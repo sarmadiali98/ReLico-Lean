@@ -42,6 +42,7 @@ import Relico.Correctness.MachineInvariant
 import Relico.Correctness.MachineTrace
 import Relico.Correctness.MachineTraceForward
 import Relico.Correctness.MachineInitialization
+import Relico.Correctness.ExecutableTranslation
 import Relico.Correctness.Inversion
 import Relico.Correctness.RuntimeInvariant
 import Relico.Correctness.DispatchInvariant
@@ -72,3 +73,4 @@ import Relico.Tests.MachineInvariant
 import Relico.Tests.MachineTrace
 import Relico.Tests.MachineTraceForward
 import Relico.Tests.MachineInitialization
+import Relico.Tests.ExecutableTranslation
