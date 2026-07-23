@@ -1,6 +1,7 @@
 import Relico.Basic
 import Relico.Common.Name
 import Relico.Common.Time
+import Relico.Common.Occurrence
 import Relico.Common.Value
 
 import Relico.DTR.Syntax
@@ -11,6 +12,7 @@ import Relico.DTR.Semantics
 import Relico.DTR.RuntimeWellFormed
 import Relico.DTR.TraceSemantics
 import Relico.DTR.Initialization
+import Relico.DTR.Scheduling
 
 import Relico.LF.Syntax
 import Relico.LF.WellFormed
@@ -19,6 +21,7 @@ import Relico.LF.Evaluation
 import Relico.LF.Semantics
 import Relico.LF.TraceSemantics
 import Relico.LF.Initialization
+import Relico.LF.Scheduling
 
 import Relico.Translation.NameGeneration
 import Relico.Translation.Basic
@@ -45,3 +48,4 @@ import Relico.Tests.ForwardSimulation
 import Relico.Tests.BackwardSimulation
 import Relico.Tests.TraceSimulation
 import Relico.Tests.Initialization
+import Relico.Tests.Scheduling

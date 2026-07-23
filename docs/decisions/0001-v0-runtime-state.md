@@ -89,3 +89,22 @@ value.
 
 The DTR active body is the constructor body. The corresponding LF
 active body is the generated startup-reaction body.
+
+
+## Scheduler selection
+
+Pending messages and actions are stored as occurrence-preserving lists.
+Scheduler selection removes one occurrence by position; duplicate values
+are not collapsed.
+
+DTR selects an occurrence with minimum logical arrival time. Multiple
+occurrences at the same minimum time remain nondeterministically
+selectable.
+
+LF selects an occurrence with the minimum lexicographic tag. Logical
+time is compared first, followed by microstep.
+
+Consequently, source equal-time nondeterminism and target microstep
+ordering are not represented by a simple one-step bijection. Dispatch
+correctness will require an explicitly stated abstraction or weak
+execution correspondence.
