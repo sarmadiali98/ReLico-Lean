@@ -78,3 +78,15 @@ the Java AST-to-JSON exporter.
 
 The versioned JSON decoder and the DTR-to-LF translator execute in Lean.
 The previous Java LF generator is not part of this path.
+
+Official LF/C++ validation
+
+The reproducible bridge check also invokes the official lfc compiler
+on V0Controller.lf.
+
+The check succeeds only when:
+
+the LF parser accepts the generated source;
+CMake configuration succeeds;
+generated C++ compilation succeeds;
+the V0Controller executable is produced.

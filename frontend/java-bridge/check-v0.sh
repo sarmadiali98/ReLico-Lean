@@ -13,9 +13,9 @@ REPOSITORY_ROOT="$(
 )"
 
 GENERATED_DIRECTORY="$REPOSITORY_ROOT/.lake/frontend"
-
 GENERATED_JSON="$GENERATED_DIRECTORY/v0-controller.parser.json"
-GENERATED_LF="$GENERATED_DIRECTORY/v0-controller.lf"
+GENERATED_LF="$GENERATED_DIRECTORY/V0Controller.lf"
+LFC_DIRECTORY="$REPOSITORY_ROOT/.lake/lfc-check"
 
 mkdir -p "$GENERATED_DIRECTORY"
 
@@ -60,8 +60,28 @@ lake env lean \
 
 grep -qF "target Cpp" "$GENERATED_LF"
 grep -qF "reactor Controller" "$GENERATED_LF"
+grep -qF "reaction(startup) -> tick_action" "$GENERATED_LF"
+grep -qF "reaction(tick_action) -> tick_action" "$GENERATED_LF"
 grep -qF "tick_action.schedule(1ms);" "$GENERATED_LF"
+grep -qF "main reactor {" "$GENERATED_LF"
+
+command -v lfc >/dev/null
+
+rm -rf "$LFC_DIRECTORY"
+mkdir -p "$LFC_DIRECTORY/src"
+
+cp \
+  "$GENERATED_LF" \
+  "$LFC_DIRECTORY/src/V0Controller.lf"
+
+(
+  cd "$LFC_DIRECTORY"
+  lfc src/V0Controller.lf
+)
+
+test -x "$LFC_DIRECTORY/bin/V0Controller"
 
 echo "Real Timed Rebeca parser-to-LF/C++ check passed."
 echo "Generated JSON: $GENERATED_JSON"
 echo "Generated LF:   $GENERATED_LF"
+echo "Generated C++ executable: $LFC_DIRECTORY/bin/V0Controller"

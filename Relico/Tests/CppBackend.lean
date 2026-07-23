@@ -12,16 +12,16 @@ def expectedCppSource : String :=
   "reactor Controller {\n" ++
   "  state x: int = 0\n" ++
   "  logical action tick_action: void\n\n" ++
-  "  reaction(startup) {=\n" ++
+  "  reaction(startup) -> tick_action {=\n" ++
   "    x = 0;\n" ++
   "    tick_action.schedule(1ms);\n" ++
   "  =}\n\n" ++
-  "  reaction(tick_action) {=\n" ++
+  "  reaction(tick_action) -> tick_action {=\n" ++
   "    x = x;\n" ++
   "    tick_action.schedule(1ms);\n" ++
   "  =}\n" ++
   "}\n\n" ++
-  "main reactor Main {\n" ++
+  "main reactor {\n" ++
   "  controller = new Controller()\n" ++
   "}\n"
 
@@ -42,6 +42,15 @@ theorem rendered_source_uses_cpp_target :
       "target Cpp" := by
   exact
     LF.CppPrinter.targetHeader_is_cpp
+
+theorem startup_declares_scheduled_action_effect :
+    LF.CppPrinter.renderReaction
+        expectedProgram.reactor.startupReaction =
+      "  reaction(startup) -> tick_action {=\n" ++
+      "    x = 0;\n" ++
+      "    tick_action.schedule(1ms);\n" ++
+      "  =}" := by
+  rfl
 
 end Tests
 end Relico

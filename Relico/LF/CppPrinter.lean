@@ -61,6 +61,43 @@ def renderTrigger :
       action.value
 
 /--
+Collect the logical actions scheduled by a reaction body.
+
+Scheduled actions must appear in the reaction effect list so that the
+LF C++ target exposes a schedulable action handle to the reaction.
+-/
+def scheduledActionNames
+    (body : LF.Body) :
+    List String :=
+  body.foldl
+    (fun names statement =>
+      match statement with
+      | .assign _ _ =>
+          names
+
+      | .schedule action _ =>
+          if names.contains action.value then
+            names
+          else
+            names ++ [action.value])
+    []
+
+/--
+Render the reaction effect list required for scheduling actions.
+-/
+def renderEffects
+    (body : LF.Body) :
+    String :=
+  match scheduledActionNames body with
+  | [] =>
+      ""
+  | actionNames =>
+      " -> " ++
+        String.intercalate
+          ", "
+          actionNames
+
+/--
 Render the statements inside a reaction code block.
 -/
 def renderBody
@@ -80,7 +117,9 @@ def renderReaction
     String :=
   "  reaction(" ++
     renderTrigger reaction.trigger ++
-    ") {=\n" ++
+    ")" ++
+    renderEffects reaction.body ++
+    " {=\n" ++
     renderBody reaction.body ++
     "\n  =}"
 
@@ -107,11 +146,14 @@ def renderReactor
 
 /--
 Render the top-level LF main reactor and its generated instance.
+
+The main reactor is unnamed so that generated source is independent of
+its output filename.
 -/
 def renderMain
     (reactorInstance : LF.ReactorInstance) :
     String :=
-  "main reactor Main {\n" ++
+  "main reactor {\n" ++
     "  " ++ reactorInstance.name.value ++
     " = new " ++
     reactorInstance.reactorName.value ++

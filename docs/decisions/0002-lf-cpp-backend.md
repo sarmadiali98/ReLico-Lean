@@ -48,3 +48,37 @@ backend boundary until parser or compiler validation is integrated.
 
 The LF compiler, generated C++ code, C++ compiler, LF C++ runtime,
 operating system, and hardware remain outside the current proof.
+
+## Main reactor naming
+
+The generated main reactor is unnamed:
+
+```lf
+main reactor {
+
+Lingua Franca otherwise requires a named main reactor to match the LF
+source filename. Omitting the name makes generated source independent
+of the output filename.
+
+## Reaction action effects
+
+A logical action scheduled by reaction target code is included in that
+reaction's LF effect list.
+
+For example:
+
+```lf
+reaction(startup) -> tick_action {=
+  tick_action.schedule(1ms);
+=}
+
+This gives the LF C++ reaction a schedulable action handle.
+
+Generated filename
+
+Toolchain checks store the generated source as:
+
+V0Controller.lf
+
+The filename avoids characters such as hyphens that would produce an
+invalid generated C++ class identifier.
