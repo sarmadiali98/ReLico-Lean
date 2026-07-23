@@ -187,3 +187,21 @@ every finite LF sequence of statement and dispatch transitions has:
 
 The finite forward theorem remains conditional because LF scheduler
 compatibility must hold at each source dispatch step.
+
+
+## Finite conditional forward machine execution
+
+Finite forward simulation uses an explicit paired-execution
+compatibility witness.
+
+For every source machine step, the witness records:
+
+- correspondence of the states before the step;
+- the local forward scheduler-compatibility premise;
+- the selected matching LF transition;
+- correspondence of the step labels and resulting states;
+- a compatibility witness for the remaining execution.
+
+The resulting theorem covers arbitrary finite statement-and-dispatch
+executions without assuming that all DTR equal-time scheduling choices
+are valid under LF microstep ordering.
