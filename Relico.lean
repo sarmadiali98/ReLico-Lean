@@ -88,3 +88,5 @@ import Relico.DTR.StoreEvaluation
 import Relico.LF.StoreEvaluation
 import Relico.Correctness.ExpressionStore
 import Relico.Tests.StoreEvaluation
+import Relico.Common.StateStoreCoverage
+import Relico.Tests.StateStoreCoverage

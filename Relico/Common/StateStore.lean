@@ -103,14 +103,11 @@ theorem lookup_update_eq
         (update store name value)
         name =
       some value := by
-  simpa [
-    lookup,
-    update
-  ] using
-    (Store.lookup_update_eq
+  exact
+    Store.lookup_update_eq
       store
       name
-      value)
+      value
 
 theorem lookup_update_ne
     (store : StateStore)
@@ -122,14 +119,11 @@ theorem lookup_update_ne
         (update store name value)
         other =
       lookup store other := by
-  simpa [
-    lookup,
-    update
-  ] using
-    (Store.lookup_update_ne
+  exact
+    Store.lookup_update_ne
       store
       value
-      hDifferent)
+      hDifferent
 
 @[simp]
 theorem update_same
@@ -147,12 +141,12 @@ theorem update_same
         store
         name
         secondValue := by
-  simpa [update] using
-    (Store.update_same
+  exact
+    Store.update_same
       store
       name
       firstValue
-      secondValue)
+      secondValue
 
 end StateStore
 end Relico

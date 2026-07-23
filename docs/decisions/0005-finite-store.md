@@ -65,3 +65,29 @@ stores.
 
 The original runtime-state representation and operational semantics
 remain unchanged at this checkpoint.
+
+## Declared-variable coverage
+
+The third migration checkpoint introduces:
+
+```lean
+StateStore.Covers declaredVariables store
+
+Coverage means that every declared variable has an observable integer
+binding in the runtime store.
+
+The development proves:
+
+the empty declaration list is covered by every store;
+a singleton store covers its singleton declaration;
+coverage provides a concrete lookup result for each declaration;
+assignment-style store updates preserve coverage;
+coverage is preserved when restricting to a declaration subset.
+
+At this checkpoint, coverage deliberately permits additional store
+bindings. Exact correspondence between the declared-variable list and
+the store domain will be introduced together with multiple-variable
+model syntax.
+
+The existing DTR and LF runtime states still use the original single
+integer value.
