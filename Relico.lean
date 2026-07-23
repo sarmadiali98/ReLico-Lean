@@ -96,3 +96,5 @@ import Relico.Tests.StoreState
 import Relico.DTR.StoreSemantics
 import Relico.LF.StoreSemantics
 import Relico.Tests.StoreSemantics
+import Relico.Correctness.StoreForward
+import Relico.Tests.StoreForward

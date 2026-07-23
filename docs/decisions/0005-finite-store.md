@@ -150,3 +150,35 @@ Self-send and action-scheduling steps retain their existing queue and
 logical-time behavior while leaving the state store unchanged.
 
 The legacy DTR.Step and LF.Step relations remain unchanged.
+
+## Forward store simulation
+
+The sixth migration checkpoint introduces store-backed runtime
+correspondence:
+
+```lean
+Correctness.StoreStateCorresponds
+
+The relation preserves the complete finite store rather than one
+integer state value. It also preserves logical time, pending event
+occurrences, and compiled active bodies.
+
+The theorem:
+
+Correctness.store_step_forward
+
+establishes forward one-step simulation for the store-based DTR and LF
+statement semantics.
+
+The assignment case uses:
+
+Correctness.compileExpr_preserves_store_evaluation
+
+Consequently, an assignment may read one declared state variable and
+update another while retaining the same full source/target store.
+
+The self-send case retains occurrence-preserving queue correspondence
+and logical-time label correspondence.
+
+This theorem is parameterized by a declaration list and therefore is
+not restricted to a singleton runtime store.
