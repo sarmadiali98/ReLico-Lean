@@ -5,3 +5,4 @@ import Relico.Common.Value
 import Relico.DTR.Syntax
 import Relico.DTR.WellFormed
 import Relico.LF.Syntax
+import Relico.Tests.DTRWellFormed
