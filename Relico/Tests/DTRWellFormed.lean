@@ -85,6 +85,9 @@ theorem validModel_wellFormed :
       validModel,
       validReactiveClass,
       validConstructor,
+      validMessageServer,
+      tickMessageName,
+      stateVariableName,
       DTR.Body.WellFormed,
       DTR.Stmt.WellFormed,
       DTR.Expr.WellFormed
@@ -172,7 +175,13 @@ theorem invalidSelfSendModel_not_wellFormed :
 
   have hNamesEqual :
       otherMessageName = tickMessageName := by
-    simpa [DTR.Stmt.WellFormed] using hStatement
+    simpa [
+      invalidSelfSendModel,
+      validModel,
+      validReactiveClass,
+      validMessageServer,
+      DTR.Stmt.WellFormed
+    ] using hStatement
 
   have hDifferent :
       otherMessageName ≠ tickMessageName := by
