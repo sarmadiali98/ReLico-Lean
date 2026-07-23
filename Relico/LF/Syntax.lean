@@ -78,7 +78,7 @@ A complete generated LF program in vertical slice v0.
 -/
 structure Program where
   reactor : Reactor
-  instance : ReactorInstance
+  reactorInstance : ReactorInstance
 deriving Repr, DecidableEq, BEq, Inhabited
 
 end LF
