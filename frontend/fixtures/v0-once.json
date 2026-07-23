@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "className": "OnceController",
+  "actorName": "onceController",
+  "actorClass": "OnceController",
+  "stateVar": "x",
+  "messageServer": "tick",
+  "constructorBody": [
+    {
+      "kind": "assign",
+      "target": "x",
+      "expression": {
+        "kind": "intLiteral",
+        "value": 0
+      }
+    },
+    {
+      "kind": "selfSend",
+      "message": "tick",
+      "delay": 1
+    }
+  ],
+  "messageServerBody": [
+    {
+      "kind": "assign",
+      "target": "x",
+      "expression": {
+        "kind": "intLiteral",
+        "value": 1
+      }
+    }
+  ]
+}

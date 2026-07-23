@@ -110,3 +110,16 @@ target Cpp
 
 The concrete printer and LF/C++ toolchain remain trusted components.
 The verified semantic result continues to apply to the generated LF AST.
+
+Toolchain integration tests
+
+The artifact includes executable integration checks using the official
+LF C++ toolchain.
+
+One recurring fixture confirms source acceptance and native C++
+compilation. A second finite fixture confirms that the generated native
+executable starts, processes its scheduled action, and terminates
+successfully.
+
+These checks validate integration but do not extend the formal proof
+through lfc, generated C++, the C++ compiler, or the LF runtime.

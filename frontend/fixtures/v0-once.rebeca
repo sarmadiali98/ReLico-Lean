@@ -1,0 +1,18 @@
+reactiveclass OnceController(10) {
+    statevars {
+        int x;
+    }
+
+    OnceController() {
+        x = 0;
+        self.tick() after(1);
+    }
+
+    msgsrv tick() {
+        x = 1;
+    }
+}
+
+main {
+    OnceController onceController():();
+}

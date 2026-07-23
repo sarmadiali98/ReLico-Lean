@@ -90,3 +90,33 @@ the LF parser accepts the generated source;
 CMake configuration succeeds;
 generated C++ compilation succeeds;
 the V0Controller executable is produced.
+
+## Runtime execution validation
+
+A second finite fixture validates actual execution:
+
+```text
+frontend/fixtures/v0-once.rebeca
+
+Its constructor schedules one delayed self-message. The message server
+updates the state and schedules no further action, allowing the
+generated LF/C++ executable to terminate.
+
+The command:
+
+frontend/java-bridge/check-v0-runtime.sh <artifact.zip>
+
+checks:
+
+Timed Rebeca parsing
+→ bridge export
+→ Lean decoding
+→ verified translation
+→ LF/C++ rendering
+→ lfc generation
+→ C++ compilation
+→ native execution
+→ successful termination
+
+This is an integration test, not a formal verification of the LF
+compiler, C++ compiler, runtime, operating system, or hardware.
