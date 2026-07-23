@@ -8,6 +8,7 @@ import Relico.DTR.WellFormed
 import Relico.DTR.State
 import Relico.DTR.Evaluation
 import Relico.DTR.Semantics
+import Relico.DTR.RuntimeWellFormed
 
 import Relico.LF.Syntax
 import Relico.LF.WellFormed
@@ -22,6 +23,7 @@ import Relico.Correctness.Expression
 import Relico.Correctness.Structural
 import Relico.Correctness.Correspondence
 import Relico.Correctness.Inversion
+import Relico.Correctness.RuntimeInvariant
 import Relico.Correctness.Forward
 
 import Relico.Tests.DTRWellFormed
@@ -31,4 +33,5 @@ import Relico.Tests.StructuralCorrectness
 import Relico.Tests.SmallStep
 import Relico.Tests.Correspondence
 import Relico.Tests.Inversion
+import Relico.Tests.RuntimeInvariant
 import Relico.Tests.ForwardSimulation
