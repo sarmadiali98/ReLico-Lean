@@ -123,3 +123,30 @@ Round-trip theorems establish that embedding and then projecting through
 the same declared variable returns the original legacy state.
 
 The embedded stores also satisfy singleton declared-variable coverage.
+
+## Store-based statement semantics
+
+The fifth migration checkpoint introduces parallel statement
+transition relations:
+
+DTR.StoreStep
+LF.StoreStep
+
+Both relations are parameterized by a list of declared state variables.
+
+An assignment step requires:
+
+- membership of the target in the declaration list;
+- successful store-based evaluation of the expression.
+
+The resulting state updates the target binding through
+StateStore.update.
+
+The development proves that every DTR and LF store step preserves
+declared-variable coverage. Tests exercise cross-variable assignment:
+one variable is read while another variable is updated.
+
+Self-send and action-scheduling steps retain their existing queue and
+logical-time behavior while leaving the state store unchanged.
+
+The legacy DTR.Step and LF.Step relations remain unchanged.

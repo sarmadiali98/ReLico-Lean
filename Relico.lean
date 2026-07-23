@@ -93,3 +93,6 @@ import Relico.Tests.StateStoreCoverage
 import Relico.DTR.StoreState
 import Relico.LF.StoreState
 import Relico.Tests.StoreState
+import Relico.DTR.StoreSemantics
+import Relico.LF.StoreSemantics
+import Relico.Tests.StoreSemantics
