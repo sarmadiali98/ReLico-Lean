@@ -98,3 +98,7 @@ import Relico.LF.StoreSemantics
 import Relico.Tests.StoreSemantics
 import Relico.Correctness.StoreForward
 import Relico.Tests.StoreForward
+import Relico.DTR.StoreWellFormed
+import Relico.LF.StoreWellFormed
+import Relico.Correctness.StoreStructural
+import Relico.Tests.StoreStructural

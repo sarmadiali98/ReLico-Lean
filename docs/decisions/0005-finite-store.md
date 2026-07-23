@@ -182,3 +182,34 @@ and logical-time label correspondence.
 
 This theorem is parameterized by a declaration list and therefore is
 not restricted to a singleton runtime store.
+
+## Declaration-list structural well-formedness
+
+The seventh migration checkpoint introduces declaration-list
+well-formedness predicates for DTR and generated LF expressions,
+statements, and bodies:
+
+```lean
+DTR.Expr.StoreWellFormed
+DTR.Stmt.StoreWellFormed
+DTR.Body.StoreWellFormed
+
+LF.Expr.StoreWellFormed
+LF.Stmt.StoreWellFormed
+LF.Body.StoreWellFormed
+
+Variable references and assignment targets must occur in the complete
+declaration list.
+
+A store-well-formed expression evaluates successfully whenever the
+runtime store covers that declaration list.
+
+The compiler preserves these predicates:
+
+Correctness.compileExpr_storeWellFormed
+Correctness.compileStmt_storeWellFormed
+Correctness.compileBody_storeWellFormed
+
+Singleton compatibility theorems establish equivalence with the
+original v0 structural predicates. The tagged v0 result therefore
+remains a specialization of the generalized definitions.
