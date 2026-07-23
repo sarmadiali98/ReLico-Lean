@@ -155,3 +155,18 @@ The complete one-step machine relation contains two rule classes:
 The combined relation preserves the existing statement and dispatch
 labels by wrapping them in machine-level labels. This layer introduces
 no additional scheduling policy.
+
+
+## Machine runtime invariant
+
+Runtime well-formedness is preserved by both classes of DTR machine
+transition.
+
+Statement execution preserves well-formedness by consuming a
+well-formed statement. Dispatch preserves it because the activated
+message-server body is well formed in a well-formed model, and every
+remaining pending message was already present before occurrence
+removal.
+
+Consequently, finite backward machine simulation may carry the source
+runtime invariant inductively across statement and dispatch steps.
