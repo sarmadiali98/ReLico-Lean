@@ -277,3 +277,37 @@ every transition label in execution order.
 
 These are statement-level traces. Dispatch and combined machine
 execution remain to be generalized separately.
+
+## Store-based dispatch
+
+The tenth migration checkpoint introduces parallel dispatch relations:
+
+```lean
+DTR.StoreDispatchStep
+LF.StoreDispatchStep
+
+Dispatch preserves the complete finite state store while removing one
+concrete earliest pending occurrence, advancing logical time or the LF
+tag, and loading the source or generated message body.
+
+Both dispatch relations preserve declared-variable store coverage.
+
+The correctness layer establishes:
+
+Correctness.store_dispatch_forward_of_compatible
+Correctness.store_dispatch_backward
+
+Forward dispatch remains conditional through:
+
+Correctness.StoreForwardDispatchCompatible
+
+The compatibility condition is required because LF microsteps refine
+equal-logical-time scheduling choices.
+
+Backward dispatch is unconditional once the source pending-event target
+invariant is supplied. It recovers the source occurrence at the same
+queue position, proves source earliest-time eligibility, and preserves
+the complete finite store and residual queue correspondence.
+
+The regression test dispatches a message whose body performs a
+cross-variable assignment.

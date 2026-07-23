@@ -108,3 +108,7 @@ import Relico.DTR.StoreTrace
 import Relico.LF.StoreTrace
 import Relico.Correctness.StoreTrace
 import Relico.Tests.StoreTrace
+import Relico.DTR.StoreDispatchSemantics
+import Relico.LF.StoreDispatchSemantics
+import Relico.Correctness.StoreDispatch
+import Relico.Tests.StoreDispatch
