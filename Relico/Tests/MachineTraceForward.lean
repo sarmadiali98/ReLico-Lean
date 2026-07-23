@@ -6,7 +6,7 @@ set_option autoImplicit false
 namespace Relico
 namespace Tests
 
-def assignmentForwardExecutionCompatible :
+theorem assignmentForwardExecutionCompatible :
     Correctness.ForwardMachineExecutionCompatible
       validModel
       dtrAssignmentSource
@@ -55,7 +55,7 @@ theorem assignment_machine_trace_forward :
     Correctness.machineSteps_forward_of_compatible
       assignmentForwardExecutionCompatible
 
-def dispatchForwardExecutionCompatible :
+theorem dispatchForwardExecutionCompatible :
     Correctness.ForwardMachineExecutionCompatible
       validModel
       dtrDispatchSource

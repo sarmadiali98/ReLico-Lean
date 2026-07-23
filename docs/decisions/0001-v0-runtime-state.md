@@ -205,3 +205,17 @@ For every source machine step, the witness records:
 The resulting theorem covers arbitrary finite statement-and-dispatch
 executions without assuming that all DTR equal-time scheduling choices
 are valid under LF microstep ordering.
+
+
+## Initial combined-machine correctness
+
+The combined machine theorems are specialized to constructor/startup
+entry states.
+
+For a well-formed source model, every finite generated-LF machine
+execution from startup entry has a corresponding finite DTR machine
+execution from constructor entry.
+
+The finite forward result remains conditional on the explicit
+per-dispatch compatibility witness. Constructor statement execution
+requires no additional scheduler premise.
