@@ -104,3 +104,7 @@ import Relico.Correctness.StoreStructural
 import Relico.Tests.StoreStructural
 import Relico.Correctness.StoreBackward
 import Relico.Tests.StoreBackward
+import Relico.DTR.StoreTrace
+import Relico.LF.StoreTrace
+import Relico.Correctness.StoreTrace
+import Relico.Tests.StoreTrace

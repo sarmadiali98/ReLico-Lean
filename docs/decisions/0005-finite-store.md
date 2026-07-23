@@ -242,3 +242,38 @@ compiled active-body correspondence.
 Together with Correctness.store_step_forward, this establishes
 two-directional one-step correspondence for the parallel store-based
 statement semantics.
+
+## Finite store traces
+
+The ninth migration checkpoint introduces finite statement traces:
+
+```lean
+DTR.StoreTrace
+LF.StoreTrace
+
+Trace label sequences are related pointwise through:
+
+Correctness.LabelTraceCorresponds
+
+The development establishes:
+
+Correctness.store_trace_forward
+Correctness.store_trace_backward
+
+Forward simulation lifts the one-step store theorem to arbitrary finite
+DTR statement executions.
+
+Backward simulation repeatedly applies the one-step backward theorem.
+Source-body declaration-list well-formedness is preserved as each
+recovered source statement is removed.
+
+Both trace theorems preserve correspondence of:
+
+the complete finite state-variable store;
+logical time;
+pending event occurrences;
+active translated bodies;
+every transition label in execution order.
+
+These are statement-level traces. Dispatch and combined machine
+execution remain to be generalized separately.
