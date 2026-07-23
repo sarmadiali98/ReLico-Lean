@@ -35,6 +35,7 @@ import Relico.Correctness.Structural
 import Relico.Correctness.Correspondence
 import Relico.Correctness.Dispatch
 import Relico.Correctness.DispatchForward
+import Relico.Correctness.Machine
 import Relico.Correctness.Inversion
 import Relico.Correctness.RuntimeInvariant
 import Relico.Correctness.Forward
@@ -59,3 +60,4 @@ import Relico.Tests.DispatchSemantics
 import Relico.Tests.DispatchCorrectness
 import Relico.Tests.DispatchForward
 import Relico.Tests.MachineSemantics
+import Relico.Tests.MachineCorrectness
