@@ -108,3 +108,20 @@ Consequently, source equal-time nondeterminism and target microstep
 ordering are not represented by a simple one-step bijection. Dispatch
 correctness will require an explicitly stated abstraction or weak
 execution correspondence.
+
+
+## Dispatch transitions
+
+Dispatch is enabled only when the active statement body is empty.
+
+A DTR dispatch removes one earliest pending message occurrence, advances
+logical time to its arrival time, and loads the declared message-server
+body. An additional premise prevents dispatching an event in the past.
+
+An LF dispatch removes one earliest pending logical-action occurrence,
+advances the complete LF tag to the action tag, and loads the generated
+message-reaction body. The selected tag must not precede the current tag.
+
+These dispatch rules are currently separate from statement execution.
+A later combined transition system will connect dispatch and active-body
+steps.

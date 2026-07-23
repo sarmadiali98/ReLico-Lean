@@ -13,6 +13,7 @@ import Relico.DTR.RuntimeWellFormed
 import Relico.DTR.TraceSemantics
 import Relico.DTR.Initialization
 import Relico.DTR.Scheduling
+import Relico.DTR.DispatchSemantics
 
 import Relico.LF.Syntax
 import Relico.LF.WellFormed
@@ -22,6 +23,7 @@ import Relico.LF.Semantics
 import Relico.LF.TraceSemantics
 import Relico.LF.Initialization
 import Relico.LF.Scheduling
+import Relico.LF.DispatchSemantics
 
 import Relico.Translation.NameGeneration
 import Relico.Translation.Basic
@@ -49,3 +51,4 @@ import Relico.Tests.BackwardSimulation
 import Relico.Tests.TraceSimulation
 import Relico.Tests.Initialization
 import Relico.Tests.Scheduling
+import Relico.Tests.DispatchSemantics
