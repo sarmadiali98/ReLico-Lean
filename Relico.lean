@@ -102,3 +102,5 @@ import Relico.DTR.StoreWellFormed
 import Relico.LF.StoreWellFormed
 import Relico.Correctness.StoreStructural
 import Relico.Tests.StoreStructural
+import Relico.Correctness.StoreBackward
+import Relico.Tests.StoreBackward

@@ -213,3 +213,32 @@ Correctness.compileBody_storeWellFormed
 Singleton compatibility theorems establish equivalence with the
 original v0 structural predicates. The tagged v0 result therefore
 remains a specialization of the generalized definitions.
+
+## Backward store simulation
+
+The eighth migration checkpoint introduces:
+
+```lean
+Correctness.store_step_backward
+
+Every generated-LF store statement step from a corresponding runtime
+state has a matching DTR store statement step.
+
+The proof recovers the source statement through the existing compiled
+body inversion lemmas. Assignment evaluation is transferred back
+through store-based expression-evaluation preservation.
+
+Source-body declaration-list well-formedness is used to establish that
+a recovered self-send targets the declared message server.
+
+The theorem preserves:
+
+the complete finite state-variable store;
+logical time;
+occurrence-preserving pending-event correspondence;
+transition-label correspondence;
+compiled active-body correspondence.
+
+Together with Correctness.store_step_forward, this establishes
+two-directional one-step correspondence for the parallel store-based
+statement semantics.
