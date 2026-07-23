@@ -86,9 +86,27 @@ The following remain outside the proof:
 text parsing and AST import;
 LF source-code printing;
 the LF compiler and runtime implementation;
-downstream C compilation;
+generated C++ compilation;
 operating systems and hardware;
 the previous Java translator;
 unsupported source-language constructs;
 multiple actors, multiple message servers, communication, and
 environmental inputs.
+
+
+## Concrete LF/C++ source backend
+
+The executable concrete backend entry point is:
+
+```lean
+Relico.Translation.translateToCppSource
+
+It invokes the verified AST translator and renders the resulting LF AST
+as source for the Lingua Franca C++ target.
+
+Generated source begins with:
+
+target Cpp
+
+The concrete printer and LF/C++ toolchain remain trusted components.
+The verified semantic result continues to apply to the generated LF AST.

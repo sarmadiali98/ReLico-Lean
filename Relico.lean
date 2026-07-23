@@ -18,6 +18,7 @@ import Relico.DTR.MachineSemantics
 import Relico.DTR.MachineTraceSemantics
 
 import Relico.LF.Syntax
+import Relico.LF.CppPrinter
 import Relico.LF.WellFormed
 import Relico.LF.State
 import Relico.LF.Evaluation
@@ -31,6 +32,7 @@ import Relico.LF.MachineTraceSemantics
 
 import Relico.Translation.NameGeneration
 import Relico.Translation.Basic
+import Relico.Translation.CppBackend
 
 import Relico.Correctness.Expression
 import Relico.Correctness.Structural
@@ -74,3 +76,4 @@ import Relico.Tests.MachineTrace
 import Relico.Tests.MachineTraceForward
 import Relico.Tests.MachineInitialization
 import Relico.Tests.ExecutableTranslation
+import Relico.Tests.CppBackend
