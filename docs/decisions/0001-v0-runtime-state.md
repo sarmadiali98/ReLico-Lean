@@ -125,3 +125,20 @@ message-reaction body. The selected tag must not precede the current tag.
 These dispatch rules are currently separate from statement execution.
 A later combined transition system will connect dispatch and active-body
 steps.
+
+
+## Conditional forward dispatch
+
+Backward dispatch correspondence is unconditional: an LF-earliest action
+always maps to a DTR message with minimum logical arrival time.
+
+Forward dispatch correspondence requires an additional compatibility
+condition. The LF occurrence aligned with the selected DTR message must:
+
+- be earliest under lexicographic LF tag ordering;
+- not precede the current LF tag;
+- leave a target queue corresponding to the residual source queue.
+
+This condition is necessary. A DTR scheduler may select either of two
+messages at the same logical time, while LF may require the action with
+the lower microstep to execute first.
