@@ -5,6 +5,8 @@ import Relico.Common.Occurrence
 import Relico.Common.Value
 
 import Relico.DTR.Syntax
+import Relico.Frontend.Schema
+import Relico.Frontend.Decoder
 import Relico.DTR.WellFormed
 import Relico.DTR.State
 import Relico.DTR.Evaluation
@@ -77,3 +79,4 @@ import Relico.Tests.MachineTraceForward
 import Relico.Tests.MachineInitialization
 import Relico.Tests.ExecutableTranslation
 import Relico.Tests.CppBackend
+import Relico.Tests.FrontendDecoder

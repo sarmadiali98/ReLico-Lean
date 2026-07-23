@@ -1,0 +1,19 @@
+reactiveclass Controller(10) {
+    statevars {
+        int x;
+    }
+
+    Controller() {
+        x = 0;
+        self.tick() after(1);
+    }
+
+    msgsrv tick() {
+        x = x;
+        self.tick() after(1);
+    }
+}
+
+main {
+    Controller controller():();
+}
