@@ -112,3 +112,7 @@ import Relico.DTR.StoreDispatchSemantics
 import Relico.LF.StoreDispatchSemantics
 import Relico.Correctness.StoreDispatch
 import Relico.Tests.StoreDispatch
+import Relico.DTR.StoreMachineSemantics
+import Relico.LF.StoreMachineSemantics
+import Relico.Correctness.StoreMachine
+import Relico.Tests.StoreMachine

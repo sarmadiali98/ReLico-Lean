@@ -311,3 +311,41 @@ the complete finite store and residual queue correspondence.
 
 The regression test dispatches a message whose body performs a
 cross-variable assignment.
+
+## Combined store machine semantics
+
+The eleventh migration checkpoint introduces combined finite-store
+machine relations:
+
+```lean
+DTR.StoreMachineLabel
+DTR.StoreMachineStep
+
+LF.StoreMachineLabel
+LF.StoreMachineStep
+
+Each combined transition is either:
+
+one active-body statement transition; or
+one pending message or logical-action dispatch.
+
+Machine-label correspondence is represented by:
+
+Correctness.StoreMachineLabelCorresponds
+
+The correctness layer establishes:
+
+Correctness.storeMachineStep_forward
+Correctness.storeMachineStep_backward
+
+Forward simulation is unconditional for statement execution and
+conditional for dispatch through:
+
+Correctness.StoreForwardMachineCompatible
+
+Backward simulation uses declaration-list body well-formedness for
+statement recovery and the pending-message target invariant for
+dispatch recovery.
+
+The regression tests cover both machine-step forms using a complete
+two-variable store.
