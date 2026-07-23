@@ -8,7 +8,7 @@ namespace Relico
 namespace Tests
 
 def dtrAssignmentSource : DTR.State where
-  currentTime := 0
+  currentTime := 2
   stateValue := 5
   pendingMessages := []
   activeBody := [
@@ -18,7 +18,7 @@ def dtrAssignmentSource : DTR.State where
   ]
 
 def dtrAssignmentTarget : DTR.State where
-  currentTime := 0
+  currentTime := 2
   stateValue := 7
   pendingMessages := []
   activeBody := []
@@ -35,7 +35,7 @@ example :
   ] using
     (DTR.Step.assign
       (model := validModel)
-      (currentTime := 0)
+      (currentTime := 2)
       (stateValue := 5)
       (pendingMessages := [])
       (target := stateVariableName)
