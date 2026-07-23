@@ -42,3 +42,26 @@ generalize state correspondence and simulation proofs;
 extend syntax and the parser bridge to multiple declarations.
 
 The tagged milestone-v0-end-to-end baseline remains unchanged.
+
+## Store-based expression evaluation
+
+The second migration checkpoint adds partial store-based evaluation for
+both DTR and generated LF expressions:
+
+```lean
+DTR.Expr.evaluateStore
+LF.Expr.evaluateStore
+
+A variable reference evaluates through its VarName binding. Missing
+bindings produce none.
+
+The compiler preserves store-based evaluation for every finite store:
+
+Correctness.compileExpr_preserves_store_evaluation
+
+Compatibility theorems show that store evaluation agrees with the
+original single-value evaluator on well-formed expressions and singleton
+stores.
+
+The original runtime-state representation and operational semantics
+remain unchanged at this checkpoint.

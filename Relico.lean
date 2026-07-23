@@ -83,3 +83,8 @@ import Relico.Tests.FrontendDecoder
 
 import Relico.Common.Store
 import Relico.Tests.Store
+import Relico.Common.StateStore
+import Relico.DTR.StoreEvaluation
+import Relico.LF.StoreEvaluation
+import Relico.Correctness.ExpressionStore
+import Relico.Tests.StoreEvaluation
