@@ -54,7 +54,6 @@ theorem validModel_translation_succeeds :
         .ok program := by
   exact Translation.translate_succeeds validModel
 
-#eval Translation.translate validModel
 
 end Tests
 end Relico
