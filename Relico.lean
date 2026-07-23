@@ -20,9 +20,11 @@ import Relico.Translation.Basic
 
 import Relico.Correctness.Expression
 import Relico.Correctness.Structural
+import Relico.Correctness.Correspondence
 
 import Relico.Tests.DTRWellFormed
 import Relico.Tests.Translation
 import Relico.Tests.ExpressionCorrectness
 import Relico.Tests.StructuralCorrectness
 import Relico.Tests.SmallStep
+import Relico.Tests.Correspondence

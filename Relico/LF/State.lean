@@ -60,6 +60,23 @@ theorem schedule_positive
 
   simp [schedule, hNonzero]
 
+/--
+Scheduling preserves the intended logical arrival time.
+
+For zero delay, the logical time stays unchanged and the microstep
+advances. For positive delay, logical time advances by the delay.
+-/
+@[simp]
+theorem schedule_time
+    (tag : Tag)
+    (delay : Delay) :
+    (schedule tag delay).time =
+      LogicalTime.after tag.time delay := by
+  unfold schedule
+  by_cases hZero : delay.value = 0
+  · simp [hZero, LogicalTime.after]
+  · simp [hZero]
+
 end Tag
 
 /--

@@ -57,3 +57,21 @@ Expression evaluation
 Vertical slice v0 contains one integer state variable. Expression evaluation therefore receives the current integer state value directly.
 
 Well-formedness separately guarantees that every source or target variable reference names the declared state variable.
+
+
+## Source-target correspondence
+
+DTR states contain logical time but no microstep. LF states contain a
+complete tag with both logical time and microstep.
+
+The initial correspondence relation therefore preserves the logical-time
+projection of LF tags rather than asserting equality between DTR time and
+the complete LF tag.
+
+A pending DTR message corresponds to a pending LF logical action when:
+
+- its message name maps to the generated action name;
+- both occurrences have the same logical arrival time.
+
+The LF microstep remains target-level scheduling information. Message and
+action multiplicity is preserved occurrence by occurrence.
