@@ -91,3 +91,35 @@ model syntax.
 
 The existing DTR and LF runtime states still use the original single
 integer value.
+
+## Store-backed runtime-state views
+
+The fourth migration checkpoint introduces parallel store-backed
+runtime-state structures:
+
+```lean
+DTR.StoreState
+LF.StoreState
+
+They replace the single integer runtime field with:
+
+stateStore : StateStore
+
+The existing DTR.State and LF.State structures remain unchanged, so
+the established v0 operational semantics and proofs continue to build.
+
+Each legacy state has an embedding into its store-backed form:
+
+DTR.State.toStoreState
+LF.State.toStoreState
+
+A partial projection recovers a legacy state when the requested v0
+variable has a store binding:
+
+DTR.StoreState.toLegacyState
+LF.StoreState.toLegacyState
+
+Round-trip theorems establish that embedding and then projecting through
+the same declared variable returns the original legacy state.
+
+The embedded stores also satisfy singleton declared-variable coverage.

@@ -90,3 +90,6 @@ import Relico.Correctness.ExpressionStore
 import Relico.Tests.StoreEvaluation
 import Relico.Common.StateStoreCoverage
 import Relico.Tests.StateStoreCoverage
+import Relico.DTR.StoreState
+import Relico.LF.StoreState
+import Relico.Tests.StoreState
