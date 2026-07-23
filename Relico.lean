@@ -15,6 +15,7 @@ import Relico.DTR.Initialization
 import Relico.DTR.Scheduling
 import Relico.DTR.DispatchSemantics
 import Relico.DTR.MachineSemantics
+import Relico.DTR.MachineTraceSemantics
 
 import Relico.LF.Syntax
 import Relico.LF.WellFormed
@@ -26,6 +27,7 @@ import Relico.LF.Initialization
 import Relico.LF.Scheduling
 import Relico.LF.DispatchSemantics
 import Relico.LF.MachineSemantics
+import Relico.LF.MachineTraceSemantics
 
 import Relico.Translation.NameGeneration
 import Relico.Translation.Basic
@@ -37,6 +39,7 @@ import Relico.Correctness.Dispatch
 import Relico.Correctness.DispatchForward
 import Relico.Correctness.Machine
 import Relico.Correctness.MachineInvariant
+import Relico.Correctness.MachineTrace
 import Relico.Correctness.Inversion
 import Relico.Correctness.RuntimeInvariant
 import Relico.Correctness.DispatchInvariant
@@ -64,3 +67,4 @@ import Relico.Tests.DispatchForward
 import Relico.Tests.MachineSemantics
 import Relico.Tests.MachineCorrectness
 import Relico.Tests.MachineInvariant
+import Relico.Tests.MachineTrace

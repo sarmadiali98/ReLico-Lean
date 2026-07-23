@@ -170,3 +170,20 @@ removal.
 
 Consequently, finite backward machine simulation may carry the source
 runtime invariant inductively across statement and dispatch steps.
+
+
+## Finite backward machine execution
+
+The unconditional backward one-step theorem lifts to arbitrary finite
+generated-LF machine executions.
+
+For a well-formed DTR model and corresponding initial runtime states,
+every finite LF sequence of statement and dispatch transitions has:
+
+- a finite DTR machine execution;
+- pointwise-corresponding machine labels;
+- corresponding final runtime states;
+- a well-formed final DTR state.
+
+The finite forward theorem remains conditional because LF scheduler
+compatibility must hold at each source dispatch step.
