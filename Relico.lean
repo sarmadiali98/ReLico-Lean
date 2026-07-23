@@ -5,7 +5,10 @@ import Relico.Common.Value
 import Relico.DTR.Syntax
 import Relico.DTR.WellFormed
 import Relico.LF.Syntax
+import Relico.LF.WellFormed
 import Relico.Translation.NameGeneration
 import Relico.Translation.Basic
+import Relico.Correctness.Structural
 import Relico.Tests.DTRWellFormed
 import Relico.Tests.Translation
+import Relico.Tests.StructuralCorrectness
