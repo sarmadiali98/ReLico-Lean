@@ -142,3 +142,16 @@ condition. The LF occurrence aligned with the selected DTR message must:
 This condition is necessary. A DTR scheduler may select either of two
 messages at the same logical time, while LF may require the action with
 the lower microstep to execute first.
+
+
+## Combined machine transitions
+
+The complete one-step machine relation contains two rule classes:
+
+- statement execution while an active body is present;
+- dispatch when the active body is empty and an eligible pending event
+  is selected.
+
+The combined relation preserves the existing statement and dispatch
+labels by wrapping them in machine-level labels. This layer introduces
+no additional scheduling policy.
