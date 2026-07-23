@@ -25,6 +25,7 @@ import Relico.Correctness.Correspondence
 import Relico.Correctness.Inversion
 import Relico.Correctness.RuntimeInvariant
 import Relico.Correctness.Forward
+import Relico.Correctness.Backward
 
 import Relico.Tests.DTRWellFormed
 import Relico.Tests.Translation
@@ -35,3 +36,4 @@ import Relico.Tests.Correspondence
 import Relico.Tests.Inversion
 import Relico.Tests.RuntimeInvariant
 import Relico.Tests.ForwardSimulation
+import Relico.Tests.BackwardSimulation
