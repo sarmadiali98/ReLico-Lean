@@ -75,3 +75,17 @@ A pending DTR message corresponds to a pending LF logical action when:
 
 The LF microstep remains target-level scheduling information. Message and
 action multiplicity is preserved occurrence by occurrence.
+
+
+## Constructor and startup entry
+
+Constructor/startup entry states use logical time zero, LF microstep
+zero, and empty pending-event collections.
+
+The pre-constructor integer value is an explicit parameter. The
+formalization does not silently assume a source-language or LF runtime
+default value. Corresponding DTR and LF entry states receive the same
+value.
+
+The DTR active body is the constructor body. The corresponding LF
+active body is the generated startup-reaction body.

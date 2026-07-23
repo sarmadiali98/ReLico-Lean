@@ -10,6 +10,7 @@ import Relico.DTR.Evaluation
 import Relico.DTR.Semantics
 import Relico.DTR.RuntimeWellFormed
 import Relico.DTR.TraceSemantics
+import Relico.DTR.Initialization
 
 import Relico.LF.Syntax
 import Relico.LF.WellFormed
@@ -17,6 +18,7 @@ import Relico.LF.State
 import Relico.LF.Evaluation
 import Relico.LF.Semantics
 import Relico.LF.TraceSemantics
+import Relico.LF.Initialization
 
 import Relico.Translation.NameGeneration
 import Relico.Translation.Basic
@@ -29,6 +31,7 @@ import Relico.Correctness.RuntimeInvariant
 import Relico.Correctness.Forward
 import Relico.Correctness.Backward
 import Relico.Correctness.Trace
+import Relico.Correctness.Initialization
 
 import Relico.Tests.DTRWellFormed
 import Relico.Tests.Translation
@@ -41,3 +44,4 @@ import Relico.Tests.RuntimeInvariant
 import Relico.Tests.ForwardSimulation
 import Relico.Tests.BackwardSimulation
 import Relico.Tests.TraceSimulation
+import Relico.Tests.Initialization
