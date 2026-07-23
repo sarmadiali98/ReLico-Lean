@@ -1,0 +1,10 @@
+name = "Relico"
+version = "0.1.0"
+defaultTargets = ["relico"]
+
+[[lean_lib]]
+name = "Relico"
+
+[[lean_exe]]
+name = "relico"
+root = "Main"

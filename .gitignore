@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Lean build output
+.lake/
+
+# Editors
+.idea/
+.vscode/
+*.swp
+
+# Generated output
+generated/
+*.log
+*.out
+
+# Temporary files
+tmp/
+.temp/
