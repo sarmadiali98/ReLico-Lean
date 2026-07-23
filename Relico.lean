@@ -80,3 +80,6 @@ import Relico.Tests.MachineInitialization
 import Relico.Tests.ExecutableTranslation
 import Relico.Tests.CppBackend
 import Relico.Tests.FrontendDecoder
+
+import Relico.Common.Store
+import Relico.Tests.Store

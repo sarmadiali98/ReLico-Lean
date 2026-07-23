@@ -1,0 +1,44 @@
+# Decision 0005: Finite runtime store
+
+## Status
+
+Accepted as the foundation of the multiple-state-variable extension.
+
+## Representation
+
+The shared store abstraction is:
+
+```lean
+Relico.Store Key Value
+
+It is represented as an ordered association list.
+
+Lookup observes the first binding for a key. Update replaces that first
+binding when present and appends a new binding when the key is absent.
+
+Established properties
+
+The initial store module proves:
+
+lookup in the empty store returns no value;
+lookup after updating the same key returns the new value;
+updating one key preserves lookup at a distinct key;
+a second update of the same key supersedes the first;
+an updated key is present in the store.
+Migration strategy
+
+This commit does not change the existing v0 source state, LF state,
+semantics, translation, or correctness theorems.
+
+The migration will proceed incrementally:
+
+introduce the generic finite store;
+define declared-variable store well-formedness;
+add store-based expression evaluation;
+migrate source runtime states;
+migrate LF runtime states;
+migrate assignment semantics;
+generalize state correspondence and simulation proofs;
+extend syntax and the parser bridge to multiple declarations.
+
+The tagged milestone-v0-end-to-end baseline remains unchanged.
