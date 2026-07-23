@@ -60,3 +60,40 @@ theorem RemovesOne.selected_mem
 
 end Occurrence
 end Relico
+
+namespace Relico
+namespace Occurrence
+
+/--
+Every occurrence remaining after one removal was present before the
+removal.
+-/
+theorem RemovesOne.remaining_mem
+    {α : Type u}
+    {selected value : α}
+    {before after : List α}
+    (hRemove :
+      RemovesOne selected before after)
+    (hValue :
+      value ∈ after) :
+    value ∈ before := by
+  induction hRemove with
+
+  | head remaining =>
+      simp only [List.mem_cons]
+      exact Or.inr hValue
+
+  | tail headValue hRemove inductionHypothesis =>
+      simp only [List.mem_cons] at hValue ⊢
+
+      rcases hValue with
+        hHead | hTail
+
+      · exact Or.inl hHead
+
+      · exact
+          Or.inr
+            (inductionHypothesis hTail)
+
+end Occurrence
+end Relico
