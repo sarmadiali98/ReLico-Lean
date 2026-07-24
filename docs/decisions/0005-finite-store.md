@@ -452,3 +452,63 @@ exactly the embedded result of the original executable translator.
 
 The regression model declares two variables with distinct initial
 values and contains an assignment from one state variable to the other.
+
+## Schema-version-2 executable pipeline
+
+Checkpoint 14 extends the executable frontend and concrete backend to
+the finite-store model while preserving the schema-version-1 pipeline.
+
+The parser-independent schema is represented by:
+
+```lean
+Frontend.RawStateVariable
+Frontend.RawStoreModel
+Frontend.storeBridgeSchemaVersion
+
+Schema version 2 replaces the singleton stateVar field with an
+ordered stateVariables array. Each declaration records its name and
+integer initial value.
+
+The generalized trusted decoder is:
+
+Frontend.decodeRawStoreModel
+Frontend.decodeStoreModelText
+
+Assignment targets and variable references are accepted only when they
+occur in the complete state-variable declaration list.
+
+The executable generalized backend is:
+
+Translation.translateStoreToCppSource
+LF.CppPrinter.renderStoreProgram
+
+It invokes the verified Translation.translateStore function and emits
+all LF state declarations in source order.
+
+The schema-version-2 Java adapter is:
+
+frontend/java-bridge/RebecaStoreJsonExporter.java
+
+It reads all integer state-variable declarators from the existing Timed
+Rebeca parser AST. It validates assignment targets and expression
+references against the full declaration list. Declaration initializers
+remain outside the parser fragment; declarations begin at zero and the
+translated constructor performs executable initialization.
+
+The reusable real-parser integration check is:
+
+frontend/java-bridge/check-store.sh <artifact.zip>
+
+It verifies the following path:
+
+Timed Rebeca source
+→ existing Java parser and semantic checker
+→ schema-version-2 JSON
+→ Lean finite-store decoder
+→ verified finite-store translation
+→ LF/C++ printer
+→ official lfc compiler
+→ generated C++ native executable
+
+The committed two-variable fixture includes declarations x and y
+and the cross-variable assignment y = x.

@@ -128,3 +128,9 @@ import Relico.LF.StoreModelWellFormed
 import Relico.Translation.StoreBasic
 import Relico.Correctness.StoreModelStructural
 import Relico.Tests.StoreModelTranslation
+import Relico.Frontend.StoreSchema
+import Relico.Frontend.StoreDecoder
+import Relico.Tests.StoreFrontendDecoder
+import Relico.LF.StoreCppPrinter
+import Relico.Translation.StoreCppBackend
+import Relico.Tests.StoreCppBackend

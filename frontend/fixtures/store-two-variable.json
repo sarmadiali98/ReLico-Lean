@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 2,
+  "className": "TwoStateController",
+  "actorName": "controller",
+  "actorClass": "TwoStateController",
+  "stateVariables": [
+    {
+      "name": "x",
+      "initialValue": 0
+    },
+    {
+      "name": "y",
+      "initialValue": 0
+    }
+  ],
+  "messageServer": "tick",
+  "constructorBody": [
+    {
+      "kind": "assign",
+      "target": "x",
+      "expression": {
+        "kind": "intLiteral",
+        "value": 1
+      }
+    },
+    {
+      "kind": "assign",
+      "target": "y",
+      "expression": {
+        "kind": "intLiteral",
+        "value": 2
+      }
+    },
+    {
+      "kind": "selfSend",
+      "message": "tick",
+      "delay": 1
+    }
+  ],
+  "messageServerBody": [
+    {
+      "kind": "assign",
+      "target": "y",
+      "expression": {
+        "kind": "stateVar",
+        "name": "x"
+      }
+    }
+  ]
+}
