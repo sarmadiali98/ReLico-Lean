@@ -121,3 +121,10 @@ import Relico.DTR.StoreMachineTraceSemantics
 import Relico.LF.StoreMachineTraceSemantics
 import Relico.Correctness.StoreMachineTrace
 import Relico.Tests.StoreMachineTrace
+import Relico.DTR.StoreSyntax
+import Relico.LF.StoreSyntax
+import Relico.DTR.StoreModelWellFormed
+import Relico.LF.StoreModelWellFormed
+import Relico.Translation.StoreBasic
+import Relico.Correctness.StoreModelStructural
+import Relico.Tests.StoreModelTranslation

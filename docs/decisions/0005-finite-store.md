@@ -396,3 +396,59 @@ Backward execution is unconditional from a corresponding target trace
 and a well-formed source runtime state. The result includes a matching
 source trace, pointwise machine-label correspondence, corresponding
 final states, and preservation of source runtime well-formedness.
+
+## Multiple-variable model syntax
+
+The thirteenth migration checkpoint introduces generalized model ASTs:
+
+```lean
+DTR.StateVariableDecl
+DTR.StoreReactiveClass
+DTR.StoreModel
+
+LF.StateVariableDecl
+LF.StoreReactor
+LF.StoreProgram
+
+Each state declaration contains a variable name and an integer initial
+value. Declaration order is preserved by translation.
+
+The executable generalized translator is:
+
+Translation.translateStoreCore
+Translation.translateStore
+
+It compiles every DTR declaration into an LF reactor-state declaration
+and continues to use the verified expression, statement, body, action,
+reaction, and instance compilation functions.
+
+Generalized model well-formedness requires:
+
+valid and unique state-variable names;
+valid class, actor, message-server, reactor, action, and reaction
+names;
+constructor and message bodies well formed against the complete
+declaration list;
+a matching actor/class or reactor-instance relationship.
+
+Structural preservation is established by:
+
+Correctness.compileStoreReactor_wellFormed
+Correctness.translateStoreCore_wellFormed
+Correctness.translateStore_wellFormed
+
+The existing v0 AST and theorem stack remain unchanged. Singleton
+models embed into the generalized syntax through:
+
+DTR.Model.toStoreModel
+LF.Program.toStoreProgram
+
+The theorem:
+
+Translation.translateStoreCore_singleton
+
+proves that generalized translation of an embedded singleton model is
+exactly the embedded result of the original executable translator.
+
+The regression model declares two variables with distinct initial
+values and contains an assignment from one state variable to the other.
