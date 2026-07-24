@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for vertical slice v0.
+Accepted for vertical slice v0; extended by Decision 0005.
 
 ## Parser entry point
 
@@ -10,6 +10,7 @@ The frontend bridge uses the existing Rebeca compiler framework:
 
 ```text
 RebecaModelCompiler.compileRebecaFile
+```
 
 It selects:
 
@@ -97,6 +98,7 @@ A second finite fixture validates actual execution:
 
 ```text
 frontend/fixtures/v0-once.rebeca
+```
 
 Its constructor schedules one delayed self-message. The message server
 updates the state and schedules no further action, allowing the
@@ -120,3 +122,24 @@ Timed Rebeca parsing
 
 This is an integration test, not a formal verification of the LF
 compiler, C++ compiler, runtime, operating system, or hardware.
+
+## Finite-store extension
+
+Decision 0005 adds the generalized exporter:
+
+```text
+org.rebecalang.compiler.frontendbridge.RebecaStoreJsonExporter
+```
+
+The exporter accepts a finite nonempty list of integer state-variable
+declarations. Assignment targets and variable references are validated
+against the complete declaration list.
+
+The reusable parser-to-native integration command is:
+
+```text
+frontend/java-bridge/check-store.sh <artifact.zip>
+```
+
+The schema-version-1 exporter and integration checks remain available
+for regression and compatibility testing.

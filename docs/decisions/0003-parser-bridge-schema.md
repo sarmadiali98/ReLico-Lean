@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for vertical slice v0.
+Accepted for vertical slice v0; extended by Decision 0005.
 
 ## Context
 
@@ -26,6 +26,7 @@ The path is:
 → stable bridge JSON
 → Lean Frontend.decodeModelText
 → Lean DTR.Model
+```
 
 Schema version 1 contains:
 
@@ -61,3 +62,21 @@ does not call the previous Java Lingua Franca generator.
 
 The DTR-to-LF translation continues to be performed only by the
 executable Lean translator.
+
+## Finite-store extension
+
+Decision 0005 adds schema version 2. It replaces the singleton
+`stateVar` field with an ordered `stateVariables` array and decodes to
+`DTR.StoreModel` through `Frontend.decodeStoreModelText`.
+
+Schema version 1 and `Frontend.decodeModelText` remain available as the
+singleton compatibility path.
+
+The generalized parser-independent path is:
+
+```text
+schema-version-2 JSON
+→ Frontend.decodeStoreModelText
+→ DTR.StoreModel
+→ Translation.translateStore
+```

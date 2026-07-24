@@ -1,11 +1,16 @@
 # Vertical-slice v0 correctness claim
 
+This document records the original singleton milestone. The current
+generalized claim is documented in
+`docs/claims/finite-store-correctness.md`.
+
 ## Executable translation path
 
 The verified translation entry point is:
 
 ```lean
 Relico.Translation.translate
+```
 
 A successful result has the form:
 
@@ -100,6 +105,7 @@ The executable concrete backend entry point is:
 
 ```lean
 Relico.Translation.translateToCppSource
+```
 
 It invokes the verified AST translator and renders the resulting LF AST
 as source for the Lingua Franca C++ target.

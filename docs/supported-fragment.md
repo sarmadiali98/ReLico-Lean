@@ -113,3 +113,28 @@ Vertical slice v0 is complete only when the repository contains:
 9. a backward simulation theorem;
 10. an end-to-end compiler correctness theorem about the executable translation function;
 11. no `sorry`, `admit`, or project-specific axioms in the final theorem dependency.
+
+
+## Finite-store executable extension
+
+The current generalized path extends the v0 fragment with a finite
+nonempty list of integer state variables.
+
+Expressions may reference any declared state variable. Assignments may
+target any declared state variable, including cross-variable
+assignments.
+
+The remaining model restrictions are unchanged:
+
+- one reactive class;
+- one actor instance;
+- one constructor;
+- one message server;
+- delayed self-sends with nonnegative constant delays;
+- the explicitly supported expression and statement forms.
+
+The generalized bridge uses schema version 2 and decodes to
+`DTR.StoreModel`.
+
+The singleton schema-version-1 path remains available for regression
+and compatibility checks.

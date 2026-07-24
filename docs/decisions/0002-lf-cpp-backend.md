@@ -12,6 +12,7 @@ Generated LF source begins with:
 
 ```lf
 target Cpp
+```
 
 The C target is not the deployment target of the ReLico translator.
 
@@ -42,9 +43,14 @@ Trust boundary
 The DTR-to-LF AST translation is covered by the current Lean
 correctness results.
 
-The LF/C++ text printer is executable but is not yet proved to produce
-text accepted by the official LF parser. It remains part of the trusted
-backend boundary until parser or compiler validation is integrated.
+The LF/C++ text printer is executable but is not formally proved to
+produce text accepted by the official LF parser. It therefore remains
+part of the trusted backend boundary.
+
+Executable integration checks now validate generated source with the
+official `lfc` compiler, generated C++, and native execution. These
+checks provide toolchain evidence but do not extend the Lean proof
+through the printer or downstream toolchain.
 
 The LF compiler, generated C++ code, C++ compiler, LF C++ runtime,
 operating system, and hardware remain outside the current proof.
@@ -55,10 +61,12 @@ The generated main reactor is unnamed:
 
 ```lf
 main reactor {
+```
 
-Lingua Franca otherwise requires a named main reactor to match the LF
-source filename. Omitting the name makes generated source independent
-of the output filename.
+The main reactor is intentionally unnamed. The output filename must
+nevertheless not collide, up to case differences, with the name of a
+declared reactor. Integration checks therefore use neutral filenames
+such as `StoreProgram.lf`.
 
 ## Reaction action effects
 
@@ -71,6 +79,7 @@ For example:
 reaction(startup) -> tick_action {=
   tick_action.schedule(1ms);
 =}
+```
 
 This gives the LF C++ reaction a schedulable action handle.
 

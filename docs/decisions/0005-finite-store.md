@@ -10,6 +10,7 @@ The shared store abstraction is:
 
 ```lean
 Relico.Store Key Value
+```
 
 It is represented as an ordered association list.
 
@@ -51,6 +52,7 @@ both DTR and generated LF expressions:
 ```lean
 DTR.Expr.evaluateStore
 LF.Expr.evaluateStore
+```
 
 A variable reference evaluates through its VarName binding. Missing
 bindings produce none.
@@ -72,6 +74,7 @@ The third migration checkpoint introduces:
 
 ```lean
 StateStore.Covers declaredVariables store
+```
 
 Coverage means that every declared variable has an observable integer
 binding in the runtime store.
@@ -100,6 +103,7 @@ runtime-state structures:
 ```lean
 DTR.StoreState
 LF.StoreState
+```
 
 They replace the single integer runtime field with:
 
@@ -158,6 +162,7 @@ correspondence:
 
 ```lean
 Correctness.StoreStateCorresponds
+```
 
 The relation preserves the complete finite store rather than one
 integer state value. It also preserves logical time, pending event
@@ -193,6 +198,7 @@ statements, and bodies:
 DTR.Expr.StoreWellFormed
 DTR.Stmt.StoreWellFormed
 DTR.Body.StoreWellFormed
+```
 
 LF.Expr.StoreWellFormed
 LF.Stmt.StoreWellFormed
@@ -220,6 +226,7 @@ The eighth migration checkpoint introduces:
 
 ```lean
 Correctness.store_step_backward
+```
 
 Every generated-LF store statement step from a corresponding runtime
 state has a matching DTR store statement step.
@@ -250,6 +257,7 @@ The ninth migration checkpoint introduces finite statement traces:
 ```lean
 DTR.StoreTrace
 LF.StoreTrace
+```
 
 Trace label sequences are related pointwise through:
 
@@ -285,6 +293,7 @@ The tenth migration checkpoint introduces parallel dispatch relations:
 ```lean
 DTR.StoreDispatchStep
 LF.StoreDispatchStep
+```
 
 Dispatch preserves the complete finite state store while removing one
 concrete earliest pending occurrence, advancing logical time or the LF
@@ -320,6 +329,7 @@ machine relations:
 ```lean
 DTR.StoreMachineLabel
 DTR.StoreMachineStep
+```
 
 LF.StoreMachineLabel
 LF.StoreMachineStep
@@ -358,6 +368,7 @@ execution relations:
 ```lean
 DTR.StoreMachineSteps
 LF.StoreMachineSteps
+```
 
 A source runtime invariant records:
 
@@ -405,6 +416,7 @@ The thirteenth migration checkpoint introduces generalized model ASTs:
 DTR.StateVariableDecl
 DTR.StoreReactiveClass
 DTR.StoreModel
+```
 
 LF.StateVariableDecl
 LF.StoreReactor
@@ -464,6 +476,7 @@ The parser-independent schema is represented by:
 Frontend.RawStateVariable
 Frontend.RawStoreModel
 Frontend.storeBridgeSchemaVersion
+```
 
 Schema version 2 replaces the singleton stateVar field with an
 ordered stateVariables array. Each declaration records its name and

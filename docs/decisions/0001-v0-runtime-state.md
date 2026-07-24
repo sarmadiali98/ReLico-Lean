@@ -45,6 +45,7 @@ Scheduling an action with zero delay at tag `(t, m)` produces tag:
 
 ```text
 (t, m + 1)
+```
 
 Scheduling an action with positive delay d produces tag:
 
