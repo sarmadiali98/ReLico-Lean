@@ -349,3 +349,50 @@ dispatch recovery.
 
 The regression tests cover both machine-step forms using a complete
 two-variable store.
+
+## Finite combined store-machine executions
+
+The twelfth migration checkpoint introduces finite combined-machine
+execution relations:
+
+```lean
+DTR.StoreMachineSteps
+LF.StoreMachineSteps
+
+A source runtime invariant records:
+
+DTR.StoreState.RuntimeWellFormed
+
+This invariant requires:
+
+coverage of every declared state variable;
+structural validity of the currently active body;
+correct targeting of every pending message occurrence.
+
+Statement execution preserves all three components. Dispatch preserves
+the store and pending-target invariant and loads the declared
+well-formed message body.
+
+Finite source execution preserves runtime well-formedness through:
+
+Correctness.dtrStoreMachineSteps_preserve_runtimeWellFormed
+
+Finite machine-label sequences are related by:
+
+Correctness.StoreMachineTraceCorresponds
+
+The development establishes:
+
+Correctness.storeMachineSteps_forward_of_compatible
+Correctness.storeMachineSteps_backward
+
+Forward execution remains conditional because an LF scheduler can
+refine equal-logical-time events by microstep. Compatibility is tracked
+for the complete execution by:
+
+Correctness.StoreForwardMachineStepsCompatible
+
+Backward execution is unconditional from a corresponding target trace
+and a well-formed source runtime state. The result includes a matching
+source trace, pointwise machine-label correspondence, corresponding
+final states, and preservation of source runtime well-formedness.

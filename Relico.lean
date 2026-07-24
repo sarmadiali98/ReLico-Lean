@@ -116,3 +116,8 @@ import Relico.DTR.StoreMachineSemantics
 import Relico.LF.StoreMachineSemantics
 import Relico.Correctness.StoreMachine
 import Relico.Tests.StoreMachine
+import Relico.DTR.StoreRuntimeWellFormed
+import Relico.DTR.StoreMachineTraceSemantics
+import Relico.LF.StoreMachineTraceSemantics
+import Relico.Correctness.StoreMachineTrace
+import Relico.Tests.StoreMachineTrace
