@@ -1,4 +1,5 @@
 import Relico.LF.MultiStoreSyntax
+import Relico.LF.MultiStoreReactionScheduling
 import Relico.LF.Scheduling
 import Relico.LF.StoreState
 
@@ -36,8 +37,9 @@ inductive MultiStoreDispatchStep
           selectedAction
           pendingActions
           remainingActions)
-      (hEarliest :
-        LF.IsEarliest
+      (hPriorityEligible :
+        LF.IsReactionPriorityEligible
+          messageReactions
           selectedAction
           pendingActions)
       (hNotPast :

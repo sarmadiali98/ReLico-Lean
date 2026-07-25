@@ -132,17 +132,21 @@ theorem translateMultiStore_initialMachineSteps_forward
       hCompatible
 
 /--
-Unconditional finite backward correctness from generated startup entry
-to source constructor entry for a well-formed multi-server model.
+Finite backward correctness from generated startup entry to source
+constructor entry for a structurally well-formed multi-server model in
+the positive-delay priority timing fragment.
 
 Every finite generated-LF execution is matched by a finite source
-execution, and runtime well-formedness is preserved in the recovered
-source state.
+execution. Runtime well-formedness and the priority timing invariants
+used by dispatch correspondence are preserved.
 -/
 theorem translateMultiStoreCore_initialMachineSteps_backward
     {model : DTR.MultiStoreModel}
     (hModel :
       DTR.MultiStoreModel.WellFormed
+        model)
+    (hPriorityTiming :
+      DTR.MultiStoreModel.PriorityTimingWellFormed
         model)
     {targetAfter : LF.StoreState}
     {targetLabels :
@@ -181,25 +185,55 @@ theorem translateMultiStoreCore_initialMachineSteps_backward
         model.reactiveClass.messageServers
         sourceAfter := by
 
+  have hTargetInitialMicrostepsZero :
+      LF.StoreState.PendingMicrostepsZero
+        (LF.MultiStoreProgram.initialState
+          (Translation.translateMultiStoreCore
+            model)) := by
+
+    intro action hAction
+
+    simp [
+      LF.MultiStoreProgram.initialState,
+      Translation.translateMultiStoreCore
+    ] at hAction
+
+  have hSourceInitialTiming :
+      DTR.Body.PriorityTimingWellFormed
+        (DTR.MultiStoreModel.initialState
+          model).activeBody := by
+
+    simpa [
+      DTR.MultiStoreModel.initialState
+    ] using
+      hPriorityTiming.constructorBody
+
   exact
     multiStoreMachineSteps_backward
       hTargetSteps
       (translateMultiStoreCore_initialStates_correspond
         model)
+      hTargetInitialMicrostepsZero
       hModel.messageServerBodiesWellFormed
+      hPriorityTiming.messageServerBodies
       (DTR.MultiStoreModel.initialState_runtimeWellFormed
         model
         hModel)
+      hSourceInitialTiming
 
 /--
-Unconditional finite backward correctness for the program returned by
-the public executable multi-server translator.
+Finite backward correctness for the program returned by the public
+executable multi-server translator in the positive-delay priority timing
+fragment.
 -/
 theorem translateMultiStore_initialMachineSteps_backward
     {model : DTR.MultiStoreModel}
     {program : LF.MultiStoreProgram}
     (hModel :
       DTR.MultiStoreModel.WellFormed
+        model)
+    (hPriorityTiming :
+      DTR.MultiStoreModel.PriorityTimingWellFormed
         model)
     (hTranslate :
       Translation.translateMultiStore model =
@@ -255,6 +289,7 @@ theorem translateMultiStore_initialMachineSteps_backward
   exact
     translateMultiStoreCore_initialMachineSteps_backward
       hModel
+      hPriorityTiming
       hTargetSteps
 
 end Correctness

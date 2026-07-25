@@ -1,4 +1,5 @@
 import Relico.Correctness.StoreDispatch
+import Relico.Correctness.PriorityEligibility
 import Relico.DTR.MultiStoreDispatchSemantics
 import Relico.LF.MultiStoreDispatchSemantics
 import Relico.Translation.MultiStoreBasic
@@ -66,7 +67,7 @@ theorem multiStore_dispatch_forward_of_compatible
       selectedServer
       hServerDeclared
       hSourceRemoved
-      hSourceEarliest
+      hSourcePriorityEligible
       hSourceNotPast
       hSourceTarget =>
 
@@ -91,6 +92,15 @@ theorem multiStore_dispatch_forward_of_compatible
               Translation.compileBody
             ] using
               hStates.activeBody
+
+
+          have hQueues :
+              QueueCorresponds
+                pendingMessages
+                pendingActions := by
+
+            simpa using
+              hStates.pendingEvents
 
           change
             ∃ selectedAction targetRemaining,
@@ -123,6 +133,19 @@ theorem multiStore_dispatch_forward_of_compatible
 
           subst targetStore
           subst targetBody
+
+          have hTargetPriorityEligible :
+              LF.IsReactionPriorityEligible
+                (Translation.compileMessageReactions
+                  messageServers)
+                selectedAction
+                pendingActions :=
+
+            sourcePriorityEligible_implies_targetReactionPriorityEligible
+              hQueues
+              hSelectedCorresponds
+              hTargetEarliest
+              hSourcePriorityEligible
 
           have hGeneratedTarget :
               selectedAction.name =
@@ -208,7 +231,7 @@ theorem multiStore_dispatch_forward_of_compatible
                     selectedServer)
                 hReactionDeclared
                 hTargetRemoved
-                hTargetEarliest
+                hTargetPriorityEligible
                 hTargetNotPast
                 hReactionTrigger
 
@@ -250,6 +273,9 @@ theorem multiStore_dispatch_backward
     (hStates :
       StoreStateCorresponds
         sourceState
+        targetState)
+    (hTargetMicrostepsZero :
+      LF.StoreState.PendingMicrostepsZero
         targetState) :
     ∃ selectedMessage sourceServer sourceStateAfter,
       DTR.MultiStoreDispatchStep
@@ -279,7 +305,7 @@ theorem multiStore_dispatch_backward
       selectedReaction
       hReactionDeclared
       hTargetRemoved
-      hTargetEarliest
+      hTargetPriorityEligible
       hTargetNotPast
       hTrigger =>
 
@@ -320,6 +346,16 @@ theorem multiStore_dispatch_backward
             simpa using
               hStates.pendingEvents
 
+
+          have hAllMicrostepsZero :
+              LF.ActionQueue.AllMicrostepsZero
+                pendingActions := by
+
+            simpa [
+              LF.StoreState.PendingMicrostepsZero
+            ] using
+              hTargetMicrostepsZero
+
           have hCompiledEmpty :
               Translation.compileBody
                   sourceActiveBody =
@@ -352,15 +388,25 @@ theorem multiStore_dispatch_backward
                hSelectedCorresponds,
                hRemainingCorresponds⟩
 
-          have hSourceEarliest :
-              DTR.IsEarliest
+          have hTargetSelected :
+              selectedAction ∈
+                pendingActions :=
+
+            Occurrence.RemovesOne.selected_mem
+              hTargetRemoved
+
+          have hSourcePriorityEligible :
+              DTR.IsPriorityEligible
+                messageServers
                 selectedMessage
                 pendingMessages :=
 
-            targetEarliest_implies_sourceEarliest
+            targetReactionPriorityEligible_implies_sourcePriorityEligible
               hQueues
               hSelectedCorresponds
-              hTargetEarliest
+              hTargetSelected
+              hTargetPriorityEligible
+              hAllMicrostepsZero
 
           have hTargetActionName :
               selectedAction.name =
@@ -460,7 +506,7 @@ theorem multiStore_dispatch_backward
                   sourceServer)
                 hSourceServerDeclared
                 hSourceRemoved
-                hSourceEarliest
+                hSourcePriorityEligible
                 hSourceNotPast
                 hSourceTarget
 

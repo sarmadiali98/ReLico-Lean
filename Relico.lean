@@ -193,3 +193,7 @@ import Relico.Tests.PriorityOrder
 
 import Relico.Correctness.PriorityEligibility
 import Relico.Tests.PriorityEligibility
+
+import Relico.DTR.PriorityTimingInvariant
+import Relico.Correctness.PriorityMachineTiming
+import Relico.Tests.PriorityMachineTiming

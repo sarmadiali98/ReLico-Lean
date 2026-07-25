@@ -122,6 +122,52 @@ theorem twoMessage_public_initial_refl_execution_forward :
       hSourceSteps
       hCompatible
 
+theorem twoMessageModel_priorityTimingWellFormed :
+    DTR.MultiStoreModel.PriorityTimingWellFormed
+      twoMessageModel := by
+
+  exact {
+    constructorBody := by
+      simp [
+        twoMessageModel,
+        twoMessageReactiveClass,
+        twoMessageConstructor,
+        DTR.Body.PriorityTimingWellFormed,
+        DTR.Stmt.PriorityTimingWellFormed
+      ]
+
+    messageServerBodies := by
+      intro messageServer hMember
+
+      have hConcreteMember :
+          messageServer =
+              tickMessageServer ∨
+            messageServer =
+              resetMessageServer := by
+
+        simpa [
+          twoMessageModel,
+          twoMessageReactiveClass,
+          twoMessageServers
+        ] using
+          hMember
+
+      rcases hConcreteMember with
+        rfl | rfl
+
+      · simp [
+          tickMessageServer,
+          DTR.Body.PriorityTimingWellFormed,
+          DTR.Stmt.PriorityTimingWellFormed
+        ]
+
+      · simp [
+          resetMessageServer,
+          DTR.Body.PriorityTimingWellFormed,
+          DTR.Stmt.PriorityTimingWellFormed
+        ]
+  }
+
 theorem twoMessage_initial_refl_execution_backward :
     ∃ sourceLabels sourceAfter,
       DTR.MultiStoreMachineSteps
@@ -149,6 +195,7 @@ theorem twoMessage_initial_refl_execution_backward :
   exact
     Correctness.translateMultiStoreCore_initialMachineSteps_backward
       twoMessageModel_wellFormed
+      twoMessageModel_priorityTimingWellFormed
       (LF.MultiStoreMachineSteps.refl
         _)
 
@@ -179,6 +226,7 @@ theorem twoMessage_public_initial_refl_execution_backward :
   exact
     Correctness.translateMultiStore_initialMachineSteps_backward
       twoMessageModel_wellFormed
+      twoMessageModel_priorityTimingWellFormed
       (program :=
         Translation.translateMultiStoreCore
           twoMessageModel)

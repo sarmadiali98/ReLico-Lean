@@ -112,6 +112,66 @@ def multiLfDispatchAfter :
     (Translation.compileMessageReaction
       resetMessageServer).body
 
+theorem multi_dispatch_message_is_priority_eligible :
+    DTR.IsPriorityEligible
+      twoMessageServers
+      multiDispatchMessage
+      [multiDispatchMessage] := by
+
+  refine
+    ⟨?_,
+     ?_⟩
+
+  · intro candidate hCandidate
+
+    simp only [
+      List.mem_singleton
+    ] at hCandidate
+
+    subst candidate
+    native_decide
+
+  · intro candidate hCandidate hSameTime
+
+    simp only [
+      List.mem_singleton
+    ] at hCandidate
+
+    subst candidate
+    native_decide
+
+theorem multi_dispatch_action_is_reaction_priority_eligible :
+    LF.IsReactionPriorityEligible
+      (Translation.compileMessageReactions
+        twoMessageServers)
+      multiDispatchAction
+      [multiDispatchAction] := by
+
+  refine
+    ⟨?_,
+     ?_⟩
+
+  · intro candidate hCandidate
+
+    simp only [
+      List.mem_singleton
+    ] at hCandidate
+
+    subst candidate
+
+    exact
+      LF.Tag.precedesOrEqual_refl
+        multiDispatchAction.tag
+
+  · intro candidate hCandidate hSameTag
+
+    simp only [
+      List.mem_singleton
+    ] at hCandidate
+
+    subst candidate
+    native_decide
+
 theorem multi_dtr_dispatch_selects_reset :
     DTR.MultiStoreDispatchStep
       twoMessageServers
@@ -142,16 +202,7 @@ theorem multi_dtr_dispatch_selects_reset :
           twoMessageServers
         ])
       (Occurrence.RemovesOne.head [])
-      (by
-        intro candidate hCandidate
-
-        simp only [
-          List.mem_singleton
-        ] at hCandidate
-
-        subst candidate
-
-        exact Nat.le_refl 5)
+      multi_dispatch_message_is_priority_eligible
       (by decide)
       rfl
 
@@ -192,18 +243,7 @@ theorem multi_lf_dispatch_selects_reset_reaction :
                 twoMessageServers
               ]))
       (Occurrence.RemovesOne.head [])
-      (by
-        intro candidate hCandidate
-
-        simp only [
-          List.mem_singleton
-        ] at hCandidate
-
-        subst candidate
-
-        exact
-          LF.Tag.precedesOrEqual_refl
-            multiDispatchTag)
+      multi_dispatch_action_is_reaction_priority_eligible
       (by
         exact Or.inl (by decide))
       (by
@@ -299,6 +339,19 @@ theorem multi_dispatch_forward_correspondence :
       multiDispatchStatesCorrespond
       multiDispatchForwardCompatible
 
+theorem multi_lf_dispatch_before_pending_microsteps_zero :
+    LF.StoreState.PendingMicrostepsZero
+      multiLfDispatchBefore := by
+
+  intro action hAction
+
+  simp [
+    multiLfDispatchBefore
+  ] at hAction
+
+  subst action
+  rfl
+
 theorem multi_dispatch_backward_correspondence :
     ∃ selectedMessage sourceServer sourceStateAfter,
       DTR.MultiStoreDispatchStep
@@ -322,6 +375,7 @@ theorem multi_dispatch_backward_correspondence :
     Correctness.multiStore_dispatch_backward
       multi_lf_dispatch_selects_reset_reaction
       multiDispatchStatesCorrespond
+      multi_lf_dispatch_before_pending_microsteps_zero
 
 end Tests
 end Relico

@@ -1,4 +1,5 @@
 import Relico.DTR.MultiStoreSyntax
+import Relico.DTR.MultiStorePriorityScheduling
 import Relico.DTR.Scheduling
 import Relico.DTR.StoreState
 
@@ -37,8 +38,9 @@ inductive MultiStoreDispatchStep
           selectedMessage
           pendingMessages
           remainingMessages)
-      (hEarliest :
-        DTR.IsEarliest
+      (hPriorityEligible :
+        DTR.IsPriorityEligible
+          messageServers
           selectedMessage
           pendingMessages)
       (hNotPast :

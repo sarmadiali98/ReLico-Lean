@@ -208,6 +208,9 @@ theorem multiStoreMachineStep_backward
       StoreStateCorresponds
         sourceState
         targetState)
+    (hTargetMicrostepsZero :
+      LF.StoreState.PendingMicrostepsZero
+        targetState)
     (hSourceBodyWellFormed :
       DTR.Body.MultiStoreWellFormed
         declaredVariables
@@ -258,6 +261,7 @@ theorem multiStoreMachineStep_backward
           multiStore_dispatch_backward
             hDispatch
             hStates
+            hTargetMicrostepsZero
         with
           ⟨selectedMessage,
            sourceServer,

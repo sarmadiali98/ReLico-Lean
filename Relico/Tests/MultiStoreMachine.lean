@@ -87,6 +87,16 @@ theorem multi_statement_machine_forward :
       multiStatementInitialStatesCorrespond
       multiStatementMachineCompatible
 
+theorem multiStatementTargetBefore_pendingMicrostepsZero :
+    LF.StoreState.PendingMicrostepsZero
+      multiStatementTargetBefore := by
+
+  intro action hAction
+
+  simp [
+    multiStatementTargetBefore
+  ] at hAction
+
 theorem multi_statement_machine_backward :
     ∃ sourceLabel sourceStateAfter,
       DTR.MultiStoreMachineStep
@@ -110,6 +120,7 @@ theorem multi_statement_machine_backward :
     Correctness.multiStoreMachineStep_backward
       multi_target_statement_machine_step
       multiStatementInitialStatesCorrespond
+      multiStatementTargetBefore_pendingMicrostepsZero
       multiStatementSourceBodyWellFormed
 
 /--
@@ -223,6 +234,7 @@ theorem multi_dispatch_machine_backward :
     Correctness.multiStoreMachineStep_backward
       multi_target_dispatch_machine_step
       multiDispatchStatesCorrespond
+      multi_lf_dispatch_before_pending_microsteps_zero
       multiDispatchSourceBodyWellFormed
 
 end Tests

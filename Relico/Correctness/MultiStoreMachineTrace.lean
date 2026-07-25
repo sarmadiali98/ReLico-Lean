@@ -1,4 +1,5 @@
 import Relico.Correctness.MultiStoreMachine
+import Relico.Correctness.PriorityMachineTiming
 import Relico.DTR.MultiStoreMachineTraceSemantics
 import Relico.DTR.MultiStoreRuntimeWellFormed
 import Relico.LF.MultiStoreMachineTraceSemantics
@@ -319,12 +320,12 @@ theorem multiStoreMachineSteps_forward_of_compatible
          hFinalStates⟩
 
 /--
-Unconditional backward simulation for arbitrary finite generated-LF
-multi-server machine executions.
+Backward simulation for finite generated-LF multi-server machine
+executions in the positive-delay priority timing fragment.
 
-Runtime well-formedness supplies the source active-body premise required
-by each one-step backward theorem and is preserved through the recovered
-source execution.
+Runtime well-formedness supplies the structural source-body premise.
+Source priority timing and target zero-microstep invariants are preserved
+through every recovered execution step.
 -/
 theorem multiStoreMachineSteps_backward
     {declaredVariables : List VarName}
@@ -347,6 +348,9 @@ theorem multiStoreMachineSteps_backward
       StoreStateCorresponds
         sourceBefore
         targetBefore)
+    (hTargetMicrostepsZero :
+      LF.StoreState.PendingMicrostepsZero
+        targetBefore)
     (hMessageBodies :
       ∀ messageServer,
         messageServer ∈
@@ -356,11 +360,20 @@ theorem multiStoreMachineSteps_backward
           (DTR.messageServerNames
             messageServers)
           messageServer.body)
+    (hMessageTiming :
+      ∀ messageServer,
+        messageServer ∈
+            messageServers →
+          DTR.Body.PriorityTimingWellFormed
+            messageServer.body)
     (hSourceWellFormed :
       DTR.StoreState.MultiStoreRuntimeWellFormed
         declaredVariables
         messageServers
-        sourceBefore) :
+        sourceBefore)
+    (hSourceTiming :
+      DTR.Body.PriorityTimingWellFormed
+        sourceBefore.activeBody) :
     ∃ sourceLabels sourceAfter,
       DTR.MultiStoreMachineSteps
           declaredVariables
@@ -396,6 +409,7 @@ theorem multiStoreMachineSteps_backward
           multiStoreMachineStep_backward
             hHead
             hStates
+            hTargetMicrostepsZero
             hSourceWellFormed.activeBody
         with
           ⟨sourceLabel,
@@ -415,10 +429,32 @@ theorem multiStoreMachineSteps_backward
           hMessageBodies
           hSourceWellFormed
 
+
+      have hMiddleSourceTiming :
+          DTR.Body.PriorityTimingWellFormed
+            sourceMiddle.activeBody :=
+
+        DTR.MultiStoreMachineStep.preserves_priorityTimingWellFormed
+          hSourceHead
+          hMessageTiming
+          hSourceTiming
+
+      have hMiddleTargetMicrostepsZero :
+          LF.StoreState.PendingMicrostepsZero
+            _ :=
+
+        targetMultiStoreMachineStep_preserves_pendingMicrostepsZero
+          hHead
+          hStates
+          hSourceTiming
+          hTargetMicrostepsZero
+
       rcases
           inductionHypothesis
             hMiddleStates
+            hMiddleTargetMicrostepsZero
             hMiddleWellFormed
+            hMiddleSourceTiming
         with
           ⟨sourceRemainingLabels,
            sourceAfter,

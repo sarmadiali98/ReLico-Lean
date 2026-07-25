@@ -163,6 +163,46 @@ theorem multiDispatchSource_runtimeWellFormed :
       ]
   }
 
+theorem twoMessageServerBodies_priorityTimingWellFormed :
+    ∀ messageServer,
+      messageServer ∈
+          twoMessageServers →
+        DTR.Body.PriorityTimingWellFormed
+          messageServer.body := by
+
+  intro messageServer hMember
+
+  simp [
+    twoMessageServers
+  ] at hMember
+
+  rcases hMember with
+    hTick | hReset
+
+  · subst messageServer
+
+    simp [
+      tickMessageServer,
+      DTR.Body.PriorityTimingWellFormed,
+      DTR.Stmt.PriorityTimingWellFormed
+    ]
+
+  · subst messageServer
+
+    simp [
+      resetMessageServer,
+      DTR.Body.PriorityTimingWellFormed,
+      DTR.Stmt.PriorityTimingWellFormed
+    ]
+
+theorem multiDispatchSource_priorityTimingWellFormed :
+    DTR.Body.PriorityTimingWellFormed
+      multiDtrDispatchBefore.activeBody := by
+
+  simp [
+    multiDtrDispatchBefore
+  ]
+
 /--
 The one-dispatch source execution preserves complete multi-server
 runtime well-formedness.
@@ -279,8 +319,11 @@ theorem multi_dispatch_machine_steps_backward :
     Correctness.multiStoreMachineSteps_backward
       multi_target_dispatch_machine_steps
       multiDispatchStatesCorrespond
+      multi_lf_dispatch_before_pending_microsteps_zero
       twoMessageServerBodies_runtimeWellFormed
+      twoMessageServerBodies_priorityTimingWellFormed
       multiDispatchSource_runtimeWellFormed
+      multiDispatchSource_priorityTimingWellFormed
 
 end Tests
 end Relico
