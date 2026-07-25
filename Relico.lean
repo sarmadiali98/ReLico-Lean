@@ -187,3 +187,6 @@ import Relico.DTR.PriorityTimingWellFormed
 import Relico.LF.PriorityTimingInvariant
 import Relico.Correctness.PriorityTiming
 import Relico.Tests.PriorityTiming
+
+import Relico.Correctness.PriorityOrder
+import Relico.Tests.PriorityOrder

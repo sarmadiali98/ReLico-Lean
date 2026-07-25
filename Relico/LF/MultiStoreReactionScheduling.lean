@@ -65,6 +65,89 @@ def ReactionActionPrecedesOrEqual
     true
 
 
+/--
+The empty reaction list contains neither requested logical-action
+trigger.
+-/
+@[simp]
+theorem reactionActionPrecedesOrEqual_nil
+    (left right : ActionName) :
+    ¬ ReactionActionPrecedesOrEqual
+        left
+        right
+        [] := by
+
+  unfold ReactionActionPrecedesOrEqual
+
+  simp [
+    reactionActionPrecedesOrEqualBool
+  ]
+
+/--
+Public recursive equation for a logical-action-triggered reaction at
+the head of a generated reaction list.
+
+The private Boolean scanner remains an implementation detail.
+-/
+@[simp]
+theorem reactionActionPrecedesOrEqual_cons_logicalAction
+    (left right action : ActionName)
+    (reactionName : ReactionName)
+    (body : LF.Body)
+    (remaining :
+      List LF.Reaction) :
+    ReactionActionPrecedesOrEqual
+        left
+        right
+        ({
+          name :=
+            reactionName
+
+          trigger :=
+            LF.Trigger.logicalAction
+              action
+
+          body :=
+            body
+        } :: remaining) ↔
+      if action = left then
+        True
+      else if action = right then
+        False
+      else
+        ReactionActionPrecedesOrEqual
+          left
+          right
+          remaining := by
+
+  by_cases hLeft :
+      action =
+        left
+
+  · simp [
+      ReactionActionPrecedesOrEqual,
+      reactionActionPrecedesOrEqualBool,
+      hLeft
+    ]
+
+  · by_cases hRight :
+        action =
+          right
+
+    · simp [
+        ReactionActionPrecedesOrEqual,
+        reactionActionPrecedesOrEqualBool,
+        hRight
+      ]
+
+    · simp [
+        ReactionActionPrecedesOrEqual,
+        reactionActionPrecedesOrEqualBool,
+        hLeft,
+        hRight
+      ]
+
+
 instance
     (left right : ActionName)
     (messageReactions :

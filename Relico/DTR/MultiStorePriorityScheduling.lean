@@ -73,6 +73,78 @@ def PriorityServerNamePrecedesOrEqual
       messageServers)
 
 
+/--
+The empty declaration list contains neither requested server name.
+-/
+@[simp]
+theorem serverNamePrecedesOrEqual_nil
+    (left right : MsgName) :
+    ¬ ServerNamePrecedesOrEqual
+        left
+        right
+        [] := by
+
+  unfold ServerNamePrecedesOrEqual
+
+  simp [
+    serverNamePrecedesOrEqualBool
+  ]
+
+/--
+Public recursive equation for the name-order relation.
+
+The private Boolean scanner remains an implementation detail. This
+equation exposes exactly the recursion needed by translation
+correctness proofs.
+-/
+@[simp]
+theorem serverNamePrecedesOrEqual_cons
+    (left right : MsgName)
+    (current : DTR.MessageServer)
+    (remaining :
+      List DTR.MessageServer) :
+    ServerNamePrecedesOrEqual
+        left
+        right
+        (current :: remaining) ↔
+      if current.name = left then
+        True
+      else if current.name = right then
+        False
+      else
+        ServerNamePrecedesOrEqual
+          left
+          right
+          remaining := by
+
+  by_cases hLeft :
+      current.name =
+        left
+
+  · simp [
+      ServerNamePrecedesOrEqual,
+      serverNamePrecedesOrEqualBool,
+      hLeft
+    ]
+
+  · by_cases hRight :
+        current.name =
+          right
+
+    · simp [
+        ServerNamePrecedesOrEqual,
+        serverNamePrecedesOrEqualBool,
+        hRight
+      ]
+
+    · simp [
+        ServerNamePrecedesOrEqual,
+        serverNamePrecedesOrEqualBool,
+        hLeft,
+        hRight
+      ]
+
+
 instance
     (left right : MsgName)
     (messageServers :
