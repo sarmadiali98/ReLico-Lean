@@ -201,3 +201,7 @@ import Relico.Tests.PriorityMachineTiming
 import Relico.LF.MultiStoreCppPrinter
 import Relico.Translation.MultiStoreCppBackend
 import Relico.Tests.MultiStoreCppBackend
+
+import Relico.Correctness.PayloadCorrespondence
+
+import Relico.Tests.PayloadFoundation

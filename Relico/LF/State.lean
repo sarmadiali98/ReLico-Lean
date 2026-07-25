@@ -85,6 +85,14 @@ One pending logical-action occurrence.
 structure PendingAction where
   name : ActionName
   tag : Tag
+
+  /--
+  The evaluated values carried by this logical-action occurrence.
+
+  The default preserves the existing void-action fragment exactly.
+  -/
+  payload : Payload := []
+
 deriving Repr, DecidableEq, BEq, Inhabited
 
 abbrev ActionQueue := List PendingAction

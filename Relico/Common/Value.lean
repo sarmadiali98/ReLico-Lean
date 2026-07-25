@@ -24,3 +24,17 @@ theorem asInt_int (value : Int) :
 end Value
 
 end Relico
+
+namespace Relico
+
+/--
+An ordered finite payload of integer values.
+
+The current verified fragment uses empty payloads. This representation is
+introduced independently so subsequent syntax and semantic checkpoints can
+carry concrete message arguments without changing their order.
+-/
+abbrev Payload :=
+  List Int
+
+end Relico

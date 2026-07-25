@@ -14,6 +14,14 @@ one distinct pending occurrence.
 structure PendingMessage where
 name : MsgName
 arrivalTime : LogicalTime
+
+/--
+The evaluated argument values carried by this message occurrence.
+
+The default preserves the existing parameter-free fragment exactly.
+-/
+payload : Payload := []
+
 deriving Repr, DecidableEq, BEq, Inhabited
 
 abbrev MessageBag := List PendingMessage
