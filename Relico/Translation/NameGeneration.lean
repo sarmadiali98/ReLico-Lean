@@ -24,5 +24,32 @@ def messageReactionNameFor
     ReactionName :=
   ⟨messageName.value ++ "_reaction"⟩
 
+
+theorem actionNameFor_injective :
+    Function.Injective actionNameFor := by
+
+  intro left right hEqual
+
+  cases left
+  cases right
+
+  simpa [
+    actionNameFor
+  ] using
+    hEqual
+
+theorem messageReactionNameFor_injective :
+    Function.Injective messageReactionNameFor := by
+
+  intro left right hEqual
+
+  cases left
+  cases right
+
+  simpa [
+    messageReactionNameFor
+  ] using
+    hEqual
+
 end Translation
 end Relico
