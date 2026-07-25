@@ -170,8 +170,11 @@ import Relico.Tests.MultiStoreExecutableTranslation
 import Relico.Tests.StoreInitialization
 import Relico.Tests.StoreExecutableTranslation
 import Relico.Frontend.StoreSchema
+import Relico.Frontend.MultiStoreSchema
 import Relico.Frontend.StoreDecoder
+import Relico.Frontend.MultiStoreDecoder
 import Relico.Tests.StoreFrontendDecoder
+import Relico.Tests.MultiStoreFrontendDecoder
 import Relico.LF.StoreCppPrinter
 import Relico.Translation.StoreCppBackend
 import Relico.Tests.StoreCppBackend
