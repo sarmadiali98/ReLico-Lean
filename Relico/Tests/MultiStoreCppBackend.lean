@@ -1,6 +1,7 @@
 import Relico.Translation.MultiStoreCppBackend
 import Relico.Tests.MessageServerPriority
 import Relico.Tests.MultiStoreModelTranslation
+import Relico.Tests.MultiStoreFrontendDecoder
 import Relico.Tests.StoreCppBackend
 
 set_option autoImplicit false
@@ -84,6 +85,41 @@ theorem twoMessageModel_renders_from_executable_translation :
         (LF.CppPrinter.renderMultiStoreProgram
           (Translation.translateMultiStoreCore
             twoMessageModel)) := by
+  rfl
+
+/--
+The concrete logical-action declarations produced from the decoded
+frontend priority fixture place the high-priority server first.
+-/
+theorem decoded_priority_cpp_action_declaration_order :
+    LF.CppPrinter.renderLogicalActionDecls
+        (Translation.translateMultiStoreCore
+          expectedDecodedMultiStoreModel).reactor.logicalActions =
+      LF.CppPrinter.renderLogicalActionDecl
+          (Translation.actionNameFor
+            frontendHighName) ++
+        LF.CppPrinter.renderLogicalActionDecl
+          (Translation.actionNameFor
+            frontendLowName) := by
+  rfl
+
+/--
+The concrete reaction triggers produced from the decoded frontend
+priority fixture retain the same high-before-low order.
+-/
+theorem decoded_priority_cpp_reaction_trigger_order :
+    List.map
+        (fun reaction =>
+          LF.CppPrinter.renderTrigger
+            reaction.trigger)
+        (Translation.translateMultiStoreCore
+          expectedDecodedMultiStoreModel).reactor.messageReactions = [
+      (Translation.actionNameFor
+        frontendHighName).value,
+
+      (Translation.actionNameFor
+        frontendLowName).value
+    ] := by
   rfl
 
 end Tests
