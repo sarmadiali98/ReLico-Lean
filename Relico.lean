@@ -182,3 +182,8 @@ import Relico.Tests.StoreCppBackend
 import Relico.DTR.MultiStorePriorityScheduling
 import Relico.LF.MultiStoreReactionScheduling
 import Relico.Tests.PriorityDispatchScheduling
+
+import Relico.DTR.PriorityTimingWellFormed
+import Relico.LF.PriorityTimingInvariant
+import Relico.Correctness.PriorityTiming
+import Relico.Tests.PriorityTiming
