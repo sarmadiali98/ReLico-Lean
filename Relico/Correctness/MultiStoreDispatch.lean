@@ -148,7 +148,7 @@ theorem multiStore_dispatch_forward_of_compatible
                   messageServers := by
 
             exact
-              List.mem_map_of_mem
+              Translation.compileMessageReaction_mem
                 hServerDeclared
 
           have hReactionTrigger :
@@ -283,15 +283,13 @@ theorem multiStore_dispatch_backward
       hTargetNotPast
       hTrigger =>
 
-      simp only [
-        Translation.compileMessageReactions,
-        List.mem_map
-      ] at hReactionDeclared
-
-      rcases hReactionDeclared with
-        ⟨sourceServer,
-         hSourceServerDeclared,
-         hCompiledReaction⟩
+      rcases
+          Translation.mem_compileMessageReactions
+            hReactionDeclared
+        with
+          ⟨sourceServer,
+           hSourceServerDeclared,
+           hCompiledReaction⟩
 
       subst selectedReaction
 

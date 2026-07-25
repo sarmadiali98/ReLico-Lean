@@ -179,5 +179,73 @@ theorem existing_unannotated_order_regression :
       twoMessageServers := by
   rfl
 
+
+def priorityTranslationServers :
+    List DTR.MessageServer := [
+  priorityLowServer,
+  priorityNoneServer,
+  priorityHighServer,
+  priorityHighTieServer
+]
+
+/--
+The source declaration list itself remains unchanged.
+-/
+theorem priority_translation_preserves_source_declarations :
+    priorityTranslationServers = [
+      priorityLowServer,
+      priorityNoneServer,
+      priorityHighServer,
+      priorityHighTieServer
+    ] := by
+  rfl
+
+/--
+Generated logical actions use stable priority order.
+-/
+theorem priority_translation_action_order :
+    Translation.compileLogicalActions
+        priorityTranslationServers = [
+      Translation.actionNameFor
+        priorityHighName,
+      Translation.actionNameFor
+        priorityHighTieName,
+      Translation.actionNameFor
+        priorityLowName,
+      Translation.actionNameFor
+        priorityNoneName
+    ] := by
+  rfl
+
+/--
+Generated message reactions use exactly the same stable priority order.
+-/
+theorem priority_translation_reaction_order :
+    Translation.compileMessageReactions
+        priorityTranslationServers = [
+      Translation.compileMessageReaction
+        priorityHighServer,
+      Translation.compileMessageReaction
+        priorityHighTieServer,
+      Translation.compileMessageReaction
+        priorityLowServer,
+      Translation.compileMessageReaction
+        priorityNoneServer
+    ] := by
+  rfl
+
+/--
+The logical-action and reaction lists remain positionally aligned after
+priority normalization.
+-/
+theorem priority_translation_triggers_align :
+    LF.reactionTriggers
+        (Translation.compileMessageReactions
+          priorityTranslationServers) =
+      (Translation.compileLogicalActions
+        priorityTranslationServers).map
+          LF.Trigger.logicalAction := by
+  rfl
+
 end Tests
 end Relico

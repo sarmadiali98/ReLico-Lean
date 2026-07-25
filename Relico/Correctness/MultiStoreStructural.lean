@@ -61,8 +61,9 @@ private theorem compileMessageReactionNames
         (Translation.compileMessageReactions
           messageServers) =
       (DTR.messageServerNames
-        messageServers).map
-          Translation.messageReactionNameFor := by
+        (Translation.priorityOrderedMessageServers
+          messageServers)).map
+            Translation.messageReactionNameFor := by
 
   simp [
     LF.reactionNames,
@@ -127,19 +128,11 @@ theorem compileStmt_multiStoreWellFormed
           Translation.compileLogicalActions
             messageServers
 
-      have hMapped :
-          Translation.actionNameFor
-              targetMessage ∈
-            (DTR.messageServerNames
-              messageServers).map
-                Translation.actionNameFor :=
-        List.mem_map_of_mem
-          hStatement
-
-      simpa only [
-        Translation.compileLogicalActions_names
-      ] using
-        hMapped
+      exact
+        (Translation.actionName_mem_compileLogicalActions_iff
+            targetMessage
+            messageServers).mpr
+              hStatement
 
 theorem compileBody_multiStoreWellFormed
     {declaredVariables : List VarName}
@@ -197,7 +190,7 @@ theorem compileMultiStoreReactor_wellFormed
     (hMessageServersNonempty :
       reactiveClass.messageServers ≠
         [])
-    (_hMessageServerNames :
+    (hMessageServerNames :
       ∀ messageServer,
         messageServer ∈
           reactiveClass.messageServers →
@@ -282,10 +275,10 @@ theorem compileMultiStoreReactor_wellFormed
       hStateVariableNamesUnique
 
   · simpa [
-      Translation.compileMultiStoreReactor,
-      Translation.compileLogicalActions
+      Translation.compileMultiStoreReactor
     ] using
-      hMessageServersNonempty
+      Translation.compileLogicalActions_ne_nil
+        hMessageServersNonempty
 
   · intro logicalAction hLogicalAction
 
@@ -295,31 +288,44 @@ theorem compileMultiStoreReactor_wellFormed
           reactiveClass.messageServers
       at hLogicalAction
 
-    simp only [
-      Translation.compileLogicalActions,
-      List.mem_map
-    ] at hLogicalAction
+    rcases
+        Translation.mem_compileLogicalActions
+          hLogicalAction
+      with
+        ⟨messageServer,
+         hMessageServer,
+         hAction⟩
 
-    rcases hLogicalAction with
-      ⟨messageServer,
-       hMessageServer,
-       rfl⟩
+    subst logicalAction
 
-    simp [
+    simpa [
       Translation.actionNameFor,
       ActionName.isValid
-    ]
+    ] using
+      hMessageServerNames
+        messageServer
+        hMessageServer
 
   · change
       (Translation.compileLogicalActions
         reactiveClass.messageServers).Nodup
 
-    simpa only [
+    rw [
       Translation.compileLogicalActions_names
-    ] using
+    ]
+
+    apply
       nodup_map_of_injective
         Translation.actionNameFor
         Translation.actionNameFor_injective
+
+    simpa [
+      Translation.priorityOrderedMessageServers,
+      DTR.messageServerNames
+    ] using
+      DTR.MessageServerPriority.map_normalize_nodup
+        (fun messageServer =>
+          messageServer.name)
         hMessageServerNamesUnique
 
   · simp [
@@ -346,15 +352,15 @@ theorem compileMultiStoreReactor_wellFormed
           reactiveClass.messageServers
       at hReaction
 
-    simp only [
-      Translation.compileMessageReactions,
-      List.mem_map
-    ] at hReaction
+    rcases
+        Translation.mem_compileMessageReactions
+          hReaction
+      with
+        ⟨messageServer,
+         hMessageServer,
+         hCompiledReaction⟩
 
-    rcases hReaction with
-      ⟨messageServer,
-       hMessageServer,
-       rfl⟩
+    subst reaction
 
     simp [
       Translation.compileMessageReaction,
@@ -371,10 +377,18 @@ theorem compileMultiStoreReactor_wellFormed
       compileMessageReactionNames
     ]
 
-    exact
+    apply
       nodup_map_of_injective
         Translation.messageReactionNameFor
         Translation.messageReactionNameFor_injective
+
+    simpa [
+      Translation.priorityOrderedMessageServers,
+      DTR.messageServerNames
+    ] using
+      DTR.MessageServerPriority.map_normalize_nodup
+        (fun messageServer =>
+          messageServer.name)
         hMessageServerNamesUnique
 
   · simp [
@@ -394,15 +408,15 @@ theorem compileMultiStoreReactor_wellFormed
           reactiveClass.messageServers
       at hReaction
 
-    simp only [
-      Translation.compileMessageReactions,
-      List.mem_map
-    ] at hReaction
+    rcases
+        Translation.mem_compileMessageReactions
+          hReaction
+      with
+        ⟨messageServer,
+         hMessageServer,
+         hCompiledReaction⟩
 
-    rcases hReaction with
-      ⟨messageServer,
-       hMessageServer,
-       rfl⟩
+    subst reaction
 
     simpa [
       Translation.compileMultiStoreReactor,

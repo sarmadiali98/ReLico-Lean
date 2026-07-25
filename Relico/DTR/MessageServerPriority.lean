@@ -288,6 +288,103 @@ theorem normalize_singleton
       [messageServer] := by
   rfl
 
+
+/--
+Priority insertion is a permutation of adding the declaration at the
+front of the original list.
+-/
+theorem insert_perm
+    (messageServer : DTR.MessageServer)
+    (messageServers :
+      List DTR.MessageServer) :
+    List.Perm
+      (insert
+        messageServer
+        messageServers)
+      (messageServer ::
+        messageServers) := by
+
+  induction messageServers with
+
+  | nil =>
+      simp [
+        insert
+      ]
+
+  | cons current remaining inductionHypothesis =>
+      by_cases hOrder :
+          PrecedesOrEqual
+            messageServer
+            current
+
+      · simpa [
+          insert,
+          hOrder
+        ]
+
+      · simpa [
+          insert,
+          hOrder
+        ] using
+          (List.Perm.cons
+              current
+              inductionHypothesis).trans
+            (List.Perm.swap
+              messageServer
+              current
+              remaining)
+
+/--
+Priority normalization is a permutation of the source declaration
+list.
+-/
+theorem normalize_perm
+    (messageServers :
+      List DTR.MessageServer) :
+    List.Perm
+      (normalize
+        messageServers)
+      messageServers := by
+
+  induction messageServers with
+
+  | nil =>
+      exact
+        List.Perm.nil
+
+  | cons messageServer remaining inductionHypothesis =>
+      exact
+        (insert_perm
+            messageServer
+            (normalize remaining)).trans
+          (List.Perm.cons
+            messageServer
+            inductionHypothesis)
+
+/--
+Stable priority normalization preserves uniqueness after mapping each
+message server through an arbitrary projection.
+-/
+theorem map_normalize_nodup
+    {α : Type}
+    (function :
+      DTR.MessageServer →
+      α)
+    {messageServers :
+      List DTR.MessageServer}
+    (hNodup :
+      (messageServers.map
+        function).Nodup) :
+    ((normalize
+      messageServers).map
+        function).Nodup := by
+
+  exact
+    ((normalize_perm
+      messageServers).map
+        function).nodup_iff.mpr
+      hNodup
+
 /--
 Priority normalization neither introduces nor removes message-server
 names.

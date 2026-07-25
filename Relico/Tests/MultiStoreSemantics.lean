@@ -177,20 +177,11 @@ theorem multi_target_cross_server_schedule :
       resetMessageServer
     ]
 
-  have hMapped :
-      Translation.actionNameFor
-          resetMessageName ∈
-        (DTR.messageServerNames
-          twoMessageServers).map
-            Translation.actionNameFor :=
-
-    List.mem_map_of_mem
-      hSourceTarget
-
-  simpa only [
-    Translation.compileLogicalActions_names
-  ] using
-    hMapped
+  exact
+    (Translation.actionName_mem_compileLogicalActions_iff
+        resetMessageName
+        twoMessageServers).mpr
+          hSourceTarget
 
 theorem multiStatementInitialStatesCorrespond :
     Correctness.StoreStateCorresponds

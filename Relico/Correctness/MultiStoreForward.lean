@@ -224,19 +224,11 @@ theorem multiStore_step_forward
                 Translation.compileLogicalActions
                   messageServers := by
 
-            have hMapped :
-                Translation.actionNameFor
-                    targetMessage ∈
-                  (DTR.messageServerNames
-                    messageServers).map
-                      Translation.actionNameFor :=
-              List.mem_map_of_mem
-                hTarget
-
-            simpa only [
-              Translation.compileLogicalActions_names
-            ] using
-              hMapped
+            exact
+              (Translation.actionName_mem_compileLogicalActions_iff
+                  targetMessage
+                  messageServers).mpr
+                    hTarget
 
           let scheduledTag :
               LF.Tag :=
