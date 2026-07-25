@@ -123,6 +123,7 @@ import Relico.Correctness.StoreMachineTrace
 import Relico.Tests.StoreMachineTrace
 import Relico.DTR.StoreSyntax
 import Relico.DTR.MultiStoreSyntax
+import Relico.DTR.MessageServerPriority
 import Relico.DTR.MultiStoreDispatchSemantics
 import Relico.DTR.MultiStoreSemantics
 import Relico.DTR.MultiStoreMachineSemantics
@@ -159,6 +160,7 @@ import Relico.Correctness.StoreInitialization
 import Relico.Correctness.StoreExecutableTranslation
 import Relico.Tests.StoreModelTranslation
 import Relico.Tests.MultiStoreModelTranslation
+import Relico.Tests.MessageServerPriority
 import Relico.Tests.MultiStoreDispatch
 import Relico.Tests.MultiStoreSemantics
 import Relico.Tests.MultiStoreMachine

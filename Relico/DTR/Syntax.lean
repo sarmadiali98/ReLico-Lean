@@ -51,6 +51,18 @@ The single message server supported by vertical slice v0.
 structure MessageServer where
   name : MsgName
   body : Body
+
+  /--
+  Optional local message-server priority.
+
+  Smaller numeric values denote higher priority. `none` represents an
+  unannotated server and is ordered after every explicitly prioritized
+  server.
+  -/
+  priority :
+    Option Nat :=
+      none
+
 deriving Repr, DecidableEq, BEq, Inhabited
 
 /--
