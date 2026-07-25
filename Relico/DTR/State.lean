@@ -39,5 +39,75 @@ pendingMessages : MessageBag
 activeBody : Body
 deriving Repr, DecidableEq, BEq, Inhabited
 
+
+namespace PendingMessage
+
+/--
+Create one pending source-message occurrence with an evaluated payload.
+-/
+def scheduleWithPayload
+    (currentTime : LogicalTime)
+    (messageName : MsgName)
+    (payload : Payload)
+    (delay : Delay) :
+    DTR.PendingMessage where
+
+  name :=
+    messageName
+
+  arrivalTime :=
+    LogicalTime.after
+      currentTime
+      delay
+
+  payload :=
+    payload
+
+@[simp]
+theorem scheduleWithPayload_name
+    (currentTime : LogicalTime)
+    (messageName : MsgName)
+    (payload : Payload)
+    (delay : Delay) :
+    (scheduleWithPayload
+      currentTime
+      messageName
+      payload
+      delay).name =
+        messageName := by
+  rfl
+
+@[simp]
+theorem scheduleWithPayload_arrivalTime
+    (currentTime : LogicalTime)
+    (messageName : MsgName)
+    (payload : Payload)
+    (delay : Delay) :
+    (scheduleWithPayload
+      currentTime
+      messageName
+      payload
+      delay).arrivalTime =
+        LogicalTime.after
+          currentTime
+          delay := by
+  rfl
+
+@[simp]
+theorem scheduleWithPayload_payload
+    (currentTime : LogicalTime)
+    (messageName : MsgName)
+    (payload : Payload)
+    (delay : Delay) :
+    (scheduleWithPayload
+      currentTime
+      messageName
+      payload
+      delay).payload =
+        payload := by
+  rfl
+
+end PendingMessage
+
 end DTR
 end Relico

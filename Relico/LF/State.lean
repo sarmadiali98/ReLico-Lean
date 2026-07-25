@@ -110,5 +110,76 @@ structure State where
   activeBody : Body
 deriving Repr, DecidableEq, BEq, Inhabited
 
+
+namespace PendingAction
+
+/--
+Create one pending generated logical-action occurrence with an evaluated
+payload.
+-/
+def scheduleWithPayload
+    (currentTag : LF.Tag)
+    (actionName : ActionName)
+    (payload : Payload)
+    (delay : Delay) :
+    LF.PendingAction where
+
+  name :=
+    actionName
+
+  tag :=
+    LF.Tag.schedule
+      currentTag
+      delay
+
+  payload :=
+    payload
+
+@[simp]
+theorem scheduleWithPayload_name
+    (currentTag : LF.Tag)
+    (actionName : ActionName)
+    (payload : Payload)
+    (delay : Delay) :
+    (scheduleWithPayload
+      currentTag
+      actionName
+      payload
+      delay).name =
+        actionName := by
+  rfl
+
+@[simp]
+theorem scheduleWithPayload_tag
+    (currentTag : LF.Tag)
+    (actionName : ActionName)
+    (payload : Payload)
+    (delay : Delay) :
+    (scheduleWithPayload
+      currentTag
+      actionName
+      payload
+      delay).tag =
+        LF.Tag.schedule
+          currentTag
+          delay := by
+  rfl
+
+@[simp]
+theorem scheduleWithPayload_payload
+    (currentTag : LF.Tag)
+    (actionName : ActionName)
+    (payload : Payload)
+    (delay : Delay) :
+    (scheduleWithPayload
+      currentTag
+      actionName
+      payload
+      delay).payload =
+        payload := by
+  rfl
+
+end PendingAction
+
 end LF
 end Relico
