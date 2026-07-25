@@ -207,3 +207,13 @@ import Relico.Correctness.PayloadCorrespondence
 import Relico.Tests.PayloadFoundation
 
 import Relico.Tests.PayloadQueueFoundation
+
+import Relico.DTR.PayloadSyntax
+
+import Relico.LF.PayloadSyntax
+
+import Relico.Translation.PayloadBasic
+
+import Relico.LF.PayloadCppPrinter
+
+import Relico.Tests.PayloadStatementTranslation
