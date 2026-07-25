@@ -190,3 +190,6 @@ import Relico.Tests.PriorityTiming
 
 import Relico.Correctness.PriorityOrder
 import Relico.Tests.PriorityOrder
+
+import Relico.Correctness.PriorityEligibility
+import Relico.Tests.PriorityEligibility
