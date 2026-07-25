@@ -197,3 +197,7 @@ import Relico.Tests.PriorityEligibility
 import Relico.DTR.PriorityTimingInvariant
 import Relico.Correctness.PriorityMachineTiming
 import Relico.Tests.PriorityMachineTiming
+
+import Relico.LF.MultiStoreCppPrinter
+import Relico.Translation.MultiStoreCppBackend
+import Relico.Tests.MultiStoreCppBackend
