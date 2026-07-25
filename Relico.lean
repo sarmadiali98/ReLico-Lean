@@ -178,3 +178,7 @@ import Relico.Tests.MultiStoreFrontendDecoder
 import Relico.LF.StoreCppPrinter
 import Relico.Translation.StoreCppBackend
 import Relico.Tests.StoreCppBackend
+
+import Relico.DTR.MultiStorePriorityScheduling
+import Relico.LF.MultiStoreReactionScheduling
+import Relico.Tests.PriorityDispatchScheduling
