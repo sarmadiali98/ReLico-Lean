@@ -1,0 +1,25 @@
+reactiveclass PriorityController(10) {
+  statevars {
+    int x;
+  }
+
+  PriorityController() {
+    x = 0;
+    self.low() after(1);
+    self.high() after(1);
+  }
+
+  @priority(4)
+  msgsrv low() {
+    x = 0;
+  }
+
+  @priority(1)
+  msgsrv high() {
+    self.low() after(2);
+  }
+}
+
+main {
+  PriorityController controller():();
+}

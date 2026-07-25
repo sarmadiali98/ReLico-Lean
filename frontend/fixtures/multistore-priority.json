@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 3,
+  "className": "PriorityController",
+  "actorName": "controller",
+  "actorClass": "PriorityController",
+  "stateVariables": [
+    {
+      "name": "x",
+      "initialValue": 0
+    }
+  ],
+  "constructorBody": [
+    {
+      "kind": "assign",
+      "target": "x",
+      "expression": {
+        "kind": "intLiteral",
+        "value": 0
+      }
+    },
+    {
+      "kind": "selfSend",
+      "message": "low",
+      "delay": 1
+    },
+    {
+      "kind": "selfSend",
+      "message": "high",
+      "delay": 1
+    }
+  ],
+  "messageServers": [
+    {
+      "name": "low",
+      "priority": 4,
+      "body": [
+        {
+          "kind": "assign",
+          "target": "x",
+          "expression": {
+            "kind": "intLiteral",
+            "value": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "high",
+      "priority": 1,
+      "body": [
+        {
+          "kind": "selfSend",
+          "message": "low",
+          "delay": 2
+        }
+      ]
+    }
+  ]
+}
