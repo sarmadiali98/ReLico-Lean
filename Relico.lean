@@ -128,6 +128,7 @@ import Relico.DTR.MultiStoreSemantics
 import Relico.DTR.MultiStoreMachineSemantics
 import Relico.DTR.MultiStoreMachineTraceSemantics
 import Relico.DTR.MultiStoreRuntimeWellFormed
+import Relico.DTR.MultiStoreInitialization
 import Relico.DTR.MultiStoreWellFormed
 import Relico.DTR.MultiStoreModelWellFormed
 import Relico.DTR.StoreInitialization
@@ -137,6 +138,7 @@ import Relico.LF.MultiStoreDispatchSemantics
 import Relico.LF.MultiStoreSemantics
 import Relico.LF.MultiStoreMachineSemantics
 import Relico.LF.MultiStoreMachineTraceSemantics
+import Relico.LF.MultiStoreInitialization
 import Relico.LF.MultiStoreWellFormed
 import Relico.LF.MultiStoreModelWellFormed
 import Relico.LF.StoreInitialization
@@ -151,6 +153,8 @@ import Relico.Correctness.MultiStoreForward
 import Relico.Correctness.MultiStoreBackward
 import Relico.Correctness.MultiStoreMachine
 import Relico.Correctness.MultiStoreMachineTrace
+import Relico.Correctness.MultiStoreInitialization
+import Relico.Correctness.MultiStoreExecutableTranslation
 import Relico.Correctness.StoreInitialization
 import Relico.Correctness.StoreExecutableTranslation
 import Relico.Tests.StoreModelTranslation
@@ -159,6 +163,8 @@ import Relico.Tests.MultiStoreDispatch
 import Relico.Tests.MultiStoreSemantics
 import Relico.Tests.MultiStoreMachine
 import Relico.Tests.MultiStoreMachineTrace
+import Relico.Tests.MultiStoreInitialization
+import Relico.Tests.MultiStoreExecutableTranslation
 import Relico.Tests.StoreInitialization
 import Relico.Tests.StoreExecutableTranslation
 import Relico.Frontend.StoreSchema
