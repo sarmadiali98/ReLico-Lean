@@ -308,3 +308,6 @@ import Relico.Tests.DetailedForwardWeakSimulation
 
 import Relico.Correctness.DetailedBackwardWeakSimulation
 import Relico.Tests.DetailedBackwardWeakSimulation
+
+import Relico.Correctness.DetailedPhaseWeakBisimulation
+import Relico.Tests.DetailedPhaseWeakBisimulation
