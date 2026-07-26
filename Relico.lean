@@ -249,3 +249,17 @@ import Relico.Tests.PayloadBinding
 import Relico.Correctness.PayloadDispatchQueue
 
 import Relico.Tests.PayloadDispatchQueue
+
+import Relico.DTR.BoundPayloadSyntax
+
+import Relico.LF.BoundPayloadSyntax
+
+import Relico.Translation.BoundPayloadBasic
+
+import Relico.DTR.BoundPayloadState
+
+import Relico.LF.BoundPayloadState
+
+import Relico.Correctness.BoundPayloadState
+
+import Relico.Tests.BoundPayloadFoundation
