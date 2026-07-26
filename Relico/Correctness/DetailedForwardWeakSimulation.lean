@@ -9,7 +9,8 @@ namespace Correctness
 Concrete correspondence between one detailed DTR label and one detailed
 generated-LF label.
 
-Internal statement transitions correspond directly.
+Internal statement transitions correspond directly. Pure LF microstep
+progression corresponds to DTR internal stuttering.
 
 Visible time transitions may use syntactically different time expressions,
 but the two endpoints must denote the same metric times.
@@ -26,6 +27,14 @@ inductive ConcreteDetailedLabelCorresponds :
       ConcreteDetailedLabelCorresponds
         DTR.DetailedMultiStoreLabel.tau
         LF.DetailedMultiStoreLabel.tau
+
+  | microstep
+      (before after : LF.Tag) :
+      ConcreteDetailedLabelCorresponds
+        DTR.DetailedMultiStoreLabel.tau
+        (LF.DetailedMultiStoreLabel.microstepAdvance
+          before
+          after)
 
   | timeAdvance
       {sourceBefore sourceAfter : LogicalTime}
