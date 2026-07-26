@@ -317,3 +317,6 @@ import Relico.DTR.DetailedWeakExecution
 import Relico.LF.DetailedWeakExecution
 import Relico.Correctness.DetailedObservableWeakExecution
 import Relico.Tests.DetailedObservableWeakExecution
+
+import Relico.Correctness.DetailedFiniteWeakExecution
+import Relico.Tests.DetailedFiniteWeakExecution
