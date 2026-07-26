@@ -217,3 +217,11 @@ import Relico.Translation.PayloadBasic
 import Relico.LF.PayloadCppPrinter
 
 import Relico.Tests.PayloadStatementTranslation
+
+import Relico.DTR.PayloadSemantics
+
+import Relico.LF.PayloadSemantics
+
+import Relico.Correctness.PayloadStep
+
+import Relico.Tests.PayloadSemantics
