@@ -326,3 +326,6 @@ import Relico.Tests.DetailedPriorityRuntimeInvariant
 
 import Relico.Correctness.DetailedRuntimeInvariants
 import Relico.Tests.DetailedRuntimeInvariants
+
+import Relico.Correctness.DetailedInvariantMatches
+import Relico.Tests.DetailedInvariantMatches
