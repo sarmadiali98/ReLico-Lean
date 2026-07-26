@@ -281,3 +281,5 @@ import Relico.LF.BoundPayloadSemantics
 import Relico.Correctness.BoundPayloadStep
 
 import Relico.Tests.BoundPayloadSemantics
+
+import Relico.Tests.ZeroDelayPriorityMismatch
