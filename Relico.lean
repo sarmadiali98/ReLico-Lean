@@ -286,3 +286,8 @@ import Relico.Tests.ZeroDelayPriorityMismatch
 
 import Relico.Common.WeakTransition
 import Relico.Tests.WeakTransitionFoundation
+
+import Relico.DTR.DetailedMultiStoreSemantics
+import Relico.LF.DetailedMultiStoreSemantics
+import Relico.Correctness.DetailedMultiStoreRefinement
+import Relico.Tests.DetailedMultiStoreSemantics
