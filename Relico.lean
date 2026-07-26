@@ -320,3 +320,6 @@ import Relico.Tests.DetailedObservableWeakExecution
 
 import Relico.Correctness.DetailedFiniteWeakExecution
 import Relico.Tests.DetailedFiniteWeakExecution
+
+import Relico.Correctness.DetailedPriorityRuntimeInvariant
+import Relico.Tests.DetailedPriorityRuntimeInvariant
