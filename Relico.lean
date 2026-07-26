@@ -283,3 +283,6 @@ import Relico.Correctness.BoundPayloadStep
 import Relico.Tests.BoundPayloadSemantics
 
 import Relico.Tests.ZeroDelayPriorityMismatch
+
+import Relico.Common.WeakTransition
+import Relico.Tests.WeakTransitionFoundation
