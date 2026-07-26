@@ -323,3 +323,6 @@ import Relico.Tests.DetailedFiniteWeakExecution
 
 import Relico.Correctness.DetailedPriorityRuntimeInvariant
 import Relico.Tests.DetailedPriorityRuntimeInvariant
+
+import Relico.Correctness.DetailedRuntimeInvariants
+import Relico.Tests.DetailedRuntimeInvariants
