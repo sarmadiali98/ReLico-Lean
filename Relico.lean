@@ -273,3 +273,11 @@ import Relico.Tests.BoundPayloadDispatch
 import Relico.Correctness.BoundPayloadDispatch
 
 import Relico.Tests.BoundPayloadDispatchCorrectness
+
+import Relico.DTR.BoundPayloadSemantics
+
+import Relico.LF.BoundPayloadSemantics
+
+import Relico.Correctness.BoundPayloadStep
+
+import Relico.Tests.BoundPayloadSemantics
