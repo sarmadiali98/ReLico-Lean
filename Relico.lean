@@ -227,3 +227,11 @@ import Relico.Correctness.PayloadStep
 import Relico.Tests.PayloadSemantics
 
 import Relico.DTR.PayloadWellFormed
+
+import Relico.DTR.PayloadMachine
+
+import Relico.LF.PayloadMachine
+
+import Relico.Correctness.PayloadTrace
+
+import Relico.Tests.PayloadTrace
