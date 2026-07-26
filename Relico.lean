@@ -302,3 +302,6 @@ import Relico.Tests.DetailedStateCorrespondence
 
 import Relico.Correctness.ConcreteDetailedStateCorrespondence
 import Relico.Tests.ConcreteDetailedStateCorrespondence
+
+import Relico.Correctness.DetailedForwardWeakSimulation
+import Relico.Tests.DetailedForwardWeakSimulation
