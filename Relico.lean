@@ -311,3 +311,9 @@ import Relico.Tests.DetailedBackwardWeakSimulation
 
 import Relico.Correctness.DetailedPhaseWeakBisimulation
 import Relico.Tests.DetailedPhaseWeakBisimulation
+
+import Relico.Common.WeakExecution
+import Relico.DTR.DetailedWeakExecution
+import Relico.LF.DetailedWeakExecution
+import Relico.Correctness.DetailedObservableWeakExecution
+import Relico.Tests.DetailedObservableWeakExecution
