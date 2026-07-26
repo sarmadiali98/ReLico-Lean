@@ -245,3 +245,7 @@ import Relico.LF.PayloadExpression
 import Relico.Translation.PayloadBinding
 
 import Relico.Tests.PayloadBinding
+
+import Relico.Correctness.PayloadDispatchQueue
+
+import Relico.Tests.PayloadDispatchQueue
