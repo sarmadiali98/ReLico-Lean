@@ -291,3 +291,8 @@ import Relico.DTR.DetailedMultiStoreSemantics
 import Relico.LF.DetailedMultiStoreSemantics
 import Relico.Correctness.DetailedMultiStoreRefinement
 import Relico.Tests.DetailedMultiStoreSemantics
+
+import Relico.DTR.DetailedWeakSemantics
+import Relico.LF.DetailedWeakSemantics
+import Relico.Correctness.DetailedWeakFoundation
+import Relico.Tests.DetailedWeakSemantics
