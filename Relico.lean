@@ -296,3 +296,6 @@ import Relico.DTR.DetailedWeakSemantics
 import Relico.LF.DetailedWeakSemantics
 import Relico.Correctness.DetailedWeakFoundation
 import Relico.Tests.DetailedWeakSemantics
+
+import Relico.Correctness.DetailedStateCorrespondence
+import Relico.Tests.DetailedStateCorrespondence
