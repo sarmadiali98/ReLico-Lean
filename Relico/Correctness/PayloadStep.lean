@@ -1,6 +1,7 @@
 import Relico.Correctness.Expression
 import Relico.Correctness.PayloadCorrespondence
 import Relico.DTR.PayloadSemantics
+import Relico.DTR.PayloadWellFormed
 import Relico.LF.PayloadSemantics
 import Relico.Translation.PayloadBasic
 
@@ -317,6 +318,318 @@ theorem payloadStep_forward
                 ]
                 delay
                 hCurrentTime
+
+
+/--
+Every generated payload scheduling step corresponding to a well-formed
+source payload body can be reconstructed as a source payload-send step.
+
+The proof inverts the executable payload-body translation, uses source
+well-formedness to recover the declared message target, and transfers
+expression evaluation from generated LF back to DTR.
+-/
+theorem payloadStep_backward
+    {declaredMessageServer : MsgName}
+    {sourceBefore : DTR.PayloadState}
+    {targetBefore targetAfter : LF.PayloadState}
+    {targetLabel : LF.PayloadLabel}
+    (hSourceBodyWellFormed :
+      DTR.PayloadBody.WellFormed
+        declaredMessageServer
+        sourceBefore.activeBody)
+    (hStates :
+      PayloadStateCorresponds
+        sourceBefore
+        targetBefore)
+    (hTargetStep :
+      LF.PayloadStep
+        (Translation.actionNameFor
+          declaredMessageServer)
+        targetBefore
+        targetLabel
+        targetAfter) :
+    ∃ sourceLabel sourceAfter,
+      DTR.PayloadStep
+          declaredMessageServer
+          sourceBefore
+          sourceLabel
+          sourceAfter ∧
+        PayloadLabelCorresponds
+          sourceLabel
+          targetLabel ∧
+        PayloadStateCorresponds
+          sourceAfter
+          targetAfter := by
+
+  cases hTargetStep with
+
+  | scheduleInt
+      currentTag
+      targetStateValue
+      pendingActions
+      targetAction
+      targetExpression
+      targetDelay
+      evaluatedValue
+      targetRemaining
+      hTargetAction
+      hTargetEvaluate =>
+
+      cases sourceBefore with
+
+      | mk
+          sourceTime
+          sourceStateValue
+          pendingMessages
+          sourceBody =>
+
+          have hCurrentTime :
+              currentTag.time =
+                sourceTime :=
+            hStates.currentTime
+
+          have hStateValue :
+              targetStateValue =
+                sourceStateValue :=
+            hStates.stateValue
+
+          have hPending :
+              PayloadQueueCorresponds
+                pendingMessages
+                pendingActions :=
+            hStates.pendingEvents
+
+          have hCompiledBody :
+              LF.PayloadStmt.scheduleInt
+                    targetAction
+                    targetExpression
+                    targetDelay ::
+                  targetRemaining =
+                Translation.compilePayloadBody
+                  sourceBody :=
+            hStates.activeBody
+
+          cases sourceBody with
+
+          | nil =>
+
+              simp [
+                Translation.compilePayloadBody
+              ] at hCompiledBody
+
+          | cons sourceStatement sourceRemaining =>
+
+              cases sourceStatement with
+
+              | selfSendInt
+                  sourceMessage
+                  sourceExpression
+                  sourceDelay =>
+
+                  have hCompiledBody' :
+                      LF.PayloadStmt.scheduleInt
+                            targetAction
+                            targetExpression
+                            targetDelay ::
+                          targetRemaining =
+                        LF.PayloadStmt.scheduleInt
+                              (Translation.actionNameFor
+                                sourceMessage)
+                              (Translation.compileExpr
+                                sourceExpression)
+                              sourceDelay ::
+                            Translation.compilePayloadBody
+                              sourceRemaining := by
+
+                    simpa [
+                      Translation.compilePayloadBody,
+                      Translation.compilePayloadStmt
+                    ] using
+                      hCompiledBody
+
+                  injection hCompiledBody' with
+                    hCompiledHead
+                    hCompiledRemaining
+
+                  injection hCompiledHead with
+                    hAction
+                    hExpression
+                    hDelay
+
+                  have hWellFormedParts :=
+                    (DTR.PayloadBody.wellFormed_cons
+                      declaredMessageServer
+                      (DTR.PayloadStmt.selfSendInt
+                        sourceMessage
+                        sourceExpression
+                        sourceDelay)
+                      sourceRemaining).mp
+                      hSourceBodyWellFormed
+
+                  have hSourceTarget :
+                      sourceMessage =
+                        declaredMessageServer := by
+
+                    simpa [
+                      DTR.PayloadStmt.WellFormed
+                    ] using
+                      hWellFormedParts.1
+
+                  subst targetAction
+                  subst targetExpression
+                  subst targetDelay
+                  subst targetRemaining
+                  subst targetStateValue
+
+                  have hSourceEvaluate :
+                      DTR.Expr.evaluate
+                          sourceStateValue
+                          sourceExpression =
+                        evaluatedValue := by
+
+                    calc
+                      DTR.Expr.evaluate
+                          sourceStateValue
+                          sourceExpression =
+                        LF.Expr.evaluate
+                          sourceStateValue
+                          (Translation.compileExpr
+                            sourceExpression) := by
+
+                            exact
+                              (compileExpr_preserves_evaluation
+                                sourceExpression
+                                sourceStateValue).symm
+
+                      _ =
+                        evaluatedValue :=
+                          hTargetEvaluate
+
+                  let sourceLabel :
+                      DTR.PayloadLabel :=
+                    DTR.PayloadLabel.sendInt
+                      sourceMessage
+                      (LogicalTime.after
+                        sourceTime
+                        sourceDelay)
+                      evaluatedValue
+
+                  let sourceAfter :
+                      DTR.PayloadState := {
+                    currentTime :=
+                      sourceTime
+
+                    stateValue :=
+                      sourceStateValue
+
+                    pendingMessages :=
+                      pendingMessages ++ [
+                        DTR.PendingMessage.scheduleWithPayload
+                          sourceTime
+                          sourceMessage
+                          [
+                            evaluatedValue
+                          ]
+                          sourceDelay
+                      ]
+
+                    activeBody :=
+                      sourceRemaining
+                  }
+
+                  refine
+                    ⟨sourceLabel,
+                     sourceAfter,
+                     ?_,
+                     ?_,
+                     ?_⟩
+
+                  · exact
+                      DTR.PayloadStep.selfSendInt
+                        (declaredMessageServer :=
+                          declaredMessageServer)
+                        (currentTime :=
+                          sourceTime)
+                        (stateValue :=
+                          sourceStateValue)
+                        (pendingMessages :=
+                          pendingMessages)
+                        (targetMessage :=
+                          sourceMessage)
+                        (payloadExpression :=
+                          sourceExpression)
+                        (delay :=
+                          sourceDelay)
+                        (evaluatedValue :=
+                          evaluatedValue)
+                        (remaining :=
+                          sourceRemaining)
+                        hSourceTarget
+                        hSourceEvaluate
+
+                  · unfold
+                      PayloadLabelCorresponds
+
+                    refine
+                      ⟨?_,
+                       ?_,
+                       rfl⟩
+
+                    · exact
+                        congrArg
+                          Translation.actionNameFor
+                          hSourceTarget.symm
+
+                    · calc
+                      (LF.Tag.schedule
+                        currentTag
+                        sourceDelay).time =
+                        LogicalTime.after
+                          currentTag.time
+                          sourceDelay := by
+
+                            exact
+                              LF.Tag.schedule_time
+                                currentTag
+                                sourceDelay
+
+                      _ =
+                        LogicalTime.after
+                          sourceTime
+                          sourceDelay := by
+
+                            rw [
+                              hCurrentTime
+                            ]
+
+                  · refine {
+                      currentTime :=
+                        hCurrentTime
+
+                      stateValue :=
+                        rfl
+
+                      pendingEvents :=
+                        ?_
+
+                      activeBody :=
+                        rfl
+                    }
+
+                    simpa [
+                      sourceAfter,
+                      hSourceTarget
+                    ] using
+                      payloadQueueCorresponds_append_scheduleWithPayload
+                        hPending
+                        sourceTime
+                        currentTag
+                        sourceMessage
+                        [
+                          evaluatedValue
+                        ]
+                        sourceDelay
+                        hCurrentTime
 
 end Correctness
 end Relico

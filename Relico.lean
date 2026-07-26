@@ -225,3 +225,5 @@ import Relico.LF.PayloadSemantics
 import Relico.Correctness.PayloadStep
 
 import Relico.Tests.PayloadSemantics
+
+import Relico.DTR.PayloadWellFormed

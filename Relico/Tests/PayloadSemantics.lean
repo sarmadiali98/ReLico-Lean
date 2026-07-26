@@ -303,5 +303,42 @@ theorem payload_semantics_target_queue_exact :
       ] := by
   rfl
 
+
+theorem payload_semantics_source_body_well_formed :
+    DTR.PayloadBody.WellFormed
+      payloadSemanticsMessage
+      payloadSemanticsSourceBefore.activeBody := by
+
+  intro statement hMember
+
+  simp only [
+    payloadSemanticsSourceBefore,
+    List.mem_singleton
+  ] at hMember
+
+  subst statement
+
+  rfl
+
+theorem payload_semantics_backward_exists :
+    ∃ sourceLabel sourceAfter,
+      DTR.PayloadStep
+          payloadSemanticsMessage
+          payloadSemanticsSourceBefore
+          sourceLabel
+          sourceAfter ∧
+        Correctness.PayloadLabelCorresponds
+          sourceLabel
+          payloadSemanticsTargetLabel ∧
+        Correctness.PayloadStateCorresponds
+          sourceAfter
+          payloadSemanticsTargetAfter := by
+
+  exact
+    Correctness.payloadStep_backward
+      payload_semantics_source_body_well_formed
+      payload_semantics_before_corresponds
+      payload_semantics_target_step
+
 end Tests
 end Relico
