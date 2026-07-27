@@ -385,3 +385,6 @@ import Relico.Tests.DetailedBoundPayloadRuntimeInvariant
 
 import Relico.Correctness.DetailedBoundPayloadRuntimeInvariantPreservation
 import Relico.Tests.DetailedBoundPayloadRuntimeInvariantPreservation
+
+import Relico.Correctness.DetailedBoundPayloadInvariantMatches
+import Relico.Tests.DetailedBoundPayloadInvariantMatches
