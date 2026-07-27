@@ -190,3 +190,11 @@ The generalized finite-store parser-to-native milestone is recorded at commit:
 The generalized executable path supports multiple declared integer state variables and cross-variable assignments.
 
 The trusted Java parser adapter, schema-version-2 Lean decoder, verified Lean store translator, LF/C++ printer, official `lfc` compiler, generated C++, and native execution have been exercised together on the committed two-variable fixture.
+
+## License
+
+Materials in this repository for which the ReLico authors hold copyright are
+licensed under the [MIT License](LICENSE) (`MIT`).
+
+Third-party software, tools, and dependencies retain their respective license
+terms and are not relicensed by this repository.
