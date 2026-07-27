@@ -42,7 +42,7 @@ migrate assignment semantics;
 generalize state correspondence and simulation proofs;
 extend syntax and the parser bridge to multiple declarations.
 
-The tagged milestone-v0-end-to-end baseline remains unchanged.
+The earlier executable v0 baseline remains unchanged.
 
 ## Store-based expression evaluation
 

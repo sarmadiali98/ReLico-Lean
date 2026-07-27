@@ -173,16 +173,16 @@ The integration tests exercise these components but do not formally verify them.
 
 ## Milestones
 
-The end-to-end singleton baseline is tagged:
+The end-to-end singleton baseline is recorded at commit:
 
 ```text
-milestone-v0-end-to-end
+f94c13876abb14b13c068535950f9a70c871f84e
 ```
 
-The generalized finite-store parser-to-native milestone is tagged:
+The generalized finite-store parser-to-native milestone is recorded at commit:
 
 ```text
-milestone-finite-store-end-to-end
+1566d391d1d1ce0ac6d46e87e49530a4ea1280f7
 ```
 
 ## Current status

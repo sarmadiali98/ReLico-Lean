@@ -1,4 +1,3 @@
-import Relico.Basic
 
 set_option autoImplicit false
 
