@@ -371,3 +371,6 @@ import Relico.Tests.DetailedBoundPayloadFiniteWeakExecution
 
 import Relico.Correctness.DetailedBoundPayloadObservableWeakExecution
 import Relico.Tests.DetailedBoundPayloadObservableWeakExecution
+
+import Relico.Correctness.DetailedBoundPayloadInitialization
+import Relico.Tests.DetailedBoundPayloadInitialization
