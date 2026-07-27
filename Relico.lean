@@ -365,3 +365,6 @@ import Relico.Tests.DetailedBoundPayloadBackwardWeakSimulation
 
 import Relico.Correctness.DetailedBoundPayloadPhaseWeakBisimulation
 import Relico.Tests.DetailedBoundPayloadPhaseWeakBisimulation
+
+import Relico.Correctness.DetailedBoundPayloadFiniteWeakExecution
+import Relico.Tests.DetailedBoundPayloadFiniteWeakExecution
