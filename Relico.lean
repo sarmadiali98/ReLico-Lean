@@ -382,3 +382,6 @@ import Relico.DTR.BoundPayloadTimingWellFormed
 import Relico.LF.BoundPayloadRuntimeInvariant
 import Relico.Correctness.DetailedBoundPayloadRuntimeInvariant
 import Relico.Tests.DetailedBoundPayloadRuntimeInvariant
+
+import Relico.Correctness.DetailedBoundPayloadRuntimeInvariantPreservation
+import Relico.Tests.DetailedBoundPayloadRuntimeInvariantPreservation
