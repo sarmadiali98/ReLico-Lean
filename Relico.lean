@@ -356,3 +356,6 @@ import Relico.DTR.DetailedBoundPayloadWeakSemantics
 import Relico.LF.DetailedBoundPayloadWeakSemantics
 import Relico.Correctness.DetailedBoundPayloadWeakFoundation
 import Relico.Tests.DetailedBoundPayloadWeakFoundation
+
+import Relico.Correctness.DetailedBoundPayloadForwardWeakSimulation
+import Relico.Tests.DetailedBoundPayloadForwardWeakSimulation
