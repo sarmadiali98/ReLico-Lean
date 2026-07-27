@@ -377,3 +377,8 @@ import Relico.Tests.DetailedBoundPayloadInitialization
 
 import Relico.Correctness.DetailedBoundPayloadInvocationEntry
 import Relico.Tests.DetailedBoundPayloadInvocationEntry
+
+import Relico.DTR.BoundPayloadTimingWellFormed
+import Relico.LF.BoundPayloadRuntimeInvariant
+import Relico.Correctness.DetailedBoundPayloadRuntimeInvariant
+import Relico.Tests.DetailedBoundPayloadRuntimeInvariant
