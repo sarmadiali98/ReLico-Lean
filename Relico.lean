@@ -335,3 +335,6 @@ import Relico.Tests.DetailedInvariantCarryingBackwardMatch
 
 import Relico.Correctness.DetailedInvariantCarryingForwardMatch
 import Relico.Tests.DetailedInvariantCarryingForwardMatch
+
+import Relico.Correctness.DetailedInvariantCarryingFiniteWeakExecution
+import Relico.Tests.DetailedInvariantCarryingFiniteWeakExecution
