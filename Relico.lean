@@ -341,3 +341,6 @@ import Relico.Tests.DetailedInvariantCarryingFiniteWeakExecution
 
 import Relico.Correctness.DetailedInitialFiniteWeakExecution
 import Relico.Tests.DetailedInitialFiniteWeakExecution
+
+import Relico.Correctness.DetailedExecutableTranslation
+import Relico.Tests.DetailedExecutableTranslation
