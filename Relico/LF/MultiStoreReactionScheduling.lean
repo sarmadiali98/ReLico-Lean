@@ -235,5 +235,50 @@ theorem IsReactionPriorityEligible.precedes_same_tag
     hCandidate
     hSameTag
 
+/--
+A textually earlier reaction at a later microstep is not eligible while
+an occurrence remains pending at an earlier microstep of the same
+metric time.
+
+Complete-tag order precedes reaction declaration order.
+-/
+theorem IsReactionPriorityEligible.not_of_earlier_microstep_candidate
+    {messageReactions :
+      List LF.Reaction}
+    {selected candidate :
+      LF.PendingAction}
+    {queue :
+      LF.ActionQueue}
+    (hCandidate :
+      candidate ∈
+        queue)
+    (hSameTime :
+      candidate.tag.time =
+        selected.tag.time)
+    (hEarlierMicrostep :
+      candidate.tag.microstep <
+        selected.tag.microstep) :
+    ¬ LF.IsReactionPriorityEligible
+        messageReactions
+        selected
+        queue := by
+
+  intro hEligible
+
+  have hCompleteTagOrder :
+      LF.Tag.PrecedesOrEqual
+        selected.tag
+        candidate.tag :=
+
+    hEligible.1
+      candidate
+      hCandidate
+
+  exact
+    (LF.Tag.not_precedesOrEqual_same_time_of_microstep_lt
+      hSameTime
+      hEarlierMicrostep)
+      hCompleteTagOrder
+
 end LF
 end Relico

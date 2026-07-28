@@ -393,3 +393,39 @@ import Relico.Tests.DetailedBoundPayloadInvariantCarryingFiniteWeakExecution
 
 import Relico.Correctness.DetailedBoundPayloadEndToEndCorrectness
 import Relico.Tests.DetailedBoundPayloadEndToEndCorrectness
+
+import Relico.Correctness.DirectLFBagQueueCorrespondence
+import Relico.Tests.DirectLFBagQueueCorrespondence
+
+import Relico.Correctness.DirectLFSelectionCompatibility
+import Relico.Tests.DirectLFSelectionCompatibility
+
+import Relico.Correctness.DirectLFSelectionRemoval
+import Relico.Tests.DirectLFSelectionRemoval
+
+import Relico.Correctness.DirectLFSelectionAppend
+import Relico.Tests.DirectLFSelectionAppend
+
+import Relico.Correctness.DirectLFStatementForward
+import Relico.Tests.DirectLFStatementForward
+
+import Relico.Correctness.DirectLFStatementBackward
+import Relico.Tests.DirectLFStatementBackward
+
+import Relico.Correctness.DirectLFDispatchSelection
+import Relico.Tests.DirectLFDispatchSelection
+
+import Relico.LF.PendingNotPast
+import Relico.Tests.LFPendingNotPast
+
+import Relico.Correctness.DirectLFRuntimeStateCorrespondence
+import Relico.Tests.DirectLFRuntimeStateCorrespondence
+
+import Relico.Correctness.DirectLFForwardDispatchRuntime
+import Relico.Tests.DirectLFForwardDispatchRuntime
+
+import Relico.Correctness.DirectLFBackwardDispatchRuntime
+import Relico.Tests.DirectLFBackwardDispatchRuntime
+
+import Relico.Correctness.DirectLFDetailedRuntimeStateCorrespondence
+import Relico.Tests.DirectLFDetailedRuntimeStateCorrespondence

@@ -38,6 +38,75 @@ theorem precedesOrEqual_same_time
     Or.inr
       ⟨hTime, hMicrostep⟩
 
+/--
+Two LF tags are equal when both components are equal.
+
+This standalone lemma avoids dependent elimination in correctness
+proofs whose surrounding hypotheses are indexed by pending actions.
+-/
+theorem eq_of_time_eq_of_microstep
+    {left right :
+      LF.Tag}
+    (hTime :
+      left.time =
+        right.time)
+    (hMicrostep :
+      left.microstep =
+        right.microstep) :
+    left =
+      right := by
+
+  cases left with
+
+  | mk leftTime leftMicrostep =>
+      cases right with
+
+      | mk rightTime rightMicrostep =>
+          cases hTime
+          cases hMicrostep
+          rfl
+
+/--
+At equal metric time, a later microstep cannot precede an earlier
+microstep.
+
+Reaction declaration order is consulted only after complete-tag
+ordering and therefore cannot reverse this fact.
+-/
+theorem not_precedesOrEqual_same_time_of_microstep_lt
+    {earlier later :
+      LF.Tag}
+    (hSameTime :
+      earlier.time =
+        later.time)
+    (hEarlierMicrostep :
+      earlier.microstep <
+        later.microstep) :
+    ¬ PrecedesOrEqual
+        later
+        earlier := by
+
+  intro hOrder
+
+  rcases hOrder with
+    hEarlierTime |
+      ⟨_hEqualTime,
+       hMicrostepOrder⟩
+
+  · rw [
+      hSameTime
+    ] at hEarlierTime
+
+    exact
+      (Nat.lt_irrefl
+        later.time)
+        hEarlierTime
+
+  · exact
+      (Nat.not_le_of_gt
+        hEarlierMicrostep)
+        hMicrostepOrder
+
 theorem time_le_of_precedesOrEqual
     {left right : LF.Tag}
     (hOrder :
