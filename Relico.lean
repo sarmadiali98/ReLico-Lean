@@ -491,3 +491,6 @@ import Relico.Correctness.MultiStorePayloadRuntimeStateCorrespondence
 import Relico.Tests.MultiStorePayloadRuntimeStateCorrespondence
 
 import Relico.Tests.MultiStorePayloadReactionMembership
+
+import Relico.Correctness.MultiStorePayloadRuntimeDispatchSupport
+import Relico.Tests.MultiStorePayloadRuntimeDispatchSupport
