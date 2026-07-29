@@ -1,0 +1,40 @@
+import Relico.Correctness.DirectLFDetailedBackwardWeakSimulation
+
+set_option autoImplicit false
+
+namespace Relico
+namespace Tests
+namespace DirectLFDetailedBackwardWeakSimulation
+
+#check Correctness.DirectLFDetailedBackwardMatch
+
+#check
+  Correctness.directLFDetailedRuntime_statement_backward_weak
+
+#check
+  Correctness.directLFDetailedRuntime_timeAdvance_backward_weak
+
+#check
+  Correctness.directLFDetailedRuntime_microstepAfterTime_backward_weak
+
+#check
+  Correctness.directLFDetailedRuntime_microstepSameTime_backward_weak
+
+#check
+  Correctness.directLFDetailedRuntime_consumeAfterTimeZero_backward_weak
+
+#check
+  Correctness.directLFDetailedRuntime_consumeReadyFuture_backward_weak
+
+#check
+  Correctness.directLFDetailedRuntime_consumeReadySameTime_backward_weak
+
+#check
+  Correctness.directLFDetailedRuntime_consumeNow_backward_weak
+
+#check
+  Correctness.DirectLFDetailedBackwardMatch.source_corresponds
+
+end DirectLFDetailedBackwardWeakSimulation
+end Tests
+end Relico

@@ -429,3 +429,15 @@ import Relico.Tests.DirectLFBackwardDispatchRuntime
 
 import Relico.Correctness.DirectLFDetailedRuntimeStateCorrespondence
 import Relico.Tests.DirectLFDetailedRuntimeStateCorrespondence
+
+import Relico.Correctness.DirectLFDetailedForwardWeakSimulation
+import Relico.Tests.DirectLFDetailedForwardWeakSimulation
+
+import Relico.Correctness.DirectLFDetailedBackwardWeakSimulation
+import Relico.Tests.DirectLFDetailedBackwardWeakSimulation
+
+import Relico.Correctness.DirectLFDetailedPhaseWeakBisimulation
+import Relico.Tests.DirectLFDetailedPhaseWeakBisimulation
+
+import Relico.Correctness.DirectLFDetailedFiniteWeakExecution
+import Relico.Tests.DirectLFDetailedFiniteWeakExecution
