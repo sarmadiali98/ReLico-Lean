@@ -400,6 +400,9 @@ import Relico.Tests.DirectLFBagQueueCorrespondence
 import Relico.Correctness.DirectLFSelectionCompatibility
 import Relico.Tests.DirectLFSelectionCompatibility
 
+import Relico.Correctness.DirectLFPayloadSelectionCompatibility
+import Relico.Tests.DirectLFPayloadSelectionCompatibility
+
 import Relico.Correctness.DirectLFSelectionRemoval
 import Relico.Tests.DirectLFSelectionRemoval
 
