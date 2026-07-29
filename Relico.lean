@@ -406,6 +406,9 @@ import Relico.Tests.DirectLFPayloadSelectionCompatibility
 import Relico.Correctness.DirectLFSelectionRemoval
 import Relico.Tests.DirectLFSelectionRemoval
 
+import Relico.Correctness.DirectLFPayloadSelectionRemoval
+import Relico.Tests.DirectLFPayloadSelectionRemoval
+
 import Relico.Correctness.DirectLFSelectionAppend
 import Relico.Tests.DirectLFSelectionAppend
 
