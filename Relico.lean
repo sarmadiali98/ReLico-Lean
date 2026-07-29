@@ -441,3 +441,6 @@ import Relico.Tests.DirectLFDetailedPhaseWeakBisimulation
 
 import Relico.Correctness.DirectLFDetailedFiniteWeakExecution
 import Relico.Tests.DirectLFDetailedFiniteWeakExecution
+
+import Relico.Correctness.DirectLFDetailedObservableWeakExecution
+import Relico.Tests.DirectLFDetailedObservableWeakExecution
