@@ -460,3 +460,9 @@ import Relico.Tests.DirectLFDetailedFiniteWeakExecution
 
 import Relico.Correctness.DirectLFDetailedObservableWeakExecution
 import Relico.Tests.DirectLFDetailedObservableWeakExecution
+
+import Relico.DTR.MultiStorePayloadSyntax
+import Relico.DTR.MultiStorePayloadPriority
+import Relico.LF.MultiStorePayloadSyntax
+import Relico.Translation.MultiStorePayloadBasic
+import Relico.Tests.MultiStorePayloadFoundation
