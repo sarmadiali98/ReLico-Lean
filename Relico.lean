@@ -505,3 +505,7 @@ import Relico.DTR.DetailedMultiStorePayloadRuntime
 import Relico.LF.DetailedMultiStorePayloadRuntime
 import Relico.Correctness.MultiStorePayloadDetailedRuntimeLabelCorrespondence
 import Relico.Tests.MultiStorePayloadDetailedRuntimeLabelCorrespondence
+
+import Relico.DTR.DetailedMultiStorePayloadSemantics
+import Relico.LF.DetailedMultiStorePayloadSemantics
+import Relico.Tests.DetailedMultiStorePayloadSemantics
