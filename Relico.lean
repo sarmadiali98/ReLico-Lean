@@ -466,3 +466,8 @@ import Relico.DTR.MultiStorePayloadPriority
 import Relico.LF.MultiStorePayloadSyntax
 import Relico.Translation.MultiStorePayloadBasic
 import Relico.Tests.MultiStorePayloadFoundation
+
+import Relico.DTR.MultiStorePayloadSemantics
+import Relico.LF.MultiStorePayloadSemantics
+import Relico.Correctness.MultiStorePayloadStatementCorrespondence
+import Relico.Tests.MultiStorePayloadSemantics
