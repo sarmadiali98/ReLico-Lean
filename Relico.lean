@@ -442,6 +442,10 @@ import Relico.Tests.DirectLFPayloadRuntimeDispatch
 import Relico.Correctness.DirectLFDetailedRuntimeStateCorrespondence
 import Relico.Tests.DirectLFDetailedRuntimeStateCorrespondence
 
+import Relico.Correctness.DirectLFPayloadDetailedRuntimeStateCorrespondence
+import Relico.Correctness.DirectLFPayloadDetailedLabelCorrespondence
+import Relico.Tests.DirectLFPayloadDetailedRuntimeLabelCorrespondence
+
 import Relico.Correctness.DirectLFDetailedForwardWeakSimulation
 import Relico.Tests.DirectLFDetailedForwardWeakSimulation
 
