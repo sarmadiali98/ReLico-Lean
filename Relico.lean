@@ -513,3 +513,6 @@ import Relico.Tests.DetailedMultiStorePayloadSemantics
 import Relico.DTR.DetailedMultiStorePayloadWeakSemantics
 import Relico.LF.DetailedMultiStorePayloadWeakSemantics
 import Relico.Tests.DetailedMultiStorePayloadWeakSemantics
+
+import Relico.Correctness.MultiStorePayloadDetailedDispatchWeakMatches
+import Relico.Tests.MultiStorePayloadDetailedDispatchWeakMatches

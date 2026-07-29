@@ -1,0 +1,68 @@
+import Relico.Correctness.MultiStorePayloadDetailedDispatchWeakMatches
+
+set_option autoImplicit false
+
+namespace Relico
+namespace Tests
+namespace MultiStorePayloadDetailedDispatchWeakMatches
+
+#check
+  Correctness.MultiStorePayloadDetailedForwardMatch
+
+#check
+  Correctness.MultiStorePayloadDetailedBackwardMatch
+
+#check
+  Correctness.MultiStorePayloadDetailedForwardMatch.target_corresponds
+
+#check
+  Correctness.MultiStorePayloadDetailedBackwardMatch.source_corresponds
+
+#check
+  Correctness.multiStorePayloadDetailedRuntime_timeAdvance_forward_weak
+
+#check
+  Correctness.multiStorePayloadDetailedRuntime_consume_afterTime_forward_weak
+
+#check
+  Correctness.multiStorePayloadDetailedRuntime_consume_ready_forward_weak
+
+#check
+  Correctness.multiStorePayloadDetailedRuntime_consumeNow_forward_weak
+
+#check
+  Correctness.multiStorePayloadDetailedRuntime_timeAdvance_backward_weak
+
+#check
+  Correctness.multiStorePayloadDetailedRuntime_microstepAfterTime_backward_weak
+
+#check
+  Correctness.multiStorePayloadDetailedRuntime_microstepSameTime_backward_weak
+
+#check
+  Correctness.multiStorePayloadDetailedRuntime_consumeAfterTimeZero_backward_weak
+
+#check
+  Correctness.multiStorePayloadDetailedRuntime_consumeReadyFuture_backward_weak
+
+#check
+  Correctness.multiStorePayloadDetailedRuntime_consumeReadySameTime_backward_weak
+
+#check
+  Correctness.multiStorePayloadDetailedRuntime_consumeNow_backward_weak
+
+#print axioms
+  Correctness.multiStorePayloadDetailedRuntime_timeAdvance_forward_weak
+
+#print axioms
+  Correctness.multiStorePayloadDetailedRuntime_consumeNow_forward_weak
+
+#print axioms
+  Correctness.multiStorePayloadDetailedRuntime_timeAdvance_backward_weak
+
+#print axioms
+  Correctness.multiStorePayloadDetailedRuntime_consumeNow_backward_weak
+
+end MultiStorePayloadDetailedDispatchWeakMatches
+end Tests
+end Relico
