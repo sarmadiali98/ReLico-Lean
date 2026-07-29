@@ -70,6 +70,107 @@ instance
   infer_instance
 
 /--
+The empty generated-reaction list contains neither requested action
+trigger.
+-/
+@[simp]
+theorem multiStorePayloadReactionActionPrecedesOrEqual_nil
+    (left right :
+      ActionName) :
+    ¬ LF.MultiStorePayloadReactionActionPrecedesOrEqual
+        left
+        right
+        [] := by
+
+  simp [
+    LF.MultiStorePayloadReactionActionPrecedesOrEqual,
+    multiStorePayloadReactionActionPrecedesOrEqualBool
+  ]
+
+/--
+Public recursive equation for generated-reaction action order.
+
+Startup reactions are skipped. A logical-action reaction succeeds when
+its trigger is `left`, fails when its trigger is `right`, and otherwise
+delegates to the remaining generated reactions.
+-/
+@[simp]
+theorem multiStorePayloadReactionActionPrecedesOrEqual_cons
+    (left right :
+      ActionName)
+    (current :
+      LF.MultiStorePayloadReaction)
+    (remaining :
+      List LF.MultiStorePayloadReaction) :
+    LF.MultiStorePayloadReactionActionPrecedesOrEqual
+        left
+        right
+        (current :: remaining) ↔
+      match current.trigger with
+
+      | .startup =>
+          LF.MultiStorePayloadReactionActionPrecedesOrEqual
+            left
+            right
+            remaining
+
+      | .logicalAction actionName =>
+          actionName =
+              left ∨
+            (
+              actionName ≠
+                  left ∧
+                actionName ≠
+                  right ∧
+                LF.MultiStorePayloadReactionActionPrecedesOrEqual
+                  left
+                  right
+                  remaining
+            ) := by
+
+  cases hTrigger :
+      current.trigger with
+
+  | startup =>
+      simp [
+        LF.MultiStorePayloadReactionActionPrecedesOrEqual,
+        multiStorePayloadReactionActionPrecedesOrEqualBool,
+        hTrigger
+      ]
+
+  | logicalAction actionName =>
+      by_cases hLeft :
+          actionName =
+            left
+
+      · simp [
+          LF.MultiStorePayloadReactionActionPrecedesOrEqual,
+          multiStorePayloadReactionActionPrecedesOrEqualBool,
+          hTrigger,
+          hLeft
+        ]
+
+      · by_cases hRight :
+          actionName =
+            right
+
+        · simp [
+            LF.MultiStorePayloadReactionActionPrecedesOrEqual,
+            multiStorePayloadReactionActionPrecedesOrEqualBool,
+            hTrigger,
+            hLeft,
+            hRight
+          ]
+
+        · simp [
+            LF.MultiStorePayloadReactionActionPrecedesOrEqual,
+            multiStorePayloadReactionActionPrecedesOrEqualBool,
+            hTrigger,
+            hLeft,
+            hRight
+          ]
+
+/--
 Priority-aware LF eligibility for one pending logical-action
 occurrence.
 

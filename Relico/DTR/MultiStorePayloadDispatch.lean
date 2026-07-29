@@ -94,6 +94,86 @@ instance
   infer_instance
 
 /--
+The empty declaration list contains neither requested server name.
+-/
+@[simp]
+theorem multiStorePayloadServerNamePrecedesOrEqual_nil
+    (left right :
+      MsgName) :
+    ¬ DTR.MultiStorePayloadServerNamePrecedesOrEqual
+        left
+        right
+        [] := by
+
+  simp [
+    DTR.MultiStorePayloadServerNamePrecedesOrEqual,
+    multiStorePayloadServerNamePrecedesOrEqualBool
+  ]
+
+/--
+Public recursive equation for declaration-list name order.
+
+This theorem exposes the existing scanner behavior without changing its
+definition. The first occurrence of `left` succeeds, the first
+occurrence of `right` fails, and an unrelated head delegates to the
+remaining declaration list.
+-/
+@[simp]
+theorem multiStorePayloadServerNamePrecedesOrEqual_cons
+    (left right :
+      MsgName)
+    (current :
+      DTR.MultiStorePayloadMessageServer)
+    (remaining :
+      List DTR.MultiStorePayloadMessageServer) :
+    DTR.MultiStorePayloadServerNamePrecedesOrEqual
+        left
+        right
+        (current :: remaining) ↔
+      (
+        current.name =
+            left ∨
+          (
+            current.name ≠
+                left ∧
+              current.name ≠
+                right ∧
+              DTR.MultiStorePayloadServerNamePrecedesOrEqual
+                left
+                right
+                remaining
+          )
+      ) := by
+
+  by_cases hLeft :
+      current.name =
+        left
+
+  · simp [
+      DTR.MultiStorePayloadServerNamePrecedesOrEqual,
+      multiStorePayloadServerNamePrecedesOrEqualBool,
+      hLeft
+    ]
+
+  · by_cases hRight :
+        current.name =
+          right
+
+    · simp [
+        DTR.MultiStorePayloadServerNamePrecedesOrEqual,
+        multiStorePayloadServerNamePrecedesOrEqualBool,
+        hLeft,
+        hRight
+      ]
+
+    · simp [
+        DTR.MultiStorePayloadServerNamePrecedesOrEqual,
+        multiStorePayloadServerNamePrecedesOrEqualBool,
+        hLeft,
+        hRight
+      ]
+
+/--
 Priority-aware source eligibility for one payload-bearing pending
 message occurrence.
 

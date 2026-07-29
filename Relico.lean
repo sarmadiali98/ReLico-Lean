@@ -475,3 +475,8 @@ import Relico.Tests.MultiStorePayloadSemantics
 import Relico.DTR.MultiStorePayloadDispatch
 import Relico.LF.MultiStorePayloadDispatch
 import Relico.Tests.MultiStorePayloadDispatch
+
+import Relico.Correctness.MultiStorePayloadPriorityOrder
+import Relico.Correctness.MultiStorePayloadBaseSelectionCompatibility
+import Relico.Correctness.MultiStorePayloadSelectionCompatibility
+import Relico.Tests.MultiStorePayloadSelectionCompatibility

@@ -152,6 +152,21 @@ def priorityOrderedMultiStorePayloadMessageServers
     messageServers
 
 /--
+Compile the local message-server list into exactly the generated
+message-reaction declaration order.
+
+This helper names the reaction list already constructed by
+`compileMultiStorePayloadReactor`; it introduces no new ordering policy.
+-/
+def compileMultiStorePayloadMessageReactions
+    (messageServers :
+      List DTR.MultiStorePayloadMessageServer) :
+    List LF.MultiStorePayloadReaction :=
+  (priorityOrderedMultiStorePayloadMessageServers
+      messageServers).map
+    compileMultiStorePayloadReaction
+
+/--
 Compile a one-actor payload-aware class into one generated payload-aware
 reactor. Actions and reactions are generated from the same normalized
 server list.
