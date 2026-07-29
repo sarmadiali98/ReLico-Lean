@@ -500,3 +500,8 @@ import Relico.Tests.MultiStorePayloadForwardDispatchRuntime
 
 import Relico.Correctness.MultiStorePayloadBackwardDispatchRuntime
 import Relico.Tests.MultiStorePayloadBackwardDispatchRuntime
+
+import Relico.DTR.DetailedMultiStorePayloadRuntime
+import Relico.LF.DetailedMultiStorePayloadRuntime
+import Relico.Correctness.MultiStorePayloadDetailedRuntimeLabelCorrespondence
+import Relico.Tests.MultiStorePayloadDetailedRuntimeLabelCorrespondence
