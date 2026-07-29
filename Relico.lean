@@ -471,3 +471,7 @@ import Relico.DTR.MultiStorePayloadSemantics
 import Relico.LF.MultiStorePayloadSemantics
 import Relico.Correctness.MultiStorePayloadStatementCorrespondence
 import Relico.Tests.MultiStorePayloadSemantics
+
+import Relico.DTR.MultiStorePayloadDispatch
+import Relico.LF.MultiStorePayloadDispatch
+import Relico.Tests.MultiStorePayloadDispatch
