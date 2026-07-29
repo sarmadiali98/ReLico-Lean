@@ -258,5 +258,93 @@ theorem compileMultiStorePayloadReaction_priority
       messageServer.priority := by
   rfl
 
+
+/--
+The priority-ordered source declaration list contains exactly the declarations
+of the original message-server list.
+-/
+theorem priorityOrderedMultiStorePayloadMessageServers_mem_iff
+    (candidate :
+      DTR.MultiStorePayloadMessageServer)
+    (messageServers :
+      List DTR.MultiStorePayloadMessageServer) :
+    candidate ∈
+        priorityOrderedMultiStorePayloadMessageServers
+          messageServers ↔
+      candidate ∈
+        messageServers := by
+
+  simpa [
+    priorityOrderedMultiStorePayloadMessageServers
+  ] using
+    DTR.MultiStorePayloadMessageServerPriority.mem_normalize_iff
+      candidate
+      messageServers
+
+/--
+Every declared payload-aware message server generates a reaction occurrence.
+-/
+theorem compileMultiStorePayloadReaction_mem
+    {messageServer :
+      DTR.MultiStorePayloadMessageServer}
+    {messageServers :
+      List DTR.MultiStorePayloadMessageServer}
+    (hMember :
+      messageServer ∈
+        messageServers) :
+    compileMultiStorePayloadReaction
+          messageServer ∈
+        compileMultiStorePayloadMessageReactions
+          messageServers := by
+
+  apply
+    List.mem_map.mpr
+
+  exact
+    ⟨messageServer,
+     (priorityOrderedMultiStorePayloadMessageServers_mem_iff
+        messageServer
+        messageServers).mpr
+          hMember,
+     rfl⟩
+
+/--
+Every generated payload-aware reaction occurrence originates from a declared
+source message server.
+-/
+theorem mem_compileMultiStorePayloadMessageReactions
+    {reaction :
+      LF.MultiStorePayloadReaction}
+    {messageServers :
+      List DTR.MultiStorePayloadMessageServer}
+    (hMember :
+      reaction ∈
+        compileMultiStorePayloadMessageReactions
+          messageServers) :
+    ∃ messageServer,
+      messageServer ∈
+          messageServers ∧
+        compileMultiStorePayloadReaction
+            messageServer =
+          reaction := by
+
+  simp only [
+    compileMultiStorePayloadMessageReactions,
+    List.mem_map
+  ] at hMember
+
+  rcases hMember with
+    ⟨messageServer,
+     hOrderedMember,
+     hReaction⟩
+
+  exact
+    ⟨messageServer,
+     (priorityOrderedMultiStorePayloadMessageServers_mem_iff
+        messageServer
+        messageServers).mp
+          hOrderedMember,
+     hReaction⟩
+
 end Translation
 end Relico

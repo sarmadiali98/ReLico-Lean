@@ -108,6 +108,77 @@ theorem normalize_singleton
       [messageServer] := by
   rfl
 
+
+/--
+Priority insertion preserves declaration membership exactly.
+-/
+theorem mem_insert_iff
+    (candidate messageServer :
+      DTR.MultiStorePayloadMessageServer)
+    (messageServers :
+      List DTR.MultiStorePayloadMessageServer) :
+    candidate ∈
+        insert
+          messageServer
+          messageServers ↔
+      candidate =
+          messageServer ∨
+        candidate ∈
+          messageServers := by
+
+  induction messageServers with
+
+  | nil =>
+      simp [
+        insert
+      ]
+
+  | cons current remaining inductionHypothesis =>
+      by_cases hOrder :
+          PrecedesOrEqual
+            messageServer
+            current
+
+      · simp [
+          insert,
+          hOrder
+        ]
+
+      · simp [
+          insert,
+          hOrder,
+          inductionHypothesis,
+          or_left_comm
+        ]
+
+/--
+Stable priority normalization preserves declaration membership exactly.
+-/
+theorem mem_normalize_iff
+    (candidate :
+      DTR.MultiStorePayloadMessageServer)
+    (messageServers :
+      List DTR.MultiStorePayloadMessageServer) :
+    candidate ∈
+        normalize
+          messageServers ↔
+      candidate ∈
+        messageServers := by
+
+  induction messageServers with
+
+  | nil =>
+      simp [
+        normalize
+      ]
+
+  | cons messageServer remaining inductionHypothesis =>
+      simp [
+        normalize,
+        mem_insert_iff,
+        inductionHypothesis
+      ]
+
 end MultiStorePayloadMessageServerPriority
 end DTR
 end Relico
