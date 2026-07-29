@@ -1,0 +1,51 @@
+import Relico.Correctness.MultiStorePayloadDetailedRuntimePhaseWeakBisimulation
+
+set_option autoImplicit false
+
+#check
+  Relico.Correctness.MultiStorePayloadDetailedRuntimePhaseWeakBisimulation
+
+#check
+  Relico.Correctness.MultiStorePayloadDetailedRuntimePhaseWeakBisimulation.forwardStatementMatch
+
+#check
+  Relico.Correctness.MultiStorePayloadDetailedRuntimePhaseWeakBisimulation.forwardTimeAdvanceMatch
+
+#check
+  Relico.Correctness.MultiStorePayloadDetailedRuntimePhaseWeakBisimulation.forwardConsumeAfterTimeMatch
+
+#check
+  Relico.Correctness.MultiStorePayloadDetailedRuntimePhaseWeakBisimulation.forwardConsumeReadyMatch
+
+#check
+  Relico.Correctness.MultiStorePayloadDetailedRuntimePhaseWeakBisimulation.forwardConsumeNowMatch
+
+#check
+  Relico.Correctness.MultiStorePayloadDetailedRuntimePhaseWeakBisimulation.backwardStatementMatch
+
+#check
+  Relico.Correctness.MultiStorePayloadDetailedRuntimePhaseWeakBisimulation.backwardTimeAdvanceMatch
+
+#check
+  Relico.Correctness.MultiStorePayloadDetailedRuntimePhaseWeakBisimulation.backwardMicrostepAfterTimeMatch
+
+#check
+  Relico.Correctness.MultiStorePayloadDetailedRuntimePhaseWeakBisimulation.backwardMicrostepSameTimeMatch
+
+#check
+  Relico.Correctness.MultiStorePayloadDetailedRuntimePhaseWeakBisimulation.backwardConsumeAfterTimeZeroMatch
+
+#check
+  Relico.Correctness.MultiStorePayloadDetailedRuntimePhaseWeakBisimulation.backwardConsumeReadyFutureMatch
+
+#check
+  Relico.Correctness.MultiStorePayloadDetailedRuntimePhaseWeakBisimulation.backwardConsumeReadySameTimeMatch
+
+#check
+  Relico.Correctness.MultiStorePayloadDetailedRuntimePhaseWeakBisimulation.backwardConsumeNowMatch
+
+#check
+  Relico.Correctness.multiStorePayloadDetailedRuntime_phaseWeakBisimulation
+
+#print axioms
+  Relico.Correctness.multiStorePayloadDetailedRuntime_phaseWeakBisimulation
