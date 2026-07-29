@@ -1,0 +1,18 @@
+import Relico.Correctness.MultiStorePayloadDetailedStatementForwardWeakMatch
+
+set_option autoImplicit false
+
+#check
+  Relico.Correctness.MultiStorePayloadStatementRuntimeCompatible
+
+#check
+  Relico.Correctness.multiStorePayload_statement_forward_runtime
+
+#check
+  Relico.Correctness.multiStorePayloadDetailedRuntime_statement_forward_weak
+
+#print axioms
+  Relico.Correctness.multiStorePayload_statement_forward_runtime
+
+#print axioms
+  Relico.Correctness.multiStorePayloadDetailedRuntime_statement_forward_weak
