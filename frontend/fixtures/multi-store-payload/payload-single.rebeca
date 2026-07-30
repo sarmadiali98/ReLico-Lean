@@ -1,0 +1,18 @@
+reactiveclass PayloadController(10) {
+    statevars {
+        int x;
+    }
+
+    PayloadController() {
+        x = 0;
+        self.deliver(7) after(1);
+    }
+
+    msgsrv deliver(int value) {
+        x = value;
+    }
+}
+
+main {
+    PayloadController controller():();
+}

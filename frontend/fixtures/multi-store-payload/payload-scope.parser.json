@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "family": "multiStorePayload",
+  "className": "ScopedController",
+  "actorName": "controller",
+  "actorClass": "ScopedController",
+  "stateVariables": [
+    {
+      "name": "x",
+      "initialValue": 0
+    }
+  ],
+  "constructorBody": [
+      {
+        "kind": "assign",
+        "target": "x",
+        "expression": {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      },
+      {
+        "kind": "selfSend",
+        "message": "first",
+        "arguments": [
+{
+            "kind": "intLiteral",
+            "value": 7
+          }
+        ],
+        "delay": 1
+      },
+      {
+        "kind": "selfSend",
+        "message": "second",
+        "arguments": [
+{
+            "kind": "intLiteral",
+            "value": 9
+          }
+        ],
+        "delay": 2
+      }
+    ],
+  "messageServers": [
+    {
+      "name": "first",
+      "parameters": ["value"],
+      "priority": null,
+      "body": [
+        {
+          "kind": "assign",
+          "target": "x",
+          "expression": {
+            "kind": "parameterVar",
+            "name": "value"
+          }
+        },
+        {
+          "kind": "selfSend",
+          "message": "second",
+          "arguments": [
+{
+              "kind": "parameterVar",
+              "name": "value"
+            }
+          ],
+          "delay": 1
+        }
+      ]
+    },
+    {
+      "name": "second",
+      "parameters": ["other"],
+      "priority": null,
+      "body": [
+        {
+          "kind": "assign",
+          "target": "x",
+          "expression": {
+            "kind": "parameterVar",
+            "name": "other"
+          }
+        }
+      ]
+    }
+  ]
+}

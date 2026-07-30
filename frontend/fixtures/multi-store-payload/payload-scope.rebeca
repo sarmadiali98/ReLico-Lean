@@ -1,0 +1,24 @@
+reactiveclass ScopedController(10) {
+    statevars {
+        int x;
+    }
+
+    ScopedController() {
+        x = 0;
+        self.first(7) after(1);
+        self.second(9) after(2);
+    }
+
+    msgsrv first(int value) {
+        x = value;
+        self.second(value) after(1);
+    }
+
+    msgsrv second(int other) {
+        x = other;
+    }
+}
+
+main {
+    ScopedController controller():();
+}

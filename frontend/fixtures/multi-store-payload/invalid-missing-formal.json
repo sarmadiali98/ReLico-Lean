@@ -1,0 +1,51 @@
+{
+  "actorClass": "PayloadController",
+  "actorName": "controller",
+  "className": "PayloadController",
+  "constructorBody": [
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 0
+      },
+      "kind": "assign",
+      "target": "x"
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 7
+        }
+      ],
+      "delay": 1,
+      "kind": "selfSend",
+      "message": "deliver"
+    }
+  ],
+  "family": "multiStorePayload",
+  "messageServers": [
+    {
+      "body": [
+        {
+          "expression": {
+            "kind": "parameterVar",
+            "name": "value"
+          },
+          "kind": "assign",
+          "target": "x"
+        }
+      ],
+      "name": "deliver",
+      "parameters": [],
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1,
+  "stateVariables": [
+    {
+      "initialValue": 0,
+      "name": "x"
+    }
+  ]
+}
