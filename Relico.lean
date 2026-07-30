@@ -530,3 +530,6 @@ import Relico.Tests.MultiStorePayloadDetailedFiniteWeakExecutionFoundation
 import Relico.Tests.MultiStorePayloadDetailedFiniteWeakExecution
 import Relico.Tests.MultiStorePayloadDetailedObservableWeakExecution
 import Relico.Tests.MultiStorePayloadDetailedInitialization
+
+import Relico.Correctness.MultiStorePayloadDetailedInvocationEntry
+import Relico.Tests.MultiStorePayloadDetailedInvocationEntry
