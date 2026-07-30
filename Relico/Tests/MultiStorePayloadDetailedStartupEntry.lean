@@ -1,0 +1,29 @@
+import Relico.Correctness.MultiStorePayloadDetailedStartupEntry
+
+set_option autoImplicit false
+
+#check Relico.DTR.MultiStorePayloadConstructor.startupMultiStorePayloadState
+#check Relico.DTR.MultiStorePayloadConstructor.startupDetailedMultiStorePayloadState
+
+#check Relico.LF.startupLFMultiStorePayloadState
+#check Relico.LF.startupDetailedLFMultiStorePayloadState
+
+#check Relico.Correctness.multiStorePayloadStartupReaction_shape
+#check Relico.Correctness.multiStorePayloadStartupStates_correspond
+#check Relico.Correctness.detailedMultiStorePayloadStartupStates_correspond
+#check Relico.Correctness.multiStorePayloadStartupEntry_package
+
+#check Relico.Correctness.multiStorePayloadStartupFinite_forward
+#check Relico.Correctness.multiStorePayloadStartupFinite_backward
+#check Relico.Correctness.multiStorePayloadStartupObservable_forward
+#check Relico.Correctness.multiStorePayloadStartupObservable_backward
+
+#print axioms Relico.Correctness.multiStorePayloadStartupReaction_shape
+#print axioms Relico.Correctness.multiStorePayloadStartupStates_correspond
+#print axioms Relico.Correctness.detailedMultiStorePayloadStartupStates_correspond
+#print axioms Relico.Correctness.multiStorePayloadStartupEntry_package
+
+#print axioms Relico.Correctness.multiStorePayloadStartupFinite_forward
+#print axioms Relico.Correctness.multiStorePayloadStartupFinite_backward
+#print axioms Relico.Correctness.multiStorePayloadStartupObservable_forward
+#print axioms Relico.Correctness.multiStorePayloadStartupObservable_backward
