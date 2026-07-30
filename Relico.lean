@@ -544,3 +544,5 @@ import Relico.Frontend.MultiStorePayloadSchema
 import Relico.Frontend.MultiStorePayloadDecoder
 import Relico.Frontend.MultiStorePayloadBridgeCheck
 import Relico.Tests.MultiStorePayloadFrontend
+import Relico.LF.MultiStorePayloadCppPrinter
+import Relico.Tests.MultiStorePayloadCppPrinter
