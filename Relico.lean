@@ -533,3 +533,6 @@ import Relico.Tests.MultiStorePayloadDetailedInitialization
 
 import Relico.Correctness.MultiStorePayloadDetailedInvocationEntry
 import Relico.Tests.MultiStorePayloadDetailedInvocationEntry
+
+import Relico.Correctness.MultiStorePayloadDetailedInvocationFiniteObservable
+import Relico.Tests.MultiStorePayloadDetailedInvocationFiniteObservable

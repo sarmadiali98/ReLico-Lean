@@ -1,0 +1,37 @@
+import Relico.Correctness.MultiStorePayloadDetailedInvocationFiniteObservable
+
+set_option autoImplicit false
+
+namespace Relico
+namespace Tests
+namespace MultiStorePayloadDetailedInvocationFiniteObservable
+
+open Correctness
+
+#check
+  Correctness.multiStorePayloadInvocationFinite_forward
+
+#check
+  Correctness.multiStorePayloadInvocationFinite_backward
+
+#check
+  Correctness.multiStorePayloadInvocationObservable_forward
+
+#check
+  Correctness.multiStorePayloadInvocationObservable_backward
+
+#print axioms
+  Correctness.multiStorePayloadInvocationFinite_forward
+
+#print axioms
+  Correctness.multiStorePayloadInvocationFinite_backward
+
+#print axioms
+  Correctness.multiStorePayloadInvocationObservable_forward
+
+#print axioms
+  Correctness.multiStorePayloadInvocationObservable_backward
+
+end MultiStorePayloadDetailedInvocationFiniteObservable
+end Tests
+end Relico
