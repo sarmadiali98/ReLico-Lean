@@ -555,3 +555,7 @@ import Relico.LF.GlobalMultiStorePayload
 import Relico.Translation.GlobalMultiStorePayloadBasic
 import Relico.Correctness.GlobalMultiStorePayloadStateCorrespondence
 import Relico.Tests.GlobalMultiStorePayloadFoundation
+import Relico.DTR.GlobalMultiStorePayloadInitialization
+import Relico.LF.GlobalMultiStorePayloadInitialization
+import Relico.Correctness.GlobalMultiStorePayloadInitializationCorrespondence
+import Relico.Tests.GlobalMultiStorePayloadInitialization
