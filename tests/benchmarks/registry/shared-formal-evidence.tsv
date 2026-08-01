@@ -1,0 +1,3 @@
+test_file	formal_capability	anchor_benchmark	obligation_count	required_artifacts	justification
+Relico/Tests/StateStoreCoverage.lean	state-store-coverage	finite-store--runtime-semantics--positive	5	coverage-manifest,formal-witness,trust-report	proves StateStore coverage, lookup existence, and coverage preservation under updates; no distinct Timed Rebeca source construct
+Relico/Tests/Store.lean	store-operations	finite-store--runtime-semantics--positive	8	coverage-manifest,formal-witness,trust-report	proves generic Store lookup and update laws; common formal infrastructure rather than a distinct Timed Rebeca source construct

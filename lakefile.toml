@@ -4,3 +4,7 @@ defaultTargets = ["Relico"]
 
 [[lean_lib]]
 name = "Relico"
+
+[[lean_exe]]
+name = "relico-bench"
+root = "Relico.Benchmark.Main"
