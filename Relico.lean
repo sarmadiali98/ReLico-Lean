@@ -559,3 +559,9 @@ import Relico.DTR.GlobalMultiStorePayloadInitialization
 import Relico.LF.GlobalMultiStorePayloadInitialization
 import Relico.Correctness.GlobalMultiStorePayloadInitializationCorrespondence
 import Relico.Tests.GlobalMultiStorePayloadInitialization
+
+import Relico.DTR.GlobalMultiStorePayloadExternalSend
+import Relico.LF.GlobalMultiStorePayloadExternalSend
+import Relico.Translation.GlobalMultiStorePayloadExternalSend
+import Relico.Correctness.GlobalMultiStorePayloadExternalSendCorrespondence
+import Relico.Tests.GlobalMultiStorePayloadExternalSend
