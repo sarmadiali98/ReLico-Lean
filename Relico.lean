@@ -590,3 +590,5 @@ import Relico.Tests.GlobalMultiStorePayloadDispatch
 import Relico.Tests.GlobalMultiStorePayloadDeclaredFragment
 import Relico.Tests.GlobalMultiStorePayloadActorPriorityBoundary
 import Relico.Tests.GlobalMultiStorePayloadOneStep
+import Relico.Correctness.GlobalMultiStorePayloadOneStepCorrespondence
+import Relico.Tests.GlobalMultiStorePayloadOneStepCorrespondence
