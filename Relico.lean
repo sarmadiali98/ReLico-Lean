@@ -577,3 +577,8 @@ import Relico.LF.GlobalMultiStorePayloadExternalSendFrame
 import Relico.Translation.GlobalMultiStorePayloadExternalSendFrame
 import Relico.Correctness.GlobalMultiStorePayloadExternalSendFrameCorrespondence
 import Relico.Tests.GlobalMultiStorePayloadExternalSendFrame
+
+import Relico.DTR.GlobalMultiStorePayloadDispatch
+import Relico.LF.GlobalMultiStorePayloadDispatch
+import Relico.Correctness.GlobalMultiStorePayloadDispatchCorrespondence
+import Relico.Tests.GlobalMultiStorePayloadDispatch
