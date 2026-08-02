@@ -1,0 +1,20 @@
+target Cpp
+
+reactor Controller {
+  state x: int = 0
+  logical action tick_action: void
+
+  reaction(startup) -> tick_action {=
+    x = 0;
+    tick_action.schedule(1ms);
+  =}
+
+  reaction(tick_action) -> tick_action {=
+    x = x;
+    tick_action.schedule(1ms);
+  =}
+}
+
+main reactor {
+  controller = new Controller()
+}

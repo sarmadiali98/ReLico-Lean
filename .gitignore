@@ -17,3 +17,7 @@ generated/
 # Temporary files
 tmp/
 .temp/
+
+# Benchmark execution evidence
+tests/benchmarks/*/actual/
+tests/benchmarks/*/.expected-regeneration/
