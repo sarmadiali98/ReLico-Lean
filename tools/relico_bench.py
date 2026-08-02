@@ -7,7 +7,6 @@ import json
 import sys
 
 from relico_bench_execution import (
-    BENCHMARK_ROOT,
     BenchmarkResult,
     ExecutionError,
     run_benchmark,
@@ -122,13 +121,11 @@ def run_all(
     for row in registry["benchmarks"]:
         benchmark_id = row["benchmark_id"]
 
-        manifest_path = (
-            BENCHMARK_ROOT
-            / benchmark_id
-            / "manifest.json"
-        )
+        implementation_status = row[
+            "implementation_status"
+        ]
 
-        if not manifest_path.is_file():
+        if implementation_status != "implemented":
             not_implemented_count += 1
 
             print(

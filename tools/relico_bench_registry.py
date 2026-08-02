@@ -10,6 +10,7 @@ import sys
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_ROOT = REPOSITORY_ROOT / "tests" / "benchmarks" / "registry"
+BENCHMARK_ROOT = REPOSITORY_ROOT / "tests" / "benchmarks"
 
 EXPECTED_BENCHMARKS = 57
 EXPECTED_POSITIVE = 42
@@ -56,6 +57,46 @@ def require_columns(
         raise RegistryError(
             f"{label} registry missing columns: "
             + ", ".join(sorted(missing))
+        )
+
+
+def validate_implementation_status(
+    benchmark_id: str,
+    implementation_status: str,
+) -> None:
+    if implementation_status not in {
+        "planned",
+        "implemented",
+    }:
+        raise RegistryError(
+            f"{benchmark_id}: invalid implementation status "
+            f"{implementation_status!r}"
+        )
+
+    manifest_path = (
+        BENCHMARK_ROOT
+        / benchmark_id
+        / "manifest.json"
+    )
+
+    manifest_present = manifest_path.is_file()
+
+    if (
+        implementation_status == "implemented"
+        and not manifest_present
+    ):
+        raise RegistryError(
+            f"{benchmark_id}: registry status is implemented "
+            "but manifest.json is absent"
+        )
+
+    if (
+        implementation_status == "planned"
+        and manifest_present
+    ):
+        raise RegistryError(
+            f"{benchmark_id}: manifest.json exists but "
+            "registry status is planned"
         )
 
 
@@ -151,6 +192,11 @@ def validate(registry: dict[str, list[dict[str, str]]]) -> list[str]:
             raise RegistryError(
                 f"{benchmark_id}: invalid polarity"
             )
+
+        validate_implementation_status(
+            benchmark_id,
+            row["implementation_status"],
+        )
 
         expected_source = (
             f"tests/benchmarks/{benchmark_id}/source/model.rebeca"
@@ -258,8 +304,21 @@ def validate(registry: dict[str, list[dict[str, str]]]) -> list[str]:
                 "legacy migration has an unknown replacement"
             )
 
+    implemented_count = sum(
+        row["implementation_status"] == "implemented"
+        for row in benchmarks
+    )
+
+    planned_count = sum(
+        row["implementation_status"] == "planned"
+        for row in benchmarks
+    )
+
     return [
         f"BENCHMARK_COUNT={len(benchmarks)}",
+        f"IMPLEMENTED_BENCHMARK_COUNT={implemented_count}",
+        f"PLANNED_BENCHMARK_COUNT={planned_count}",
+        "IMPLEMENTATION_STATUS_AGREEMENT=yes",
         f"POSITIVE_COUNT={positive_count}",
         f"NEGATIVE_COUNT={negative_count}",
         f"OBLIGATION_COUNT={len(obligations)}",

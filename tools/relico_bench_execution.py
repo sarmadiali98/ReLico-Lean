@@ -368,6 +368,93 @@ def load_manifest(
             f"{benchmark_id}: mandatory RMC stage is absent"
         )
 
+    expected_terminal_stage = manifest[
+        "expected_terminal_stage"
+    ]
+
+    if (
+        not isinstance(expected_terminal_stage, str)
+        or not expected_terminal_stage
+    ):
+        raise ExecutionError(
+            f"{benchmark_id}: expected terminal stage is invalid"
+        )
+
+    if expected_terminal_stage not in stage_names:
+        raise ExecutionError(
+            f"{benchmark_id}: expected terminal stage "
+            f"{expected_terminal_stage!r} is not declared"
+        )
+
+    final_declared_stage = str(stages[-1]["name"])
+
+    if final_declared_stage != expected_terminal_stage:
+        raise ExecutionError(
+            f"{benchmark_id}: expected terminal stage "
+            f"{expected_terminal_stage!r} must be the final "
+            f"declared stage, not {final_declared_stage!r}"
+        )
+
+    artifacts = manifest.get(
+        "expected_artifacts",
+        [],
+    )
+
+    if not isinstance(artifacts, list):
+        raise ExecutionError(
+            f"{benchmark_id}: expected_artifacts is invalid"
+        )
+
+    for artifact in artifacts:
+        if not isinstance(artifact, dict):
+            raise ExecutionError(
+                f"{benchmark_id}: artifact entry is invalid"
+            )
+
+        relative = artifact.get("path")
+
+        if not isinstance(relative, str) or not relative:
+            raise ExecutionError(
+                f"{benchmark_id}: artifact path is invalid"
+            )
+
+        relative_path = Path(relative)
+
+        if (
+            relative_path.is_absolute()
+            or relative_path == Path(".")
+            or ".." in relative_path.parts
+        ):
+            raise ExecutionError(
+                f"{benchmark_id}: unsafe artifact path "
+                f"{relative!r}"
+            )
+
+        required = artifact.get("required", True)
+
+        if not isinstance(required, bool):
+            raise ExecutionError(
+                f"{benchmark_id}: artifact required flag "
+                "is invalid"
+            )
+
+        expected_sha256 = artifact.get("sha256")
+
+        if (
+            expected_sha256 is not None
+            and (
+                not isinstance(expected_sha256, str)
+                or len(expected_sha256) != 64
+                or any(
+                    character not in "0123456789abcdef"
+                    for character in expected_sha256
+                )
+            )
+        ):
+            raise ExecutionError(
+                f"{benchmark_id}: artifact SHA-256 is invalid"
+            )
+
     return benchmark_directory, manifest
 
 
@@ -718,6 +805,103 @@ def verify_expected_artifacts(
     return failures
 
 
+def regenerate_expected_artifacts(
+    *,
+    benchmark_id: str,
+    benchmark_directory: Path,
+    manifest: dict[str, Any],
+    actual_root: Path,
+) -> None:
+    artifacts = manifest.get(
+        "expected_artifacts",
+        [],
+    )
+
+    if not artifacts:
+        raise ExecutionError(
+            f"{benchmark_id}: --regenerate requires at "
+            "least one declared expected artifact"
+        )
+
+    expected_root = (
+        benchmark_directory
+        / "expected"
+    )
+
+    temporary_root = (
+        benchmark_directory
+        / ".expected-regeneration"
+    )
+
+    if temporary_root.exists():
+        shutil.rmtree(temporary_root)
+
+    temporary_root.mkdir(
+        parents=True,
+        exist_ok=False,
+    )
+
+    copied_count = 0
+
+    try:
+        for artifact in artifacts:
+            relative = Path(
+                str(artifact["path"])
+            )
+
+            source = actual_root / relative
+
+            if not source.is_file():
+                if bool(
+                    artifact.get(
+                        "required",
+                        True,
+                    )
+                ):
+                    raise ExecutionError(
+                        f"{benchmark_id}: cannot regenerate "
+                        f"missing artifact {relative}"
+                    )
+
+                continue
+
+            destination = (
+                temporary_root
+                / relative
+            )
+
+            destination.parent.mkdir(
+                parents=True,
+                exist_ok=True,
+            )
+
+            shutil.copy2(
+                source,
+                destination,
+            )
+
+            copied_count += 1
+
+        if copied_count == 0:
+            raise ExecutionError(
+                f"{benchmark_id}: regeneration selected "
+                "no existing artifacts"
+            )
+
+        if expected_root.exists():
+            shutil.rmtree(expected_root)
+
+        temporary_root.replace(
+            expected_root
+        )
+
+    except Exception:
+        if temporary_root.exists():
+            shutil.rmtree(temporary_root)
+
+        raise
+
+
 def run_benchmark(
     *,
     registry: dict[str, list[dict[str, str]]],
@@ -733,6 +917,17 @@ def run_benchmark(
 
     except RegistryError as error:
         raise ExecutionError(str(error)) from error
+
+    implementation_status = registry_row.get(
+        "implementation_status"
+    )
+
+    if implementation_status != "implemented":
+        raise ExecutionError(
+            f"{benchmark_id}: registry status is "
+            f"{implementation_status!r}, expected "
+            "'implemented'"
+        )
 
     benchmark_directory, manifest = load_manifest(
         benchmark_id
@@ -775,11 +970,14 @@ def run_benchmark(
 
     overall_status = "pass"
     overall_exit_code = 0
+    last_stage_name: str | None = None
 
     for index, stage in enumerate(
         manifest["stages"],
         start=1,
     ):
+        last_stage_name = str(stage["name"])
+
         status, exit_code = run_stage(
             benchmark_id=benchmark_id,
             benchmark_directory=benchmark_directory,
@@ -815,9 +1013,37 @@ def run_benchmark(
             ):
                 break
 
+    expected_terminal_stage = str(
+        manifest["expected_terminal_stage"]
+    )
+
+    terminal_stage_reached = (
+        not dry_run
+        and overall_status == "pass"
+        and last_stage_name == expected_terminal_stage
+    )
+
+    if not dry_run and not terminal_stage_reached:
+        overall_status = "fail"
+
+        if overall_exit_code == 0:
+            overall_exit_code = 1
+
+        (
+            actual_root
+            / "terminal-stage-validation.txt"
+        ).write_text(
+            "expected_terminal_stage="
+            + expected_terminal_stage
+            + "\nactual_terminal_stage="
+            + str(last_stage_name)
+            + "\nterminal_stage_reached=no\n",
+            encoding="utf-8",
+        )
+
     artifact_failures = (
         []
-        if dry_run
+        if dry_run or not terminal_stage_reached
         else verify_expected_artifacts(
             benchmark_id,
             manifest,
@@ -852,6 +1078,10 @@ def run_benchmark(
                 "expected_terminal_stage"
             ]
         ),
+        "actual_terminal_stage": last_stage_name,
+        "terminal_stage_reached": (
+            terminal_stage_reached
+        ),
     }
 
     (actual_root / "run-summary.json").write_text(
@@ -871,17 +1101,11 @@ def run_benchmark(
         and not dry_run
         and overall_status == "pass"
     ):
-        expected_root = (
-            benchmark_directory
-            / "expected"
-        )
-
-        if expected_root.exists():
-            shutil.rmtree(expected_root)
-
-        shutil.copytree(
-            actual_root,
-            expected_root,
+        regenerate_expected_artifacts(
+            benchmark_id=benchmark_id,
+            benchmark_directory=benchmark_directory,
+            manifest=manifest,
+            actual_root=actual_root,
         )
 
         print(

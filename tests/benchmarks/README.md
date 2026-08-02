@@ -84,3 +84,14 @@ Whole-corpus execution returns:
 
 An incomplete corpus is never reported as a successful whole-corpus
 execution.
+
+## Implementation status contract
+
+The frozen registry is authoritative for benchmark implementation status.
+
+A benchmark with status `planned` must not contain `manifest.json`. A
+benchmark with status `implemented` must contain `manifest.json`. Registry
+validation rejects either mismatch.
+
+Corpus execution runs only rows marked `implemented`. Direct benchmark
+execution also rejects rows that are not marked `implemented`.
