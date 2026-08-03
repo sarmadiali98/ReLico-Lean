@@ -1,0 +1,211 @@
+{
+  "counts": {
+    "correctness_convention_rows": 483,
+    "selection_related_declarations": 52,
+    "source_declarations": 17,
+    "target_declarations": 17,
+    "translation_declarations": 18
+  },
+  "evidence": {
+    "build_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D4A-Eligible-Names-Repair-20260803T001525+0330/lake-build.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "build_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D4A-Eligible-Names-Repair-20260803T001525+0330/lake-build.stdout.txt",
+      "sha256": "8e47d889d498c7c8c17cfe1e1d047cd4c8697014271bb3fc352ce296e85617d0"
+    },
+    "contexts": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D4A-Eligible-Names-Repair-20260803T001525+0330/selection-related-contexts.txt",
+      "sha256": "84af30a642dc6d5bde232a8ca09f594afb85a1e1c4e8b2e2d0927fd0cf1f82e3"
+    },
+    "correctness_conventions": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D4A-Eligible-Names-Repair-20260803T001525+0330/correctness-correspondence-conventions.tsv",
+      "sha256": "4f4264e39fd77c256057063ce52255877603f6d0f10ef585bfb6f79d4c59faf8"
+    },
+    "declarations": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D4A-Eligible-Names-Repair-20260803T001525+0330/selection-related-declarations.tsv",
+      "sha256": "8a81480831afd8cd4b3e87ed5d2a7de881a8396ed6556f2f0d11dc5ea2514399"
+    },
+    "probe_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D4A-Eligible-Names-Repair-20260803T001525+0330/selection-interface-probe.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "probe_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D4A-Eligible-Names-Repair-20260803T001525+0330/selection-interface-probe.stdout.txt",
+      "sha256": "852d608c7e30b12f05a7730d0736bb2d2bc908825abac3a671119d966d2ec335"
+    }
+  },
+  "exact_interfaces": {
+    "compile_ready_actor": "Relico.Translation.GlobalMultiStorePayloadActorOrder.compileReadyActor",
+    "compile_ready_actors": "Relico.Translation.GlobalMultiStorePayloadActorOrder.compileReadyActors",
+    "compile_request": "Relico.Translation.GlobalMultiStorePayloadActorOrder.compileActorPriorityRequest",
+    "source_eligibility_bool": "Relico.DTR.GlobalMultiStorePayloadActorPriority.actorPriorityEligibleBool",
+    "source_eligibility_prop": "Relico.DTR.GlobalMultiStorePayloadActorPriority.ActorPriorityEligible",
+    "source_eligible_names": "Relico.DTR.GlobalMultiStorePayloadActorPriority.eligibleActorNames",
+    "source_ready_actor": "Relico.DTR.GlobalMultiStorePayloadActorPriority.ReadyActor",
+    "target_eligibility_bool": "Relico.LF.GlobalMultiStorePayloadActorOrder.targetActorOrderEligibleBool",
+    "target_eligibility_prop": "Relico.LF.GlobalMultiStorePayloadActorOrder.TargetActorOrderEligible",
+    "target_eligible_names": "Relico.LF.GlobalMultiStorePayloadActorOrder.eligibleTargetActorNames",
+    "target_ready_actor": "Relico.LF.GlobalMultiStorePayloadActorOrder.ReadyTargetActor"
+  },
+  "implementation_contract": {
+    "contract_rows": [
+      {
+        "contract_id": "SC1",
+        "required_value": "Relico/Correctness/GlobalMultiStorePayloadActorSelectionCorrespondence.lean",
+        "status": "planned",
+        "subject": "new correctness module"
+      },
+      {
+        "contract_id": "SC2",
+        "required_value": "Relico.DTR.GlobalMultiStorePayloadActorPriority.ReadyActor",
+        "status": "bound",
+        "subject": "source ready actor"
+      },
+      {
+        "contract_id": "SC3",
+        "required_value": "Relico.LF.GlobalMultiStorePayloadActorOrder.ReadyTargetActor",
+        "status": "bound",
+        "subject": "target ready actor"
+      },
+      {
+        "contract_id": "SC4",
+        "required_value": "Relico.DTR.GlobalMultiStorePayloadActorPriority.actorPriorityEligibleBool",
+        "status": "bound",
+        "subject": "source Boolean"
+      },
+      {
+        "contract_id": "SC5",
+        "required_value": "Relico.LF.GlobalMultiStorePayloadActorOrder.targetActorOrderEligibleBool",
+        "status": "bound",
+        "subject": "target Boolean"
+      },
+      {
+        "contract_id": "SC6",
+        "required_value": "source and compiled-target eligibility Booleans are equal",
+        "status": "required",
+        "subject": "Boolean correspondence"
+      },
+      {
+        "contract_id": "SC7",
+        "required_value": "Relico.DTR.GlobalMultiStorePayloadActorPriority.ActorPriorityEligible iff Relico.LF.GlobalMultiStorePayloadActorOrder.TargetActorOrderEligible after compilation",
+        "status": "required",
+        "subject": "propositional correspondence"
+      },
+      {
+        "contract_id": "SC8",
+        "required_value": "Relico.DTR.GlobalMultiStorePayloadActorPriority.eligibleActorNames equals Relico.LF.GlobalMultiStorePayloadActorOrder.eligibleTargetActorNames after compilation",
+        "status": "required",
+        "subject": "eligible-name correspondence"
+      },
+      {
+        "contract_id": "SC9",
+        "required_value": "source eligibility implies compiled target eligibility",
+        "status": "required",
+        "subject": "forward implication"
+      },
+      {
+        "contract_id": "SC10",
+        "required_value": "compiled target eligibility implies source eligibility",
+        "status": "required",
+        "subject": "backward implication"
+      },
+      {
+        "contract_id": "SC11",
+        "required_value": "Relico.Translation.GlobalMultiStorePayloadActorOrder.compileActorPriorityRequest, Relico.Translation.GlobalMultiStorePayloadActorOrder.compileReadyActor, Relico.Translation.GlobalMultiStorePayloadActorOrder.compileReadyActors",
+        "status": "bound",
+        "subject": "translation inputs"
+      },
+      {
+        "contract_id": "SC12",
+        "required_value": "base, reversed, tied, absent, incomplete, logical-time precedence",
+        "status": "required",
+        "subject": "required examples"
+      },
+      {
+        "contract_id": "SC13",
+        "required_value": "dispatch remains out of scope; no sorry, admit, axiom, unsafe, or sorryAx",
+        "status": "required",
+        "subject": "dispatch and trust boundary"
+      },
+      {
+        "contract_id": "SC14",
+        "required_value": "phase4d4b-source-target-actor-selection-correspondence-implementation",
+        "status": "ready",
+        "subject": "next phase"
+      }
+    ],
+    "dispatch_correspondence_in_scope": false,
+    "existing_modules_must_remain_unchanged": true,
+    "namespace": "Relico.Correctness.GlobalMultiStorePayloadActorSelectionCorrespondence",
+    "new_module": "Relico/Correctness/GlobalMultiStorePayloadActorSelectionCorrespondence.lean",
+    "required_examples": [
+      "base priority",
+      "reversed priority",
+      "tied priority",
+      "absent request",
+      "incomplete assignment",
+      "logical-time precedence"
+    ],
+    "required_theorem_kinds": [
+      "Boolean equality",
+      "propositional iff",
+      "eligible-name list equality",
+      "forward implication",
+      "backward implication"
+    ]
+  },
+  "inputs": {
+    "canonical_readme": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/README.md",
+      "sha256": "e51a898667a5ec4bf06b6d724889f62fedce38cd8b29c466628ec2e80f06340f"
+    },
+    "phase4d3b_report": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase4d3/PHASE4D3B_ORDER_TRANSLATION.json",
+      "sha256": "fca2a0ab6899effad2e8f67c97feadb9c4975cfd299dcf7d2723cfa7216bd641"
+    }
+  },
+  "phase": "phase4d4a-source-target-actor-selection-correspondence-audit",
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "repair": {
+    "exact_source_eligible_names": "Relico.DTR.GlobalMultiStorePayloadActorPriority.eligibleActorNames",
+    "obsolete_token": "sourceEligibleActorNames",
+    "previous_failure": "probe validator expected nonexistent sourceEligibleActorNames token",
+    "previous_full_build_passed": true,
+    "previous_interface_probe_lean_exit": 0,
+    "repair_passed": true
+  },
+  "result": {
+    "classification": "SELECTION_CORRESPONDENCE_INTERFACES_BOUND_GENERIC_PROOF_READY",
+    "current_production_integration_complete": false,
+    "dispatch_correspondence_complete": false,
+    "final_actor_priority_necessity_conclusion": "CONCLUSION_2_REACHED",
+    "next_phase": "phase4d4b-source-target-actor-selection-correspondence-implementation",
+    "passed": true,
+    "production_correctness_source_mutated": false,
+    "selection_correspondence_complete": false,
+    "source_actor_priority_semantics_complete": true,
+    "target_actor_order_semantics_complete": true,
+    "translation_complete": true
+  },
+  "schema_version": 1,
+  "validation": {
+    "exact_source_eligible_name_identifier_bound": true,
+    "full_build_passed": true,
+    "phase4d3b_gate_passed": true,
+    "preconditions_revalidated": true,
+    "selection_interface_probe_passed": true,
+    "sorryAx_dependency_absent": true,
+    "source_elaboration_passed": true,
+    "source_tests_preserved": true,
+    "target_elaboration_passed": true,
+    "target_tests_preserved": true,
+    "translation_elaboration_passed": true,
+    "translation_preservation_theorems_probed": true,
+    "translation_tests_preserved": true
+  }
+}

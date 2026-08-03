@@ -1,0 +1,8 @@
+rank	role	path	sha256	bound_fact
+1	frontend_schema	Relico/Frontend/MultiStorePayloadSchema.lean	8277ad0dd40da77c286e9acdef343bce683c2abde8defe9763cf73aa405ab21d	Contains the frontend message-server `priority : Option Nat` field.
+2	frontend_decoder	Relico/Frontend/MultiStorePayloadDecoder.lean	79207f6aedf3fff73b174b87a3f4b889172a3ed400753e4597ef3dbd8737a21c	Decodes the frontend message-server priority into the source syntax.
+3	json_schema	frontend/schema/multi-store-payload-v1.schema.json	d3f3d0c9ef29ab2b46231b2c86a825aebb79882f220423ff78a0267a64abe4ab	Defines serialized message-priority properties but no actor-priority property.
+4	java_payload_exporter	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	78b27e9d3587cb4fc31517b96581bbc49b6d46d72f415c16af759f51f8406521	Exports payload frontend data, local priority metadata, and actor/class surfaces.
+5	java_multistore_exporter	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	ac430c7672dbbcab5d0c034df1735824621708545a96bc29bf424a17bddcdaec	Exports multi-store frontend data and contains matching parser-bridge constraints.
+6	approach_a_exclusion_test	tests/actor-priority/approach-a-single-main-actor-payload-exclusion/run-approach-a-exclusion.sh	594286bcca32d4c63df36aeeb449385230af8c26fbc276ec867e93b8f8f2d073	Mechanically tests the current exact single-main-actor payload profile.
+7	approach_a_manifest	tests/actor-priority/approach-a-single-main-actor-payload-exclusion/manifest.json	f7233ea1731715febaf6dd8e0b38de4964380d956e2f4a9654b77a1cee2c284a	Records the accepted current-profile frontend exclusion boundary.

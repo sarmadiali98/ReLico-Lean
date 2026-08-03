@@ -1,0 +1,432 @@
+# Phase 3A Approach-A Implementation Plan
+
+## Status
+
+This is an implementation-surface audit. No production source, test
+harness, benchmark registry, or Lean theorem was modified.
+
+## Readiness
+
+Ready for controlled source mutation:
+**true**
+
+Negative expectation schema:
+**RESOLVED**
+
+Lean boundary evidence rows:
+**1376**
+
+Frontend and pipeline evidence rows:
+**1452**
+
+Benchmark harness evidence rows:
+**328**
+
+Benchmark manifests:
+**1**
+
+## Exact implementation sequence
+
+### 1. A1-LEAN-BOUNDARY
+
+Verify and, only where missing, strengthen the named no-actor-priority supported-fragment contract.
+
+Primary paths:
+
+- `Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean`
+- `Relico/Correctness/GlobalMultiStorePayloadDeclaredFragment.lean`
+
+Acceptance criteria:
+
+- none request is accepted
+- every some assignment is rejected
+- some [] is rejected
+- local reaction priority remains outside this actor-level boundary
+
+### 2. A2-FRONTEND-DIAGNOSTIC
+
+Make valid integer actor-priority rejection a stable production diagnostic without changing local-priority support.
+
+Primary paths:
+
+- `Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean`
+- `Relico/Correctness/GlobalMultiStorePayloadDeclaredFragment.lean`
+- `Relico/Correctness/GlobalMultiStorePayloadDispatchCorrespondence.lean`
+- `Relico/Correctness/GlobalMultiStorePayloadExternalSendCorrespondence.lean`
+- `Relico/DTR/GlobalMultiStorePayloadExternalSend.lean`
+- `Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean`
+- `frontend/fixtures/multistore-priority.json`
+- `frontend/java-bridge/RebecaMultiStoreJsonExporter.java`
+- `frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java`
+- `frontend/java-bridge/RebecaStoreJsonExporter.java`
+- `frontend/java-bridge/RebecaV0JsonExporter.java`
+- `frontend/java-bridge/run-multistore-from-zip.sh`
+- `frontend/java-bridge/run-multistore-payload-from-zip.sh`
+- `tests/benchmarks/registry/benchmarks.tsv`
+- `tests/benchmarks/registry/obligations.tsv`
+- `tests/benchmarks/registry/source-model-plan.tsv`
+
+Acceptance criteria:
+
+- valid integer actor priority rejected
+- local message-server priority accepted
+- no parser JSON for rejected actor priority
+
+### 3. A3-NEGATIVE-BENCHMARK
+
+Create the permanent global multi-actor payload actor-priority negative benchmark.
+
+Primary paths:
+
+- `tests/benchmarks/global-multi-actor-payload--priority-selection--negative`
+
+Acceptance criteria:
+
+- stable expected diagnostic
+- expected failing stage recorded
+- no decoded AST
+- no translated LF
+- no lfc output
+- no runtime output
+
+### 4. A4-BYPASS-AUDIT
+
+Exercise every discovered source-to-parser and source-to-LF entrypoint with the same actor-priority model.
+
+Primary paths:
+
+- `Relico/Benchmark/ArtifactExporter.lean`
+- `Relico/Common/Time.lean`
+- `Relico/Correctness/Backward.lean`
+- `Relico/Correctness/BoundPayloadDispatch.lean`
+- `Relico/Correctness/BoundPayloadState.lean`
+- `Relico/Correctness/BoundPayloadStep.lean`
+- `Relico/Correctness/ConcreteDetailedStateCorrespondence.lean`
+- `Relico/Correctness/Correspondence.lean`
+- `Relico/Correctness/DetailedBackwardWeakSimulation.lean`
+- `Relico/Correctness/DetailedBoundPayloadBackwardWeakSimulation.lean`
+- `Relico/Correctness/DetailedBoundPayloadEndToEndCorrectness.lean`
+- `Relico/Correctness/DetailedBoundPayloadFiniteWeakExecution.lean`
+- `Relico/Correctness/DetailedBoundPayloadForwardWeakSimulation.lean`
+- `Relico/Correctness/DetailedBoundPayloadInitialization.lean`
+- `Relico/Correctness/DetailedBoundPayloadInvariantCarryingFiniteWeakExecution.lean`
+- `Relico/Correctness/DetailedBoundPayloadInvariantMatches.lean`
+- `Relico/Correctness/DetailedBoundPayloadInvocationEntry.lean`
+- `Relico/Correctness/DetailedBoundPayloadObservableWeakExecution.lean`
+- `Relico/Correctness/DetailedBoundPayloadPhaseWeakBisimulation.lean`
+- `Relico/Correctness/DetailedBoundPayloadRuntimeInvariant.lean`
+- `Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean`
+- `Relico/Correctness/DetailedBoundPayloadStateCorrespondence.lean`
+- `Relico/Correctness/DetailedBoundPayloadWeakFoundation.lean`
+- `Relico/Correctness/DetailedExecutableTranslation.lean`
+- `Relico/Correctness/DetailedFiniteWeakExecution.lean`
+- `Relico/Correctness/DetailedForwardWeakSimulation.lean`
+- `Relico/Correctness/DetailedInitialFiniteWeakExecution.lean`
+- `Relico/Correctness/DetailedInvariantCarryingFiniteWeakExecution.lean`
+- `Relico/Correctness/DetailedMultiStoreRefinement.lean`
+- `Relico/Correctness/DetailedObservableWeakExecution.lean`
+- `Relico/Correctness/DetailedPriorityRuntimeInvariant.lean`
+- `Relico/Correctness/DetailedRuntimeInvariants.lean`
+- `Relico/Correctness/DetailedStateCorrespondence.lean`
+- `Relico/Correctness/DetailedWeakFoundation.lean`
+- `Relico/Correctness/DirectLFBackwardDispatchRuntime.lean`
+- `Relico/Correctness/DirectLFBagQueueCorrespondence.lean`
+- `Relico/Correctness/DirectLFDetailedBackwardWeakSimulation.lean`
+- `Relico/Correctness/DirectLFDetailedFiniteWeakExecution.lean`
+- `Relico/Correctness/DirectLFDetailedForwardWeakSimulation.lean`
+- `Relico/Correctness/DirectLFDetailedObservableWeakExecution.lean`
+- `Relico/Correctness/DirectLFDetailedRuntimeStateCorrespondence.lean`
+- `Relico/Correctness/DirectLFDispatchSelection.lean`
+- `Relico/Correctness/DirectLFForwardDispatchRuntime.lean`
+- `Relico/Correctness/DirectLFPayloadBackwardDispatchRuntime.lean`
+- `Relico/Correctness/DirectLFPayloadDetailedLabelCorrespondence.lean`
+- `Relico/Correctness/DirectLFPayloadDetailedRuntimeStateCorrespondence.lean`
+- `Relico/Correctness/DirectLFPayloadForwardDispatchRuntime.lean`
+- `Relico/Correctness/DirectLFPayloadRuntimeStateCorrespondence.lean`
+- `Relico/Correctness/DirectLFPayloadSelectionCompatibility.lean`
+- `Relico/Correctness/DirectLFRuntimeStateCorrespondence.lean`
+- `Relico/Correctness/DirectLFSelectionCompatibility.lean`
+- `Relico/Correctness/DirectLFStatementBackward.lean`
+- `Relico/Correctness/DirectLFStatementForward.lean`
+- `Relico/Correctness/Dispatch.lean`
+- `Relico/Correctness/ExecutableTranslation.lean`
+- `Relico/Correctness/Expression.lean`
+- `Relico/Correctness/ExpressionStore.lean`
+- `Relico/Correctness/Forward.lean`
+- `Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean`
+- `Relico/Correctness/GlobalMultiStorePayloadDeclaredFragment.lean`
+- `Relico/Correctness/GlobalMultiStorePayloadDispatchCorrespondence.lean`
+- `Relico/Correctness/GlobalMultiStorePayloadExternalSendCorrespondence.lean`
+- `Relico/Correctness/GlobalMultiStorePayloadExternalSendFrameStepCorrespondence.lean`
+- `Relico/Correctness/GlobalMultiStorePayloadFiniteExecutionCorrespondence.lean`
+- `Relico/Correctness/GlobalMultiStorePayloadInitializationCorrespondence.lean`
+- `Relico/Correctness/GlobalMultiStorePayloadOneStepCorrespondence.lean`
+- `Relico/Correctness/Initialization.lean`
+- `Relico/Correctness/Machine.lean`
+- `Relico/Correctness/MachineInitialization.lean`
+- `Relico/Correctness/MachineTrace.lean`
+- `Relico/Correctness/MachineTraceForward.lean`
+- `Relico/Correctness/MultiStoreDispatch.lean`
+- `Relico/Correctness/MultiStoreExecutableTranslation.lean`
+- `Relico/Correctness/MultiStoreForward.lean`
+- `Relico/Correctness/MultiStoreInitialization.lean`
+- `Relico/Correctness/MultiStoreMachine.lean`
+- `Relico/Correctness/MultiStoreMachineTrace.lean`
+- `Relico/Correctness/MultiStorePayloadBackwardDispatchRuntime.lean`
+- `Relico/Correctness/MultiStorePayloadBaseDispatchSelection.lean`
+- `Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean`
+- `Relico/Correctness/MultiStorePayloadDetailedDispatchWeakMatches.lean`
+- `Relico/Correctness/MultiStorePayloadDetailedFiniteWeakExecution.lean`
+- `Relico/Correctness/MultiStorePayloadDetailedFiniteWeakExecutionFoundation.lean`
+- `Relico/Correctness/MultiStorePayloadDetailedInitialization.lean`
+- `Relico/Correctness/MultiStorePayloadDetailedInvocationEntry.lean`
+- `Relico/Correctness/MultiStorePayloadDetailedInvocationFiniteObservable.lean`
+- `Relico/Correctness/MultiStorePayloadDetailedObservableWeakExecution.lean`
+- `Relico/Correctness/MultiStorePayloadDetailedRuntimeLabelCorrespondence.lean`
+- `Relico/Correctness/MultiStorePayloadDetailedStartupEntry.lean`
+- `Relico/Correctness/MultiStorePayloadForwardDispatchRuntime.lean`
+- `Relico/Correctness/MultiStorePayloadPriorityOrder.lean`
+- `Relico/Correctness/MultiStorePayloadRuntimeStateCorrespondence.lean`
+- `Relico/Correctness/MultiStorePayloadSelectionCompatibility.lean`
+- `Relico/Correctness/MultiStorePayloadStatementCorrespondence.lean`
+- `Relico/Correctness/MultiStoreStructural.lean`
+- `Relico/Correctness/PayloadCorrespondence.lean`
+- `Relico/Correctness/PayloadStep.lean`
+- `Relico/Correctness/PayloadTrace.lean`
+- `Relico/Correctness/PriorityEligibility.lean`
+- `Relico/Correctness/PriorityMachineTiming.lean`
+- `Relico/Correctness/PriorityOrder.lean`
+- `Relico/Correctness/PriorityTiming.lean`
+- `Relico/Correctness/StoreBackward.lean`
+- `Relico/Correctness/StoreDispatch.lean`
+- `Relico/Correctness/StoreExecutableTranslation.lean`
+- `Relico/Correctness/StoreForward.lean`
+- `Relico/Correctness/StoreInitialization.lean`
+- `Relico/Correctness/StoreMachine.lean`
+- `Relico/Correctness/StoreMachineTrace.lean`
+- `Relico/Correctness/StoreModelStructural.lean`
+- `Relico/Correctness/StoreStructural.lean`
+- `Relico/Correctness/StoreTrace.lean`
+- `Relico/Correctness/Structural.lean`
+- `Relico/Correctness/Trace.lean`
+- `Relico/Frontend/BridgeCheck.lean`
+- `Relico/Frontend/Decoder.lean`
+- `Relico/Frontend/MultiStoreBridgeCheck.lean`
+- `Relico/Frontend/MultiStoreDecoder.lean`
+- `Relico/Frontend/MultiStorePayloadBridgeCheck.lean`
+- `Relico/Frontend/MultiStorePayloadSchema.lean`
+- `Relico/Frontend/MultiStoreSchema.lean`
+- `Relico/Frontend/Schema.lean`
+- `Relico/Frontend/StoreBridgeCheck.lean`
+- `Relico/LF/BoundPayloadDispatch.lean`
+- `Relico/LF/BoundPayloadRuntimeInvariant.lean`
+- `Relico/LF/BoundPayloadSemantics.lean`
+- `Relico/LF/BoundPayloadState.lean`
+- `Relico/LF/BoundPayloadSyntax.lean`
+- `Relico/LF/CppPrinter.lean`
+- `Relico/LF/DetailedBoundPayloadSemantics.lean`
+- `Relico/LF/DetailedBoundPayloadWeakSemantics.lean`
+- `Relico/LF/DetailedMultiStorePayloadRuntime.lean`
+- `Relico/LF/DetailedMultiStorePayloadSemantics.lean`
+- `Relico/LF/DetailedMultiStorePayloadWeakSemantics.lean`
+- `Relico/LF/DetailedMultiStoreSemantics.lean`
+- `Relico/LF/DetailedWeakExecution.lean`
+- `Relico/LF/DetailedWeakSemantics.lean`
+- `Relico/LF/DispatchSemantics.lean`
+- `Relico/LF/Evaluation.lean`
+- `Relico/LF/GlobalMultiStorePayload.lean`
+- `Relico/LF/GlobalMultiStorePayloadDispatch.lean`
+- `Relico/LF/GlobalMultiStorePayloadExternalSend.lean`
+- `Relico/LF/GlobalMultiStorePayloadExternalSendFrame.lean`
+- `Relico/LF/GlobalMultiStorePayloadExternalSendStatement.lean`
+- `Relico/LF/GlobalMultiStorePayloadFiniteExecution.lean`
+- `Relico/LF/GlobalMultiStorePayloadInitialization.lean`
+- `Relico/LF/GlobalMultiStorePayloadOneStep.lean`
+- `Relico/LF/Initialization.lean`
+- `Relico/LF/MachineSemantics.lean`
+- `Relico/LF/MachineTraceSemantics.lean`
+- `Relico/LF/MultiStoreCppPrinter.lean`
+- `Relico/LF/MultiStoreDispatchSemantics.lean`
+- `Relico/LF/MultiStoreInitialization.lean`
+- `Relico/LF/MultiStoreMachineSemantics.lean`
+- `Relico/LF/MultiStoreMachineTraceSemantics.lean`
+- `Relico/LF/MultiStoreModelWellFormed.lean`
+- `Relico/LF/MultiStorePayloadCppPrinter.lean`
+- `Relico/LF/MultiStorePayloadDispatch.lean`
+- `Relico/LF/MultiStorePayloadSemantics.lean`
+- `Relico/LF/MultiStorePayloadSyntax.lean`
+- `Relico/LF/MultiStoreReactionScheduling.lean`
+- `Relico/LF/MultiStoreSemantics.lean`
+- `Relico/LF/MultiStoreSyntax.lean`
+- `Relico/LF/MultiStoreWellFormed.lean`
+- `Relico/LF/PayloadCppPrinter.lean`
+- `Relico/LF/PayloadExpression.lean`
+- `Relico/LF/PayloadMachine.lean`
+- `Relico/LF/PayloadSemantics.lean`
+- `Relico/LF/PayloadSyntax.lean`
+- `Relico/LF/PendingNotPast.lean`
+- `Relico/LF/PriorityTimingInvariant.lean`
+- `Relico/LF/Scheduling.lean`
+- `Relico/LF/Semantics.lean`
+- `Relico/LF/State.lean`
+- `Relico/LF/StoreCppPrinter.lean`
+- `Relico/LF/StoreDispatchSemantics.lean`
+- `Relico/LF/StoreEvaluation.lean`
+- `Relico/LF/StoreInitialization.lean`
+- `Relico/LF/StoreMachineSemantics.lean`
+- `Relico/LF/StoreMachineTraceSemantics.lean`
+- `Relico/LF/StoreModelWellFormed.lean`
+- `Relico/LF/StoreSemantics.lean`
+- `Relico/LF/StoreState.lean`
+- `Relico/LF/StoreSyntax.lean`
+- `Relico/LF/StoreTrace.lean`
+- `Relico/LF/StoreWellFormed.lean`
+- `Relico/LF/Syntax.lean`
+- `Relico/LF/TraceSemantics.lean`
+- `Relico/LF/WellFormed.lean`
+- `Relico/Tests/BoundPayloadDispatch.lean`
+- `Relico/Tests/DetailedBoundPayloadSemantics.lean`
+- `Relico/Tests/DetailedMultiStorePayloadSemantics.lean`
+- `Relico/Tests/DetailedMultiStorePayloadWeakSemantics.lean`
+- `Relico/Tests/DirectLFBackwardDispatchRuntime.lean`
+- `Relico/Tests/DirectLFDispatchSelection.lean`
+- `Relico/Tests/DirectLFForwardDispatchRuntime.lean`
+- `Relico/Tests/DirectLFStatementBackward.lean`
+- `Relico/Tests/DirectLFStatementForward.lean`
+- `Relico/Tests/DispatchCorrectness.lean`
+- `Relico/Tests/DispatchSemantics.lean`
+- `Relico/Tests/GlobalMultiStorePayloadInitialization.lean`
+- `Relico/Tests/GlobalMultiStorePayloadOneStep.lean`
+- `Relico/Tests/LFPendingNotPast.lean`
+- `Relico/Tests/MachineCorrectness.lean`
+- `Relico/Tests/MachineSemantics.lean`
+- `Relico/Tests/MachineTrace.lean`
+- `Relico/Tests/MultiStoreMachine.lean`
+- `Relico/Tests/MultiStoreModelTranslation.lean`
+- `Relico/Tests/MultiStorePayloadCppBackend.lean`
+- `Relico/Tests/MultiStorePayloadCppPrinter.lean`
+- `Relico/Tests/MultiStorePayloadDetailedStartupCompletion.lean`
+- `Relico/Tests/MultiStorePayloadDetailedStartupEntry.lean`
+- `Relico/Tests/MultiStorePayloadDispatch.lean`
+- `Relico/Tests/MultiStorePayloadFrontend.lean`
+- `Relico/Tests/PayloadStatementTranslation.lean`
+- `Relico/Tests/PriorityDispatchScheduling.lean`
+- `Relico/Tests/Scheduling.lean`
+- `Relico/Tests/SmallStep.lean`
+- `Relico/Tests/StoreMachine.lean`
+- `Relico/Tests/StoreMachineTrace.lean`
+- `Relico/Tests/StoreModelTranslation.lean`
+- `Relico/Tests/StoreSemantics.lean`
+- `Relico/Tests/StoreState.lean`
+- `Relico/Tests/StructuralCorrectness.lean`
+- `Relico/Tests/ZeroDelayPriorityMismatch.lean`
+- `Relico/Translation/Basic.lean`
+- `Relico/Translation/BoundPayloadBasic.lean`
+- `Relico/Translation/CppBackend.lean`
+- `Relico/Translation/GlobalMultiStorePayloadBasic.lean`
+- `Relico/Translation/GlobalMultiStorePayloadExternalSend.lean`
+- `Relico/Translation/GlobalMultiStorePayloadExternalSendFrame.lean`
+- `Relico/Translation/GlobalMultiStorePayloadExternalSendStatement.lean`
+- `Relico/Translation/MultiStoreBasic.lean`
+- `Relico/Translation/MultiStoreCppBackend.lean`
+- `Relico/Translation/MultiStorePayloadBasic.lean`
+- `Relico/Translation/MultiStorePayloadCppBackend.lean`
+- `Relico/Translation/PayloadBasic.lean`
+- `Relico/Translation/PayloadBinding.lean`
+- `Relico/Translation/StoreBasic.lean`
+- `Relico/Translation/StoreCppBackend.lean`
+- `frontend/check-multistore-payload-backend.sh`
+- `frontend/check-multistore-payload-frontend.sh`
+- `frontend/java-bridge/RebecaMultiStoreJsonExporter.java`
+- `frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java`
+- `frontend/java-bridge/RebecaStoreJsonExporter.java`
+- `frontend/java-bridge/RebecaV0JsonExporter.java`
+- `frontend/java-bridge/check-multistore.sh`
+- `frontend/java-bridge/check-store.sh`
+- `frontend/java-bridge/check-v0-runtime.sh`
+- `frontend/java-bridge/check-v0.sh`
+- `frontend/java-bridge/run-from-zip.sh`
+- `frontend/java-bridge/run-multistore-from-zip.sh`
+- `frontend/java-bridge/run-multistore-payload-from-zip.sh`
+- `frontend/java-bridge/run-store-from-zip.sh`
+- `frontend/lean-bridge/MultiStorePayloadCppBackendMain.lean`
+- `frontend/schema/multi-store-payload-v1.schema.json`
+- `tests/benchmarks/README.md`
+- `tests/benchmarks/core--initialization--positive/README.md`
+- `tests/benchmarks/core--initialization--positive/expected/lfc/result.json`
+- `tests/benchmarks/core--initialization--positive/expected/translated-lf-ast/program.txt`
+- `tests/benchmarks/core--initialization--positive/manifest.json`
+- `tests/benchmarks/registry/benchmarks.tsv`
+- `tests/benchmarks/registry/legacy-script-migration.tsv`
+- `tests/benchmarks/registry/obligations.tsv`
+
+Acceptance criteria:
+
+- all supported entrypoints reject before translation
+- no bypass path produces LF
+
+### 5. A5-REGISTRY
+
+Update the target registry row only after the permanent benchmark passes.
+
+Primary paths:
+
+- `tests/benchmarks/registry/benchmarks.tsv`
+
+Acceptance criteria:
+
+- target benchmark becomes implemented
+- published accepted benchmark count changes only after test success
+
+### 6. A6-REGRESSION
+
+Run targeted Lean, frontend, benchmark, and full-project regression tests.
+
+Primary paths:
+
+- `Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean`
+- `Relico/Correctness/GlobalMultiStorePayloadFiniteExecutionCorrespondence.lean`
+- `Relico/Correctness/GlobalMultiStorePayloadOneStepCorrespondence.lean`
+- `tests/benchmarks/README.md`
+- `tests/benchmarks/core--initialization--positive/README.md`
+- `tests/benchmarks/core--initialization--positive/coverage.json`
+- `tests/benchmarks/core--initialization--positive/expected/formal-witness/result.json`
+- `tests/benchmarks/core--initialization--positive/expected/runtime/result.json`
+- `tests/benchmarks/core--initialization--positive/expected/source/result.json`
+- `tests/benchmarks/core--initialization--positive/manifest.json`
+- `tests/benchmarks/registry/PROVENANCE.md`
+- `tests/benchmarks/registry/benchmarks.tsv`
+- `tests/benchmarks/registry/coverage-audit.txt`
+- `tests/benchmarks/registry/final-b1-summary.txt`
+- `tests/benchmarks/registry/legacy-script-migration.tsv`
+- `tests/benchmarks/registry/obligations.tsv`
+- `tests/benchmarks/registry/shared-formal-evidence.tsv`
+- `tests/benchmarks/registry/source-model-plan.tsv`
+- `tests/benchmarks/schema/benchmark-manifest.schema.json`
+- `tests/benchmarks/schema/stage-result.schema.json`
+
+Acceptance criteria:
+
+- targeted Lean elaboration passes
+- full lake build passes
+- existing accepted benchmark remains accepted
+- new actor-priority benchmark is accepted as a negative benchmark
+
+
+## Mutation constraints
+
+Phase 3B may modify only the investigation worktree.
+
+It must not stage, commit, push, modify the original worktree, or begin
+Approach B.
+
+Actor-priority AST fields, scheduler semantics, and priority-aware
+correspondence proofs are prohibited in Approach A.
+
+## Gate
+
+Approach A source mutation is permitted only after this package validates.
+
+## Next phase
+
+**phase3b-approach-a-exclusion-source-and-benchmark-implementation**

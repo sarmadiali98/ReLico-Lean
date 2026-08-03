@@ -1,0 +1,143 @@
+page	extracted_line	matched_categories	excerpt
+1	4	determinism	RELICO: Formally Verified Deterministic Timed
+1	19	priority	to-LF translator. Source priorities resolve behaviorally relevant
+1	22	correspondence	models. We establish weak bisimulation for the supported DTR
+1	65	determinism	lates deterministic Timed Rebeca (DTR) into Lingua Franca
+1	67	determinism	deterministic concurrent systems. Lingua Franca is based on
+1	72	determinism	Rebeca models are inherently non-deterministic due to the
+1	73	scheduler	unordered scheduling of simultaneously delivered messages
+1	74	determinism	and concurrent actor execution. While this non-determinism
+1	78	priority	safety properties on real hardware. DTR priorities resolve
+1	82	determinism	observable behavior while enabling deterministic execution.
+1	84	determinism	translation from deterministic Timed Rebeca to LF. While
+2	108	priority	8 @priority(1) msgsrv sendReading() {
+2	117	priority	@priority(1) msgsrv receiveReading() {
+2	122	priority	@priority(1) TempSensor sensor(controller):(1);
+2	123	priority	@priority(2) Controller controller():(2);
+2	130	scheduler	6 sendReading.schedule(1ms);
+2	134	scheduler	10 sendReading.schedule(5ms);
+2	189	correspondence	• We prove the behavioral equivalence between the opera-
+2	207	determinism	concurrent systems that are inherently non-deterministic [18],
+2	210	determinism	message servers is non-deterministically chosen to faithfully
+3	213	message-server-priority|priority	designer-specified actor and message-server priorities resolve
+3	216	priority	In DTR, priorities resolve ordering dependencies that arise
+3	217	scheduler	when two or more enabled actors or message servers execute at
+3	224	priority	models with unresolved observable choices require priorities
+3	242	priority	body is omitted in the example (lines 17–19). The priority on
+3	243	message-server-priority|priority	sendReading (line 8) is a message-server priority, whereas
+3	244	priority	the priorities on sensor and controller in the main
+3	245	priority	block (lines 22–23) are actor-level priorities. The number in
+3	246	priority	parentheses after @priority indicates the priority value
+3	248	priority	ample, the sensor actor is given a higher priority than
+3	283	trace-or-step	The semantics of DTR is a transition system ⟨S,Actdtr ,→
+3	290	trace-or-step	constructor. The transition relation →defines state changes
+3	318	scheduler	schedule future events. Logical actions schedule events with
+3	320	scheduler	the delay is set to zero, the event is scheduled for the next
+4	331	determinism	STRUCTURAL OPERATIONAL SEMANTICS OF DETERMINISTIC TIMED REBECA (BASED ON [19], [20] AND EXTENDED)
+4	367	determinism	LF guarantees determinism at each logical time instant:
+4	374	determinism	affecting determinism.
+4	412	scheduler	sendReading.schedule(5ms) (line 10) is an internal
+4	435	scheduler	scheduled events and delayed causal links across logical time,
+4	437	scheduler	ing scheduled logical actions and delayed port connections in
+5	462	trace-or-step	LF semantics is a transition system ⟨S,Actlf ,→,s0⟩, where
+5	468	trace-or-step	the time tag are set to default values. The transition relation
+5	476	scheduler	is scheduled with a delay d and payload ⃗ν, a new trigger
+5	519	scheduler	in DTR is mapped to a schedule() call on a
+5	522	scheduler	mapped to sendReading.schedule(1ms) (line 6).
+5	533	determinism	B. Time Progress and Deterministic Execution
+5	536	scheduler	time to the earliest scheduled event: DTR does so when
+5	540	determinism	LF ensures determinism by building a DAG of reactor
+5	544	actor-priority|priority	minism using priorities: actor priorities (e.g., sensor over
+5	545	message-server-priority|priority	controller, lines 22–23) and message-server priorities
+5	547	priority	serves source priorities; it does not infer them. Table III
+6	560	scheduler	(INTERNAL SEND) s(r) = ηr, qr, act.schedule(⃗ν,d) ; µr
+6	595	determinism	A SUBSET OF MAPPING FROM DETERMINISTIC TIMED REBECA TO
+6	597	determinism	Deterministic Timed Rebeca
+6	611	scheduler	action.schedule(t),
+6	624	scheduler	ters map to a schedule call on a typed logical ac-
+6	627	scheduler	line 3), scheduled as sendReading.schedule(v, 0ms)
+6	642	actor-priority|priority	time, reactions are ordered according to DTR actor priorities.
+6	643	priority	Because temp has higher priority than smoke (lines 36–38),
+6	648	scheduler	internal sends, delay dbecomes a schedule() call on a log-
+6	650	scheduler	line 11) →sendReading.schedule(v, 5ms) (line 10).
+6	656	scheduler	scheduling at the next microstep within the same logical tag.
+6	659	determinism	rejection due to non-deterministic execution order.
+7	680	priority	8 @priority(1)
+7	695	priority	23 24 25 26 @priority(1)
+7	708	priority	@priority(1) TempSensor temp(controller):(1);
+7	709	priority	@priority(2) SmokeSensor smoke(controller):(2);
+7	710	priority	@priority(3) Controller controller():();
+7	717	scheduler	6 sendReading.schedule(v, 0ms);
+7	721	scheduler	10 sendReading.schedule(v, 5ms);
+7	728	scheduler	sendReading.schedule(v, 0ms);
+7	732	scheduler	sendReading.schedule(v, 5ms);
+7	760	correspondence|trace-or-step	a weak bisimulation between their transition systems. This
+7	764	correspondence	and time progression. A weak bisimulation guarantees that the
+7	770	correspondence	We prove weak bisimulation between a DTR model Mdtr
+7	771	trace-or-step	and its LF translation Mlf . Let TS dtr , TS lf be their transition
+7	779	correspondence	1,2) be LTSs. A relation R⊆S1 ×S2 is a weak bisimulation
+7	814	correspondence	s,t are weakly bisimilar (s ≃t) iff some weak bisimulation
+7	823	correspondence	Lemma 1 (Time Equivalence). If a DTR event occurs at
+8	831	correspondence	pending DTR messages is in bijective correspondence with
+8	837	correspondence	correspondence assumption holds trivially. (Inductive step)
+8	839	trace-or-step	show that it is preserved by the (n+ 1)-st transition.
+8	843	correspondence	logical time equality and the queue correspondence are
+8	865	correspondence	all other pairs intact. Hence, the bijective correspondence
+8	871	correspondence	queue correspondence assumption, the earliest pending
+8	877	correspondence	Hence, the queue correspondence is preserved, and the
+8	887	message-server-priority|priority	mapA(x). Local priority is defined by prtyl : MName →N,
+8	888	priority	and global priority by prtyg : AID →N.
+8	890	priority	Lemma 2 (Priority Preservation). For two message servers
+8	906	priority	priority prtyg. If prtyg(x) < prtyg(y), then mapA(x)
+8	908	scheduler|determinism	deterministic scheduler executes upstream reactors before
+8	911	priority	in both cases, the DTR priority order is preserved under
+8	934	correspondence	transfer conditions of weak bisimulation given in Definition 1.
+9	951	trace-or-step	by Lemmas 1–3 there exists a weak transition s′
+9	957	scheduler	Since scheduler steps are internal to LF and have no corre-
+9	958	trace-or-step	sponding observable transition in DTR, they are subsumed by
+9	959	trace-or-step	the weak transition relation τ
+9	961	correspondence|trace-or-step	ing observable transition must be matched in the bisimulation
+9	963	trace-or-step	• Time Progress Transition: Suppose in DTR time pro-
+9	970	trace-or-step	a time transition to ar min , LF may execute a finite
+9	971	scheduler	sequence of internal scheduler transitions which are ab-
+9	972	trace-or-step	sorbed by the weak transition relation. According to
+9	974	trace-or-step	performs the matching time progress transition at time
+9	976	trace-or-step	min. Thus, there exists a weak transition
+9	994	trace-or-step	• Message Take Transition: By this rule, there exists x∈
+9	1008	scheduler	message is scheduled on a port at any logical time.
+9	1009	scheduler	Upon taking a trigger (r,ep,⃗ν,arr), the scheduler may
+9	1011	trace-or-step	are absorbed by the weak transition relation. Hence,
+9	1013	trace-or-step	there exist a transition s′
+9	1034	correspondence	is one-to-one correspondence between state variables,
+9	1040	trace-or-step	the LF system performs a matching weak transition
+9	1069	scheduler	message is scheduled for the correct future logical time.
+9	1071	scheduler	allowed (Section III-G), the LF schedule does not over-
+9	1084	correspondence	We can prove the second condition of the bisimulation
+10	1217	priority	lights. Fire mode has priority: opens door, clears intrusion,
+11	1234	priority	priority rule established in the DTR model and prevents the
+11	1242	determinism	tions and deterministic coordination frameworks.
+11	1250	correspondence	Cortex-M3 assembly with bisimulation-verified equivalence.
+11	1253	determinism	Deterministic Coordination Languages: Deterministic
+11	1259	priority	tion [23]. BIP [29] uses priority constraints [30], imple-
+11	1263	priority	ministic Timed Rebeca to LF, mapping actors, priorities, and
+11	1266	determinism	The semantic gap between non-deterministic actor-based
+11	1268	determinism	and deterministic coordination languages, which are required
+11	1271	determinism	to LF. We define a deterministic subset of Timed Rebeca
+11	1272	priority	with priority-based message ordering and provide Structural
+11	1274	correspondence	and the target Lingua Franca reactor model. Weak bisimulation
+11	1276	scheduler	translation preserves timing and scheduling behavior. We fur-
+11	1311	correspondence	darson, and M. Sirjani, “Modelling and simulation of asynchronous
+11	1322	determinism	Franca for deterministic concurrent systems,” ACM Transactions on
+11	1325	determinism	Hanxleden, and E. A. Lee, “Reactors: A deterministic model for
+12	1356	correspondence	gólfsdóttir, and S. H. Sigurdarson, “Modelling and simulation of asyn-
+12	1361	determinism	and E. A. Lee, “High-performance deterministic concurrency using
+12	1378	determinism	[26] M. Lohstroh, “Deterministic concurrent systems: Reactors, time, and
+12	1381	determinism	able determinism for software in cyber-physical systems,” in Verified
+13	1421	determinism	A. Deterministic Timed Rebeca Syntax
+13	1422	determinism	In this part, we give the syntax of Deterministic Timed
+13	1425	priority	and extends it with priority annotations for actor instances and
+13	1429	priority	InstanceDecl ::= Priority?C rebecName
+13	1437	priority	MsgSrv ::= Priority? msgsrv msgsrvName
+13	1439	priority	Priority ::= @priority (IntLit)
+13	1446	determinism	Fig. 4. Syntax of Deterministic Timed Rebeca [18].
+13	1472	scheduler	act.schedule(delay) ; |

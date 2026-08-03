@@ -1,0 +1,239 @@
+{
+  "counts": {
+    "compile_prefixed_declarations": 59,
+    "relevant_translation_files": 16,
+    "translate_prefixed_declarations": 44,
+    "translation_candidates": 46,
+    "translation_declarations": 120
+  },
+  "evidence": {
+    "all_declarations": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3A-Translation-Audit-Hash-Repair-20260802T235233+0330/all-translation-declarations.tsv",
+      "sha256": "832de3a0d2bb37fe449cfc7fd5cca2bdea27826f249c8b957a0d0b33eb07dd46"
+    },
+    "build_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3A-Translation-Audit-Hash-Repair-20260802T235233+0330/lake-build.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "build_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3A-Translation-Audit-Hash-Repair-20260802T235233+0330/lake-build.stdout.txt",
+      "sha256": "05c2722d416e3cf53197ebdc4051ba4f21de3c09ae0f094518c16b370463c22e"
+    },
+    "candidates": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3A-Translation-Audit-Hash-Repair-20260802T235233+0330/translation-candidates.tsv",
+      "sha256": "d703b5a66053ea0348fe6ced660e663700df63038fee9e6178b99896e2d15985"
+    },
+    "contexts": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3A-Translation-Audit-Hash-Repair-20260802T235233+0330/translation-candidate-contexts.txt",
+      "sha256": "d0339c7ebbcf9244200a17ff1ee89a4eb4ef248363ae4cc531416d7b1ada427d"
+    },
+    "import_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3A-Translation-Audit-Hash-Repair-20260802T235233+0330/import-probe.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "import_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3A-Translation-Audit-Hash-Repair-20260802T235233+0330/import-probe.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "naming_conventions": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3A-Translation-Audit-Hash-Repair-20260802T235233+0330/translation-naming-conventions.tsv",
+      "sha256": "d2cd42c0592f74a673974c9c492ef3682ff3efcb07835713709e14c8d739ec19"
+    },
+    "relevant_files": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3A-Translation-Audit-Hash-Repair-20260802T235233+0330/relevant-translation-files.txt",
+      "sha256": "47a76bb709a6747c3db817607a29447ca61fb25b2d9cc81f4b71bb388364895f"
+    }
+  },
+  "implementation_contract": {
+    "base_reversed_outputs_must_differ": true,
+    "contract_rows": [
+      {
+        "contract_id": "TR1",
+        "required_value": "Relico/Translation/GlobalMultiStorePayloadActorOrder.lean",
+        "status": "planned",
+        "subject": "new translation module"
+      },
+      {
+        "contract_id": "TR2",
+        "required_value": "Relico.Translation.GlobalMultiStorePayloadActorOrder",
+        "status": "planned",
+        "subject": "namespace"
+      },
+      {
+        "contract_id": "TR3",
+        "required_value": "Relico.DTR.GlobalMultiStorePayloadActorPriority",
+        "status": "required",
+        "subject": "source import"
+      },
+      {
+        "contract_id": "TR4",
+        "required_value": "Relico.LF.GlobalMultiStorePayloadActorOrder",
+        "status": "required",
+        "subject": "target import"
+      },
+      {
+        "contract_id": "TR5",
+        "required_value": "compileActorPriorityAssignment preserves actor names and numeric values",
+        "status": "required",
+        "subject": "assignment translation"
+      },
+      {
+        "contract_id": "TR6",
+        "required_value": "compileActorPriorityRequest maps none to none and some structurally",
+        "status": "required",
+        "subject": "request translation"
+      },
+      {
+        "contract_id": "TR7",
+        "required_value": "compileReadyActor preserves actorName and logicalTime",
+        "status": "required",
+        "subject": "ready-actor translation"
+      },
+      {
+        "contract_id": "TR8",
+        "required_value": "compileReadyActors is structural list mapping",
+        "status": "required",
+        "subject": "ready-list translation"
+      },
+      {
+        "contract_id": "TR9",
+        "required_value": "base and reversed priority requests compile to distinct target order requests",
+        "status": "required",
+        "subject": "discrimination"
+      },
+      {
+        "contract_id": "TR10",
+        "required_value": "equal source priorities remain equal target orders",
+        "status": "required",
+        "subject": "tie preservation"
+      },
+      {
+        "contract_id": "TR11",
+        "required_value": "translation preserves absent and incomplete metadata without inventing entries",
+        "status": "required",
+        "subject": "absence and incompleteness"
+      },
+      {
+        "contract_id": "TR12",
+        "required_value": "translation only; selection and dispatch correspondence remain later phases",
+        "status": "required",
+        "subject": "semantic scope"
+      },
+      {
+        "contract_id": "TR13",
+        "required_value": "existing translation modules remain unchanged",
+        "status": "required",
+        "subject": "existing translation compatibility"
+      },
+      {
+        "contract_id": "TR14",
+        "required_value": "phase4d3b-actor-priority-to-target-order-translation-implementation",
+        "status": "ready",
+        "subject": "next phase"
+      }
+    ],
+    "dispatch_correspondence_in_scope": false,
+    "existing_translation_modules_must_remain_unchanged": true,
+    "preserve_actor_names": true,
+    "preserve_incomplete_assignments": true,
+    "preserve_logical_times": true,
+    "preserve_none": true,
+    "preserve_numeric_order_values": true,
+    "required_definitions": [
+      "compileActorPriorityAssignment",
+      "compileActorPriorityRequest",
+      "compileReadyActor",
+      "compileReadyActors"
+    ],
+    "selection_correspondence_in_scope": false
+  },
+  "inputs": {
+    "canonical_readme": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/README.md",
+      "sha256": "7e3795540b96c17a2848b6d57357dcb66d6b1abf579a9c1e2454ce8a9c088c1b"
+    },
+    "phase4d2b_report": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase4d2/PHASE4D2B_TARGET_ORDER_SEMANTICS.json",
+      "sha256": "42bf1c2a82783943ece0a5f2d3514b4becbf6f2ae4c1368702d99f9663a95fc4"
+    },
+    "source_actor_priority_module": {
+      "path": "Relico/DTR/GlobalMultiStorePayloadActorPriority.lean",
+      "sha256": "11ef3591ae5bbeca5bf1f89933e6bc7bc7b28d1b5d8728cf5b0d35aab5456c26"
+    },
+    "target_actor_order_module": {
+      "path": "Relico/LF/GlobalMultiStorePayloadActorOrder.lean",
+      "sha256": "be3bb64a009613e1e47c6640947f2aedcaf331b341e10e356b8a323d4af5bf4b"
+    }
+  },
+  "phase": "phase4d3a-actor-priority-to-target-order-translation-interface-audit",
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "relevant_translation_files": [
+    "Relico/Translation/Basic.lean",
+    "Relico/Translation/BoundPayloadBasic.lean",
+    "Relico/Translation/CppBackend.lean",
+    "Relico/Translation/GlobalMultiStorePayloadBasic.lean",
+    "Relico/Translation/GlobalMultiStorePayloadExternalSend.lean",
+    "Relico/Translation/GlobalMultiStorePayloadExternalSendFrame.lean",
+    "Relico/Translation/GlobalMultiStorePayloadExternalSendStatement.lean",
+    "Relico/Translation/MultiStoreBasic.lean",
+    "Relico/Translation/MultiStoreCppBackend.lean",
+    "Relico/Translation/MultiStorePayloadBasic.lean",
+    "Relico/Translation/MultiStorePayloadCppBackend.lean",
+    "Relico/Translation/NameGeneration.lean",
+    "Relico/Translation/PayloadBasic.lean",
+    "Relico/Translation/PayloadBinding.lean",
+    "Relico/Translation/StoreBasic.lean",
+    "Relico/Translation/StoreCppBackend.lean"
+  ],
+  "repair": {
+    "correct_expected_sha": "7e3795540b96c17a2848b6d57357dcb66d6b1abf579a9c1e2454ce8a9c088c1b",
+    "incorrect_expected_sha": "7e3795540b96c17a2848b6d57357dcb66d6b1abf579a9c1e2454ce8a9c088c1",
+    "phase4d2b_semantic_gate_failure": false,
+    "previous_failure": "expected canonical README SHA was truncated by one hexadecimal digit"
+  },
+  "result": {
+    "classification": "TRANSLATION_CONVENTIONS_AUDITED_STRUCTURAL_ORDER_COMPILER_READY",
+    "current_production_integration_complete": false,
+    "dispatch_correspondence_complete": false,
+    "final_actor_priority_necessity_conclusion": "CONCLUSION_2_REACHED",
+    "next_phase": "phase4d3b-actor-priority-to-target-order-translation-implementation",
+    "passed": true,
+    "production_translation_source_mutated": false,
+    "selection_correspondence_complete": false,
+    "source_actor_priority_semantics_complete": true,
+    "target_actor_order_semantics_complete": true,
+    "translation_complete": false
+  },
+  "schema_version": 1,
+  "selected_conventions": {
+    "function_prefix": "compile",
+    "namespace": "Relico.Translation.GlobalMultiStorePayloadActorOrder",
+    "new_module": "Relico/Translation/GlobalMultiStorePayloadActorOrder.lean",
+    "source_namespace": "Relico.DTR.GlobalMultiStorePayloadActorPriority",
+    "target_namespace": "Relico.LF.GlobalMultiStorePayloadActorOrder"
+  },
+  "top_existing_candidate": {
+    "first_line": "def compileGlobalMultiStorePayloadActors :",
+    "kind": "def",
+    "line_end": 34,
+    "line_start": 15,
+    "path": "Relico/Translation/GlobalMultiStorePayloadBasic.lean",
+    "qualified_name": "Relico.Translation.GlobalMultiStorePayloadBasic.compileGlobalMultiStorePayloadActors",
+    "rank": 1,
+    "score": 27,
+    "score_reasons": "executable-declaration,translation-name,global-payload-type,payload-type,actor-name,source-reference,target-reference"
+  },
+  "validation": {
+    "corrected_readme_hash_gate_passed": true,
+    "full_build_passed": true,
+    "phase4d2b_semantic_gate_passed": true,
+    "source_regression_passed": true,
+    "source_tests_preserved": true,
+    "target_regression_passed": true,
+    "target_tests_preserved": true,
+    "translation_import_probe_passed": true
+  }
+}

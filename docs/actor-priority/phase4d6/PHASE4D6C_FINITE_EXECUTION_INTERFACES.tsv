@@ -1,0 +1,13 @@
+order	kind	name	role	elaborated	regression_checked	sorryAx
+1	structure	ActorDispatchFrame	Carries the step-local ready snapshot and selected ActorName.	true	true	false
+2	structure	SourceActorDispatchEvent	Retains the selected source pending message and message server.	true	true	false
+3	structure	TargetActorDispatchEvent	Retains the selected target action and reaction.	true	true	false
+4	structure	ActorDispatchEventCorresponds	Pairs compiled reactions with pending-payload correspondence.	true	true	false
+5	inductive	ActorDispatchEventTraceCorresponds	Defines pointwise finite occurrence-trace correspondence.	true	true	false
+6	inductive	SourceActorPriorityDispatchSteps	Defines finite source actor-priority dispatch closure.	true	true	false
+7	inductive	TargetActorOrderDispatchSteps	Defines finite target actor-order dispatch closure.	true	true	false
+8	theorem	sourceActorPriorityDispatchSteps_single	Embeds one source dispatch into a finite run.	true	true	false
+9	theorem	targetActorOrderDispatchSteps_single	Embeds one target dispatch into a finite run.	true	true	false
+10	theorem	sourceActorPriorityDispatchSteps_forward	Proves forward finite dispatch correspondence.	true	true	false
+11	theorem	targetActorOrderDispatchSteps_backward	Proves backward finite dispatch correspondence.	true	true	false
+12	theorem	actorDispatchEventTraceCorresponds_length_eq	Proves corresponding occurrence traces have equal lengths.	true	true	false

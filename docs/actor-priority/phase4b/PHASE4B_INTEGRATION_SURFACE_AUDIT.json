@@ -1,0 +1,232 @@
+{
+  "counts": {
+    "actor_priority_hits_outside_boundary_and_frontend": 3,
+    "audited_production_files": 320,
+    "correctness_actor_priority_hits": 2,
+    "dtr_actor_priority_hits": 1,
+    "frontend_actor_priority_hits": 4,
+    "integration_surface_hits": 1173,
+    "lf_actor_priority_hits": 0,
+    "local_priority_hits": 120,
+    "translation_actor_priority_hits": 0
+  },
+  "evidence": {
+    "build_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4B-Integration-Audit-20260802T202110+0330/lake-build.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "build_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4B-Integration-Audit-20260802T202110+0330/lake-build.stdout.txt",
+      "sha256": "9a624f0a7dae641df34b0ebcda5af1d87467841f3583e251269d70b561f2be2f"
+    },
+    "lean_probe": {
+      "passed": true,
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4B-Integration-Audit-20260802T202110+0330/Phase4BIntegrationSurfaceProbe.lean",
+      "sha256": "1c3aaa781d8c2225e15743b26e6f21eb56b5ae7f9e06d75fb262434da9e5ff4e"
+    },
+    "lean_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4B-Integration-Audit-20260802T202110+0330/lean-probe.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "lean_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4B-Integration-Audit-20260802T202110+0330/lean-probe.stdout.txt",
+      "sha256": "ff948dbafa78b3dac9f9b51543ae75eb2cf2a3a4858080df1f35fba457db8a79"
+    },
+    "source_contexts": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4B-Integration-Audit-20260802T202110+0330/integration-contexts.txt",
+      "sha256": "248ef39f8f3532155aaf50a4732a713565be5f9c9665d3ae6fdecd9570df1de1"
+    },
+    "source_hits": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4B-Integration-Audit-20260802T202110+0330/actor-priority-source-hits.tsv",
+      "row_count": 1340,
+      "sha256": "c6c42a1429b553784d3db26e940d111efbe9908877a15827c593a3966d00a717"
+    }
+  },
+  "findings": {
+    "boundary_excludes_explicit_request": true,
+    "dispatch_and_selection_surface_present": true,
+    "erasure_impossibility_theorem_ready": false,
+    "explicit_actor_priority_in_correctness": true,
+    "explicit_actor_priority_in_dtr": true,
+    "explicit_actor_priority_in_lf": false,
+    "explicit_actor_priority_in_translation": false,
+    "frontend_rejection_surface_present": true,
+    "local_priority_mechanism_present": true,
+    "priority_reversal_changes_isolated_selection": true,
+    "priority_reversal_changes_rmc_trace_language": true,
+    "production_actor_priority_integrated": true
+  },
+  "inputs": {
+    "isolated_model": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/Relico/Investigation/ActorPriority/IsolatedScheduler.lean",
+      "sha256": "52aee28be03df365ca04d91bf00e0aed236178eb9ec561a7c00d01cc4d6a3699"
+    },
+    "isolated_tests": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/Relico/Tests/ActorPriorityIsolatedScheduler.lean",
+      "sha256": "fa01ba9346aa5902a7c96968ea8e73fff14fdd73a7115f781951d31ad0ccf629"
+    },
+    "phase2b2e_witness": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase2b/PHASE2B2E_SEMANTIC_GRAPH_WITNESS.json",
+      "sha256": "406bf64a0b370d985969d9288e4bf6b87660581ad3d143b4412b9fcecd221c48"
+    },
+    "phase4a_foundation": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase4a/PHASE4A_ISOLATED_AST_SCHEDULER_FOUNDATION.json",
+      "sha256": "54da892deb4d5301589c73d8a244455f024c629473d59a8e0662d5fce36b93e7"
+    }
+  },
+  "phase": "phase4b-approach-b-integration-surface-and-proof-obligation-audit",
+  "proof_obligations": [
+    {
+      "decisive_for": "inclusion architecture",
+      "name": "source actor-priority eligibility",
+      "obligation_id": "P1",
+      "statement": "Define actor-level eligibility over simultaneously ready actor instances."
+    },
+    {
+      "decisive_for": "semantic relevance",
+      "name": "priority-reversal discrimination",
+      "obligation_id": "P2",
+      "statement": "Prove that the base and reversed assignments produce different eligible actor sets."
+    },
+    {
+      "decisive_for": "necessity",
+      "name": "priority-erasure identity",
+      "obligation_id": "P3",
+      "statement": "Formalize that a priority-erasing translation maps source programs differing only in actor priority to the same target program or target scheduler state."
+    },
+    {
+      "decisive_for": "target conclusion 2",
+      "name": "priority-erasure impossibility",
+      "obligation_id": "P4",
+      "statement": "Prove that one identical target behavior cannot be trace-equivalent to both priority-reversed source behaviors when those source trace languages differ."
+    },
+    {
+      "decisive_for": "faithful implementation",
+      "name": "compiled ordering preservation",
+      "obligation_id": "P5",
+      "statement": "Provide actor metadata, precedence constraints, microsteps, or another target mechanism preserving the source actor ordering."
+    },
+    {
+      "decisive_for": "forward simulation",
+      "name": "forward actor-selection correspondence",
+      "obligation_id": "P6",
+      "statement": "Every source actor-priority-eligible dispatch has a corresponding target-eligible dispatch."
+    },
+    {
+      "decisive_for": "backward simulation",
+      "name": "backward actor-selection reflection",
+      "obligation_id": "P7",
+      "statement": "Every target dispatch permitted by the encoding reflects a source actor-priority-eligible dispatch."
+    },
+    {
+      "decisive_for": "target conclusion 1 in a restricted scope",
+      "name": "priority-inertness theorem",
+      "obligation_id": "P8",
+      "statement": "Characterize cases where actor priority may be erased safely, such as no simultaneous competition, ties, or an already forced causal order."
+    },
+    {
+      "decisive_for": "mechanical validation",
+      "name": "multi-actor benchmark",
+      "obligation_id": "P9",
+      "statement": "Implement base, reversed, tied, and absent multi-actor variants and compare source and target actor-dispatch traces."
+    }
+  ],
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "result": {
+    "approach_a_status": "current_profile_exclusion_mechanically_enforced",
+    "approach_b_status": "integration_surface_audited_erasure_theorem_pending",
+    "classification": "UNEXPECTED_EXPLICIT_ACTOR_PRIORITY_INTEGRATION_FOUND_REQUIRES_MANUAL_REVIEW",
+    "current_defensible_statement": "The current production correspondence matches explicitly chosen multi-actor dispatches, but no audited explicit actor-priority selection or translation mechanism is integrated.",
+    "final_actor_priority_necessity_conclusion": "not_yet_reached",
+    "next_phase": "phase4b-manual-review-of-existing-actor-priority-integration",
+    "passed": true,
+    "target_conclusion_1_status": "established only for priority-inert or explicitly excluded scopes",
+    "target_conclusion_2_status": "empirically and mechanically motivated; decisive erasure-impossibility theorem not yet proved"
+  },
+  "schema_version": 1,
+  "surfaces": [
+    {
+      "actor_priority_integrated": false,
+      "artifact": "Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean",
+      "current_state": "request accepted only when equal to none",
+      "layer": "source-boundary",
+      "proof_impact": "current theorem excludes explicit actor-priority requests",
+      "surface_id": "S1"
+    },
+    {
+      "actor_priority_integrated": true,
+      "artifact": "Relico.DTR.MultiStoreDispatchStep",
+      "current_state": "dispatch relation receives selected message and selected message server explicitly",
+      "layer": "source-global-dispatch",
+      "proof_impact": "an autonomous cross-actor eligibility predicate must be added or separately assumed",
+      "surface_id": "S2"
+    },
+    {
+      "actor_priority_integrated": false,
+      "artifact": "Relico.DTR.IsPriorityEligible",
+      "current_state": "message-server priority eligibility is present",
+      "layer": "source-local-selection",
+      "proof_impact": "local message-server priority cannot substitute for actor-level competition",
+      "surface_id": "S3"
+    },
+    {
+      "actor_priority_integrated": false,
+      "artifact": "Relico.LF.MultiStoreDispatchStep",
+      "current_state": "target dispatch selects an action and reaction",
+      "layer": "target-global-dispatch",
+      "proof_impact": "target requires an equivalent compiled ordering when source actor ordering is semantically active",
+      "surface_id": "S4"
+    },
+    {
+      "actor_priority_integrated": false,
+      "artifact": "Relico.LF.IsReactionPriorityEligible",
+      "current_state": "reaction-priority eligibility is present",
+      "layer": "target-local-selection",
+      "proof_impact": "reaction priority currently represents local message-server ordering, not actor ordering",
+      "surface_id": "S5"
+    },
+    {
+      "actor_priority_integrated": false,
+      "artifact": "Relico.Translation.compileMessageReactions",
+      "current_state": "message servers compile to reactions",
+      "layer": "translation",
+      "proof_impact": "translation currently has no audited explicit actor-priority input or output",
+      "surface_id": "S6"
+    },
+    {
+      "actor_priority_integrated": true,
+      "artifact": "Relico.Correctness.DirectLFSelectionCompatible",
+      "current_state": "source and target local-priority selection are related",
+      "layer": "selection-correspondence",
+      "proof_impact": "correspondence must be strengthened with cross-actor eligibility",
+      "surface_id": "S7"
+    },
+    {
+      "actor_priority_integrated": true,
+      "artifact": "directLF_multiStore_dispatch_forward_runtime/backward_runtime",
+      "current_state": "chosen dispatches correspond in both directions",
+      "layer": "dispatch-correspondence",
+      "proof_impact": "existing theorems match a chosen dispatch but do not yet justify actor choice by actor priority",
+      "surface_id": "S8"
+    },
+    {
+      "actor_priority_integrated": false,
+      "artifact": "frontend/java-bridge",
+      "current_state": "actor-priority annotations are rejected by the supported bridge",
+      "layer": "frontend",
+      "proof_impact": "Approach B requires a separate multi-actor frontend or direct formal fixture",
+      "surface_id": "S9"
+    },
+    {
+      "actor_priority_integrated": false,
+      "artifact": "Relico/Investigation/ActorPriority/IsolatedScheduler.lean",
+      "current_state": "priority reversal mechanically changes the eligible actor",
+      "layer": "isolated-investigation",
+      "proof_impact": "isolated result supplies the premise for the erasure-impossibility theorem",
+      "surface_id": "S10"
+    }
+  ]
+}

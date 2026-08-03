@@ -1,0 +1,139 @@
+{
+  "approach_a_gate": {
+    "goal": "Make the current no-actor-priority fragment boundary explicit, permanent, tested, and theorem-connected.",
+    "must_not_claim": "Actor priority is semantically unnecessary in Timed Rebeca.",
+    "status": "READY_TO_IMPLEMENT"
+  },
+  "approach_b_gate": {
+    "goal": "Implement actor-priority syntax and scheduling semantics and prove correspondence for the enlarged fragment.",
+    "semantic_oracle": "Confirmed base/reversed RMC dispatch-trace languages.",
+    "status": "READY_AFTER_APPROACH_A_BASELINE"
+  },
+  "benchmark_dashboard": {
+    "implemented": 1,
+    "planned": 56,
+    "priority_named_obligations": 9,
+    "published_accepted": "1/57",
+    "total": 57
+  },
+  "claims": [
+    {
+      "claim_id": "A",
+      "classification": "OUTSIDE CURRENT FRAGMENT",
+      "defensible_statement": "The published correspondence result is scoped to explicit actor-indexed steps with no actor-priority request.",
+      "evidence_basis": "The current global model and step relations contain no actor-priority metadata or autonomous actor-selection policy; the actor-priority boundary accepts only request = none.",
+      "limitations": "This does not prove equivalence for full Timed Rebeca actor-priority scheduling.",
+      "next_required_evidence": "Approach A must make the exclusion boundary permanent, tested, and theorem-connected.",
+      "scope": "Current Lean equivalence and correspondence theorem"
+    },
+    {
+      "claim_id": "B",
+      "classification": "NOT YET PROVED",
+      "defensible_statement": "Observed current frontend behavior excludes actor-priority annotations and preserves local priority.",
+      "evidence_basis": "The production parser bridge dynamically rejects valid integer main-actor priorities before emitting JSON, while accepting and preserving local message-server priority.",
+      "limitations": "The exclusion is not yet represented by a complete permanent negative benchmark, bypass audit, and support contract.",
+      "next_required_evidence": "Implement and test Approach A.",
+      "scope": "Current supported ReLico fragment"
+    },
+    {
+      "claim_id": "C",
+      "classification": "CONDITIONAL",
+      "defensible_statement": "Actor priority belongs to the upstream Timed Rebeca/RMC surface but not to the current ReLico frontend fragment.",
+      "evidence_basis": "Official compiler examples use integer actor priorities, and official RMC successfully executes actor-priority models; the current ReLico bridge rejects them.",
+      "limitations": "The complete upstream syntax and semantics are not yet implemented in ReLico.",
+      "next_required_evidence": "Approach B must implement the supported syntax, AST, scheduler semantics, translation, and proofs.",
+      "scope": "Intended Timed Rebeca frontend and upstream language"
+    },
+    {
+      "claim_id": "D",
+      "classification": "YES",
+      "defensible_statement": "Actor priority is behaviorally relevant for at least one simultaneous-actor Timed Rebeca model.",
+      "evidence_basis": "In the selected model, reversing only worker actor priorities changed stable canonical reachable worker-dispatch trace languages from workerA\u2192workerB to workerB\u2192workerA.",
+      "limitations": "Base and reversed property verdicts did not differ, and this does not imply relevance for every model.",
+      "next_required_evidence": "Use the trace witness as an oracle for Approach B tests.",
+      "scope": "Simultaneously enabled actors"
+    },
+    {
+      "claim_id": "E",
+      "classification": "NOT YET PROVED",
+      "defensible_statement": "The corpus contains explicit priority-selection obligations.",
+      "evidence_basis": "Nine registry entries are priority-selection obligations, but their local-priority versus actor-priority intent has not yet been permanently classified and implemented.",
+      "limitations": "Benchmark identifiers alone do not prove their intended semantic level.",
+      "next_required_evidence": "Classify each obligation during Approach A and Approach B test implementation.",
+      "scope": "Benchmark corpus obligations"
+    },
+    {
+      "claim_id": "F",
+      "classification": "NOT YET PROVED",
+      "defensible_statement": "Paper references relevant to scheduling and priority have been inventoried.",
+      "evidence_basis": "The paper evidence inventory contains 142 priority-related hit rows.",
+      "limitations": "A page-by-page claim reconciliation against both approaches has not yet been completed.",
+      "next_required_evidence": "Map each load-bearing paper statement to the final Approach A and Approach B results.",
+      "scope": "Canonical paper claims"
+    },
+    {
+      "claim_id": "G",
+      "classification": "CONDITIONAL",
+      "defensible_statement": "The current LF encoding can be claimed faithful only for the no-actor-priority explicit actor-indexed fragment.",
+      "evidence_basis": "The current target and translation preserve actor identity, topology, payload, stores, and local reaction priority, but contain no actor-priority scheduler metadata.",
+      "limitations": "No theorem establishes faithful encoding of full actor-priority scheduling.",
+      "next_required_evidence": "Approach B must add and prove a faithful LF representation or establish that the intended target scheduler supplies equivalent semantics.",
+      "scope": "Faithful current LF target encoding"
+    }
+  ],
+  "decisions": {
+    "actor_priority_behaviorally_relevant": true,
+    "actor_priority_unnecessary_globally": false,
+    "approach_a_required": true,
+    "approach_b_required_for_full_language_support": true,
+    "behavioral_relevance_scope": "At least one tested simultaneous-actor model.",
+    "current_correspondence_scoped_to_no_actor_priority": true,
+    "current_correspondence_uses_actor_priority": false,
+    "current_frontend_exclusion_fully_documented_and_permanent": false,
+    "current_frontend_observationally_excludes_actor_priority": true,
+    "final_necessity_decision_deferred_until_both_approaches_tested": true,
+    "full_timed_rebeca_support_requires_actor_priority_semantics": true,
+    "implementation_order": [
+      "Approach A exclusion",
+      "Approach B inclusion"
+    ]
+  },
+  "inputs": {
+    "dynamic_parser": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase2b/PHASE2B2B_DYNAMIC_PARSER_PROBES.json",
+      "sha256": "0387c1ef1d50b3565553d44f1e69c15baaacdc301c2139ea8caf54867aaf98a0"
+    },
+    "official_rmc": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase2b/PHASE2B2C_OFFICIAL_RMC_PROBES.json",
+      "sha256": "8ed3b4f21a4c2cdd78c70069dddb97028f9bede7b0987455c9d79fba86410bf6"
+    },
+    "paper_hit_count": 142,
+    "priority_benchmark_ids": [
+      "bound-payload--priority-selection--positive",
+      "core--priority-selection--positive",
+      "finite-store--priority-selection--positive",
+      "global-multi-actor-payload--priority-selection--negative",
+      "multi-store--priority-selection--negative",
+      "multi-store--priority-selection--positive",
+      "multi-store-payload--priority-selection--negative",
+      "multi-store-payload--priority-selection--positive",
+      "payload--priority-selection--positive"
+    ],
+    "registry_audit_row_count": 302,
+    "semantic_graph_witness": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase2b/PHASE2B2E_SEMANTIC_GRAPH_WITNESS.json",
+      "sha256": "406bf64a0b370d985969d9288e4bf6b87660581ad3d143b4412b9fcecd221c48"
+    },
+    "strict_witness_audit": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase2b/PHASE2B2D_SEMANTIC_WITNESS_AUDIT.json",
+      "sha256": "68e056e8438f93257cc53e51408d234106c5c5989ff0fd0a1dfab755a22fd62f"
+    }
+  },
+  "next_phase": "phase3-approach-a-exclusion-implementation-and-permanent-tests",
+  "phase": "phase2b3-evidence-classification",
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "schema_version": 1
+}

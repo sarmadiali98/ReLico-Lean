@@ -1,0 +1,6 @@
+finding_id	subject	historical_value	corrected_value	evidence	status
+C1	three broad actor-priority hits	semantic integration suspected	all three are comment-only	exact lexical review after comment and string removal	corrected
+C2	semantic actor-priority core hits	3	0	H1, H2, and H3 have zero code occurrences	corrected
+C3	audited production signatures	not decisive	8 audited; 0 contain actor-priority parameters or terms	Lean #check signature review	corrected
+C4	production actor-priority integration	true	false	zero semantic core hits and zero signature occurrences	corrected
+C5	erasure-impossibility theorem readiness	false	true	discriminating RMC witness, isolated Lean selection result, and confirmed absence of production integration	advanced

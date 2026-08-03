@@ -1,0 +1,13 @@
+test_id	request	expected	property	result
+simultaneous-ready-pair	base	true	both actors have the same logical time	pass
+base-request-covers-pair	base	true	the base request covers both actors	pass
+base-selection-enabled	base	true	complete simultaneous priority selection is enabled	pass
+base-priority-lookup	base	workera=1	priority lookup preserves the assignment	pass
+base-strict-order	base	workera-precedes-workerb	lower numeric priority strictly precedes	pass
+base-eligible-set	base	workera	base priorities select workera	pass
+reversed-eligible-set	reversed	workerb	reversing priorities selects workerb	pass
+tie-eligible-set	tie	workera,workerb	tied minimal priorities retain both actors	pass
+absent-eligible-set	absent	workera,workerb	absence imposes no actor-priority order	pass
+explicit-empty-coverage	explicit-empty	false	an empty assignment does not cover ready actors	pass
+explicit-empty-eligible-set	explicit-empty	workera,workerb	uncovered metadata creates no strict order	pass
+reversal-discriminates	base-vs-reversed	different-eligible-sets	priority reversal changes the eligible actor set	pass

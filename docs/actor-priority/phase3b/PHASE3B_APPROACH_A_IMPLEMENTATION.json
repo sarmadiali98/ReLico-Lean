@@ -1,0 +1,166 @@
+{
+  "claims": {
+    "claim_a": "OUTSIDE CURRENT FRAGMENT",
+    "claim_b": "NOT YET PROVED",
+    "claim_b_reason": "The permanent current-profile regression passes from an external caller directory; the complete entrypoint bypass audit remains.",
+    "claim_c": "CONDITIONAL",
+    "claim_d": "YES"
+  },
+  "fixture_diagnostic": {
+    "classification": "SECOND_MAIN_ACTOR_INSTANCE_REJECTED_BY_CURRENT_FRONTEND",
+    "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase3B-Fixture-Diagnostic-20260802T185240+0330/PHASE3B_FIXTURE_ISOLATION.json",
+    "sha256": "5080c30b4c63578f6754be7d0b8926120faf96ce43fc5ca94c5e2ce9f27178b8"
+  },
+  "git_worktree_repair": {
+    "actual_layout": "linked worktree may contain a .git file",
+    "incorrect_predicate": "repository root must contain a .git directory",
+    "replacement_validation": [
+      "git rev-parse --show-toplevel",
+      "git rev-parse --is-inside-work-tree"
+    ],
+    "validated": true
+  },
+  "implementation_decisions": {
+    "approach_b_ast_added": false,
+    "approach_b_scheduler_added": false,
+    "multi_actor_registry_obligation_deferred": true,
+    "multi_actor_registry_obligation_implemented": false,
+    "permanent_test_runner_repair_required": true,
+    "production_frontend_change_required": false,
+    "production_lean_change_required": false,
+    "production_wrapper_mutation_required": false,
+    "registry_updated": false
+  },
+  "installed_artifacts": [
+    {
+      "executable": false,
+      "path": "tests/actor-priority/approach-a-single-main-actor-payload-exclusion/source/model.rebeca",
+      "role": "fixture-source",
+      "sha256": "61d84567aeb3b30461320839f68f4fc584e95584d359f0f9e1a2efd8321ae365"
+    },
+    {
+      "executable": false,
+      "path": "tests/actor-priority/approach-a-single-main-actor-payload-exclusion/manifest.json",
+      "role": "fixture-manifest",
+      "sha256": "f7233ea1731715febaf6dd8e0b38de4964380d956e2f4a9654b77a1cee2c284a"
+    },
+    {
+      "executable": false,
+      "path": "tests/actor-priority/approach-a-single-main-actor-payload-exclusion/expected/frontend-output-required-substring.txt",
+      "role": "expected-diagnostic",
+      "sha256": "ff89c0804608c13a3f2ab786caeff862e8d43d898b7d0b84260dbdf93ce2a7db"
+    },
+    {
+      "executable": true,
+      "path": "tests/actor-priority/approach-a-single-main-actor-payload-exclusion/run-approach-a-exclusion.sh",
+      "role": "permanent-runner",
+      "sha256": "594286bcca32d4c63df36aeeb449385230af8c26fbc276ec867e93b8f8f2d073"
+    }
+  ],
+  "next_phase": "phase3c-approach-a-bypass-audit-with-single-main-actor-frontend-scope",
+  "permanent_test_result": {
+    "cases": [
+      {
+        "case": "actor-priority",
+        "exit_code": 1,
+        "expected_diagnostic_observed": true,
+        "json_exists": false,
+        "json_parseable": false,
+        "priority_fields": [],
+        "priority_one_observed": false,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "c4d196c1a7cdacfa170061c394b0ab4ca82edd40bcac749bc1b3ebc58e085249",
+        "wrapper_working_directory": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation"
+      },
+      {
+        "case": "actor-priority-absent",
+        "exit_code": 0,
+        "expected_diagnostic_observed": false,
+        "json_exists": true,
+        "json_parseable": true,
+        "priority_fields": [
+          {
+            "path": "$.messageServers[0].priority",
+            "value": null
+          },
+          {
+            "path": "$.messageServers[1].priority",
+            "value": null
+          }
+        ],
+        "priority_one_observed": false,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "af9c4aede674a95bafe6053f78a705fce25977187d5a701ad9be72b6de431d71",
+        "wrapper_working_directory": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation"
+      },
+      {
+        "case": "local-message-server-priority",
+        "exit_code": 0,
+        "expected_diagnostic_observed": false,
+        "json_exists": true,
+        "json_parseable": true,
+        "priority_fields": [
+          {
+            "path": "$.messageServers[0].priority",
+            "value": 1
+          },
+          {
+            "path": "$.messageServers[1].priority",
+            "value": null
+          }
+        ],
+        "priority_one_observed": true,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "e9c7cb3ae8628f058b4b4bfb25c549497814a3fe9c497a0a5e52780abf5e7230",
+        "wrapper_working_directory": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation"
+      }
+    ],
+    "expected_diagnostic_fragment": "unsupported by the ReLico multi-server parser bridge: main-actor annotations",
+    "failure_count": 0,
+    "failures": [],
+    "linked_worktree_validation": "git-rev-parse",
+    "passed": true,
+    "phase": "approach-a-single-main-actor-payload-exclusion-test",
+    "repository_root": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation",
+    "schema_version": 1,
+    "wrapper_invocation_contract": "repository-working-directory"
+  },
+  "phase": "phase3b-approach-a-single-main-actor-frontend-exclusion",
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "runner_cwd_repair": {
+    "external_caller_directory": "/Users/ali",
+    "implemented": true,
+    "validated": true,
+    "wrapper_invocation": "subshell enters repository root"
+  },
+  "schema_version": 1,
+  "scope_correction": {
+    "current_frontend_main_actor_count": 1,
+    "multi_actor_obligation_deferred_to": "Approach B",
+    "multi_actor_registry_obligation": "global-multi-actor-payload--priority-selection--negative",
+    "multi_actor_registry_status": "planned",
+    "permanent_fixture": "tests/actor-priority/approach-a-single-main-actor-payload-exclusion"
+  },
+  "validation": {
+    "boundary_direct_elaboration_passed": true,
+    "full_lake_build_passed": true,
+    "installed_external_caller_probe_passed": true,
+    "linked_worktree_git_validation_passed": true,
+    "local_message_server_priority_preserved": true,
+    "payload_supported_without_actor_priority": true,
+    "rejected_downstream_artifacts_absent": true,
+    "rejected_json_absent": true,
+    "single_main_actor_priority_rejected": true,
+    "temporary_external_caller_probe_passed": true,
+    "wrapper_repository_cwd_verified": true
+  },
+  "wrapper_cwd_diagnostic": {
+    "classification": "WRAPPER_REQUIRES_REPOSITORY_WORKING_DIRECTORY",
+    "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase3B-Wrapper-CWD-Diagnostic-20260802T190645+0330/PHASE3B_WRAPPER_CWD_DIAGNOSTIC.json",
+    "repository_contract_passes": true,
+    "sha256": "b5238a70fdc2477351599c8cc2f8a9a14d499dc21fed10cc72b73e4581c27896"
+  }
+}

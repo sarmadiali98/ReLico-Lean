@@ -1,0 +1,57 @@
+{
+  "counts": {
+    "regression_check_count": 4,
+    "theorem_count": 4
+  },
+  "hashes": {
+    "axiom_probe_stdout_sha256": "76e6ba5d107fd19d0d1fceca35d0a482fefad1c2987e82b53c9acc286c79159e",
+    "correctness_sha256": "df0c6219fce1c53c0d0fbe68322d923f05078a12f76d93169f2ac47e5870d0f6",
+    "full_build_log_sha256": "e73217c01e96f20f10ec5f917240f486a21c4faba61e6a57d30c5fd9754feffc",
+    "test_sha256": "4bd9e0014b20613578cd74fcd18ef4d24bdfe3c2772eae7c3adbf21eb838c125"
+  },
+  "modules": {
+    "correctness": "Relico.Correctness.GlobalMultiStorePayloadActorDispatchCorrespondence",
+    "tests": "Relico.Tests.GlobalMultiStorePayloadActorDispatchCorrespondence"
+  },
+  "phase": "phase4d5c1-regression-check-repair-and-production-install",
+  "progress": {
+    "overall_after_percent": 74,
+    "overall_before_percent": 70,
+    "overall_change_percentage_points": 4,
+    "overall_remaining_percent": 26
+  },
+  "repair": {
+    "failed_regression_form": "untyped private-def aliases of highly implicit theorem constants",
+    "installed_regression_form": "direct root-qualified #check assertions",
+    "untyped_alias_count": 0
+  },
+  "result": {
+    "classification": "DISPATCH_CORRESPONDENCE_PRODUCTION_INSTALLED",
+    "next_phase": "phase4d6a-finite-execution-correspondence-interface-audit"
+  },
+  "schema_version": 1,
+  "semantic_status": {
+    "dispatch_correspondence_complete": true,
+    "final_actor_priority_equivalence_complete": false,
+    "finite_execution_correspondence_complete": false,
+    "frontend_integration_complete": false,
+    "selection_correspondence_complete": true,
+    "source_actor_priority_semantics_complete": true,
+    "target_actor_order_semantics_complete": true,
+    "translation_complete": true
+  },
+  "timestamp": "20260803T165604+0330",
+  "validation": {
+    "axiom_probe_passed": true,
+    "committed": false,
+    "correctness_elaboration": true,
+    "full_lake_build_passed": true,
+    "original_repository_mutated": false,
+    "prior_failed_install_rollback_verified": true,
+    "pushed": false,
+    "regression_checks_passed": true,
+    "regression_module_elaboration": true,
+    "sorryAx_dependency": false,
+    "staged": false
+  }
+}

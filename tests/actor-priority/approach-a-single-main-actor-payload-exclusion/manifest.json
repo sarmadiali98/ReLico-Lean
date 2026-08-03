@@ -1,0 +1,31 @@
+{
+  "actor_priority_case": {
+    "expected_diagnostic_file": "expected/frontend-output-required-substring.txt",
+    "expected_diagnostic_stream": "combined-stdout-stderr",
+    "expected_downstream_artifacts": "absent",
+    "expected_exit": "nonzero",
+    "expected_json": "absent"
+  },
+  "current_frontend_profile": {
+    "main_actor_instance_count": 1,
+    "payload_message_server": "relcoPayload(int value)",
+    "reactive_class_count": 1
+  },
+  "deferred_obligation": "Multi-actor actor-priority selection remains an Approach B obligation.",
+  "fixture_id": "approach-a-single-main-actor-payload-exclusion",
+  "fixture_kind": "frontend-supported-fragment-negative-regression",
+  "positive_controls": [
+    "actor-priority-absent",
+    "local-message-server-priority"
+  ],
+  "prohibited_claim": "Actor priority is globally unnecessary.",
+  "runner": "run-approach-a-exclusion.sh",
+  "schema_version": 1,
+  "scope_statement": "The current exactly-one-main-actor frontend profile rejects main-actor priority while accepting payload and local priority.",
+  "semantic_level": "main-actor-priority",
+  "source": "source/model.rebeca",
+  "wrapper_invocation_contract": {
+    "linked_worktree_validation": "git-rev-parse",
+    "required_working_directory": "repository-root"
+  }
+}

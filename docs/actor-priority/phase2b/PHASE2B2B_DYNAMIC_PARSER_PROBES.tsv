@@ -1,0 +1,89 @@
+probe_id	category	annotation	placement	official_form	duration_ms	timed_out	exit_code	classification	source_sha256	json_exists	json_size	json_parseable	json_sha256	canonical_json_sha256	json_equals_baseline	observed_priority_fields	stdout_sha256	stderr_sha256	stdout_excerpt	stderr_excerpt	downstream_artifacts
+PARSER-ABSENT	control-absent		none	True	9314	False	0	ACCEPTED_PARSEABLE_JSON	ae0ddbb74361cd2ce49012837eb22a5e201ff2124988d984b240b8eb2e7a40dc	True	954	True	2c11c33a76cb279e5a6df9f7fd555baf0d869942a8133c5eaf76dcee0f56e807	772b254a16d8c7074633d59e8b7c020154a360888689664e2904627f70398403	True	"[{""path"":""$.messageServers[0].priority"",""value"":null}]"	53a0f3a7511db05c3b6af93e597c1ff20a252ceab194cd7511ee00f6f90a4e5f	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855	"Wrote multi-server parser bridge JSON: /tmp/relico-multistore-parser-bridge.RU9mb3/output.json
+Multi-server parser bridge output: /Users/ali/Desktop/ReLico-Actor-Priority-Parser-Probes-20260802T162610+0330/PARSER-ABSENT/model.json
+"		[]
+PARSER-LOCAL-PRIORITY-1	control-local-priority	@priority(1)	first-message-server	True	8723	False	0	ACCEPTED_PARSEABLE_JSON	aef63b6aa9b69bbdd2f121084ea2b201cdb2f9bc62e039f51415073df9cc0f15	True	951	True	118b020bbaa00534904642d31669c5882525482823ca9f9f2a72b747c6deea03	25fc4b9476f6fc490a364faa3283ed868f0b23854cf0fa3529b0ba7afe86de6b	False	"[{""path"":""$.messageServers[0].priority"",""value"":1}]"	4bcc195cf22ce2ea467b5ba76935af40d5fe0a47d8bad2d01e81d7c17dcac8ca	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855	"Wrote multi-server parser bridge JSON: /tmp/relico-multistore-parser-bridge.oAy4FX/output.json
+Multi-server parser bridge output: /Users/ali/Desktop/ReLico-Actor-Priority-Parser-Probes-20260802T162610+0330/PARSER-LOCAL-PRIORITY-1/model.json
+"		[]
+PARSER-ACTOR-PRIORITY-1	actor-priority-nonempty	@priority(1)	first-main-actor	True	8608	False	1	REJECTED_NO_JSON	22114f4ee951203210941437a2bc022f46f07cc3e4732a32ce1b53ca4a111e90	False	0	False			False	[]	c4d196c1a7cdacfa170061c394b0ab4ca82edd40bcac749bc1b3ebc58e085249	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855	"[ERROR] Failed to execute goal org.codehaus.mojo:exec-maven-plugin:3.1.0:java (default-cli) on project compiler: An exception occurred while executing the Java class. unsupported by the ReLico multi-server parser bridge: main-actor annotations -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
+"		[]
+PARSER-ACTOR-PRIORITY-2	actor-priority-nonempty	@priority(2)	first-main-actor	True	8951	False	1	REJECTED_NO_JSON	3391a1a2cd505291a3af8b88d35e368a26cb9753698c299b342f6a85580fad07	False	0	False			False	[]	c4d196c1a7cdacfa170061c394b0ab4ca82edd40bcac749bc1b3ebc58e085249	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855	"[ERROR] Failed to execute goal org.codehaus.mojo:exec-maven-plugin:3.1.0:java (default-cli) on project compiler: An exception occurred while executing the Java class. unsupported by the ReLico multi-server parser bridge: main-actor annotations -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
+"		[]
+PARSER-ACTOR-PRIORITY-STRING-2	actor-priority-nonempty	"@priority(""2"")"	first-main-actor	True	8807	False	1	REJECTED_NO_JSON	912872b37995a3c4d24b8e06639cdbbd335eae28a83e7dd87c0acf08866a5c8d	False	0	False			False	[]	4a27c503f9d84c5cd29fd460339298eb85fedbe698f01d7366dbd0d9401020db	07479dea09c4132c6c3c020b6a4f211afcede1d461a50ef2c50bed37a303a94f	"[ERROR] Failed to execute goal org.codehaus.mojo:exec-maven-plugin:3.1.0:java (default-cli) on project compiler: An exception occurred while executing the Java class. Timed Rebeca parsing or semantic checking failed -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
+"	"/tmp/relico-multistore-parser-bridge.dpMxy3/input.rebeca
+Errors:
+line:21, column:5, Value of priority must be an integer expression
+"	[]
+PARSER-ACTOR-PRIORITY-EMPTY-PARENS	actor-priority-empty-candidate	@priority()	first-main-actor	False	8390	False	1	REJECTED_NO_JSON	726c8cab9cdffa72f53062f197c1f4c650fd75d1c8c4a25e5637327ce54eea89	False	0	False			False	[]	4a27c503f9d84c5cd29fd460339298eb85fedbe698f01d7366dbd0d9401020db	67e94fb8db99e0e4b46f58fb87b9ff82dc10ecfb3c044b79f8b67157c39adb17	"[ERROR] Failed to execute goal org.codehaus.mojo:exec-maven-plugin:3.1.0:java (default-cli) on project compiler: An exception occurred while executing the Java class. Timed Rebeca parsing or semantic checking failed -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
+"	"/tmp/relico-multistore-parser-bridge.BfQOni/input.rebeca
+Errors:
+java.lang.NullPointerException: Cannot invoke ""Object.getClass()"" because ""expression"" is null
+	at org.rebecalang.compiler.modelcompiler.ExpressionSemanticCheckContainer.check(ExpressionSemanticCheckContainer.java:29)
+	at org.rebecalang.compiler.modelcompiler.ExpressionSemanticCheckContainer.check(ExpressionSemanticCheckContainer.java:20)
+	at org.rebecalang.compiler.modelcompiler.StatementSemanticCheckContainer.check(StatementSemanticCheckContainer.java:43)
+	at org.rebecalang.compiler.modelcompiler.timedrebeca.TimedRebecaCompleteCompilerFacade.checkPriorityAnnotations(TimedRebecaCompleteCompilerFacade.java:144)
+	at org.rebecalang.compiler.modelcompiler.corerebeca.CoreRebecaCompleteCompilerFacade.semanticCheckMainBindings(CoreRebecaCompleteCompilerFacade.java:515)
+	at org.rebecalang.compiler.modelcompiler.corerebeca.CoreRebecaCompleteCompilerFacade.semanticCheck(CoreRebecaCompleteCompilerFacade.java:267)
+	at org.rebecalang.compiler.modelcompiler.timedrebeca.TimedRebecaCompleteCompilerFacade.semanticCheck(TimedRebecaCompleteCompilerFacade.java:57)
+	at org.rebecalang.compiler.modelcompiler.RebecaModelCompiler.compileRebecaFile(RebecaModelCompiler.java:103)
+	at org.rebecalang.compiler.frontendbridge.RebecaMultiStorePayloadJsonExporter.main(RebecaMultiStorePayloadJsonExporter.java:91)
+	at org.codehaus.mojo.exec.ExecJavaMojo$1.run(ExecJavaMojo.java:279)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+"	[]
+PARSER-ACTOR-PRIORITY-EMPTY-STRING	actor-priority-empty-candidate	"@priority("""")"	first-main-actor	False	8410	False	1	REJECTED_NO_JSON	20d3d1fa44b1576b9ffd140c6708f749dfd841aea10fc8d1738b30d09fe659b9	False	0	False			False	[]	4a27c503f9d84c5cd29fd460339298eb85fedbe698f01d7366dbd0d9401020db	5b2e1d116d638926c0c492b9356c45c4db28bb98812c19b3f3d08374023511df	"[ERROR] Failed to execute goal org.codehaus.mojo:exec-maven-plugin:3.1.0:java (default-cli) on project compiler: An exception occurred while executing the Java class. Timed Rebeca parsing or semantic checking failed -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
+"	"/tmp/relico-multistore-parser-bridge.7QxWRW/input.rebeca
+Errors:
+line:21, column:5, Value of priority must be an integer expression
+"	[]
+PARSER-ACTOR-PRIORITY-BARE	actor-priority-empty-candidate	@priority	first-main-actor	False	8400	False	1	REJECTED_NO_JSON	22f638f7d9b2a4caf24e97f1a43a32f31b80caf6d330b2f9a1971c25d7dd262f	False	0	False			False	[]	4a27c503f9d84c5cd29fd460339298eb85fedbe698f01d7366dbd0d9401020db	da4e4731091f3b8491ac9d587c87ecd1566652afdd30090ad9b61290ddc90212	"[ERROR] Failed to execute goal org.codehaus.mojo:exec-maven-plugin:3.1.0:java (default-cli) on project compiler: An exception occurred while executing the Java class. Timed Rebeca parsing or semantic checking failed -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
+"	"/tmp/relico-multistore-parser-bridge.8BEu0P/input.rebeca
+Errors:
+java.lang.NullPointerException: Cannot invoke ""Object.getClass()"" because ""expression"" is null
+	at org.rebecalang.compiler.modelcompiler.ExpressionSemanticCheckContainer.check(ExpressionSemanticCheckContainer.java:29)
+	at org.rebecalang.compiler.modelcompiler.ExpressionSemanticCheckContainer.check(ExpressionSemanticCheckContainer.java:20)
+	at org.rebecalang.compiler.modelcompiler.StatementSemanticCheckContainer.check(StatementSemanticCheckContainer.java:43)
+	at org.rebecalang.compiler.modelcompiler.timedrebeca.TimedRebecaCompleteCompilerFacade.checkPriorityAnnotations(TimedRebecaCompleteCompilerFacade.java:144)
+	at org.rebecalang.compiler.modelcompiler.corerebeca.CoreRebecaCompleteCompilerFacade.semanticCheckMainBindings(CoreRebecaCompleteCompilerFacade.java:515)
+	at org.rebecalang.compiler.modelcompiler.corerebeca.CoreRebecaCompleteCompilerFacade.semanticCheck(CoreRebecaCompleteCompilerFacade.java:267)
+	at org.rebecalang.compiler.modelcompiler.timedrebeca.TimedRebecaCompleteCompilerFacade.semanticCheck(TimedRebecaCompleteCompilerFacade.java:57)
+	at org.rebecalang.compiler.modelcompiler.RebecaModelCompiler.compileRebecaFile(RebecaModelCompiler.java:103)
+	at org.rebecalang.compiler.frontendbridge.RebecaMultiStorePayloadJsonExporter.main(RebecaMultiStorePayloadJsonExporter.java:91)
+	at org.codehaus.mojo.exec.ExecJavaMojo$1.run(ExecJavaMojo.java:279)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+"	[]

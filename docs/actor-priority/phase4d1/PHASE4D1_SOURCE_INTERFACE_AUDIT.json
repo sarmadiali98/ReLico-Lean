@@ -1,0 +1,177 @@
+{
+  "contract_rows": [
+    {
+      "contract_id": "S1",
+      "reason": "GlobalMultiStorePayloadDispatch.Step is directly parameterized by the selected actor name",
+      "required_value": "actorName : ActorName",
+      "status": "confirmed",
+      "subject": "actor selector"
+    },
+    {
+      "contract_id": "S2",
+      "reason": "the existing relation performs lookup, local dispatch, and synchronized global-state replacement",
+      "required_value": "Relico.DTR.GlobalMultiStorePayloadDispatch.Step",
+      "status": "confirmed",
+      "subject": "existing transition primitive"
+    },
+    {
+      "contract_id": "S3",
+      "reason": "actor-priority semantics must constrain selection without changing chosen-actor dispatch",
+      "required_value": "eligibility premise plus existing Step premise",
+      "status": "required",
+      "subject": "wrapper architecture"
+    },
+    {
+      "contract_id": "S4",
+      "reason": "matches the mechanically tested source policy",
+      "required_value": "lower Nat means higher actor priority",
+      "status": "required",
+      "subject": "priority numeric order"
+    },
+    {
+      "contract_id": "S5",
+      "reason": "ties must preserve nondeterminism",
+      "required_value": "all minimal-priority ready actors remain eligible",
+      "status": "required",
+      "subject": "tie policy"
+    },
+    {
+      "contract_id": "S6",
+      "reason": "absence of actor-priority metadata must retain the existing dispatch possibilities",
+      "required_value": "no additional actor filtering",
+      "status": "required",
+      "subject": "absent request policy"
+    },
+    {
+      "contract_id": "S7",
+      "reason": "uncovered actors must not be silently eliminated",
+      "required_value": "priority filtering disabled for an uncovered ready set",
+      "status": "required",
+      "subject": "incomplete assignment policy"
+    },
+    {
+      "contract_id": "S8",
+      "reason": "actor priority resolves simultaneous competition only",
+      "required_value": "actors at different logical times are not compared by this simultaneous-selection layer",
+      "status": "required",
+      "subject": "non-simultaneous policy"
+    },
+    {
+      "contract_id": "S9",
+      "reason": "current chosen-actor correspondence must retain its existing meaning",
+      "required_value": "existing Step and its theorems remain unchanged",
+      "status": "required",
+      "subject": "compatibility"
+    },
+    {
+      "contract_id": "S10",
+      "reason": "new production-layer source semantics remain modular",
+      "required_value": "Relico/DTR/GlobalMultiStorePayloadActorPriority.lean",
+      "status": "planned",
+      "subject": "next implementation module"
+    }
+  ],
+  "counts": {
+    "ActorName_occurrences": 3,
+    "actorName_occurrences": 11,
+    "all_diagnostic_declarations": 20,
+    "bound_dispatch_declarations": 4,
+    "contract_rows": 10,
+    "literal_actorIndex_occurrences": 0
+  },
+  "exact_interface": {
+    "constructor": "Relico.DTR.GlobalMultiStorePayloadDispatch.Step.lift",
+    "constructor_obligations": [
+      "actor model lookup",
+      "actor state lookup",
+      "local payload dispatch"
+    ],
+    "dispatch_parameters": [
+      "model",
+      "actorName",
+      "beforeGlobal",
+      "selectedMessage",
+      "selectedServer",
+      "afterGlobal"
+    ],
+    "dispatch_relation": "Relico.DTR.GlobalMultiStorePayloadDispatch.Step",
+    "selector_identifier": "actorName",
+    "selector_type": "ActorName",
+    "state_update": "synchronizedAfter"
+  },
+  "findings": {
+    "chosen_actor_dispatch_present": true,
+    "existing_dispatch_must_remain_unchanged": true,
+    "global_formal_model_is_multi_actor": true,
+    "noninvasive_eligibility_wrapper_ready": true,
+    "selector_is_actor_name": true,
+    "selector_is_numeric_index": false
+  },
+  "implementation_contract": {
+    "module": "Relico/DTR/GlobalMultiStorePayloadActorPriority.lean",
+    "must_import": "Relico.DTR.GlobalMultiStorePayloadDispatch",
+    "must_not_modify": [
+      "Relico/DTR/GlobalMultiStorePayload.lean",
+      "Relico/DTR/GlobalMultiStorePayloadDispatch.lean"
+    ],
+    "namespace": "Relico.DTR.GlobalMultiStorePayloadActorPriority",
+    "required_definitions": [
+      "lookupPriority",
+      "requestCoversReadyActors",
+      "simultaneouslyReady",
+      "actorPriorityEligible",
+      "eligibleActorNames",
+      "ActorPriorityDispatchStep"
+    ],
+    "required_types": [
+      "ActorPriorityAssignment",
+      "ActorPriorityRequest",
+      "ReadyActor"
+    ],
+    "wrapper_rule": "ActorPriorityDispatchStep requires the selected actorName to be eligible and requires the existing GlobalMultiStorePayloadDispatch.Step for the actual state transition."
+  },
+  "inputs": {
+    "all_declarations": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D1A-Selector-Diagnostic-20260802T205127+0330/PHASE4D1A_ALL_DECLARATIONS.tsv",
+      "sha256": "02ccf8d7298504b3091bcbb47091bafc28b8f5abe5eec4001cab008a17bd9586"
+    },
+    "canonical_readme": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/README.md",
+      "sha256": "40d6775988ec1ad64d919579c716088c900a7611bec03a839089c2c0163b6d5d"
+    },
+    "dispatch_declarations": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D1A-Selector-Diagnostic-20260802T205127+0330/PHASE4D1A_DISPATCH_DECLARATIONS.txt",
+      "sha256": "37020238dc0757d3896f1a121f926814eea284e011d292a78b6ce5276c274e97"
+    },
+    "phase4d0_architecture": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase4d/PHASE4D_INTEGRATION_ARCHITECTURE.json",
+      "sha256": "ce2dee15a5765fdda34df1216cef4389405619a6b982dc16330ac709c4b638e7"
+    },
+    "relevant_declarations": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D1A-Selector-Diagnostic-20260802T205127+0330/PHASE4D1A_RELEVANT_DECLARATIONS.txt",
+      "sha256": "37670ccd2f093e84c9290ef28c3d197e5cafb424346b501e310d8b6a5839a07c"
+    },
+    "selector_diagnostic": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D1A-Selector-Diagnostic-20260802T205127+0330/PHASE4D1A_SELECTOR_DIAGNOSTIC.json",
+      "sha256": "0ce2d29957b9cac7ebd7439086f07008678d03bbbd48da359c35c118dc29c06e"
+    },
+    "selector_lexemes": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D1A-Selector-Diagnostic-20260802T205127+0330/PHASE4D1A_SELECTOR_LEXEMES.tsv",
+      "sha256": "a4ae25462ca5aae4ff5e9ebd0c7fe7e8ac9d9afa946e6a4ae6acacabd4d08942"
+    }
+  },
+  "phase": "phase4d1a-source-semantics-interface-audit",
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "result": {
+    "classification": "ACTOR_NAME_SELECTOR_CONFIRMED_NONINVASIVE_SOURCE_WRAPPER_READY",
+    "current_production_integration_complete": false,
+    "final_actor_priority_necessity_conclusion": "CONCLUSION_2_REACHED",
+    "next_phase": "phase4d1b-source-global-actor-priority-semantics-implementation",
+    "passed": true,
+    "production_lean_source_mutated": false
+  },
+  "schema_version": 1
+}

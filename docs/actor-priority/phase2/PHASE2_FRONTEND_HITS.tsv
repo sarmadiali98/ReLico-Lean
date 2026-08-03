@@ -1,0 +1,45 @@
+source	path	line	matched_categories	excerpt
+relico-frontend	Relico/Frontend/MultiStorePayloadSchema.lean	91	message-server-priority|priority	/-- One message-server declaration with ordered formal parameters and optional local priority. -/ structure RawMultiStorePayloadMessageServer where
+relico-frontend	Relico/Frontend/MultiStorePayloadSchema.lean	100	priority	List String priority : Option Nat := none
+relico-frontend	Relico/Frontend/MultiStorePayloadDecoder.lean	422	priority	⟨parameter⟩) priority := declaration.priority
+relico-frontend	Relico/Frontend/MultiStorePayloadDecoder.lean	423	priority	priority := declaration.priority body :=
+relico-frontend	frontend/schema/multi-store-payload-v1.schema.json	354	priority	"""type"": ""array"" }, ""priority"": { ""oneOf"": [ {"
+relico-frontend	frontend/schema/multi-store-payload-v1.schema.json	370	priority	"""parameters"", ""body"", ""priority"" ], ""type"": ""object"""
+relico-frontend	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	43	priority	* * The adapter preserves parser declaration order. It performs no * Lingua Franca translation and no priority sorting. */ public final class RebecaMultiStorePayloadJsonExporter {
+relico-frontend	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	51	message-server-priority	"private static final int SCHEMA_VERSION = 3; private static final String LOCAL_PRIORITY_ANNOTATION = ""priority"";"
+relico-frontend	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	52	priority	"private static final String LOCAL_PRIORITY_ANNOTATION = ""priority""; private RebecaMultiStorePayloadJsonExporter() {"
+relico-frontend	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	502	priority	); String priority = extractLocalPriority( messageServer
+relico-frontend	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	503	message-server-priority	String priority = extractLocalPriority( messageServer );
+relico-frontend	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	509	priority	"String priorityField = fieldPrefix + ""\""priority\"": "" + ( priority == null"
+relico-frontend	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	511	priority	"""\""priority\"": "" + ( priority == null ? ""null"" : priority"
+relico-frontend	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	513	priority	"priority == null ? ""null"" : priority ) + "",\n"";"
+relico-frontend	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	574	message-server-priority	} private static String extractLocalPriority( MsgsrvDeclaration messageServer ) {
+relico-frontend	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	577	priority	MsgsrvDeclaration messageServer ) { String priority = null;
+relico-frontend	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	591	message-server-priority	if ( !LOCAL_PRIORITY_ANNOTATION.equals( identifier )
+relico-frontend	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	601	priority	"} if (priority != null) { throw unsupported( ""multiple @priority annotations on "" +"
+relico-frontend	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	603	priority	"if (priority != null) { throw unsupported( ""multiple @priority annotations on "" + messageServer.getName() );"
+relico-frontend	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	611	priority	"requireNonNull( annotation.getValue(), ""@priority annotation without a value"" );"
+relico-frontend	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	616	priority	"if (!(value instanceof Literal literal)) { throw unsupported( ""@priority value was not normalized "" + ""to an integer literal"" );"
+relico-frontend	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	624	priority	"renderIntegerLiteral( literal, ""@priority value"" );"
+relico-frontend	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	632	priority	"if (numeric.signum() < 0) { throw unsupported( ""@priority value must be nonnegative"" ); }"
+relico-frontend	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	636	priority	} priority = numeric.toString(); }
+relico-frontend	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	640	priority	} return priority; }
+relico-frontend	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	43	priority	* * The adapter preserves parser declaration order. It performs no * Lingua Franca translation and no priority sorting. */ public final class RebecaMultiStoreJsonExporter {
+relico-frontend	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	49	message-server-priority	"private static final int SCHEMA_VERSION = 3; private static final String LOCAL_PRIORITY_ANNOTATION = ""priority"";"
+relico-frontend	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	50	priority	"private static final String LOCAL_PRIORITY_ANNOTATION = ""priority""; private RebecaMultiStoreJsonExporter() {"
+relico-frontend	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	503	priority	); String priority = extractLocalPriority( messageServer
+relico-frontend	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	504	message-server-priority	String priority = extractLocalPriority( messageServer );
+relico-frontend	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	509	priority	"String priorityField = priority == null ? """" : fieldPrefix +"
+relico-frontend	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	512	priority	"? """" : fieldPrefix + ""\""priority\"": "" + priority + "",\n"";"
+relico-frontend	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	513	priority	": fieldPrefix + ""\""priority\"": "" + priority + "",\n"";"
+relico-frontend	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	549	message-server-priority	} private static String extractLocalPriority( MsgsrvDeclaration messageServer ) {
+relico-frontend	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	552	priority	MsgsrvDeclaration messageServer ) { String priority = null;
+relico-frontend	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	566	message-server-priority	if ( !LOCAL_PRIORITY_ANNOTATION.equals( identifier )
+relico-frontend	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	576	priority	"} if (priority != null) { throw unsupported( ""multiple @priority annotations on "" +"
+relico-frontend	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	578	priority	"if (priority != null) { throw unsupported( ""multiple @priority annotations on "" + messageServer.getName() );"
+relico-frontend	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	586	priority	"requireNonNull( annotation.getValue(), ""@priority annotation without a value"" );"
+relico-frontend	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	591	priority	"if (!(value instanceof Literal literal)) { throw unsupported( ""@priority value was not normalized "" + ""to an integer literal"" );"
+relico-frontend	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	599	priority	"renderIntegerLiteral( literal, ""@priority value"" );"
+relico-frontend	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	607	priority	"if (numeric.signum() < 0) { throw unsupported( ""@priority value must be nonnegative"" ); }"
+relico-frontend	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	611	priority	} priority = numeric.toString(); }
+relico-frontend	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	615	priority	} return priority; }

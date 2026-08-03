@@ -1,0 +1,69 @@
+{
+  "binding_status": {
+    "compile_ready": true,
+    "compile_request": true,
+    "selection_backward": true,
+    "selection_forward": true,
+    "selection_iff": true,
+    "source_base_step": true,
+    "source_wrapper": true,
+    "source_wrapper_dispatch": true,
+    "source_wrapper_eligible": true,
+    "target_base_step": true,
+    "target_wrapper": true,
+    "target_wrapper_dispatch": true,
+    "target_wrapper_eligible": true
+  },
+  "counts": {
+    "preexisting_actor_priority_wrapper_reference_count": 0,
+    "ranked_dispatch_candidate_count": 40,
+    "scanned_declaration_count": 1023,
+    "scanned_file_count": 145
+  },
+  "phase": "phase4d5a-dispatch-correspondence-interface-audit",
+  "progress": {
+    "overall_after_percent": 65,
+    "overall_before_percent": 64,
+    "overall_change_percentage_points": 1,
+    "overall_remaining_percent": 35
+  },
+  "proof_contract": {
+    "base_dispatch_relation_mutation_forbidden": true,
+    "dispatch_correspondence_complete": false,
+    "existing_chosen_actor_dispatch_correspondence_reuse_required": true,
+    "preserve_exact_actor_name_selector": true,
+    "preserve_existing_base_dispatch_relations": true,
+    "selection_backward_transport_required": true,
+    "selection_forward_transport_required": true,
+    "source_wrapper_decomposition_required": true,
+    "source_wrapper_redefinition_forbidden": true,
+    "target_wrapper_construction_required": true,
+    "target_wrapper_redefinition_forbidden": true
+  },
+  "result": {
+    "classification": "DISPATCH_CORRESPONDENCE_INTERFACES_BOUND_GENERIC_PROOF_READY",
+    "next_phase": "phase4d5b-dispatch-correspondence-proof-search"
+  },
+  "schema_version": 1,
+  "timestamp": "20260803T022825+0330",
+  "top_existing_dispatch_candidate": {
+    "file": "Relico/Correctness/GlobalMultiStorePayloadDispatchCorrespondence.lean",
+    "kind": "theorem",
+    "line": 642,
+    "qualified_name": "Relico.Correctness.GlobalMultiStorePayloadDispatch.synchronizedGlobalDispatch_forward",
+    "score": 53,
+    "signature": "theorem synchronizedGlobalDispatch_forward\n    {sourceModel :\n      DTR.GlobalMultiStorePayloadModel}\n    {targetProgram :\n      LF.GlobalMultiStorePayloadProgram}\n    {actorName :\n      ActorName}\n    {sourceBefore sourceAfter :\n      DTR.GlobalMultiStorePayloadState}\n    {targetBefore :\n      LF.GlobalMultiStorePayloadState}\n    {selectedMessage :\n      DTR.PendingMessage}\n    {selectedServer :\n      DTR.MultiStorePayloadMessageServer}\n    (hSourceStep :\n      DTR.GlobalMultiStorePayloadDispatch.Step\n        sourceModel"
+  },
+  "validation": {
+    "committed": false,
+    "exact_api_probe_passed": true,
+    "existing_dispatch_candidates_found": true,
+    "full_lake_build_passed": true,
+    "original_repository_mutated": false,
+    "pushed": false,
+    "selection_correspondence_bound": true,
+    "sorryAx_dependency": false,
+    "source_and_target_wrappers_bound": true,
+    "staged": false
+  }
+}

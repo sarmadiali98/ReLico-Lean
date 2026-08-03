@@ -1,0 +1,673 @@
+{
+  "audit_evidence_root": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330",
+  "classification": "PHASE2B2D_GENERIC_HASH_DIFFERENCE_NOT_SUFFICIENT_FOR_SEMANTIC_WITNESS",
+  "comparison": {
+    "base_and_reversed_deterministic": false,
+    "base_vs_absent_strict_signature_differs": true,
+    "exit_signature_differs": false,
+    "explicit_trace_or_order_differs": true,
+    "normalized_full_runtime_transcript_differs": true,
+    "state_or_transition_count_differs": false,
+    "strict_semantic_evidence_present": true,
+    "strict_signature_differs": true,
+    "strict_verdict_differs": false
+  },
+  "input": {
+    "phase2b2d_flags": {
+      "base_violation_observed": true,
+      "behavioral_output_differs": true,
+      "code_generation_differs": true,
+      "reversed_violation_observed": true,
+      "runtime_exit_differs": false
+    },
+    "phase2b2d_result": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase2b/PHASE2B2D_SYSTEMATIC_DISCRIMINATING_FAMILY.json",
+      "sha256": "9c0d6e37ba56085bade02a5275bda08199f7b692f01823da57bf86545bebbe3a"
+    },
+    "selected_family": {
+      "expected_first": 1,
+      "fire_delay": 0
+    },
+    "selected_family_id": "expected-1-delay-0"
+  },
+  "method": {
+    "accepted_semantic_categories": [
+      "runtime-exit-signature",
+      "strict-property-or-assertion-verdict",
+      "counterexample-or-deadlock-verdict",
+      "explicit-state-or-transition-count",
+      "explicit-runtime-trace-or-order"
+    ],
+    "build_output_used_as_semantic_evidence": false,
+    "generated_code_used_as_semantic_evidence": false,
+    "generic_behavior_hash_used_as_semantic_evidence": false,
+    "runtime_repetitions_per_variant": 3
+  },
+  "next_phase": "phase2b2e-repair-witness-model-and-property-observation-contract",
+  "phase": "phase2b2d-semantic-witness-audit",
+  "provisional_claims": {
+    "claim_a": "OUTSIDE CURRENT FRAGMENT",
+    "claim_b": "NOT YET PROVED",
+    "claim_c": "CONDITIONAL: official RMC accepts actor-priority models",
+    "claim_d": "NOT YET PROVED",
+    "claims_e_through_g": "NOT YET PROVED"
+  },
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "schema_version": 1,
+  "semantic_witness_confirmed": false,
+  "variant_reruns": {
+    "absent": {
+      "deterministic": true,
+      "executable": "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/absent/relico-systematic-verifier",
+      "executable_sha256": "12aa4e2a1e4d1f90726c31fb15e28b5f0e719efd774873e698322f793837e790",
+      "exit_signature_count": 1,
+      "normalized_transcript_hash_count": 1,
+      "repetition_count": 3,
+      "representative_exit_code": 0,
+      "representative_semantic_facts": {
+        "build_lines": [],
+        "count_facts": [],
+        "normalized_transcript": "<model-checking-report>\n<system-info>\n<total-spent-time>0</total-spent-time>\n<reached-states>8</reached-states>\n<reached-transitions>11</reached-transitions>\n<consumed-mem>96</consumed-mem>\n</system-info>\n<checked-property>\n<type>Reachability</type>\n<name>Deadlock-Freedom and No Deadline Missed</name>\n<result>assertion failed</result>\n<message>no message</message>\n<options>\n<option>Safe mode is enabled</option>\n<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">2</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"4_0\" destination=\"assertion failed\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"assertion failed\" atomicpropositions=\"assertion failed\">\n</state>\n</counter-example-trace>\n</model-checking-report>",
+        "normalized_transcript_sha256": "ed9bf2a4dcc47852ac62dce682ebf08fdd300e9f99b74ac04e5adc5ffa473d10",
+        "source_echo_lines": [
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+          "<rebec name=\"workerA\">",
+          "<rebec name=\"workerB\">",
+          "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+          "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+          "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+          "<transition source=\"4_0\" destination=\"assertion failed\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>"
+        ],
+        "strict_fact_count": 14,
+        "strict_signature_sha256": "21d2ed5af77c438909d06d1f1f51fc3dea7f7492795ddfbc7adc73fd1012b384",
+        "trace_lines": [
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+          "<rebec name=\"observer\">",
+          "<rebec name=\"workerA\">",
+          "<rebec name=\"workerB\">",
+          "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+          "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+          "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+          "<transition source=\"4_0\" destination=\"assertion failed\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>"
+        ],
+        "verdict_lines": [
+          "<result>assertion failed</result>",
+          "<state id=\"assertion failed\" atomicpropositions=\"assertion failed\">",
+          "<transition source=\"4_0\" destination=\"assertion failed\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>"
+        ]
+      },
+      "representative_timed_out": false,
+      "runs": [
+        {
+          "command": [
+            "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/absent/relico-systematic-verifier"
+          ],
+          "cwd": "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/absent",
+          "duration_ms": 125,
+          "exit_code": 0,
+          "repetition": 1,
+          "semantic_facts": {
+            "build_lines": [],
+            "count_facts": [],
+            "normalized_transcript": "<model-checking-report>\n<system-info>\n<total-spent-time>0</total-spent-time>\n<reached-states>8</reached-states>\n<reached-transitions>11</reached-transitions>\n<consumed-mem>96</consumed-mem>\n</system-info>\n<checked-property>\n<type>Reachability</type>\n<name>Deadlock-Freedom and No Deadline Missed</name>\n<result>assertion failed</result>\n<message>no message</message>\n<options>\n<option>Safe mode is enabled</option>\n<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">2</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"4_0\" destination=\"assertion failed\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"assertion failed\" atomicpropositions=\"assertion failed\">\n</state>\n</counter-example-trace>\n</model-checking-report>",
+            "normalized_transcript_sha256": "ed9bf2a4dcc47852ac62dce682ebf08fdd300e9f99b74ac04e5adc5ffa473d10",
+            "source_echo_lines": [
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+              "<rebec name=\"workerA\">",
+              "<rebec name=\"workerB\">",
+              "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+              "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+              "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+              "<transition source=\"4_0\" destination=\"assertion failed\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ],
+            "strict_fact_count": 14,
+            "strict_signature_sha256": "21d2ed5af77c438909d06d1f1f51fc3dea7f7492795ddfbc7adc73fd1012b384",
+            "trace_lines": [
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+              "<rebec name=\"observer\">",
+              "<rebec name=\"workerA\">",
+              "<rebec name=\"workerB\">",
+              "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+              "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+              "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+              "<transition source=\"4_0\" destination=\"assertion failed\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ],
+            "verdict_lines": [
+              "<result>assertion failed</result>",
+              "<state id=\"assertion failed\" atomicpropositions=\"assertion failed\">",
+              "<transition source=\"4_0\" destination=\"assertion failed\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ]
+          },
+          "stderr_excerpt": "",
+          "stderr_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/absent/run-1.stderr.txt",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_excerpt": "<model-checking-report>\n<system-info>\n\t<total-spent-time>0</total-spent-time>\n\t<reached-states>8</reached-states>\n\t<reached-transitions>11</reached-transitions>\n\t<consumed-mem>96</consumed-mem>\n</system-info>\n<checked-property>\n\t<type>Reachability</type>\n\t<name>Deadlock-Freedom and No Deadline Missed</name>\n\t<result>assertion failed</result>\n\t<message>no message</message>\n<options>\n\t<option>Safe mode is enabled</option>\n\t<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">2</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"4_0\" destination=\"assertion failed\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"assertion failed\" atomicpropositions=\"assertion failed\">\n</state>\n</counter-example-trace>\n</model-checking-report>\n",
+          "stdout_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/absent/run-1.stdout.txt",
+          "stdout_sha256": "25e84d6ef080d31cdfaca65f2667481593e4b3bdf018e9eb9e6997c802253ffc",
+          "timed_out": false
+        },
+        {
+          "command": [
+            "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/absent/relico-systematic-verifier"
+          ],
+          "cwd": "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/absent",
+          "duration_ms": 123,
+          "exit_code": 0,
+          "repetition": 2,
+          "semantic_facts": {
+            "build_lines": [],
+            "count_facts": [],
+            "normalized_transcript": "<model-checking-report>\n<system-info>\n<total-spent-time>0</total-spent-time>\n<reached-states>8</reached-states>\n<reached-transitions>11</reached-transitions>\n<consumed-mem>96</consumed-mem>\n</system-info>\n<checked-property>\n<type>Reachability</type>\n<name>Deadlock-Freedom and No Deadline Missed</name>\n<result>assertion failed</result>\n<message>no message</message>\n<options>\n<option>Safe mode is enabled</option>\n<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">2</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"4_0\" destination=\"assertion failed\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"assertion failed\" atomicpropositions=\"assertion failed\">\n</state>\n</counter-example-trace>\n</model-checking-report>",
+            "normalized_transcript_sha256": "ed9bf2a4dcc47852ac62dce682ebf08fdd300e9f99b74ac04e5adc5ffa473d10",
+            "source_echo_lines": [
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+              "<rebec name=\"workerA\">",
+              "<rebec name=\"workerB\">",
+              "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+              "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+              "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+              "<transition source=\"4_0\" destination=\"assertion failed\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ],
+            "strict_fact_count": 14,
+            "strict_signature_sha256": "21d2ed5af77c438909d06d1f1f51fc3dea7f7492795ddfbc7adc73fd1012b384",
+            "trace_lines": [
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+              "<rebec name=\"observer\">",
+              "<rebec name=\"workerA\">",
+              "<rebec name=\"workerB\">",
+              "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+              "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+              "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+              "<transition source=\"4_0\" destination=\"assertion failed\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ],
+            "verdict_lines": [
+              "<result>assertion failed</result>",
+              "<state id=\"assertion failed\" atomicpropositions=\"assertion failed\">",
+              "<transition source=\"4_0\" destination=\"assertion failed\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ]
+          },
+          "stderr_excerpt": "",
+          "stderr_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/absent/run-2.stderr.txt",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_excerpt": "<model-checking-report>\n<system-info>\n\t<total-spent-time>0</total-spent-time>\n\t<reached-states>8</reached-states>\n\t<reached-transitions>11</reached-transitions>\n\t<consumed-mem>96</consumed-mem>\n</system-info>\n<checked-property>\n\t<type>Reachability</type>\n\t<name>Deadlock-Freedom and No Deadline Missed</name>\n\t<result>assertion failed</result>\n\t<message>no message</message>\n<options>\n\t<option>Safe mode is enabled</option>\n\t<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">2</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"4_0\" destination=\"assertion failed\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"assertion failed\" atomicpropositions=\"assertion failed\">\n</state>\n</counter-example-trace>\n</model-checking-report>\n",
+          "stdout_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/absent/run-2.stdout.txt",
+          "stdout_sha256": "25e84d6ef080d31cdfaca65f2667481593e4b3bdf018e9eb9e6997c802253ffc",
+          "timed_out": false
+        },
+        {
+          "command": [
+            "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/absent/relico-systematic-verifier"
+          ],
+          "cwd": "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/absent",
+          "duration_ms": 120,
+          "exit_code": 0,
+          "repetition": 3,
+          "semantic_facts": {
+            "build_lines": [],
+            "count_facts": [],
+            "normalized_transcript": "<model-checking-report>\n<system-info>\n<total-spent-time>0</total-spent-time>\n<reached-states>8</reached-states>\n<reached-transitions>11</reached-transitions>\n<consumed-mem>96</consumed-mem>\n</system-info>\n<checked-property>\n<type>Reachability</type>\n<name>Deadlock-Freedom and No Deadline Missed</name>\n<result>assertion failed</result>\n<message>no message</message>\n<options>\n<option>Safe mode is enabled</option>\n<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">2</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"4_0\" destination=\"assertion failed\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"assertion failed\" atomicpropositions=\"assertion failed\">\n</state>\n</counter-example-trace>\n</model-checking-report>",
+            "normalized_transcript_sha256": "ed9bf2a4dcc47852ac62dce682ebf08fdd300e9f99b74ac04e5adc5ffa473d10",
+            "source_echo_lines": [
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+              "<rebec name=\"workerA\">",
+              "<rebec name=\"workerB\">",
+              "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+              "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+              "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+              "<transition source=\"4_0\" destination=\"assertion failed\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ],
+            "strict_fact_count": 14,
+            "strict_signature_sha256": "21d2ed5af77c438909d06d1f1f51fc3dea7f7492795ddfbc7adc73fd1012b384",
+            "trace_lines": [
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+              "<rebec name=\"observer\">",
+              "<rebec name=\"workerA\">",
+              "<rebec name=\"workerB\">",
+              "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+              "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+              "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+              "<transition source=\"4_0\" destination=\"assertion failed\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ],
+            "verdict_lines": [
+              "<result>assertion failed</result>",
+              "<state id=\"assertion failed\" atomicpropositions=\"assertion failed\">",
+              "<transition source=\"4_0\" destination=\"assertion failed\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ]
+          },
+          "stderr_excerpt": "",
+          "stderr_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/absent/run-3.stderr.txt",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_excerpt": "<model-checking-report>\n<system-info>\n\t<total-spent-time>0</total-spent-time>\n\t<reached-states>8</reached-states>\n\t<reached-transitions>11</reached-transitions>\n\t<consumed-mem>96</consumed-mem>\n</system-info>\n<checked-property>\n\t<type>Reachability</type>\n\t<name>Deadlock-Freedom and No Deadline Missed</name>\n\t<result>assertion failed</result>\n\t<message>no message</message>\n<options>\n\t<option>Safe mode is enabled</option>\n\t<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">2</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"4_0\" destination=\"assertion failed\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"assertion failed\" atomicpropositions=\"assertion failed\">\n</state>\n</counter-example-trace>\n</model-checking-report>\n",
+          "stdout_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/absent/run-3.stdout.txt",
+          "stdout_sha256": "25e84d6ef080d31cdfaca65f2667481593e4b3bdf018e9eb9e6997c802253ffc",
+          "timed_out": false
+        }
+      ],
+      "strict_signature_hash_count": 1,
+      "variant": "absent"
+    },
+    "base": {
+      "deterministic": true,
+      "executable": "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/base/relico-systematic-verifier",
+      "executable_sha256": "c15a8a11003ba6ff397887b776485cbdbba9e0c9078e6c15e78a4fba671bb65a",
+      "exit_signature_count": 1,
+      "normalized_transcript_hash_count": 1,
+      "repetition_count": 3,
+      "representative_exit_code": 0,
+      "representative_semantic_facts": {
+        "build_lines": [],
+        "count_facts": [],
+        "normalized_transcript": "<model-checking-report>\n<system-info>\n<total-spent-time>0</total-spent-time>\n<reached-states>6</reached-states>\n<reached-transitions>6</reached-transitions>\n<consumed-mem>72</consumed-mem>\n</system-info>\n<checked-property>\n<type>Reachability</type>\n<name>Deadlock-Freedom and No Deadline Missed</name>\n<result>deadlock</result>\n<options>\n<option>Safe mode is enabled</option>\n<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">1</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"5_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">1</variable>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n</state>\n</counter-example-trace>\n</model-checking-report>",
+        "normalized_transcript_sha256": "902681d6909deb41981bbe97938d0b8ffe3f8f6b968199c40873f0ef82c7e48d",
+        "source_echo_lines": [
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+          "<rebec name=\"workerA\">",
+          "<rebec name=\"workerB\">",
+          "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+          "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+          "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+          "<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>"
+        ],
+        "strict_fact_count": 11,
+        "strict_signature_sha256": "7fc781feb15a283bf752061e22ab9d6d9c3747ef9a72b6698db07490ede45f76",
+        "trace_lines": [
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+          "<rebec name=\"observer\">",
+          "<rebec name=\"workerA\">",
+          "<rebec name=\"workerB\">",
+          "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+          "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+          "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+          "<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>"
+        ],
+        "verdict_lines": []
+      },
+      "representative_timed_out": false,
+      "runs": [
+        {
+          "command": [
+            "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/base/relico-systematic-verifier"
+          ],
+          "cwd": "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/base",
+          "duration_ms": 192,
+          "exit_code": 0,
+          "repetition": 1,
+          "semantic_facts": {
+            "build_lines": [],
+            "count_facts": [],
+            "normalized_transcript": "<model-checking-report>\n<system-info>\n<total-spent-time>0</total-spent-time>\n<reached-states>6</reached-states>\n<reached-transitions>6</reached-transitions>\n<consumed-mem>72</consumed-mem>\n</system-info>\n<checked-property>\n<type>Reachability</type>\n<name>Deadlock-Freedom and No Deadline Missed</name>\n<result>deadlock</result>\n<options>\n<option>Safe mode is enabled</option>\n<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">1</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"5_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">1</variable>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n</state>\n</counter-example-trace>\n</model-checking-report>",
+            "normalized_transcript_sha256": "902681d6909deb41981bbe97938d0b8ffe3f8f6b968199c40873f0ef82c7e48d",
+            "source_echo_lines": [
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+              "<rebec name=\"workerA\">",
+              "<rebec name=\"workerB\">",
+              "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+              "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+              "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+              "<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ],
+            "strict_fact_count": 11,
+            "strict_signature_sha256": "7fc781feb15a283bf752061e22ab9d6d9c3747ef9a72b6698db07490ede45f76",
+            "trace_lines": [
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+              "<rebec name=\"observer\">",
+              "<rebec name=\"workerA\">",
+              "<rebec name=\"workerB\">",
+              "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+              "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+              "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+              "<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ],
+            "verdict_lines": []
+          },
+          "stderr_excerpt": "",
+          "stderr_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/base/run-1.stderr.txt",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_excerpt": "<model-checking-report>\n<system-info>\n\t<total-spent-time>0</total-spent-time>\n\t<reached-states>6</reached-states>\n\t<reached-transitions>6</reached-transitions>\n\t<consumed-mem>72</consumed-mem>\n</system-info>\n<checked-property>\n\t<type>Reachability</type>\n\t<name>Deadlock-Freedom and No Deadline Missed</name>\n\t<result>deadlock</result>\n<options>\n\t<option>Safe mode is enabled</option>\n\t<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">1</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"5_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>2147483647</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>2147483647</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">1</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>2147483647</now>\n\t</rebec>\n</state>\n</counter-example-trace>\n</model-checking-report>\n",
+          "stdout_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/base/run-1.stdout.txt",
+          "stdout_sha256": "b5cd05706defc0c47431bb04e5215b6993e7cf65557b875e30d93d9a6327a046",
+          "timed_out": false
+        },
+        {
+          "command": [
+            "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/base/relico-systematic-verifier"
+          ],
+          "cwd": "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/base",
+          "duration_ms": 155,
+          "exit_code": 0,
+          "repetition": 2,
+          "semantic_facts": {
+            "build_lines": [],
+            "count_facts": [],
+            "normalized_transcript": "<model-checking-report>\n<system-info>\n<total-spent-time>0</total-spent-time>\n<reached-states>6</reached-states>\n<reached-transitions>6</reached-transitions>\n<consumed-mem>72</consumed-mem>\n</system-info>\n<checked-property>\n<type>Reachability</type>\n<name>Deadlock-Freedom and No Deadline Missed</name>\n<result>deadlock</result>\n<options>\n<option>Safe mode is enabled</option>\n<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">1</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"5_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">1</variable>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n</state>\n</counter-example-trace>\n</model-checking-report>",
+            "normalized_transcript_sha256": "902681d6909deb41981bbe97938d0b8ffe3f8f6b968199c40873f0ef82c7e48d",
+            "source_echo_lines": [
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+              "<rebec name=\"workerA\">",
+              "<rebec name=\"workerB\">",
+              "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+              "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+              "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+              "<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ],
+            "strict_fact_count": 11,
+            "strict_signature_sha256": "7fc781feb15a283bf752061e22ab9d6d9c3747ef9a72b6698db07490ede45f76",
+            "trace_lines": [
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+              "<rebec name=\"observer\">",
+              "<rebec name=\"workerA\">",
+              "<rebec name=\"workerB\">",
+              "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+              "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+              "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+              "<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ],
+            "verdict_lines": []
+          },
+          "stderr_excerpt": "",
+          "stderr_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/base/run-2.stderr.txt",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_excerpt": "<model-checking-report>\n<system-info>\n\t<total-spent-time>0</total-spent-time>\n\t<reached-states>6</reached-states>\n\t<reached-transitions>6</reached-transitions>\n\t<consumed-mem>72</consumed-mem>\n</system-info>\n<checked-property>\n\t<type>Reachability</type>\n\t<name>Deadlock-Freedom and No Deadline Missed</name>\n\t<result>deadlock</result>\n<options>\n\t<option>Safe mode is enabled</option>\n\t<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">1</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"5_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>2147483647</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>2147483647</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">1</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>2147483647</now>\n\t</rebec>\n</state>\n</counter-example-trace>\n</model-checking-report>\n",
+          "stdout_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/base/run-2.stdout.txt",
+          "stdout_sha256": "b5cd05706defc0c47431bb04e5215b6993e7cf65557b875e30d93d9a6327a046",
+          "timed_out": false
+        },
+        {
+          "command": [
+            "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/base/relico-systematic-verifier"
+          ],
+          "cwd": "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/base",
+          "duration_ms": 137,
+          "exit_code": 0,
+          "repetition": 3,
+          "semantic_facts": {
+            "build_lines": [],
+            "count_facts": [],
+            "normalized_transcript": "<model-checking-report>\n<system-info>\n<total-spent-time>0</total-spent-time>\n<reached-states>6</reached-states>\n<reached-transitions>6</reached-transitions>\n<consumed-mem>72</consumed-mem>\n</system-info>\n<checked-property>\n<type>Reachability</type>\n<name>Deadlock-Freedom and No Deadline Missed</name>\n<result>deadlock</result>\n<options>\n<option>Safe mode is enabled</option>\n<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">1</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"5_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">1</variable>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n</state>\n</counter-example-trace>\n</model-checking-report>",
+            "normalized_transcript_sha256": "902681d6909deb41981bbe97938d0b8ffe3f8f6b968199c40873f0ef82c7e48d",
+            "source_echo_lines": [
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+              "<rebec name=\"workerA\">",
+              "<rebec name=\"workerB\">",
+              "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+              "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+              "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+              "<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ],
+            "strict_fact_count": 11,
+            "strict_signature_sha256": "7fc781feb15a283bf752061e22ab9d6d9c3747ef9a72b6698db07490ede45f76",
+            "trace_lines": [
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+              "<rebec name=\"observer\">",
+              "<rebec name=\"workerA\">",
+              "<rebec name=\"workerB\">",
+              "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+              "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+              "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+              "<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ],
+            "verdict_lines": []
+          },
+          "stderr_excerpt": "",
+          "stderr_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/base/run-3.stderr.txt",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_excerpt": "<model-checking-report>\n<system-info>\n\t<total-spent-time>0</total-spent-time>\n\t<reached-states>6</reached-states>\n\t<reached-transitions>6</reached-transitions>\n\t<consumed-mem>72</consumed-mem>\n</system-info>\n<checked-property>\n\t<type>Reachability</type>\n\t<name>Deadlock-Freedom and No Deadline Missed</name>\n\t<result>deadlock</result>\n<options>\n\t<option>Safe mode is enabled</option>\n\t<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">1</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"5_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>2147483647</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>2147483647</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">1</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>2147483647</now>\n\t</rebec>\n</state>\n</counter-example-trace>\n</model-checking-report>\n",
+          "stdout_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/base/run-3.stdout.txt",
+          "stdout_sha256": "b5cd05706defc0c47431bb04e5215b6993e7cf65557b875e30d93d9a6327a046",
+          "timed_out": false
+        }
+      ],
+      "strict_signature_hash_count": 1,
+      "variant": "base"
+    },
+    "reversed": {
+      "deterministic": false,
+      "executable": "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/reversed/relico-systematic-verifier",
+      "executable_sha256": "e6dc1cd67aff39d909a08aa27dda8b460d4fa0e88a9fccc297696a6ed338389b",
+      "exit_signature_count": 1,
+      "normalized_transcript_hash_count": 2,
+      "repetition_count": 3,
+      "representative_exit_code": 0,
+      "representative_semantic_facts": {
+        "build_lines": [],
+        "count_facts": [],
+        "normalized_transcript": "<model-checking-report>\n<system-info>\n<total-spent-time>0</total-spent-time>\n<reached-states>6</reached-states>\n<reached-transitions>6</reached-transitions>\n<consumed-mem>72</consumed-mem>\n</system-info>\n<checked-property>\n<type>Reachability</type>\n<name>Deadlock-Freedom and No Deadline Missed</name>\n<result>deadlock</result>\n<options>\n<option>Safe mode is enabled</option>\n<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">1</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"5_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">1</variable>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n</state>\n</counter-example-trace>\n</model-checking-report>",
+        "normalized_transcript_sha256": "0317ea4c9063558c7146923759a709b961db3398e4533a0656110b85010dcdc7",
+        "source_echo_lines": [
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+          "<rebec name=\"workerA\">",
+          "<rebec name=\"workerB\">",
+          "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+          "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+          "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+          "<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>"
+        ],
+        "strict_fact_count": 11,
+        "strict_signature_sha256": "1afa615479339e6a14842e70b5b8db77727f88d72d374c55a060caafd0b1894a",
+        "trace_lines": [
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+          "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+          "<rebec name=\"observer\">",
+          "<rebec name=\"workerA\">",
+          "<rebec name=\"workerB\">",
+          "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+          "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+          "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+          "<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>"
+        ],
+        "verdict_lines": []
+      },
+      "representative_timed_out": false,
+      "runs": [
+        {
+          "command": [
+            "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/reversed/relico-systematic-verifier"
+          ],
+          "cwd": "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/reversed",
+          "duration_ms": 125,
+          "exit_code": 0,
+          "repetition": 1,
+          "semantic_facts": {
+            "build_lines": [],
+            "count_facts": [],
+            "normalized_transcript": "<model-checking-report>\n<system-info>\n<total-spent-time>0</total-spent-time>\n<reached-states>6</reached-states>\n<reached-transitions>6</reached-transitions>\n<consumed-mem>72</consumed-mem>\n</system-info>\n<checked-property>\n<type>Reachability</type>\n<name>Deadlock-Freedom and No Deadline Missed</name>\n<result>deadlock</result>\n<options>\n<option>Safe mode is enabled</option>\n<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">1</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"5_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">1</variable>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n</state>\n</counter-example-trace>\n</model-checking-report>",
+            "normalized_transcript_sha256": "0317ea4c9063558c7146923759a709b961db3398e4533a0656110b85010dcdc7",
+            "source_echo_lines": [
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+              "<rebec name=\"workerA\">",
+              "<rebec name=\"workerB\">",
+              "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+              "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+              "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+              "<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ],
+            "strict_fact_count": 11,
+            "strict_signature_sha256": "1afa615479339e6a14842e70b5b8db77727f88d72d374c55a060caafd0b1894a",
+            "trace_lines": [
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+              "<rebec name=\"observer\">",
+              "<rebec name=\"workerA\">",
+              "<rebec name=\"workerB\">",
+              "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+              "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+              "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+              "<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ],
+            "verdict_lines": []
+          },
+          "stderr_excerpt": "",
+          "stderr_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/reversed/run-1.stderr.txt",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_excerpt": "<model-checking-report>\n<system-info>\n\t<total-spent-time>0</total-spent-time>\n\t<reached-states>6</reached-states>\n\t<reached-transitions>6</reached-transitions>\n\t<consumed-mem>72</consumed-mem>\n</system-info>\n<checked-property>\n\t<type>Reachability</type>\n\t<name>Deadlock-Freedom and No Deadline Missed</name>\n\t<result>deadlock</result>\n<options>\n\t<option>Safe mode is enabled</option>\n\t<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">1</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"5_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>2147483647</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>2147483647</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">1</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>2147483647</now>\n\t</rebec>\n</state>\n</counter-example-trace>\n</model-checking-report>\n",
+          "stdout_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/reversed/run-1.stdout.txt",
+          "stdout_sha256": "5b673079b36bb562ec4002f683534056b5214b7bf75f1b0f5bfb796a28f9a937",
+          "timed_out": false
+        },
+        {
+          "command": [
+            "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/reversed/relico-systematic-verifier"
+          ],
+          "cwd": "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/reversed",
+          "duration_ms": 129,
+          "exit_code": 0,
+          "repetition": 2,
+          "semantic_facts": {
+            "build_lines": [],
+            "count_facts": [],
+            "normalized_transcript": "<model-checking-report>\n<system-info>\n<total-spent-time>0</total-spent-time>\n<reached-states>6</reached-states>\n<reached-transitions>6</reached-transitions>\n<consumed-mem>72</consumed-mem>\n</system-info>\n<checked-property>\n<type>Reachability</type>\n<name>Deadlock-Freedom and No Deadline Missed</name>\n<result>deadlock</result>\n<options>\n<option>Safe mode is enabled</option>\n<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">1</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"5_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">1</variable>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n</state>\n</counter-example-trace>\n</model-checking-report>",
+            "normalized_transcript_sha256": "0317ea4c9063558c7146923759a709b961db3398e4533a0656110b85010dcdc7",
+            "source_echo_lines": [
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+              "<rebec name=\"workerA\">",
+              "<rebec name=\"workerB\">",
+              "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+              "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+              "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+              "<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ],
+            "strict_fact_count": 11,
+            "strict_signature_sha256": "1afa615479339e6a14842e70b5b8db77727f88d72d374c55a060caafd0b1894a",
+            "trace_lines": [
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+              "<rebec name=\"observer\">",
+              "<rebec name=\"workerA\">",
+              "<rebec name=\"workerB\">",
+              "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+              "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+              "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+              "<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ],
+            "verdict_lines": []
+          },
+          "stderr_excerpt": "",
+          "stderr_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/reversed/run-2.stderr.txt",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_excerpt": "<model-checking-report>\n<system-info>\n\t<total-spent-time>0</total-spent-time>\n\t<reached-states>6</reached-states>\n\t<reached-transitions>6</reached-transitions>\n\t<consumed-mem>72</consumed-mem>\n</system-info>\n<checked-property>\n\t<type>Reachability</type>\n\t<name>Deadlock-Freedom and No Deadline Missed</name>\n\t<result>deadlock</result>\n<options>\n\t<option>Safe mode is enabled</option>\n\t<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">1</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"5_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>2147483647</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>2147483647</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">1</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>2147483647</now>\n\t</rebec>\n</state>\n</counter-example-trace>\n</model-checking-report>\n",
+          "stdout_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/reversed/run-2.stdout.txt",
+          "stdout_sha256": "5b673079b36bb562ec4002f683534056b5214b7bf75f1b0f5bfb796a28f9a937",
+          "timed_out": false
+        },
+        {
+          "command": [
+            "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/reversed/relico-systematic-verifier"
+          ],
+          "cwd": "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/reversed",
+          "duration_ms": 129,
+          "exit_code": 0,
+          "repetition": 3,
+          "semantic_facts": {
+            "build_lines": [],
+            "count_facts": [],
+            "normalized_transcript": "<model-checking-report>\n<system-info>\n<total-spent-time>1</total-spent-time>\n<reached-states>6</reached-states>\n<reached-transitions>6</reached-transitions>\n<consumed-mem>72</consumed-mem>\n</system-info>\n<checked-property>\n<type>Reachability</type>\n<name>Deadlock-Freedom and No Deadline Missed</name>\n<result>deadlock</result>\n<options>\n<option>Safe mode is enabled</option>\n<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">0</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>0</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">1</variable>\n</statevariables>\n<queue>\n<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n</queue>\n<now>0</now>\n</rebec>\n</state>\n<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"5_0\" atomicpropositions=\"\" >\n<rebec name=\"workerA\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n<rebec name=\"workerB\">\n<statevariables>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n<rebec name=\"observer\">\n<statevariables>\n<variable name=\"Observer.first\" type=\"int\">1</variable>\n</statevariables>\n<queue>\n</queue>\n<now>2147483647</now>\n</rebec>\n</state>\n</counter-example-trace>\n</model-checking-report>",
+            "normalized_transcript_sha256": "971e2ee8da52d8c3743b53c9d14fa196a30a46d4f38093827b482b165c09f279",
+            "source_echo_lines": [
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+              "<rebec name=\"workerA\">",
+              "<rebec name=\"workerB\">",
+              "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+              "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+              "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+              "<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ],
+            "strict_fact_count": 11,
+            "strict_signature_sha256": "1afa615479339e6a14842e70b5b8db77727f88d72d374c55a060caafd0b1894a",
+            "trace_lines": [
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>",
+              "<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>",
+              "<rebec name=\"observer\">",
+              "<rebec name=\"workerA\">",
+              "<rebec name=\"workerB\">",
+              "<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>",
+              "<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>",
+              "<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>",
+              "<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>"
+            ],
+            "verdict_lines": []
+          },
+          "stderr_excerpt": "",
+          "stderr_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/reversed/run-3.stderr.txt",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_excerpt": "<model-checking-report>\n<system-info>\n\t<total-spent-time>1</total-spent-time>\n\t<reached-states>6</reached-states>\n\t<reached-transitions>6</reached-transitions>\n\t<consumed-mem>72</consumed-mem>\n</system-info>\n<checked-property>\n\t<type>Reachability</type>\n\t<name>Deadlock-Freedom and No Deadline Missed</name>\n\t<result>deadlock</result>\n<options>\n\t<option>Safe mode is enabled</option>\n\t<option>FTTS</option>\n</options>\n</checked-property>\n<counter-example-trace>\n<state id=\"1_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"1_0\" destination=\"2_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"workerB\" title=\"FIRE\"/></transition>\n<state id=\"2_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">fire()</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"2_0\" destination=\"3_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"workerA\" title=\"FIRE\"/></transition>\n<state id=\"3_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">0</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerA\">hit(1)</message>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"3_0\" destination=\"4_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerA\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"4_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">1</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t\t<message arrival=\"0\" deadline=\"infinity\" sender=\"workerB\">hit(2)</message>\n\t\t</queue>\n\t\t<now>0</now>\n\t</rebec>\n</state>\n<transition source=\"4_0\" destination=\"5_0\" executionTime=\"0\" shift=\"0\"> <messageserver sender=\"workerB\" owner=\"observer\" title=\"HIT\"/></transition>\n<state id=\"5_0\" atomicpropositions=\"\" >\n\t<rebec name=\"workerA\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>2147483647</now>\n\t</rebec>\n\t<rebec name=\"workerB\">\n\t\t<statevariables>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>2147483647</now>\n\t</rebec>\n\t<rebec name=\"observer\">\n\t\t<statevariables>\n\t\t\t<variable name=\"Observer.first\" type=\"int\">1</variable>\n\t\t</statevariables>\n\t\t<queue>\n\t\t</queue>\n\t\t<now>2147483647</now>\n\t</rebec>\n</state>\n</counter-example-trace>\n</model-checking-report>\n",
+          "stdout_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/reversed/run-3.stdout.txt",
+          "stdout_sha256": "cac66006c3559eb98eea28a8242fae955c0bac00f7d73312fe7106ac73dd98b4",
+          "timed_out": false
+        }
+      ],
+      "strict_signature_hash_count": 1,
+      "variant": "reversed"
+    }
+  }
+}

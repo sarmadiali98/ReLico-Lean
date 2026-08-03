@@ -1,0 +1,13 @@
+test_id	property	result
+empty-assignment	empty assignment remains empty	pass
+base-assignment	base actor names and numeric values are preserved	pass
+absent-request	none remains none	pass
+present-base-request	present base request remains present	pass
+base-reversed-discrimination	base and reversed requests compile differently	pass
+tie-preservation	equal priorities remain equal target orders	pass
+incomplete-assignment	incomplete assignments remain incomplete	pass
+present-empty-request	some empty assignment is not collapsed to none	pass
+ready-actor-name	ready actor name is preserved	pass
+ready-actor-time	ready actor logical time is preserved	pass
+ready-list	ready-list order and entries are preserved	pass
+assignment-length	assignment entries are neither invented nor dropped	pass

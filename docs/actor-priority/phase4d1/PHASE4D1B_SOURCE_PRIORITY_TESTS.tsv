@@ -1,0 +1,11 @@
+test_id	property	result
+base-selection	base assignment selects workerAName	pass
+reversed-selection	reversed assignment selects workerBName	pass
+tied-selection	tied priorities retain both actors	pass
+absent-request	absent request retains both earliest actors	pass
+incomplete-request	incomplete request retains uncovered actors	pass
+logical-time-precedence	later actor is excluded before priority comparison	pass
+actor-not-ready	workerCName is ineligible when absent from ready set	pass
+base-ineligible-worker-b	workerBName is ineligible under base priorities	pass
+wrapper-introduction	eligible actor wraps existing chosen-actor Step	pass
+wrapper-elimination	wrapper exposes eligibility and existing Step	pass

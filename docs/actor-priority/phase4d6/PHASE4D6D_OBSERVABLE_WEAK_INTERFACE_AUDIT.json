@@ -1,0 +1,62 @@
+{
+  "baseline": {
+    "full_lake_build_jobs": 474,
+    "strong_finite_dispatch_correspondence_complete": true
+  },
+  "bound_interface": {
+    "actor_trace_projection": "frames.map ActorDispatchFrame.actorName",
+    "backward_finite_theorem": "targetActorOrderDispatchSteps_backward",
+    "event_trace_correspondence": "ActorDispatchEventTraceCorresponds",
+    "forward_finite_theorem": "sourceActorPriorityDispatchSteps_forward",
+    "shared_frame_relation": true
+  },
+  "inventory": {
+    "actor_observable_declaration_count": 2,
+    "actor_weak_declaration_count": 0,
+    "candidate_file_count": 97,
+    "detailed_observable_declaration_count": 113,
+    "detailed_weak_declaration_count": 173,
+    "relevant_declaration_count": 401,
+    "top_candidate_path": "Relico/Correctness/GlobalMultiStorePayloadActorFiniteExecution.lean",
+    "top_candidate_score": 77
+  },
+  "phase": "phase4d6d2-canonical-fingerprint-observable-weak-interface-audit",
+  "progress": {
+    "overall_after_percent": 83,
+    "overall_before_percent": 82,
+    "overall_change_percentage_points": 1,
+    "overall_remaining_percent": 17
+  },
+  "repair": {
+    "canonical_fingerprint_domain_separator_restored": true,
+    "python_summary_writer_indentation_corrected": true
+  },
+  "result": {
+    "classification": "ACTOR_DISPATCH_OBSERVABLE_PROJECTION_BOUND_FULL_WEAK_RUNTIME_INTEGRATION_SEPARATE",
+    "next_phase": "phase4d6e-actor-dispatch-observable-projection-proof-search"
+  },
+  "schema_version": 1,
+  "semantic_scope": {
+    "actor_dispatch_observable_projection_proved": false,
+    "actor_dispatch_observable_projection_ready": true,
+    "dispatch_layer_stuttering_present": false,
+    "final_actor_priority_equivalence_complete": false,
+    "frontend_integration_complete": false,
+    "full_detailed_weak_runtime_correspondence_proved": false,
+    "full_detailed_weak_runtime_correspondence_ready": false
+  },
+  "timestamp": "20260803T175115+0330",
+  "validation": {
+    "baseline_build_passed": true,
+    "canonical_readme_mutated": false,
+    "committed": false,
+    "correctness_modules_mutated": false,
+    "finite_production_interface_probe_passed": true,
+    "original_repository_mutated": false,
+    "pushed": false,
+    "sorryAx_dependency": false,
+    "source_modules_mutated": false,
+    "staged": false,
+    "test_modules_mutated": false
+  }
+}

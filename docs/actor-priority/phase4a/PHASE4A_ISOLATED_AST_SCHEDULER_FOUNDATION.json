@@ -1,0 +1,170 @@
+{
+  "approach_a_status": "current_profile_exclusion_mechanically_enforced",
+  "approach_b_status": "isolated_ast_scheduler_foundation_passed_not_integrated",
+  "claim_status": {
+    "claim_a": "OUTSIDE CURRENT FRAGMENT",
+    "claim_b": "NO",
+    "claim_b_scope": "current single-main-actor payload frontend and Lean boundary only",
+    "claim_c": "CONDITIONAL",
+    "claim_d": "YES",
+    "claim_e": "NOT YET PROVED",
+    "claim_f": "NOT YET PROVED",
+    "claim_g": "CONDITIONAL"
+  },
+  "dependency_resolution": {
+    "boundary_olean": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/.lake/build/lib/lean/Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.olean",
+    "boundary_olean_sha256": "6c688b6461ca84c3ece9aa8872538a5884f9331ca971d43363ea2433ad0a867d",
+    "model_object_location_during_test": ".lake/build/lib/lean/Relico/Investigation/ActorPriority/IsolatedScheduler.olean",
+    "temporary_project_object_remaining": false
+  },
+  "evidence": {
+    "build_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4A-Build-Object-Repair-20260802T201124+0330/lake-build.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "build_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4A-Build-Object-Repair-20260802T201124+0330/lake-build.stdout.txt",
+      "sha256": "84381ef727bca08d0563fa85e977935b666551e75546806ed74f477103900c33"
+    },
+    "model_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4A-Build-Object-Repair-20260802T201124+0330/model-elaboration.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "model_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4A-Build-Object-Repair-20260802T201124+0330/model-elaboration.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "test_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4A-Build-Object-Repair-20260802T201124+0330/test-elaboration.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "test_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4A-Build-Object-Repair-20260802T201124+0330/test-elaboration.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "final_actor_priority_necessity_conclusion": "not_yet_reached",
+  "integration_status": {
+    "benchmark_registry": false,
+    "equivalence_theorem": false,
+    "lf_encoding": false,
+    "production_dtr_global_semantics": false,
+    "production_frontend": false,
+    "production_translation": false
+  },
+  "mechanical_findings": {
+    "absence_retains_both": true,
+    "base_selects_workera": true,
+    "priority_reversal_changes_eligible_set": true,
+    "reversed_selects_workerb": true,
+    "tie_retains_both": true
+  },
+  "model": {
+    "path": "Relico/Investigation/ActorPriority/IsolatedScheduler.lean",
+    "sha256": "52aee28be03df365ca04d91bf00e0aed236178eb9ec561a7c00d01cc4d6a3699"
+  },
+  "next_phase": "phase4b-approach-b-integration-surface-and-proof-obligation-audit",
+  "phase": "phase4a-approach-b-isolated-ast-and-scheduler-foundation",
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "recovery": {
+    "existing_lean_sources_overwritten": false,
+    "existing_lean_sources_preserved": true,
+    "missing_reports_installed": 3,
+    "previous_failure": "the model olean was stored under a temporary package root, so its transitive project dependency was resolved under that root",
+    "previous_model_elaboration_passed": true,
+    "previous_test_elaboration_failed": true,
+    "repair": "temporarily compile the model into Lake's normal project object tree, elaborate the test, then remove the temporary project object",
+    "temporary_project_build_object_removed": true
+  },
+  "schema_version": 1,
+  "test_module": {
+    "path": "Relico/Tests/ActorPriorityIsolatedScheduler.lean",
+    "sha256": "fa01ba9346aa5902a7c96968ea8e73fff14fdd73a7115f781951d31ad0ccf629",
+    "test_count": 12,
+    "tests": [
+      {
+        "expected": "true",
+        "property": "both actors have the same logical time",
+        "request": "base",
+        "test_id": "simultaneous-ready-pair"
+      },
+      {
+        "expected": "true",
+        "property": "the base request covers both actors",
+        "request": "base",
+        "test_id": "base-request-covers-pair"
+      },
+      {
+        "expected": "true",
+        "property": "complete simultaneous priority selection is enabled",
+        "request": "base",
+        "test_id": "base-selection-enabled"
+      },
+      {
+        "expected": "workera=1",
+        "property": "priority lookup preserves the assignment",
+        "request": "base",
+        "test_id": "base-priority-lookup"
+      },
+      {
+        "expected": "workera-precedes-workerb",
+        "property": "lower numeric priority strictly precedes",
+        "request": "base",
+        "test_id": "base-strict-order"
+      },
+      {
+        "expected": "workera",
+        "property": "base priorities select workera",
+        "request": "base",
+        "test_id": "base-eligible-set"
+      },
+      {
+        "expected": "workerb",
+        "property": "reversing priorities selects workerb",
+        "request": "reversed",
+        "test_id": "reversed-eligible-set"
+      },
+      {
+        "expected": "workera,workerb",
+        "property": "tied minimal priorities retain both actors",
+        "request": "tie",
+        "test_id": "tie-eligible-set"
+      },
+      {
+        "expected": "workera,workerb",
+        "property": "absence imposes no actor-priority order",
+        "request": "absent",
+        "test_id": "absent-eligible-set"
+      },
+      {
+        "expected": "false",
+        "property": "an empty assignment does not cover ready actors",
+        "request": "explicit-empty",
+        "test_id": "explicit-empty-coverage"
+      },
+      {
+        "expected": "workera,workerb",
+        "property": "uncovered metadata creates no strict order",
+        "request": "explicit-empty",
+        "test_id": "explicit-empty-eligible-set"
+      },
+      {
+        "expected": "different-eligible-sets",
+        "property": "priority reversal changes the eligible actor set",
+        "request": "base-vs-reversed",
+        "test_id": "reversal-discriminates"
+      }
+    ]
+  },
+  "validation": {
+    "closed_examples_passed": true,
+    "full_lake_build_passed": true,
+    "model_elaboration_passed": true,
+    "temporary_project_object_removed": true,
+    "test_elaboration_passed": true,
+    "trust_audit_passed": true
+  }
+}

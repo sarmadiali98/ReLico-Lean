@@ -1,0 +1,1377 @@
+path	line	declaration_kind	declaration_name	matched_terms	source_line
+Relico/Correctness/DetailedBoundPayloadEndToEndCorrectness.lean	28			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadEndToEndCorrectness.lean	32			priority	DTR.BoundPayloadBody.priorityTimingWellFormed_nil
+Relico/Correctness/DetailedBoundPayloadEndToEndCorrectness.lean	129			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadEndToEndCorrectness.lean	133			priority	DTR.BoundPayloadBody.priorityTimingWellFormed_nil
+Relico/Correctness/DetailedBoundPayloadEndToEndCorrectness.lean	363			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadEndToEndCorrectness.lean	447			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadEndToEndCorrectness.lean	711			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadEndToEndCorrectness.lean	1015			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadInvariantCarryingFiniteWeakExecution.lean	84			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadInvariantCarryingFiniteWeakExecution.lean	99			priority	(boundPayloadStep_preserves_priorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadInvariantCarryingFiniteWeakExecution.lean	107			priority	(boundPayloadDispatch_establishes_priorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadInvariantCarryingFiniteWeakExecution.lean	120			priority	(boundPayloadDispatch_establishes_priorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadInvariantCarryingFiniteWeakExecution.lean	163			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadInvariantCarryingFiniteWeakExecution.lean	814			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadInvariantMatches.lean	26			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadInvariantMatches.lean	35			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadInvariantMatches.lean	128			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadInvariantMatches.lean	152			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariant.lean	2			priority	import Relico.Correctness.PriorityEligibility
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	32			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	95			priority	DTR.BoundPayloadStmt.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	101			priority	((DTR.BoundPayloadBody.priorityTimingWellFormed_cons
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	112			priority	(DTR.BoundPayloadStmt.priorityTimingWellFormed_selfSendInt
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	130	theorem	boundPayloadStep_preserves_priorityTimingWellFormed	priority	theorem boundPayloadStep_preserves_priorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	141			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	143			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	162			priority	DTR.BoundPayloadBody.priorityTimingWellFormed_tail
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	195			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	381	theorem	boundPayloadDispatch_establishes_priorityTimingWellFormed	priority	theorem boundPayloadDispatch_establishes_priorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	392			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	394			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	429			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	447			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	464			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	467			priority	boundPayloadStep_preserves_priorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	515			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	533			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	562			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Correctness/DetailedBoundPayloadRuntimeInvariantPreservation.lean	565			priority	boundPayloadDispatch_establishes_priorityTimingWellFormed
+Relico/Correctness/DetailedExecutableTranslation.lean	44			priority	DTR.MultiStoreModel.PriorityTimingWellFormed
+Relico/Correctness/DetailedExecutableTranslation.lean	137			priority	DTR.MultiStoreModel.PriorityTimingWellFormed
+Relico/Correctness/DetailedInitialFiniteWeakExecution.lean	3			priority	import Relico.DTR.PriorityTimingWellFormed
+Relico/Correctness/DetailedInitialFiniteWeakExecution.lean	32			priority	A structurally well-formed source model satisfying the priority timing
+Relico/Correctness/DetailedInitialFiniteWeakExecution.lean	41			priority	DTR.MultiStoreModel.PriorityTimingWellFormed
+Relico/Correctness/DetailedInitialFiniteWeakExecution.lean	71			priority	LF.MultiStoreProgram.initialState_priorityRuntimeInvariant
+Relico/Correctness/DetailedInitialFiniteWeakExecution.lean	81			priority	positive-delay priority timing assumption.
+Relico/Correctness/DetailedInitialFiniteWeakExecution.lean	104			priority	DTR.MultiStoreModel.PriorityTimingWellFormed
+Relico/Correctness/DetailedInitialFiniteWeakExecution.lean	189			priority	DTR.MultiStoreModel.PriorityTimingWellFormed
+Relico/Correctness/DetailedInvariantCarryingBackwardMatch.lean	66			priority	targetMultiStoreMachineStep_preserves_priorityRuntimeInvariant
+Relico/Correctness/DetailedInvariantCarryingBackwardMatch.lean	95			priority	targetMultiStoreMachineStep_preserves_priorityRuntimeInvariant
+Relico/Correctness/DetailedInvariantCarryingBackwardMatch.lean	156			priority	LF.StoreState.PriorityRuntimeInvariant
+Relico/Correctness/DetailedInvariantCarryingBackwardMatch.lean	159			priority	targetMultiStoreMachineStep_preserves_priorityRuntimeInvariant
+Relico/Correctness/DetailedInvariantCarryingBackwardMatch.lean	212			priority	targetMultiStoreMachineStep_preserves_priorityRuntimeInvariant
+Relico/Correctness/DetailedInvariantCarryingBackwardMatch.lean	249			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Correctness/DetailedInvariantCarryingBackwardMatch.lean	309			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Correctness/DetailedInvariantCarryingBackwardMatch.lean	460			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Correctness/DetailedInvariantCarryingFiniteWeakExecution.lean	62			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Correctness/DetailedInvariantCarryingFiniteWeakExecution.lean	222			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Correctness/DetailedInvariantCarryingForwardMatch.lean	104			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Correctness/DetailedInvariantCarryingForwardMatch.lean	215			priority	storeForwardDispatchCompatible_of_priorityRuntimeInvariant
+Relico/Correctness/DetailedInvariantCarryingForwardMatch.lean	444			priority	storeForwardDispatchCompatible_of_priorityRuntimeInvariant
+Relico/Correctness/DetailedInvariantMatches.lean	68			priority	storeForwardDispatchCompatible_of_priorityRuntimeInvariant
+Relico/Correctness/DetailedInvariantMatches.lean	102			priority	storeForwardDispatchCompatible_of_priorityRuntimeInvariant
+Relico/Correctness/DetailedMultiStoreRefinement.lean	154			priority	hPriorityEligible
+Relico/Correctness/DetailedMultiStoreRefinement.lean	501			priority	hPriorityEligible
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	2			priority	import Relico.Correctness.PriorityEligibility
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	3			priority	import Relico.Correctness.PriorityMachineTiming
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	15			priority	priority-sensitive fragment.
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	22	structure	PriorityRuntimeInvariant	priority	structure PriorityRuntimeInvariant
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	42	theorem	initialState_priorityRuntimeInvariant	priority	theorem initialState_priorityRuntimeInvariant
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	44			priority	LF.StoreState.PriorityRuntimeInvariant
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	137			priority	hPriorityEligible
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	149			priority	priority runtime invariant.
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	155	theorem	targetMultiStoreMachineStep_preserves_priorityRuntimeInvariant	priority	theorem targetMultiStoreMachineStep_preserves_priorityRuntimeInvariant
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	176			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	179			priority	LF.StoreState.PriorityRuntimeInvariant
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	181			priority	LF.StoreState.PriorityRuntimeInvariant
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	200			priority	A source priority-aware dispatch from corresponding states automatically
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	202			priority	target priority runtime invariant holds.
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	211	theorem	storeForwardDispatchCompatible_of_priorityRuntimeInvariant	priority	theorem storeForwardDispatchCompatible_of_priorityRuntimeInvariant
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	229			priority	LF.StoreState.PriorityRuntimeInvariant
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	247			priority	hPriorityEligible
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	278			priority	(DTR.IsPriorityEligible.isEarliest
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	279			priority	hPriorityEligible)
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	340			priority	full target priority runtime invariant.
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	361			priority	LF.StoreState.PriorityRuntimeInvariant
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	379			priority	storeForwardDispatchCompatible_of_priorityRuntimeInvariant
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	387			priority	premise from the full target priority runtime invariant.
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	408			priority	LF.StoreState.PriorityRuntimeInvariant
+Relico/Correctness/DetailedPriorityRuntimeInvariant.lean	423			priority	storeForwardDispatchCompatible_of_priorityRuntimeInvariant
+Relico/Correctness/DetailedRuntimeInvariants.lean	1			priority	import Relico.Correctness.DetailedPriorityRuntimeInvariant
+Relico/Correctness/DetailedRuntimeInvariants.lean	32			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Correctness/DetailedRuntimeInvariants.lean	46			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Correctness/DetailedRuntimeInvariants.lean	51			priority	positive-delay priority fragment.
+Relico/Correctness/DetailedRuntimeInvariants.lean	53			priority	Stable states and `afterTime` states carry the full priority runtime
+Relico/Correctness/DetailedRuntimeInvariants.lean	71			priority	LF.StoreState.PriorityRuntimeInvariant
+Relico/Correctness/DetailedRuntimeInvariants.lean	81			priority	LF.StoreState.PriorityRuntimeInvariant
+Relico/Correctness/DetailedRuntimeInvariants.lean	106			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Correctness/DetailedRuntimeInvariants.lean	138			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Correctness/DetailedRuntimeInvariants.lean	150			priority	LF.StoreState.PriorityRuntimeInvariant
+Relico/Correctness/DetailedRuntimeInvariants.lean	177			priority	LF.StoreState.PriorityRuntimeInvariant
+Relico/Correctness/DetailedRuntimeInvariants.lean	246			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Correctness/DetailedRuntimeInvariants.lean	267			priority	DTR.MultiStoreMachineStep.preserves_priorityTimingWellFormed
+Relico/Correctness/DetailedRuntimeInvariants.lean	280			priority	DTR.MultiStoreMachineStep.preserves_priorityTimingWellFormed
+Relico/Correctness/DetailedRuntimeInvariants.lean	303			priority	DTR.MultiStoreMachineStep.preserves_priorityTimingWellFormed
+Relico/Correctness/DirectLFBackwardDispatchRuntime.lean	14			priority	- LF and DTR priority eligibility;
+Relico/Correctness/DirectLFBackwardDispatchRuntime.lean	59			priority	3. transports LF reaction-priority eligibility to DTR priority eligibility;
+Relico/Correctness/DirectLFBackwardDispatchRuntime.lean	120			priority	hTargetPriorityEligible
+Relico/Correctness/DirectLFBackwardDispatchRuntime.lean	169			priority	hSourcePriorityEligible,
+Relico/Correctness/DirectLFBackwardDispatchRuntime.lean	174			priority	hTargetPriorityEligible
+Relico/Correctness/DirectLFBackwardDispatchRuntime.lean	299			priority	hSourcePriorityEligible
+Relico/Correctness/DirectLFBackwardDispatchRuntime.lean	358			priority	hTargetPriorityEligible.1
+Relico/Correctness/DirectLFDispatchSelection.lean	8			priority	with one corresponding LF action occurrence that is reaction-priority
+Relico/Correctness/DirectLFDispatchSelection.lean	12			priority	with one corresponding DTR message occurrence that is source-priority
+Relico/Correctness/DirectLFDispatchSelection.lean	190			priority	DTR.IsPriorityEligible
+Relico/Correctness/DirectLFDispatchSelection.lean	202			priority	LF.IsReactionPriorityEligible
+Relico/Correctness/DirectLFDispatchSelection.lean	233			priority	directLF_sourcePriorityEligible_implies_exists_targetReactionPriorityEligible
+Relico/Correctness/DirectLFDispatchSelection.lean	375			priority	DirectLFStrictPriorityPrecedes
+Relico/Correctness/DirectLFDispatchSelection.lean	382			priority	DirectLFStrictPriorityPrecedes
+Relico/Correctness/DirectLFDispatchSelection.lean	395			priority	DirectLFStrictPriorityPrecedes
+Relico/Correctness/DirectLFDispatchSelection.lean	402			priority	DirectLFStrictPriorityPrecedes
+Relico/Correctness/DirectLFDispatchSelection.lean	422			priority	LF.IsReactionPriorityEligible
+Relico/Correctness/DirectLFDispatchSelection.lean	485			priority	Synchronize target occurrence removal with source priority eligibility.
+Relico/Correctness/DirectLFDispatchSelection.lean	491			priority	DTR priority eligibility is insensitive to payload and transfers directly.
+Relico/Correctness/DirectLFDispatchSelection.lean	513			priority	LF.IsReactionPriorityEligible
+Relico/Correctness/DirectLFDispatchSelection.lean	526			priority	DTR.IsPriorityEligible
+Relico/Correctness/DirectLFDispatchSelection.lean	556			priority	directLF_targetReactionPriorityEligible_implies_exists_sourcePriorityEligible
+Relico/Correctness/DirectLFDispatchSelection.lean	576			priority	DTR.IsPriorityEligible
+Relico/Correctness/DirectLFDispatchSelection.lean	582			priority	DTR.IsPriorityEligible,
+Relico/Correctness/DirectLFForwardDispatchRuntime.lean	38			priority	removal that is reaction-priority eligible;
+Relico/Correctness/DirectLFPayloadBackwardDispatchRuntime.lean	14			priority	- LF and DTR priority eligibility;
+Relico/Correctness/DirectLFPayloadBackwardDispatchRuntime.lean	59			priority	3. transports LF reaction-priority eligibility to DTR priority eligibility;
+Relico/Correctness/DirectLFPayloadBackwardDispatchRuntime.lean	120			priority	hTargetPriorityEligible
+Relico/Correctness/DirectLFPayloadBackwardDispatchRuntime.lean	169			priority	hSourcePriorityEligible,
+Relico/Correctness/DirectLFPayloadBackwardDispatchRuntime.lean	174			priority	hTargetPriorityEligible
+Relico/Correctness/DirectLFPayloadBackwardDispatchRuntime.lean	299			priority	hSourcePriorityEligible
+Relico/Correctness/DirectLFPayloadBackwardDispatchRuntime.lean	358			priority	hTargetPriorityEligible.1
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	26			priority	strict source-priority cycle for equal source names.
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	176			priority	DirectLFStrictPriorityPrecedes
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	183			priority	DirectLFStrictPriorityPrecedes
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	196			priority	DirectLFStrictPriorityPrecedes
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	203			priority	DirectLFStrictPriorityPrecedes
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	221			priority	Transfer LF reaction-priority eligibility between two actions that correspond
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	224	theorem	directLF_reactionPriorityEligible_of_sameSource	priority	theorem directLF_reactionPriorityEligible_of_sameSource
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	248			priority	LF.IsReactionPriorityEligible
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	253			priority	LF.IsReactionPriorityEligible
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	326			priority	LF reaction-priority eligibility, and payload-aware residual compatibility.
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	344			priority	DTR.IsPriorityEligible
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	356			priority	LF.IsReactionPriorityEligible
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	393			priority	directLF_sourcePriorityEligible_implies_exists_targetReactionPriorityEligible
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	404			priority	LF.IsReactionPriorityEligible
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	409			priority	directLF_reactionPriorityEligible_of_sameSource
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	427			priority	DTR priority eligibility, and payload-aware residual compatibility.
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	445			priority	LF.IsReactionPriorityEligible
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	458			priority	DTR.IsPriorityEligible
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	494			priority	directLF_targetReactionPriorityEligible_implies_exists_sourcePriorityEligible
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	514			priority	DTR.IsPriorityEligible
+Relico/Correctness/DirectLFPayloadDispatchSelection.lean	520			priority	DTR.IsPriorityEligible,
+Relico/Correctness/DirectLFPayloadForwardDispatchRuntime.lean	38			priority	removal that is reaction-priority eligible;
+Relico/Correctness/DirectLFPayloadSelectionCompatibility.lean	338			priority	* the approved DirectLF non-overtaking and priority compatibility proof; and
+Relico/Correctness/DirectLFSelectionCompatibility.lean	7			priority	complete-tag order must not contradict DTR message-server priority among
+Relico/Correctness/DirectLFSelectionCompatibility.lean	15			priority	import Relico.Correctness.PriorityOrder
+Relico/Correctness/DirectLFSelectionCompatibility.lean	16			priority	import Relico.DTR.MultiStorePriorityScheduling
+Relico/Correctness/DirectLFSelectionCompatibility.lean	27			priority	`DTR.PriorityServerNamePrecedesOrEqual`.
+Relico/Correctness/DirectLFSelectionCompatibility.lean	29	def	DirectLFStrictPriorityPrecedes	priority	def DirectLFStrictPriorityPrecedes
+Relico/Correctness/DirectLFSelectionCompatibility.lean	33			priority	DTR.PriorityServerNamePrecedesOrEqual
+Relico/Correctness/DirectLFSelectionCompatibility.lean	37			priority	¬DTR.PriorityServerNamePrecedesOrEqual
+Relico/Correctness/DirectLFSelectionCompatibility.lean	42	theorem	DirectLFStrictPriorityPrecedes.precedes	priority	theorem DirectLFStrictPriorityPrecedes.precedes
+Relico/Correctness/DirectLFSelectionCompatibility.lean	46			priority	DirectLFStrictPriorityPrecedes
+Relico/Correctness/DirectLFSelectionCompatibility.lean	50			priority	DTR.PriorityServerNamePrecedesOrEqual
+Relico/Correctness/DirectLFSelectionCompatibility.lean	56	theorem	DirectLFStrictPriorityPrecedes.not_reverse	priority	theorem DirectLFStrictPriorityPrecedes.not_reverse
+Relico/Correctness/DirectLFSelectionCompatibility.lean	60			priority	DirectLFStrictPriorityPrecedes
+Relico/Correctness/DirectLFSelectionCompatibility.lean	64			priority	¬DTR.PriorityServerNamePrecedesOrEqual
+Relico/Correctness/DirectLFSelectionCompatibility.lean	79			priority	* an earlier LF microstep must correspond to a strictly higher-priority DTR
+Relico/Correctness/DirectLFSelectionCompatibility.lean	105			priority	DirectLFStrictPriorityPrecedes
+Relico/Correctness/DirectLFSelectionCompatibility.lean	114			priority	DirectLFStrictPriorityPrecedes
+Relico/Correctness/DirectLFSelectionCompatibility.lean	275			priority	(hPriority :
+Relico/Correctness/DirectLFSelectionCompatibility.lean	276			priority	DirectLFStrictPriorityPrecedes
+Relico/Correctness/DirectLFSelectionCompatibility.lean	294			priority	hPriority⟩))⟩
+Relico/Correctness/DirectLFSelectionCompatibility.lean	296	theorem	DirectLFPairSelectionCompatible.strictPriority_of_leftEarlier	priority	theorem DirectLFPairSelectionCompatible.strictPriority_of_leftEarlier
+Relico/Correctness/DirectLFSelectionCompatibility.lean	313			priority	DirectLFStrictPriorityPrecedes
+Relico/Correctness/DirectLFSelectionCompatibility.lean	346	theorem	DirectLFPairSelectionCompatible.strictPriority_of_rightEarlier	priority	theorem DirectLFPairSelectionCompatible.strictPriority_of_rightEarlier
+Relico/Correctness/DirectLFSelectionCompatibility.lean	363			priority	DirectLFStrictPriorityPrecedes
+Relico/Correctness/DirectLFSelectionCompatibility.lean	369			priority	hCompatible.symm.strictPriority_of_leftEarlier
+Relico/Correctness/DirectLFSelectionCompatibility.lean	743			priority	A source-priority-eligible occurrence has an aligned generated-LF occurrence
+Relico/Correctness/DirectLFSelectionCompatibility.lean	744			priority	that is reaction-priority eligible.
+Relico/Correctness/DirectLFSelectionCompatibility.lean	750			priority	directLF_sourcePriorityEligible_implies_exists_targetReactionPriorityEligible
+Relico/Correctness/DirectLFSelectionCompatibility.lean	767			priority	DTR.IsPriorityEligible
+Relico/Correctness/DirectLFSelectionCompatibility.lean	776			priority	LF.IsReactionPriorityEligible
+Relico/Correctness/DirectLFSelectionCompatibility.lean	924			priority	DirectLFStrictPriorityPrecedes
+Relico/Correctness/DirectLFSelectionCompatibility.lean	928			priority	hPairCompatible.strictPriority_of_rightEarlier
+Relico/Correctness/DirectLFSelectionCompatibility.lean	933			priority	DTR.PriorityServerNamePrecedesOrEqual
+Relico/Correctness/DirectLFSelectionCompatibility.lean	1030			priority	DTR.PriorityServerNamePrecedesOrEqual
+Relico/Correctness/DirectLFSelectionCompatibility.lean	1046			priority	Correctness.priorityServerOrder_implies_reactionOrder
+Relico/Correctness/DirectLFSelectionCompatibility.lean	1057			priority	A reaction-priority-eligible generated-LF occurrence has an aligned source
+Relico/Correctness/DirectLFSelectionCompatibility.lean	1058			priority	occurrence that is source-priority eligible.
+Relico/Correctness/DirectLFSelectionCompatibility.lean	1061			priority	directLF_targetReactionPriorityEligible_implies_exists_sourcePriorityEligible
+Relico/Correctness/DirectLFSelectionCompatibility.lean	1078			priority	LF.IsReactionPriorityEligible
+Relico/Correctness/DirectLFSelectionCompatibility.lean	1088			priority	DTR.IsPriorityEligible
+Relico/Correctness/DirectLFSelectionCompatibility.lean	1256			priority	DirectLFStrictPriorityPrecedes
+Relico/Correctness/DirectLFSelectionCompatibility.lean	1260			priority	hPairCompatible.strictPriority_of_leftEarlier
+Relico/Correctness/DirectLFSelectionCompatibility.lean	1290			priority	Correctness.reactionOrder_implies_priorityServerOrder
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	6			actorPriority,priority	namespace GlobalMultiStorePayloadActorPriorityBoundary
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	9			priority	An actor-priority assignment supplied outside the published source and
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	12	abbrev	ActorPriorityAssignment	ActorPriorityAssignment,actorPriority,priority	abbrev ActorPriorityAssignment :=
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	16			priority	`none` requests no actor-level priority policy.
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	18			priority	A `some` value requests actor-priority metadata that is not represented by
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	21	abbrev	ActorPriorityRequest	ActorPriorityRequest,actorPriority,priority	abbrev ActorPriorityRequest :=
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	22			ActorPriorityAssignment,actorPriority,priority	Option ActorPriorityAssignment
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	25			priority	The source global model exposes no actor-priority metadata.
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	27	def	sourceActorPriorityMetadata	actorPriority,priority	def sourceActorPriorityMetadata
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	29			ActorPriorityRequest,actorPriority,priority	ActorPriorityRequest :=
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	33			priority	The target global program exposes no actor-priority metadata.
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	35	def	targetActorPriorityMetadata	actorPriority,priority	def targetActorPriorityMetadata
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	37			ActorPriorityRequest,actorPriority,priority	ActorPriorityRequest :=
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	41	theorem	sourceActorPriorityMetadata_eq_none	actorPriority,priority	theorem sourceActorPriorityMetadata_eq_none
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	43			actorPriority,priority	sourceActorPriorityMetadata model = none := by
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	47	theorem	targetActorPriorityMetadata_eq_none	actorPriority,priority	theorem targetActorPriorityMetadata_eq_none
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	49			actorPriority,priority	targetActorPriorityMetadata program = none := by
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	53			priority	The source and target actor-priority projections agree because both are
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	56	def	ActorPriorityMetadataCorresponds	actorPriority,priority	def ActorPriorityMetadataCorresponds
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	60			actorPriority,priority	sourceActorPriorityMetadata model =
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	61			actorPriority,priority	targetActorPriorityMetadata program
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	63	theorem	actorPriorityMetadataCorresponds	actorPriority,priority	theorem actorPriorityMetadataCorresponds
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	66			actorPriority,priority	ActorPriorityMetadataCorresponds model program := by
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	70			supported fragment	The supported fragment accepts exactly the absence of an external
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	71			priority	actor-priority request.
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	73	def	RequestWithinSupportedFragment	RequestWithinSupportedFragment	def RequestWithinSupportedFragment
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	74			ActorPriorityRequest,actorPriority,priority	(request : ActorPriorityRequest) :
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	78	theorem	noActorPriorityRequest_supported	ActorPriorityRequest,actorPriority,priority	theorem noActorPriorityRequest_supported :
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	79			RequestWithinSupportedFragment	RequestWithinSupportedFragment none := by
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	82	theorem	explicitActorPriorityRequest_rejected	ActorPriorityRequest,actorPriority,priority	theorem explicitActorPriorityRequest_rejected
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	83			ActorPriorityAssignment,actorPriority,priority	(assignment : ActorPriorityAssignment) :
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	84			RequestWithinSupportedFragment	¬RequestWithinSupportedFragment (some assignment) := by
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	86			RequestWithinSupportedFragment	RequestWithinSupportedFragment,
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	90			priority	The E4B actor-priority boundary combines metadata agreement with rejection
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	91			priority	of any external actor-priority assignment.
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	96			ActorPriorityRequest,actorPriority,priority	(request : ActorPriorityRequest) :
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	98			actorPriority,priority	ActorPriorityMetadataCorresponds model program ∧
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	99			RequestWithinSupportedFragment	RequestWithinSupportedFragment request
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	104			ActorPriorityRequest,actorPriority,priority	(request : ActorPriorityRequest) :
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	109			actorPriority,priority	ActorPriorityMetadataCorresponds,
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	110			RequestWithinSupportedFragment	RequestWithinSupportedFragment,
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	111			actorPriority,priority	sourceActorPriorityMetadata,
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	112			actorPriority,priority	targetActorPriorityMetadata,
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	115	theorem	boundary_without_actor_priority	priority	theorem boundary_without_actor_priority
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	125	theorem	boundary_rejects_explicit_actor_priority	priority	theorem boundary_rejects_explicit_actor_priority
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	128			ActorPriorityAssignment,actorPriority,priority	(assignment : ActorPriorityAssignment) :
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	137			priority	Local message-server priority remains represented and is preserved by
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	138			priority	translation. It is not reinterpreted as actor-level scheduling priority.
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	140	theorem	localReactionPriority_preserved	priority	theorem localReactionPriority_preserved
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	142			priority	(Translation.compileMultiStorePayloadReaction server).priority =
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	143			priority	server.priority :=
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	144			priority	GlobalMultiStorePayloadDeclaredFragment.compileReaction_priority
+Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	147			actorPriority,priority	end GlobalMultiStorePayloadActorPriorityBoundary
+Relico/Correctness/GlobalMultiStorePayloadDeclaredFragment.lean	30			priority	The existing actor-local source priority-eligibility relation.
+Relico/Correctness/GlobalMultiStorePayloadDeclaredFragment.lean	32	abbrev	SourcePriorityEligible	priority	abbrev SourcePriorityEligible :=
+Relico/Correctness/GlobalMultiStorePayloadDeclaredFragment.lean	33			priority	DTR.MultiStorePayloadIsPriorityEligible
+Relico/Correctness/GlobalMultiStorePayloadDeclaredFragment.lean	36			priority	The existing actor-local target priority-eligibility relation.
+Relico/Correctness/GlobalMultiStorePayloadDeclaredFragment.lean	38	abbrev	TargetPriorityEligible	priority	abbrev TargetPriorityEligible :=
+Relico/Correctness/GlobalMultiStorePayloadDeclaredFragment.lean	39			priority	LF.MultiStorePayloadIsReactionPriorityEligible
+Relico/Correctness/GlobalMultiStorePayloadDeclaredFragment.lean	195			priority	Compilation preserves actor-local message-server priority definitionally.
+Relico/Correctness/GlobalMultiStorePayloadDeclaredFragment.lean	198	theorem	compileReaction_priority	priority	theorem compileReaction_priority
+Relico/Correctness/GlobalMultiStorePayloadDeclaredFragment.lean	200			priority	(Translation.compileMultiStorePayloadReaction server).priority =
+Relico/Correctness/GlobalMultiStorePayloadDeclaredFragment.lean	201			priority	server.priority := by
+Relico/Correctness/GlobalMultiStorePayloadDispatchCorrespondence.lean	6			priority	pointwise through aligned actor stores. Actor selection, cross-actor priority,
+Relico/Correctness/GlobalMultiStorePayloadExternalSendCorrespondence.lean	221			priority	state relation. It deliberately contains no global dispatch or actor-priority
+Relico/Correctness/MultiStoreDispatch.lean	2			priority	import Relico.Correctness.PriorityEligibility
+Relico/Correctness/MultiStoreDispatch.lean	70			priority	hSourcePriorityEligible
+Relico/Correctness/MultiStoreDispatch.lean	137			priority	have hTargetPriorityEligible :
+Relico/Correctness/MultiStoreDispatch.lean	138			priority	LF.IsReactionPriorityEligible
+Relico/Correctness/MultiStoreDispatch.lean	144			priority	sourcePriorityEligible_implies_targetReactionPriorityEligible
+Relico/Correctness/MultiStoreDispatch.lean	148			priority	hSourcePriorityEligible
+Relico/Correctness/MultiStoreDispatch.lean	234			priority	hTargetPriorityEligible
+Relico/Correctness/MultiStoreDispatch.lean	308			priority	hTargetPriorityEligible
+Relico/Correctness/MultiStoreDispatch.lean	398			priority	have hSourcePriorityEligible :
+Relico/Correctness/MultiStoreDispatch.lean	399			priority	DTR.IsPriorityEligible
+Relico/Correctness/MultiStoreDispatch.lean	404			priority	targetReactionPriorityEligible_implies_sourcePriorityEligible
+Relico/Correctness/MultiStoreDispatch.lean	408			priority	hTargetPriorityEligible
+Relico/Correctness/MultiStoreDispatch.lean	509			priority	hSourcePriorityEligible
+Relico/Correctness/MultiStoreExecutableTranslation.lean	137			priority	the positive-delay priority timing fragment.
+Relico/Correctness/MultiStoreExecutableTranslation.lean	140			priority	execution. Runtime well-formedness and the priority timing invariants
+Relico/Correctness/MultiStoreExecutableTranslation.lean	148			priority	(hPriorityTiming :
+Relico/Correctness/MultiStoreExecutableTranslation.lean	149			priority	DTR.MultiStoreModel.PriorityTimingWellFormed
+Relico/Correctness/MultiStoreExecutableTranslation.lean	202			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Correctness/MultiStoreExecutableTranslation.lean	209			priority	hPriorityTiming.constructorBody
+Relico/Correctness/MultiStoreExecutableTranslation.lean	218			priority	hPriorityTiming.messageServerBodies
+Relico/Correctness/MultiStoreExecutableTranslation.lean	226			priority	executable multi-server translator in the positive-delay priority timing
+Relico/Correctness/MultiStoreExecutableTranslation.lean	235			priority	(hPriorityTiming :
+Relico/Correctness/MultiStoreExecutableTranslation.lean	236			priority	DTR.MultiStoreModel.PriorityTimingWellFormed
+Relico/Correctness/MultiStoreExecutableTranslation.lean	292			priority	hPriorityTiming
+Relico/Correctness/MultiStoreMachineTrace.lean	2			priority	import Relico.Correctness.PriorityMachineTiming
+Relico/Correctness/MultiStoreMachineTrace.lean	324			priority	executions in the positive-delay priority timing fragment.
+Relico/Correctness/MultiStoreMachineTrace.lean	327			priority	Source priority timing and target zero-microstep invariants are preserved
+Relico/Correctness/MultiStoreMachineTrace.lean	367			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Correctness/MultiStoreMachineTrace.lean	375			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Correctness/MultiStoreMachineTrace.lean	434			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Correctness/MultiStoreMachineTrace.lean	437			priority	DTR.MultiStoreMachineStep.preserves_priorityTimingWellFormed
+Relico/Correctness/MultiStorePayloadBackwardDispatchRuntime.lean	31			priority	needed to reconcile DTR priority selection with complete LF tags.
+Relico/Correctness/MultiStorePayloadBackwardDispatchRuntime.lean	88			priority	hTargetPriorityEligible
+Relico/Correctness/MultiStorePayloadBackwardDispatchRuntime.lean	135			priority	hTargetPriorityEligible
+Relico/Correctness/MultiStorePayloadBackwardDispatchRuntime.lean	366			priority	hTargetPriorityEligible.isEarliest
+Relico/Correctness/MultiStorePayloadBaseDispatchSelection.lean	8			priority	with one corresponding LF action occurrence that is reaction-priority
+Relico/Correctness/MultiStorePayloadBaseDispatchSelection.lean	12			priority	with one corresponding DTR message occurrence that is source-priority
+Relico/Correctness/MultiStorePayloadBaseDispatchSelection.lean	190			priority	DTR.MultiStorePayloadIsPriorityEligible
+Relico/Correctness/MultiStorePayloadBaseDispatchSelection.lean	202			priority	LF.MultiStorePayloadIsReactionPriorityEligible
+Relico/Correctness/MultiStorePayloadBaseDispatchSelection.lean	233			priority	multiStorePayloadBase_sourcePriorityEligible_implies_exists_targetReactionPriorityEligible
+Relico/Correctness/MultiStorePayloadBaseDispatchSelection.lean	375			priority	MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Correctness/MultiStorePayloadBaseDispatchSelection.lean	382			priority	MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Correctness/MultiStorePayloadBaseDispatchSelection.lean	395			priority	MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Correctness/MultiStorePayloadBaseDispatchSelection.lean	402			priority	MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Correctness/MultiStorePayloadBaseDispatchSelection.lean	422			priority	LF.MultiStorePayloadIsReactionPriorityEligible
+Relico/Correctness/MultiStorePayloadBaseDispatchSelection.lean	485			priority	Synchronize target occurrence removal with source priority eligibility.
+Relico/Correctness/MultiStorePayloadBaseDispatchSelection.lean	491			priority	DTR priority eligibility is insensitive to payload and transfers directly.
+Relico/Correctness/MultiStorePayloadBaseDispatchSelection.lean	513			priority	LF.MultiStorePayloadIsReactionPriorityEligible
+Relico/Correctness/MultiStorePayloadBaseDispatchSelection.lean	526			priority	DTR.MultiStorePayloadIsPriorityEligible
+Relico/Correctness/MultiStorePayloadBaseDispatchSelection.lean	556			priority	multiStorePayloadBase_targetReactionPriorityEligible_implies_exists_sourcePriorityEligible
+Relico/Correctness/MultiStorePayloadBaseDispatchSelection.lean	576			priority	DTR.MultiStorePayloadIsPriorityEligible
+Relico/Correctness/MultiStorePayloadBaseDispatchSelection.lean	582			priority	DTR.MultiStorePayloadIsPriorityEligible,
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	7			priority	complete-tag order must not contradict DTR message-server priority among
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	15			priority	import Relico.Correctness.MultiStorePayloadPriorityOrder
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	27			priority	`DTR.MultiStorePayloadPriorityServerNamePrecedesOrEqual`.
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	29	def	MultiStorePayloadBaseStrictPriorityPrecedes	priority	def MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	33			priority	DTR.MultiStorePayloadPriorityServerNamePrecedesOrEqual
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	37			priority	¬DTR.MultiStorePayloadPriorityServerNamePrecedesOrEqual
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	42	theorem	MultiStorePayloadBaseStrictPriorityPrecedes.precedes	priority	theorem MultiStorePayloadBaseStrictPriorityPrecedes.precedes
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	46			priority	MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	50			priority	DTR.MultiStorePayloadPriorityServerNamePrecedesOrEqual
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	56	theorem	MultiStorePayloadBaseStrictPriorityPrecedes.not_reverse	priority	theorem MultiStorePayloadBaseStrictPriorityPrecedes.not_reverse
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	60			priority	MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	64			priority	¬DTR.MultiStorePayloadPriorityServerNamePrecedesOrEqual
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	79			priority	* an earlier LF microstep must correspond to a strictly higher-priority DTR
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	105			priority	MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	114			priority	MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	275			priority	(hPriority :
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	276			priority	MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	294			priority	hPriority⟩))⟩
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	296	theorem	MultiStorePayloadBasePairSelectionCompatible.strictPriority_of_leftEarlier	priority	theorem MultiStorePayloadBasePairSelectionCompatible.strictPriority_of_leftEarlier
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	313			priority	MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	346	theorem	MultiStorePayloadBasePairSelectionCompatible.strictPriority_of_rightEarlier	priority	theorem MultiStorePayloadBasePairSelectionCompatible.strictPriority_of_rightEarlier
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	363			priority	MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	369			priority	hCompatible.symm.strictPriority_of_leftEarlier
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	743			priority	A source-priority-eligible occurrence has an aligned generated-LF occurrence
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	744			priority	that is reaction-priority eligible.
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	750			priority	multiStorePayloadBase_sourcePriorityEligible_implies_exists_targetReactionPriorityEligible
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	767			priority	DTR.MultiStorePayloadIsPriorityEligible
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	776			priority	LF.MultiStorePayloadIsReactionPriorityEligible
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	924			priority	MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	928			priority	hPairCompatible.strictPriority_of_rightEarlier
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	933			priority	DTR.MultiStorePayloadPriorityServerNamePrecedesOrEqual
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	1030			priority	DTR.MultiStorePayloadPriorityServerNamePrecedesOrEqual
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	1046			priority	Correctness.multiStorePayloadPriorityServerOrder_implies_reactionOrder
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	1057			priority	A reaction-priority-eligible generated-LF occurrence has an aligned source
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	1058			priority	occurrence that is source-priority eligible.
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	1061			priority	multiStorePayloadBase_targetReactionPriorityEligible_implies_exists_sourcePriorityEligible
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	1078			priority	LF.MultiStorePayloadIsReactionPriorityEligible
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	1088			priority	DTR.MultiStorePayloadIsPriorityEligible
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	1256			priority	MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	1260			priority	hPairCompatible.strictPriority_of_leftEarlier
+Relico/Correctness/MultiStorePayloadBaseSelectionCompatibility.lean	1290			priority	Correctness.multiStorePayloadReactionOrder_implies_priorityServerOrder
+Relico/Correctness/MultiStorePayloadDetailedDispatchWeakMatches.lean	51			priority	_hPriorityEligible
+Relico/Correctness/MultiStorePayloadDetailedInvocationEntry.lean	1			priority	import Relico.LF.PriorityTimingInvariant
+Relico/Correctness/MultiStorePayloadDetailedInvocationEntry.lean	898			priority	A declared source server's normalized priority position precedes itself.
+Relico/Correctness/MultiStorePayloadDetailedInvocationEntry.lean	900	theorem	multiStorePayloadInvocationPriority_self_of_mem	priority	theorem multiStorePayloadInvocationPriority_self_of_mem
+Relico/Correctness/MultiStorePayloadDetailedInvocationEntry.lean	907			priority	DTR.MultiStorePayloadPriorityServerNamePrecedesOrEqual
+Relico/Correctness/MultiStorePayloadDetailedInvocationEntry.lean	913			priority	DTR.MultiStorePayloadPriorityServerNamePrecedesOrEqual
+Relico/Correctness/MultiStorePayloadDetailedInvocationEntry.lean	919			priority	(DTR.MultiStorePayloadMessageServerPriority.mem_normalize_iff
+Relico/Correctness/MultiStorePayloadDetailedInvocationEntry.lean	925			priority	The sole pending source message is priority eligible.
+Relico/Correctness/MultiStorePayloadDetailedInvocationEntry.lean	928			priority	same-name priority obligation follows from declaration membership.
+Relico/Correctness/MultiStorePayloadDetailedInvocationEntry.lean	930	theorem	multiStorePayloadInvocationSource_priorityEligible	priority	theorem multiStorePayloadInvocationSource_priorityEligible
+Relico/Correctness/MultiStorePayloadDetailedInvocationEntry.lean	941			priority	DTR.MultiStorePayloadIsPriorityEligible
+Relico/Correctness/MultiStorePayloadDetailedInvocationEntry.lean	973			priority	multiStorePayloadInvocationPriority_self_of_mem
+Relico/Correctness/MultiStorePayloadDetailedInvocationEntry.lean	1058			priority	(multiStorePayloadInvocationSource_priorityEligible
+Relico/Correctness/MultiStorePayloadDetailedInvocationEntry.lean	1379			priority	hPriorityEligible
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	26			priority	strict source-priority cycle for equal source names.
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	176			priority	MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	183			priority	MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	196			priority	MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	203			priority	MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	221			priority	Transfer LF reaction-priority eligibility between two actions that correspond
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	224	theorem	multiStorePayloadBase_reactionPriorityEligible_of_sameSource	priority	theorem multiStorePayloadBase_reactionPriorityEligible_of_sameSource
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	248			priority	LF.MultiStorePayloadIsReactionPriorityEligible
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	253			priority	LF.MultiStorePayloadIsReactionPriorityEligible
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	326			priority	LF reaction-priority eligibility, and payload-aware residual compatibility.
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	344			priority	DTR.MultiStorePayloadIsPriorityEligible
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	356			priority	LF.MultiStorePayloadIsReactionPriorityEligible
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	393			priority	multiStorePayloadBase_sourcePriorityEligible_implies_exists_targetReactionPriorityEligible
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	404			priority	LF.MultiStorePayloadIsReactionPriorityEligible
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	409			priority	multiStorePayloadBase_reactionPriorityEligible_of_sameSource
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	427			priority	DTR priority eligibility, and payload-aware residual compatibility.
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	445			priority	LF.MultiStorePayloadIsReactionPriorityEligible
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	458			priority	DTR.MultiStorePayloadIsPriorityEligible
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	494			priority	multiStorePayloadBase_targetReactionPriorityEligible_implies_exists_sourcePriorityEligible
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	514			priority	DTR.MultiStorePayloadIsPriorityEligible
+Relico/Correctness/MultiStorePayloadDispatchSelection.lean	520			priority	DTR.MultiStorePayloadIsPriorityEligible,
+Relico/Correctness/MultiStorePayloadForwardDispatchRuntime.lean	15			priority	needed to reconcile DTR priority selection with complete LF tags.
+Relico/Correctness/MultiStorePayloadPriorityOrder.lean	155			priority	Priority normalization on the source side is exactly the declaration
+Relico/Correctness/MultiStorePayloadPriorityOrder.lean	158	theorem	multiStorePayloadPriorityServerNamePrecedesOrEqual_compileMessageReactions	priority	theorem multiStorePayloadPriorityServerNamePrecedesOrEqual_compileMessageReactions
+Relico/Correctness/MultiStorePayloadPriorityOrder.lean	162			priority	DTR.MultiStorePayloadPriorityServerNamePrecedesOrEqual
+Relico/Correctness/MultiStorePayloadPriorityOrder.lean	175			priority	DTR.MultiStorePayloadPriorityServerNamePrecedesOrEqual,
+Relico/Correctness/MultiStorePayloadPriorityOrder.lean	177			priority	Translation.priorityOrderedMultiStorePayloadMessageServers
+Relico/Correctness/MultiStorePayloadPriorityOrder.lean	182			priority	(DTR.MultiStorePayloadMessageServerPriority.normalize
+Relico/Correctness/MultiStorePayloadPriorityOrder.lean	189	theorem	multiStorePayloadPriorityServerOrder_implies_reactionOrder	priority	theorem multiStorePayloadPriorityServerOrder_implies_reactionOrder
+Relico/Correctness/MultiStorePayloadPriorityOrder.lean	194			priority	DTR.MultiStorePayloadPriorityServerNamePrecedesOrEqual
+Relico/Correctness/MultiStorePayloadPriorityOrder.lean	206			priority	(multiStorePayloadPriorityServerNamePrecedesOrEqual_compileMessageReactions
+Relico/Correctness/MultiStorePayloadPriorityOrder.lean	216	theorem	multiStorePayloadReactionOrder_implies_priorityServerOrder	priority	theorem multiStorePayloadReactionOrder_implies_priorityServerOrder
+Relico/Correctness/MultiStorePayloadPriorityOrder.lean	228			priority	DTR.MultiStorePayloadPriorityServerNamePrecedesOrEqual
+Relico/Correctness/MultiStorePayloadPriorityOrder.lean	233			priority	(multiStorePayloadPriorityServerNamePrecedesOrEqual_compileMessageReactions
+Relico/Correctness/MultiStorePayloadSelectionCompatibility.lean	338			priority	* the approved MultiStorePayloadBase non-overtaking and priority compatibility proof; and
+Relico/Correctness/MultiStoreStructural.lean	64			priority	(Translation.priorityOrderedMessageServers
+Relico/Correctness/MultiStoreStructural.lean	323			priority	Translation.priorityOrderedMessageServers,
+Relico/Correctness/MultiStoreStructural.lean	326			priority	DTR.MessageServerPriority.map_normalize_nodup
+Relico/Correctness/MultiStoreStructural.lean	386			priority	Translation.priorityOrderedMessageServers,
+Relico/Correctness/MultiStoreStructural.lean	389			priority	DTR.MessageServerPriority.map_normalize_nodup
+Relico/Correctness/PriorityEligibility.lean	2			priority	import Relico.Correctness.PriorityOrder
+Relico/Correctness/PriorityEligibility.lean	3			priority	import Relico.Correctness.PriorityTiming
+Relico/Correctness/PriorityEligibility.lean	4			priority	import Relico.DTR.MultiStorePriorityScheduling
+Relico/Correctness/PriorityEligibility.lean	186			priority	Source priority eligibility transports to generated-LF reaction
+Relico/Correctness/PriorityEligibility.lean	187			priority	priority eligibility.
+Relico/Correctness/PriorityEligibility.lean	191			priority	priority-order obligation.
+Relico/Correctness/PriorityEligibility.lean	193	theorem	sourcePriorityEligible_implies_targetReactionPriorityEligible	priority	theorem sourcePriorityEligible_implies_targetReactionPriorityEligible
+Relico/Correctness/PriorityEligibility.lean	213			priority	DTR.IsPriorityEligible
+Relico/Correctness/PriorityEligibility.lean	217			priority	LF.IsReactionPriorityEligible
+Relico/Correctness/PriorityEligibility.lean	262			priority	DTR.PriorityServerNamePrecedesOrEqual
+Relico/Correctness/PriorityEligibility.lean	280			priority	priorityServerOrder_implies_reactionOrder
+Relico/Correctness/PriorityEligibility.lean	292			priority	Generated-LF reaction-priority eligibility transports back to source
+Relico/Correctness/PriorityEligibility.lean	293			priority	priority eligibility when every pending target occurrence has
+Relico/Correctness/PriorityEligibility.lean	299	theorem	targetReactionPriorityEligible_implies_sourcePriorityEligible	priority	theorem targetReactionPriorityEligible_implies_sourcePriorityEligible
+Relico/Correctness/PriorityEligibility.lean	318			priority	LF.IsReactionPriorityEligible
+Relico/Correctness/PriorityEligibility.lean	326			priority	DTR.IsPriorityEligible
+Relico/Correctness/PriorityEligibility.lean	395			priority	reactionOrder_implies_priorityServerOrder
+Relico/Correctness/PriorityMachineTiming.lean	2			priority	import Relico.DTR.PriorityTimingInvariant
+Relico/Correctness/PriorityMachineTiming.lean	3			priority	import Relico.LF.PriorityTimingInvariant
+Relico/Correctness/PriorityMachineTiming.lean	12			priority	translation of a priority-timing-well-formed source body, that schedule
+Relico/Correctness/PriorityMachineTiming.lean	28			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Correctness/PriorityMachineTiming.lean	99			priority	DTR.Stmt.PriorityTimingWellFormed
+Relico/Correctness/PriorityMachineTiming.lean	104			priority	((DTR.Body.priorityTimingWellFormed_cons
+Relico/Correctness/PriorityMachineTiming.lean	115			priority	DTR.Stmt.PriorityTimingWellFormed
+Relico/Correctness/PriorityMachineTiming.lean	127			priority	the positive-delay priority timing restriction.
+Relico/Correctness/PriorityMachineTiming.lean	153			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Correctness/PriorityOrder.lean	1			priority	import Relico.DTR.MultiStorePriorityScheduling
+Relico/Correctness/PriorityOrder.lean	130			priority	Stable source priority order is exactly the reaction declaration order
+Relico/Correctness/PriorityOrder.lean	133	theorem	priorityServerNamePrecedesOrEqual_compileMessageReactions	priority	theorem priorityServerNamePrecedesOrEqual_compileMessageReactions
+Relico/Correctness/PriorityOrder.lean	137			priority	DTR.PriorityServerNamePrecedesOrEqual
+Relico/Correctness/PriorityOrder.lean	150			priority	DTR.PriorityServerNamePrecedesOrEqual,
+Relico/Correctness/PriorityOrder.lean	152			priority	Translation.priorityOrderedMessageServers
+Relico/Correctness/PriorityOrder.lean	157			priority	(DTR.MessageServerPriority.normalize
+Relico/Correctness/PriorityOrder.lean	164	theorem	priorityServerOrder_implies_reactionOrder	priority	theorem priorityServerOrder_implies_reactionOrder
+Relico/Correctness/PriorityOrder.lean	169			priority	DTR.PriorityServerNamePrecedesOrEqual
+Relico/Correctness/PriorityOrder.lean	181			priority	(priorityServerNamePrecedesOrEqual_compileMessageReactions
+Relico/Correctness/PriorityOrder.lean	191	theorem	reactionOrder_implies_priorityServerOrder	priority	theorem reactionOrder_implies_priorityServerOrder
+Relico/Correctness/PriorityOrder.lean	203			priority	DTR.PriorityServerNamePrecedesOrEqual
+Relico/Correctness/PriorityOrder.lean	208			priority	(priorityServerNamePrecedesOrEqual_compileMessageReactions
+Relico/Correctness/PriorityTiming.lean	2			priority	import Relico.DTR.PriorityTimingWellFormed
+Relico/Correctness/PriorityTiming.lean	3			priority	import Relico.LF.PriorityTimingInvariant
+Relico/Correctness/PriorityTiming.lean	15			priority	This is the bridge needed to transport source same-time priority order
+Relico/DTR/BoundPayloadSyntax.lean	45			priority	priority :
+Relico/DTR/BoundPayloadTimingWellFormed.lean	16	def	PriorityTimingWellFormed	priority	def PriorityTimingWellFormed :
+Relico/DTR/BoundPayloadTimingWellFormed.lean	27	theorem	priorityTimingWellFormed_selfSendInt	priority	theorem priorityTimingWellFormed_selfSendInt
+Relico/DTR/BoundPayloadTimingWellFormed.lean	31			priority	PriorityTimingWellFormed
+Relico/DTR/BoundPayloadTimingWellFormed.lean	47	def	PriorityTimingWellFormed	priority	def PriorityTimingWellFormed :
+Relico/DTR/BoundPayloadTimingWellFormed.lean	55			priority	DTR.BoundPayloadStmt.PriorityTimingWellFormed
+Relico/DTR/BoundPayloadTimingWellFormed.lean	57			priority	PriorityTimingWellFormed
+Relico/DTR/BoundPayloadTimingWellFormed.lean	61	theorem	priorityTimingWellFormed_nil	priority	theorem priorityTimingWellFormed_nil :
+Relico/DTR/BoundPayloadTimingWellFormed.lean	62			priority	PriorityTimingWellFormed
+Relico/DTR/BoundPayloadTimingWellFormed.lean	68	theorem	priorityTimingWellFormed_cons	priority	theorem priorityTimingWellFormed_cons
+Relico/DTR/BoundPayloadTimingWellFormed.lean	71			priority	PriorityTimingWellFormed
+Relico/DTR/BoundPayloadTimingWellFormed.lean	73			priority	DTR.BoundPayloadStmt.PriorityTimingWellFormed
+Relico/DTR/BoundPayloadTimingWellFormed.lean	75			priority	PriorityTimingWellFormed
+Relico/DTR/BoundPayloadTimingWellFormed.lean	80	theorem	priorityTimingWellFormed_head	priority	theorem priorityTimingWellFormed_head
+Relico/DTR/BoundPayloadTimingWellFormed.lean	84			priority	PriorityTimingWellFormed
+Relico/DTR/BoundPayloadTimingWellFormed.lean	86			priority	DTR.BoundPayloadStmt.PriorityTimingWellFormed
+Relico/DTR/BoundPayloadTimingWellFormed.lean	91	theorem	priorityTimingWellFormed_tail	priority	theorem priorityTimingWellFormed_tail
+Relico/DTR/BoundPayloadTimingWellFormed.lean	95			priority	PriorityTimingWellFormed
+Relico/DTR/BoundPayloadTimingWellFormed.lean	97			priority	PriorityTimingWellFormed
+Relico/DTR/GlobalMultiStorePayloadExternalSend.lean	216			priority	This function performs no dispatch, global event selection, actor-priority
+Relico/DTR/MessageServerPriority.lean	7			priority	namespace MessageServerPriority
+Relico/DTR/MessageServerPriority.lean	10			priority	The local-priority preorder used for DTR message-server declarations.
+Relico/DTR/MessageServerPriority.lean	14			priority	- smaller explicit numbers have higher priority;
+Relico/DTR/MessageServerPriority.lean	15			priority	- every explicit priority precedes an unannotated declaration;
+Relico/DTR/MessageServerPriority.lean	16			priority	- two unannotated declarations have equal priority.
+Relico/DTR/MessageServerPriority.lean	24			priority	match left.priority, right.priority with
+Relico/DTR/MessageServerPriority.lean	26			priority	| some leftPriority,
+Relico/DTR/MessageServerPriority.lean	27			priority	some rightPriority =>
+Relico/DTR/MessageServerPriority.lean	28			priority	leftPriority ≤
+Relico/DTR/MessageServerPriority.lean	29			priority	rightPriority
+Relico/DTR/MessageServerPriority.lean	52			priority	cases left.priority <;>
+Relico/DTR/MessageServerPriority.lean	53			priority	cases right.priority <;>
+Relico/DTR/MessageServerPriority.lean	62			priority	cases hPriority :
+Relico/DTR/MessageServerPriority.lean	63			priority	messageServer.priority <;>
+Relico/DTR/MessageServerPriority.lean	66			priority	hPriority
+Relico/DTR/MessageServerPriority.lean	72			priority	{priority : Nat}
+Relico/DTR/MessageServerPriority.lean	74			priority	explicitServer.priority =
+Relico/DTR/MessageServerPriority.lean	75			priority	some priority)
+Relico/DTR/MessageServerPriority.lean	77			priority	unannotatedServer.priority =
+Relico/DTR/MessageServerPriority.lean	91			priority	{leftPriority rightPriority : Nat}
+Relico/DTR/MessageServerPriority.lean	93			priority	left.priority =
+Relico/DTR/MessageServerPriority.lean	94			priority	some leftPriority)
+Relico/DTR/MessageServerPriority.lean	96			priority	right.priority =
+Relico/DTR/MessageServerPriority.lean	97			priority	some rightPriority)
+Relico/DTR/MessageServerPriority.lean	98			priority	(hPriority :
+Relico/DTR/MessageServerPriority.lean	99			priority	leftPriority ≤
+Relico/DTR/MessageServerPriority.lean	100			priority	rightPriority) :
+Relico/DTR/MessageServerPriority.lean	110			priority	hPriority
+Relico/DTR/MessageServerPriority.lean	113			priority	Insert one declaration into an already priority-normalized list.
+Relico/DTR/MessageServerPriority.lean	116			priority	priority. Because `normalize` processes the original list from right to
+Relico/DTR/MessageServerPriority.lean	117			priority	left, this preserves source declaration order among equal-priority
+Relico/DTR/MessageServerPriority.lean	144			priority	Stable local-priority normalization of a message-server declaration
+Relico/DTR/MessageServerPriority.lean	293			priority	Priority insertion is a permutation of adding the declaration at the
+Relico/DTR/MessageServerPriority.lean	338			priority	Priority normalization is a permutation of the source declaration
+Relico/DTR/MessageServerPriority.lean	365			priority	Stable priority normalization preserves uniqueness after mapping each
+Relico/DTR/MessageServerPriority.lean	389			priority	Priority normalization neither introduces nor removes message-server
+Relico/DTR/MessageServerPriority.lean	450			priority	end MessageServerPriority
+Relico/DTR/MultiStoreDispatchSemantics.lean	2			priority	import Relico.DTR.MultiStorePriorityScheduling
+Relico/DTR/MultiStoreDispatchSemantics.lean	41			priority	(hPriorityEligible :
+Relico/DTR/MultiStoreDispatchSemantics.lean	42			priority	DTR.IsPriorityEligible
+Relico/DTR/MultiStorePayloadDispatch.lean	2			priority	import Relico.DTR.MultiStorePayloadPriority
+Relico/DTR/MultiStorePayloadDispatch.lean	65			priority	Name order after stable local-priority normalization.
+Relico/DTR/MultiStorePayloadDispatch.lean	70	def	MultiStorePayloadPriorityServerNamePrecedesOrEqual	priority	def MultiStorePayloadPriorityServerNamePrecedesOrEqual
+Relico/DTR/MultiStorePayloadDispatch.lean	79			priority	(DTR.MultiStorePayloadMessageServerPriority.normalize
+Relico/DTR/MultiStorePayloadDispatch.lean	88			priority	(MultiStorePayloadPriorityServerNamePrecedesOrEqual
+Relico/DTR/MultiStorePayloadDispatch.lean	93			priority	unfold MultiStorePayloadPriorityServerNamePrecedesOrEqual
+Relico/DTR/MultiStorePayloadDispatch.lean	177			priority	Priority-aware source eligibility for one payload-bearing pending
+Relico/DTR/MultiStorePayloadDispatch.lean	180			priority	Metric arrival time is selected first. Local message-server priority
+Relico/DTR/MultiStorePayloadDispatch.lean	183	def	MultiStorePayloadIsPriorityEligible	priority	def MultiStorePayloadIsPriorityEligible
+Relico/DTR/MultiStorePayloadDispatch.lean	199			priority	DTR.MultiStorePayloadPriorityServerNamePrecedesOrEqual
+Relico/DTR/MultiStorePayloadDispatch.lean	204			priority	namespace MultiStorePayloadIsPriorityEligible
+Relico/DTR/MultiStorePayloadDispatch.lean	214			priority	DTR.MultiStorePayloadIsPriorityEligible
+Relico/DTR/MultiStorePayloadDispatch.lean	231			priority	DTR.MultiStorePayloadIsPriorityEligible
+Relico/DTR/MultiStorePayloadDispatch.lean	241			priority	DTR.MultiStorePayloadPriorityServerNamePrecedesOrEqual
+Relico/DTR/MultiStorePayloadDispatch.lean	250			priority	end MultiStorePayloadIsPriorityEligible
+Relico/DTR/MultiStorePayloadDispatch.lean	291			priority	(hPriorityEligible :
+Relico/DTR/MultiStorePayloadDispatch.lean	292			priority	DTR.MultiStorePayloadIsPriorityEligible
+Relico/DTR/MultiStorePayloadDispatch.lean	379			priority	_hPriorityEligible
+Relico/DTR/MultiStorePayloadDispatch.lean	420			priority	_hPriorityEligible
+Relico/DTR/MultiStorePayloadDispatch.lean	505			priority	_hPriorityEligible
+Relico/DTR/MultiStorePayloadPriority.lean	7			priority	namespace MultiStorePayloadMessageServerPriority
+Relico/DTR/MultiStorePayloadPriority.lean	10			priority	Local priority order for payload-aware message servers.
+Relico/DTR/MultiStorePayloadPriority.lean	12			priority	Smaller explicit numbers have higher priority. Every explicit priority
+Relico/DTR/MultiStorePayloadPriority.lean	21			priority	match left.priority, right.priority with
+Relico/DTR/MultiStorePayloadPriority.lean	23			priority	| some leftPriority,
+Relico/DTR/MultiStorePayloadPriority.lean	24			priority	some rightPriority =>
+Relico/DTR/MultiStorePayloadPriority.lean	25			priority	leftPriority ≤
+Relico/DTR/MultiStorePayloadPriority.lean	26			priority	rightPriority
+Relico/DTR/MultiStorePayloadPriority.lean	50			priority	cases left.priority <;>
+Relico/DTR/MultiStorePayloadPriority.lean	51			priority	cases right.priority <;>
+Relico/DTR/MultiStorePayloadPriority.lean	55			priority	Insert one declaration into a priority-normalized list.
+Relico/DTR/MultiStorePayloadPriority.lean	82			priority	Stable local-priority normalization for payload-aware message servers.
+Relico/DTR/MultiStorePayloadPriority.lean	113			priority	Priority insertion preserves declaration membership exactly.
+Relico/DTR/MultiStorePayloadPriority.lean	155			priority	Stable priority normalization preserves declaration membership exactly.
+Relico/DTR/MultiStorePayloadPriority.lean	182			priority	end MultiStorePayloadMessageServerPriority
+Relico/DTR/MultiStorePayloadSyntax.lean	124			priority	parameters and optional local-priority metadata.
+Relico/DTR/MultiStorePayloadSyntax.lean	136			priority	priority :
+Relico/DTR/MultiStorePayloadSyntax.lean	158			priority	Because `none` is itself a priority class, this condition also permits
+Relico/DTR/MultiStorePayloadSyntax.lean	160			priority	priority metadata separate from this explicit well-formedness premise.
+Relico/DTR/MultiStorePayloadSyntax.lean	168			priority	messageServer.priority)).Nodup
+Relico/DTR/MultiStorePayloadSyntax.lean	171			priority	The distinct-priority well-formedness predicate is executable because
+Relico/DTR/MultiStorePayloadSyntax.lean	172			priority	priority metadata has decidable equality.
+Relico/DTR/MultiStorePriorityScheduling.lean	1			priority	import Relico.DTR.MessageServerPriority
+Relico/DTR/MultiStorePriorityScheduling.lean	59			priority	Same-server-order relation after stable local-priority normalization.
+Relico/DTR/MultiStorePriorityScheduling.lean	64	def	PriorityServerNamePrecedesOrEqual	priority	def PriorityServerNamePrecedesOrEqual
+Relico/DTR/MultiStorePriorityScheduling.lean	72			priority	(DTR.MessageServerPriority.normalize
+Relico/DTR/MultiStorePriorityScheduling.lean	165			priority	(PriorityServerNamePrecedesOrEqual
+Relico/DTR/MultiStorePriorityScheduling.lean	169			priority	unfold PriorityServerNamePrecedesOrEqual
+Relico/DTR/MultiStorePriorityScheduling.lean	173			priority	Priority-aware eligibility for a pending DTR message.
+Relico/DTR/MultiStorePriorityScheduling.lean	178			priority	2. target the first priority-ordered server represented among all
+Relico/DTR/MultiStorePriorityScheduling.lean	181			priority	Priority does not allow a later message to overtake an earlier message.
+Relico/DTR/MultiStorePriorityScheduling.lean	183	def	IsPriorityEligible	priority	def IsPriorityEligible
+Relico/DTR/MultiStorePriorityScheduling.lean	197			priority	PriorityServerNamePrecedesOrEqual
+Relico/DTR/MultiStorePriorityScheduling.lean	203			priority	Priority-aware eligibility implies ordinary earliest-time eligibility.
+Relico/DTR/MultiStorePriorityScheduling.lean	205	theorem	IsPriorityEligible.isEarliest	priority	theorem IsPriorityEligible.isEarliest
+Relico/DTR/MultiStorePriorityScheduling.lean	211			priority	DTR.IsPriorityEligible
+Relico/DTR/MultiStorePriorityScheduling.lean	221			priority	Extract the same-time server-order obligation from priority-aware
+Relico/DTR/MultiStorePriorityScheduling.lean	224	theorem	IsPriorityEligible.precedes_same_time	priority	theorem IsPriorityEligible.precedes_same_time
+Relico/DTR/MultiStorePriorityScheduling.lean	231			priority	DTR.IsPriorityEligible
+Relico/DTR/MultiStorePriorityScheduling.lean	241			priority	DTR.PriorityServerNamePrecedesOrEqual
+Relico/DTR/MultiStoreSyntax.lean	22			priority	The declaration order will later encode message-server priority where
+Relico/DTR/PriorityTimingInvariant.lean	2			priority	import Relico.DTR.PriorityTimingWellFormed
+Relico/DTR/PriorityTimingInvariant.lean	12			priority	Executing one source statement preserves priority timing
+Relico/DTR/PriorityTimingInvariant.lean	15	theorem	preserves_priorityTimingWellFormed	priority	theorem preserves_priorityTimingWellFormed
+Relico/DTR/PriorityTimingInvariant.lean	28			priority	DTR.Body.PriorityTimingWellFormed
+Relico/DTR/PriorityTimingInvariant.lean	30			priority	DTR.Body.PriorityTimingWellFormed
+Relico/DTR/PriorityTimingInvariant.lean	47			priority	((DTR.Body.priorityTimingWellFormed_cons
+Relico/DTR/PriorityTimingInvariant.lean	64			priority	((DTR.Body.priorityTimingWellFormed_cons
+Relico/DTR/PriorityTimingInvariant.lean	76			priority	A combined source-machine step preserves active-body priority timing
+Relico/DTR/PriorityTimingInvariant.lean	82	theorem	preserves_priorityTimingWellFormed	priority	theorem preserves_priorityTimingWellFormed
+Relico/DTR/PriorityTimingInvariant.lean	98			priority	DTR.Body.PriorityTimingWellFormed
+Relico/DTR/PriorityTimingInvariant.lean	101			priority	DTR.Body.PriorityTimingWellFormed
+Relico/DTR/PriorityTimingInvariant.lean	103			priority	DTR.Body.PriorityTimingWellFormed
+Relico/DTR/PriorityTimingInvariant.lean	110			priority	DTR.MultiStoreStep.preserves_priorityTimingWellFormed
+Relico/DTR/PriorityTimingInvariant.lean	126			priority	hPriorityEligible
+Relico/DTR/PriorityTimingWellFormed.lean	11			priority	Timing restriction used by the priority-preserving multi-server
+Relico/DTR/PriorityTimingWellFormed.lean	17			priority	This restriction is specific to the priority-sensitive fragment. The
+Relico/DTR/PriorityTimingWellFormed.lean	20	def	PriorityTimingWellFormed	priority	def PriorityTimingWellFormed :
+Relico/DTR/PriorityTimingWellFormed.lean	31	theorem	priorityTimingWellFormed_assign	priority	theorem priorityTimingWellFormed_assign
+Relico/DTR/PriorityTimingWellFormed.lean	34			priority	PriorityTimingWellFormed
+Relico/DTR/PriorityTimingWellFormed.lean	39	theorem	priorityTimingWellFormed_selfSend	priority	theorem priorityTimingWellFormed_selfSend
+Relico/DTR/PriorityTimingWellFormed.lean	42			priority	PriorityTimingWellFormed
+Relico/DTR/PriorityTimingWellFormed.lean	54	def	PriorityTimingWellFormed	priority	def PriorityTimingWellFormed :
+Relico/DTR/PriorityTimingWellFormed.lean	62			priority	DTR.Stmt.PriorityTimingWellFormed
+Relico/DTR/PriorityTimingWellFormed.lean	64			priority	PriorityTimingWellFormed
+Relico/DTR/PriorityTimingWellFormed.lean	68	theorem	priorityTimingWellFormed_nil	priority	theorem priorityTimingWellFormed_nil :
+Relico/DTR/PriorityTimingWellFormed.lean	69			priority	PriorityTimingWellFormed
+Relico/DTR/PriorityTimingWellFormed.lean	74	theorem	priorityTimingWellFormed_cons	priority	theorem priorityTimingWellFormed_cons
+Relico/DTR/PriorityTimingWellFormed.lean	77			priority	PriorityTimingWellFormed
+Relico/DTR/PriorityTimingWellFormed.lean	79			priority	DTR.Stmt.PriorityTimingWellFormed
+Relico/DTR/PriorityTimingWellFormed.lean	81			priority	PriorityTimingWellFormed
+Relico/DTR/PriorityTimingWellFormed.lean	85	theorem	priorityTimingWellFormed_append	priority	theorem priorityTimingWellFormed_append
+Relico/DTR/PriorityTimingWellFormed.lean	87			priority	PriorityTimingWellFormed
+Relico/DTR/PriorityTimingWellFormed.lean	89			priority	PriorityTimingWellFormed left ∧
+Relico/DTR/PriorityTimingWellFormed.lean	90			priority	PriorityTimingWellFormed right := by
+Relico/DTR/PriorityTimingWellFormed.lean	96			priority	PriorityTimingWellFormed
+Relico/DTR/PriorityTimingWellFormed.lean	101			priority	DTR.Stmt.PriorityTimingWellFormed
+Relico/DTR/PriorityTimingWellFormed.lean	103			priority	PriorityTimingWellFormed
+Relico/DTR/PriorityTimingWellFormed.lean	105			priority	(DTR.Stmt.PriorityTimingWellFormed
+Relico/DTR/PriorityTimingWellFormed.lean	107			priority	PriorityTimingWellFormed
+Relico/DTR/PriorityTimingWellFormed.lean	109			priority	PriorityTimingWellFormed
+Relico/DTR/PriorityTimingWellFormed.lean	137			priority	Model-level timing assumption for priority-preserving execution
+Relico/DTR/PriorityTimingWellFormed.lean	144			priority	well-formedness so models without priority-sensitive claims retain the
+Relico/DTR/PriorityTimingWellFormed.lean	147	structure	PriorityTimingWellFormed	priority	structure PriorityTimingWellFormed
+Relico/DTR/PriorityTimingWellFormed.lean	152			priority	DTR.Body.PriorityTimingWellFormed
+Relico/DTR/PriorityTimingWellFormed.lean	159			priority	DTR.Body.PriorityTimingWellFormed
+Relico/DTR/Syntax.lean	56			priority	Optional local message-server priority.
+Relico/DTR/Syntax.lean	58			priority	Smaller numeric values denote higher priority. `none` represents an
+Relico/DTR/Syntax.lean	62			priority	priority :
+Relico/Frontend/MultiStoreBridgeCheck.lean	16			priority	private def renderPriority :
+Relico/Frontend/MultiStoreBridgeCheck.lean	20			priority	| some priority =>
+Relico/Frontend/MultiStoreBridgeCheck.lean	21			priority	toString priority
+Relico/Frontend/MultiStoreBridgeCheck.lean	42			priority	renderPriority
+Relico/Frontend/MultiStoreBridgeCheck.lean	43			priority	messageServer.priority)
+Relico/Frontend/MultiStoreDecoder.lean	179			priority	Priority normalization is performed later by translation.
+Relico/Frontend/MultiStoreDecoder.lean	296			priority	priority :=
+Relico/Frontend/MultiStoreDecoder.lean	297			priority	declaration.priority?
+Relico/Frontend/MultiStorePayloadDecoder.lean	422			priority	priority :=
+Relico/Frontend/MultiStorePayloadDecoder.lean	423			priority	declaration.priority
+Relico/Frontend/MultiStorePayloadSchema.lean	91			priority	local priority.
+Relico/Frontend/MultiStorePayloadSchema.lean	100			priority	priority :
+Relico/Frontend/MultiStoreSchema.lean	20			priority	`priority? = none` represents an unannotated message server.
+Relico/Frontend/MultiStoreSchema.lean	26			priority	priority? :
+Relico/LF/BoundPayloadRuntimeInvariant.lean	2			priority	import Relico.LF.PriorityTimingInvariant
+Relico/LF/BoundPayloadSyntax.lean	43			priority	priority :
+Relico/LF/MultiStoreCppPrinter.lean	23			priority	For translated programs, this is the normalized source priority order.
+Relico/LF/MultiStoreDispatchSemantics.lean	40			priority	(hPriorityEligible :
+Relico/LF/MultiStoreDispatchSemantics.lean	41			priority	LF.IsReactionPriorityEligible
+Relico/LF/MultiStorePayloadCppPrinter.lean	309			priority	priority order.
+Relico/LF/MultiStorePayloadCppPrinter.lean	339			priority	Priority metadata is not printed directly. The translator has already
+Relico/LF/MultiStorePayloadCppPrinter.lean	340			priority	normalized logical actions and message reactions into semantic priority
+Relico/LF/MultiStorePayloadDispatch.lean	174			priority	Priority-aware LF eligibility for one pending logical-action
+Relico/LF/MultiStorePayloadDispatch.lean	180	def	MultiStorePayloadIsReactionPriorityEligible	priority	def MultiStorePayloadIsReactionPriorityEligible
+Relico/LF/MultiStorePayloadDispatch.lean	201			priority	namespace MultiStorePayloadIsReactionPriorityEligible
+Relico/LF/MultiStorePayloadDispatch.lean	211			priority	LF.MultiStorePayloadIsReactionPriorityEligible
+Relico/LF/MultiStorePayloadDispatch.lean	228			priority	LF.MultiStorePayloadIsReactionPriorityEligible
+Relico/LF/MultiStorePayloadDispatch.lean	247			priority	end MultiStorePayloadIsReactionPriorityEligible
+Relico/LF/MultiStorePayloadDispatch.lean	288			priority	(hPriorityEligible :
+Relico/LF/MultiStorePayloadDispatch.lean	289			priority	LF.MultiStorePayloadIsReactionPriorityEligible
+Relico/LF/MultiStorePayloadDispatch.lean	378			priority	_hPriorityEligible
+Relico/LF/MultiStorePayloadDispatch.lean	419			priority	_hPriorityEligible
+Relico/LF/MultiStorePayloadDispatch.lean	504			priority	_hPriorityEligible
+Relico/LF/MultiStorePayloadSyntax.lean	143			priority	priority :
+Relico/LF/MultiStoreReactionScheduling.lean	164			priority	Priority-aware eligibility for a pending LF logical-action occurrence.
+Relico/LF/MultiStoreReactionScheduling.lean	170	def	IsReactionPriorityEligible	priority	def IsReactionPriorityEligible
+Relico/LF/MultiStoreReactionScheduling.lean	190			priority	Reaction-priority eligibility implies ordinary earliest-tag
+Relico/LF/MultiStoreReactionScheduling.lean	193	theorem	IsReactionPriorityEligible.isEarliest	priority	theorem IsReactionPriorityEligible.isEarliest
+Relico/LF/MultiStoreReactionScheduling.lean	199			priority	LF.IsReactionPriorityEligible
+Relico/LF/MultiStoreReactionScheduling.lean	209			priority	Extract the same-tag reaction-order obligation from priority-aware LF
+Relico/LF/MultiStoreReactionScheduling.lean	212	theorem	IsReactionPriorityEligible.precedes_same_tag	priority	theorem IsReactionPriorityEligible.precedes_same_tag
+Relico/LF/MultiStoreReactionScheduling.lean	219			priority	LF.IsReactionPriorityEligible
+Relico/LF/MultiStoreReactionScheduling.lean	245	theorem	IsReactionPriorityEligible.not_of_earlier_microstep_candidate	priority	theorem IsReactionPriorityEligible.not_of_earlier_microstep_candidate
+Relico/LF/MultiStoreReactionScheduling.lean	261			priority	¬ LF.IsReactionPriorityEligible
+Relico/LF/PendingNotPast.lean	377			priority	The selected action is reaction-priority eligible and hence earliest by
+Relico/LF/PendingNotPast.lean	407			priority	hPriorityEligible
+Relico/LF/PendingNotPast.lean	418			priority	hPriorityEligible.1
+Relico/LF/PriorityTimingInvariant.lean	150			priority	Runtime timing invariant for the priority-sensitive generated-LF
+Relico/Tests/BoundPayloadFoundation.lean	47			priority	priority :=
+Relico/Tests/BoundPayloadFoundation.lean	134	theorem	bound_payload_priority_preserved	priority	theorem bound_payload_priority_preserved :
+Relico/Tests/BoundPayloadFoundation.lean	135			priority	boundPayloadTargetReaction.priority =
+Relico/Tests/BoundPayloadFoundation.lean	136			priority	boundPayloadSourceServer.priority := by
+Relico/Tests/DetailedBoundPayloadEndToEndCorrectness.lean	149			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadEndToEndCorrectness.lean	215			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadEndToEndCorrectness.lean	290			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadInvariantCarryingFiniteWeakExecution.lean	28			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadInvariantCarryingFiniteWeakExecution.lean	79			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadInvariantCarryingFiniteWeakExecution.lean	131			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadInvariantCarryingFiniteWeakExecution.lean	206			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadInvariantMatches.lean	37			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadRuntimeInvariant.lean	9			priority	#check DTR.BoundPayloadStmt.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadRuntimeInvariant.lean	10			priority	#check DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadRuntimeInvariant.lean	12			priority	#check DTR.BoundPayloadStmt.priorityTimingWellFormed_selfSendInt
+Relico/Tests/DetailedBoundPayloadRuntimeInvariant.lean	13			priority	#check DTR.BoundPayloadBody.priorityTimingWellFormed_nil
+Relico/Tests/DetailedBoundPayloadRuntimeInvariant.lean	14			priority	#check DTR.BoundPayloadBody.priorityTimingWellFormed_cons
+Relico/Tests/DetailedBoundPayloadRuntimeInvariant.lean	15			priority	#check DTR.BoundPayloadBody.priorityTimingWellFormed_head
+Relico/Tests/DetailedBoundPayloadRuntimeInvariant.lean	16			priority	#check DTR.BoundPayloadBody.priorityTimingWellFormed_tail
+Relico/Tests/DetailedBoundPayloadRuntimeInvariant.lean	33			priority	DTR.BoundPayloadStmt.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadRuntimeInvariant.lean	41			priority	(DTR.BoundPayloadStmt.priorityTimingWellFormed_selfSendInt
+Relico/Tests/DetailedBoundPayloadRuntimeInvariant.lean	51			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadRuntimeInvariant.lean	53			priority	DTR.BoundPayloadStmt.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadRuntimeInvariant.lean	57			priority	DTR.BoundPayloadBody.priorityTimingWellFormed_head
+Relico/Tests/DetailedBoundPayloadRuntimeInvariantPreservation.lean	10			priority	#check Correctness.boundPayloadStep_preserves_priorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadRuntimeInvariantPreservation.lean	13			priority	#check Correctness.boundPayloadDispatch_establishes_priorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadRuntimeInvariantPreservation.lean	28			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadRuntimeInvariantPreservation.lean	30			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadRuntimeInvariantPreservation.lean	34			priority	Correctness.boundPayloadStep_preserves_priorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadRuntimeInvariantPreservation.lean	55			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadRuntimeInvariantPreservation.lean	102			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadRuntimeInvariantPreservation.lean	104			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadRuntimeInvariantPreservation.lean	108			priority	Correctness.boundPayloadDispatch_establishes_priorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadRuntimeInvariantPreservation.lean	128			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadRuntimeInvariantPreservation.lean	146			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadRuntimeInvariantPreservation.lean	174			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Tests/DetailedBoundPayloadRuntimeInvariantPreservation.lean	192			priority	DTR.BoundPayloadBody.PriorityTimingWellFormed
+Relico/Tests/DetailedExecutableTranslation.lean	34			priority	DTR.MultiStoreModel.PriorityTimingWellFormed
+Relico/Tests/DetailedExecutableTranslation.lean	106			priority	DTR.MultiStoreModel.PriorityTimingWellFormed
+Relico/Tests/DetailedInitialFiniteWeakExecution.lean	31			priority	DTR.MultiStoreModel.PriorityTimingWellFormed
+Relico/Tests/DetailedInitialFiniteWeakExecution.lean	81			priority	DTR.MultiStoreModel.PriorityTimingWellFormed
+Relico/Tests/DetailedInitialFiniteWeakExecution.lean	150			priority	DTR.MultiStoreModel.PriorityTimingWellFormed
+Relico/Tests/DetailedInvariantCarryingBackwardMatch.lean	84			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Tests/DetailedInvariantCarryingBackwardMatch.lean	152			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Tests/DetailedInvariantCarryingFiniteWeakExecution.lean	55			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Tests/DetailedInvariantCarryingFiniteWeakExecution.lean	145			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Tests/DetailedInvariantCarryingForwardMatch.lean	55			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Tests/DetailedInvariantCarryingForwardMatch.lean	119			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Tests/DetailedPriorityRuntimeInvariant.lean	1			priority	import Relico.Correctness.DetailedPriorityRuntimeInvariant
+Relico/Tests/DetailedPriorityRuntimeInvariant.lean	7			priority	namespace DetailedPriorityRuntimeInvariant
+Relico/Tests/DetailedPriorityRuntimeInvariant.lean	9	theorem	generated_initial_state_has_priority_runtime_invariant	priority	theorem generated_initial_state_has_priority_runtime_invariant
+Relico/Tests/DetailedPriorityRuntimeInvariant.lean	11			priority	LF.StoreState.PriorityRuntimeInvariant
+Relico/Tests/DetailedPriorityRuntimeInvariant.lean	16			priority	LF.MultiStoreProgram.initialState_priorityRuntimeInvariant
+Relico/Tests/DetailedPriorityRuntimeInvariant.lean	37			priority	LF.StoreState.PriorityRuntimeInvariant
+Relico/Tests/DetailedPriorityRuntimeInvariant.lean	45			priority	Correctness.storeForwardDispatchCompatible_of_priorityRuntimeInvariant
+Relico/Tests/DetailedPriorityRuntimeInvariant.lean	71			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Tests/DetailedPriorityRuntimeInvariant.lean	74			priority	LF.StoreState.PriorityRuntimeInvariant
+Relico/Tests/DetailedPriorityRuntimeInvariant.lean	76			priority	LF.StoreState.PriorityRuntimeInvariant
+Relico/Tests/DetailedPriorityRuntimeInvariant.lean	80			priority	Correctness.targetMultiStoreMachineStep_preserves_priorityRuntimeInvariant
+Relico/Tests/DetailedPriorityRuntimeInvariant.lean	86			priority	end DetailedPriorityRuntimeInvariant
+Relico/Tests/DetailedRuntimeInvariants.lean	37			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Tests/DirectLFDispatchSelection.lean	11			priority	corresponding LF occurrence that can be removed and is reaction-priority
+Relico/Tests/DirectLFDispatchSelection.lean	34			priority	DTR.IsPriorityEligible
+Relico/Tests/DirectLFDispatchSelection.lean	46			priority	LF.IsReactionPriorityEligible
+Relico/Tests/DirectLFDispatchSelection.lean	63			priority	source-priority eligible.
+Relico/Tests/DirectLFDispatchSelection.lean	85			priority	LF.IsReactionPriorityEligible
+Relico/Tests/DirectLFDispatchSelection.lean	98			priority	DTR.IsPriorityEligible
+Relico/Tests/DirectLFPayloadRuntimeDispatch.lean	20			priority	#check Correctness.directLF_reactionPriorityEligible_of_sameSource
+Relico/Tests/DirectLFSelectionCompatibility.lean	24			priority	Reaction declaration order resolves their same-tag priority.
+Relico/Tests/DirectLFSelectionCompatibility.lean	56			priority	An earlier LF microstep is compatible when it follows strict DTR priority.
+Relico/Tests/DirectLFSelectionCompatibility.lean	76			priority	(hPriority :
+Relico/Tests/DirectLFSelectionCompatibility.lean	77			priority	Correctness.DirectLFStrictPriorityPrecedes
+Relico/Tests/DirectLFSelectionCompatibility.lean	91			priority	hPriority
+Relico/Tests/DirectLFSelectionCompatibility.lean	97	theorem	earlier_microstep_recovers_priority	priority	theorem earlier_microstep_recovers_priority
+Relico/Tests/DirectLFSelectionCompatibility.lean	117			priority	Correctness.DirectLFStrictPriorityPrecedes
+Relico/Tests/DirectLFSelectionCompatibility.lean	121			priority	hCompatible.strictPriority_of_leftEarlier
+Relico/Tests/DirectLFSelectionCompatibility.lean	125			priority	#check Correctness.DirectLFStrictPriorityPrecedes
+Relico/Tests/DirectLFSelectionCompatibility.lean	142			priority	Correctness.directLF_sourcePriorityEligible_implies_exists_targetReactionPriorityEligible
+Relico/Tests/DirectLFSelectionCompatibility.lean	145			priority	Correctness.directLF_targetReactionPriorityEligible_implies_exists_sourcePriorityEligible
+Relico/Tests/DirectLFSelectionCompatibility.lean	150			priority	#check earlier_microstep_recovers_priority
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	1			actorPriority,priority	import Relico.Correctness.GlobalMultiStorePayloadActorPriorityBoundary
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	5			actorPriority,priority	namespace GlobalMultiStorePayloadActorPriorityBoundary
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	7			actorPriority,priority	open Correctness.GlobalMultiStorePayloadActorPriorityBoundary
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	11			actorPriority,priority	sourceActorPriorityMetadata model = none :=
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	12			actorPriority,priority	sourceActorPriorityMetadata_eq_none model
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	16			actorPriority,priority	targetActorPriorityMetadata program = none :=
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	17			actorPriority,priority	targetActorPriorityMetadata_eq_none program
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	22			actorPriority,priority	ActorPriorityMetadataCorresponds model program :=
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	23			actorPriority,priority	actorPriorityMetadataCorresponds model program
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	26			RequestWithinSupportedFragment	RequestWithinSupportedFragment none :=
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	27			ActorPriorityRequest,actorPriority,priority	noActorPriorityRequest_supported
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	30			ActorPriorityAssignment,actorPriority,priority	(assignment : ActorPriorityAssignment) :
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	31			RequestWithinSupportedFragment	¬RequestWithinSupportedFragment (some assignment) :=
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	32			ActorPriorityRequest,actorPriority,priority	explicitActorPriorityRequest_rejected assignment
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	35			RequestWithinSupportedFragment	¬RequestWithinSupportedFragment
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	36			ActorPriorityAssignment,actorPriority,priority	(some ([] : ActorPriorityAssignment)) :=
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	37			ActorPriorityRequest,actorPriority,priority	explicitActorPriorityRequest_rejected []
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	42			ActorPriorityRequest,actorPriority,priority	(request : ActorPriorityRequest) :
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	54			priority	boundary_without_actor_priority
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	61			ActorPriorityAssignment,actorPriority,priority	(assignment : ActorPriorityAssignment) :
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	63			priority	boundary_rejects_explicit_actor_priority
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	68	theorem	localPriority_preserved	priority	theorem localPriority_preserved
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	70			priority	(Translation.compileMultiStorePayloadReaction server).priority =
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	71			priority	server.priority :=
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	72			priority	localReactionPriority_preserved server
+Relico/Tests/GlobalMultiStorePayloadActorPriorityBoundary.lean	74			actorPriority,priority	end GlobalMultiStorePayloadActorPriorityBoundary
+Relico/Tests/GlobalMultiStorePayloadDeclaredFragment.lean	109	theorem	reactionPriority_regression	priority	theorem reactionPriority_regression
+Relico/Tests/GlobalMultiStorePayloadDeclaredFragment.lean	111			priority	(Translation.compileMultiStorePayloadReaction server).priority =
+Relico/Tests/GlobalMultiStorePayloadDeclaredFragment.lean	112			priority	server.priority :=
+Relico/Tests/GlobalMultiStorePayloadDeclaredFragment.lean	113			priority	compileReaction_priority server
+Relico/Tests/GlobalMultiStorePayloadDeclaredFragment.lean	115			priority	#check SourcePriorityEligible
+Relico/Tests/GlobalMultiStorePayloadDeclaredFragment.lean	116			priority	#check TargetPriorityEligible
+Relico/Tests/GlobalMultiStorePayloadExternalSend.lean	61			priority	priority :=
+Relico/Tests/MessageServerPriority.lean	1			priority	import Relico.DTR.MessageServerPriority
+Relico/Tests/MessageServerPriority.lean	9	def	priorityHighName	priority	def priorityHighName :
+Relico/Tests/MessageServerPriority.lean	11			priority	"⟨""priorityHigh""⟩"
+Relico/Tests/MessageServerPriority.lean	13	def	priorityHighTieName	priority	def priorityHighTieName :
+Relico/Tests/MessageServerPriority.lean	15			priority	"⟨""priorityHighTie""⟩"
+Relico/Tests/MessageServerPriority.lean	17	def	priorityLowName	priority	def priorityLowName :
+Relico/Tests/MessageServerPriority.lean	19			priority	"⟨""priorityLow""⟩"
+Relico/Tests/MessageServerPriority.lean	21	def	priorityNoneName	priority	def priorityNoneName :
+Relico/Tests/MessageServerPriority.lean	23			priority	"⟨""priorityNone""⟩"
+Relico/Tests/MessageServerPriority.lean	25	def	priorityHighServer	priority	def priorityHighServer :
+Relico/Tests/MessageServerPriority.lean	29			priority	priorityHighName
+Relico/Tests/MessageServerPriority.lean	34			priority	priority :=
+Relico/Tests/MessageServerPriority.lean	37	def	priorityHighTieServer	priority	def priorityHighTieServer :
+Relico/Tests/MessageServerPriority.lean	41			priority	priorityHighTieName
+Relico/Tests/MessageServerPriority.lean	46			priority	priority :=
+Relico/Tests/MessageServerPriority.lean	49	def	priorityLowServer	priority	def priorityLowServer :
+Relico/Tests/MessageServerPriority.lean	53			priority	priorityLowName
+Relico/Tests/MessageServerPriority.lean	58			priority	priority :=
+Relico/Tests/MessageServerPriority.lean	61	def	priorityNoneServer	priority	def priorityNoneServer :
+Relico/Tests/MessageServerPriority.lean	65			priority	priorityNoneName
+Relico/Tests/MessageServerPriority.lean	73	theorem	explicit_priority_numeric_order	priority	theorem explicit_priority_numeric_order :
+Relico/Tests/MessageServerPriority.lean	74			priority	DTR.MessageServerPriority.PrecedesOrEqual
+Relico/Tests/MessageServerPriority.lean	75			priority	priorityHighServer
+Relico/Tests/MessageServerPriority.lean	76			priority	priorityLowServer := by
+Relico/Tests/MessageServerPriority.lean	79			priority	DTR.MessageServerPriority.lower_numeric_precedes
+Relico/Tests/MessageServerPriority.lean	80			priority	(leftPriority := 1)
+Relico/Tests/MessageServerPriority.lean	81			priority	(rightPriority := 4)
+Relico/Tests/MessageServerPriority.lean	89	theorem	explicit_priority_precedes_none	priority	theorem explicit_priority_precedes_none :
+Relico/Tests/MessageServerPriority.lean	90			priority	DTR.MessageServerPriority.PrecedesOrEqual
+Relico/Tests/MessageServerPriority.lean	91			priority	priorityLowServer
+Relico/Tests/MessageServerPriority.lean	92			priority	priorityNoneServer := by
+Relico/Tests/MessageServerPriority.lean	95			priority	DTR.MessageServerPriority.explicit_precedes_unannotated
+Relico/Tests/MessageServerPriority.lean	96			priority	(priority := 4)
+Relico/Tests/MessageServerPriority.lean	101			priority	Normalization follows numeric priority, places unannotated servers
+Relico/Tests/MessageServerPriority.lean	104	theorem	priority_normalization_regression	priority	theorem priority_normalization_regression :
+Relico/Tests/MessageServerPriority.lean	105			priority	DTR.MessageServerPriority.normalize [
+Relico/Tests/MessageServerPriority.lean	106			priority	priorityLowServer,
+Relico/Tests/MessageServerPriority.lean	107			priority	priorityNoneServer,
+Relico/Tests/MessageServerPriority.lean	108			priority	priorityHighServer,
+Relico/Tests/MessageServerPriority.lean	109			priority	priorityHighTieServer
+Relico/Tests/MessageServerPriority.lean	111			priority	priorityHighServer,
+Relico/Tests/MessageServerPriority.lean	112			priority	priorityHighTieServer,
+Relico/Tests/MessageServerPriority.lean	113			priority	priorityLowServer,
+Relico/Tests/MessageServerPriority.lean	114			priority	priorityNoneServer
+Relico/Tests/MessageServerPriority.lean	121	theorem	priority_normalization_preserves_membership	priority	theorem priority_normalization_preserves_membership :
+Relico/Tests/MessageServerPriority.lean	124			priority	priorityLowServer,
+Relico/Tests/MessageServerPriority.lean	125			priority	priorityNoneServer,
+Relico/Tests/MessageServerPriority.lean	126			priority	priorityHighServer,
+Relico/Tests/MessageServerPriority.lean	127			priority	priorityHighTieServer
+Relico/Tests/MessageServerPriority.lean	130			priority	DTR.MessageServerPriority.normalize [
+Relico/Tests/MessageServerPriority.lean	131			priority	priorityLowServer,
+Relico/Tests/MessageServerPriority.lean	132			priority	priorityNoneServer,
+Relico/Tests/MessageServerPriority.lean	133			priority	priorityHighServer,
+Relico/Tests/MessageServerPriority.lean	134			priority	priorityHighTieServer
+Relico/Tests/MessageServerPriority.lean	140			priority	(DTR.MessageServerPriority.mem_normalize_iff
+Relico/Tests/MessageServerPriority.lean	148	theorem	priority_normalization_preserves_length	priority	theorem priority_normalization_preserves_length :
+Relico/Tests/MessageServerPriority.lean	149			priority	(DTR.MessageServerPriority.normalize [
+Relico/Tests/MessageServerPriority.lean	150			priority	priorityLowServer,
+Relico/Tests/MessageServerPriority.lean	151			priority	priorityNoneServer,
+Relico/Tests/MessageServerPriority.lean	152			priority	priorityHighServer,
+Relico/Tests/MessageServerPriority.lean	153			priority	priorityHighTieServer
+Relico/Tests/MessageServerPriority.lean	162	theorem	existing_tick_server_has_no_priority	priority	theorem existing_tick_server_has_no_priority :
+Relico/Tests/MessageServerPriority.lean	163			priority	tickMessageServer.priority =
+Relico/Tests/MessageServerPriority.lean	167	theorem	existing_reset_server_has_no_priority	priority	theorem existing_reset_server_has_no_priority :
+Relico/Tests/MessageServerPriority.lean	168			priority	resetMessageServer.priority =
+Relico/Tests/MessageServerPriority.lean	177			priority	DTR.MessageServerPriority.normalize
+Relico/Tests/MessageServerPriority.lean	183	def	priorityTranslationServers	priority	def priorityTranslationServers :
+Relico/Tests/MessageServerPriority.lean	185			priority	priorityLowServer,
+Relico/Tests/MessageServerPriority.lean	186			priority	priorityNoneServer,
+Relico/Tests/MessageServerPriority.lean	187			priority	priorityHighServer,
+Relico/Tests/MessageServerPriority.lean	188			priority	priorityHighTieServer
+Relico/Tests/MessageServerPriority.lean	194	theorem	priority_translation_preserves_source_declarations	priority	theorem priority_translation_preserves_source_declarations :
+Relico/Tests/MessageServerPriority.lean	195			priority	priorityTranslationServers = [
+Relico/Tests/MessageServerPriority.lean	196			priority	priorityLowServer,
+Relico/Tests/MessageServerPriority.lean	197			priority	priorityNoneServer,
+Relico/Tests/MessageServerPriority.lean	198			priority	priorityHighServer,
+Relico/Tests/MessageServerPriority.lean	199			priority	priorityHighTieServer
+Relico/Tests/MessageServerPriority.lean	204			priority	Generated logical actions use stable priority order.
+Relico/Tests/MessageServerPriority.lean	206	theorem	priority_translation_action_order	priority	theorem priority_translation_action_order :
+Relico/Tests/MessageServerPriority.lean	208			priority	priorityTranslationServers = [
+Relico/Tests/MessageServerPriority.lean	210			priority	priorityHighName,
+Relico/Tests/MessageServerPriority.lean	212			priority	priorityHighTieName,
+Relico/Tests/MessageServerPriority.lean	214			priority	priorityLowName,
+Relico/Tests/MessageServerPriority.lean	216			priority	priorityNoneName
+Relico/Tests/MessageServerPriority.lean	221			priority	Generated message reactions use exactly the same stable priority order.
+Relico/Tests/MessageServerPriority.lean	223	theorem	priority_translation_reaction_order	priority	theorem priority_translation_reaction_order :
+Relico/Tests/MessageServerPriority.lean	225			priority	priorityTranslationServers = [
+Relico/Tests/MessageServerPriority.lean	227			priority	priorityHighServer,
+Relico/Tests/MessageServerPriority.lean	229			priority	priorityHighTieServer,
+Relico/Tests/MessageServerPriority.lean	231			priority	priorityLowServer,
+Relico/Tests/MessageServerPriority.lean	233			priority	priorityNoneServer
+Relico/Tests/MessageServerPriority.lean	239			priority	priority normalization.
+Relico/Tests/MessageServerPriority.lean	241	theorem	priority_translation_triggers_align	priority	theorem priority_translation_triggers_align :
+Relico/Tests/MessageServerPriority.lean	244			priority	priorityTranslationServers) =
+Relico/Tests/MessageServerPriority.lean	246			priority	priorityTranslationServers).map
+Relico/Tests/MultiStoreCppBackend.lean	2			priority	import Relico.Tests.MessageServerPriority
+Relico/Tests/MultiStoreCppBackend.lean	33			priority	high-priority-first order produced by the executable translator.
+Relico/Tests/MultiStoreCppBackend.lean	35	theorem	priority_cpp_action_declaration_order	priority	theorem priority_cpp_action_declaration_order :
+Relico/Tests/MultiStoreCppBackend.lean	38			priority	priorityTranslationServers) =
+Relico/Tests/MultiStoreCppBackend.lean	41			priority	priorityHighName) ++
+Relico/Tests/MultiStoreCppBackend.lean	44			priority	priorityHighTieName) ++
+Relico/Tests/MultiStoreCppBackend.lean	47			priority	priorityLowName) ++
+Relico/Tests/MultiStoreCppBackend.lean	50			priority	priorityNoneName) := by
+Relico/Tests/MultiStoreCppBackend.lean	56	theorem	priority_cpp_reaction_declaration_order	priority	theorem priority_cpp_reaction_declaration_order :
+Relico/Tests/MultiStoreCppBackend.lean	59			priority	priorityTranslationServers) =
+Relico/Tests/MultiStoreCppBackend.lean	62			priority	priorityHighServer) ++
+Relico/Tests/MultiStoreCppBackend.lean	66			priority	priorityHighTieServer) ++
+Relico/Tests/MultiStoreCppBackend.lean	70			priority	priorityLowServer) ++
+Relico/Tests/MultiStoreCppBackend.lean	74			priority	priorityNoneServer) := by
+Relico/Tests/MultiStoreCppBackend.lean	92			priority	frontend priority fixture place the high-priority server first.
+Relico/Tests/MultiStoreCppBackend.lean	94	theorem	decoded_priority_cpp_action_declaration_order	priority	theorem decoded_priority_cpp_action_declaration_order :
+Relico/Tests/MultiStoreCppBackend.lean	108			priority	priority fixture retain the same high-before-low order.
+Relico/Tests/MultiStoreCppBackend.lean	110	theorem	decoded_priority_cpp_reaction_trigger_order	priority	theorem decoded_priority_cpp_reaction_trigger_order :
+Relico/Tests/MultiStoreDispatch.lean	115	theorem	multi_dispatch_message_is_priority_eligible	priority	theorem multi_dispatch_message_is_priority_eligible :
+Relico/Tests/MultiStoreDispatch.lean	116			priority	DTR.IsPriorityEligible
+Relico/Tests/MultiStoreDispatch.lean	143	theorem	multi_dispatch_action_is_reaction_priority_eligible	priority	theorem multi_dispatch_action_is_reaction_priority_eligible :
+Relico/Tests/MultiStoreDispatch.lean	144			priority	LF.IsReactionPriorityEligible
+Relico/Tests/MultiStoreDispatch.lean	205			priority	multi_dispatch_message_is_priority_eligible
+Relico/Tests/MultiStoreDispatch.lean	246			priority	multi_dispatch_action_is_reaction_priority_eligible
+Relico/Tests/MultiStoreExecutableTranslation.lean	125	theorem	twoMessageModel_priorityTimingWellFormed	priority	theorem twoMessageModel_priorityTimingWellFormed :
+Relico/Tests/MultiStoreExecutableTranslation.lean	126			priority	DTR.MultiStoreModel.PriorityTimingWellFormed
+Relico/Tests/MultiStoreExecutableTranslation.lean	135			priority	DTR.Body.PriorityTimingWellFormed,
+Relico/Tests/MultiStoreExecutableTranslation.lean	136			priority	DTR.Stmt.PriorityTimingWellFormed
+Relico/Tests/MultiStoreExecutableTranslation.lean	160			priority	DTR.Body.PriorityTimingWellFormed,
+Relico/Tests/MultiStoreExecutableTranslation.lean	161			priority	DTR.Stmt.PriorityTimingWellFormed
+Relico/Tests/MultiStoreExecutableTranslation.lean	166			priority	DTR.Body.PriorityTimingWellFormed,
+Relico/Tests/MultiStoreExecutableTranslation.lean	167			priority	DTR.Stmt.PriorityTimingWellFormed
+Relico/Tests/MultiStoreExecutableTranslation.lean	198			priority	twoMessageModel_priorityTimingWellFormed
+Relico/Tests/MultiStoreExecutableTranslation.lean	229			priority	twoMessageModel_priorityTimingWellFormed
+Relico/Tests/MultiStoreFrontendDecoder.lean	30			priority	"""PriorityController"""
+Relico/Tests/MultiStoreFrontendDecoder.lean	36			priority	"""PriorityController"""
+Relico/Tests/MultiStoreFrontendDecoder.lean	76			priority	priority? :=
+Relico/Tests/MultiStoreFrontendDecoder.lean	102			priority	priority? :=
+Relico/Tests/MultiStoreFrontendDecoder.lean	125			priority	"⟨""PriorityController""⟩"
+Relico/Tests/MultiStoreFrontendDecoder.lean	160			priority	priority :=
+Relico/Tests/MultiStoreFrontendDecoder.lean	173			priority	priority :=
+Relico/Tests/MultiStoreFrontendDecoder.lean	184			priority	"⟨""PriorityController""⟩"
+Relico/Tests/MultiStoreFrontendDecoder.lean	210			priority	messageServer.priority) = [
+Relico/Tests/MultiStoreFrontendDecoder.lean	217			priority	Translation, rather than decoding, derives the generated priority
+Relico/Tests/MultiStoreFrontendDecoder.lean	220	theorem	decoded_multiStore_translation_uses_priority_order	priority	theorem decoded_multiStore_translation_uses_priority_order :
+Relico/Tests/MultiStoreFrontendDecoder.lean	294			priority	priority? :=
+Relico/Tests/MultiStoreFrontendDecoder.lean	304			priority	priority? :=
+Relico/Tests/MultiStoreMachineTrace.lean	166	theorem	twoMessageServerBodies_priorityTimingWellFormed	priority	theorem twoMessageServerBodies_priorityTimingWellFormed :
+Relico/Tests/MultiStoreMachineTrace.lean	170			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Tests/MultiStoreMachineTrace.lean	186			priority	DTR.Body.PriorityTimingWellFormed,
+Relico/Tests/MultiStoreMachineTrace.lean	187			priority	DTR.Stmt.PriorityTimingWellFormed
+Relico/Tests/MultiStoreMachineTrace.lean	194			priority	DTR.Body.PriorityTimingWellFormed,
+Relico/Tests/MultiStoreMachineTrace.lean	195			priority	DTR.Stmt.PriorityTimingWellFormed
+Relico/Tests/MultiStoreMachineTrace.lean	198	theorem	multiDispatchSource_priorityTimingWellFormed	priority	theorem multiDispatchSource_priorityTimingWellFormed :
+Relico/Tests/MultiStoreMachineTrace.lean	199			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Tests/MultiStoreMachineTrace.lean	324			priority	twoMessageServerBodies_priorityTimingWellFormed
+Relico/Tests/MultiStoreMachineTrace.lean	326			priority	multiDispatchSource_priorityTimingWellFormed
+Relico/Tests/MultiStorePayloadCppPrinter.lean	145			priority	priority :=
+Relico/Tests/MultiStorePayloadCppPrinter.lean	169			priority	priority :=
+Relico/Tests/MultiStorePayloadDispatch.lean	51			priority	priority :=
+Relico/Tests/MultiStorePayloadDispatch.lean	66			priority	priority :=
+Relico/Tests/MultiStorePayloadDispatch.lean	70			priority	The input list is deliberately not priority-normalized.
+Relico/Tests/MultiStorePayloadDispatch.lean	98			priority	(Translation.priorityOrderedMultiStorePayloadMessageServers
+Relico/Tests/MultiStorePayloadDispatch.lean	103			priority	Translation generates the same priority-normalized reaction order used
+Relico/Tests/MultiStorePayloadDispatch.lean	106	theorem	generated_reactions_match_priority_order	priority	theorem generated_reactions_match_priority_order :
+Relico/Tests/MultiStorePayloadDispatch.lean	185			priority	Priority normalization places the explicit priority `1` server before
+Relico/Tests/MultiStorePayloadDispatch.lean	186			priority	the explicit priority `4` server.
+Relico/Tests/MultiStorePayloadDispatch.lean	189			priority	DTR.MultiStorePayloadPriorityServerNamePrecedesOrEqual
+Relico/Tests/MultiStorePayloadDispatch.lean	196			priority	The converse priority order is false.
+Relico/Tests/MultiStorePayloadDispatch.lean	199			priority	¬ DTR.MultiStorePayloadPriorityServerNamePrecedesOrEqual
+Relico/Tests/MultiStorePayloadDispatch.lean	206			priority	The generated high-priority reaction precedes the generated
+Relico/Tests/MultiStorePayloadDispatch.lean	207			priority	low-priority reaction.
+Relico/Tests/MultiStorePayloadDispatch.lean	227			priority	At equal source metric time, the high-priority occurrence is eligible.
+Relico/Tests/MultiStorePayloadDispatch.lean	229	theorem	source_high_priority_eligible	priority	theorem source_high_priority_eligible :
+Relico/Tests/MultiStorePayloadDispatch.lean	230			priority	DTR.MultiStorePayloadIsPriorityEligible
+Relico/Tests/MultiStorePayloadDispatch.lean	267			priority	At the same source metric time, the lower-priority occurrence is not
+Relico/Tests/MultiStorePayloadDispatch.lean	268			priority	eligible while the higher-priority occurrence remains pending.
+Relico/Tests/MultiStorePayloadDispatch.lean	270	theorem	source_low_not_priority_eligible	priority	theorem source_low_not_priority_eligible :
+Relico/Tests/MultiStorePayloadDispatch.lean	271			priority	¬ DTR.MultiStorePayloadIsPriorityEligible
+Relico/Tests/MultiStorePayloadDispatch.lean	290			priority	At one complete LF tag, the high-priority generated action is eligible.
+Relico/Tests/MultiStorePayloadDispatch.lean	292	theorem	target_high_priority_eligible	priority	theorem target_high_priority_eligible :
+Relico/Tests/MultiStorePayloadDispatch.lean	293			priority	LF.MultiStorePayloadIsReactionPriorityEligible
+Relico/Tests/MultiStorePayloadDispatch.lean	334			priority	At that same complete LF tag, the lower-priority action is not eligible
+Relico/Tests/MultiStorePayloadDispatch.lean	335			priority	while the higher-priority action remains pending.
+Relico/Tests/MultiStorePayloadDispatch.lean	337	theorem	target_low_not_priority_eligible	priority	theorem target_low_not_priority_eligible :
+Relico/Tests/MultiStorePayloadDispatch.lean	338			priority	¬ LF.MultiStorePayloadIsReactionPriorityEligible
+Relico/Tests/MultiStorePayloadDispatch.lean	431			priority	source_high_priority_eligible
+Relico/Tests/MultiStorePayloadDispatch.lean	504			priority	target_high_priority_eligible
+Relico/Tests/MultiStorePayloadDispatch.lean	566			priority	DTR.MultiStorePayloadIsPriorityEligible
+Relico/Tests/MultiStorePayloadDispatch.lean	589			priority	LF.MultiStorePayloadIsReactionPriorityEligible
+Relico/Tests/MultiStorePayloadFoundation.lean	95			priority	priority :=
+Relico/Tests/MultiStorePayloadFoundation.lean	115			priority	priority :=
+Relico/Tests/MultiStorePayloadFoundation.lean	118	def	duplicatePriorityMessageServer	priority	def duplicatePriorityMessageServer :
+Relico/Tests/MultiStorePayloadFoundation.lean	130			priority	priority :=
+Relico/Tests/MultiStorePayloadFoundation.lean	137	theorem	distinct_priority_fixture_is_well_formed	priority	theorem distinct_priority_fixture_is_well_formed :
+Relico/Tests/MultiStorePayloadFoundation.lean	149	theorem	duplicate_priority_fixture_is_rejected	priority	theorem duplicate_priority_fixture_is_rejected :
+Relico/Tests/MultiStorePayloadFoundation.lean	153			priority	duplicatePriorityMessageServer
+Relico/Tests/MultiStorePayloadFoundation.lean	158			priority	Smaller numeric priority is normalized before larger numeric priority.
+Relico/Tests/MultiStorePayloadFoundation.lean	160	theorem	priority_normalization_regression	priority	theorem priority_normalization_regression :
+Relico/Tests/MultiStorePayloadFoundation.lean	161			priority	DTR.MultiStorePayloadMessageServerPriority.normalize
+Relico/Tests/MultiStorePayloadFoundation.lean	173			priority	Formal-parameter order and priority metadata survive reaction
+Relico/Tests/MultiStorePayloadFoundation.lean	176	theorem	reaction_signature_and_priority_are_preserved	priority	theorem reaction_signature_and_priority_are_preserved :
+Relico/Tests/MultiStorePayloadFoundation.lean	181			priority	highMessageServer).priority =
+Relico/Tests/MultiStorePayloadFoundation.lean	217			priority	priority order.
+Relico/Tests/MultiStorePayloadReactionMembership.lean	15			priority	DTR.MultiStorePayloadMessageServerPriority.insert
+Relico/Tests/MultiStorePayloadReactionMembership.lean	23			priority	DTR.MultiStorePayloadMessageServerPriority.mem_insert_iff
+Relico/Tests/MultiStorePayloadReactionMembership.lean	34			priority	DTR.MultiStorePayloadMessageServerPriority.normalize
+Relico/Tests/MultiStorePayloadReactionMembership.lean	39			priority	DTR.MultiStorePayloadMessageServerPriority.mem_normalize_iff
+Relico/Tests/MultiStorePayloadReactionMembership.lean	43	theorem	priority_ordered_preserves_membership	priority	theorem priority_ordered_preserves_membership
+Relico/Tests/MultiStorePayloadReactionMembership.lean	49			priority	Translation.priorityOrderedMultiStorePayloadMessageServers
+Relico/Tests/MultiStorePayloadReactionMembership.lean	54			priority	Translation.priorityOrderedMultiStorePayloadMessageServers_mem_iff
+Relico/Tests/MultiStorePayloadSelectionCompatibility.lean	68			priority	(hPriority :
+Relico/Tests/MultiStorePayloadSelectionCompatibility.lean	69			priority	Correctness.MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Tests/MultiStorePayloadSelectionCompatibility.lean	84			priority	hPriority
+Relico/Tests/MultiStorePayloadSelectionCompatibility.lean	86	theorem	earlier_microstep_recovers_priority	priority	theorem earlier_microstep_recovers_priority
+Relico/Tests/MultiStorePayloadSelectionCompatibility.lean	106			priority	Correctness.MultiStorePayloadBaseStrictPriorityPrecedes
+Relico/Tests/MultiStorePayloadSelectionCompatibility.lean	111			priority	hCompatible.strictPriority_of_leftEarlier
+Relico/Tests/MultiStorePayloadSelectionRemoval.lean	173			priority	DTR.MultiStorePayloadIsPriorityEligible
+Relico/Tests/MultiStorePayloadSelectionRemoval.lean	185			priority	LF.MultiStorePayloadIsReactionPriorityEligible
+Relico/Tests/MultiStorePayloadSelectionRemoval.lean	220			priority	LF.MultiStorePayloadIsReactionPriorityEligible
+Relico/Tests/MultiStorePayloadSelectionRemoval.lean	233			priority	DTR.MultiStorePayloadIsPriorityEligible
+Relico/Tests/PriorityDispatchScheduling.lean	1			priority	import Relico.DTR.MultiStorePriorityScheduling
+Relico/Tests/PriorityDispatchScheduling.lean	11	def	dispatchPriorityLowName	priority	def dispatchPriorityLowName :
+Relico/Tests/PriorityDispatchScheduling.lean	13			priority	"⟨""dispatchPriorityLow""⟩"
+Relico/Tests/PriorityDispatchScheduling.lean	15	def	dispatchPriorityHighName	priority	def dispatchPriorityHighName :
+Relico/Tests/PriorityDispatchScheduling.lean	17			priority	"⟨""dispatchPriorityHigh""⟩"
+Relico/Tests/PriorityDispatchScheduling.lean	19	def	dispatchPriorityLowServer	priority	def dispatchPriorityLowServer :
+Relico/Tests/PriorityDispatchScheduling.lean	23			priority	dispatchPriorityLowName
+Relico/Tests/PriorityDispatchScheduling.lean	28			priority	priority :=
+Relico/Tests/PriorityDispatchScheduling.lean	31	def	dispatchPriorityHighServer	priority	def dispatchPriorityHighServer :
+Relico/Tests/PriorityDispatchScheduling.lean	35			priority	dispatchPriorityHighName
+Relico/Tests/PriorityDispatchScheduling.lean	40			priority	priority :=
+Relico/Tests/PriorityDispatchScheduling.lean	44			priority	Source declaration order deliberately places the lower-priority server
+Relico/Tests/PriorityDispatchScheduling.lean	47	def	dispatchPriorityServers	priority	def dispatchPriorityServers :
+Relico/Tests/PriorityDispatchScheduling.lean	49			priority	dispatchPriorityLowServer,
+Relico/Tests/PriorityDispatchScheduling.lean	50			priority	dispatchPriorityHighServer
+Relico/Tests/PriorityDispatchScheduling.lean	57			priority	dispatchPriorityLowName
+Relico/Tests/PriorityDispatchScheduling.lean	66			priority	dispatchPriorityHighName
+Relico/Tests/PriorityDispatchScheduling.lean	71	def	dispatchSourcePriorityQueue	priority	def dispatchSourcePriorityQueue :
+Relico/Tests/PriorityDispatchScheduling.lean	78			priority	Stable normalization places the higher-priority server first even
+Relico/Tests/PriorityDispatchScheduling.lean	82			priority	DTR.PriorityServerNamePrecedesOrEqual
+Relico/Tests/PriorityDispatchScheduling.lean	83			priority	dispatchPriorityHighName
+Relico/Tests/PriorityDispatchScheduling.lean	84			priority	dispatchPriorityLowName
+Relico/Tests/PriorityDispatchScheduling.lean	85			priority	dispatchPriorityServers := by
+Relico/Tests/PriorityDispatchScheduling.lean	89			priority	DTR.PriorityServerNamePrecedesOrEqual
+Relico/Tests/PriorityDispatchScheduling.lean	90			priority	dispatchPriorityHighName
+Relico/Tests/PriorityDispatchScheduling.lean	91			priority	dispatchPriorityHighName
+Relico/Tests/PriorityDispatchScheduling.lean	92			priority	dispatchPriorityServers := by
+Relico/Tests/PriorityDispatchScheduling.lean	96			priority	¬ DTR.PriorityServerNamePrecedesOrEqual
+Relico/Tests/PriorityDispatchScheduling.lean	97			priority	dispatchPriorityLowName
+Relico/Tests/PriorityDispatchScheduling.lean	98			priority	dispatchPriorityHighName
+Relico/Tests/PriorityDispatchScheduling.lean	99			priority	dispatchPriorityServers := by
+Relico/Tests/PriorityDispatchScheduling.lean	103			priority	Among equal-time source messages, the higher-priority server is
+Relico/Tests/PriorityDispatchScheduling.lean	106	theorem	dispatch_source_high_is_priority_eligible	priority	theorem dispatch_source_high_is_priority_eligible :
+Relico/Tests/PriorityDispatchScheduling.lean	107			priority	DTR.IsPriorityEligible
+Relico/Tests/PriorityDispatchScheduling.lean	108			priority	dispatchPriorityServers
+Relico/Tests/PriorityDispatchScheduling.lean	110			priority	dispatchSourcePriorityQueue := by
+Relico/Tests/PriorityDispatchScheduling.lean	119			priority	dispatchSourcePriorityQueue
+Relico/Tests/PriorityDispatchScheduling.lean	141			priority	dispatchSourcePriorityQueue
+Relico/Tests/PriorityDispatchScheduling.lean	158			priority	The lower-priority equal-time message is not eligible while the
+Relico/Tests/PriorityDispatchScheduling.lean	159			priority	higher-priority message remains pending.
+Relico/Tests/PriorityDispatchScheduling.lean	161	theorem	dispatch_source_low_is_not_priority_eligible	priority	theorem dispatch_source_low_is_not_priority_eligible :
+Relico/Tests/PriorityDispatchScheduling.lean	162			priority	¬ DTR.IsPriorityEligible
+Relico/Tests/PriorityDispatchScheduling.lean	163			priority	dispatchPriorityServers
+Relico/Tests/PriorityDispatchScheduling.lean	165			priority	dispatchSourcePriorityQueue := by
+Relico/Tests/PriorityDispatchScheduling.lean	170			priority	DTR.PriorityServerNamePrecedesOrEqual
+Relico/Tests/PriorityDispatchScheduling.lean	171			priority	dispatchPriorityLowName
+Relico/Tests/PriorityDispatchScheduling.lean	172			priority	dispatchPriorityHighName
+Relico/Tests/PriorityDispatchScheduling.lean	173			priority	dispatchPriorityServers :=
+Relico/Tests/PriorityDispatchScheduling.lean	180			priority	dispatchSourcePriorityQueue
+Relico/Tests/PriorityDispatchScheduling.lean	189	def	dispatchPriorityTag	priority	def dispatchPriorityTag :
+Relico/Tests/PriorityDispatchScheduling.lean	203			priority	dispatchPriorityLowName
+Relico/Tests/PriorityDispatchScheduling.lean	206			priority	dispatchPriorityTag
+Relico/Tests/PriorityDispatchScheduling.lean	213			priority	dispatchPriorityHighName
+Relico/Tests/PriorityDispatchScheduling.lean	216			priority	dispatchPriorityTag
+Relico/Tests/PriorityDispatchScheduling.lean	218	def	dispatchTargetPriorityQueue	priority	def dispatchTargetPriorityQueue :
+Relico/Tests/PriorityDispatchScheduling.lean	224	def	dispatchPriorityReactions	priority	def dispatchPriorityReactions :
+Relico/Tests/PriorityDispatchScheduling.lean	227			priority	dispatchPriorityServers
+Relico/Tests/PriorityDispatchScheduling.lean	231			priority	the source priority normalization.
+Relico/Tests/PriorityDispatchScheduling.lean	236			priority	dispatchPriorityHighName)
+Relico/Tests/PriorityDispatchScheduling.lean	238			priority	dispatchPriorityLowName)
+Relico/Tests/PriorityDispatchScheduling.lean	239			priority	dispatchPriorityReactions := by
+Relico/Tests/PriorityDispatchScheduling.lean	245			priority	dispatchPriorityHighName)
+Relico/Tests/PriorityDispatchScheduling.lean	247			priority	dispatchPriorityHighName)
+Relico/Tests/PriorityDispatchScheduling.lean	248			priority	dispatchPriorityReactions := by
+Relico/Tests/PriorityDispatchScheduling.lean	254			priority	dispatchPriorityLowName)
+Relico/Tests/PriorityDispatchScheduling.lean	256			priority	dispatchPriorityHighName)
+Relico/Tests/PriorityDispatchScheduling.lean	257			priority	dispatchPriorityReactions := by
+Relico/Tests/PriorityDispatchScheduling.lean	262			priority	high-priority action eligible.
+Relico/Tests/PriorityDispatchScheduling.lean	264	theorem	dispatch_target_high_is_reaction_priority_eligible	priority	theorem dispatch_target_high_is_reaction_priority_eligible :
+Relico/Tests/PriorityDispatchScheduling.lean	265			priority	LF.IsReactionPriorityEligible
+Relico/Tests/PriorityDispatchScheduling.lean	266			priority	dispatchPriorityReactions
+Relico/Tests/PriorityDispatchScheduling.lean	268			priority	dispatchTargetPriorityQueue := by
+Relico/Tests/PriorityDispatchScheduling.lean	277			priority	dispatchTargetPriorityQueue
+Relico/Tests/PriorityDispatchScheduling.lean	290			priority	dispatchPriorityTag
+Relico/Tests/PriorityDispatchScheduling.lean	298			priority	dispatchPriorityTag
+Relico/Tests/PriorityDispatchScheduling.lean	303			priority	dispatchTargetPriorityQueue
+Relico/Tests/PriorityDispatchScheduling.lean	320			priority	The low-priority action cannot dispatch first while the high-priority
+Relico/Tests/PriorityDispatchScheduling.lean	323	theorem	dispatch_target_low_is_not_reaction_priority_eligible	priority	theorem dispatch_target_low_is_not_reaction_priority_eligible :
+Relico/Tests/PriorityDispatchScheduling.lean	324			priority	¬ LF.IsReactionPriorityEligible
+Relico/Tests/PriorityDispatchScheduling.lean	325			priority	dispatchPriorityReactions
+Relico/Tests/PriorityDispatchScheduling.lean	327			priority	dispatchTargetPriorityQueue := by
+Relico/Tests/PriorityDispatchScheduling.lean	334			priority	dispatchPriorityLowName)
+Relico/Tests/PriorityDispatchScheduling.lean	336			priority	dispatchPriorityHighName)
+Relico/Tests/PriorityDispatchScheduling.lean	337			priority	dispatchPriorityReactions :=
+Relico/Tests/PriorityDispatchScheduling.lean	344			priority	dispatchTargetPriorityQueue
+Relico/Tests/PriorityEligibility.lean	1			priority	import Relico.Correctness.PriorityEligibility
+Relico/Tests/PriorityEligibility.lean	2			priority	import Relico.Tests.PriorityDispatchScheduling
+Relico/Tests/PriorityEligibility.lean	35	theorem	dispatch_priority_queues_correspond	priority	theorem dispatch_priority_queues_correspond :
+Relico/Tests/PriorityEligibility.lean	37			priority	dispatchSourcePriorityQueue
+Relico/Tests/PriorityEligibility.lean	38			priority	dispatchTargetPriorityQueue := by
+Relico/Tests/PriorityEligibility.lean	47	theorem	dispatch_target_priority_queue_all_microsteps_zero	priority	theorem dispatch_target_priority_queue_all_microsteps_zero :
+Relico/Tests/PriorityEligibility.lean	49			priority	dispatchTargetPriorityQueue := by
+Relico/Tests/PriorityEligibility.lean	55			priority	dispatchTargetPriorityQueue
+Relico/Tests/PriorityEligibility.lean	67	theorem	dispatch_source_priority_transports_forward	priority	theorem dispatch_source_priority_transports_forward :
+Relico/Tests/PriorityEligibility.lean	68			priority	LF.IsReactionPriorityEligible
+Relico/Tests/PriorityEligibility.lean	69			priority	dispatchPriorityReactions
+Relico/Tests/PriorityEligibility.lean	71			priority	dispatchTargetPriorityQueue := by
+Relico/Tests/PriorityEligibility.lean	74			priority	dispatchPriorityReactions
+Relico/Tests/PriorityEligibility.lean	76			priority	Correctness.sourcePriorityEligible_implies_targetReactionPriorityEligible
+Relico/Tests/PriorityEligibility.lean	78			priority	dispatchPriorityServers)
+Relico/Tests/PriorityEligibility.lean	79			priority	dispatch_priority_queues_correspond
+Relico/Tests/PriorityEligibility.lean	81			priority	(LF.IsReactionPriorityEligible.isEarliest
+Relico/Tests/PriorityEligibility.lean	82			priority	dispatch_target_high_is_reaction_priority_eligible)
+Relico/Tests/PriorityEligibility.lean	83			priority	dispatch_source_high_is_priority_eligible
+Relico/Tests/PriorityEligibility.lean	85	theorem	dispatch_target_priority_transports_backward	priority	theorem dispatch_target_priority_transports_backward :
+Relico/Tests/PriorityEligibility.lean	86			priority	DTR.IsPriorityEligible
+Relico/Tests/PriorityEligibility.lean	87			priority	dispatchPriorityServers
+Relico/Tests/PriorityEligibility.lean	89			priority	dispatchSourcePriorityQueue := by
+Relico/Tests/PriorityEligibility.lean	92			priority	Correctness.targetReactionPriorityEligible_implies_sourcePriorityEligible
+Relico/Tests/PriorityEligibility.lean	93			priority	dispatch_priority_queues_correspond
+Relico/Tests/PriorityEligibility.lean	97			priority	dispatchTargetPriorityQueue
+Relico/Tests/PriorityEligibility.lean	99			priority	dispatch_target_high_is_reaction_priority_eligible
+Relico/Tests/PriorityEligibility.lean	100			priority	dispatch_target_priority_queue_all_microsteps_zero
+Relico/Tests/PriorityEligibility.lean	105			priority	dispatchTargetPriorityQueue := by
+Relico/Tests/PriorityEligibility.lean	109			priority	dispatch_priority_queues_correspond
+Relico/Tests/PriorityEligibility.lean	113			priority	dispatchTargetPriorityQueue
+Relico/Tests/PriorityEligibility.lean	115			priority	(DTR.IsPriorityEligible.isEarliest
+Relico/Tests/PriorityEligibility.lean	116			priority	dispatch_source_high_is_priority_eligible)
+Relico/Tests/PriorityEligibility.lean	117			priority	dispatch_target_priority_queue_all_microsteps_zero
+Relico/Tests/PriorityMachineTiming.lean	1			priority	import Relico.Correctness.PriorityMachineTiming
+Relico/Tests/PriorityMachineTiming.lean	9	theorem	multi_statement_source_priority_timing	priority	theorem multi_statement_source_priority_timing :
+Relico/Tests/PriorityMachineTiming.lean	10			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Tests/PriorityMachineTiming.lean	15			priority	DTR.Body.PriorityTimingWellFormed,
+Relico/Tests/PriorityMachineTiming.lean	16			priority	DTR.Stmt.PriorityTimingWellFormed
+Relico/Tests/PriorityMachineTiming.lean	19	theorem	multi_statement_source_step_preserves_priority_timing	priority	theorem multi_statement_source_step_preserves_priority_timing :
+Relico/Tests/PriorityMachineTiming.lean	20			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Tests/PriorityMachineTiming.lean	24			priority	DTR.MultiStoreStep.preserves_priorityTimingWellFormed
+Relico/Tests/PriorityMachineTiming.lean	26			priority	multi_statement_source_priority_timing
+Relico/Tests/PriorityMachineTiming.lean	46			priority	multi_statement_source_priority_timing
+Relico/Tests/PriorityOrder.lean	1			priority	import Relico.Correctness.PriorityOrder
+Relico/Tests/PriorityOrder.lean	2			priority	import Relico.Tests.PriorityDispatchScheduling
+Relico/Tests/PriorityOrder.lean	9	theorem	priority_order_transport_equivalence	priority	theorem priority_order_transport_equivalence :
+Relico/Tests/PriorityOrder.lean	10			priority	DTR.PriorityServerNamePrecedesOrEqual
+Relico/Tests/PriorityOrder.lean	11			priority	dispatchPriorityHighName
+Relico/Tests/PriorityOrder.lean	12			priority	dispatchPriorityLowName
+Relico/Tests/PriorityOrder.lean	13			priority	dispatchPriorityServers ↔
+Relico/Tests/PriorityOrder.lean	16			priority	dispatchPriorityHighName)
+Relico/Tests/PriorityOrder.lean	18			priority	dispatchPriorityLowName)
+Relico/Tests/PriorityOrder.lean	19			priority	dispatchPriorityReactions := by
+Relico/Tests/PriorityOrder.lean	22			priority	Correctness.priorityServerNamePrecedesOrEqual_compileMessageReactions
+Relico/Tests/PriorityOrder.lean	23			priority	dispatchPriorityHighName
+Relico/Tests/PriorityOrder.lean	24			priority	dispatchPriorityLowName
+Relico/Tests/PriorityOrder.lean	25			priority	dispatchPriorityServers
+Relico/Tests/PriorityOrder.lean	27	theorem	priority_order_transport_high_before_low	priority	theorem priority_order_transport_high_before_low :
+Relico/Tests/PriorityOrder.lean	30			priority	dispatchPriorityHighName)
+Relico/Tests/PriorityOrder.lean	32			priority	dispatchPriorityLowName)
+Relico/Tests/PriorityOrder.lean	33			priority	dispatchPriorityReactions := by
+Relico/Tests/PriorityOrder.lean	36			priority	Correctness.priorityServerOrder_implies_reactionOrder
+Relico/Tests/PriorityOrder.lean	40	theorem	priority_order_transport_low_not_before_high	priority	theorem priority_order_transport_low_not_before_high :
+Relico/Tests/PriorityOrder.lean	43			priority	dispatchPriorityLowName)
+Relico/Tests/PriorityOrder.lean	45			priority	dispatchPriorityHighName)
+Relico/Tests/PriorityOrder.lean	46			priority	dispatchPriorityReactions := by
+Relico/Tests/PriorityOrder.lean	51			priority	DTR.PriorityServerNamePrecedesOrEqual
+Relico/Tests/PriorityOrder.lean	52			priority	dispatchPriorityLowName
+Relico/Tests/PriorityOrder.lean	53			priority	dispatchPriorityHighName
+Relico/Tests/PriorityOrder.lean	54			priority	dispatchPriorityServers :=
+Relico/Tests/PriorityOrder.lean	56			priority	Correctness.reactionOrder_implies_priorityServerOrder
+Relico/Tests/PriorityOrder.lean	62			priority	¬ DTR.PriorityServerNamePrecedesOrEqual
+Relico/Tests/PriorityOrder.lean	63			priority	dispatchPriorityLowName
+Relico/Tests/PriorityOrder.lean	64			priority	dispatchPriorityHighName
+Relico/Tests/PriorityOrder.lean	65			priority	dispatchPriorityServers)
+Relico/Tests/PriorityTiming.lean	1			priority	import Relico.Correctness.PriorityTiming
+Relico/Tests/PriorityTiming.lean	9	def	priorityTimingPositiveBody	priority	def priorityTimingPositiveBody :
+Relico/Tests/PriorityTiming.lean	16	def	priorityTimingZeroBody	priority	def priorityTimingZeroBody :
+Relico/Tests/PriorityTiming.lean	23	theorem	priority_timing_accepts_positive_delay	priority	theorem priority_timing_accepts_positive_delay :
+Relico/Tests/PriorityTiming.lean	24			priority	DTR.Body.PriorityTimingWellFormed
+Relico/Tests/PriorityTiming.lean	25			priority	priorityTimingPositiveBody := by
+Relico/Tests/PriorityTiming.lean	28			priority	priorityTimingPositiveBody
+Relico/Tests/PriorityTiming.lean	31	theorem	priority_timing_rejects_zero_delay	priority	theorem priority_timing_rejects_zero_delay :
+Relico/Tests/PriorityTiming.lean	32			priority	¬ DTR.Body.PriorityTimingWellFormed
+Relico/Tests/PriorityTiming.lean	33			priority	priorityTimingZeroBody := by
+Relico/Tests/PriorityTiming.lean	36			priority	priorityTimingZeroBody
+Relico/Tests/PriorityTiming.lean	39	def	priorityTimingBaseTag	priority	def priorityTimingBaseTag :
+Relico/Tests/PriorityTiming.lean	50			priority	priorityTimingBaseTag
+Relico/Tests/PriorityTiming.lean	56			priority	priorityTimingBaseTag
+Relico/Tests/PriorityTiming.lean	62			priority	priorityTimingBaseTag
+Relico/Tests/PriorityTiming.lean	68	def	priorityTimingLeftMessage	priority	def priorityTimingLeftMessage :
+Relico/Tests/PriorityTiming.lean	77	def	priorityTimingRightMessage	priority	def priorityTimingRightMessage :
+Relico/Tests/PriorityTiming.lean	86	def	priorityTimingLeftAction	priority	def priorityTimingLeftAction :
+Relico/Tests/PriorityTiming.lean	101	def	priorityTimingRightAction	priority	def priorityTimingRightAction :
+Relico/Tests/PriorityTiming.lean	116	theorem	priorityTimingLeftCorresponds	priority	theorem priorityTimingLeftCorresponds :
+Relico/Tests/PriorityTiming.lean	118			priority	priorityTimingLeftMessage
+Relico/Tests/PriorityTiming.lean	119			priority	priorityTimingLeftAction := by
+Relico/Tests/PriorityTiming.lean	129	theorem	priorityTimingRightCorresponds	priority	theorem priorityTimingRightCorresponds :
+Relico/Tests/PriorityTiming.lean	131			priority	priorityTimingRightMessage
+Relico/Tests/PriorityTiming.lean	132			priority	priorityTimingRightAction := by
+Relico/Tests/PriorityTiming.lean	143			priority	priorityTimingLeftAction.tag =
+Relico/Tests/PriorityTiming.lean	144			priority	priorityTimingRightAction.tag := by
+Relico/Tests/PriorityTiming.lean	148			priority	priorityTimingLeftCorresponds
+Relico/Tests/PriorityTiming.lean	149			priority	priorityTimingRightCorresponds
+Relico/Tests/PriorityTiming.lean	154	def	priorityTimingQueue	priority	def priorityTimingQueue :
+Relico/Tests/PriorityTiming.lean	156			priority	priorityTimingLeftAction,
+Relico/Tests/PriorityTiming.lean	157			priority	priorityTimingRightAction
+Relico/Tests/PriorityTiming.lean	160	theorem	priority_timing_queue_has_zero_microsteps	priority	theorem priority_timing_queue_has_zero_microsteps :
+Relico/Tests/PriorityTiming.lean	162			priority	priorityTimingQueue := by
+Relico/Tests/PriorityTiming.lean	167			priority	priorityTimingQueue
+Relico/Tests/PriorityTiming.lean	181			priority	(priorityTimingQueue ++ [
+Relico/Tests/PriorityTiming.lean	189			priority	priorityTimingBaseTag
+Relico/Tests/PriorityTiming.lean	196			priority	priorityTimingBaseTag
+Relico/Tests/PriorityTiming.lean	197			priority	priorityTimingQueue
+Relico/Tests/PriorityTiming.lean	201			priority	priority_timing_queue_has_zero_microsteps
+Relico/Tests/ZeroDelayPriorityMismatch.lean	1			priority	import Relico.Tests.PriorityDispatchScheduling
+Relico/Tests/ZeroDelayPriorityMismatch.lean	11	def	zeroDelayPriorityDelay	priority	def zeroDelayPriorityDelay :
+Relico/Tests/ZeroDelayPriorityMismatch.lean	17	def	zeroDelayPriorityTime	priority	def zeroDelayPriorityTime :
+Relico/Tests/ZeroDelayPriorityMismatch.lean	21	def	zeroDelayPriorityTag	priority	def zeroDelayPriorityTag :
+Relico/Tests/ZeroDelayPriorityMismatch.lean	25			priority	zeroDelayPriorityTime
+Relico/Tests/ZeroDelayPriorityMismatch.lean	31	def	zeroDelayPriorityOldLowMessage	priority	def zeroDelayPriorityOldLowMessage :
+Relico/Tests/ZeroDelayPriorityMismatch.lean	35			priority	dispatchPriorityLowName
+Relico/Tests/ZeroDelayPriorityMismatch.lean	38			priority	zeroDelayPriorityTime
+Relico/Tests/ZeroDelayPriorityMismatch.lean	41	def	zeroDelayPriorityNewHighMessage	priority	def zeroDelayPriorityNewHighMessage :
+Relico/Tests/ZeroDelayPriorityMismatch.lean	45			priority	dispatchPriorityHighName
+Relico/Tests/ZeroDelayPriorityMismatch.lean	49			priority	zeroDelayPriorityTime
+Relico/Tests/ZeroDelayPriorityMismatch.lean	50			priority	zeroDelayPriorityDelay
+Relico/Tests/ZeroDelayPriorityMismatch.lean	53	def	zeroDelayPriorityOldLowAction	priority	def zeroDelayPriorityOldLowAction :
+Relico/Tests/ZeroDelayPriorityMismatch.lean	58			priority	dispatchPriorityLowName
+Relico/Tests/ZeroDelayPriorityMismatch.lean	61			priority	zeroDelayPriorityTag
+Relico/Tests/ZeroDelayPriorityMismatch.lean	64	def	zeroDelayPriorityNewHighAction	priority	def zeroDelayPriorityNewHighAction :
+Relico/Tests/ZeroDelayPriorityMismatch.lean	69			priority	dispatchPriorityHighName
+Relico/Tests/ZeroDelayPriorityMismatch.lean	73			priority	zeroDelayPriorityTag
+Relico/Tests/ZeroDelayPriorityMismatch.lean	74			priority	zeroDelayPriorityDelay
+Relico/Tests/ZeroDelayPriorityMismatch.lean	77	def	zeroDelayPrioritySourceQueue	priority	def zeroDelayPrioritySourceQueue :
+Relico/Tests/ZeroDelayPriorityMismatch.lean	79			priority	zeroDelayPriorityOldLowMessage,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	80			priority	zeroDelayPriorityNewHighMessage
+Relico/Tests/ZeroDelayPriorityMismatch.lean	83	def	zeroDelayPriorityTargetQueue	priority	def zeroDelayPriorityTargetQueue :
+Relico/Tests/ZeroDelayPriorityMismatch.lean	85			priority	zeroDelayPriorityOldLowAction,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	86			priority	zeroDelayPriorityNewHighAction
+Relico/Tests/ZeroDelayPriorityMismatch.lean	89	theorem	zero_delay_priority_source_high_is_eligible	priority	theorem zero_delay_priority_source_high_is_eligible :
+Relico/Tests/ZeroDelayPriorityMismatch.lean	90			priority	DTR.IsPriorityEligible
+Relico/Tests/ZeroDelayPriorityMismatch.lean	91			priority	dispatchPriorityServers
+Relico/Tests/ZeroDelayPriorityMismatch.lean	92			priority	zeroDelayPriorityNewHighMessage
+Relico/Tests/ZeroDelayPriorityMismatch.lean	93			priority	zeroDelayPrioritySourceQueue := by
+Relico/Tests/ZeroDelayPriorityMismatch.lean	102			priority	zeroDelayPrioritySourceQueue
+Relico/Tests/ZeroDelayPriorityMismatch.lean	117			priority	zeroDelayPrioritySourceQueue
+Relico/Tests/ZeroDelayPriorityMismatch.lean	126			priority	zeroDelayPriorityNewHighMessage,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	127			priority	zeroDelayPriorityOldLowMessage
+Relico/Tests/ZeroDelayPriorityMismatch.lean	134			priority	zeroDelayPriorityNewHighMessage
+Relico/Tests/ZeroDelayPriorityMismatch.lean	138	theorem	zero_delay_priority_target_low_is_eligible	priority	theorem zero_delay_priority_target_low_is_eligible :
+Relico/Tests/ZeroDelayPriorityMismatch.lean	139			priority	LF.IsReactionPriorityEligible
+Relico/Tests/ZeroDelayPriorityMismatch.lean	140			priority	dispatchPriorityReactions
+Relico/Tests/ZeroDelayPriorityMismatch.lean	141			priority	zeroDelayPriorityOldLowAction
+Relico/Tests/ZeroDelayPriorityMismatch.lean	142			priority	zeroDelayPriorityTargetQueue := by
+Relico/Tests/ZeroDelayPriorityMismatch.lean	151			priority	zeroDelayPriorityTargetQueue
+Relico/Tests/ZeroDelayPriorityMismatch.lean	161			priority	zeroDelayPriorityOldLowAction.tag
+Relico/Tests/ZeroDelayPriorityMismatch.lean	168			priority	zeroDelayPriorityOldLowAction.tag)
+Relico/Tests/ZeroDelayPriorityMismatch.lean	170			priority	zeroDelayPriorityNewHighAction.tag)
+Relico/Tests/ZeroDelayPriorityMismatch.lean	179			priority	zeroDelayPriorityTargetQueue
+Relico/Tests/ZeroDelayPriorityMismatch.lean	191			priority	zeroDelayPriorityNewHighAction.tag ≠
+Relico/Tests/ZeroDelayPriorityMismatch.lean	192			priority	zeroDelayPriorityOldLowAction.tag := by
+Relico/Tests/ZeroDelayPriorityMismatch.lean	199	theorem	zero_delay_priority_target_high_is_not_eligible	priority	theorem zero_delay_priority_target_high_is_not_eligible :
+Relico/Tests/ZeroDelayPriorityMismatch.lean	200			priority	¬ LF.IsReactionPriorityEligible
+Relico/Tests/ZeroDelayPriorityMismatch.lean	201			priority	dispatchPriorityReactions
+Relico/Tests/ZeroDelayPriorityMismatch.lean	202			priority	zeroDelayPriorityNewHighAction
+Relico/Tests/ZeroDelayPriorityMismatch.lean	203			priority	zeroDelayPriorityTargetQueue := by
+Relico/Tests/ZeroDelayPriorityMismatch.lean	209			priority	zeroDelayPriorityNewHighAction.tag
+Relico/Tests/ZeroDelayPriorityMismatch.lean	210			priority	zeroDelayPriorityOldLowAction.tag :=
+Relico/Tests/ZeroDelayPriorityMismatch.lean	213			priority	zeroDelayPriorityOldLowAction
+Relico/Tests/ZeroDelayPriorityMismatch.lean	216			priority	zeroDelayPriorityTargetQueue
+Relico/Tests/ZeroDelayPriorityMismatch.lean	220			priority	zeroDelayPriorityNewHighAction.tag.time <
+Relico/Tests/ZeroDelayPriorityMismatch.lean	221			priority	zeroDelayPriorityOldLowAction.tag.time ∨
+Relico/Tests/ZeroDelayPriorityMismatch.lean	222			priority	(zeroDelayPriorityNewHighAction.tag.time =
+Relico/Tests/ZeroDelayPriorityMismatch.lean	223			priority	zeroDelayPriorityOldLowAction.tag.time ∧
+Relico/Tests/ZeroDelayPriorityMismatch.lean	224			priority	zeroDelayPriorityNewHighAction.tag.microstep ≤
+Relico/Tests/ZeroDelayPriorityMismatch.lean	225			priority	zeroDelayPriorityOldLowAction.tag.microstep)
+Relico/Tests/ZeroDelayPriorityMismatch.lean	232			priority	¬ zeroDelayPriorityNewHighAction.tag.time <
+Relico/Tests/ZeroDelayPriorityMismatch.lean	233			priority	zeroDelayPriorityOldLowAction.tag.time := by
+Relico/Tests/ZeroDelayPriorityMismatch.lean	240			priority	¬ zeroDelayPriorityNewHighAction.tag.microstep ≤
+Relico/Tests/ZeroDelayPriorityMismatch.lean	241			priority	zeroDelayPriorityOldLowAction.tag.microstep := by
+Relico/Tests/ZeroDelayPriorityMismatch.lean	248	theorem	zero_delay_priority_queues_correspond	priority	theorem zero_delay_priority_queues_correspond :
+Relico/Tests/ZeroDelayPriorityMismatch.lean	250			priority	zeroDelayPrioritySourceQueue
+Relico/Tests/ZeroDelayPriorityMismatch.lean	251			priority	zeroDelayPriorityTargetQueue := by
+Relico/Tests/ZeroDelayPriorityMismatch.lean	273			priority	zeroDelayPriorityNewHighMessage,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	274			priority	zeroDelayPriorityNewHighAction,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	275			priority	zeroDelayPriorityTag,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	276			priority	zeroDelayPriorityDelay,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	277			priority	zeroDelayPriorityTime,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	286	def	zeroDelayPrioritySourceBefore	priority	def zeroDelayPrioritySourceBefore :
+Relico/Tests/ZeroDelayPriorityMismatch.lean	290			priority	zeroDelayPriorityTime
+Relico/Tests/ZeroDelayPriorityMismatch.lean	296			priority	zeroDelayPriorityOldLowMessage
+Relico/Tests/ZeroDelayPriorityMismatch.lean	301			priority	dispatchPriorityHighName
+Relico/Tests/ZeroDelayPriorityMismatch.lean	302			priority	zeroDelayPriorityDelay
+Relico/Tests/ZeroDelayPriorityMismatch.lean	306	def	zeroDelayPrioritySourceAfter	priority	def zeroDelayPrioritySourceAfter :
+Relico/Tests/ZeroDelayPriorityMismatch.lean	310			priority	zeroDelayPriorityTime
+Relico/Tests/ZeroDelayPriorityMismatch.lean	316			priority	zeroDelayPrioritySourceQueue
+Relico/Tests/ZeroDelayPriorityMismatch.lean	322	def	zeroDelayPriorityTargetBefore	priority	def zeroDelayPriorityTargetBefore :
+Relico/Tests/ZeroDelayPriorityMismatch.lean	326			priority	zeroDelayPriorityTag
+Relico/Tests/ZeroDelayPriorityMismatch.lean	332			priority	zeroDelayPriorityOldLowAction
+Relico/Tests/ZeroDelayPriorityMismatch.lean	338			priority	dispatchPriorityHighName)
+Relico/Tests/ZeroDelayPriorityMismatch.lean	339			priority	zeroDelayPriorityDelay
+Relico/Tests/ZeroDelayPriorityMismatch.lean	343	def	zeroDelayPriorityTargetAfter	priority	def zeroDelayPriorityTargetAfter :
+Relico/Tests/ZeroDelayPriorityMismatch.lean	347			priority	zeroDelayPriorityTag
+Relico/Tests/ZeroDelayPriorityMismatch.lean	353			priority	zeroDelayPriorityTargetQueue
+Relico/Tests/ZeroDelayPriorityMismatch.lean	359	theorem	zero_delay_priority_source_shape_is_reachable	priority	theorem zero_delay_priority_source_shape_is_reachable :
+Relico/Tests/ZeroDelayPriorityMismatch.lean	363			priority	dispatchPriorityLowName,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	364			priority	dispatchPriorityHighName
+Relico/Tests/ZeroDelayPriorityMismatch.lean	366			priority	zeroDelayPrioritySourceBefore
+Relico/Tests/ZeroDelayPriorityMismatch.lean	368			priority	dispatchPriorityHighName
+Relico/Tests/ZeroDelayPriorityMismatch.lean	370			priority	zeroDelayPriorityTime
+Relico/Tests/ZeroDelayPriorityMismatch.lean	371			priority	zeroDelayPriorityDelay))
+Relico/Tests/ZeroDelayPriorityMismatch.lean	372			priority	zeroDelayPrioritySourceAfter := by
+Relico/Tests/ZeroDelayPriorityMismatch.lean	375			priority	zeroDelayPrioritySourceBefore,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	376			priority	zeroDelayPrioritySourceAfter,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	377			priority	zeroDelayPrioritySourceQueue,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	378			priority	zeroDelayPriorityOldLowMessage,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	379			priority	zeroDelayPriorityNewHighMessage
+Relico/Tests/ZeroDelayPriorityMismatch.lean	384			priority	dispatchPriorityLowName,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	385			priority	dispatchPriorityHighName
+Relico/Tests/ZeroDelayPriorityMismatch.lean	388			priority	zeroDelayPriorityTime)
+Relico/Tests/ZeroDelayPriorityMismatch.lean	392			priority	zeroDelayPriorityOldLowMessage
+Relico/Tests/ZeroDelayPriorityMismatch.lean	395			priority	dispatchPriorityHighName)
+Relico/Tests/ZeroDelayPriorityMismatch.lean	397			priority	zeroDelayPriorityDelay)
+Relico/Tests/ZeroDelayPriorityMismatch.lean	402	theorem	zero_delay_priority_target_shape_is_reachable	priority	theorem zero_delay_priority_target_shape_is_reachable :
+Relico/Tests/ZeroDelayPriorityMismatch.lean	407			priority	dispatchPriorityLowName,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	409			priority	dispatchPriorityHighName
+Relico/Tests/ZeroDelayPriorityMismatch.lean	411			priority	zeroDelayPriorityTargetBefore
+Relico/Tests/ZeroDelayPriorityMismatch.lean	414			priority	dispatchPriorityHighName)
+Relico/Tests/ZeroDelayPriorityMismatch.lean	416			priority	zeroDelayPriorityTag
+Relico/Tests/ZeroDelayPriorityMismatch.lean	417			priority	zeroDelayPriorityDelay))
+Relico/Tests/ZeroDelayPriorityMismatch.lean	418			priority	zeroDelayPriorityTargetAfter := by
+Relico/Tests/ZeroDelayPriorityMismatch.lean	421			priority	zeroDelayPriorityTargetBefore,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	422			priority	zeroDelayPriorityTargetAfter,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	423			priority	zeroDelayPriorityTargetQueue,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	424			priority	zeroDelayPriorityOldLowAction,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	425			priority	zeroDelayPriorityNewHighAction
+Relico/Tests/ZeroDelayPriorityMismatch.lean	431			priority	dispatchPriorityLowName,
+Relico/Tests/ZeroDelayPriorityMismatch.lean	433			priority	dispatchPriorityHighName
+Relico/Tests/ZeroDelayPriorityMismatch.lean	436			priority	zeroDelayPriorityTag)
+Relico/Tests/ZeroDelayPriorityMismatch.lean	440			priority	zeroDelayPriorityOldLowAction
+Relico/Tests/ZeroDelayPriorityMismatch.lean	444			priority	dispatchPriorityHighName)
+Relico/Tests/ZeroDelayPriorityMismatch.lean	446			priority	zeroDelayPriorityDelay)
+Relico/Translation/BoundPayloadBasic.lean	50			priority	Formal-parameter order and priority metadata are preserved exactly.
+Relico/Translation/BoundPayloadBasic.lean	67			priority	priority :=
+Relico/Translation/BoundPayloadBasic.lean	68			priority	server.priority
+Relico/Translation/BoundPayloadBasic.lean	135	theorem	compilePayloadMessageServer_priority	priority	theorem compilePayloadMessageServer_priority
+Relico/Translation/BoundPayloadBasic.lean	138			priority	server).priority =
+Relico/Translation/BoundPayloadBasic.lean	139			priority	server.priority := by
+Relico/Translation/MultiStoreBasic.lean	1			priority	import Relico.DTR.MessageServerPriority
+Relico/Translation/MultiStoreBasic.lean	18	def	priorityOrderedMessageServers	priority	def priorityOrderedMessageServers
+Relico/Translation/MultiStoreBasic.lean	22			priority	DTR.MessageServerPriority.normalize
+Relico/Translation/MultiStoreBasic.lean	26	theorem	priorityOrderedMessageServers_mem_iff	priority	theorem priorityOrderedMessageServers_mem_iff
+Relico/Translation/MultiStoreBasic.lean	31			priority	priorityOrderedMessageServers
+Relico/Translation/MultiStoreBasic.lean	37			priority	DTR.MessageServerPriority.mem_normalize_iff
+Relico/Translation/MultiStoreBasic.lean	42	theorem	priorityOrderedMessageServers_length	priority	theorem priorityOrderedMessageServers_length
+Relico/Translation/MultiStoreBasic.lean	45			priority	(priorityOrderedMessageServers
+Relico/Translation/MultiStoreBasic.lean	50			priority	DTR.MessageServerPriority.length_normalize
+Relico/Translation/MultiStoreBasic.lean	55			priority	stable local-priority order.
+Relico/Translation/MultiStoreBasic.lean	61			priority	(priorityOrderedMessageServers
+Relico/Translation/MultiStoreBasic.lean	69			priority	stable local-priority order as the logical actions.
+Relico/Translation/MultiStoreBasic.lean	75			priority	(priorityOrderedMessageServers
+Relico/Translation/MultiStoreBasic.lean	86			priority	(priorityOrderedMessageServers
+Relico/Translation/MultiStoreBasic.lean	176			priority	(priorityOrderedMessageServers_mem_iff
+Relico/Translation/MultiStoreBasic.lean	240			priority	(priorityOrderedMessageServers_mem_iff
+Relico/Translation/MultiStoreBasic.lean	262			priority	priority-ordered target list.
+Relico/Translation/MultiStoreBasic.lean	281			priority	(priorityOrderedMessageServers_mem_iff
+Relico/Translation/MultiStoreBasic.lean	318			priority	(priorityOrderedMessageServers_mem_iff
+Relico/Translation/MultiStoreBasic.lean	346			priority	priority-normalized source list.
+Relico/Translation/MultiStorePayloadBasic.lean	1			priority	import Relico.DTR.MultiStorePayloadPriority
+Relico/Translation/MultiStorePayloadBasic.lean	112			priority	priority :=
+Relico/Translation/MultiStorePayloadBasic.lean	117			priority	action reaction. Formal-parameter order and priority metadata are
+Relico/Translation/MultiStorePayloadBasic.lean	141			priority	priority :=
+Relico/Translation/MultiStorePayloadBasic.lean	142			priority	messageServer.priority
+Relico/Translation/MultiStorePayloadBasic.lean	147	def	priorityOrderedMultiStorePayloadMessageServers	priority	def priorityOrderedMultiStorePayloadMessageServers
+Relico/Translation/MultiStorePayloadBasic.lean	151			priority	DTR.MultiStorePayloadMessageServerPriority.normalize
+Relico/Translation/MultiStorePayloadBasic.lean	165			priority	(priorityOrderedMultiStorePayloadMessageServers
+Relico/Translation/MultiStorePayloadBasic.lean	179			priority	priorityOrderedMultiStorePayloadMessageServers
+Relico/Translation/MultiStorePayloadBasic.lean	253	theorem	compileMultiStorePayloadReaction_priority	priority	theorem compileMultiStorePayloadReaction_priority
+Relico/Translation/MultiStorePayloadBasic.lean	257			priority	messageServer).priority =
+Relico/Translation/MultiStorePayloadBasic.lean	258			priority	messageServer.priority := by
+Relico/Translation/MultiStorePayloadBasic.lean	263			priority	The priority-ordered source declaration list contains exactly the declarations
+Relico/Translation/MultiStorePayloadBasic.lean	266	theorem	priorityOrderedMultiStorePayloadMessageServers_mem_iff	priority	theorem priorityOrderedMultiStorePayloadMessageServers_mem_iff
+Relico/Translation/MultiStorePayloadBasic.lean	272			priority	priorityOrderedMultiStorePayloadMessageServers
+Relico/Translation/MultiStorePayloadBasic.lean	278			priority	priorityOrderedMultiStorePayloadMessageServers
+Relico/Translation/MultiStorePayloadBasic.lean	280			priority	DTR.MultiStorePayloadMessageServerPriority.mem_normalize_iff
+Relico/Translation/MultiStorePayloadBasic.lean	305			priority	(priorityOrderedMultiStorePayloadMessageServers_mem_iff
+Relico/Translation/MultiStorePayloadBasic.lean	343			priority	(priorityOrderedMultiStorePayloadMessageServers_mem_iff

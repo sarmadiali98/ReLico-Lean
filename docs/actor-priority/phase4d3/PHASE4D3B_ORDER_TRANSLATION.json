@@ -1,0 +1,208 @@
+{
+  "evidence": {
+    "baseline_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3B-Order-Translation-20260802T235646+0330/baseline-build.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "baseline_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3B-Order-Translation-20260802T235646+0330/baseline-build.stdout.txt",
+      "sha256": "79247cf42df9847aa52ad16fabf6f8ef3133c21827cda97d9f33ddb2d4881e5d"
+    },
+    "integration_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3B-Order-Translation-20260802T235646+0330/integration-build.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "integration_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3B-Order-Translation-20260802T235646+0330/integration-build.stdout.txt",
+      "sha256": "b9b77ca173af3bf35876c44fd1e7f2e73a320b5b0ecca9b6178926c3a665c10d"
+    },
+    "probe_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3B-Order-Translation-20260802T235646+0330/api-probe.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "probe_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3B-Order-Translation-20260802T235646+0330/api-probe.stdout.txt",
+      "sha256": "b2a1c5af99dec41fc7f25b61679b24aefcb5968b09044bd3ab571fb9d1091477"
+    },
+    "source_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3B-Order-Translation-20260802T235646+0330/source-elaboration.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "source_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3B-Order-Translation-20260802T235646+0330/source-elaboration.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "target_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3B-Order-Translation-20260802T235646+0330/target-elaboration.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "target_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3B-Order-Translation-20260802T235646+0330/target-elaboration.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "test_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3B-Order-Translation-20260802T235646+0330/translation-test-elaboration.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "test_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3B-Order-Translation-20260802T235646+0330/translation-test-elaboration.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "translation_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3B-Order-Translation-20260802T235646+0330/translation-elaboration.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "translation_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D3B-Order-Translation-20260802T235646+0330/translation-elaboration.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "implementation": {
+    "base_reversed_outputs_distinct": true,
+    "definitions": [
+      "compileActorPriorityAssignment",
+      "compileActorPriorityRequest",
+      "compileReadyActor",
+      "compileReadyActors"
+    ],
+    "existing_translation_modules_modified": false,
+    "function_prefix": "compile",
+    "preserve_actor_names": true,
+    "preserve_incomplete_assignments": true,
+    "preserve_logical_times": true,
+    "preserve_none": true,
+    "preserve_numeric_values": true,
+    "preserve_present_empty_request": true,
+    "preserve_ready_list_order": true,
+    "preserve_ties": true,
+    "translation_module": {
+      "path": "Relico/Translation/GlobalMultiStorePayloadActorOrder.lean",
+      "sha256": "d059e27b423678c1697deb96a0465aa1d37fadba3632d11a3e29673b88b9e50e"
+    },
+    "translation_test_module": {
+      "path": "Relico/Tests/GlobalMultiStorePayloadActorOrderTranslation.lean",
+      "sha256": "9c959c95c6679bce922e7c639574b3f19cde92829d3a23d467e20503b06fb2a9"
+    }
+  },
+  "inputs": {
+    "phase4d3a_audit": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase4d3/PHASE4D3A_TRANSLATION_INTERFACE_AUDIT.json",
+      "sha256": "648d6a9e23342e77f8afcd6c380be2cf60a965af2dd669b3030bae6aee2c3c0d"
+    },
+    "source_actor_priority_module": {
+      "path": "Relico/DTR/GlobalMultiStorePayloadActorPriority.lean",
+      "sha256": "11ef3591ae5bbeca5bf1f89933e6bc7bc7b28d1b5d8728cf5b0d35aab5456c26"
+    },
+    "target_actor_order_module": {
+      "path": "Relico/LF/GlobalMultiStorePayloadActorOrder.lean",
+      "sha256": "be3bb64a009613e1e47c6640947f2aedcaf331b341e10e356b8a323d4af5bf4b"
+    }
+  },
+  "phase": "phase4d3b-actor-priority-to-target-order-translation-implementation",
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "result": {
+    "classification": "ACTOR_PRIORITY_INFORMATION_PRESERVING_TARGET_ORDER_TRANSLATION_IMPLEMENTED",
+    "current_production_integration_complete": false,
+    "final_actor_priority_necessity_conclusion": "CONCLUSION_2_REACHED",
+    "next_phase": "phase4d4-source-target-actor-selection-correspondence",
+    "passed": true
+  },
+  "schema_version": 1,
+  "status": {
+    "dispatch_correspondence_complete": false,
+    "production_integration_complete": false,
+    "production_proof_extension_complete": false,
+    "selection_correspondence_complete": false,
+    "source_actor_priority_semantics_complete": true,
+    "target_actor_order_semantics_complete": true,
+    "translation_complete": true
+  },
+  "tests": [
+    {
+      "property": "empty assignment remains empty",
+      "result": "pass",
+      "test_id": "empty-assignment"
+    },
+    {
+      "property": "base actor names and numeric values are preserved",
+      "result": "pass",
+      "test_id": "base-assignment"
+    },
+    {
+      "property": "none remains none",
+      "result": "pass",
+      "test_id": "absent-request"
+    },
+    {
+      "property": "present base request remains present",
+      "result": "pass",
+      "test_id": "present-base-request"
+    },
+    {
+      "property": "base and reversed requests compile differently",
+      "result": "pass",
+      "test_id": "base-reversed-discrimination"
+    },
+    {
+      "property": "equal priorities remain equal target orders",
+      "result": "pass",
+      "test_id": "tie-preservation"
+    },
+    {
+      "property": "incomplete assignments remain incomplete",
+      "result": "pass",
+      "test_id": "incomplete-assignment"
+    },
+    {
+      "property": "some empty assignment is not collapsed to none",
+      "result": "pass",
+      "test_id": "present-empty-request"
+    },
+    {
+      "property": "ready actor name is preserved",
+      "result": "pass",
+      "test_id": "ready-actor-name"
+    },
+    {
+      "property": "ready actor logical time is preserved",
+      "result": "pass",
+      "test_id": "ready-actor-time"
+    },
+    {
+      "property": "ready-list order and entries are preserved",
+      "result": "pass",
+      "test_id": "ready-list"
+    },
+    {
+      "property": "assignment entries are neither invented nor dropped",
+      "result": "pass",
+      "test_id": "assignment-length"
+    }
+  ],
+  "theorems": [
+    "compileActorPriorityAssignment_eq",
+    "compileActorPriorityAssignment_length",
+    "compileActorPriorityRequest_eq",
+    "compileReadyActor_actorName",
+    "compileReadyActor_logicalTime",
+    "compileReadyActors_length",
+    "compileReadyActors_actorNames",
+    "compileReadyActors_logicalTimes"
+  ],
+  "validation": {
+    "all_twelve_translation_tests_passed": true,
+    "api_probe_passed": true,
+    "baseline_full_build_passed": true,
+    "integration_full_build_passed": true,
+    "sorryAx_dependency_absent": true,
+    "source_elaboration_passed": true,
+    "target_elaboration_passed": true,
+    "temporary_build_objects_removed": true,
+    "theorem_dependency_probe_passed": true,
+    "translation_elaboration_passed": true,
+    "translation_test_elaboration_passed": true
+  }
+}

@@ -1,0 +1,15 @@
+rank	path	line_start	line_end	kind	qualified_name	score	score_reasons	first_line
+1	Relico/LF/GlobalMultiStorePayloadDispatch.lean	151	201	inductive	Relico.LF.GlobalMultiStorePayloadDispatch.Step	34	inductive-relation,transition-name,global-state,pending-action,payload-reaction,actor-name,proposition,selected-value,lookup-premise	inductive Step
+2	Relico/LF/GlobalMultiStorePayloadOneStep.lean	70	118	inductive	Relico.LF.GlobalMultiStorePayloadOneStep.Step	33	inductive-relation,transition-name,global-state,pending-action,payload-reaction,actor-name,proposition,selected-value	inductive Step
+3	Relico/LF/GlobalMultiStorePayloadFiniteExecution.lean	13	49	inductive	Relico.LF.GlobalMultiStorePayloadFiniteExecution.Steps	19	inductive-relation,transition-name,global-state,proposition	inductive Steps
+4	Relico/LF/GlobalMultiStorePayloadOneStep.lean	13	39	inductive	Relico.LF.GlobalMultiStorePayloadOneStep.ExternalSendFrameStep	19	inductive-relation,transition-name,global-state,proposition	inductive ExternalSendFrameStep :
+5	Relico/LF/GlobalMultiStorePayload.lean	71	84	def	Relico.LF.GlobalMultiStorePayloadProgram.lookupActor	12	definition,global-state,actor-name,lookup-premise	def lookupActor
+6	Relico/LF/GlobalMultiStorePayload.lean	85	94	def	Relico.LF.GlobalMultiStorePayloadState.lookupActor	12	definition,global-state,actor-name,lookup-premise	def lookupActor
+7	Relico/LF/GlobalMultiStorePayload.lean	95	112	def	Relico.LF.GlobalMultiStorePayloadState.updateActor	11	definition,global-state,actor-name	def updateActor
+8	Relico/LF/GlobalMultiStorePayloadDispatch.lean	18	37	def	Relico.LF.GlobalMultiStorePayloadDispatch.synchronizedAfter	11	definition,global-state,actor-name	def synchronizedAfter
+9	Relico/LF/GlobalMultiStorePayload.lean	50	60	def	Relico.LF.GlobalMultiStorePayloadProgram.actorProgramsMatchKeys	8	definition,actor-name,reactor-instance	def actorProgramsMatchKeys
+10	Relico/LF/GlobalMultiStorePayloadExternalSend.lean	76	97	def	Relico.LF.GlobalMultiStorePayloadExternalSend.apply	8	definition,global-state,lookup-premise	def apply?
+11	Relico/LF/GlobalMultiStorePayloadExternalSendFrame.lean	105	136	def	Relico.LF.GlobalMultiStorePayloadExternalSendFrame.apply	8	definition,global-state,lookup-premise	def apply?
+12	Relico/LF/GlobalMultiStorePayloadExternalSendFrame.lean	90	104	def	Relico.LF.GlobalMultiStorePayloadExternalSendFrame.globalStateAfter	7	definition,global-state	def globalStateAfter
+13	Relico/LF/GlobalMultiStorePayloadInitialization.lean	33	47	def	Relico.LF.GlobalMultiStorePayloadInitialization.startupStateFromEntries	7	definition,global-state	def startupStateFromEntries
+14	Relico/LF/GlobalMultiStorePayloadInitialization.lean	48	69	def	Relico.LF.GlobalMultiStorePayloadInitialization.initializeGlobalMultiStorePayloadState	7	definition,global-state	def initializeGlobalMultiStorePayloadState

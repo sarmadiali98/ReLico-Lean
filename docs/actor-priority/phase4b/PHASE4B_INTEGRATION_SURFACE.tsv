@@ -1,0 +1,11 @@
+surface_id	layer	artifact	current_state	actor_priority_integrated	proof_impact
+S1	source-boundary	Relico/Correctness/GlobalMultiStorePayloadActorPriorityBoundary.lean	request accepted only when equal to none	False	current theorem excludes explicit actor-priority requests
+S2	source-global-dispatch	Relico.DTR.MultiStoreDispatchStep	dispatch relation receives selected message and selected message server explicitly	True	an autonomous cross-actor eligibility predicate must be added or separately assumed
+S3	source-local-selection	Relico.DTR.IsPriorityEligible	message-server priority eligibility is present	False	local message-server priority cannot substitute for actor-level competition
+S4	target-global-dispatch	Relico.LF.MultiStoreDispatchStep	target dispatch selects an action and reaction	False	target requires an equivalent compiled ordering when source actor ordering is semantically active
+S5	target-local-selection	Relico.LF.IsReactionPriorityEligible	reaction-priority eligibility is present	False	reaction priority currently represents local message-server ordering, not actor ordering
+S6	translation	Relico.Translation.compileMessageReactions	message servers compile to reactions	False	translation currently has no audited explicit actor-priority input or output
+S7	selection-correspondence	Relico.Correctness.DirectLFSelectionCompatible	source and target local-priority selection are related	True	correspondence must be strengthened with cross-actor eligibility
+S8	dispatch-correspondence	directLF_multiStore_dispatch_forward_runtime/backward_runtime	chosen dispatches correspond in both directions	True	existing theorems match a chosen dispatch but do not yet justify actor choice by actor priority
+S9	frontend	frontend/java-bridge	actor-priority annotations are rejected by the supported bridge	False	Approach B requires a separate multi-actor frontend or direct formal fixture
+S10	isolated-investigation	Relico/Investigation/ActorPriority/IsolatedScheduler.lean	priority reversal mechanically changes the eligible actor	False	isolated result supplies the premise for the erasure-impossibility theorem

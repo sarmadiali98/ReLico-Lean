@@ -1,0 +1,79 @@
+{
+  "actor_priority_implementation_started": false,
+  "benchmark_registry": {
+    "implemented": 1,
+    "implemented_ids": [
+      "core--initialization--positive"
+    ],
+    "planned": 56,
+    "priority_named_candidates": [
+      "bound-payload--priority-selection--positive",
+      "core--priority-selection--positive",
+      "finite-store--priority-selection--positive",
+      "global-multi-actor-payload--priority-selection--negative",
+      "multi-store--priority-selection--negative",
+      "multi-store--priority-selection--positive",
+      "multi-store-payload--priority-selection--negative",
+      "multi-store-payload--priority-selection--positive",
+      "payload--priority-selection--positive"
+    ],
+    "total": 57
+  },
+  "claim_matrix": {
+    "allowed_classifications": [
+      "YES",
+      "NO",
+      "CONDITIONAL",
+      "OUTSIDE CURRENT FRAGMENT",
+      "NOT YET PROVED"
+    ],
+    "claim_ids": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G"
+    ],
+    "phase1_classification": "NOT YET PROVED",
+    "row_count": 7
+  },
+  "external_evidence_inputs": {
+    "canonical_paper": {
+      "path": "/Users/ali/Desktop/LFStructuringNonDeterminism/DTR_LF__After_FMCAD_.pdf",
+      "sha256": "0e196d86c185fc1626588613eb39c4a044ee4021a15e04e38d9c1760480e4125"
+    },
+    "lfc": {
+      "path": "/Users/ali/.local/share/lingua-franca/cli/bin/lfc",
+      "sha256": "a8e277076ef578a677fdf7731d95d3ee745e47266ea68d37a673f44bf069cf8a"
+    },
+    "parser_artifact": {
+      "path": "/Users/ali/Desktop/LFStructuringNonDeterminism/ReLico-fmcad-2026-artifact-v1.zip",
+      "sha256": "b58052952cb753d554696dd1c23dc4c43f43648228221a8ff2f494311dc41586"
+    },
+    "rmc_jar": {
+      "path": "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+      "sha256": "a39112046d99e0895cf47f890242ace21db896e609f7eef86751a0d416d477f5"
+    }
+  },
+  "inventory": {
+    "candidate_hit_count": 9359,
+    "meaning": "Search hits are a navigation aid only and are not semantic evidence until individually inspected."
+  },
+  "investigation": {
+    "branch": "investigation/actor-priority-necessity-20260802",
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "parent": "0a9504a8a4c7ae938f458cd7ac6ce4238d078c71",
+    "repository": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "next_phase": "phase2-audit-actual-semantics-claims-parser-schema-registry-and-theorems",
+  "paused_work": {
+    "checkpoint": "/Users/ali/Desktop/ReLico-Actor-Priority-Pause-20260802T152848+0330",
+    "resume_record": "/Users/ali/Desktop/ReLico-Actor-Priority-Pause-20260802T152848+0330/RESUME_RECORD.md"
+  },
+  "phase": "phase1-define-question-and-scope",
+  "schema_version": 1,
+  "semantic_conclusions_drawn": false
+}

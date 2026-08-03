@@ -1,0 +1,14 @@
+order	theorem	role	elaborated	sorryAx
+1	lookupActorOrder_compileActorPriorityAssignment_eq	priority/order lookup preservation	true	false
+2	lookupReadyTargetActor_compileReadyActors_eq	ready-actor lookup preservation	true	false
+3	all_compileReadyActors_eq	generic List.all transport	true	false
+4	targetEarliestReady_compileReadyActors_eq	earliest logical-time preservation	true	false
+5	filter_compileReadyActors_eq	generic List.filter transport	true	false
+6	sameTimeReadyTargetActors_compileReadyActors_eq	same-time ready-set preservation	true	false
+7	targetOrderCoversReadyActors_compile_eq	priority-assignment coverage preservation	true	false
+8	selectedHasMinimalActorOrder_compile_eq	minimal actor-order preservation	true	false
+9	actorSelectionEligibleBool_compile_eq	Boolean eligibility equality	true	false
+10	actorSelectionEligible_compile_iff	propositional eligibility equivalence	true	false
+11	actorSelectionEligible_forward	source-to-target eligibility	true	false
+12	actorSelectionEligible_backward	target-to-source eligibility	true	false
+13	eligibleActorNames_compile_eq	eligible actor-name list equality	true	false

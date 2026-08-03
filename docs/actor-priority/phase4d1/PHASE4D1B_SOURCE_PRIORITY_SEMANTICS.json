@@ -1,0 +1,161 @@
+{
+  "evidence": {
+    "build_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D1B-Decidability-Repair-20260802T223658+0330/lake-build.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "build_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D1B-Decidability-Repair-20260802T223658+0330/lake-build.stdout.txt",
+      "sha256": "05c2722d416e3cf53197ebdc4051ba4f21de3c09ae0f094518c16b370463c22e"
+    },
+    "probe_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D1B-Decidability-Repair-20260802T223658+0330/api-probe.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "probe_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D1B-Decidability-Repair-20260802T223658+0330/api-probe.stdout.txt",
+      "sha256": "386916478fa1074262731dde2a32df5c1edfde8f3e832d371f3d703c3488bde2"
+    },
+    "source_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D1B-Decidability-Repair-20260802T223658+0330/source-elaboration.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "source_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D1B-Decidability-Repair-20260802T223658+0330/source-elaboration.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "test_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D1B-Decidability-Repair-20260802T223658+0330/test-elaboration.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "test_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D1B-Decidability-Repair-20260802T223658+0330/test-elaboration.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "implementation": {
+    "absent_request_filters": false,
+    "actor_name_constructor": "Relico.ActorName.mk",
+    "eligibility_decidable_instance": "instDecidableActorPriorityEligible",
+    "existing_dispatch_modified": false,
+    "existing_dispatch_relation": "Relico.DTR.GlobalMultiStorePayloadDispatch.Step",
+    "incomplete_request_filters": false,
+    "logical_time_precedes_priority": true,
+    "lower_number_is_higher_priority": true,
+    "new_wrapper_relation": "Relico.DTR.GlobalMultiStorePayloadActorPriority.ActorPriorityDispatchStep",
+    "selector_identifier": "actorName",
+    "selector_type": "ActorName",
+    "source_module": {
+      "path": "Relico/DTR/GlobalMultiStorePayloadActorPriority.lean",
+      "sha256": "11ef3591ae5bbeca5bf1f89933e6bc7bc7b28d1b5d8728cf5b0d35aab5456c26"
+    },
+    "test_module": {
+      "path": "Relico/Tests/GlobalMultiStorePayloadActorPriority.lean",
+      "sha256": "e783eaf24c47596a4282ca351656593a65772167d89e86813617d70032257def"
+    },
+    "ties_preserve_nondeterminism": true
+  },
+  "inputs": {
+    "actor_name_diagnostic": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D1B-ActorName-Diagnostic-20260802T211848+0330/PHASE4D1B_ACTOR_NAME_DIAGNOSTIC.json",
+      "sha256": "0fe67115ee20339945f3927ec4d294f6db8e54df3aff4d39380260519a5d0497"
+    },
+    "phase4d1a_contract": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase4d1/PHASE4D1_SOURCE_INTERFACE_AUDIT.json",
+      "sha256": "bf31ff50ef9e0223c84f7f1bfe82418cc895381fe3f03cc30dde72027e86b5a2"
+    }
+  },
+  "phase": "phase4d1b-source-global-actor-priority-semantics-implementation",
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "repairs": [
+    {
+      "failure": "String fixtures did not inhabit nominal ActorName",
+      "repair": "construct fixtures with Relico.ActorName.mk"
+    },
+    {
+      "failure": "Decidable ActorPriorityEligible was not synthesized",
+      "repair": "add instDecidableActorPriorityEligible by unfolding the Boolean equality definition"
+    }
+  ],
+  "result": {
+    "classification": "SOURCE_ACTOR_PRIORITY_ELIGIBILITY_AND_DISPATCH_WRAPPER_IMPLEMENTED",
+    "final_actor_priority_necessity_conclusion": "CONCLUSION_2_REACHED",
+    "next_phase": "phase4d2-target-global-actor-order-semantics",
+    "passed": true
+  },
+  "schema_version": 1,
+  "status": {
+    "dispatch_correspondence_complete": false,
+    "production_integration_complete": false,
+    "production_proof_extension_complete": false,
+    "selection_correspondence_complete": false,
+    "source_actor_priority_semantics_complete": true,
+    "target_actor_order_semantics_complete": false,
+    "translation_complete": false
+  },
+  "tests": [
+    {
+      "property": "base assignment selects workerAName",
+      "result": "pass",
+      "test_id": "base-selection"
+    },
+    {
+      "property": "reversed assignment selects workerBName",
+      "result": "pass",
+      "test_id": "reversed-selection"
+    },
+    {
+      "property": "tied priorities retain both actors",
+      "result": "pass",
+      "test_id": "tied-selection"
+    },
+    {
+      "property": "absent request retains both earliest actors",
+      "result": "pass",
+      "test_id": "absent-request"
+    },
+    {
+      "property": "incomplete request retains uncovered actors",
+      "result": "pass",
+      "test_id": "incomplete-request"
+    },
+    {
+      "property": "later actor is excluded before priority comparison",
+      "result": "pass",
+      "test_id": "logical-time-precedence"
+    },
+    {
+      "property": "workerCName is ineligible when absent from ready set",
+      "result": "pass",
+      "test_id": "actor-not-ready"
+    },
+    {
+      "property": "workerBName is ineligible under base priorities",
+      "result": "pass",
+      "test_id": "base-ineligible-worker-b"
+    },
+    {
+      "property": "eligible actor wraps existing chosen-actor Step",
+      "result": "pass",
+      "test_id": "wrapper-introduction"
+    },
+    {
+      "property": "wrapper exposes eligibility and existing Step",
+      "result": "pass",
+      "test_id": "wrapper-elimination"
+    }
+  ],
+  "validation": {
+    "all_ten_tests_passed": true,
+    "api_probe_passed": true,
+    "baseline_full_build_passed": true,
+    "decidable_instance_probe_passed": true,
+    "source_elaboration_passed": true,
+    "temporary_project_object_removed": true,
+    "test_elaboration_passed": true,
+    "theorem_dependency_probe_passed": true
+  }
+}

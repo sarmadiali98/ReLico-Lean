@@ -1,0 +1,7 @@
+test_id	property	result
+base-selection	base priorities select workera	pass
+reversed-selection	reversed priorities select workerb	pass
+source-discrimination	priority reversal changes the source observation	pass
+complete-erasure	complete erasure maps both requests to one target	pass
+erasure-impossibility	one erased target cannot preserve both observations	pass
+faithful-distinction	a faithful translation must distinguish the requests	pass

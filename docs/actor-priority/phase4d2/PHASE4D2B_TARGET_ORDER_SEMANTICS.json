@@ -1,0 +1,162 @@
+{
+  "evidence": {
+    "baseline_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2B-Target-Order-Semantics-20260802T225852+0330/baseline-build.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "baseline_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2B-Target-Order-Semantics-20260802T225852+0330/baseline-build.stdout.txt",
+      "sha256": "f34761c4ba650699dfa117e6c623b00bfca56c2c6f1c899f7c51f8b65e7c5ac5"
+    },
+    "integration_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2B-Target-Order-Semantics-20260802T225852+0330/integration-build.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "integration_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2B-Target-Order-Semantics-20260802T225852+0330/integration-build.stdout.txt",
+      "sha256": "05c2722d416e3cf53197ebdc4051ba4f21de3c09ae0f094518c16b370463c22e"
+    },
+    "probe_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2B-Target-Order-Semantics-20260802T225852+0330/target-api-probe.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "probe_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2B-Target-Order-Semantics-20260802T225852+0330/target-api-probe.stdout.txt",
+      "sha256": "67a16e603caaadf82e2d6d1d29511119d97c0a9d096c18c7f9c9470eada20cc9"
+    },
+    "source_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2B-Target-Order-Semantics-20260802T225852+0330/target-source-elaboration.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "source_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2B-Target-Order-Semantics-20260802T225852+0330/target-source-elaboration.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "test_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2B-Target-Order-Semantics-20260802T225852+0330/target-test-elaboration.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "test_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2B-Target-Order-Semantics-20260802T225852+0330/target-test-elaboration.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "implementation": {
+    "absent_order_filters": false,
+    "eligibility_decidable_instance": "instDecidableTargetActorOrderEligible",
+    "existing_transition_modified": false,
+    "existing_transition_relation": "Relico.LF.GlobalMultiStorePayloadDispatch.Step",
+    "incomplete_order_filters": false,
+    "literal_actor_priority_field_required": false,
+    "logical_time_precedes_order": true,
+    "lower_number_is_stronger_order": true,
+    "new_wrapper_relation": "Relico.LF.GlobalMultiStorePayloadActorOrder.ActorOrderDispatchStep",
+    "ordering_representation": "compiled numeric actor order",
+    "selector_identifier": "actorName",
+    "selector_type": "ActorName",
+    "target_module": {
+      "path": "Relico/LF/GlobalMultiStorePayloadActorOrder.lean",
+      "sha256": "be3bb64a009613e1e47c6640947f2aedcaf331b341e10e356b8a323d4af5bf4b"
+    },
+    "target_test_module": {
+      "path": "Relico/Tests/GlobalMultiStorePayloadActorOrder.lean",
+      "sha256": "0242da31934c8ac3fdda1af52906fa65e26532d7c26ed3c9f90dc6d258e39c7b"
+    },
+    "ties_preserve_nondeterminism": true
+  },
+  "inputs": {
+    "existing_target_step": {
+      "path": "Relico/LF/GlobalMultiStorePayloadDispatch.lean",
+      "sha256": "9f0ac3568bcd23fb326c3bb06f9c0609a17812fbce7ff2881e8983d2a960e4fa"
+    },
+    "phase4d2a2_binding": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase4d2/PHASE4D2A2_TARGET_STEP_BINDING.json",
+      "sha256": "a3ed45fec1cfafb4f6cf39ece0e4a2c5adc8a19a04e7d42c164f24b56d5d4a54"
+    }
+  },
+  "phase": "phase4d2b-target-global-actor-order-semantics-implementation",
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "result": {
+    "classification": "TARGET_ACTOR_ORDER_ELIGIBILITY_AND_DISPATCH_WRAPPER_IMPLEMENTED",
+    "current_production_integration_complete": false,
+    "final_actor_priority_necessity_conclusion": "CONCLUSION_2_REACHED",
+    "next_phase": "phase4d3-actor-priority-to-target-order-translation",
+    "passed": true
+  },
+  "schema_version": 1,
+  "status": {
+    "dispatch_correspondence_complete": false,
+    "production_integration_complete": false,
+    "production_proof_extension_complete": false,
+    "selection_correspondence_complete": false,
+    "source_actor_priority_semantics_complete": true,
+    "target_actor_order_semantics_complete": true,
+    "translation_complete": false
+  },
+  "tests": [
+    {
+      "property": "base compiled order selects worker A",
+      "result": "pass",
+      "test_id": "base-target-selection"
+    },
+    {
+      "property": "reversed compiled order selects worker B",
+      "result": "pass",
+      "test_id": "reversed-target-selection"
+    },
+    {
+      "property": "tied minimal order retains both actors",
+      "result": "pass",
+      "test_id": "tied-target-selection"
+    },
+    {
+      "property": "absent ordering retains both earliest actors",
+      "result": "pass",
+      "test_id": "absent-target-order"
+    },
+    {
+      "property": "incomplete ordering retains uncovered actors",
+      "result": "pass",
+      "test_id": "incomplete-target-order"
+    },
+    {
+      "property": "later actor is excluded before ordering comparison",
+      "result": "pass",
+      "test_id": "target-logical-time-precedence"
+    },
+    {
+      "property": "actor absent from target ready set is ineligible",
+      "result": "pass",
+      "test_id": "target-actor-not-ready"
+    },
+    {
+      "property": "worker B is ineligible under base target order",
+      "result": "pass",
+      "test_id": "target-base-ineligible-worker-b"
+    },
+    {
+      "property": "eligible target actor wraps existing LF Step",
+      "result": "pass",
+      "test_id": "target-wrapper-introduction"
+    },
+    {
+      "property": "wrapper exposes eligibility and existing LF Step",
+      "result": "pass",
+      "test_id": "target-wrapper-elimination"
+    }
+  ],
+  "validation": {
+    "all_ten_target_tests_passed": true,
+    "api_probe_passed": true,
+    "baseline_full_build_passed": true,
+    "decidable_instance_probe_passed": true,
+    "integration_full_build_passed": true,
+    "target_source_elaboration_passed": true,
+    "target_test_elaboration_passed": true,
+    "temporary_target_build_objects_removed": true,
+    "theorem_dependency_probe_passed": true
+  }
+}

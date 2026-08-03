@@ -1,0 +1,11 @@
+test_id	property	result
+base-target-selection	base compiled order selects worker A	pass
+reversed-target-selection	reversed compiled order selects worker B	pass
+tied-target-selection	tied minimal order retains both actors	pass
+absent-target-order	absent ordering retains both earliest actors	pass
+incomplete-target-order	incomplete ordering retains uncovered actors	pass
+target-logical-time-precedence	later actor is excluded before ordering comparison	pass
+target-actor-not-ready	actor absent from target ready set is ineligible	pass
+target-base-ineligible-worker-b	worker B is ineligible under base target order	pass
+target-wrapper-introduction	eligible target actor wraps existing LF Step	pass
+target-wrapper-elimination	wrapper exposes eligibility and existing LF Step	pass

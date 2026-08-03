@@ -1,0 +1,58 @@
+{
+  "counts": {
+    "exported_interface_count": 12,
+    "inductive_count": 3,
+    "regression_check_count": 12,
+    "structure_count": 4,
+    "theorem_count": 5
+  },
+  "hashes": {
+    "axiom_probe_stdout_sha256": "05cb77bbc7d7ae31148759b706f4523c370935821983259aa246240daff8c072",
+    "full_build_log_sha256": "5e539b99f7845b1eb68c8e4060d2cf834009dd051c783c6bc4304519159d184e",
+    "production_module_sha256": "797d3eda6e6c81546ee94088216757e3d8749ab9fd41e3a3f18ff53d0c30bb6b",
+    "regression_module_sha256": "5a77736b1f9e0f907e45a58c3ee779b74b17093d09f2c59b8df300eb0105875c"
+  },
+  "modules": {
+    "production": "Relico.Correctness.GlobalMultiStorePayloadActorFiniteExecution",
+    "regression": "Relico.Tests.GlobalMultiStorePayloadActorFiniteExecution"
+  },
+  "phase": "phase4d6c-step-local-finite-execution-production-install",
+  "progress": {
+    "overall_after_percent": 82,
+    "overall_before_percent": 78,
+    "overall_change_percentage_points": 4,
+    "overall_remaining_percent": 18
+  },
+  "result": {
+    "classification": "STEP_LOCAL_FINITE_DISPATCH_CORRESPONDENCE_PRODUCTION_INSTALLED",
+    "next_phase": "phase4d6d-observable-and-weak-execution-interface-audit"
+  },
+  "schema_version": 1,
+  "semantic_properties": {
+    "backward_finite_correspondence_complete": true,
+    "fixed_ready_list_across_trace_used": false,
+    "forward_finite_correspondence_complete": true,
+    "observable_projection_complete": false,
+    "occurrence_trace_correspondence_complete": true,
+    "one_for_one_finite_dispatch_closure": true,
+    "ready_snapshot_step_local": true,
+    "request_fixed_per_finite_run": true,
+    "selected_actor_step_local": true,
+    "target_ready_snapshot_compiled_per_step": true,
+    "trace_length_correspondence_complete": true,
+    "weak_execution_correspondence_complete": false
+  },
+  "timestamp": "20260803T173843+0330",
+  "validation": {
+    "axiom_probe_passed": true,
+    "committed": false,
+    "full_lake_build_passed": true,
+    "original_repository_mutated": false,
+    "production_module_elaborated": true,
+    "pushed": false,
+    "regression_checks_passed": true,
+    "regression_module_elaborated": true,
+    "sorryAx_dependency": false,
+    "staged": false
+  }
+}

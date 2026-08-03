@@ -1,0 +1,50 @@
+{
+  "counts": {
+    "regression_test_count": 14,
+    "theorem_count": 13
+  },
+  "hashes": {
+    "axiom_probe_stdout_sha256": "36764e4523380c6552422c754a7daf386dc646f7a01c656c37b5fd74b63e1cc1",
+    "correctness_sha256": "65680e8777e023926a6a461cf986989ccf8e9fa1b81c5d588cdc29a045562cc1",
+    "full_build_log_sha256": "cfe4166a54ac2528f98c43608ba3e5fa6a58c0ccc48a23b1f76de7d355cc5c59",
+    "test_sha256": "27e4123181dc30064100ab8de40254b5faa4b26f94f69d932003e74aff582307"
+  },
+  "modules": {
+    "correctness": "Relico.Correctness.GlobalMultiStorePayloadActorSelectionCorrespondence",
+    "tests": "Relico.Tests.GlobalMultiStorePayloadActorSelectionCorrespondence"
+  },
+  "phase": "phase4d4b2-selection-correspondence-production-install",
+  "progress": {
+    "overall_after_percent": 64,
+    "overall_before_percent": 60,
+    "overall_change_percentage_points": 4,
+    "overall_remaining_percent": 36
+  },
+  "result": {
+    "classification": "SELECTION_CORRESPONDENCE_PRODUCTION_INSTALLED",
+    "next_phase": "phase4d5a-dispatch-correspondence-interface-audit"
+  },
+  "schema_version": 1,
+  "semantic_status": {
+    "dispatch_correspondence_complete": false,
+    "final_actor_priority_equivalence_complete": false,
+    "finite_execution_correspondence_complete": false,
+    "frontend_integration_complete": false,
+    "selection_correspondence_complete": true,
+    "source_actor_priority_semantics_complete": true,
+    "target_actor_order_semantics_complete": true,
+    "translation_complete": true
+  },
+  "timestamp": "20260803T022432+0330",
+  "validation": {
+    "axiom_probe_passed": true,
+    "committed": false,
+    "correctness_elaboration": true,
+    "full_lake_build_passed": true,
+    "original_repository_mutated": false,
+    "pushed": false,
+    "regression_tests_passed": true,
+    "sorryAx_dependency": false,
+    "staged": false
+  }
+}

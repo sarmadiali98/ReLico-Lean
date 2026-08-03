@@ -1,0 +1,83 @@
+{
+  "bound_facts": {
+    "actor_priority_and_local_reaction_priority_are_distinct": true,
+    "frontend_actor_priority_field_present": false,
+    "frontend_message_server_priority_decoder_present": true,
+    "frontend_message_server_priority_schema_present": true,
+    "frontend_message_server_priority_type": "Option Nat",
+    "java_local_priority_export_surface_present": true,
+    "java_main_actor_surface_present": true,
+    "java_reactive_class_surface_present": true,
+    "main_actor_annotation_inspection_surface_present": true,
+    "main_actor_cardinality_restriction_confirmed": true,
+    "reactive_class_cardinality_restriction_confirmed": true,
+    "serialized_actor_priority_property_present": false,
+    "serialized_message_priority_property_present": true
+  },
+  "bound_files": {
+    "approach_a_manifest": "tests/actor-priority/approach-a-single-main-actor-payload-exclusion/manifest.json",
+    "approach_a_script": "tests/actor-priority/approach-a-single-main-actor-payload-exclusion/run-approach-a-exclusion.sh",
+    "frontend_decoder": "Relico/Frontend/MultiStorePayloadDecoder.lean",
+    "frontend_json_schema": "frontend/schema/multi-store-payload-v1.schema.json",
+    "frontend_schema": "Relico/Frontend/MultiStorePayloadSchema.lean",
+    "multistore_exporter": "frontend/java-bridge/RebecaMultiStoreJsonExporter.java",
+    "payload_exporter": "frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java"
+  },
+  "inventory": {
+    "bound_evidence_row_count": 96,
+    "cardinality_restriction_count": 4,
+    "frontend_actor_priority_occurrence_count": 0,
+    "frontend_message_priority_field_count": 1,
+    "frontend_priority_assignment_count": 1,
+    "java_local_priority_evidence_count": 14,
+    "json_actor_priority_property_count": 0,
+    "json_priority_property_count": 1,
+    "main_actor_annotation_context_count": 4,
+    "main_actor_surface_count": 12,
+    "reactive_class_surface_count": 50
+  },
+  "phase": "phase4d7a2-frontend-interface-audit-evidence-binding-repair",
+  "progress": {
+    "overall_after_percent": 89,
+    "overall_before_percent": 88,
+    "overall_change_percentage_points": 1,
+    "overall_remaining_percent": 11
+  },
+  "required_design": {
+    "actor_instance_metadata": "Add actor-level priority metadata to the frontend actor-instance representation.",
+    "compatibility": "Preserve current behavior for absent and priority-inert actor-priority requests.",
+    "exporter_bridge": "Export actor-instance ordering metadata separately from local `@priority` metadata.",
+    "parser_bridge": "Generalize the current one-main-actor and one-reactive-class payload bridge.",
+    "priority_separation": "Keep actor priority independent from message-server `priority : Option Nat`.",
+    "translation_bridge": "Compile actor-instance priorities to the existing ActorPriorityRequest and ActorOrderRequest interfaces."
+  },
+  "result": {
+    "classification": "FRONTEND_MESSAGE_PRIORITY_BOUND_ACTOR_PRIORITY_FIELD_ABSENT_SINGLE_MAIN_ACTOR_BRIDGE_RESTRICTION_CONFIRMED",
+    "next_phase": "phase4d7b-frontend-actor-priority-schema-and-parser-design"
+  },
+  "schema_version": 1,
+  "semantic_status": {
+    "actor_priority_exporter_support_complete": false,
+    "actor_priority_frontend_schema_complete": false,
+    "actor_priority_parser_support_complete": false,
+    "frontend_integration_complete": false,
+    "multi_actor_frontend_integration_complete": false,
+    "production_actor_dispatch_observable_correspondence_complete": true,
+    "production_actor_selection_semantics_complete": true,
+    "production_finite_dispatch_correspondence_complete": true
+  },
+  "timestamp": "20260803T181250+0330",
+  "validation": {
+    "baseline_build_passed": true,
+    "canonical_readme_mutated": false,
+    "committed": false,
+    "correctness_modules_mutated": false,
+    "diagnostic_gate_passed": true,
+    "evidence_binding_passed": true,
+    "original_repository_mutated": false,
+    "pushed": false,
+    "source_modules_mutated": false,
+    "staged": false,
+    "test_modules_mutated": false
+  }
+}

@@ -1,0 +1,178 @@
+{
+  "evidence": {
+    "build_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2A2-Target-Step-Binding-20260802T225320+0330/lake-build.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "build_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2A2-Target-Step-Binding-20260802T225320+0330/lake-build.stdout.txt",
+      "sha256": "2e6056ab082003e277e709f6aa0cbccb3e734401e13f2e3ae000ee3b6c4ac440"
+    },
+    "probe_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2A2-Target-Step-Binding-20260802T225320+0330/target-step-probe.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "probe_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2A2-Target-Step-Binding-20260802T225320+0330/target-step-probe.stdout.txt",
+      "sha256": "cf3d2b2c2a65d85f640d3582b8091dffff00d417091cb3a040099ea7e9cf85c0"
+    }
+  },
+  "exact_interface": {
+    "constructors": [
+      "lift"
+    ],
+    "line_end": 201,
+    "line_start": 151,
+    "numeric_actor_index_used": false,
+    "parameter_names": [
+      "program",
+      "actorName"
+    ],
+    "qualified_constructors": [
+      "Relico.LF.GlobalMultiStorePayloadDispatch.Step.lift"
+    ],
+    "selected_action_type_fragment": "PendingAction",
+    "selected_reaction_type_fragment": "MultiStorePayloadReaction",
+    "selector_identifier": "actorName",
+    "selector_type": "ActorName",
+    "source_path": "Relico/LF/GlobalMultiStorePayloadDispatch.lean",
+    "state_type_fragment": "GlobalMultiStorePayloadState",
+    "transition_relation": "Relico.LF.GlobalMultiStorePayloadDispatch.Step"
+  },
+  "implementation_contract": {
+    "contract_rows": [
+      {
+        "contract_id": "TB1",
+        "required_value": "Relico.LF.GlobalMultiStorePayloadDispatch.Step",
+        "status": "confirmed",
+        "subject": "existing target transition"
+      },
+      {
+        "contract_id": "TB2",
+        "required_value": "actorName : ActorName",
+        "status": "confirmed",
+        "subject": "target actor selector"
+      },
+      {
+        "contract_id": "TB3",
+        "required_value": "not used",
+        "status": "confirmed",
+        "subject": "numeric actor index"
+      },
+      {
+        "contract_id": "TB4",
+        "required_value": "GlobalMultiStorePayloadState",
+        "status": "confirmed",
+        "subject": "target state"
+      },
+      {
+        "contract_id": "TB5",
+        "required_value": "PendingAction",
+        "status": "confirmed",
+        "subject": "selected target event"
+      },
+      {
+        "contract_id": "TB6",
+        "required_value": "MultiStorePayloadReaction",
+        "status": "confirmed",
+        "subject": "selected target reaction"
+      },
+      {
+        "contract_id": "TB7",
+        "required_value": "Relico/LF/GlobalMultiStorePayloadActorOrder.lean",
+        "status": "planned",
+        "subject": "new wrapper module"
+      },
+      {
+        "contract_id": "TB8",
+        "required_value": "ActorOrderDispatchStep",
+        "status": "planned",
+        "subject": "new wrapper relation"
+      },
+      {
+        "contract_id": "TB9",
+        "required_value": "target actor-order eligibility plus existing GlobalMultiStorePayloadDispatch.Step",
+        "status": "required",
+        "subject": "wrapper premises"
+      },
+      {
+        "contract_id": "TB10",
+        "required_value": "existing LF Step and theorems remain unchanged",
+        "status": "required",
+        "subject": "compatibility"
+      },
+      {
+        "contract_id": "TB11",
+        "required_value": "behaviorally equivalent actor order; literal actor-priority field optional",
+        "status": "required",
+        "subject": "ordering representation"
+      },
+      {
+        "contract_id": "TB12",
+        "required_value": "phase4d2b-target-global-actor-order-semantics-implementation",
+        "status": "ready",
+        "subject": "next implementation"
+      }
+    ],
+    "equivalent_target_ordering_required": true,
+    "existing_transition_must_remain_unchanged": true,
+    "literal_actor_priority_field_required": false,
+    "namespace": "Relico.LF.GlobalMultiStorePayloadActorOrder",
+    "new_module": "Relico/LF/GlobalMultiStorePayloadActorOrder.lean",
+    "required_definitions": [
+      "lookupActorOrder",
+      "lookupReadyTargetActor",
+      "targetActorsSimultaneous",
+      "targetEarliestReady",
+      "targetOrderCoversReadyActors",
+      "targetActorOrderEligibleBool",
+      "TargetActorOrderEligible",
+      "eligibleTargetActorNames"
+    ],
+    "required_relation": "ActorOrderDispatchStep",
+    "required_types": [
+      "ActorOrderAssignment",
+      "ActorOrderRequest",
+      "ReadyTargetActor"
+    ],
+    "wrapper_rule": "ActorOrderDispatchStep must require target actor-order eligibility for actorName and the unchanged existing GlobalMultiStorePayloadDispatch.Step."
+  },
+  "inputs": {
+    "phase4d2a_audit": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase4d2/PHASE4D2A_TARGET_INTERFACE_AUDIT.json",
+      "sha256": "80b6cd603f19fdbdae2134e3965e644fc4adb0b51c54305fecdb98d5f006ca31"
+    },
+    "step_metadata": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2A2-Target-Step-Binding-20260802T225320+0330/GlobalMultiStorePayloadDispatch.Step.metadata.json",
+      "sha256": "dc846390a542469e813435e42e53f4386c668502bab75cc0bc3fcb99699746ff"
+    },
+    "target_source_block": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2A2-Target-Step-Binding-20260802T225320+0330/GlobalMultiStorePayloadDispatch.Step.txt",
+      "sha256": "26e96baca1d2209cca68f08c878e62a2de966b49364b6369fc527abee27b491a"
+    }
+  },
+  "phase": "phase4d2a2-bind-exact-target-global-payload-step",
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "result": {
+    "classification": "EXACT_TARGET_ACTOR_NAME_STEP_BOUND_NONINVASIVE_ORDER_WRAPPER_READY",
+    "current_production_integration_complete": false,
+    "final_actor_priority_necessity_conclusion": "CONCLUSION_2_REACHED",
+    "next_phase": "phase4d2b-target-global-actor-order-semantics-implementation",
+    "passed": true,
+    "production_lf_source_mutated": false,
+    "source_actor_priority_semantics_complete": true,
+    "target_actor_order_semantics_complete": false
+  },
+  "schema_version": 1,
+  "validation": {
+    "constructors_probed": true,
+    "full_build_passed": true,
+    "lean_check_passed": true,
+    "lean_print_passed": true,
+    "selector_bound": true,
+    "source_block_validated": true
+  }
+}

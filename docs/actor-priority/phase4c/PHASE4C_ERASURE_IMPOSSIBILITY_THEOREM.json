@@ -1,0 +1,129 @@
+{
+  "approach_a_status": "current_profile_exclusion_mechanically_enforced",
+  "approach_b_status": "erasure_impossibility_theorem_proved",
+  "decision": {
+    "classification": "ACTOR_ORDERING_INFORMATION_NECESSARY_WHEN_PRIORITY_CHANGES_CROSS_ACTOR_SELECTION",
+    "current_production_integration_complete": false,
+    "current_production_proof_extension_complete": false,
+    "equivalent_compiled_ordering_sufficient": true,
+    "literal_actor_priority_field_required": false,
+    "priority_inert_cases_may_omit_ordering": true,
+    "statement": "When actor priority changes which actor may dispatch among simultaneously ready actors, a faithful translation must preserve that ordering distinction.",
+    "target_conclusion_reached": 2
+  },
+  "evidence": {
+    "build_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4C-Explicit-Argument-Repair-20260802T203837+0330/lake-build.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "build_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4C-Explicit-Argument-Repair-20260802T203837+0330/lake-build.stdout.txt",
+      "sha256": "61bcefd6861817d0625ebe3cfdcbde5a06534eb134501ee4e3bfbb15e034ecfd"
+    },
+    "probe_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4C-Explicit-Argument-Repair-20260802T203837+0330/api-probe.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "probe_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4C-Explicit-Argument-Repair-20260802T203837+0330/api-probe.stdout.txt",
+      "sha256": "5a5a5b85e6814ad5647f709187c40e2eed3abf4166ee7c782f9ad1af8a759f00"
+    },
+    "test_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4C-Explicit-Argument-Repair-20260802T203837+0330/test-elaboration.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "test_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4C-Explicit-Argument-Repair-20260802T203837+0330/test-elaboration.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "theorem_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4C-Explicit-Argument-Repair-20260802T203837+0330/theorem-elaboration.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "theorem_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4C-Explicit-Argument-Repair-20260802T203837+0330/theorem-elaboration.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "final_actor_priority_necessity_conclusion": "CONCLUSION_2_REACHED",
+  "formal_result": {
+    "complete_erasure_maps_requests_equally": true,
+    "erasure_cannot_preserve_both": true,
+    "faithful_translation_must_distinguish_requests": true,
+    "source_observations_differ": true
+  },
+  "inputs": {
+    "phase4b_correction": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase4b/PHASE4B_FALSE_POSITIVE_CORRECTION.json",
+      "sha256": "12a419aa1fbfc664c15a35181e8fa663f42be56ef7158b788039e0ebdf8aa61d"
+    },
+    "rmc_semantic_witness": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase2b/PHASE2B2E_SEMANTIC_GRAPH_WITNESS.json",
+      "sha256": "406bf64a0b370d985969d9288e4bf6b87660581ad3d143b4412b9fcecd221c48"
+    }
+  },
+  "lean": {
+    "closed_test_count": 6,
+    "test_module": {
+      "path": "Relico/Tests/ActorPriorityErasureImpossibility.lean",
+      "sha256": "d8a420285b3a08805f95bf4ffc7db64362e9cb21720c9df886a9a1093f58064b"
+    },
+    "tests": [
+      {
+        "property": "base priorities select workera",
+        "result": "pass",
+        "test_id": "base-selection"
+      },
+      {
+        "property": "reversed priorities select workerb",
+        "result": "pass",
+        "test_id": "reversed-selection"
+      },
+      {
+        "property": "priority reversal changes the source observation",
+        "result": "pass",
+        "test_id": "source-discrimination"
+      },
+      {
+        "property": "complete erasure maps both requests to one target",
+        "result": "pass",
+        "test_id": "complete-erasure"
+      },
+      {
+        "property": "one erased target cannot preserve both observations",
+        "result": "pass",
+        "test_id": "erasure-impossibility"
+      },
+      {
+        "property": "a faithful translation must distinguish the requests",
+        "result": "pass",
+        "test_id": "faithful-distinction"
+      }
+    ],
+    "theorem_module": {
+      "path": "Relico/Investigation/ActorPriority/ErasureImpossibility.lean",
+      "sha256": "bc9149e5b7332e78f5e48423b4fb7c5b8be6f4ecf89527e8c58826a72db64fba"
+    }
+  },
+  "next_phase": "phase4d-integrate-actor-ordering-into-production-semantics-translation-and-proof",
+  "phase": "phase4c-actor-priority-erasure-impossibility-theorem",
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "repair": {
+    "correction": "readyPair, baseRequest, and reversedRequest were supplied explicitly",
+    "previous_failure": "Lean could not infer the ready-actor list in the final theorem application"
+  },
+  "schema_version": 1,
+  "validation": {
+    "api_probe_passed": true,
+    "axiom_probe_passed": true,
+    "closed_tests_passed": true,
+    "full_lake_build_passed": true,
+    "model_elaboration_passed": true,
+    "temporary_project_objects_removed": true,
+    "test_elaboration_passed": true,
+    "theorem_elaboration_passed": true
+  }
+}

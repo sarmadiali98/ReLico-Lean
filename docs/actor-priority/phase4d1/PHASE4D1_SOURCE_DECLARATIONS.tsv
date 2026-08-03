@@ -1,0 +1,11 @@
+contract_id	subject	required_value	reason	status
+S1	actor selector	actorName : ActorName	GlobalMultiStorePayloadDispatch.Step is directly parameterized by the selected actor name	confirmed
+S2	existing transition primitive	Relico.DTR.GlobalMultiStorePayloadDispatch.Step	the existing relation performs lookup, local dispatch, and synchronized global-state replacement	confirmed
+S3	wrapper architecture	eligibility premise plus existing Step premise	actor-priority semantics must constrain selection without changing chosen-actor dispatch	required
+S4	priority numeric order	lower Nat means higher actor priority	matches the mechanically tested source policy	required
+S5	tie policy	all minimal-priority ready actors remain eligible	ties must preserve nondeterminism	required
+S6	absent request policy	no additional actor filtering	absence of actor-priority metadata must retain the existing dispatch possibilities	required
+S7	incomplete assignment policy	priority filtering disabled for an uncovered ready set	uncovered actors must not be silently eliminated	required
+S8	non-simultaneous policy	actors at different logical times are not compared by this simultaneous-selection layer	actor priority resolves simultaneous competition only	required
+S9	compatibility	existing Step and its theorems remain unchanged	current chosen-actor correspondence must retain its existing meaning	required
+S10	next implementation module	Relico/DTR/GlobalMultiStorePayloadActorPriority.lean	new production-layer source semantics remain modular	planned

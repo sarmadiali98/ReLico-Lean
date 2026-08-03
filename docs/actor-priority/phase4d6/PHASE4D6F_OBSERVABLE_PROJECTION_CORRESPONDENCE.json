@@ -1,0 +1,53 @@
+{
+  "counts": {
+    "definition_count": 3,
+    "exported_interface_count": 8,
+    "regression_check_count": 8,
+    "theorem_count": 5
+  },
+  "hashes": {
+    "axiom_probe_stdout_sha256": "0f72de8f28428098e25989f3a7e5990a24c777b3bf489d77f1804da24ae39ccc",
+    "full_build_log_sha256": "05c2722d416e3cf53197ebdc4051ba4f21de3c09ae0f094518c16b370463c22e",
+    "production_module_sha256": "471b4e76c9781149cd1e62c515f1060708515c39a2720213ced300eacf813e25",
+    "regression_module_sha256": "dc4c1800887124613cfed178d8c4c34710d2ba79134efea1a9218a6b34c6a72a"
+  },
+  "modules": {
+    "production": "Relico.Correctness.GlobalMultiStorePayloadActorObservableProjection",
+    "regression": "Relico.Tests.GlobalMultiStorePayloadActorObservableProjection"
+  },
+  "phase": "phase4d6f-actor-dispatch-observable-projection-production-install",
+  "progress": {
+    "overall_after_percent": 88,
+    "overall_before_percent": 85,
+    "overall_change_percentage_points": 3,
+    "overall_remaining_percent": 12
+  },
+  "result": {
+    "classification": "ACTOR_DISPATCH_OBSERVABLE_CORRESPONDENCE_PRODUCTION_INSTALLED",
+    "next_phase": "phase4d7a-frontend-actor-priority-interface-audit"
+  },
+  "schema_version": 1,
+  "semantic_properties": {
+    "backward_actor_dispatch_observable_correspondence_complete": true,
+    "dispatch_event_trace_correspondence_retained": true,
+    "dispatch_layer_stuttering_present": false,
+    "forward_actor_dispatch_observable_correspondence_complete": true,
+    "full_detailed_weak_runtime_equivalence_complete": false,
+    "scope_is_actor_dispatch_observable": true,
+    "selected_actor_trace_equality_complete": true,
+    "selected_actor_trace_shared": true
+  },
+  "timestamp": "20260803T175910+0330",
+  "validation": {
+    "axiom_probe_passed": true,
+    "committed": false,
+    "full_lake_build_passed": true,
+    "original_repository_mutated": false,
+    "production_module_elaborated": true,
+    "pushed": false,
+    "regression_checks_passed": true,
+    "regression_module_elaborated": true,
+    "sorryAx_dependency": false,
+    "staged": false
+  }
+}

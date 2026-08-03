@@ -1,0 +1,9 @@
+order	kind	name	role	elaborated	regression_checked	sorryAx
+1	definition	actorDispatchFrameTrace	Projects the selected ActorName from each step-local dispatch frame.	true	true	false
+2	definition	sourceActorDispatchObservableTrace	Defines the source actor-dispatch observable trace.	true	true	false
+3	definition	targetActorDispatchObservableTrace	Defines the target actor-dispatch observable trace.	true	true	false
+4	theorem	actorDispatchObservableTrace_eq	Proves source and target selected-actor traces are equal.	true	true	false
+5	theorem	sourceActorPriorityDispatchSteps_actorTrace	Binds a source finite execution to the shared frame projection.	true	true	false
+6	theorem	targetActorOrderDispatchSteps_actorTrace	Binds a target finite execution to the shared frame projection.	true	true	false
+7	theorem	sourceActorPriorityDispatchObservable_forward	Proves forward actor-dispatch observable correspondence.	true	true	false
+8	theorem	targetActorOrderDispatchObservable_backward	Proves backward actor-dispatch observable correspondence.	true	true	false

@@ -1,0 +1,190 @@
+{
+  "architecture_rule": "Keep the existing chosen-actor dispatch relation as a primitive and add actor-priority eligibility as a separate production layer. Do not silently change the meaning of existing theorems.",
+  "canonical_decision": {
+    "classification": "ACTOR_ORDERING_INFORMATION_NECESSARY_WHEN_PRIORITY_CHANGES_CROSS_ACTOR_SELECTION",
+    "current_production_integration_complete": false,
+    "current_production_proof_extension_complete": false,
+    "equivalent_compiled_ordering_sufficient": true,
+    "literal_actor_priority_field_required": false,
+    "priority_inert_cases_may_omit_ordering": true
+  },
+  "claim_guardrails": [
+    "Do not say DTR is single-actor; the global formal model contains multiple actor instances.",
+    "Do not conflate the current one-main-actor parser bridge with the multi-actor DTR formal model.",
+    "Do not claim full actor-priority equivalence until source eligibility, target ordering, translation, and bidirectional scheduler-choice correspondence pass.",
+    "Do not require a literal actor-priority field when an equivalent compiled ordering mechanism is proved.",
+    "Do not erase actor ordering in a priority-discriminating simultaneous-actor case."
+  ],
+  "evidence": {
+    "full_build_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D0-Architecture-20260802T204316+0330/lake-build.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "full_build_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D0-Architecture-20260802T204316+0330/lake-build.stdout.txt",
+      "sha256": "824c479bb2287b46f7dd542561741c2f77af00316b7b74960a9e24f408d3d542"
+    },
+    "production_contexts": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D0-Architecture-20260802T204316+0330/production-surface-contexts.txt",
+      "sha256": "8bda5326b8cf465f73581e6e3d2b4d409e45f88088bc81920fcca5c532da0740"
+    },
+    "production_inventory": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D0-Architecture-20260802T204316+0330/production-surface-inventory.tsv",
+      "row_count": 2767,
+      "sha256": "3013effe8d429f5de3b9bd2f8f3537e2b97766ef686136aacec7038de9679ace"
+    }
+  },
+  "implementation_phases": [
+    {
+      "deliverable": "durable decision record, surface inventory, and implementation sequence",
+      "name": "README and architecture",
+      "phase": "4D0",
+      "status": "complete_after_this_run"
+    },
+    {
+      "deliverable": "production-layer source actor eligibility and actor-priority dispatch relation",
+      "name": "source actor-priority semantics",
+      "phase": "4D1",
+      "status": "next"
+    },
+    {
+      "deliverable": "LF representation of equivalent cross-actor ordering",
+      "name": "target actor-order semantics",
+      "phase": "4D2",
+      "status": "planned"
+    },
+    {
+      "deliverable": "compile source priority assignment to target ordering",
+      "name": "translation",
+      "phase": "4D3",
+      "status": "planned"
+    },
+    {
+      "deliverable": "preservation and reflection of eligible actors",
+      "name": "selection correspondence",
+      "phase": "4D4",
+      "status": "planned"
+    },
+    {
+      "deliverable": "scheduler choice plus existing chosen-dispatch proof",
+      "name": "dispatch correspondence",
+      "phase": "4D5",
+      "status": "planned"
+    },
+    {
+      "deliverable": "trace-level theorem for actor-priority-bearing models",
+      "name": "finite and weak behavior",
+      "phase": "4D6",
+      "status": "planned"
+    },
+    {
+      "deliverable": "production benchmark and frontend extension or explicitly documented deferred frontend scope",
+      "name": "benchmark and frontend",
+      "phase": "4D7",
+      "status": "planned"
+    }
+  ],
+  "phase": "phase4d0-readme-and-integration-architecture",
+  "phase4c_decision": {
+    "conclusion": "CONCLUSION_2_REACHED",
+    "report": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase4c/PHASE4C_ERASURE_IMPOSSIBILITY_THEOREM.json",
+      "sha256": "c84110a0c778b880cc5325a0469802b256d4d662894dad996c08ccef00ce3da9"
+    },
+    "tests": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/Relico/Tests/ActorPriorityErasureImpossibility.lean",
+      "sha256": "d8a420285b3a08805f95bf4ffc7db64362e9cb21720c9df886a9a1093f58064b"
+    },
+    "theorem": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/Relico/Investigation/ActorPriority/ErasureImpossibility.lean",
+      "sha256": "bc9149e5b7332e78f5e48423b4fb7c5b8be6f4ecf89527e8c58826a72db64fba"
+    }
+  },
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "result": {
+    "final_actor_priority_necessity_conclusion": "CONCLUSION_2_REACHED",
+    "next_phase": "phase4d1-source-global-actor-priority-semantics",
+    "passed": true,
+    "phase4d_status": "architecture_documented_source_semantics_next",
+    "production_source_mutated": false,
+    "readme_installed": true
+  },
+  "schema_version": 1,
+  "surfaces": [
+    {
+      "current_capability": "global multi-store state and actor-indexed dispatch",
+      "layer": "DTR source model",
+      "missing_capability": "autonomous actor-level eligibility among simultaneously ready actors",
+      "planned_module": "Relico/DTR/GlobalMultiStorePayloadActorPriority.lean",
+      "planned_work": "define assignment lookup, simultaneous readiness, actor eligibility, and actor-priority dispatch wrapper",
+      "status": "planned",
+      "surface_id": "D1"
+    },
+    {
+      "current_capability": "global multi-store action dispatch and local reaction-priority selection",
+      "layer": "LF target model",
+      "missing_capability": "compiled cross-actor ordering corresponding to source actor priority",
+      "planned_module": "Relico/LF/GlobalMultiStorePayloadActorOrder.lean",
+      "planned_work": "define target actor-order metadata and target actor eligibility",
+      "status": "planned",
+      "surface_id": "D2"
+    },
+    {
+      "current_capability": "message servers compile to LF reactions",
+      "layer": "translation",
+      "missing_capability": "translation of actor-ordering information",
+      "planned_module": "Relico/Translation/GlobalMultiStorePayloadActorPriority.lean",
+      "planned_work": "compile actor-priority assignments to a behaviorally equivalent LF ordering representation",
+      "status": "planned",
+      "surface_id": "D3"
+    },
+    {
+      "current_capability": "local message-server and reaction-priority selection correspondence",
+      "layer": "selection correctness",
+      "missing_capability": "source/target cross-actor eligibility correspondence",
+      "planned_module": "Relico/Correctness/GlobalMultiStorePayloadActorPriorityCorrespondence.lean",
+      "planned_work": "prove actor-eligibility preservation and reflection",
+      "status": "planned",
+      "surface_id": "D4"
+    },
+    {
+      "current_capability": "chosen actor-indexed dispatch correspondence",
+      "layer": "dispatch correctness",
+      "missing_capability": "proof that the chosen actor is scheduler-eligible",
+      "planned_module": "Relico/Correctness/GlobalMultiStorePayloadActorPriorityDispatch.lean",
+      "planned_work": "lift the existing chosen-dispatch theorem through source and target actor eligibility",
+      "status": "planned",
+      "surface_id": "D5"
+    },
+    {
+      "current_capability": "current parser bridge accepts one main actor instance and rejects actor-priority requests",
+      "layer": "frontend",
+      "missing_capability": "multi-actor actor-priority-bearing frontend model",
+      "planned_module": "deferred until direct formal integration is stable",
+      "planned_work": "retain Approach A exclusion while Phase 4D uses direct formal multi-actor fixtures",
+      "status": "deferred",
+      "surface_id": "D6"
+    },
+    {
+      "current_capability": "isolated base, reversed, tied, absent, and erasure-impossibility tests",
+      "layer": "tests",
+      "missing_capability": "production source/target traces under actor ordering",
+      "planned_module": "Relico/Tests/GlobalMultiStorePayloadActorPriority*.lean",
+      "planned_work": "test base, reversed, tied, absent, inert, forward, backward, and erasure-regression cases",
+      "status": "planned",
+      "surface_id": "D7"
+    },
+    {
+      "current_capability": "equivalence for the declared actor-priority-excluded fragment and chosen-actor dispatch correspondence",
+      "layer": "final equivalence theorem",
+      "missing_capability": "scheduler-choice correspondence for active actor-priority ordering",
+      "planned_module": "new theorem; existing theorem remains unchanged",
+      "planned_work": "prove forward and backward actor-selection correspondence before lifting finite/weak steps",
+      "status": "planned",
+      "surface_id": "D8"
+    }
+  ]
+}

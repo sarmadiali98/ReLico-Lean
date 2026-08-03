@@ -1,0 +1,5 @@
+entrypoint	applicable_to_current_profile	actor_rejected_before_json	actor_diagnostic_observed	local_priority_preserved	bypass_observed	status	actor_exit_code	actor_json_exists	absent_exit_code	absent_json_parseable	local_exit_code	local_json_parseable	local_priority_one_observed
+frontend/java-bridge/run-from-zip.sh	False	True	False	False	False	NOT_APPLICABLE_TO_CURRENT_FIXTURE_PROFILE	1	False	1	False	1	False	False
+frontend/java-bridge/run-multistore-from-zip.sh	False	True	False	False	False	NOT_APPLICABLE_TO_CURRENT_FIXTURE_PROFILE	1	False	1	False	1	False	False
+frontend/java-bridge/run-multistore-payload-from-zip.sh	True	True	True	True	False	CURRENT_PROFILE_EXCLUSION_ENFORCED	1	False	0	True	0	True	True
+frontend/java-bridge/run-store-from-zip.sh	False	True	False	False	False	NOT_APPLICABLE_TO_CURRENT_FIXTURE_PROFILE	1	False	1	False	1	False	False

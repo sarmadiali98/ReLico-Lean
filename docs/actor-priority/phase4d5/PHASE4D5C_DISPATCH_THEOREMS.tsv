@@ -1,0 +1,5 @@
+order	theorem	role	elaborated	regression_check	sorryAx
+1	actorPriorityDispatchStep_forward_of_targetBase	transport source eligibility and pair it with a matching target base dispatch	true	true	false
+2	actorOrderDispatchStep_backward_of_sourceBase	transport target eligibility and pair it with a reconstructed source base dispatch	true	true	false
+3	synchronizedActorPriorityDispatch_forward	forward one-step actor-priority dispatch correspondence	true	true	false
+4	synchronizedActorPriorityDispatch_backward	backward one-step actor-order dispatch correspondence	true	true	false

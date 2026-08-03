@@ -1,0 +1,8 @@
+order	phase	path	implementation_required	change
+1	lean-schema	Relico/Frontend/MultiStorePayloadSchema.lean	True	Add RawMultiStorePayloadActorInstance and a declaration-ordered actors list while leaving message-server priority unchanged.
+2	json-schema	frontend/schema/multi-store-payload-v1.schema.json	True	Add an actors array and optional non-negative per-instance priority, then bump the schema version.
+3	lean-decoder	Relico/Frontend/MultiStorePayloadDecoder.lean	True	Decode actor instances, validate unique names and reactive-class references, and construct ActorPriorityRequest.
+4	java-exporter	frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java	True	Export every main-block actor and remove singleton main-actor and reactive-class restrictions.
+5	java-exporter	frontend/java-bridge/RebecaMultiStoreJsonExporter.java	True	Apply the same multi-actor normalization while preserving local @priority metadata.
+6	translation	Relico/Translation/GlobalMultiStorePayloadActorOrder.lean	False	Reuse compileActorPriorityRequest to produce ActorOrderRequest; no literal target priority field is required.
+7	regression	Relico/Tests and frontend/fixtures/multi-store-payload	True	Implement the ten-case compatibility and multi-actor validation matrix.

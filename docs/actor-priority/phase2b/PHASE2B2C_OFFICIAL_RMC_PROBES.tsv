@@ -1,0 +1,49 @@
+candidate_id	source	relative_path	source_sha256	actor_priority_values	variant	accepted	selected_attempt	exit_code	timed_out	fatal_diagnostic	duration_ms	semantic_sha256	semantic_files	artifact_count	stdout_excerpt	stderr_excerpt
+candidate-01	published-parser-artifact	ReLico-fmcad-2026-artifact-v1/benchmarks/worker_sink.rebeca	089e0955ae6fde3af137e07620fae04aca8b11ac05049089bd0bbb7e6471481a	[1,2]	base	True	4	0	False	False	801	90a4c8af49722a6f8eeb6831047ea2d074adafa86325afdb66bb8d0b0873c13d	[]	22		"SLF4J: Failed to load class ""org.slf4j.impl.StaticLoggerBinder"".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+"
+candidate-01	published-parser-artifact	ReLico-fmcad-2026-artifact-v1/benchmarks/worker_sink.rebeca	089e0955ae6fde3af137e07620fae04aca8b11ac05049089bd0bbb7e6471481a	[1,2]	reversed	True	4	0	False	False	796	90a4c8af49722a6f8eeb6831047ea2d074adafa86325afdb66bb8d0b0873c13d	[]	22		"SLF4J: Failed to load class ""org.slf4j.impl.StaticLoggerBinder"".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+"
+candidate-01	published-parser-artifact	ReLico-fmcad-2026-artifact-v1/benchmarks/worker_sink.rebeca	089e0955ae6fde3af137e07620fae04aca8b11ac05049089bd0bbb7e6471481a	[1,2]	absent	True	4	0	False	False	789	90a4c8af49722a6f8eeb6831047ea2d074adafa86325afdb66bb8d0b0873c13d	[]	22		"SLF4J: Failed to load class ""org.slf4j.impl.StaticLoggerBinder"".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+"
+candidate-02	published-parser-artifact	ReLico-fmcad-2026-artifact-v1/benchmarks/node_and_switch_with_after.rebeca	0c2852ed543787d06942a9e2e31d48fd38ae95c4fae23030f3020ab30d9d10ff	[1,2]	base	True	4	0	False	False	780	90a4c8af49722a6f8eeb6831047ea2d074adafa86325afdb66bb8d0b0873c13d	[]	22		"SLF4J: Failed to load class ""org.slf4j.impl.StaticLoggerBinder"".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+"
+candidate-02	published-parser-artifact	ReLico-fmcad-2026-artifact-v1/benchmarks/node_and_switch_with_after.rebeca	0c2852ed543787d06942a9e2e31d48fd38ae95c4fae23030f3020ab30d9d10ff	[1,2]	reversed	True	4	0	False	False	784	90a4c8af49722a6f8eeb6831047ea2d074adafa86325afdb66bb8d0b0873c13d	[]	22		"SLF4J: Failed to load class ""org.slf4j.impl.StaticLoggerBinder"".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+"
+candidate-02	published-parser-artifact	ReLico-fmcad-2026-artifact-v1/benchmarks/node_and_switch_with_after.rebeca	0c2852ed543787d06942a9e2e31d48fd38ae95c4fae23030f3020ab30d9d10ff	[1,2]	absent	True	4	0	False	False	781	90a4c8af49722a6f8eeb6831047ea2d074adafa86325afdb66bb8d0b0873c13d	[]	22		"SLF4J: Failed to load class ""org.slf4j.impl.StaticLoggerBinder"".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+"
+candidate-03	published-parser-artifact	ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Alarm/Alarm.rebeca	7fcc8ee67bc38735f1213b19c598d7f7160e7c03d012b858d8fa4a0e090e63d5	[1,2]	base	True	4	0	False	False	806	90a4c8af49722a6f8eeb6831047ea2d074adafa86325afdb66bb8d0b0873c13d	[]	24		"SLF4J: Failed to load class ""org.slf4j.impl.StaticLoggerBinder"".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+"
+candidate-03	published-parser-artifact	ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Alarm/Alarm.rebeca	7fcc8ee67bc38735f1213b19c598d7f7160e7c03d012b858d8fa4a0e090e63d5	[1,2]	reversed	True	4	0	False	False	806	90a4c8af49722a6f8eeb6831047ea2d074adafa86325afdb66bb8d0b0873c13d	[]	24		"SLF4J: Failed to load class ""org.slf4j.impl.StaticLoggerBinder"".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+"
+candidate-03	published-parser-artifact	ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Alarm/Alarm.rebeca	7fcc8ee67bc38735f1213b19c598d7f7160e7c03d012b858d8fa4a0e090e63d5	[1,2]	absent	True	4	0	False	False	804	90a4c8af49722a6f8eeb6831047ea2d074adafa86325afdb66bb8d0b0873c13d	[]	24		"SLF4J: Failed to load class ""org.slf4j.impl.StaticLoggerBinder"".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+"
+candidate-04	published-parser-artifact	ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/UnsafeSend/UnsafeSend.rebeca	220c993a05aee74b34b19b86673b94be4f0fff5d76a5670f87def5d9d9bfe8bb	[1,2]	base	True	4	0	False	False	837	90a4c8af49722a6f8eeb6831047ea2d074adafa86325afdb66bb8d0b0873c13d	[]	26		"SLF4J: Failed to load class ""org.slf4j.impl.StaticLoggerBinder"".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+"
+candidate-04	published-parser-artifact	ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/UnsafeSend/UnsafeSend.rebeca	220c993a05aee74b34b19b86673b94be4f0fff5d76a5670f87def5d9d9bfe8bb	[1,2]	reversed	True	4	0	False	False	859	90a4c8af49722a6f8eeb6831047ea2d074adafa86325afdb66bb8d0b0873c13d	[]	26		"SLF4J: Failed to load class ""org.slf4j.impl.StaticLoggerBinder"".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+"
+candidate-04	published-parser-artifact	ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/UnsafeSend/UnsafeSend.rebeca	220c993a05aee74b34b19b86673b94be4f0fff5d76a5670f87def5d9d9bfe8bb	[1,2]	absent	True	4	0	False	False	833	90a4c8af49722a6f8eeb6831047ea2d074adafa86325afdb66bb8d0b0873c13d	[]	26		"SLF4J: Failed to load class ""org.slf4j.impl.StaticLoggerBinder"".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+"

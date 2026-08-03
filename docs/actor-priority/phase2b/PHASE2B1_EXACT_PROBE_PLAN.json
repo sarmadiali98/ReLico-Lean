@@ -1,0 +1,83 @@
+{
+  "frontend_static_path": {
+    "actor_annotation_access": true,
+    "assert_no_annotations_path": false,
+    "dynamic_rejection_proved": false,
+    "main_actor_context": true
+  },
+  "gate_for_phase2b2": {
+    "official_rmc_invocation_required": true,
+    "parser_entrypoint_required": true,
+    "production_source_mutation_allowed": false,
+    "syntax_candidate_required": true
+  },
+  "next_phase": "phase2b2-execute-parser-and-rmc-probe-set",
+  "official_sources": {
+    "compiler_commit": "91dcffcc67fd320fdf27863adbba4d6fab28ac43",
+    "modelchecker_commit": "fb4197f4b3c54c19d569b46c614024fe75bbf4b6"
+  },
+  "parser_entrypoints": {
+    "candidate_main_classes": [],
+    "entrypoint_row_count": 236,
+    "manifest_main_classes": []
+  },
+  "phase": "phase2b1-exact-probe-planning",
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "required_dynamic_probe_set": [
+    {
+      "expected_question": "Does the parser/exporter accept and emit JSON?",
+      "probe_id": "PARSER-ABSENT",
+      "source_case": "no actor-priority declaration"
+    },
+    {
+      "expected_question": "Is local priority preserved in JSON?",
+      "probe_id": "PARSER-LOCAL",
+      "source_case": "local message-server priority only"
+    },
+    {
+      "expected_question": "Is it parsed and explicitly rejected before JSON/LF?",
+      "probe_id": "PARSER-ACTOR-NONEMPTY",
+      "source_case": "nonempty actor-priority declaration"
+    },
+    {
+      "expected_question": "Does rejection remain explicit and deterministic?",
+      "probe_id": "PARSER-ACTOR-REVERSED",
+      "source_case": "same model with reversed actor priorities"
+    },
+    {
+      "expected_question": "Can the parser distinguish explicit presence from absence?",
+      "probe_id": "PARSER-ACTOR-EMPTY",
+      "source_case": "explicit empty actor-priority declaration"
+    },
+    {
+      "expected_question": "What observable behavior occurs with one actor ordering?",
+      "probe_id": "RMC-ACTOR-BASE",
+      "source_case": "two actors simultaneously enabled with fixed local priority"
+    },
+    {
+      "expected_question": "Does observable behavior change?",
+      "probe_id": "RMC-ACTOR-REVERSED",
+      "source_case": "same model with reversed actor ordering"
+    },
+    {
+      "expected_question": "What nondeterminism or reachable-state difference appears?",
+      "probe_id": "RMC-ACTOR-ABSENT",
+      "source_case": "same model without actor-priority metadata"
+    }
+  ],
+  "schema_version": 1,
+  "syntax_resolution": {
+    "actor_or_global_evidence_rows": 2,
+    "candidate_forms": [
+      "@priority(\"2\")",
+      "@priority(1)",
+      "@priority(3)"
+    ],
+    "local_priority_evidence_rows": 4,
+    "official_rebeca_example_rows": 3,
+    "status": "ACTOR_PRIORITY_CANDIDATE_FORMS_IDENTIFIED"
+  }
+}

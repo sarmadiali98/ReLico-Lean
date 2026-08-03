@@ -1,0 +1,322 @@
+{
+  "counts": {
+    "ActorName_occurrences": 6,
+    "PendingAction_occurrences": 3,
+    "actorName_occurrences": 15,
+    "correctness_reference_hits": 809,
+    "high_confidence_candidates": 4,
+    "public_transition_candidates": 14,
+    "relevant_lf_files": 8,
+    "target_declarations": 62,
+    "top_score_candidates": 1,
+    "transition_candidates": 14
+  },
+  "evidence": {
+    "all_declarations": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2A-Scoring-Repair-20260802T224444+0330/all-target-declarations.tsv",
+      "sha256": "16b2cc7d8ff372f019a320d951912612bc1e08251996400ca62a99a797e17f27"
+    },
+    "build_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2A-Scoring-Repair-20260802T224444+0330/lake-build.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "build_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2A-Scoring-Repair-20260802T224444+0330/lake-build.stdout.txt",
+      "sha256": "4d9e6cb6584bd6fc00aa6b820998992e5297d2cd85047480b5ecbf117fa885fc"
+    },
+    "correctness_references": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2A-Scoring-Repair-20260802T224444+0330/correctness-target-reference-hits.tsv",
+      "sha256": "dd3cf7309f874c402d35b88a5889262ef499034228cc6ceac5d9488ed2465202"
+    },
+    "import_stderr": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2A-Scoring-Repair-20260802T224444+0330/import-probe.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "import_stdout": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2A-Scoring-Repair-20260802T224444+0330/import-probe.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "relevant_files": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2A-Scoring-Repair-20260802T224444+0330/relevant-lf-files.txt",
+      "sha256": "fd632ef681b6ad4ac72fb51f5a98a5a9284a9a0dce91150f9b4a4e08728b64a0"
+    },
+    "selector_lexemes": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2A-Scoring-Repair-20260802T224444+0330/target-selector-lexemes.tsv",
+      "sha256": "d09cfd6d430c24cc402950c90fbe9042fe6700e7dfc074fbdd252d5a545df7f9"
+    },
+    "target_contexts": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2A-Scoring-Repair-20260802T224444+0330/target-interface-contexts.txt",
+      "sha256": "88cd8226bee1bddde4b55cc74cab567bfbcc016621c94c8e1233806802318ffa"
+    },
+    "transition_candidates": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4D2A-Scoring-Repair-20260802T224444+0330/target-transition-candidates.tsv",
+      "sha256": "e39192ddbedfe35abd8a2c26b3857586a0ee5ef656725cd0cafe4da1b937acb2"
+    }
+  },
+  "findings": {
+    "existing_lf_transition_must_remain_unchanged": true,
+    "lf_global_payload_surface_present": true,
+    "source_semantics_regression_passed": true,
+    "target_actor_name_evidence_present": true,
+    "target_actor_order_semantics_complete": false,
+    "target_order_wrapper_required": true,
+    "target_pending_action_evidence_present": true,
+    "target_transition_candidates_present": true
+  },
+  "high_confidence_candidates": [
+    {
+      "first_line": "inductive Step",
+      "kind": "inductive",
+      "line_end": 201,
+      "line_start": 151,
+      "path": "Relico/LF/GlobalMultiStorePayloadDispatch.lean",
+      "qualified_name": "Relico.LF.GlobalMultiStorePayloadDispatch.Step",
+      "rank": 1,
+      "score": 34,
+      "score_reasons": "inductive-relation,transition-name,global-state,pending-action,payload-reaction,actor-name,proposition,selected-value,lookup-premise"
+    },
+    {
+      "first_line": "inductive Step",
+      "kind": "inductive",
+      "line_end": 118,
+      "line_start": 70,
+      "path": "Relico/LF/GlobalMultiStorePayloadOneStep.lean",
+      "qualified_name": "Relico.LF.GlobalMultiStorePayloadOneStep.Step",
+      "rank": 2,
+      "score": 33,
+      "score_reasons": "inductive-relation,transition-name,global-state,pending-action,payload-reaction,actor-name,proposition,selected-value"
+    },
+    {
+      "first_line": "inductive Steps",
+      "kind": "inductive",
+      "line_end": 49,
+      "line_start": 13,
+      "path": "Relico/LF/GlobalMultiStorePayloadFiniteExecution.lean",
+      "qualified_name": "Relico.LF.GlobalMultiStorePayloadFiniteExecution.Steps",
+      "rank": 3,
+      "score": 19,
+      "score_reasons": "inductive-relation,transition-name,global-state,proposition"
+    },
+    {
+      "first_line": "inductive ExternalSendFrameStep :",
+      "kind": "inductive",
+      "line_end": 39,
+      "line_start": 13,
+      "path": "Relico/LF/GlobalMultiStorePayloadOneStep.lean",
+      "qualified_name": "Relico.LF.GlobalMultiStorePayloadOneStep.ExternalSendFrameStep",
+      "rank": 4,
+      "score": 19,
+      "score_reasons": "inductive-relation,transition-name,global-state,proposition"
+    }
+  ],
+  "implementation_contract": {
+    "contract_rows": [
+      {
+        "contract_id": "T1",
+        "required_value": "Relico/LF/GlobalMultiStorePayloadActorOrder.lean",
+        "status": "planned",
+        "subject": "new target module"
+      },
+      {
+        "contract_id": "T2",
+        "required_value": "existing LF global payload transitions remain unchanged",
+        "status": "required",
+        "subject": "existing transition compatibility"
+      },
+      {
+        "contract_id": "T3",
+        "required_value": "behaviorally equivalent ordering; literal priority field optional",
+        "status": "required",
+        "subject": "ordering representation"
+      },
+      {
+        "contract_id": "T4",
+        "required_value": "logical time precedes actor ordering",
+        "status": "required",
+        "subject": "logical time"
+      },
+      {
+        "contract_id": "T5",
+        "required_value": "minimal-order ties retain eligibility",
+        "status": "required",
+        "subject": "ties"
+      },
+      {
+        "contract_id": "T6",
+        "required_value": "no additional target filtering",
+        "status": "required",
+        "subject": "absent metadata"
+      },
+      {
+        "contract_id": "T7",
+        "required_value": "uncovered actors are not silently eliminated",
+        "status": "required",
+        "subject": "incomplete metadata"
+      },
+      {
+        "contract_id": "T8",
+        "required_value": "target eligibility plus existing LF transition",
+        "status": "required",
+        "subject": "wrapper architecture"
+      },
+      {
+        "contract_id": "T9",
+        "required_value": "base and reversed source priorities compile to distinguishable target ordering",
+        "status": "required",
+        "subject": "translation discrimination"
+      },
+      {
+        "contract_id": "T10",
+        "required_value": "Boolean and propositional target eligibility APIs",
+        "status": "required",
+        "subject": "proof readiness"
+      }
+    ],
+    "equivalent_target_ordering_required": true,
+    "existing_lf_modules_must_remain_unchanged": true,
+    "literal_actor_priority_field_required": false,
+    "namespace": "Relico.LF.GlobalMultiStorePayloadActorOrder",
+    "new_module": "Relico/LF/GlobalMultiStorePayloadActorOrder.lean",
+    "required_definitions": [
+      "ActorOrderAssignment",
+      "ActorOrderRequest",
+      "ReadyTargetActor",
+      "lookupActorOrder",
+      "targetActorOrderEligibleBool",
+      "TargetActorOrderEligible",
+      "eligibleTargetActorNames"
+    ],
+    "required_relation": "ActorOrderDispatchStep"
+  },
+  "inputs": {
+    "canonical_readme": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/README.md",
+      "sha256": "f27a8774f34cda8ca8effd31a9e400024ed82b86d1eab3f950654303b630fc5d"
+    },
+    "phase4d1b_report": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase4d1/PHASE4D1B_SOURCE_PRIORITY_SEMANTICS.json",
+      "sha256": "08af1a72f073bac05c68dbe61c57c4c79622bd7d97c3185ba55a4be91285410f"
+    },
+    "source_module": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/Relico/DTR/GlobalMultiStorePayloadActorPriority.lean",
+      "sha256": "11ef3591ae5bbeca5bf1f89933e6bc7bc7b28d1b5d8728cf5b0d35aab5456c26"
+    },
+    "source_test_module": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/Relico/Tests/GlobalMultiStorePayloadActorPriority.lean",
+      "sha256": "e783eaf24c47596a4282ca351656593a65772167d89e86813617d70032257def"
+    }
+  },
+  "phase": "phase4d2a-target-global-actor-order-interface-audit",
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "relevant_lf_files": [
+    "Relico/LF/GlobalMultiStorePayload.lean",
+    "Relico/LF/GlobalMultiStorePayloadDispatch.lean",
+    "Relico/LF/GlobalMultiStorePayloadExternalSend.lean",
+    "Relico/LF/GlobalMultiStorePayloadExternalSendFrame.lean",
+    "Relico/LF/GlobalMultiStorePayloadExternalSendStatement.lean",
+    "Relico/LF/GlobalMultiStorePayloadFiniteExecution.lean",
+    "Relico/LF/GlobalMultiStorePayloadInitialization.lean",
+    "Relico/LF/GlobalMultiStorePayloadOneStep.lean"
+  ],
+  "repair": {
+    "correction": "score is accumulated directly in the declaration-analysis loop",
+    "previous_failure": "Python nonlocal score declaration had no enclosing function binding"
+  },
+  "result": {
+    "classification": "UNIQUE_HIGH_CONFIDENCE_TARGET_TRANSITION_INTERFACE_DISCOVERED",
+    "current_production_integration_complete": false,
+    "final_actor_priority_necessity_conclusion": "CONCLUSION_2_REACHED",
+    "next_phase": "phase4d2b-target-global-actor-order-semantics-implementation",
+    "passed": true,
+    "production_lf_source_mutated": false,
+    "source_actor_priority_semantics_complete": true,
+    "target_actor_order_semantics_complete": false
+  },
+  "schema_version": 1,
+  "selector_lexemes": [
+    {
+      "candidate_occurrences": 15,
+      "correctness_reference_occurrences": 96,
+      "token": "actorName"
+    },
+    {
+      "candidate_occurrences": 6,
+      "correctness_reference_occurrences": 24,
+      "token": "ActorName"
+    },
+    {
+      "candidate_occurrences": 0,
+      "correctness_reference_occurrences": 0,
+      "token": "selectedActor"
+    },
+    {
+      "candidate_occurrences": 0,
+      "correctness_reference_occurrences": 0,
+      "token": "actorIndex"
+    },
+    {
+      "candidate_occurrences": 0,
+      "correctness_reference_occurrences": 0,
+      "token": "actorIdx"
+    },
+    {
+      "candidate_occurrences": 2,
+      "correctness_reference_occurrences": 4,
+      "token": "reactorInstance"
+    },
+    {
+      "candidate_occurrences": 0,
+      "correctness_reference_occurrences": 0,
+      "token": "ReactorInstance"
+    },
+    {
+      "candidate_occurrences": 0,
+      "correctness_reference_occurrences": 0,
+      "token": "instanceName"
+    },
+    {
+      "candidate_occurrences": 0,
+      "correctness_reference_occurrences": 0,
+      "token": "selectedInstance"
+    },
+    {
+      "candidate_occurrences": 3,
+      "correctness_reference_occurrences": 3,
+      "token": "PendingAction"
+    },
+    {
+      "candidate_occurrences": 5,
+      "correctness_reference_occurrences": 0,
+      "token": "selectedAction"
+    },
+    {
+      "candidate_occurrences": 5,
+      "correctness_reference_occurrences": 0,
+      "token": "selectedReaction"
+    },
+    {
+      "candidate_occurrences": 0,
+      "correctness_reference_occurrences": 0,
+      "token": "messageReaction"
+    },
+    {
+      "candidate_occurrences": 3,
+      "correctness_reference_occurrences": 8,
+      "token": "MultiStorePayloadReaction"
+    }
+  ],
+  "top_candidate": {
+    "first_line": "inductive Step",
+    "kind": "inductive",
+    "line_end": 201,
+    "line_start": 151,
+    "path": "Relico/LF/GlobalMultiStorePayloadDispatch.lean",
+    "qualified_name": "Relico.LF.GlobalMultiStorePayloadDispatch.Step",
+    "rank": 1,
+    "score": 34,
+    "score_reasons": "inductive-relation,transition-name,global-state,pending-action,payload-reaction,actor-name,proposition,selected-value,lookup-premise"
+  }
+}

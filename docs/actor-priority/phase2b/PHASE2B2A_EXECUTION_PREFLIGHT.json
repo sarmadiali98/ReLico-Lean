@@ -1,0 +1,3202 @@
+{
+  "baseline_main_context": [
+    {
+      "line": 20,
+      "text": "main {"
+    },
+    {
+      "line": 21,
+      "text": "Controller controller():();"
+    },
+    {
+      "line": 22,
+      "text": "}"
+    }
+  ],
+  "candidate_priority_forms": [
+    "@priority(\"2\")",
+    "@priority(1)",
+    "@priority(2)",
+    "@priority(3)",
+    "@priority(4)",
+    "@priority(5)",
+    "@priority(6)",
+    "@priority(7)",
+    "@priority(8)"
+  ],
+  "cli_usage_probes": [
+    {
+      "command": [
+        "/bin/bash",
+        "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/frontend/java-bridge/run-multistore-payload-from-zip.sh"
+      ],
+      "exit_code": 2,
+      "probe_id": "wrapper-no-args:run-multistore-payload-from-zip.sh",
+      "stderr": "usage: run-multistore-from-zip.sh <artifact.zip> <input.rebeca> <output.json>\n",
+      "stdout": "",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "/bin/bash",
+        "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/frontend/java-bridge/run-multistore-payload-from-zip.sh",
+        "--help"
+      ],
+      "exit_code": 2,
+      "probe_id": "wrapper-help:run-multistore-payload-from-zip.sh",
+      "stderr": "usage: run-multistore-from-zip.sh <artifact.zip> <input.rebeca> <output.json>\n",
+      "stdout": "",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "/bin/bash",
+        "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/frontend/java-bridge/run-multistore-from-zip.sh"
+      ],
+      "exit_code": 2,
+      "probe_id": "wrapper-no-args:run-multistore-from-zip.sh",
+      "stderr": "usage: run-multistore-from-zip.sh <artifact.zip> <input.rebeca> <output.json>\n",
+      "stdout": "",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "/bin/bash",
+        "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/frontend/java-bridge/run-multistore-from-zip.sh",
+        "--help"
+      ],
+      "exit_code": 2,
+      "probe_id": "wrapper-help:run-multistore-from-zip.sh",
+      "stderr": "usage: run-multistore-from-zip.sh <artifact.zip> <input.rebeca> <output.json>\n",
+      "stdout": "",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "/usr/bin/java",
+        "-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar"
+      ],
+      "exit_code": 0,
+      "probe_id": "rmc-no-args",
+      "stderr": "SLF4J: Failed to load class \"org.slf4j.impl.StaticLoggerBinder\".\nSLF4J: Defaulting to no-operation (NOP) logger implementation\nSLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.\n",
+      "stdout": "Unexpected exception: Missing required option: s\nusage: rmc [options]\n    --compactdtg                      Using this feature, compact DTG is\n                                      generated on-the-fly from TTS.\n    --debug                           Enables debug mode in result C++\n                                      files.\n    --debug2                          Enables debug level 2 mode in result\n                                      C++ files.\n -e,--extension <value>               Rebeca model extension\n                                      (CORE_REBECA/TIMED_REBECA/PROBABILIS\n                                      TIC_REBECA/PROBABILISTIC_TIME_REBECA\n                                      ). Default is 'CORE_REBECA'.\n -h,--help                            Print this message.\n    --nosafemode                      Disable checking for array index out\n                                      of bound and access to NULL objects\n                                      during the model checking.\n -o,--output <file>                   Generated C++ source files location.\n                                      Default location is './rmc-output'\n                                      folder.\n -p,--property <file>                 Rebeca model property file.\n    --progressreport                  Enables progress report during\n                                      analysis.\n -s,--source <file>                   Rebeca model source file.\n    --tracegenerator                  Instead of model checking, some\n                                      traces of the model is generated.\n    --tts                             Using TTS semantics of Rebeca\n                                      instead of FTTS.\n -v,--version <value>                 Rebeca compiler version (2.0, 2.1,\n                                      2.3). Default version is 2.1\n -x,--exporttransitionsystem <file>   Exports transition system in an XML\n                                      file.\n",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "/usr/bin/java",
+        "-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--help"
+      ],
+      "exit_code": 0,
+      "probe_id": "rmc-help",
+      "stderr": "SLF4J: Failed to load class \"org.slf4j.impl.StaticLoggerBinder\".\nSLF4J: Defaulting to no-operation (NOP) logger implementation\nSLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.\n",
+      "stdout": "Unexpected exception: Missing required option: s\nusage: rmc [options]\n    --compactdtg                      Using this feature, compact DTG is\n                                      generated on-the-fly from TTS.\n    --debug                           Enables debug mode in result C++\n                                      files.\n    --debug2                          Enables debug level 2 mode in result\n                                      C++ files.\n -e,--extension <value>               Rebeca model extension\n                                      (CORE_REBECA/TIMED_REBECA/PROBABILIS\n                                      TIC_REBECA/PROBABILISTIC_TIME_REBECA\n                                      ). Default is 'CORE_REBECA'.\n -h,--help                            Print this message.\n    --nosafemode                      Disable checking for array index out\n                                      of bound and access to NULL objects\n                                      during the model checking.\n -o,--output <file>                   Generated C++ source files location.\n                                      Default location is './rmc-output'\n                                      folder.\n -p,--property <file>                 Rebeca model property file.\n    --progressreport                  Enables progress report during\n                                      analysis.\n -s,--source <file>                   Rebeca model source file.\n    --tracegenerator                  Instead of model checking, some\n                                      traces of the model is generated.\n    --tts                             Using TTS semantics of Rebeca\n                                      instead of FTTS.\n -v,--version <value>                 Rebeca compiler version (2.0, 2.1,\n                                      2.3). Default version is 2.1\n -x,--exporttransitionsystem <file>   Exports transition system in an XML\n                                      file.\n",
+      "timed_out": false
+    }
+  ],
+  "command_evidence": {
+    "parser_json_stage": [
+      {
+        "json_path": "$.stages.parser-json.command",
+        "value": [
+          "/opt/homebrew/bin/python3",
+          "{repo}/tools/relico_bench_stage.py",
+          "parser-json",
+          "--repo",
+          "{repo}",
+          "--source",
+          "{source}",
+          "--actual",
+          "{actual}",
+          "--artifact-zip",
+          "/Users/ali/Desktop/LFStructuringNonDeterminism/ReLico-fmcad-2026-artifact-v1.zip",
+          "--maven",
+          "/opt/homebrew/Cellar/maven/3.9.16/bin/mvn",
+          "--output",
+          "{actual}/parser-json/model.json"
+        ]
+      }
+    ],
+    "rmc_stage": [
+      {
+        "json_path": "$.stages.rmc.command",
+        "value": [
+          "/opt/homebrew/bin/python3",
+          "{repo}/tools/relico_bench_stage.py",
+          "rmc",
+          "--source",
+          "{source}",
+          "--actual",
+          "{actual}",
+          "--rmc-jar",
+          "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+          "--java",
+          "/usr/bin/java",
+          "--cxx",
+          "/usr/bin/clang++",
+          "--output",
+          "{actual}/rmc/verdict.json"
+        ]
+      }
+    ],
+    "wrappers": [
+      {
+        "path": "frontend/java-bridge/run-multistore-payload-from-zip.sh",
+        "selected_lines": [
+          {
+            "line": 5,
+            "text": "echo \"usage: run-multistore-from-zip.sh <artifact.zip> <input.rebeca> <output.json>\" >&2"
+          },
+          {
+            "line": 9,
+            "text": "ARTIFACT_ZIP=\"$1\""
+          },
+          {
+            "line": 11,
+            "text": "OUTPUT_FILE=\"$3\""
+          },
+          {
+            "line": 17,
+            "text": "EXPORTER_SOURCE=\"$(cd \"$(dirname \"$0\")\" && pwd)/RebecaMultiStorePayloadJsonExporter.java\""
+          },
+          {
+            "line": 19,
+            "text": "test -f \"$ARTIFACT_ZIP\""
+          },
+          {
+            "line": 21,
+            "text": "test -f \"$EXPORTER_SOURCE\""
+          },
+          {
+            "line": 54,
+            "text": "mktemp -d /tmp/relico-multistore-parser-bridge.XXXXXX"
+          },
+          {
+            "line": 62,
+            "text": "python3 - \"$ARTIFACT_ZIP\" \"$UNPACKED_DIRECTORY\" <<'PY'"
+          },
+          {
+            "line": 65,
+            "text": "import zipfile"
+          },
+          {
+            "line": 70,
+            "text": "with zipfile.ZipFile(archive) as source:"
+          },
+          {
+            "line": 92,
+            "text": "echo \"No pom.xml was found in the artifact ZIP.\" >&2"
+          },
+          {
+            "line": 100,
+            "text": "EXPORTER_DIRECTORY=\"$PROJECT_DIRECTORY/src/main/java/org/rebecalang/compiler/frontendbridge\""
+          },
+          {
+            "line": 102,
+            "text": "mkdir -p \"$EXPORTER_DIRECTORY\""
+          },
+          {
+            "line": 105,
+            "text": "\"$EXPORTER_SOURCE\" \\"
+          },
+          {
+            "line": 106,
+            "text": "\"$EXPORTER_DIRECTORY/RebecaMultiStorePayloadJsonExporter.java\""
+          },
+          {
+            "line": 109,
+            "text": "OUTPUT_COPY=\"$WORK_DIRECTORY/output.json\""
+          },
+          {
+            "line": 123,
+            "text": "org.codehaus.mojo:exec-maven-plugin:3.1.0:java \\"
+          },
+          {
+            "line": 124,
+            "text": "-Dexec.mainClass=org.rebecalang.compiler.frontendbridge.RebecaMultiStorePayloadJsonExporter \\"
+          },
+          {
+            "line": 125,
+            "text": "-Dexec.args=\"$INPUT_COPY $OUTPUT_COPY\""
+          },
+          {
+            "line": 128,
+            "text": "test -f \"$OUTPUT_COPY\""
+          },
+          {
+            "line": 131,
+            "text": "dirname \"$OUTPUT_FILE\""
+          },
+          {
+            "line": 134,
+            "text": "cp \"$OUTPUT_COPY\" \"$OUTPUT_FILE\""
+          },
+          {
+            "line": 136,
+            "text": "echo \"Multi-server parser bridge output: $OUTPUT_FILE\""
+          }
+        ],
+        "sha256": "7e0dae2270cfd08f1f8b9f993ae485dd424e9e82a975b89d9533b3f4ae44e2c0"
+      },
+      {
+        "path": "frontend/java-bridge/run-multistore-from-zip.sh",
+        "selected_lines": [
+          {
+            "line": 5,
+            "text": "echo \"usage: run-multistore-from-zip.sh <artifact.zip> <input.rebeca> <output.json>\" >&2"
+          },
+          {
+            "line": 9,
+            "text": "ARTIFACT_ZIP=\"$1\""
+          },
+          {
+            "line": 11,
+            "text": "OUTPUT_FILE=\"$3\""
+          },
+          {
+            "line": 17,
+            "text": "EXPORTER_SOURCE=\"$REPOSITORY_ROOT/frontend/java-bridge/RebecaMultiStoreJsonExporter.java\""
+          },
+          {
+            "line": 19,
+            "text": "test -f \"$ARTIFACT_ZIP\""
+          },
+          {
+            "line": 21,
+            "text": "test -f \"$EXPORTER_SOURCE\""
+          },
+          {
+            "line": 54,
+            "text": "mktemp -d /tmp/relico-multistore-parser-bridge.XXXXXX"
+          },
+          {
+            "line": 62,
+            "text": "python3 - \"$ARTIFACT_ZIP\" \"$UNPACKED_DIRECTORY\" <<'PY'"
+          },
+          {
+            "line": 65,
+            "text": "import zipfile"
+          },
+          {
+            "line": 70,
+            "text": "with zipfile.ZipFile(archive) as source:"
+          },
+          {
+            "line": 92,
+            "text": "echo \"No pom.xml was found in the artifact ZIP.\" >&2"
+          },
+          {
+            "line": 100,
+            "text": "EXPORTER_DIRECTORY=\"$PROJECT_DIRECTORY/src/main/java/org/rebecalang/compiler/frontendbridge\""
+          },
+          {
+            "line": 102,
+            "text": "mkdir -p \"$EXPORTER_DIRECTORY\""
+          },
+          {
+            "line": 105,
+            "text": "\"$EXPORTER_SOURCE\" \\"
+          },
+          {
+            "line": 106,
+            "text": "\"$EXPORTER_DIRECTORY/RebecaMultiStoreJsonExporter.java\""
+          },
+          {
+            "line": 109,
+            "text": "OUTPUT_COPY=\"$WORK_DIRECTORY/output.json\""
+          },
+          {
+            "line": 123,
+            "text": "org.codehaus.mojo:exec-maven-plugin:3.1.0:java \\"
+          },
+          {
+            "line": 124,
+            "text": "-Dexec.mainClass=org.rebecalang.compiler.frontendbridge.RebecaMultiStoreJsonExporter \\"
+          },
+          {
+            "line": 125,
+            "text": "-Dexec.args=\"$INPUT_COPY $OUTPUT_COPY\""
+          },
+          {
+            "line": 128,
+            "text": "test -f \"$OUTPUT_COPY\""
+          },
+          {
+            "line": 131,
+            "text": "dirname \"$OUTPUT_FILE\""
+          },
+          {
+            "line": 134,
+            "text": "cp \"$OUTPUT_COPY\" \"$OUTPUT_FILE\""
+          },
+          {
+            "line": 136,
+            "text": "echo \"Multi-server parser bridge output: $OUTPUT_FILE\""
+          }
+        ],
+        "sha256": "1e2f8c497c3aef1e726a8e33ebd50e4cfaa339071142bcd8b18440e1a78a788a"
+      }
+    ]
+  },
+  "inputs": {
+    "baseline_source": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/tests/benchmarks/core--initialization--positive/source/model.rebeca",
+      "sha256": "ae0ddbb74361cd2ce49012837eb22a5e201ff2124988d984b240b8eb2e7a40dc"
+    },
+    "benchmark_manifest": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/tests/benchmarks/core--initialization--positive/manifest.json",
+      "sha256": "70c94d51dc65102e2e41f39e2c731d31699ac4823ce0ba43367a3c28f2ae153b"
+    },
+    "parser_artifact": {
+      "path": "/Users/ali/Desktop/LFStructuringNonDeterminism/ReLico-fmcad-2026-artifact-v1.zip",
+      "sha256": "b58052952cb753d554696dd1c23dc4c43f43648228221a8ff2f494311dc41586"
+    },
+    "rmc_jar": {
+      "path": "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+      "sha256": "a39112046d99e0895cf47f890242ace21db896e609f7eef86751a0d416d477f5"
+    }
+  },
+  "manifest_stages": {
+    "ordered_names": [
+      "source",
+      "rmc",
+      "parser-json",
+      "decoded-dtr-ast",
+      "formal-witness",
+      "translated-lf-ast",
+      "lf-source",
+      "lfc",
+      "runtime"
+    ],
+    "parser_json": {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "parser-json",
+        "--repo",
+        "{repo}",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--artifact-zip",
+        "/Users/ali/Desktop/LFStructuringNonDeterminism/ReLico-fmcad-2026-artifact-v1.zip",
+        "--maven",
+        "/opt/homebrew/Cellar/maven/3.9.16/bin/mvn",
+        "--output",
+        "{actual}/parser-json/model.json"
+      ],
+      "name": "parser-json",
+      "timeout_seconds": 600
+    },
+    "rmc": {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc/verdict.json"
+      ],
+      "name": "rmc",
+      "timeout_seconds": 600
+    }
+  },
+  "next_phase": "phase2b2b-execute-dynamic-parser-probes",
+  "official_priority_examples": [
+    {
+      "context": "6: \tstatevars {\n7: \t}\n8: \tA() {\n9: \t}\n10: \t\n11: \t@priority(3)\n12: \tmsgsrv m2() {\n13: \t}\n14: }\n15: \n16: reactiveclass B (3) {",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 11,
+      "path": "src/test/resources/org/rebecalang/compiler/modelcompiler/TimedRebecaPriority.rebeca",
+      "source": "official-compiler",
+      "source_line": "@priority(3)"
+    },
+    {
+      "context": "23: \tmsgsrv m(A param1, int param2) {\n24: \t}\n25: }\n26: \n27: main {\n28: \t@priority(1)\n29: \tA a():();\n30: \t@priority(\"2\")\n31: \tB b():();\n32: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 28,
+      "path": "src/test/resources/org/rebecalang/compiler/modelcompiler/TimedRebecaPriority.rebeca",
+      "source": "official-compiler",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "25: }\n26: \n27: main {\n28: \t@priority(1)\n29: \tA a():();\n30: \t@priority(\"2\")\n31: \tB b():();\n32: }",
+      "forms": [
+        "@priority(\"2\")"
+      ],
+      "line": 30,
+      "path": "src/test/resources/org/rebecalang/compiler/modelcompiler/TimedRebecaPriority.rebeca",
+      "source": "official-compiler",
+      "source_line": "@priority(\"2\")"
+    },
+    {
+      "context": "25:         c = c || false;\n26: \n27:         self.send();\n28:     }\n29: \n30:     @priority(1)\n31:     msgsrv send() {\n32:       //  no-op\n33:     }\n34: }\n35: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 30,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/Arithmetic_test.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "5: \n6:     Sender() {\n7:         self.sendMessage(1);\n8:     }\n9: \n10:     @priority(1)\n11:     msgsrv sendMessage(int data){\n12:         receiver0.receiveMessage(data);\n13:     }\n14: }\n15: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 10,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/Sender_and_Receiver.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "12:         receiver0.receiveMessage(data);\n13:     }\n14: }\n15: \n16: reactiveclass Receiver(100) {\n17:     @priority(1)\n18:     msgsrv receiveMessage(int data){\n19:         // Process data\n20:     }\n21: }\n22: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 17,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/Sender_and_Receiver.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "7:     Node(){\n8:         self.sendMsg(var);\n9:         self.sendMsg2(1);\n10:     }\n11: \n12:     @priority(1)\n13:     msgsrv sendMsg(int msg){\n14:         sw.rcvMsg(msg, true);\n15:         sw.rcvMsg2(msg, true);\n16:     }\n17: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 12,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/env_example.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "13:     msgsrv sendMsg(int msg){\n14:         sw.rcvMsg(msg, true);\n15:         sw.rcvMsg2(msg, true);\n16:     }\n17: \n18:     @priority(2)\n19:     msgsrv sendMsg2(int msg){\n20:         sw.rcvMsg(msg, true);\n21:         sw.rcvMsg2(msg, true);\n22:     }\n23: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 18,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/env_example.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "29:     statevars {\n30:         boolean ke;\n31:         int kkkkk;\n32:     }\n33: \n34:     @priority(1)\n35:     msgsrv rcvMsg(int msg, boolean k){\n36:         ke = k;\n37:     }\n38: \n39:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 34,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/env_example.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "34:     @priority(1)\n35:     msgsrv rcvMsg(int msg, boolean k){\n36:         ke = k;\n37:     }\n38: \n39:     @priority(2)\n40:     msgsrv rcvMsg2(int msg, boolean k){\n41:         while(k){\n42:             kkkkk = msg;\n43:             k = !k;\n44:         }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 39,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/env_example.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "45:         r0.blah(msg);\n46: \n47:         self.internalrcvMsg(msg);\n48:     }\n49: \n50:     @priority(3)\n51:     msgsrv internalrcvMsg(int msg){}\n52: }\n53: \n54: reactiveclass Router(100){\n55:     @priority(1)",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 50,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/env_example.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3)"
+    },
+    {
+      "context": "50:     @priority(3)\n51:     msgsrv internalrcvMsg(int msg){}\n52: }\n53: \n54: reactiveclass Router(100){\n55:     @priority(1)\n56:     msgsrv blah(int msg){\n57:     }\n58: }\n59: \n60: main {",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 55,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/env_example.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "5:     Node() {\n6:         counter = 0;\n7:         self.processData(10); // Internal call\n8:     }\n9: \n10:     @priority(1)\n11:     msgsrv processData(int value) {\n12:         counter += value;\n13:     }\n14: }\n15: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 10,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/hybrid.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "5:     Node(){\n6:         self.sendMsg(1);\n7:         self.sendMsg2(1) after(1);\n8:     }\n9: \n10:     @priority(1)\n11:     msgsrv sendMsg(int msg){\n12:         sw.rcvMsg(msg, true);\n13:         sw.rcvMsg2(msg, true);\n14:     }\n15: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 10,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/if_else_example.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "11:     msgsrv sendMsg(int msg){\n12:         sw.rcvMsg(msg, true);\n13:         sw.rcvMsg2(msg, true);\n14:     }\n15: \n16:     @priority(2)\n17:     msgsrv sendMsg2(int msg){\n18:         sw.rcvMsg(msg, true);\n19:         sw.rcvMsg2(msg, true);\n20:     }\n21: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 16,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/if_else_example.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "27:     statevars {\n28:         boolean ke;\n29:         int kkkkk;\n30:     }\n31: \n32:     @priority(1)\n33:     msgsrv rcvMsg(int msg, boolean k){\n34:         ke = k;\n35:     }\n36: \n37:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 32,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/if_else_example.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "32:     @priority(1)\n33:     msgsrv rcvMsg(int msg, boolean k){\n34:         ke = k;\n35:     }\n36: \n37:     @priority(2)\n38:     msgsrv rcvMsg2(int msg, boolean k){\n39:         if(k){\n40:             kkkkk = msg;\n41:         } else {\n42:             r0.blah(msg);",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 37,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/if_else_example.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "42:             r0.blah(msg);\n43:         }\n44:         self.internalrcvMsg(msg);\n45:     }\n46: \n47:     @priority(3)\n48:     msgsrv internalrcvMsg(int msg){}\n49: }\n50: \n51: reactiveclass Router(100){\n52:     @priority(1)",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 47,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/if_else_example.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3)"
+    },
+    {
+      "context": "47:     @priority(3)\n48:     msgsrv internalrcvMsg(int msg){}\n49: }\n50: \n51: reactiveclass Router(100){\n52:     @priority(1)\n53:     msgsrv blah(int msg){\n54:     }\n55: }\n56: \n57: main {",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 52,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/if_else_example.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "2:     knownrebecs{\n3:         Switch switch0;\n4:         Switch switch1;\n5:     }\n6: \n7:     @priority(1)\n8:     msgsrv runme(int in0){\n9:         //do task\n10:     }\n11: }\n12: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 7,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/node_and_switch_with_after.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "17: \n18:     Switch(){\n19:         self.runme2(0);\n20:     }\n21: \n22:     @priority(1)\n23:     msgsrv runme2(int in1){\n24:         node0.runme(in1) after(1);\n25:     }\n26: }\n27: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 22,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/node_and_switch_with_after.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "25:     }\n26: }\n27: \n28: main {\n29:     Node node0(sw0, sw1):();\n30:     @priority(1) Switch sw0(node0):();\n31:     @priority(2) Switch sw1(node0):();\n32: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 30,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/node_and_switch_with_after.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) Switch sw0(node0):();"
+    },
+    {
+      "context": "26: }\n27: \n28: main {\n29:     Node node0(sw0, sw1):();\n30:     @priority(1) Switch sw0(node0):();\n31:     @priority(2) Switch sw1(node0):();\n32: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 31,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/node_and_switch_with_after.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2) Switch sw1(node0):();"
+    },
+    {
+      "context": "1: reactiveclass Node(100) {\n2:     Node(){\n3:         self.runme() after (1);\n4:     }\n5: \n6:     @priority(1)\n7:     msgsrv runme(){\n8:         //do task\n9:     }\n10: }\n11: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 6,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/node_and_switch_with_internal_after.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "5:     Node(){\n6:         self.sendMsg(1);\n7:         self.sendMsg2(1) after(1);\n8:     }\n9: \n10:     @priority(1)\n11:     msgsrv sendMsg(int msg){\n12:         sw.rcvMsg(msg, true);\n13:         sw.rcvMsg2(msg, true);\n14:     }\n15: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 10,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/node_sw.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "11:     msgsrv sendMsg(int msg){\n12:         sw.rcvMsg(msg, true);\n13:         sw.rcvMsg2(msg, true);\n14:     }\n15: \n16:     @priority(2)\n17:     msgsrv sendMsg2(int msg){\n18:         sw.rcvMsg(msg, false);\n19:         sw.rcvMsg2(msg, false);\n20:     }\n21: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 16,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/node_sw.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "27:     statevars {\n28:         boolean ke;\n29:         int kkkkk;\n30:     }\n31: \n32:     @priority(1)\n33:     msgsrv rcvMsg(int msg, boolean k){\n34:         ke = k;\n35:     }\n36: \n37:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 32,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/node_sw.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "32:     @priority(1)\n33:     msgsrv rcvMsg(int msg, boolean k){\n34:         ke = k;\n35:     }\n36: \n37:     @priority(2)\n38:     msgsrv rcvMsg2(int msg, boolean k){\n39:         kkkkk = msg;\n40:         r0.blah(msg);\n41:         self.internalrcvMsg(msg);\n42:     }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 37,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/node_sw.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "39:         kkkkk = msg;\n40:         r0.blah(msg);\n41:         self.internalrcvMsg(msg);\n42:     }\n43: \n44:     @priority(3)\n45:     msgsrv internalrcvMsg(int msg){}\n46: }\n47: \n48: reactiveclass Router(100){\n49:     @priority(1)",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 44,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/node_sw.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3)"
+    },
+    {
+      "context": "44:     @priority(3)\n45:     msgsrv internalrcvMsg(int msg){}\n46: }\n47: \n48: reactiveclass Router(100){\n49:     @priority(1)\n50:     msgsrv blah(int msg){\n51:     }\n52: }\n53: \n54: main {",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 49,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/node_sw.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "15: \tPhilosopher()\n16: \t{\n17: \t\tself.initialize();\n18: \t}\n19: \n20: \t@priority(1)\n21: \tmsgsrv initialize()\n22: \t{\n23: \t\tfL = false;\n24: \t\tfR = false;\n25: \t\teating = false;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 20,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/phils.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "24: \t\tfR = false;\n25: \t\teating = false;\n26: \t\tself.arrive();\n27: \t}\n28: \n29: \t@priority(2)\n30: \tmsgsrv arrive()\n31: \t{\n32: \t\tforkL.request();\n33: \t}\n34: ",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 29,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/phils.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "30: \tmsgsrv arrive()\n31: \t{\n32: \t\tforkL.request();\n33: \t}\n34: \n35: \t@priority(3)\n36: \tmsgsrv permit()\n37: \t{\n38: \t\tif (sender == forkL) {\n39: \t\t\tif (!fL) {\n40: \t\t\t\tfL = true;",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 35,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/phils.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3)"
+    },
+    {
+      "context": "48: \t\t\t}\n49: \t\t\t/* else discard the message */\n50: \t\t}\n51: \t}\n52: \n53: \t@priority(4)\n54: \tmsgsrv eat()\n55: \t{\n56: \t\teating = true;\n57: \t\tself.leave();\n58: \t}",
+      "forms": [
+        "@priority(4)"
+      ],
+      "line": 53,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/phils.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(4)"
+    },
+    {
+      "context": "55: \t{\n56: \t\teating = true;\n57: \t\tself.leave();\n58: \t}\n59: \n60: \t@priority(5)\n61: \tmsgsrv leave()\n62: \t{\n63: \t\tfL = false;\n64: \t\tfR = false;\n65: \t\teating = false;",
+      "forms": [
+        "@priority(5)"
+      ],
+      "line": 60,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/phils.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(5)"
+    },
+    {
+      "context": "87: \tFork()\n88: \t{\n89: \t\tself.initialize();\n90: \t}\n91: \n92: \t@priority(1)\n93: \tmsgsrv initialize()\n94: \t{\n95: \t\tlAssign = false;\n96: \t\trAssign = false;\n97: \t\tleftReq = false;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 92,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/phils.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "96: \t\trAssign = false;\n97: \t\tleftReq = false;\n98: \t\trightReq = false;\n99: \t}\n100: \n101: \t@priority(2)\n102: \tmsgsrv request()\n103: \t{\n104: \t\tif (sender == philL) {\n105: \t\t\tif (!leftReq) {\n106: \t\t\t\tleftReq = true;",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 101,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/phils.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "121: \t\t\t}\n122: \t\t\t/* else discard message */\n123: \t\t}\n124: \t}\n125: \n126: \t@priority(3)\n127: \tmsgsrv release()\n128: \t{\n129: \t\tif (sender == philL && lAssign){\n130: \t\t\tleftReq = false;\n131: \t\t\tlAssign = false;",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 126,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/phils.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3)"
+    },
+    {
+      "context": "145: \t}\n146: }\n147: \n148: main\n149: {\n150:        @priority(1) Fork fork0(phil0, phil1):();\n151:        @priority(2) Fork fork1(phil1, phil2):();\n152:        @priority(3) Fork fork2(phil2, phil0):();\n153: \n154:        @priority(4) Philosopher phil0(fork0, fork2):();\n155:        @priority(5) Philosopher phil1(fork0, fork1):();",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 150,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/phils.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) Fork fork0(phil0, phil1):();"
+    },
+    {
+      "context": "146: }\n147: \n148: main\n149: {\n150:        @priority(1) Fork fork0(phil0, phil1):();\n151:        @priority(2) Fork fork1(phil1, phil2):();\n152:        @priority(3) Fork fork2(phil2, phil0):();\n153: \n154:        @priority(4) Philosopher phil0(fork0, fork2):();\n155:        @priority(5) Philosopher phil1(fork0, fork1):();\n156:        @priority(6) Philosopher phil2(fork1, fork2):();",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 151,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/phils.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2) Fork fork1(phil1, phil2):();"
+    },
+    {
+      "context": "147: \n148: main\n149: {\n150:        @priority(1) Fork fork0(phil0, phil1):();\n151:        @priority(2) Fork fork1(phil1, phil2):();\n152:        @priority(3) Fork fork2(phil2, phil0):();\n153: \n154:        @priority(4) Philosopher phil0(fork0, fork2):();\n155:        @priority(5) Philosopher phil1(fork0, fork1):();\n156:        @priority(6) Philosopher phil2(fork1, fork2):();\n157: }",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 152,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/phils.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3) Fork fork2(phil2, phil0):();"
+    },
+    {
+      "context": "149: {\n150:        @priority(1) Fork fork0(phil0, phil1):();\n151:        @priority(2) Fork fork1(phil1, phil2):();\n152:        @priority(3) Fork fork2(phil2, phil0):();\n153: \n154:        @priority(4) Philosopher phil0(fork0, fork2):();\n155:        @priority(5) Philosopher phil1(fork0, fork1):();\n156:        @priority(6) Philosopher phil2(fork1, fork2):();\n157: }",
+      "forms": [
+        "@priority(4)"
+      ],
+      "line": 154,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/phils.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(4) Philosopher phil0(fork0, fork2):();"
+    },
+    {
+      "context": "150:        @priority(1) Fork fork0(phil0, phil1):();\n151:        @priority(2) Fork fork1(phil1, phil2):();\n152:        @priority(3) Fork fork2(phil2, phil0):();\n153: \n154:        @priority(4) Philosopher phil0(fork0, fork2):();\n155:        @priority(5) Philosopher phil1(fork0, fork1):();\n156:        @priority(6) Philosopher phil2(fork1, fork2):();\n157: }",
+      "forms": [
+        "@priority(5)"
+      ],
+      "line": 155,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/phils.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(5) Philosopher phil1(fork0, fork1):();"
+    },
+    {
+      "context": "151:        @priority(2) Fork fork1(phil1, phil2):();\n152:        @priority(3) Fork fork2(phil2, phil0):();\n153: \n154:        @priority(4) Philosopher phil0(fork0, fork2):();\n155:        @priority(5) Philosopher phil1(fork0, fork1):();\n156:        @priority(6) Philosopher phil2(fork1, fork2):();\n157: }",
+      "forms": [
+        "@priority(6)"
+      ],
+      "line": 156,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/phils.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(6) Philosopher phil2(fork1, fork2):();"
+    },
+    {
+      "context": "12:         id = _id;\n13:         ke = _ke;\n14:         self.sendMsg(1, false);\n15:     }\n16: \n17:     @priority(1)\n18:     msgsrv sendMsg(int msg, boolean blush) {\n19:         msg = 2*msg+84;\n20:         blush = !blush;\n21:         next.rcvMsg(msg, true);\n22:         self.sendMsg(msg, blush) after(1);",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 17,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/pingpong.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "20:         blush = !blush;\n21:         next.rcvMsg(msg, true);\n22:         self.sendMsg(msg, blush) after(1);\n23:     }\n24: \n25:     @priority(2)\n26:     msgsrv rcvMsg(int msg, boolean isvalid) {\n27:         kkkkk = msg + 3 * kkkkk;\n28:         ka = !isvalid;\n29:     }\n30: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 25,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/pingpong.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "12:         period = myPeriod;\n13:         self.doReport();\n14:         netDelay = 1;\n15:     }\n16: \n17:     @priority(1)\n18:     msgsrv doReport() {\n19:         admin.report(4) after(3);\n20:         self.doReport() after(2);\n21:     }\n22: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 17,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/sensornetwork.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "32: \n33:     Scientist() {\n34:         netDelay = 1;\n35:     }\n36: \n37:     @priority(1)\n38:     msgsrv abortPlan() {\n39:         admin.ack() after(1);\n40:     }\n41: }\n42: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 37,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/sensornetwork.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "53:     Rescue() {\n54:         netDelay = 1;\n55:         rescueDeadline = 10;\n56:     }\n57: \n58:     @priority(1)\n59:     msgsrv go() {\n60:         admin.rescueReach() after(1);\n61:     }\n62: }\n63: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 58,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/sensornetwork.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "91:         adminCheckDelay = 15;\n92:         scientistDeadline = 5;\n93:         self.checkSensors();\n94:     }\n95: \n96:     @priority(1)\n97:     msgsrv report(int value) {\n98:         if (sender == sensor0) {\n99:             reported0 = true;\n100:             sensorValue0 = value;\n101:         } else if (sender == sensor1) {",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 96,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/sensornetwork.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "102:             reported1 = true;\n103:             sensorValue1 = value;\n104:         }\n105:     }\n106: \n107:     @priority(2)\n108:     msgsrv rescueReach() {\n109:         scientistReached = true;\n110:     }\n111: \n112:     @priority(3)",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 107,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/sensornetwork.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "107:     @priority(2)\n108:     msgsrv rescueReach() {\n109:         scientistReached = true;\n110:     }\n111: \n112:     @priority(3)\n113:     msgsrv checkSensors() {\n114:         if (reported0) reported0 = false;\n115:         else sensorFailure = true;\n116: \n117:         if (reported1) reported1 = false;",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 112,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/sensornetwork.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3)"
+    },
+    {
+      "context": "123:         }\n124: \n125:         self.checkSensors() after(2);\n126:     }\n127: \n128:     @priority(4)\n129:     msgsrv checkRescue() {\n130:         if (!scientistReached) {\n131:             scientistDead = true;\n132:         } else {\n133:             scientistReached = false;",
+      "forms": [
+        "@priority(4)"
+      ],
+      "line": 128,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/sensornetwork.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(4)"
+    },
+    {
+      "context": "132:         } else {\n133:             scientistReached = false;\n134:         }\n135:     }\n136: \n137:     @priority(5)\n138:     msgsrv ack() {\n139:         scientistAck = true;\n140:     }\n141: \n142:     @priority(6)",
+      "forms": [
+        "@priority(5)"
+      ],
+      "line": 137,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/sensornetwork.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(5)"
+    },
+    {
+      "context": "137:     @priority(5)\n138:     msgsrv ack() {\n139:         scientistAck = true;\n140:     }\n141: \n142:     @priority(6)\n143:     msgsrv checkScientistAck() {\n144:         if (!scientistAck) {\n145:             rescue.go() after(1);\n146:             self.checkRescue() after(2);\n147:         }",
+      "forms": [
+        "@priority(6)"
+      ],
+      "line": 142,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/sensornetwork.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(6)"
+    },
+    {
+      "context": "17:       \t\tn = 2;\n18:             next = 1;\n19: \t\t\tself.sendENQ();              \n20:       } \n21:   \n22:       @priority(1)\n23:       msgsrv sendENQ()\n24:       {\n25:       \t\tctrlSend = true;\n26:       \t\tself.finSend();\n27:             medium.passMsg(0, next, 3);",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 22,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/tcsma.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "28: \n29:             self.sendENQ() after(2);\n30:             next = next % 2 + 1;\n31:       }\n32: \n33:       @priority(2)\n34:       msgsrv finSend()\n35:       {\n36:       \tctrlSend = false;\n37:       }\n38: ",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 33,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/tcsma.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "34:       msgsrv finSend()\n35:       {\n36:       \tctrlSend = false;\n37:       }\n38: \n39:       @priority(3)\n40: \t  msgsrv receiveData(int senderr, int receiver, int msg)\n41: \t  {\n42: \t  }\n43: }\n44: ",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 39,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/tcsma.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3)"
+    },
+    {
+      "context": "61:       Medium()\n62:       {\n63:            passMessage=false;\n64:       }\n65: \n66:       @priority(1)\n67:       msgsrv passMsg(int senderr, int receiver, int msg)\n68:       {\n69:       \t\tpassMessage = true;\n70: \t\t\tcontroller.receiveData(senderr, receiver, msg);\n71:             interface1.getFromMedium(senderr, receiver, msg);",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 66,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/tcsma.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "71:             interface1.getFromMedium(senderr, receiver, msg);\n72: \t\t\tinterface2.getFromMedium(senderr, receiver, msg);\n73: \t\t\tself.finishedPassing();\n74:       }\n75: \n76:       @priority(2)\n77: \t  msgsrv finishedPassing()\n78: \t  {\n79: \t  \t\tpassMessage = false;\n80: \n81: \t  }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 76,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/tcsma.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "102: \t\t\tid = myId;\n103: \t\t\tinterfaceSent = false;\n104: \n105:       }\n106: \n107:       @priority(1)\n108:       msgsrv getFromMedium(int senderr, int receiver, int msg)\n109:       {\n110:             if(receiver == id)\n111: \t\t\t{\n112: \t\t\t\tif(msg == 3)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 107,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/tcsma.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "118: \t\t\t\t\tuser.receiveData(senderr, msg);\n119: \t\t\t\t}\n120: \t\t\t}\n121:       }\n122: \n123:       @priority(2)\n124: \t  msgsrv getFromUser(int receiver, int data)\n125: \t  {\n126: \t  \tuser.changeStatus(true, false);\n127: \t  \tinterfaceSent = true;\n128: \t  \tself.finSend();",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 123,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/tcsma.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "128: \t  \tself.finSend();\n129: \t\t\tmedium.passMsg(id, receiver, data);\n130: \n131: \t  }\n132: \n133:       @priority(3)\n134: \t  msgsrv finSend()\n135: \t  {\n136: \t  \tinterfaceSent = false;\n137: \t  }\n138: ",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 133,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/tcsma.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3)"
+    },
+    {
+      "context": "134: \t  msgsrv finSend()\n135: \t  {\n136: \t  \tinterfaceSent = false;\n137: \t  }\n138: \n139:       @priority(4)\n140: \t  msgsrv getAckFromUser()\n141: \t  {\n142: \t  \tuser.changeStatus(false, true);\n143: \t  }\n144: ",
+      "forms": [
+        "@priority(4)"
+      ],
+      "line": 139,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/tcsma.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(4)"
+    },
+    {
+      "context": "167:       \treceived = false;\n168:       \tmyId = id;\n169: \n170:       }\n171: \n172:       @priority(1)\n173: \t  msgsrv receiveData(int senderr, int msg)\n174: \t  {\n175: \t  \treceived = true;\n176: \t  \tinterface1.getAckFromUser();\n177: \t  }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 172,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/tcsma.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "174: \t  {\n175: \t  \treceived = true;\n176: \t  \tinterface1.getAckFromUser();\n177: \t  }\n178: \n179:       @priority(2)\n180: \t  msgsrv sendData()\n181: \t  {\n182: \t  \tspeak = true;\n183: \t  \tdata = 1;\n184: \t\tif(data != 0)",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 179,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/tcsma.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "193: \t\t}\n194: \n195: \n196: \t  }\n197: \n198:       @priority(3)\n199: \t  msgsrv changeStatus(boolean spk , boolean rcv)\n200: \t  {\n201: \t  \tif(spk == true)\n202: \t  \t\tspeak = false;\n203: \t  \telse if(rcv == true)",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 198,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/tcsma.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3)"
+    },
+    {
+      "context": "5:     Node(){\n6:         self.sendMsg(1);\n7:         self.sendMsg2(1) after(1);\n8:     }\n9: \n10:     @priority(1)\n11:     msgsrv sendMsg(int msg){\n12:         sw.rcvMsg(msg, true);\n13:         sw.rcvMsg2(msg, true);\n14:     }\n15: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 10,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/while_example.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "11:     msgsrv sendMsg(int msg){\n12:         sw.rcvMsg(msg, true);\n13:         sw.rcvMsg2(msg, true);\n14:     }\n15: \n16:     @priority(2)\n17:     msgsrv sendMsg2(int msg){\n18:         sw.rcvMsg(msg, true);\n19:         sw.rcvMsg2(msg, true);\n20:     }\n21: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 16,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/while_example.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "27:     statevars {\n28:         boolean ke;\n29:         int kkkkk;\n30:     }\n31: \n32:     @priority(1)\n33:     msgsrv rcvMsg(int msg, boolean k){\n34:         ke = k;\n35:     }\n36: \n37:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 32,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/while_example.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "32:     @priority(1)\n33:     msgsrv rcvMsg(int msg, boolean k){\n34:         ke = k;\n35:     }\n36: \n37:     @priority(2)\n38:     msgsrv rcvMsg2(int msg, boolean k){\n39:         while(k){\n40:             kkkkk = msg;\n41:             k = !k;\n42:         }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 37,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/while_example.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "43:         r0.blah(msg);\n44: \n45:         self.internalrcvMsg(msg);\n46:     }\n47: \n48:     @priority(3)\n49:     msgsrv internalrcvMsg(int msg){}\n50: }\n51: \n52: reactiveclass Router(100){\n53:     @priority(1)",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 48,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/while_example.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3)"
+    },
+    {
+      "context": "48:     @priority(3)\n49:     msgsrv internalrcvMsg(int msg){}\n50: }\n51: \n52: reactiveclass Router(100){\n53:     @priority(1)\n54:     msgsrv blah(int msg){\n55:     }\n56: }\n57: \n58: main {",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 53,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/while_example.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "6:   base = a;\n7:   self.high(base, true);\n8:   self.low(base);\n9:  }\n10: \n11:  @priority(1)\n12:  msgsrv high(int x, boolean ok) {\n13:   s.report(x, ok) after(2);\n14:  }\n15: \n16:  @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 11,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/worker_sink.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "11:  @priority(1)\n12:  msgsrv high(int x, boolean ok) {\n13:   s.report(x, ok) after(2);\n14:  }\n15: \n16:  @priority(2)\n17:  msgsrv low(int x) {\n18:   self.high(x + 1, false) after(5);\n19:  }\n20: }\n21: ",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 16,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/worker_sink.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "24:   // receive result\n25:  }\n26: }\n27: \n28: main {\n29:  @priority(1) Worker w(sink):(10);\n30:  @priority(2) Sink sink():();\n31: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 29,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/worker_sink.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) Worker w(sink):(10);"
+    },
+    {
+      "context": "25:  }\n26: }\n27: \n28: main {\n29:  @priority(1) Worker w(sink):(10);\n30:  @priority(2) Sink sink():();\n31: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 30,
+      "path": "ReLico-fmcad-2026-artifact-v1/benchmarks/worker_sink.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2) Sink sink():();"
+    },
+    {
+      "context": "53: \n54:     Heater() {\n55:         on = false;\n56:     }\n57: \n58:     @priority(2)\n59:     msgsrv setOn() {\n60:         if (!on) {\n61:             on = true;\n62:             rc.notifyHeater(HEATER_ON);\n63:         }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 58,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "61:             on = true;\n62:             rc.notifyHeater(HEATER_ON);\n63:         }\n64:     }\n65: \n66:     @priority(1)\n67:     msgsrv setOff() {\n68:         if (on) {\n69:             on = false;\n70:             rc.notifyHeater(HEATER_OFF);\n71:         }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 66,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "78: \n79:     Light() {\n80:         on = false;\n81:     }\n82: \n83:     @priority(2)\n84:     msgsrv setOn() {\n85:         if (!on) {\n86:             on = true;\n87:             rc.notifyLight(LIGHT_ON);\n88:         }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 83,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "86:             on = true;\n87:             rc.notifyLight(LIGHT_ON);\n88:         }\n89:     }\n90: \n91:     @priority(1)\n92:     msgsrv setOff() {\n93:         if (on) {\n94:             on = false;\n95:             rc.notifyLight(LIGHT_OFF);\n96:         }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 91,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "103: \n104:     Door() {\n105:         closed = false;\n106:     }\n107: \n108:     @priority(2)\n109:     msgsrv closeDoor() {\n110:         if (!closed) {\n111:             closed = true;\n112:             central.report(DOOR_CLOSED);\n113:         }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 108,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "111:             closed = true;\n112:             central.report(DOOR_CLOSED);\n113:         }\n114:     }\n115: \n116:     @priority(1)\n117:     msgsrv openDoor() {\n118:         closed = false;\n119:         central.report(DOOR_OPENED);\n120:     }\n121: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 116,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "126: \n127:     TempSensor() {\n128:         self.measure();\n129:     }\n130: \n131:     @priority(1)\n132:     msgsrv measure() {\n133:         rc.tempUpdate(tempLevel) after(NET_DELAY);\n134:         self.measure() after(SAMPLE_PERIOD);\n135:     }\n136: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 131,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "140: \n141:     LightSensor() {\n142:         self.measure();\n143:     }\n144: \n145:     @priority(1)\n146:     msgsrv measure() {\n147:         // LDR digital: true = DARK (HIGH), false = BRIGHT (LOW)\n148:         rc.lightUpdate(lightIsDark) after(NET_DELAY);\n149:         self.measure() after(SAMPLE_PERIOD);\n150:     }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 145,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "155: \n156:     MotionSensor() {\n157:         self.measure();\n158:     }\n159: \n160:     @priority(1)\n161:     msgsrv measure() {\n162:         if (motionIsDetected) {\n163:             rc.motionDetected() after(NET_DELAY);\n164:         }\n165:         self.measure() after(SAMPLE_PERIOD);",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 160,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "186:         lastLightDark = false;\n187:         lightIsOn = false;\n188:         lightOverrideActive = false;\n189:     }\n190: \n191:     @priority(1)\n192:     msgsrv tempUpdate(int t) {\n193:         lastTemp = t;\n194: \n195:         if (t < TEMP_LOW) {\n196:             // Cold - turn heater on",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 191,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "206:             // Between NORMAL and FIRE (25-35\u00b0C) - turn heater off\n207:             heater.setOff() after(NET_DELAY);\n208:         }\n209:     }\n210: \n211:     @priority(5)\n212:     msgsrv lightUpdate(boolean isDark) {\n213:         lastLightDark = isDark;\n214: \n215:         // Don't control light if override is active\n216:         if (!lightOverrideActive) {",
+      "forms": [
+        "@priority(5)"
+      ],
+      "line": 211,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(5)"
+    },
+    {
+      "context": "222:                 light.setOff() after(NET_DELAY);\n223:             }\n224:         }\n225:     }\n226: \n227:     @priority(2)\n228:     msgsrv motionDetected() {\n229:         central.unwantedPersonAlert();\n230:     }\n231: \n232:     @priority(7)",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 227,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "227:     @priority(2)\n228:     msgsrv motionDetected() {\n229:         central.unwantedPersonAlert();\n230:     }\n231: \n232:     @priority(7)\n233:     msgsrv notifyLight(int msg) {\n234:         if (msg == LIGHT_ON) {\n235:             // Only acknowledge light is on if override is NOT active\n236:             if (!lightOverrideActive) {\n237:                 lightIsOn = true;",
+      "forms": [
+        "@priority(7)"
+      ],
+      "line": 232,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(7)"
+    },
+    {
+      "context": "241:         }\n242: \n243:         central.report(msg);\n244:     }\n245: \n246:     @priority(6)\n247:     msgsrv notifyHeater(int msg) {\n248:         // Just forward heater status to central\n249:         central.report(msg);\n250:     }\n251: ",
+      "forms": [
+        "@priority(6)"
+      ],
+      "line": 246,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(6)"
+    },
+    {
+      "context": "247:     msgsrv notifyHeater(int msg) {\n248:         // Just forward heater status to central\n249:         central.report(msg);\n250:     }\n251: \n252:     @priority(3)\n253:     msgsrv activateLightOverride() {\n254:         lightOverrideActive = true;\n255:         // If we think light is on, turn it off and update tracking immediately\n256:         if (lightIsOn) {\n257:             lightIsOn = false;",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 252,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3)"
+    },
+    {
+      "context": "257:             lightIsOn = false;\n258:             light.setOff() after(NET_DELAY);\n259:         }\n260:     }\n261: \n262:     @priority(4)\n263:     msgsrv deactivateLightOverride() {\n264:         lightOverrideActive = false;\n265:         // Resume normal light control based on current sensor reading\n266:         if (lastLightDark) {\n267:             light.setOn() after(NET_DELAY);",
+      "forms": [
+        "@priority(4)"
+      ],
+      "line": 262,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(4)"
+    },
+    {
+      "context": "289:         emergencyModeActive = false;\n290:         intrusionWasCleared = false;\n291:         doorCloseRequested = false;\n292:     }\n293: \n294:     @priority(1)\n295:     msgsrv fireAlert() {\n296:         if (!fireAlarmActive) {\n297:             fireAlarmActive = true;\n298:             emergencyModeActive = true;\n299:             report(FIRE_DETECTED);",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 294,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "306:             intrusionWasCleared = true;\n307:             rc.deactivateLightOverride();\n308:         }\n309:     }\n310: \n311:     @priority(2)\n312:     msgsrv unwantedPersonAlert() {\n313:         // Only trigger intrusion if NO fire alarm active and not already in intrusion\n314:         if (!fireAlarmActive && !intrusionAlarmActive && !intrusionWasCleared) {\n315:             intrusionAlarmActive = true;\n316:             emergencyModeActive = true;",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 311,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "320:             rc.activateLightOverride() after(NET_DELAY);\n321:             self.clearIntrusionAlarm() after(INTRUSION_CLEAR_DELAY);\n322:         }\n323:     }\n324: \n325:     @priority(3)\n326:     msgsrv requestCloseDoor() {\n327:         // Only actually close if no fire and door close is still requested\n328:         if (!fireAlarmActive && doorCloseRequested) {\n329:             mainDoor.closeDoor();\n330:         }",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 325,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3)"
+    },
+    {
+      "context": "328:         if (!fireAlarmActive && doorCloseRequested) {\n329:             mainDoor.closeDoor();\n330:         }\n331:     }\n332: \n333:     @priority(4)\n334:     msgsrv clearIntrusionAlarm() {\n335:         if (intrusionAlarmActive && !fireAlarmActive) {\n336:             intrusionAlarmActive = false;\n337:             emergencyModeActive = false;\n338:             intrusionWasCleared = true;",
+      "forms": [
+        "@priority(4)"
+      ],
+      "line": 333,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(4)"
+    },
+    {
+      "context": "338:             intrusionWasCleared = true;\n339:             rc.deactivateLightOverride();\n340:         }\n341:     }\n342: \n343:     @priority(5)\n344:     msgsrv report(int msg) {\n345:         // Logging/monitoring placeholder\n346:     }\n347: }\n348: ",
+      "forms": [
+        "@priority(5)"
+      ],
+      "line": 343,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(5)"
+    },
+    {
+      "context": "345:         // Logging/monitoring placeholder\n346:     }\n347: }\n348: \n349: main {\n350:     @priority(1) RoomController rc1(central, heater1, light1):();\n351:     @priority(2) CentralController central(mainDoor, rc1):();\n352:     @priority(3) Door mainDoor(central):();\n353: \n354:     // Single room implementation (matches esp32 setup)\n355:     @priority(4) Heater heater1(rc1):();",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 350,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) RoomController rc1(central, heater1, light1):();"
+    },
+    {
+      "context": "346:     }\n347: }\n348: \n349: main {\n350:     @priority(1) RoomController rc1(central, heater1, light1):();\n351:     @priority(2) CentralController central(mainDoor, rc1):();\n352:     @priority(3) Door mainDoor(central):();\n353: \n354:     // Single room implementation (matches esp32 setup)\n355:     @priority(4) Heater heater1(rc1):();\n356:     @priority(5) Light light1(rc1):();",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 351,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2) CentralController central(mainDoor, rc1):();"
+    },
+    {
+      "context": "347: }\n348: \n349: main {\n350:     @priority(1) RoomController rc1(central, heater1, light1):();\n351:     @priority(2) CentralController central(mainDoor, rc1):();\n352:     @priority(3) Door mainDoor(central):();\n353: \n354:     // Single room implementation (matches esp32 setup)\n355:     @priority(4) Heater heater1(rc1):();\n356:     @priority(5) Light light1(rc1):();\n357:     @priority(6) TempSensor ts1(rc1):();",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 352,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3) Door mainDoor(central):();"
+    },
+    {
+      "context": "350:     @priority(1) RoomController rc1(central, heater1, light1):();\n351:     @priority(2) CentralController central(mainDoor, rc1):();\n352:     @priority(3) Door mainDoor(central):();\n353: \n354:     // Single room implementation (matches esp32 setup)\n355:     @priority(4) Heater heater1(rc1):();\n356:     @priority(5) Light light1(rc1):();\n357:     @priority(6) TempSensor ts1(rc1):();\n358:     @priority(7) MotionSensor ms1(rc1):();\n359:     @priority(8) LightSensor ls1(rc1):();\n360: }",
+      "forms": [
+        "@priority(4)"
+      ],
+      "line": 355,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(4) Heater heater1(rc1):();"
+    },
+    {
+      "context": "351:     @priority(2) CentralController central(mainDoor, rc1):();\n352:     @priority(3) Door mainDoor(central):();\n353: \n354:     // Single room implementation (matches esp32 setup)\n355:     @priority(4) Heater heater1(rc1):();\n356:     @priority(5) Light light1(rc1):();\n357:     @priority(6) TempSensor ts1(rc1):();\n358:     @priority(7) MotionSensor ms1(rc1):();\n359:     @priority(8) LightSensor ls1(rc1):();\n360: }",
+      "forms": [
+        "@priority(5)"
+      ],
+      "line": 356,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(5) Light light1(rc1):();"
+    },
+    {
+      "context": "352:     @priority(3) Door mainDoor(central):();\n353: \n354:     // Single room implementation (matches esp32 setup)\n355:     @priority(4) Heater heater1(rc1):();\n356:     @priority(5) Light light1(rc1):();\n357:     @priority(6) TempSensor ts1(rc1):();\n358:     @priority(7) MotionSensor ms1(rc1):();\n359:     @priority(8) LightSensor ls1(rc1):();\n360: }",
+      "forms": [
+        "@priority(6)"
+      ],
+      "line": 357,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(6) TempSensor ts1(rc1):();"
+    },
+    {
+      "context": "353: \n354:     // Single room implementation (matches esp32 setup)\n355:     @priority(4) Heater heater1(rc1):();\n356:     @priority(5) Light light1(rc1):();\n357:     @priority(6) TempSensor ts1(rc1):();\n358:     @priority(7) MotionSensor ms1(rc1):();\n359:     @priority(8) LightSensor ls1(rc1):();\n360: }",
+      "forms": [
+        "@priority(7)"
+      ],
+      "line": 358,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(7) MotionSensor ms1(rc1):();"
+    },
+    {
+      "context": "354:     // Single room implementation (matches esp32 setup)\n355:     @priority(4) Heater heater1(rc1):();\n356:     @priority(5) Light light1(rc1):();\n357:     @priority(6) TempSensor ts1(rc1):();\n358:     @priority(7) MotionSensor ms1(rc1):();\n359:     @priority(8) LightSensor ls1(rc1):();\n360: }",
+      "forms": [
+        "@priority(8)"
+      ],
+      "line": 359,
+      "path": "ReLico-fmcad-2026-artifact-v1/examples/hardware/smarthome/smarthome.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(8) LightSensor ls1(rc1):();"
+    },
+    {
+      "context": "5: \n6:     Monitor() {\n7:         violation = 0;\n8:     }\n9: \n10:     @priority(1)\n11:     msgsrv observeDoor(int doorValue) {\n12:         if (doorValue != 1) {\n13:             violation = 1;\n14:         }\n15:     }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 10,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/AircraftDoor/AircraftDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "25: \n26:     Door() {\n27:         doorOpen = 0;\n28:     }\n29: \n30:     @priority(1)\n31:     msgsrv setDoor(int v) {\n32:         if (v == 1) {\n33:             doorOpen = 1;\n34:         } else if (v == 0) {\n35:             doorOpen = 0;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 30,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/AircraftDoor/AircraftDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "48: \n49:     Vision() {\n50:         ramp = 0;\n51:     }\n52: \n53:     @priority(1)\n54:     msgsrv input(int v) {\n55:         if (ramp == 1) {\n56:             door.setDoor(0);\n57:         } else {\n58:             door.setDoor(1);",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 53,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/AircraftDoor/AircraftDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "67: \n68:     KeepAlive() {\n69:         phase = 0;\n70:     }\n71: \n72:     @priority(1)\n73:     msgsrv kick() {\n74:         self.tick() after(1000);\n75:     }\n76: \n77:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 72,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/AircraftDoor/AircraftDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "72:     @priority(1)\n73:     msgsrv kick() {\n74:         self.tick() after(1000);\n75:     }\n76: \n77:     @priority(2)\n78:     msgsrv tick() {\n79:         if (phase == 0) {\n80:             phase = 1;\n81:         } else {\n82:             phase = 0;",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 77,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/AircraftDoor/AircraftDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "93: \n94:     Controller() {\n95:         self.start();\n96:     }\n97: \n98:     @priority(1)\n99:     msgsrv start() {\n100:         vision.input(1);\n101:         ka.kick();\n102:     }\n103: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 98,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/AircraftDoor/AircraftDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "101:         ka.kick();\n102:     }\n103: }\n104: \n105: main {\n106:     @priority(1) Controller controller(vision, ka):();\n107:     @priority(2) Vision vision(door):();\n108:     @priority(3) Door door(m):();\n109:     @priority(4) Monitor m():();\n110:     KeepAlive ka():();\n111: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 106,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/AircraftDoor/AircraftDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) Controller controller(vision, ka):();"
+    },
+    {
+      "context": "102:     }\n103: }\n104: \n105: main {\n106:     @priority(1) Controller controller(vision, ka):();\n107:     @priority(2) Vision vision(door):();\n108:     @priority(3) Door door(m):();\n109:     @priority(4) Monitor m():();\n110:     KeepAlive ka():();\n111: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 107,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/AircraftDoor/AircraftDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2) Vision vision(door):();"
+    },
+    {
+      "context": "103: }\n104: \n105: main {\n106:     @priority(1) Controller controller(vision, ka):();\n107:     @priority(2) Vision vision(door):();\n108:     @priority(3) Door door(m):();\n109:     @priority(4) Monitor m():();\n110:     KeepAlive ka():();\n111: }",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 108,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/AircraftDoor/AircraftDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3) Door door(m):();"
+    },
+    {
+      "context": "104: \n105: main {\n106:     @priority(1) Controller controller(vision, ka):();\n107:     @priority(2) Vision vision(door):();\n108:     @priority(3) Door door(m):();\n109:     @priority(4) Monitor m():();\n110:     KeepAlive ka():();\n111: }",
+      "forms": [
+        "@priority(4)"
+      ],
+      "line": 109,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/AircraftDoor/AircraftDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(4) Monitor m():();"
+    },
+    {
+      "context": "5: \n6:     Checker() {\n7:         violation = 0;\n8:     }\n9: \n10:     @priority(1)\n11:     msgsrv observeStopResult(int v) {\n12:         if (v != 0) {\n13:             violation = 1;\n14:         }\n15:     }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 10,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Alarm/Alarm.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "26:     Controller() {\n27:         fault = 0;\n28:         self.start();\n29:     }\n30: \n31:     @priority(1)\n32:     msgsrv start() {\n33:         fault = 1;\n34:         self.turnOff(0) after(1000);\n35:     }\n36: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 31,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Alarm/Alarm.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "32:     msgsrv start() {\n33:         fault = 1;\n34:         self.turnOff(0) after(1000);\n35:     }\n36: \n37:     @priority(2)\n38:     msgsrv turnOff(int v) {\n39:         if (v == 1) {\n40:             fault = 0;\n41:         }\n42:         chk.observeStopResult(fault);",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 37,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Alarm/Alarm.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "51:     KeepAlive() {\n52:         phase = 0;\n53:         self.tick() after(2000);\n54:     }\n55: \n56:     @priority(1)\n57:     msgsrv tick() {\n58:         if (phase == 0) {\n59:             phase = 1;\n60:         } else {\n61:             phase = 0;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 56,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Alarm/Alarm.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "63:         self.tick() after(2000);\n64:     }\n65: }\n66: \n67: main {\n68:     @priority(1) Controller c(chk):();\n69:     @priority(2) Checker chk():();\n70:     KeepAlive ka():();\n71: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 68,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Alarm/Alarm.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) Controller c(chk):();"
+    },
+    {
+      "context": "64:     }\n65: }\n66: \n67: main {\n68:     @priority(1) Controller c(chk):();\n69:     @priority(2) Checker chk():();\n70:     KeepAlive ka():();\n71: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 69,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Alarm/Alarm.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2) Checker chk():();"
+    },
+    {
+      "context": "10:         seen = 0;\n11:         violation = 0;\n12:         self.start();\n13:     }\n14: \n15:     @priority(1)\n16:     msgsrv start() {\n17:         self.dispatch();\n18:     }\n19: \n20:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 15,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/CheckpointBarrier2/CheckpointBarrier2.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "15:     @priority(1)\n16:     msgsrv start() {\n17:         self.dispatch();\n18:     }\n19: \n20:     @priority(2)\n21:     msgsrv dispatch() {\n22:         if (epoch < 8) {\n23:             epoch = epoch + 1;\n24:             seen = 0;\n25: ",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 20,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/CheckpointBarrier2/CheckpointBarrier2.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "26:             self.arrive() after(2);\n27:             self.arrive() after(2);\n28:         }\n29:     }\n30: \n31:     @priority(3)\n32:     msgsrv arrive() {\n33:         seen = seen + 1;\n34: \n35:         if (seen > 2) {\n36:             violation = 1;",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 31,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/CheckpointBarrier2/CheckpointBarrier2.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3)"
+    },
+    {
+      "context": "52:     KeepAlive() {\n53:         phase = 0;\n54:         self.kick();\n55:     }\n56: \n57:     @priority(1)\n58:     msgsrv kick() {\n59:         self.tick() after(100000);\n60:     }\n61: \n62:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 57,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/CheckpointBarrier2/CheckpointBarrier2.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "57:     @priority(1)\n58:     msgsrv kick() {\n59:         self.tick() after(100000);\n60:     }\n61: \n62:     @priority(2)\n63:     msgsrv tick() {\n64:         phase = 1 - phase;\n65:         self.tick() after(100000);\n66:     }\n67: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 62,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/CheckpointBarrier2/CheckpointBarrier2.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "7:     Checker() {\n8:         seen1 = 0;\n9:         violation = 0;\n10:     }\n11: \n12:     @priority(1)\n13:     msgsrv elected0(int v) {\n14:         violation = 1;\n15:     }\n16: \n17:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 12,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Election/Election.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "12:     @priority(1)\n13:     msgsrv elected0(int v) {\n14:         violation = 1;\n15:     }\n16: \n17:     @priority(2)\n18:     msgsrv elected1(int v) {\n19:         seen1 = 1;\n20:     }\n21: }\n22: ",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 17,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Election/Election.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "30: \n31:     Node1() {\n32:         elected = 0;\n33:     }\n34: \n35:     @priority(1)\n36:     msgsrv fromSrc(int v) {\n37:         if (v == 1) {\n38:             elected = 1;\n39:             chk.elected1(1);\n40:         }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 35,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Election/Election.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "38:             elected = 1;\n39:             chk.elected1(1);\n40:         }\n41:     }\n42: \n43:     @priority(2)\n44:     msgsrv fromRouter(int v) {\n45:         if (v == 1) {\n46:             elected = 1;\n47:             chk.elected1(1);\n48:         }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 43,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Election/Election.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "55:     }\n56: \n57:     Router() {\n58:     }\n59: \n60:     @priority(1)\n61:     msgsrv routeTo1(int v) {\n62:         n1.fromRouter(v);\n63:     }\n64: }\n65: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 60,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Election/Election.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "74: \n75:     Node0() {\n76:         elected = 0;\n77:     }\n78: \n79:     @priority(1)\n80:     msgsrv in(int v) {\n81:         if (v > 0) {\n82:             r.routeTo1(v);\n83:         } else if (v == 0) {\n84:             elected = 1;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 79,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Election/Election.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "95: \n96:     Source() {\n97:         self.start();\n98:     }\n99: \n100:     @priority(1)\n101:     msgsrv start() {\n102:         n0.in(1);\n103:         n1.fromSrc(0);\n104:     }\n105: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 100,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Election/Election.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "112:     KeepAlive() {\n113:         phase = 0;\n114:         self.tick();\n115:     }\n116: \n117:     @priority(1)\n118:     msgsrv tick() {\n119:         if (phase == 0) {\n120:             phase = 1;\n121:         } else {\n122:             phase = 0;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 117,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Election/Election.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "124:         self.tick() after(100);\n125:     }\n126: }\n127: \n128: main {\n129:     @priority(1) Source src(i0, i1):();\n130:     @priority(2) Node0 i0(r, chk):();\n131:     @priority(3) Router r(i1):();\n132:     @priority(4) Node1 i1(chk):();\n133:     @priority(5) Checker chk():();\n134:     KeepAlive ka():();",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 129,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Election/Election.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) Source src(i0, i1):();"
+    },
+    {
+      "context": "125:     }\n126: }\n127: \n128: main {\n129:     @priority(1) Source src(i0, i1):();\n130:     @priority(2) Node0 i0(r, chk):();\n131:     @priority(3) Router r(i1):();\n132:     @priority(4) Node1 i1(chk):();\n133:     @priority(5) Checker chk():();\n134:     KeepAlive ka():();\n135: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 130,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Election/Election.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2) Node0 i0(r, chk):();"
+    },
+    {
+      "context": "126: }\n127: \n128: main {\n129:     @priority(1) Source src(i0, i1):();\n130:     @priority(2) Node0 i0(r, chk):();\n131:     @priority(3) Router r(i1):();\n132:     @priority(4) Node1 i1(chk):();\n133:     @priority(5) Checker chk():();\n134:     KeepAlive ka():();\n135: }",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 131,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Election/Election.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3) Router r(i1):();"
+    },
+    {
+      "context": "127: \n128: main {\n129:     @priority(1) Source src(i0, i1):();\n130:     @priority(2) Node0 i0(r, chk):();\n131:     @priority(3) Router r(i1):();\n132:     @priority(4) Node1 i1(chk):();\n133:     @priority(5) Checker chk():();\n134:     KeepAlive ka():();\n135: }",
+      "forms": [
+        "@priority(4)"
+      ],
+      "line": 132,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Election/Election.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(4) Node1 i1(chk):();"
+    },
+    {
+      "context": "128: main {\n129:     @priority(1) Source src(i0, i1):();\n130:     @priority(2) Node0 i0(r, chk):();\n131:     @priority(3) Router r(i1):();\n132:     @priority(4) Node1 i1(chk):();\n133:     @priority(5) Checker chk():();\n134:     KeepAlive ka():();\n135: }",
+      "forms": [
+        "@priority(5)"
+      ],
+      "line": 133,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Election/Election.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(5) Checker chk():();"
+    },
+    {
+      "context": "6: \n7:     Source() {\n8:         self.start();\n9:     }\n10: \n11:     @priority(1)\n12:     msgsrv start() {\n13:         ka.kick();\n14:         f.inputN(4);\n15:     }\n16: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 11,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Factorial/Factorial.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "18: reactiveclass FactorialCore(5) {\n19:     knownrebecs {\n20:         Checker chk;\n21:     }\n22: \n23:     @priority(1)\n24:     msgsrv inputN(int n) {\n25:         if (n == 4) {\n26:             self.complete(24) after(10);\n27:         } else {\n28:             self.complete(0) after(10);",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 23,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Factorial/Factorial.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "27:         } else {\n28:             self.complete(0) after(10);\n29:         }\n30:     }\n31: \n32:     @priority(2)\n33:     msgsrv complete(int v) {\n34:         chk.complete(v);\n35:     }\n36: }\n37: ",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 32,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Factorial/Factorial.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "42: \n43:     Checker() {\n44:         violation = 0;\n45:     }\n46: \n47:     @priority(1)\n48:     msgsrv complete(int v) {\n49:         if (v != 24) {\n50:             violation = 1;\n51:         }\n52:     }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 47,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Factorial/Factorial.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "59: \n60:     KeepAlive() {\n61:         phase = 0;\n62:     }\n63: \n64:     @priority(1)\n65:     msgsrv kick() {\n66:         self.tick() after(100);\n67:     }\n68: \n69:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 64,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Factorial/Factorial.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "64:     @priority(1)\n65:     msgsrv kick() {\n66:         self.tick() after(100);\n67:     }\n68: \n69:     @priority(2)\n70:     msgsrv tick() {\n71:         if (phase == 0) {\n72:             phase = 1;\n73:         } else {\n74:             phase = 0;",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 69,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Factorial/Factorial.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "76:         self.tick() after(100);\n77:     }\n78: }\n79: \n80: main {\n81:     @priority(1) Source src(f, ka):();\n82:     @priority(2) FactorialCore f(chk):();\n83:     @priority(3) Checker chk():();\n84:     KeepAlive ka():();\n85: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 81,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Factorial/Factorial.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) Source src(f, ka):();"
+    },
+    {
+      "context": "77:     }\n78: }\n79: \n80: main {\n81:     @priority(1) Source src(f, ka):();\n82:     @priority(2) FactorialCore f(chk):();\n83:     @priority(3) Checker chk():();\n84:     KeepAlive ka():();\n85: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 82,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Factorial/Factorial.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2) FactorialCore f(chk):();"
+    },
+    {
+      "context": "78: }\n79: \n80: main {\n81:     @priority(1) Source src(f, ka):();\n82:     @priority(2) FactorialCore f(chk):();\n83:     @priority(3) Checker chk():();\n84:     KeepAlive ka():();\n85: }",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 83,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Factorial/Factorial.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3) Checker chk():();"
+    },
+    {
+      "context": "5: \n6:     Source() {\n7:         self.start();\n8:     }\n9: \n10:     @priority(1)\n11:     msgsrv start() {\n12:         fib.inputN(10);\n13:     }\n14: }\n15: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 10,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Fibonacci/Fibonacci.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "16: reactiveclass FibCore(5) {\n17:     knownrebecs {\n18:         Checker chk;\n19:     }\n20: \n21:     @priority(1)\n22:     msgsrv inputN(int n) {\n23:         if (n == 10) {\n24:             self.complete(89) after(10);\n25:         } else {\n26:             self.complete(0) after(10);",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 21,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Fibonacci/Fibonacci.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "25:         } else {\n26:             self.complete(0) after(10);\n27:         }\n28:     }\n29: \n30:     @priority(2)\n31:     msgsrv complete(int v) {\n32:         chk.complete(v);\n33:     }\n34: }\n35: ",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 30,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Fibonacci/Fibonacci.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "40: \n41:     Checker() {\n42:         violation = 0;\n43:     }\n44: \n45:     @priority(1)\n46:     msgsrv complete(int v) {\n47:         if (v != 89) {\n48:             violation = 1;\n49:         }\n50:     }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 45,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Fibonacci/Fibonacci.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "58:     KeepAlive() {\n59:         phase = 0;\n60:         self.tick() after(100);\n61:     }\n62: \n63:     @priority(1)\n64:     msgsrv tick() {\n65:         if (phase == 0) {\n66:             phase = 1;\n67:         } else {\n68:             phase = 0;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 63,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Fibonacci/Fibonacci.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "70:         self.tick() after(100);\n71:     }\n72: }\n73: \n74: main {\n75:     @priority(1) Source src(fib):();\n76:     @priority(2) FibCore fib(chk):();\n77:     @priority(3) Checker chk():();\n78:     KeepAlive ka():();\n79: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 75,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Fibonacci/Fibonacci.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) Source src(fib):();"
+    },
+    {
+      "context": "71:     }\n72: }\n73: \n74: main {\n75:     @priority(1) Source src(fib):();\n76:     @priority(2) FibCore fib(chk):();\n77:     @priority(3) Checker chk():();\n78:     KeepAlive ka():();\n79: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 76,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Fibonacci/Fibonacci.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2) FibCore fib(chk):();"
+    },
+    {
+      "context": "72: }\n73: \n74: main {\n75:     @priority(1) Source src(fib):();\n76:     @priority(2) FibCore fib(chk):();\n77:     @priority(3) Checker chk():();\n78:     KeepAlive ka():();\n79: }",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 77,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Fibonacci/Fibonacci.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3) Checker chk():();"
+    },
+    {
+      "context": "8:         x = 0;\n9:         violation = 0;\n10:         self.tick();\n11:     }\n12: \n13:     @priority(1)\n14:     msgsrv tick() {\n15:         if (x == 0) {\n16:             x = 1;\n17:         } else {\n18:             x = 0;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 13,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Minimal/Minimal.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "5: \n6:     Checker() {\n7:         violation = 0;\n8:     }\n9: \n10:     @priority(1)\n11:     msgsrv pongSeen(int v) {\n12:         if (v != 3) {\n13:             violation = 1;\n14:         }\n15:     }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 10,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/PingPong/PingPong.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "12:         if (v != 3) {\n13:             violation = 1;\n14:         }\n15:     }\n16: \n17:     @priority(2)\n18:     msgsrv pingSeen(int v) {\n19:         if (v != 3) {\n20:             violation = 1;\n21:         }\n22:     }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 17,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/PingPong/PingPong.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "30: \n31:     Ping() {\n32:         self.start();\n33:     }\n34: \n35:     @priority(1)\n36:     msgsrv start() {\n37:         self.serve(3) after(10);\n38:     }\n39: \n40:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 35,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/PingPong/PingPong.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "35:     @priority(1)\n36:     msgsrv start() {\n37:         self.serve(3) after(10);\n38:     }\n39: \n40:     @priority(2)\n41:     msgsrv serve(int v) {\n42:         pong.receive(v);\n43:     }\n44: \n45:     @priority(3)",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 40,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/PingPong/PingPong.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "40:     @priority(2)\n41:     msgsrv serve(int v) {\n42:         pong.receive(v);\n43:     }\n44: \n45:     @priority(3)\n46:     msgsrv receive(int v) {\n47:         chk.pingSeen(v);\n48:     }\n49: }\n50: ",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 45,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/PingPong/PingPong.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3)"
+    },
+    {
+      "context": "55:     }\n56: \n57:     Pong() {\n58:     }\n59: \n60:     @priority(1)\n61:     msgsrv receive(int v) {\n62:         chk.pongSeen(v);\n63:         self.reply(v) after(10);\n64:     }\n65: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 60,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/PingPong/PingPong.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "61:     msgsrv receive(int v) {\n62:         chk.pongSeen(v);\n63:         self.reply(v) after(10);\n64:     }\n65: \n66:     @priority(2)\n67:     msgsrv reply(int v) {\n68:         ping.receive(v);\n69:     }\n70: }\n71: ",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 66,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/PingPong/PingPong.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "77:     KeepAlive() {\n78:         phase = 0;\n79:         self.tick() after(100);\n80:     }\n81: \n82:     @priority(1)\n83:     msgsrv tick() {\n84:         if (phase == 0) {\n85:             phase = 1;\n86:         } else {\n87:             phase = 0;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 82,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/PingPong/PingPong.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "5: \n6:     Checker() {\n7:         violation = 0;\n8:     }\n9: \n10:     @priority(1)\n11:     msgsrv complete(int v) {\n12:         if (v != 1) {\n13:             violation = 1;\n14:         }\n15:     }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 10,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Pipe/Pipe.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "21:     }\n22: \n23:     Sink() {\n24:     }\n25: \n26:     @priority(1)\n27:     msgsrv in(int v) {\n28:         chk.complete(v);\n29:     }\n30: }\n31: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 26,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Pipe/Pipe.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "35:     }\n36: \n37:     Node() {\n38:     }\n39: \n40:     @priority(1)\n41:     msgsrv in(int v) {\n42:         self.forward(v) after(10);\n43:     }\n44: \n45:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 40,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Pipe/Pipe.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "40:     @priority(1)\n41:     msgsrv in(int v) {\n42:         self.forward(v) after(10);\n43:     }\n44: \n45:     @priority(2)\n46:     msgsrv forward(int v) {\n47:         sink.in(v);\n48:     }\n49: }\n50: ",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 45,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Pipe/Pipe.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "55: \n56:     Source() {\n57:         self.start();\n58:     }\n59: \n60:     @priority(1)\n61:     msgsrv start() {\n62:         node.in(1);\n63:     }\n64: }\n65: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 60,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Pipe/Pipe.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "71:     KeepAlive() {\n72:         phase = 0;\n73:         self.tick() after(100);\n74:     }\n75: \n76:     @priority(1)\n77:     msgsrv tick() {\n78:         if (phase == 0) {\n79:             phase = 1;\n80:         } else {\n81:             phase = 0;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 76,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Pipe/Pipe.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "83:         self.tick() after(100);\n84:     }\n85: }\n86: \n87: main {\n88:     @priority(1) Source source(node):();\n89:     @priority(2) Node node(sink):();\n90:     @priority(3) Sink sink(chk):();\n91:     @priority(4) Checker chk():();\n92:     KeepAlive ka():();\n93: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 88,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Pipe/Pipe.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) Source source(node):();"
+    },
+    {
+      "context": "84:     }\n85: }\n86: \n87: main {\n88:     @priority(1) Source source(node):();\n89:     @priority(2) Node node(sink):();\n90:     @priority(3) Sink sink(chk):();\n91:     @priority(4) Checker chk():();\n92:     KeepAlive ka():();\n93: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 89,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Pipe/Pipe.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2) Node node(sink):();"
+    },
+    {
+      "context": "85: }\n86: \n87: main {\n88:     @priority(1) Source source(node):();\n89:     @priority(2) Node node(sink):();\n90:     @priority(3) Sink sink(chk):();\n91:     @priority(4) Checker chk():();\n92:     KeepAlive ka():();\n93: }",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 90,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Pipe/Pipe.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3) Sink sink(chk):();"
+    },
+    {
+      "context": "86: \n87: main {\n88:     @priority(1) Source source(node):();\n89:     @priority(2) Node node(sink):();\n90:     @priority(3) Sink sink(chk):();\n91:     @priority(4) Checker chk():();\n92:     KeepAlive ka():();\n93: }",
+      "forms": [
+        "@priority(4)"
+      ],
+      "line": 91,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Pipe/Pipe.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(4) Checker chk():();"
+    },
+    {
+      "context": "5: \n6:     Source() {\n7:         self.start();\n8:     }\n9: \n10:     @priority(1)\n11:     msgsrv start() {\n12:         task.msg(0);\n13:     }\n14: }\n15: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 10,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/ProcessMsg/ProcessMsg.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "26:     Task() {\n27:         lastMsg = 0;\n28:         ok = 0;\n29:     }\n30: \n31:     @priority(1)\n32:     msgsrv msg(int v) {\n33:         self.process(v) after(10);\n34:     }\n35: \n36:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 31,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/ProcessMsg/ProcessMsg.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "31:     @priority(1)\n32:     msgsrv msg(int v) {\n33:         self.process(v) after(10);\n34:     }\n35: \n36:     @priority(2)\n37:     msgsrv process(int v) {\n38:         lastMsg = v;\n39:         if (lastMsg == 0) {\n40:             ok = 1;\n41:         } else {",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 36,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/ProcessMsg/ProcessMsg.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "52: \n53:     Checker() {\n54:         violation = 0;\n55:     }\n56: \n57:     @priority(1)\n58:     msgsrv complete(int v) {\n59:         if (v != 1) {\n60:             violation = 1;\n61:         }\n62:     }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 57,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/ProcessMsg/ProcessMsg.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "70:     KeepAlive() {\n71:         phase = 0;\n72:         self.tick() after(100);\n73:     }\n74: \n75:     @priority(1)\n76:     msgsrv tick() {\n77:         if (phase == 0) {\n78:             phase = 1;\n79:         } else {\n80:             phase = 0;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 75,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/ProcessMsg/ProcessMsg.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "82:         self.tick() after(100);\n83:     }\n84: }\n85: \n86: main {\n87:     @priority(1) Source src(task):();\n88:     @priority(2) Task task(chk):();\n89:     @priority(3) Checker chk():();\n90:     KeepAlive ka():();\n91: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 87,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/ProcessMsg/ProcessMsg.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) Source src(task):();"
+    },
+    {
+      "context": "83:     }\n84: }\n85: \n86: main {\n87:     @priority(1) Source src(task):();\n88:     @priority(2) Task task(chk):();\n89:     @priority(3) Checker chk():();\n90:     KeepAlive ka():();\n91: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 88,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/ProcessMsg/ProcessMsg.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2) Task task(chk):();"
+    },
+    {
+      "context": "84: }\n85: \n86: main {\n87:     @priority(1) Source src(task):();\n88:     @priority(2) Task task(chk):();\n89:     @priority(3) Checker chk():();\n90:     KeepAlive ka():();\n91: }",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 89,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/ProcessMsg/ProcessMsg.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3) Checker chk():();"
+    },
+    {
+      "context": "6: \n7:     Source() {\n8:         self.start();\n9:     }\n10: \n11:     @priority(1)\n12:     msgsrv start() {\n13:         n1.in(0) after(10);\n14:     }\n15: \n16:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 11,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Ring/Ring.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "11:     @priority(1)\n12:     msgsrv start() {\n13:         n1.in(0) after(10);\n14:     }\n15: \n16:     @priority(2)\n17:     msgsrv in(int v) {\n18:         chk.returned(v);\n19:     }\n20: }\n21: ",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 16,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Ring/Ring.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "25:     }\n26: \n27:     Node1() {\n28:     }\n29: \n30:     @priority(1)\n31:     msgsrv in(int v) {\n32:         n2.in(1) after(10);\n33:     }\n34: }\n35: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 30,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Ring/Ring.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "39:     }\n40: \n41:     Node2() {\n42:     }\n43: \n44:     @priority(1)\n45:     msgsrv in(int v) {\n46:         s.in(2) after(10);\n47:     }\n48: }\n49: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 44,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Ring/Ring.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "54: \n55:     Checker() {\n56:         violation = 0;\n57:     }\n58: \n59:     @priority(1)\n60:     msgsrv returned(int v) {\n61:         if (v != 2) {\n62:             violation = 1;\n63:         }\n64:     }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 59,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Ring/Ring.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "72:     KeepAlive() {\n73:         phase = 0;\n74:         self.tick() after(100);\n75:     }\n76: \n77:     @priority(1)\n78:     msgsrv tick() {\n79:         if (phase == 0) {\n80:             phase = 1;\n81:         } else {\n82:             phase = 0;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 77,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Ring/Ring.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "84:         self.tick() after(100);\n85:     }\n86: }\n87: \n88: main {\n89:     @priority(1) Source s(n1, chk):();\n90:     Node1 n1(n2):();\n91:     Node2 n2(s):();\n92:     @priority(2) Checker chk():();\n93:     KeepAlive ka():();\n94: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 89,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Ring/Ring.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) Source s(n1, chk):();"
+    },
+    {
+      "context": "87: \n88: main {\n89:     @priority(1) Source s(n1, chk):();\n90:     Node1 n1(n2):();\n91:     Node2 n2(s):();\n92:     @priority(2) Checker chk():();\n93:     KeepAlive ka():();\n94: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 92,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Ring/Ring.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2) Checker chk():();"
+    },
+    {
+      "context": "5: \n6:     Checker() {\n7:         violation = 0;\n8:     }\n9: \n10:     @priority(1)\n11:     msgsrv replySeen(int v) {\n12:         if (v != 1) {\n13:             violation = 1;\n14:         }\n15:     }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 10,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/SafeSend/SafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "12:         if (v != 1) {\n13:             violation = 1;\n14:         }\n15:     }\n16: \n17:     @priority(2)\n18:     msgsrv errorIn() {\n19:         violation = 1;\n20:     }\n21: }\n22: ",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 17,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/SafeSend/SafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "33:     Client() {\n34:         req = 0;\n35:         self.start();\n36:     }\n37: \n38:     @priority(1)\n39:     msgsrv start() {\n40:         req = 1;\n41:         s.in(req) after(10);\n42:     }\n43: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 38,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/SafeSend/SafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "39:     msgsrv start() {\n40:         req = 1;\n41:         s.in(req) after(10);\n42:     }\n43: \n44:     @priority(2)\n45:     msgsrv in(int v) {\n46:         chk.replySeen(v);\n47:     }\n48: }\n49: ",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 44,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/SafeSend/SafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "54:     }\n55: \n56:     Server() {\n57:     }\n58: \n59:     @priority(1)\n60:     msgsrv in(int v) {\n61:         if (v == 0) {\n62:             self.err() after(10);\n63:         } else {\n64:             c.in(v);",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 59,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/SafeSend/SafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "63:         } else {\n64:             c.in(v);\n65:         }\n66:     }\n67: \n68:     @priority(2)\n69:     msgsrv err() {\n70:         chk.errorIn();\n71:     }\n72: }\n73: ",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 68,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/SafeSend/SafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "79:     KeepAlive() {\n80:         phase = 0;\n81:         self.tick() after(100);\n82:     }\n83: \n84:     @priority(1)\n85:     msgsrv tick() {\n86:         if (phase == 0) {\n87:             phase = 1;\n88:         } else {\n89:             phase = 0;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 84,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/SafeSend/SafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "91:         self.tick() after(100);\n92:     }\n93: }\n94: \n95: main {\n96:     @priority(1) Server s(c, chk):();\n97:     @priority(2) Client c(s, chk):();\n98:     @priority(3) Checker chk():();\n99:     KeepAlive ka():();\n100: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 96,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/SafeSend/SafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) Server s(c, chk):();"
+    },
+    {
+      "context": "92:     }\n93: }\n94: \n95: main {\n96:     @priority(1) Server s(c, chk):();\n97:     @priority(2) Client c(s, chk):();\n98:     @priority(3) Checker chk():();\n99:     KeepAlive ka():();\n100: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 97,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/SafeSend/SafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2) Client c(s, chk):();"
+    },
+    {
+      "context": "93: }\n94: \n95: main {\n96:     @priority(1) Server s(c, chk):();\n97:     @priority(2) Client c(s, chk):();\n98:     @priority(3) Checker chk():();\n99:     KeepAlive ka():();\n100: }",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 98,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/SafeSend/SafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3) Checker chk():();"
+    },
+    {
+      "context": "4:     }\n5: \n6:     Scenario() {\n7:     }\n8: \n9:     @priority(1)\n10:     msgsrv start() {\n11:         self.requestAfterWait() after(2);\n12:     }\n13: \n14:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 9,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Subway/Subway.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "9:     @priority(1)\n10:     msgsrv start() {\n11:         self.requestAfterWait() after(2);\n12:     }\n13: \n14:     @priority(2)\n15:     msgsrv requestAfterWait() {\n16:         self.finishPassing() after(10);\n17:     }\n18: \n19:     @priority(3)",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 14,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Subway/Subway.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "14:     @priority(2)\n15:     msgsrv requestAfterWait() {\n16:         self.finishPassing() after(10);\n17:     }\n18: \n19:     @priority(3)\n20:     msgsrv finishPassing() {\n21:         chk.doneIn();\n22:     }\n23: }\n24: ",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 19,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Subway/Subway.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3)"
+    },
+    {
+      "context": "31:     Checker() {\n32:         gotDone = 0;\n33:         violation = 0;\n34:     }\n35: \n36:     @priority(1)\n37:     msgsrv arm() {\n38:         self.timeout() after(11);\n39:     }\n40: \n41:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 36,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Subway/Subway.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "36:     @priority(1)\n37:     msgsrv arm() {\n38:         self.timeout() after(11);\n39:     }\n40: \n41:     @priority(2)\n42:     msgsrv doneIn() {\n43:         gotDone = 1;\n44:     }\n45: \n46:     @priority(3)",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 41,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Subway/Subway.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "41:     @priority(2)\n42:     msgsrv doneIn() {\n43:         gotDone = 1;\n44:     }\n45: \n46:     @priority(3)\n47:     msgsrv timeout() {\n48:         if (gotDone == 0) {\n49:             violation = 1;\n50:         }\n51:     }",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 46,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Subway/Subway.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3)"
+    },
+    {
+      "context": "59:     KeepAlive() {\n60:         phase = 0;\n61:         self.kick();\n62:     }\n63: \n64:     @priority(1)\n65:     msgsrv kick() {\n66:         self.tick() after(100);\n67:     }\n68: \n69:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 64,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Subway/Subway.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "64:     @priority(1)\n65:     msgsrv kick() {\n66:         self.tick() after(100);\n67:     }\n68: \n69:     @priority(2)\n70:     msgsrv tick() {\n71:         if (phase == 0) {\n72:             phase = 1;\n73:         } else {\n74:             phase = 0;",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 69,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Subway/Subway.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "85: \n86:     Bootstrap() {\n87:         self.start();\n88:     }\n89: \n90:     @priority(1)\n91:     msgsrv start() {\n92:         chk.arm();\n93:         s.start();\n94:     }\n95: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 90,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Subway/Subway.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "5: \n6:     Checker() {\n7:         violation = 0;\n8:     }\n9: \n10:     @priority(1)\n11:     msgsrv heatIn(int v) {\n12:         if (v != 1) {\n13:             violation = 1;\n14:         }\n15:     }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 10,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Thermostat/Thermostat.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "26: \n27:     ThermostatCore() {\n28:         thermoState = 0;\n29:     }\n30: \n31:     @priority(1)\n32:     msgsrv temperature(int v) {\n33:         if (v <= 18) {\n34:             thermoState = 1;\n35:             chk.heatIn(1);\n36:         } else if (v >= 22) {",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 31,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Thermostat/Thermostat.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "47: \n48:     TemperatureSource() {\n49:         self.start();\n50:     }\n51: \n52:     @priority(1)\n53:     msgsrv start() {\n54:         t.temperature(18);\n55:     }\n56: }\n57: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 52,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Thermostat/Thermostat.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "63:     KeepAlive() {\n64:         phase = 0;\n65:         self.tick() after(100);\n66:     }\n67: \n68:     @priority(1)\n69:     msgsrv tick() {\n70:         if (phase == 0) {\n71:             phase = 1;\n72:         } else {\n73:             phase = 0;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 68,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Thermostat/Thermostat.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "75:         self.tick() after(100);\n76:     }\n77: }\n78: \n79: main {\n80:     @priority(1) TemperatureSource src(t):();\n81:     @priority(2) ThermostatCore t(chk):();\n82:     @priority(3) Checker chk():();\n83:     KeepAlive ka():();\n84: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 80,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Thermostat/Thermostat.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) TemperatureSource src(t):();"
+    },
+    {
+      "context": "76:     }\n77: }\n78: \n79: main {\n80:     @priority(1) TemperatureSource src(t):();\n81:     @priority(2) ThermostatCore t(chk):();\n82:     @priority(3) Checker chk():();\n83:     KeepAlive ka():();\n84: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 81,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Thermostat/Thermostat.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2) ThermostatCore t(chk):();"
+    },
+    {
+      "context": "77: }\n78: \n79: main {\n80:     @priority(1) TemperatureSource src(t):();\n81:     @priority(2) ThermostatCore t(chk):();\n82:     @priority(3) Checker chk():();\n83:     KeepAlive ka():();\n84: }",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 82,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/Thermostat/Thermostat.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3) Checker chk():();"
+    },
+    {
+      "context": "7:     Checker() {\n8:         lastState = 0;\n9:         violation = 0;\n10:     }\n11: \n12:     @priority(1)\n13:     msgsrv stateIn(int v) {\n14:         lastState = v;\n15:     }\n16: \n17:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 12,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrafficLight/TrafficLight.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "12:     @priority(1)\n13:     msgsrv stateIn(int v) {\n14:         lastState = v;\n15:     }\n16: \n17:     @priority(2)\n18:     msgsrv sigGIn() {\n19:         if (lastState != 1) {\n20:             violation = 1;\n21:         }\n22:     }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 17,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrafficLight/TrafficLight.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "34:     TrafficLightCore() {\n35:         lightState = 0;\n36:         self.start();\n37:     }\n38: \n39:     @priority(1)\n40:     msgsrv start() {\n41:         chk.stateIn(lightState);\n42:         self.emitGreen() after(1);\n43:     }\n44: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 39,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrafficLight/TrafficLight.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "40:     msgsrv start() {\n41:         chk.stateIn(lightState);\n42:         self.emitGreen() after(1);\n43:     }\n44: \n45:     @priority(2)\n46:     msgsrv emitGreen() {\n47:         // Bug preserved: green is emitted, but the state never changes to GREEN.\n48:         chk.sigGIn();\n49:     }\n50: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 45,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrafficLight/TrafficLight.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "57:     KeepAlive() {\n58:         phase = 0;\n59:         self.tick() after(100);\n60:     }\n61: \n62:     @priority(1)\n63:     msgsrv tick() {\n64:         if (phase == 0) {\n65:             phase = 1;\n66:         } else {\n67:             phase = 0;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 62,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrafficLight/TrafficLight.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "69:         self.tick() after(100);\n70:     }\n71: }\n72: \n73: main {\n74:     @priority(1) TrafficLightCore tl(chk):();\n75:     @priority(2) Checker chk():();\n76:     KeepAlive ka():();\n77: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 74,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrafficLight/TrafficLight.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) TrafficLightCore tl(chk):();"
+    },
+    {
+      "context": "70:     }\n71: }\n72: \n73: main {\n74:     @priority(1) TrafficLightCore tl(chk):();\n75:     @priority(2) Checker chk():();\n76:     KeepAlive ka():();\n77: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 75,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrafficLight/TrafficLight.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2) Checker chk():();"
+    },
+    {
+      "context": "7:     Checker() {\n8:         doorClosed = 0;\n9:         violation = 0;\n10:     }\n11: \n12:     @priority(1)\n13:     msgsrv trainEvt() {\n14:         if (doorClosed == 0) {\n15:             violation = 1;\n16:         }\n17:     }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 12,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor/TrainDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "14:         if (doorClosed == 0) {\n15:             violation = 1;\n16:         }\n17:     }\n18: \n19:     @priority(2)\n20:     msgsrv doorEvt() {\n21:         doorClosed = 1;\n22:     }\n23: }\n24: ",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 19,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor/TrainDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "28:     }\n29: \n30:     Train() {\n31:     }\n32: \n33:     @priority(1)\n34:     msgsrv move() {\n35:         chk.trainEvt();\n36:     }\n37: }\n38: ",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 33,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor/TrainDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "42:     }\n43: \n44:     Door() {\n45:     }\n46: \n47:     @priority(1)\n48:     msgsrv close() {\n49:         self.finishClose() after(1);\n50:     }\n51: \n52:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 47,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor/TrainDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "47:     @priority(1)\n48:     msgsrv close() {\n49:         self.finishClose() after(1);\n50:     }\n51: \n52:     @priority(2)\n53:     msgsrv finishClose() {\n54:         chk.doorEvt();\n55:     }\n56: }\n57: ",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 52,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor/TrainDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "63: \n64:     Controller() {\n65:         self.start();\n66:     }\n67: \n68:     @priority(1)\n69:     msgsrv start() {\n70:         t.move() after(1);\n71:         d.close() after(1);\n72:     }\n73: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 68,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor/TrainDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "80:     KeepAlive() {\n81:         phase = 0;\n82:         self.tick() after(100);\n83:     }\n84: \n85:     @priority(1)\n86:     msgsrv tick() {\n87:         if (phase == 0) {\n88:             phase = 1;\n89:         } else {\n90:             phase = 0;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 85,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor/TrainDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "92:         self.tick() after(100);\n93:     }\n94: }\n95: \n96: main {\n97:     @priority(1) Train t(chk):();\n98:     @priority(1) Door d(chk):();\n99:     @priority(2) Checker chk():();\n100:     Controller c(t, d):();\n101:     KeepAlive ka():();\n102: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 97,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor/TrainDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) Train t(chk):();"
+    },
+    {
+      "context": "93:     }\n94: }\n95: \n96: main {\n97:     @priority(1) Train t(chk):();\n98:     @priority(1) Door d(chk):();\n99:     @priority(2) Checker chk():();\n100:     Controller c(t, d):();\n101:     KeepAlive ka():();\n102: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 98,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor/TrainDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) Door d(chk):();"
+    },
+    {
+      "context": "94: }\n95: \n96: main {\n97:     @priority(1) Train t(chk):();\n98:     @priority(1) Door d(chk):();\n99:     @priority(2) Checker chk():();\n100:     Controller c(t, d):();\n101:     KeepAlive ka():();\n102: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 99,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor/TrainDoor.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2) Checker chk():();"
+    },
+    {
+      "context": "6: \n7:     Controller() {\n8:         self.start();\n9:     }\n10: \n11:     @priority(1)\n12:     msgsrv start() {\n13:         t.in(1) after(1);\n14:         d.in(2) after(1);\n15:     }\n16: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 11,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor2/TrainDoor2.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "26: \n27:     Train() {\n28:         received = 0;\n29:     }\n30: \n31:     @priority(1)\n32:     msgsrv in(int v) {\n33:         received = v;\n34:         s.in1(received);\n35:     }\n36: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 31,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor2/TrainDoor2.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "46: \n47:     Door() {\n48:         received = 0;\n49:     }\n50: \n51:     @priority(1)\n52:     msgsrv in(int v) {\n53:         received = v;\n54:         s.in2(received);\n55:     }\n56: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 51,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor2/TrainDoor2.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "72:         seen2 = 0;\n73:         v1 = 0;\n74:         v2 = 0;\n75:     }\n76: \n77:     @priority(1)\n78:     msgsrv in1(int v) {\n79:         seen1 = 1;\n80:         v1 = v;\n81:         if (seen2 == 1) {\n82:             chk.sumIn(v1 + v2);",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 77,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor2/TrainDoor2.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "81:         if (seen2 == 1) {\n82:             chk.sumIn(v1 + v2);\n83:         }\n84:     }\n85: \n86:     @priority(2)\n87:     msgsrv in2(int v) {\n88:         seen2 = 1;\n89:         v2 = v;\n90:         if (seen1 == 1) {\n91:             chk.sumIn(v1 + v2);",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 86,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor2/TrainDoor2.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "100: \n101:     Checker() {\n102:         violation = 0;\n103:     }\n104: \n105:     @priority(1)\n106:     msgsrv sumIn(int v) {\n107:         if (v != 3) {\n108:             violation = 1;\n109:         }\n110:     }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 105,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor2/TrainDoor2.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "118:     KeepAlive() {\n119:         phase = 0;\n120:         self.tick() after(100);\n121:     }\n122: \n123:     @priority(1)\n124:     msgsrv tick() {\n125:         if (phase == 0) {\n126:             phase = 1;\n127:         } else {\n128:             phase = 0;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 123,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor2/TrainDoor2.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "130:         self.tick() after(100);\n131:     }\n132: }\n133: \n134: main {\n135:     @priority(1) Train t(s):();\n136:     @priority(1) Door d(s):();\n137:     @priority(2) Sink s(chk):();\n138:     @priority(3) Checker chk():();\n139:     Controller c(t, d):();\n140:     KeepAlive ka():();",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 135,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor2/TrainDoor2.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) Train t(s):();"
+    },
+    {
+      "context": "131:     }\n132: }\n133: \n134: main {\n135:     @priority(1) Train t(s):();\n136:     @priority(1) Door d(s):();\n137:     @priority(2) Sink s(chk):();\n138:     @priority(3) Checker chk():();\n139:     Controller c(t, d):();\n140:     KeepAlive ka():();\n141: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 136,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor2/TrainDoor2.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) Door d(s):();"
+    },
+    {
+      "context": "132: }\n133: \n134: main {\n135:     @priority(1) Train t(s):();\n136:     @priority(1) Door d(s):();\n137:     @priority(2) Sink s(chk):();\n138:     @priority(3) Checker chk():();\n139:     Controller c(t, d):();\n140:     KeepAlive ka():();\n141: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 137,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor2/TrainDoor2.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2) Sink s(chk):();"
+    },
+    {
+      "context": "133: \n134: main {\n135:     @priority(1) Train t(s):();\n136:     @priority(1) Door d(s):();\n137:     @priority(2) Sink s(chk):();\n138:     @priority(3) Checker chk():();\n139:     Controller c(t, d):();\n140:     KeepAlive ka():();\n141: }",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 138,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoor2/TrainDoor2.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3) Checker chk():();"
+    },
+    {
+      "context": "7: \n8:     Controller() {\n9:         self.start();\n10:     }\n11: \n12:     @priority(1)\n13:     msgsrv start() {\n14:         t.in(1) after(1);\n15:         d.in(2) after(1);\n16:         d2.in(3) after(1);\n17:     }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 12,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoorFeedback/TrainDoorFeedback.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "28: \n29:     Train() {\n30:         received = 0;\n31:     }\n32: \n33:     @priority(1)\n34:     msgsrv in(int v) {\n35:         received = v;\n36:         s12.a(received);\n37:     }\n38: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 33,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoorFeedback/TrainDoorFeedback.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "48: \n49:     DoorA() {\n50:         received = 0;\n51:     }\n52: \n53:     @priority(1)\n54:     msgsrv in(int v) {\n55:         received = v;\n56:         s12.b(received);\n57:     }\n58: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 53,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoorFeedback/TrainDoorFeedback.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "68: \n69:     DoorB() {\n70:         received = 0;\n71:     }\n72: \n73:     @priority(1)\n74:     msgsrv in(int v) {\n75:         received = v;\n76:         s123.c(received);\n77:     }\n78: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 73,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoorFeedback/TrainDoorFeedback.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "96:         va = 0;\n97:         vb = 0;\n98:         emitted = 0;\n99:     }\n100: \n101:     @priority(1)\n102:     msgsrv a(int v) {\n103:         seenA = 1;\n104:         va = v;\n105:         if (seenA == 1 && seenB == 1 && emitted == 0) {\n106:             emitted = 1;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 101,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoorFeedback/TrainDoorFeedback.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "106:             emitted = 1;\n107:             s123.partial(va + vb);\n108:         }\n109:     }\n110: \n111:     @priority(2)\n112:     msgsrv b(int v) {\n113:         seenB = 1;\n114:         vb = v;\n115:         if (seenA == 1 && seenB == 1 && emitted == 0) {\n116:             emitted = 1;",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 111,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoorFeedback/TrainDoorFeedback.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "138:         vp = 0;\n139:         vc = 0;\n140:         emitted = 0;\n141:     }\n142: \n143:     @priority(1)\n144:     msgsrv partial(int v) {\n145:         seenP = 1;\n146:         vp = v;\n147:         if (seenP == 1 && seenC == 1 && emitted == 0) {\n148:             emitted = 1;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 143,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoorFeedback/TrainDoorFeedback.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "148:             emitted = 1;\n149:             chk.sumIn(vp + vc);\n150:         }\n151:     }\n152: \n153:     @priority(2)\n154:     msgsrv c(int v) {\n155:         seenC = 1;\n156:         vc = v;\n157:         if (seenP == 1 && seenC == 1 && emitted == 0) {\n158:             emitted = 1;",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 153,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoorFeedback/TrainDoorFeedback.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "168: \n169:     Checker() {\n170:         violation = 0;\n171:     }\n172: \n173:     @priority(1)\n174:     msgsrv sumIn(int v) {\n175:         if (v != 6) {\n176:             violation = 1;\n177:         }\n178:     }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 173,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoorFeedback/TrainDoorFeedback.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "186:     KeepAlive() {\n187:         phase = 0;\n188:         self.tick() after(100);\n189:     }\n190: \n191:     @priority(1)\n192:     msgsrv tick() {\n193:         if (phase == 0) {\n194:             phase = 1;\n195:         } else {\n196:             phase = 0;",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 191,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoorFeedback/TrainDoorFeedback.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "198:         self.tick() after(100);\n199:     }\n200: }\n201: \n202: main {\n203:     @priority(1) Train t(s12):();\n204:     @priority(1) DoorA d(s12):();\n205:     @priority(1) DoorB d2(s123):();\n206:     @priority(2) Sum2 s12(s123):();\n207:     @priority(3) SumFinal s123(chk):();\n208:     @priority(4) Checker chk():();",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 203,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoorFeedback/TrainDoorFeedback.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) Train t(s12):();"
+    },
+    {
+      "context": "199:     }\n200: }\n201: \n202: main {\n203:     @priority(1) Train t(s12):();\n204:     @priority(1) DoorA d(s12):();\n205:     @priority(1) DoorB d2(s123):();\n206:     @priority(2) Sum2 s12(s123):();\n207:     @priority(3) SumFinal s123(chk):();\n208:     @priority(4) Checker chk():();\n209:     Controller c(t, d, d2):();",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 204,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoorFeedback/TrainDoorFeedback.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) DoorA d(s12):();"
+    },
+    {
+      "context": "200: }\n201: \n202: main {\n203:     @priority(1) Train t(s12):();\n204:     @priority(1) DoorA d(s12):();\n205:     @priority(1) DoorB d2(s123):();\n206:     @priority(2) Sum2 s12(s123):();\n207:     @priority(3) SumFinal s123(chk):();\n208:     @priority(4) Checker chk():();\n209:     Controller c(t, d, d2):();\n210:     KeepAlive ka():();",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 205,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoorFeedback/TrainDoorFeedback.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) DoorB d2(s123):();"
+    },
+    {
+      "context": "201: \n202: main {\n203:     @priority(1) Train t(s12):();\n204:     @priority(1) DoorA d(s12):();\n205:     @priority(1) DoorB d2(s123):();\n206:     @priority(2) Sum2 s12(s123):();\n207:     @priority(3) SumFinal s123(chk):();\n208:     @priority(4) Checker chk():();\n209:     Controller c(t, d, d2):();\n210:     KeepAlive ka():();\n211: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 206,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoorFeedback/TrainDoorFeedback.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2) Sum2 s12(s123):();"
+    },
+    {
+      "context": "202: main {\n203:     @priority(1) Train t(s12):();\n204:     @priority(1) DoorA d(s12):();\n205:     @priority(1) DoorB d2(s123):();\n206:     @priority(2) Sum2 s12(s123):();\n207:     @priority(3) SumFinal s123(chk):();\n208:     @priority(4) Checker chk():();\n209:     Controller c(t, d, d2):();\n210:     KeepAlive ka():();\n211: }",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 207,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoorFeedback/TrainDoorFeedback.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3) SumFinal s123(chk):();"
+    },
+    {
+      "context": "203:     @priority(1) Train t(s12):();\n204:     @priority(1) DoorA d(s12):();\n205:     @priority(1) DoorB d2(s123):();\n206:     @priority(2) Sum2 s12(s123):();\n207:     @priority(3) SumFinal s123(chk):();\n208:     @priority(4) Checker chk():();\n209:     Controller c(t, d, d2):();\n210:     KeepAlive ka():();\n211: }",
+      "forms": [
+        "@priority(4)"
+      ],
+      "line": 208,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/TrainDoorFeedback/TrainDoorFeedback.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(4) Checker chk():();"
+    },
+    {
+      "context": "5: \n6:     Checker() {\n7:         violation = 0;\n8:     }\n9: \n10:     @priority(1)\n11:     msgsrv errorIn() {\n12:         self.latch() after(1);\n13:     }\n14: \n15:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 10,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/UnsafeSend/UnsafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "10:     @priority(1)\n11:     msgsrv errorIn() {\n12:         self.latch() after(1);\n13:     }\n14: \n15:     @priority(2)\n16:     msgsrv latch() {\n17:         violation = 1;\n18:     }\n19: }\n20: ",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 15,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/UnsafeSend/UnsafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "25: \n26:     Client() {\n27:         self.start();\n28:     }\n29: \n30:     @priority(1)\n31:     msgsrv start() {\n32:         s.in(0) after(10);\n33:     }\n34: \n35:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 30,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/UnsafeSend/UnsafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "30:     @priority(1)\n31:     msgsrv start() {\n32:         s.in(0) after(10);\n33:     }\n34: \n35:     @priority(2)\n36:     msgsrv in(int v) {\n37:     }\n38: }\n39: \n40: reactiveclass Server(5) {",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 35,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/UnsafeSend/UnsafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "43:     }\n44: \n45:     Server() {\n46:     }\n47: \n48:     @priority(1)\n49:     msgsrv in(int v) {\n50:         if (v == 0) {\n51:             self.err() after(10);\n52:         }\n53:     }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 48,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/UnsafeSend/UnsafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "50:         if (v == 0) {\n51:             self.err() after(10);\n52:         }\n53:     }\n54: \n55:     @priority(2)\n56:     msgsrv err() {\n57:         chk.errorIn();\n58:     }\n59: }\n60: ",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 55,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/UnsafeSend/UnsafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "66:     KeepAlive() {\n67:         phase = 0;\n68:         self.kick();\n69:     }\n70: \n71:     @priority(1)\n72:     msgsrv kick() {\n73:         self.tick() after(100);\n74:     }\n75: \n76:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 71,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/UnsafeSend/UnsafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "71:     @priority(1)\n72:     msgsrv kick() {\n73:         self.tick() after(100);\n74:     }\n75: \n76:     @priority(2)\n77:     msgsrv tick() {\n78:         phase = 1 - phase;\n79:         self.tick() after(100);\n80:     }\n81: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 76,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/UnsafeSend/UnsafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "79:         self.tick() after(100);\n80:     }\n81: }\n82: \n83: main {\n84:     @priority(1) Server s(chk):();\n85:     @priority(2) Checker chk():();\n86:     Client c(s):();\n87:     KeepAlive ka():();\n88: }",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 84,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/UnsafeSend/UnsafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1) Server s(chk):();"
+    },
+    {
+      "context": "80:     }\n81: }\n82: \n83: main {\n84:     @priority(1) Server s(chk):();\n85:     @priority(2) Checker chk():();\n86:     Client c(s):();\n87:     KeepAlive ka():();\n88: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 85,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/UnsafeSend/UnsafeSend.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2) Checker chk():();"
+    },
+    {
+      "context": "10:         seen = 0;\n11:         violation = 0;\n12:         self.start();\n13:     }\n14: \n15:     @priority(1)\n16:     msgsrv start() {\n17:         self.dispatch();\n18:     }\n19: \n20:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 15,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/WideBarrier24/WideBarrier24.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "15:     @priority(1)\n16:     msgsrv start() {\n17:         self.dispatch();\n18:     }\n19: \n20:     @priority(2)\n21:     msgsrv dispatch() {\n22:         if (round < 40) {\n23:             round = round + 1;\n24:             seen = 0;\n25: ",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 20,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/WideBarrier24/WideBarrier24.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    },
+    {
+      "context": "48:             self.token() after(1);\n49:             self.token() after(1);\n50:         }\n51:     }\n52: \n53:     @priority(3)\n54:     msgsrv token() {\n55:         seen = seen + 1;\n56: \n57:         if (seen > 24) {\n58:             violation = 1;",
+      "forms": [
+        "@priority(3)"
+      ],
+      "line": 53,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/WideBarrier24/WideBarrier24.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(3)"
+    },
+    {
+      "context": "74:     KeepAlive() {\n75:         phase = 0;\n76:         self.kick();\n77:     }\n78: \n79:     @priority(1)\n80:     msgsrv kick() {\n81:         self.tick() after(100000);\n82:     }\n83: \n84:     @priority(2)",
+      "forms": [
+        "@priority(1)"
+      ],
+      "line": 79,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/WideBarrier24/WideBarrier24.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(1)"
+    },
+    {
+      "context": "79:     @priority(1)\n80:     msgsrv kick() {\n81:         self.tick() after(100000);\n82:     }\n83: \n84:     @priority(2)\n85:     msgsrv tick() {\n86:         phase = 1 - phase;\n87:         self.tick() after(100000);\n88:     }\n89: }",
+      "forms": [
+        "@priority(2)"
+      ],
+      "line": 84,
+      "path": "ReLico-fmcad-2026-artifact-v1/verifier-benchmarks/TR/src/WideBarrier24/WideBarrier24.rebeca",
+      "source": "published-parser-artifact",
+      "source_line": "@priority(2)"
+    }
+  ],
+  "phase": "phase2b2a-execution-preflight",
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "readiness": {
+    "dynamic_parser_probe_ready": true,
+    "official_rmc_probe_ready": true,
+    "production_source_mutation_required": false,
+    "semantic_model_execution_performed": false
+  },
+  "schema_version": 1
+}

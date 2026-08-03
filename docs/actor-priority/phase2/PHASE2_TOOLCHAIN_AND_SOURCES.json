@@ -1,0 +1,47 @@
+{
+  "canonical_paper_text": {
+    "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase2-Evidence-20260802T154051+0330/canonical-paper-pages.txt",
+    "sha256": "fc2557de2fff5276f34f81357251ef633bbb06fb2a5e5305109aad5c0fbeb901"
+  },
+  "next_phase": "phase2b-dynamic-parser-rmc-and-theorem-behavior-probes",
+  "official_compiler": {
+    "commit": "91dcffcc67fd320fdf27863adbba4d6fab28ac43",
+    "snapshot": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase2-Evidence-20260802T154051+0330/org.rebecalang.compiler"
+  },
+  "official_modelchecker": {
+    "commit": "fb4197f4b3c54c19d569b46c614024fe75bbf4b6",
+    "snapshot": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase2-Evidence-20260802T154051+0330/org.rebecalang.modelchecker"
+  },
+  "phase": "phase2a-static-semantic-audit",
+  "phase2a_partial_evidence": {
+    "compiler_hits": "1c1f89a567ae9f44351bc8d4baa4c1375beb3850c58d0079a97c80b9a7387a6a",
+    "declarations": "6fa75599983d14a296925d8039158db5aeeab0bf89a2fe1f1546b7a9b02a2929",
+    "frontend_hits": "63565406adf071df67f47c3e9bf99b3293c3eabbdac3f83774e8a1171bfb6cc9",
+    "modelchecker_hits": "7d01d833d515ca3d3bcd6d2f7a929d9e54b6352f65cb665b707624344c1f0506",
+    "paper_hits": "78dbc01511a567d2bf791c068d78510321e8020c58c1c93d1c94281440d0a9a4",
+    "parser_hits": "3161d9508c7d9e0da08c0beb3acf348b64c9f382aa40174ab3a33bcdef50aa63",
+    "registry_audit": "7424b1daab9d48d326151a8422817971194b061754bfa68ef84bd083d54029b0",
+    "relico_hits": "cdf5fd717d5f4f4b1e011ae8ab54f709b11300806382f71037218af3ba4f3092",
+    "rmc_hits": "982ac50b0d1a8c08c270f6700dabec72ab383be740963318530abcfb5ccc3aa3"
+  },
+  "relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "repository": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "repair": {
+    "direct_annotation_access": true,
+    "frontend_annotation_classification": "DIRECT_ACTOR_ANNOTATION_ACCESS_FOUND",
+    "local_priority_extraction": true,
+    "reason": "The initial audit required an exact Java source spelling instead of classifying actual annotation handling.",
+    "unsupported_annotation_diagnostic": true,
+    "validator_call_on_actor": false
+  },
+  "schema_version": 1,
+  "semantic_state": {
+    "approach_a_implementation": "not started",
+    "approach_b_implementation": "not started",
+    "claim_a": "OUTSIDE CURRENT FRAGMENT provisional",
+    "claims_b_through_g": "NOT YET PROVED"
+  }
+}

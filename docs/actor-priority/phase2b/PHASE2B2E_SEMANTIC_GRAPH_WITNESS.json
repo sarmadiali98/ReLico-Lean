@@ -1,0 +1,1049 @@
+{
+  "canonicalization_contract": {
+    "edge_labels": [
+      "messageserver.sender",
+      "messageserver.owner",
+      "messageserver.title"
+    ],
+    "file_paths_semantic": false,
+    "generated_source_differences_semantic": false,
+    "load_bearing_observable": "reachable ordered dispatch traces",
+    "maximum_trace_depth": 10,
+    "state_identifiers_semantic": false,
+    "wall_clock_durations_semantic": false,
+    "xml_serialization_order_semantic": false
+  },
+  "claim_scope": {
+    "claim_d": "YES",
+    "established_statement": "For the tested RMC model, reversing only the first two actor priorities changes the canonical reachable actor-dispatch trace language.",
+    "not_established": [
+      "Actor priorities are required for models outside the actor-priority-using subset.",
+      "The current ReLico correspondence theorem already models actor-priority scheduling.",
+      "Base and reversed variants have different property verdicts.",
+      "Actor priority must be added to the current restricted theorem rather than excluded."
+    ]
+  },
+  "classification": "SEMANTIC_TRACE_WITNESS_CONFIRMED_ACTOR_PRIORITY_REVERSAL_CHANGES_REACHABLE_DISPATCH_TRACE_LANGUAGE",
+  "comparison": {
+    "all_runs_exit_zero_without_timeout": true,
+    "base_and_reversed_semantic_graphs_stable": true,
+    "base_vs_absent_semantic_graph_differs": true,
+    "base_worker_fire_order_language": [
+      [
+        "workera",
+        "workerb"
+      ]
+    ],
+    "first_worker_dispatch_sets_differ": true,
+    "observer_hit_languages_differ": false,
+    "property_verdicts_differ": false,
+    "reversed_worker_fire_order_language": [
+      [
+        "workerb",
+        "workera"
+      ]
+    ],
+    "transition_prefix_languages_differ": true,
+    "worker_fire_order_languages_disjoint": true,
+    "worker_fire_order_languages_nonempty": true
+  },
+  "inputs": {
+    "phase2b2d": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase2b/PHASE2B2D_SYSTEMATIC_DISCRIMINATING_FAMILY.json",
+      "sha256": "9c0d6e37ba56085bade02a5275bda08199f7b692f01823da57bf86545bebbe3a"
+    },
+    "selected_family_id": "expected-1-delay-0",
+    "witness_audit": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase2b/PHASE2B2D_SEMANTIC_WITNESS_AUDIT.json",
+      "sha256": "68e056e8438f93257cc53e51408d234106c5c5989ff0fd0a1dfab755a22fd62f"
+    }
+  },
+  "next_phase": "phase2b3-classify-phase2-evidence-before-approach-implementations",
+  "phase": "phase2b2e-semantic-graph-witness",
+  "provisional_claims": {
+    "claim_a": "OUTSIDE CURRENT FRAGMENT",
+    "claim_b": "NOT YET PROVED",
+    "claim_c": "CONDITIONAL: official RMC accepts actor-priority models",
+    "claim_d": "YES",
+    "claims_e_through_g": "NOT YET PROVED"
+  },
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "schema_version": 1,
+  "semantic_trace_witness_confirmed": true,
+  "source_delta_audit": {
+    "absent_equals_base_after_removing_priorities": true,
+    "absent_source": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/absent/model.rebeca",
+      "priority_placeholder_sha256": "6d8cfafc8fab2f3207a9193e1504f194cc22777b024b9e5dd4a9b431ac5aa005",
+      "priority_removed_sha256": "6d8cfafc8fab2f3207a9193e1504f194cc22777b024b9e5dd4a9b431ac5aa005",
+      "priority_values": [],
+      "sha256": "6d8cfafc8fab2f3207a9193e1504f194cc22777b024b9e5dd4a9b431ac5aa005"
+    },
+    "base_and_reversed_differ_only_in_priority_values": true,
+    "base_source": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/base/model.rebeca",
+      "priority_placeholder_sha256": "599e9ba3cf75baa6ed47cc07606695149c1441de56ac731a90f2aba80fdf7d41",
+      "priority_removed_sha256": "6d8cfafc8fab2f3207a9193e1504f194cc22777b024b9e5dd4a9b431ac5aa005",
+      "priority_values": [
+        1,
+        2,
+        3
+      ],
+      "sha256": "a65bcf32d21dad09e4b02fd502807d2a6aae0fbc6cc8413308c10fcce3d0686f"
+    },
+    "first_two_worker_priorities_exactly_reversed": true,
+    "reversed_source": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Systematic-Family-20260802T165327+0330/expected-1-delay-0/reversed/model.rebeca",
+      "priority_placeholder_sha256": "599e9ba3cf75baa6ed47cc07606695149c1441de56ac731a90f2aba80fdf7d41",
+      "priority_removed_sha256": "6d8cfafc8fab2f3207a9193e1504f194cc22777b024b9e5dd4a9b431ac5aa005",
+      "priority_values": [
+        2,
+        1,
+        3
+      ],
+      "sha256": "70d5dbae3c5c0836d53ed5ca28ff153d48f2ad5dfcac988ed2c05368cbc2c8d2"
+    }
+  },
+  "variants": {
+    "absent": {
+      "canonical_semantic_sha256": "0dcf9116d466e43b1486b2b0d01df596a7a9d245583d5dea068535693ad69afb",
+      "exit_signature_stable": true,
+      "representative_summary": {
+        "assertion_failed_reachable": true,
+        "edge_label_multiset": [
+          [
+            "workera>observer:HIT",
+            2
+          ],
+          [
+            "workera>workera:FIRE",
+            1
+          ],
+          [
+            "workerb>workerb:FIRE",
+            1
+          ]
+        ],
+        "first_worker_fire_senders": [
+          "workera"
+        ],
+        "observer_hit_order_language": [
+          [
+            "workera"
+          ]
+        ],
+        "result_tags": [
+          "assertion failed"
+        ],
+        "root_count": 1,
+        "state_count_lower_bound": 5,
+        "terminal_state_reachable": true,
+        "transition_count": 4,
+        "transition_prefix_language": [
+          [
+            "workera>workera:FIRE"
+          ],
+          [
+            "workera>workera:FIRE",
+            "workerb>workerb:FIRE"
+          ],
+          [
+            "workera>workera:FIRE",
+            "workerb>workerb:FIRE",
+            "workera>observer:HIT"
+          ],
+          [
+            "workera>workera:FIRE",
+            "workerb>workerb:FIRE",
+            "workera>observer:HIT",
+            "workera>observer:HIT"
+          ]
+        ],
+        "worker_fire_order_language": [
+          [
+            "workera",
+            "workerb"
+          ]
+        ]
+      },
+      "run_count": 3,
+      "runs": [
+        {
+          "canonical_semantic_sha256": "0dcf9116d466e43b1486b2b0d01df596a7a9d245583d5dea068535693ad69afb",
+          "canonical_summary": {
+            "assertion_failed_reachable": true,
+            "edge_label_multiset": [
+              [
+                "workera>observer:HIT",
+                2
+              ],
+              [
+                "workera>workera:FIRE",
+                1
+              ],
+              [
+                "workerb>workerb:FIRE",
+                1
+              ]
+            ],
+            "first_worker_fire_senders": [
+              "workera"
+            ],
+            "observer_hit_order_language": [
+              [
+                "workera"
+              ]
+            ],
+            "result_tags": [
+              "assertion failed"
+            ],
+            "root_count": 1,
+            "state_count_lower_bound": 5,
+            "terminal_state_reachable": true,
+            "transition_count": 4,
+            "transition_prefix_language": [
+              [
+                "workera>workera:FIRE"
+              ],
+              [
+                "workera>workera:FIRE",
+                "workerb>workerb:FIRE"
+              ],
+              [
+                "workera>workera:FIRE",
+                "workerb>workerb:FIRE",
+                "workera>observer:HIT"
+              ],
+              [
+                "workera>workera:FIRE",
+                "workerb>workerb:FIRE",
+                "workera>observer:HIT",
+                "workera>observer:HIT"
+              ]
+            ],
+            "worker_fire_order_language": [
+              [
+                "workera",
+                "workerb"
+              ]
+            ]
+          },
+          "edge_count": 4,
+          "exit_code": 0,
+          "repetition": 1,
+          "results": [
+            "assertion failed"
+          ],
+          "roots": [
+            "1_0"
+          ],
+          "state_count_lower_bound": 5,
+          "stderr_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/absent/run-1.stderr.txt",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/absent/run-1.stdout.txt",
+          "stdout_sha256": "25e84d6ef080d31cdfaca65f2667481593e4b3bdf018e9eb9e6997c802253ffc",
+          "timed_out": false,
+          "variant": "absent"
+        },
+        {
+          "canonical_semantic_sha256": "0dcf9116d466e43b1486b2b0d01df596a7a9d245583d5dea068535693ad69afb",
+          "canonical_summary": {
+            "assertion_failed_reachable": true,
+            "edge_label_multiset": [
+              [
+                "workera>observer:HIT",
+                2
+              ],
+              [
+                "workera>workera:FIRE",
+                1
+              ],
+              [
+                "workerb>workerb:FIRE",
+                1
+              ]
+            ],
+            "first_worker_fire_senders": [
+              "workera"
+            ],
+            "observer_hit_order_language": [
+              [
+                "workera"
+              ]
+            ],
+            "result_tags": [
+              "assertion failed"
+            ],
+            "root_count": 1,
+            "state_count_lower_bound": 5,
+            "terminal_state_reachable": true,
+            "transition_count": 4,
+            "transition_prefix_language": [
+              [
+                "workera>workera:FIRE"
+              ],
+              [
+                "workera>workera:FIRE",
+                "workerb>workerb:FIRE"
+              ],
+              [
+                "workera>workera:FIRE",
+                "workerb>workerb:FIRE",
+                "workera>observer:HIT"
+              ],
+              [
+                "workera>workera:FIRE",
+                "workerb>workerb:FIRE",
+                "workera>observer:HIT",
+                "workera>observer:HIT"
+              ]
+            ],
+            "worker_fire_order_language": [
+              [
+                "workera",
+                "workerb"
+              ]
+            ]
+          },
+          "edge_count": 4,
+          "exit_code": 0,
+          "repetition": 2,
+          "results": [
+            "assertion failed"
+          ],
+          "roots": [
+            "1_0"
+          ],
+          "state_count_lower_bound": 5,
+          "stderr_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/absent/run-2.stderr.txt",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/absent/run-2.stdout.txt",
+          "stdout_sha256": "25e84d6ef080d31cdfaca65f2667481593e4b3bdf018e9eb9e6997c802253ffc",
+          "timed_out": false,
+          "variant": "absent"
+        },
+        {
+          "canonical_semantic_sha256": "0dcf9116d466e43b1486b2b0d01df596a7a9d245583d5dea068535693ad69afb",
+          "canonical_summary": {
+            "assertion_failed_reachable": true,
+            "edge_label_multiset": [
+              [
+                "workera>observer:HIT",
+                2
+              ],
+              [
+                "workera>workera:FIRE",
+                1
+              ],
+              [
+                "workerb>workerb:FIRE",
+                1
+              ]
+            ],
+            "first_worker_fire_senders": [
+              "workera"
+            ],
+            "observer_hit_order_language": [
+              [
+                "workera"
+              ]
+            ],
+            "result_tags": [
+              "assertion failed"
+            ],
+            "root_count": 1,
+            "state_count_lower_bound": 5,
+            "terminal_state_reachable": true,
+            "transition_count": 4,
+            "transition_prefix_language": [
+              [
+                "workera>workera:FIRE"
+              ],
+              [
+                "workera>workera:FIRE",
+                "workerb>workerb:FIRE"
+              ],
+              [
+                "workera>workera:FIRE",
+                "workerb>workerb:FIRE",
+                "workera>observer:HIT"
+              ],
+              [
+                "workera>workera:FIRE",
+                "workerb>workerb:FIRE",
+                "workera>observer:HIT",
+                "workera>observer:HIT"
+              ]
+            ],
+            "worker_fire_order_language": [
+              [
+                "workera",
+                "workerb"
+              ]
+            ]
+          },
+          "edge_count": 4,
+          "exit_code": 0,
+          "repetition": 3,
+          "results": [
+            "assertion failed"
+          ],
+          "roots": [
+            "1_0"
+          ],
+          "state_count_lower_bound": 5,
+          "stderr_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/absent/run-3.stderr.txt",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/absent/run-3.stdout.txt",
+          "stdout_sha256": "25e84d6ef080d31cdfaca65f2667481593e4b3bdf018e9eb9e6997c802253ffc",
+          "timed_out": false,
+          "variant": "absent"
+        }
+      ],
+      "semantic_graph_hash_count": 1,
+      "semantic_graph_stable": true,
+      "variant": "absent"
+    },
+    "base": {
+      "canonical_semantic_sha256": "37951cccb8d0522cc11130a2d0ad6f22d264429b7b14b19c04fb4caf9b208e07",
+      "exit_signature_stable": true,
+      "representative_summary": {
+        "assertion_failed_reachable": false,
+        "edge_label_multiset": [
+          [
+            "workera>observer:HIT",
+            1
+          ],
+          [
+            "workera>workera:FIRE",
+            1
+          ],
+          [
+            "workerb>observer:HIT",
+            1
+          ],
+          [
+            "workerb>workerb:FIRE",
+            1
+          ]
+        ],
+        "first_worker_fire_senders": [
+          "workera"
+        ],
+        "observer_hit_order_language": [
+          [
+            "workera",
+            "workerb"
+          ]
+        ],
+        "result_tags": [
+          "deadlock"
+        ],
+        "root_count": 1,
+        "state_count_lower_bound": 5,
+        "terminal_state_reachable": true,
+        "transition_count": 4,
+        "transition_prefix_language": [
+          [
+            "workera>workera:FIRE"
+          ],
+          [
+            "workera>workera:FIRE",
+            "workerb>workerb:FIRE"
+          ],
+          [
+            "workera>workera:FIRE",
+            "workerb>workerb:FIRE",
+            "workera>observer:HIT"
+          ],
+          [
+            "workera>workera:FIRE",
+            "workerb>workerb:FIRE",
+            "workera>observer:HIT",
+            "workerb>observer:HIT"
+          ]
+        ],
+        "worker_fire_order_language": [
+          [
+            "workera",
+            "workerb"
+          ]
+        ]
+      },
+      "run_count": 3,
+      "runs": [
+        {
+          "canonical_semantic_sha256": "37951cccb8d0522cc11130a2d0ad6f22d264429b7b14b19c04fb4caf9b208e07",
+          "canonical_summary": {
+            "assertion_failed_reachable": false,
+            "edge_label_multiset": [
+              [
+                "workera>observer:HIT",
+                1
+              ],
+              [
+                "workera>workera:FIRE",
+                1
+              ],
+              [
+                "workerb>observer:HIT",
+                1
+              ],
+              [
+                "workerb>workerb:FIRE",
+                1
+              ]
+            ],
+            "first_worker_fire_senders": [
+              "workera"
+            ],
+            "observer_hit_order_language": [
+              [
+                "workera",
+                "workerb"
+              ]
+            ],
+            "result_tags": [
+              "deadlock"
+            ],
+            "root_count": 1,
+            "state_count_lower_bound": 5,
+            "terminal_state_reachable": true,
+            "transition_count": 4,
+            "transition_prefix_language": [
+              [
+                "workera>workera:FIRE"
+              ],
+              [
+                "workera>workera:FIRE",
+                "workerb>workerb:FIRE"
+              ],
+              [
+                "workera>workera:FIRE",
+                "workerb>workerb:FIRE",
+                "workera>observer:HIT"
+              ],
+              [
+                "workera>workera:FIRE",
+                "workerb>workerb:FIRE",
+                "workera>observer:HIT",
+                "workerb>observer:HIT"
+              ]
+            ],
+            "worker_fire_order_language": [
+              [
+                "workera",
+                "workerb"
+              ]
+            ]
+          },
+          "edge_count": 4,
+          "exit_code": 0,
+          "repetition": 1,
+          "results": [
+            "deadlock"
+          ],
+          "roots": [
+            "1_0"
+          ],
+          "state_count_lower_bound": 5,
+          "stderr_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/base/run-1.stderr.txt",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/base/run-1.stdout.txt",
+          "stdout_sha256": "b5cd05706defc0c47431bb04e5215b6993e7cf65557b875e30d93d9a6327a046",
+          "timed_out": false,
+          "variant": "base"
+        },
+        {
+          "canonical_semantic_sha256": "37951cccb8d0522cc11130a2d0ad6f22d264429b7b14b19c04fb4caf9b208e07",
+          "canonical_summary": {
+            "assertion_failed_reachable": false,
+            "edge_label_multiset": [
+              [
+                "workera>observer:HIT",
+                1
+              ],
+              [
+                "workera>workera:FIRE",
+                1
+              ],
+              [
+                "workerb>observer:HIT",
+                1
+              ],
+              [
+                "workerb>workerb:FIRE",
+                1
+              ]
+            ],
+            "first_worker_fire_senders": [
+              "workera"
+            ],
+            "observer_hit_order_language": [
+              [
+                "workera",
+                "workerb"
+              ]
+            ],
+            "result_tags": [
+              "deadlock"
+            ],
+            "root_count": 1,
+            "state_count_lower_bound": 5,
+            "terminal_state_reachable": true,
+            "transition_count": 4,
+            "transition_prefix_language": [
+              [
+                "workera>workera:FIRE"
+              ],
+              [
+                "workera>workera:FIRE",
+                "workerb>workerb:FIRE"
+              ],
+              [
+                "workera>workera:FIRE",
+                "workerb>workerb:FIRE",
+                "workera>observer:HIT"
+              ],
+              [
+                "workera>workera:FIRE",
+                "workerb>workerb:FIRE",
+                "workera>observer:HIT",
+                "workerb>observer:HIT"
+              ]
+            ],
+            "worker_fire_order_language": [
+              [
+                "workera",
+                "workerb"
+              ]
+            ]
+          },
+          "edge_count": 4,
+          "exit_code": 0,
+          "repetition": 2,
+          "results": [
+            "deadlock"
+          ],
+          "roots": [
+            "1_0"
+          ],
+          "state_count_lower_bound": 5,
+          "stderr_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/base/run-2.stderr.txt",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/base/run-2.stdout.txt",
+          "stdout_sha256": "b5cd05706defc0c47431bb04e5215b6993e7cf65557b875e30d93d9a6327a046",
+          "timed_out": false,
+          "variant": "base"
+        },
+        {
+          "canonical_semantic_sha256": "37951cccb8d0522cc11130a2d0ad6f22d264429b7b14b19c04fb4caf9b208e07",
+          "canonical_summary": {
+            "assertion_failed_reachable": false,
+            "edge_label_multiset": [
+              [
+                "workera>observer:HIT",
+                1
+              ],
+              [
+                "workera>workera:FIRE",
+                1
+              ],
+              [
+                "workerb>observer:HIT",
+                1
+              ],
+              [
+                "workerb>workerb:FIRE",
+                1
+              ]
+            ],
+            "first_worker_fire_senders": [
+              "workera"
+            ],
+            "observer_hit_order_language": [
+              [
+                "workera",
+                "workerb"
+              ]
+            ],
+            "result_tags": [
+              "deadlock"
+            ],
+            "root_count": 1,
+            "state_count_lower_bound": 5,
+            "terminal_state_reachable": true,
+            "transition_count": 4,
+            "transition_prefix_language": [
+              [
+                "workera>workera:FIRE"
+              ],
+              [
+                "workera>workera:FIRE",
+                "workerb>workerb:FIRE"
+              ],
+              [
+                "workera>workera:FIRE",
+                "workerb>workerb:FIRE",
+                "workera>observer:HIT"
+              ],
+              [
+                "workera>workera:FIRE",
+                "workerb>workerb:FIRE",
+                "workera>observer:HIT",
+                "workerb>observer:HIT"
+              ]
+            ],
+            "worker_fire_order_language": [
+              [
+                "workera",
+                "workerb"
+              ]
+            ]
+          },
+          "edge_count": 4,
+          "exit_code": 0,
+          "repetition": 3,
+          "results": [
+            "deadlock"
+          ],
+          "roots": [
+            "1_0"
+          ],
+          "state_count_lower_bound": 5,
+          "stderr_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/base/run-3.stderr.txt",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/base/run-3.stdout.txt",
+          "stdout_sha256": "b5cd05706defc0c47431bb04e5215b6993e7cf65557b875e30d93d9a6327a046",
+          "timed_out": false,
+          "variant": "base"
+        }
+      ],
+      "semantic_graph_hash_count": 1,
+      "semantic_graph_stable": true,
+      "variant": "base"
+    },
+    "reversed": {
+      "canonical_semantic_sha256": "8a6d442d4bcb1c03311ccd73a135e0781471edeea816f50c247c76e57a2e60d5",
+      "exit_signature_stable": true,
+      "representative_summary": {
+        "assertion_failed_reachable": false,
+        "edge_label_multiset": [
+          [
+            "workera>observer:HIT",
+            1
+          ],
+          [
+            "workera>workera:FIRE",
+            1
+          ],
+          [
+            "workerb>observer:HIT",
+            1
+          ],
+          [
+            "workerb>workerb:FIRE",
+            1
+          ]
+        ],
+        "first_worker_fire_senders": [
+          "workerb"
+        ],
+        "observer_hit_order_language": [
+          [
+            "workera",
+            "workerb"
+          ]
+        ],
+        "result_tags": [
+          "deadlock"
+        ],
+        "root_count": 1,
+        "state_count_lower_bound": 5,
+        "terminal_state_reachable": true,
+        "transition_count": 4,
+        "transition_prefix_language": [
+          [
+            "workerb>workerb:FIRE"
+          ],
+          [
+            "workerb>workerb:FIRE",
+            "workera>workera:FIRE"
+          ],
+          [
+            "workerb>workerb:FIRE",
+            "workera>workera:FIRE",
+            "workera>observer:HIT"
+          ],
+          [
+            "workerb>workerb:FIRE",
+            "workera>workera:FIRE",
+            "workera>observer:HIT",
+            "workerb>observer:HIT"
+          ]
+        ],
+        "worker_fire_order_language": [
+          [
+            "workerb",
+            "workera"
+          ]
+        ]
+      },
+      "run_count": 3,
+      "runs": [
+        {
+          "canonical_semantic_sha256": "8a6d442d4bcb1c03311ccd73a135e0781471edeea816f50c247c76e57a2e60d5",
+          "canonical_summary": {
+            "assertion_failed_reachable": false,
+            "edge_label_multiset": [
+              [
+                "workera>observer:HIT",
+                1
+              ],
+              [
+                "workera>workera:FIRE",
+                1
+              ],
+              [
+                "workerb>observer:HIT",
+                1
+              ],
+              [
+                "workerb>workerb:FIRE",
+                1
+              ]
+            ],
+            "first_worker_fire_senders": [
+              "workerb"
+            ],
+            "observer_hit_order_language": [
+              [
+                "workera",
+                "workerb"
+              ]
+            ],
+            "result_tags": [
+              "deadlock"
+            ],
+            "root_count": 1,
+            "state_count_lower_bound": 5,
+            "terminal_state_reachable": true,
+            "transition_count": 4,
+            "transition_prefix_language": [
+              [
+                "workerb>workerb:FIRE"
+              ],
+              [
+                "workerb>workerb:FIRE",
+                "workera>workera:FIRE"
+              ],
+              [
+                "workerb>workerb:FIRE",
+                "workera>workera:FIRE",
+                "workera>observer:HIT"
+              ],
+              [
+                "workerb>workerb:FIRE",
+                "workera>workera:FIRE",
+                "workera>observer:HIT",
+                "workerb>observer:HIT"
+              ]
+            ],
+            "worker_fire_order_language": [
+              [
+                "workerb",
+                "workera"
+              ]
+            ]
+          },
+          "edge_count": 4,
+          "exit_code": 0,
+          "repetition": 1,
+          "results": [
+            "deadlock"
+          ],
+          "roots": [
+            "1_0"
+          ],
+          "state_count_lower_bound": 5,
+          "stderr_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/reversed/run-1.stderr.txt",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/reversed/run-1.stdout.txt",
+          "stdout_sha256": "5b673079b36bb562ec4002f683534056b5214b7bf75f1b0f5bfb796a28f9a937",
+          "timed_out": false,
+          "variant": "reversed"
+        },
+        {
+          "canonical_semantic_sha256": "8a6d442d4bcb1c03311ccd73a135e0781471edeea816f50c247c76e57a2e60d5",
+          "canonical_summary": {
+            "assertion_failed_reachable": false,
+            "edge_label_multiset": [
+              [
+                "workera>observer:HIT",
+                1
+              ],
+              [
+                "workera>workera:FIRE",
+                1
+              ],
+              [
+                "workerb>observer:HIT",
+                1
+              ],
+              [
+                "workerb>workerb:FIRE",
+                1
+              ]
+            ],
+            "first_worker_fire_senders": [
+              "workerb"
+            ],
+            "observer_hit_order_language": [
+              [
+                "workera",
+                "workerb"
+              ]
+            ],
+            "result_tags": [
+              "deadlock"
+            ],
+            "root_count": 1,
+            "state_count_lower_bound": 5,
+            "terminal_state_reachable": true,
+            "transition_count": 4,
+            "transition_prefix_language": [
+              [
+                "workerb>workerb:FIRE"
+              ],
+              [
+                "workerb>workerb:FIRE",
+                "workera>workera:FIRE"
+              ],
+              [
+                "workerb>workerb:FIRE",
+                "workera>workera:FIRE",
+                "workera>observer:HIT"
+              ],
+              [
+                "workerb>workerb:FIRE",
+                "workera>workera:FIRE",
+                "workera>observer:HIT",
+                "workerb>observer:HIT"
+              ]
+            ],
+            "worker_fire_order_language": [
+              [
+                "workerb",
+                "workera"
+              ]
+            ]
+          },
+          "edge_count": 4,
+          "exit_code": 0,
+          "repetition": 2,
+          "results": [
+            "deadlock"
+          ],
+          "roots": [
+            "1_0"
+          ],
+          "state_count_lower_bound": 5,
+          "stderr_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/reversed/run-2.stderr.txt",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/reversed/run-2.stdout.txt",
+          "stdout_sha256": "5b673079b36bb562ec4002f683534056b5214b7bf75f1b0f5bfb796a28f9a937",
+          "timed_out": false,
+          "variant": "reversed"
+        },
+        {
+          "canonical_semantic_sha256": "8a6d442d4bcb1c03311ccd73a135e0781471edeea816f50c247c76e57a2e60d5",
+          "canonical_summary": {
+            "assertion_failed_reachable": false,
+            "edge_label_multiset": [
+              [
+                "workera>observer:HIT",
+                1
+              ],
+              [
+                "workera>workera:FIRE",
+                1
+              ],
+              [
+                "workerb>observer:HIT",
+                1
+              ],
+              [
+                "workerb>workerb:FIRE",
+                1
+              ]
+            ],
+            "first_worker_fire_senders": [
+              "workerb"
+            ],
+            "observer_hit_order_language": [
+              [
+                "workera",
+                "workerb"
+              ]
+            ],
+            "result_tags": [
+              "deadlock"
+            ],
+            "root_count": 1,
+            "state_count_lower_bound": 5,
+            "terminal_state_reachable": true,
+            "transition_count": 4,
+            "transition_prefix_language": [
+              [
+                "workerb>workerb:FIRE"
+              ],
+              [
+                "workerb>workerb:FIRE",
+                "workera>workera:FIRE"
+              ],
+              [
+                "workerb>workerb:FIRE",
+                "workera>workera:FIRE",
+                "workera>observer:HIT"
+              ],
+              [
+                "workerb>workerb:FIRE",
+                "workera>workera:FIRE",
+                "workera>observer:HIT",
+                "workerb>observer:HIT"
+              ]
+            ],
+            "worker_fire_order_language": [
+              [
+                "workerb",
+                "workera"
+              ]
+            ]
+          },
+          "edge_count": 4,
+          "exit_code": 0,
+          "repetition": 3,
+          "results": [
+            "deadlock"
+          ],
+          "roots": [
+            "1_0"
+          ],
+          "state_count_lower_bound": 5,
+          "stderr_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/reversed/run-3.stderr.txt",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_path": "/Users/ali/Desktop/ReLico-Actor-Priority-Semantic-Witness-Audit-20260802T170032+0330/reversed/run-3.stdout.txt",
+          "stdout_sha256": "cac66006c3559eb98eea28a8242fae955c0bac00f7d73312fe7106ac73dd98b4",
+          "timed_out": false,
+          "variant": "reversed"
+        }
+      ],
+      "semantic_graph_hash_count": 1,
+      "semantic_graph_stable": true,
+      "variant": "reversed"
+    }
+  }
+}

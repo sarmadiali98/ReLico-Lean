@@ -1,0 +1,90 @@
+{
+  "baseline": {
+    "dispatch_correspondence_complete": true,
+    "finite_execution_correspondence_complete": false,
+    "full_lake_build_jobs": 474,
+    "selection_correspondence_complete": true
+  },
+  "inventory": {
+    "candidate_file_count": 101,
+    "exact_actor_priority_finite_declaration_count": 0,
+    "finite_declaration_count": 317,
+    "reuse_status": "No exact actor-priority finite-execution declaration was found. Existing modules provide proof architecture only.",
+    "top_candidate_path": "Relico/Correctness/DetailedBoundPayloadFiniteWeakExecution.lean",
+    "top_candidate_score": 50
+  },
+  "one_step_boundary": {
+    "backward_theorem": "Correctness.GlobalMultiStorePayloadActorDispatchCorrespondence.synchronizedActorPriorityDispatch_backward",
+    "forward_theorem": "Correctness.GlobalMultiStorePayloadActorDispatchCorrespondence.synchronizedActorPriorityDispatch_forward",
+    "ready_translation": "Translation.GlobalMultiStorePayloadActorOrder.compileReadyActors",
+    "request_translation": "Translation.GlobalMultiStorePayloadActorOrder.compileActorPriorityRequest",
+    "source_relation": "DTR.GlobalMultiStorePayloadActorPriority.ActorPriorityDispatchStep",
+    "target_relation": "LF.GlobalMultiStorePayloadActorOrder.ActorOrderDispatchStep"
+  },
+  "phase": "phase4d6a1-import-prerequisite-repair-and-finite-execution-interface-audit",
+  "progress": {
+    "overall_after_percent": 75,
+    "overall_before_percent": 74,
+    "overall_change_percentage_points": 1,
+    "overall_remaining_percent": 25
+  },
+  "repair": {
+    "previous_failure": "GlobalMultiStorePayloadActorDispatchCorrespondence.olean was absent at the interface probe.",
+    "repair_applied": "Materialized source, target, translation, selection, and dispatch correspondence objects in dependency order.",
+    "root_cause": "The installed actor-priority modules are untracked and not imported by the tracked lake root."
+  },
+  "required_design_constraints": [
+    {
+      "id": "step-local-ready-snapshot",
+      "requirement": "Every transition carries the ready-actor snapshot used to justify that transition."
+    },
+    {
+      "id": "step-local-selected-actor",
+      "requirement": "Every transition retains its selected ActorName."
+    },
+    {
+      "id": "compiled-ready-snapshot",
+      "requirement": "Each target transition uses compileReadyActors on the corresponding source snapshot."
+    },
+    {
+      "id": "request-policy",
+      "requirement": "The finite relation explicitly fixes the request for the run or carries one request per transition."
+    },
+    {
+      "id": "strong-closure-first",
+      "requirement": "Prove one-for-one finite dispatch closure before weak or observable wrappers."
+    },
+    {
+      "id": "weak-layer-separate",
+      "requirement": "Do not conflate actor dispatch closure with statement, time-advance, or microstep weak semantics."
+    }
+  ],
+  "result": {
+    "classification": "FINITE_EXECUTION_REFERENCE_INTERFACES_AUDITED_STEP_LOCAL_READY_SNAPSHOTS_REQUIRED",
+    "next_phase": "phase4d6b-step-local-finite-execution-foundation"
+  },
+  "schema_version": 1,
+  "semantic_status": {
+    "final_actor_priority_equivalence_complete": false,
+    "finite_strong_dispatch_correspondence_complete": false,
+    "finite_strong_dispatch_correspondence_ready": true,
+    "frontend_integration_complete": false,
+    "observable_trace_correspondence_complete": false,
+    "weak_execution_correspondence_complete": false
+  },
+  "timestamp": "20260803T171241+0330",
+  "validation": {
+    "baseline_build_passed": true,
+    "canonical_readme_mutated": false,
+    "committed": false,
+    "correctness_modules_mutated": false,
+    "interface_probe_passed": true,
+    "original_repository_mutated": false,
+    "pushed": false,
+    "sorryAx_dependency": false,
+    "source_modules_mutated": false,
+    "staged": false,
+    "test_modules_mutated": false,
+    "untracked_import_chain_materialized": true
+  }
+}

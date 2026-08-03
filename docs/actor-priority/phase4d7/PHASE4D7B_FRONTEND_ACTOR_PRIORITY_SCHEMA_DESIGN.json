@@ -1,0 +1,174 @@
+{
+  "current_surface": {
+    "frontend_actor_priority_occurrence_count": 0,
+    "message_priority_owner": "RawMultiStorePayloadMessageServer",
+    "message_priority_type": "Option Nat",
+    "multistore_exporter_schema_version": 3,
+    "multistore_require_one_count": 4,
+    "payload_exporter_schema_version": 3,
+    "payload_require_one_count": 4,
+    "proposed_schema_version": 4,
+    "serialized_priority_paths": [
+      "$.properties.messageServers.items.properties.priority"
+    ]
+  },
+  "design_decisions": {
+    "actor_collection": {
+      "order": "main-block declaration order",
+      "property": "actors",
+      "type": "List RawMultiStorePayloadActorInstance"
+    },
+    "decoder": {
+      "all_absent": "none",
+      "duplicate_names": "reject",
+      "output": "ActorPriorityRequest",
+      "partial_assignment": "preserve; incomplete coverage causes no actor-priority filtering",
+      "proposed_function": "decodeActorPriorityRequest",
+      "some_present": "some assignments containing exactly the explicitly prioritized actors"
+    },
+    "exporter": {
+      "index_all_reactive_classes": true,
+      "iterate_all_main_actors": true,
+      "local_priority_surface": "LOCAL_PRIORITY_ANNOTATION",
+      "preserve_declaration_order": true,
+      "priority_sorting": false,
+      "remove_singleton_requirements": true
+    },
+    "lean_actor_instance": {
+      "fields": [
+        {
+          "name": "name",
+          "type": "String"
+        },
+        {
+          "name": "reactiveClass",
+          "type": "String"
+        },
+        {
+          "default": "none",
+          "name": "priority",
+          "type": "Option Nat"
+        }
+      ],
+      "name": "RawMultiStorePayloadActorInstance",
+      "preserve_existing_initialization_payload": true
+    },
+    "translation": {
+      "absent_request_no_filtering": true,
+      "compiled_ordering_sufficient": true,
+      "compiler": "compileActorPriorityRequest",
+      "incomplete_request_no_filtering": true,
+      "literal_target_field_required": false,
+      "lower_nat_stronger": true,
+      "source_request": "ActorPriorityRequest",
+      "target_request": "ActorOrderRequest",
+      "ties_nondeterministic": true
+    },
+    "validation_matrix": [
+      {
+        "expected": "Normalize to one actor, decode the request as none, and preserve current behavior.",
+        "id": "legacy-singleton-no-priority",
+        "input": "Legacy singleton payload with no actor priority."
+      },
+      {
+        "expected": "Preserve declaration order, decode the request as none, and perform no filtering.",
+        "id": "multi-actor-no-priority",
+        "input": "Two actor instances with both actor priorities absent."
+      },
+      {
+        "expected": "The decoded requests differ and the selected-actor trace changes consistently with lower-Nat strength.",
+        "id": "multi-actor-reversed-priority",
+        "input": "Two simultaneously ready actors in paired fixtures whose actor priorities are reversed."
+      },
+      {
+        "expected": "Both actors remain eligible; no deterministic tie-breaking is introduced.",
+        "id": "equal-actor-priority",
+        "input": "Two simultaneously ready actors with equal actor priorities."
+      },
+      {
+        "expected": "Preserve the partial request; incomplete coverage causes no actor-priority filtering.",
+        "id": "partial-actor-priority",
+        "input": "Only one of multiple actor instances has an explicit actor priority."
+      },
+      {
+        "expected": "Reject the frontend model.",
+        "id": "duplicate-actor-name",
+        "input": "Two actor-instance entries share the same actor name."
+      },
+      {
+        "expected": "Reject through JSON-schema or decoder validation.",
+        "id": "negative-wire-priority",
+        "input": "A serialized actor priority is a negative integer."
+      },
+      {
+        "expected": "Actor priority controls cross-actor selection; message-server priority controls local reaction selection.",
+        "id": "local-vs-actor-priority",
+        "input": "Actor priority and message-server @priority are both present with opposing numeric values."
+      },
+      {
+        "expected": "Reject the unresolved actor-instance class reference.",
+        "id": "unknown-reactive-class",
+        "input": "An actor instance references an undeclared reactive class."
+      },
+      {
+        "expected": "Java export, JSON validation, Lean decoding, ActorPriorityRequest construction, and ActorOrderRequest compilation agree.",
+        "id": "schema-round-trip",
+        "input": "A multi-actor payload contains mixed optional actor priorities."
+      }
+    ],
+    "wire_format": {
+      "actor_priority_type": "optional non-negative integer",
+      "legacy_singleton_normalization": true,
+      "missing_priority": "none",
+      "proposed_schema_version": 4
+    }
+  },
+  "implementation_status": {
+    "decoder_mapping_design_complete": true,
+    "exporter_generalization_design_complete": true,
+    "java_exporter_implemented": false,
+    "multi_actor_frontend_integration_complete": false,
+    "parser_normalization_design_complete": true,
+    "production_decoder_implemented": false,
+    "production_schema_implemented": false,
+    "regression_matrix_complete": true,
+    "schema_design_complete": true,
+    "translation_mapping_complete": true
+  },
+  "invariants": {
+    "absent_request_performs_no_filtering": true,
+    "actor_declaration_order_preserved": true,
+    "actor_priority_distinct_from_local_reaction_priority": true,
+    "actor_priority_is_optional": true,
+    "exporter_priority_sorting_forbidden": true,
+    "incomplete_request_performs_no_filtering": true,
+    "legacy_singleton_compatibility_required": true,
+    "lower_nat_is_stronger": true,
+    "ties_are_nondeterministic": true
+  },
+  "phase": "phase4d7b2-staged-schema-parser-design",
+  "progress": {
+    "overall_after_percent": 90,
+    "overall_before_percent": 89,
+    "overall_change_percentage_points": 1,
+    "overall_remaining_percent": 10
+  },
+  "result": {
+    "classification": "FRONTEND_ACTOR_PRIORITY_SCHEMA_AND_PARSER_DESIGN_COMPLETE_IMPLEMENTATION_PENDING",
+    "next_phase": "phase4d7c-frontend-actor-priority-schema-and-decoder-implementation"
+  },
+  "schema_version": 1,
+  "timestamp": "20260803T190026+0330",
+  "validation": {
+    "baseline_build_passed": true,
+    "canonical_readme_mutated": false,
+    "committed": false,
+    "correctness_modules_mutated": false,
+    "original_repository_mutated": false,
+    "phase4d7a_gate_passed": true,
+    "pushed": false,
+    "source_modules_mutated": false,
+    "staged": false,
+    "test_modules_mutated": false
+  }
+}

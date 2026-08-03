@@ -1,0 +1,2260 @@
+{
+  "accepted_template": {
+    "files": [
+      {
+        "path": "README.md",
+        "sha256": "faab8371f3429b6e74848d6900f6f25eeae161830a6a20deed8d8634413a84fc",
+        "size": 937
+      },
+      {
+        "path": "coverage.json",
+        "sha256": "f05c8908e5c35012ce02aabd97cbacb99172c52173c8dee3a3e2b0b7394d1470",
+        "size": 17548
+      },
+      {
+        "path": "expected/decoded-dtr-ast/model.txt",
+        "sha256": "454502d0c0008f6cad5e218de51b2bf940f02dbd48f9c27910f804fa853c81df",
+        "size": 906
+      },
+      {
+        "path": "expected/formal-witness/result.json",
+        "sha256": "10145d7161323d24737666b0b9f6b1c432109a536a3e06f910d40e63c42f0df4",
+        "size": 1410
+      },
+      {
+        "path": "expected/lf-source/V0Controller.lf",
+        "sha256": "1669f1cbc489c304411ae304dee638d5d87691a8b88cc82bdde188b107d5282f",
+        "size": 315
+      },
+      {
+        "path": "expected/lfc/result.json",
+        "sha256": "2ee3d75e82d1daa3311d9c5f4f50fd35fb0ca8ce2ee5f542ce2d79451adcc059",
+        "size": 102
+      },
+      {
+        "path": "expected/parser-json/model.json",
+        "sha256": "ff6c34aed1c16fce53ab39074db75b90ea1837dcaea9f93ab9210af6e441cf6a",
+        "size": 650
+      },
+      {
+        "path": "expected/rmc/verdict.json",
+        "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f",
+        "size": 141
+      },
+      {
+        "path": "expected/runtime/result.json",
+        "sha256": "98f94a1bb91705b98b1e45db395a59bc02ce8c115d7f2226c32fa551ed5e591a",
+        "size": 159
+      },
+      {
+        "path": "expected/source/result.json",
+        "sha256": "f4755fe2d0e1ebf15280b20cb4d7256bcc9a60b4316f2fddd47a82458c271add",
+        "size": 178
+      },
+      {
+        "path": "expected/translated-lf-ast/program.txt",
+        "sha256": "d341f884a3e9773c116375a554f65d3bf2638ba28cbf97ca58f62546d898c155",
+        "size": 1150
+      },
+      {
+        "path": "manifest.json",
+        "sha256": "70c94d51dc65102e2e41f39e2c731d31699ac4823ce0ba43367a3c28f2ae153b",
+        "size": 5821
+      },
+      {
+        "path": "source/model.rebeca",
+        "sha256": "ae0ddbb74361cd2ce49012837eb22a5e201ff2124988d984b240b8eb2e7a40dc",
+        "size": 437
+      }
+    ],
+    "manifest": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/tests/benchmarks/core--initialization--positive/manifest.json",
+      "recursive_keys": [
+        "$.benchmark_id",
+        "$.description",
+        "$.expected_artifacts",
+        "$.expected_artifacts[0].path",
+        "$.expected_artifacts[0].required",
+        "$.expected_artifacts[0].sha256",
+        "$.expected_artifacts[1].path",
+        "$.expected_artifacts[1].required",
+        "$.expected_artifacts[1].sha256",
+        "$.expected_artifacts[2].path",
+        "$.expected_artifacts[2].required",
+        "$.expected_artifacts[2].sha256",
+        "$.expected_artifacts[3].path",
+        "$.expected_artifacts[3].required",
+        "$.expected_artifacts[3].sha256",
+        "$.expected_artifacts[4].path",
+        "$.expected_artifacts[4].required",
+        "$.expected_artifacts[4].sha256",
+        "$.expected_artifacts[5].path",
+        "$.expected_artifacts[5].required",
+        "$.expected_artifacts[5].sha256",
+        "$.expected_artifacts[6].path",
+        "$.expected_artifacts[6].required",
+        "$.expected_artifacts[6].sha256",
+        "$.expected_artifacts[7].path",
+        "$.expected_artifacts[7].required",
+        "$.expected_artifacts[7].sha256",
+        "$.expected_artifacts[8].path",
+        "$.expected_artifacts[8].required",
+        "$.expected_artifacts[8].sha256",
+        "$.expected_terminal_stage",
+        "$.polarity",
+        "$.schema_version",
+        "$.source_files",
+        "$.stages",
+        "$.stages[0].command",
+        "$.stages[0].name",
+        "$.stages[1].command",
+        "$.stages[1].name",
+        "$.stages[1].timeout_seconds",
+        "$.stages[2].command",
+        "$.stages[2].name",
+        "$.stages[2].timeout_seconds",
+        "$.stages[3].command",
+        "$.stages[3].name",
+        "$.stages[3].timeout_seconds",
+        "$.stages[4].command",
+        "$.stages[4].name",
+        "$.stages[4].timeout_seconds",
+        "$.stages[5].command",
+        "$.stages[5].name",
+        "$.stages[5].timeout_seconds",
+        "$.stages[6].command",
+        "$.stages[6].name",
+        "$.stages[6].timeout_seconds",
+        "$.stages[7].command",
+        "$.stages[7].name",
+        "$.stages[7].timeout_seconds",
+        "$.stages[8].command",
+        "$.stages[8].name",
+        "$.stages[8].timeout_seconds"
+      ],
+      "sha256": "70c94d51dc65102e2e41f39e2c731d31699ac4823ce0ba43367a3c28f2ae153b",
+      "top_level_keys": [
+        "benchmark_id",
+        "description",
+        "expected_artifacts",
+        "expected_terminal_stage",
+        "polarity",
+        "schema_version",
+        "source_files",
+        "stages"
+      ]
+    },
+    "root": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/tests/benchmarks/core--initialization--positive",
+    "source": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/tests/benchmarks/core--initialization--positive/source/model.rebeca",
+      "sha256": "ae0ddbb74361cd2ce49012837eb22a5e201ff2124988d984b240b8eb2e7a40dc"
+    }
+  },
+  "all_manifests": [
+    {
+      "failure_markers": [],
+      "parse_error": "",
+      "path": "tests/benchmarks/core--initialization--positive/manifest.json",
+      "recursive_keys": [
+        "$.benchmark_id",
+        "$.description",
+        "$.expected_artifacts",
+        "$.expected_artifacts[0].path",
+        "$.expected_artifacts[0].required",
+        "$.expected_artifacts[0].sha256",
+        "$.expected_artifacts[1].path",
+        "$.expected_artifacts[1].required",
+        "$.expected_artifacts[1].sha256",
+        "$.expected_artifacts[2].path",
+        "$.expected_artifacts[2].required",
+        "$.expected_artifacts[2].sha256",
+        "$.expected_artifacts[3].path",
+        "$.expected_artifacts[3].required",
+        "$.expected_artifacts[3].sha256",
+        "$.expected_artifacts[4].path",
+        "$.expected_artifacts[4].required",
+        "$.expected_artifacts[4].sha256",
+        "$.expected_artifacts[5].path",
+        "$.expected_artifacts[5].required",
+        "$.expected_artifacts[5].sha256",
+        "$.expected_artifacts[6].path",
+        "$.expected_artifacts[6].required",
+        "$.expected_artifacts[6].sha256",
+        "$.expected_artifacts[7].path",
+        "$.expected_artifacts[7].required",
+        "$.expected_artifacts[7].sha256",
+        "$.expected_artifacts[8].path",
+        "$.expected_artifacts[8].required",
+        "$.expected_artifacts[8].sha256",
+        "$.expected_terminal_stage",
+        "$.polarity",
+        "$.schema_version",
+        "$.source_files",
+        "$.stages",
+        "$.stages[0].command",
+        "$.stages[0].name",
+        "$.stages[1].command",
+        "$.stages[1].name",
+        "$.stages[1].timeout_seconds",
+        "$.stages[2].command",
+        "$.stages[2].name",
+        "$.stages[2].timeout_seconds",
+        "$.stages[3].command",
+        "$.stages[3].name",
+        "$.stages[3].timeout_seconds",
+        "$.stages[4].command",
+        "$.stages[4].name",
+        "$.stages[4].timeout_seconds",
+        "$.stages[5].command",
+        "$.stages[5].name",
+        "$.stages[5].timeout_seconds",
+        "$.stages[6].command",
+        "$.stages[6].name",
+        "$.stages[6].timeout_seconds",
+        "$.stages[7].command",
+        "$.stages[7].name",
+        "$.stages[7].timeout_seconds",
+        "$.stages[8].command",
+        "$.stages[8].name",
+        "$.stages[8].timeout_seconds"
+      ],
+      "sha256": "70c94d51dc65102e2e41f39e2c731d31699ac4823ce0ba43367a3c28f2ae153b",
+      "size": 5821,
+      "top_level_keys": [
+        "benchmark_id",
+        "description",
+        "expected_artifacts",
+        "expected_terminal_stage",
+        "polarity",
+        "schema_version",
+        "source_files",
+        "stages"
+      ]
+    }
+  ],
+  "failure_oracle_paths": [
+    "tests/benchmarks/core--initialization--positive/expected/runtime/result.json",
+    "tests/benchmarks/registry/benchmarks.tsv",
+    "tests/benchmarks/schema/benchmark-manifest.schema.json",
+    "tests/benchmarks/schema/stage-result.schema.json"
+  ],
+  "harness_evidence": [
+    {
+      "category": "benchmark_execution",
+      "line": 1,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "# ReLico executable benchmark corpus"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 6,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "## Frozen benchmark plan"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 10,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "- benchmarks.tsv records the 57 planned source benchmarks"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 13,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "concrete source benchmark"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 20,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "A planned registry row is not evidence that a benchmark has been"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 23,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "## Required benchmark contents"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 25,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "An implemented benchmark directory must contain:"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 31,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "- expected stage artifacts"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 34,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "## Mandatory execution stages"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 39,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "Applicable later stages include:"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 50,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "Negative benchmarks must declare their expected terminal stage. No later"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 51,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "artifact may be fabricated after an expected rejection."
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 55,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "The benchmark runner will support:"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 58,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "- benchmark listing"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 59,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "- benchmark inspection"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 60,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "- one-benchmark execution"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 61,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "- all-benchmark execution"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 63,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "- expected-artifact regeneration"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 71,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "replacement benchmarks are implemented and passing, their documentation"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 81,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "- 0 only when every planned benchmark is implemented and passes"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 82,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "- 1 when an implemented benchmark fails"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 83,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "- 3 when one or more planned benchmarks are not implemented"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 90,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "The frozen registry is authoritative for benchmark implementation status."
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 92,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "A benchmark with status `planned` must not contain `manifest.json`. A"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 93,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "benchmark with status `implemented` must contain `manifest.json`. Registry"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 96,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "Corpus execution runs only rows marked `implemented`. Direct benchmark"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 3,
+      "path": "tests/benchmarks/core--initialization--positive/README.md",
+      "source_line": "This is the first tracked schema-conforming ReLico production benchmark."
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 5,
+      "path": "tests/benchmarks/core--initialization--positive/README.md",
+      "source_line": "prototype, but the benchmark source is now tracked independently under this"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 6,
+      "path": "tests/benchmarks/core--initialization--positive/README.md",
+      "source_line": "benchmark identifier."
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 8,
+      "path": "tests/benchmarks/core--initialization--positive/README.md",
+      "source_line": "The nine mandatory stages are:"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 20,
+      "path": "tests/benchmarks/core--initialization--positive/README.md",
+      "source_line": "The deterministic expected artifacts omit absolute paths, durations, build"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 2,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 8,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 12,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"name_or_expression\": \"expectedCppSource\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 14,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-cpp-backend\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 20,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 24,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"name_or_expression\": \"expectedProgram_renders_as_cpp\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 26,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-cpp-backend\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 32,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 38,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-cpp-backend\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 44,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 50,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-cpp-backend\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 56,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 62,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-cpp-backend\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 68,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 74,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-executable-translation\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 80,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 86,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-executable-translation\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 92,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 96,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"name_or_expression\": \"expectedProgramStartupRefl\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 98,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-executable-translation\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 104,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 110,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-executable-translation\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 116,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 122,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-executable-translation\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 128,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 134,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-executable-translation\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 140,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 146,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-initialization\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 152,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 158,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-initialization\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 164,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 170,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-initialization\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 176,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 182,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-initialization\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 188,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 194,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-initialization\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 200,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 206,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-initialization\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 212,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 218,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-initialization\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 224,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 230,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-initialization\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 236,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 242,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-machine-initialization\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 248,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 254,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-machine-initialization\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 260,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 266,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-machine-initialization\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 272,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 278,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-machine-initialization\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 284,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 290,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-machine-initialization\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 296,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 302,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-machine-initialization\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 308,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 314,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-machine-initialization\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 320,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 326,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-machine-initialization\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 332,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 336,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"name_or_expression\": \"expectedReactorName\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 338,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-translation\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 344,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 348,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"name_or_expression\": \"expectedActionName\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 350,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-translation\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 356,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 360,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"name_or_expression\": \"expectedStartupReaction\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 362,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-translation\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 368,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 372,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"name_or_expression\": \"expectedMessageReaction\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 374,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-translation\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 380,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 384,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"name_or_expression\": \"expectedReactor\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 386,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-translation\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 392,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 396,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"name_or_expression\": \"expectedReactorInstance\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 398,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-translation\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 404,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 408,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"name_or_expression\": \"expectedProgram\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 410,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-translation\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 416,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 420,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"name_or_expression\": \"validModel_translates_to_expectedProgram\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 422,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-translation\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 428,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"final_benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 434,
+      "path": "tests/benchmarks/core--initialization--positive/coverage.json",
+      "source_line": "\"original_benchmark_candidate\": \"test-translation\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 2,
+      "path": "tests/benchmarks/core--initialization--positive/expected/formal-witness/result.json",
+      "source_line": "\"benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 2,
+      "path": "tests/benchmarks/core--initialization--positive/expected/source/result.json",
+      "source_line": "\"benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 2,
+      "path": "tests/benchmarks/core--initialization--positive/manifest.json",
+      "source_line": "\"benchmark_id\": \"core--initialization--positive\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 3,
+      "path": "tests/benchmarks/core--initialization--positive/manifest.json",
+      "source_line": "\"description\": \"Tracked singleton initialization benchmark for the complete Timed Rebeca-to-native ReLico production pipeline.\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 4,
+      "path": "tests/benchmarks/core--initialization--positive/manifest.json",
+      "source_line": "\"expected_artifacts\": ["
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 16,
+      "path": "tests/benchmarks/core--initialization--positive/manifest.json",
+      "source_line": "\"path\": \"parser-json/model.json\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 51,
+      "path": "tests/benchmarks/core--initialization--positive/manifest.json",
+      "source_line": "\"expected_terminal_stage\": \"runtime\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 57,
+      "path": "tests/benchmarks/core--initialization--positive/manifest.json",
+      "source_line": "\"stages\": ["
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 63,
+      "path": "tests/benchmarks/core--initialization--positive/manifest.json",
+      "source_line": "\"--benchmark-id\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 97,
+      "path": "tests/benchmarks/core--initialization--positive/manifest.json",
+      "source_line": "\"parser-json\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 109,
+      "path": "tests/benchmarks/core--initialization--positive/manifest.json",
+      "source_line": "\"{actual}/parser-json/model.json\""
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 111,
+      "path": "tests/benchmarks/core--initialization--positive/manifest.json",
+      "source_line": "\"name\": \"parser-json\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 126,
+      "path": "tests/benchmarks/core--initialization--positive/manifest.json",
+      "source_line": "\"{actual}/parser-json/model.json\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 143,
+      "path": "tests/benchmarks/core--initialization--positive/manifest.json",
+      "source_line": "\"{benchmark}/coverage.json\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 162,
+      "path": "tests/benchmarks/core--initialization--positive/manifest.json",
+      "source_line": "\"{actual}/parser-json/model.json\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 181,
+      "path": "tests/benchmarks/core--initialization--positive/manifest.json",
+      "source_line": "\"{actual}/parser-json/model.json\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1,
+      "path": "tests/benchmarks/registry/PROVENANCE.md",
+      "source_line": "# Benchmark registry provenance"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 3,
+      "path": "tests/benchmarks/registry/PROVENANCE.md",
+      "source_line": "This registry freezes the reviewed benchmark plan at repository"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 10,
+      "path": "tests/benchmarks/registry/PROVENANCE.md",
+      "source_line": "- 57 planned source benchmarks"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 11,
+      "path": "tests/benchmarks/registry/PROVENANCE.md",
+      "source_line": "- 42 positive benchmarks"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 12,
+      "path": "tests/benchmarks/registry/PROVENANCE.md",
+      "source_line": "- 15 negative benchmarks"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 16,
+      "path": "tests/benchmarks/registry/PROVENANCE.md",
+      "source_line": "Registry inclusion does not mean that a benchmark is implemented,"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 19,
+      "path": "tests/benchmarks/registry/PROVENANCE.md",
+      "source_line": "A benchmark becomes implemented only when its directory contains its"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 20,
+      "path": "tests/benchmarks/registry/PROVENANCE.md",
+      "source_line": "manifest, coverage mapping, commented Timed Rebeca source, expected"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 23,
+      "path": "tests/benchmarks/registry/PROVENANCE.md",
+      "source_line": "Every benchmark Timed Rebeca source must first complete the official RMC"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 36,
+      "path": "tests/benchmarks/registry/PROVENANCE.md",
+      "source_line": "the replacement benchmarks listed in legacy-script-migration.tsv."
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "benchmark_id semantic_layer primary_capability polarity module_count obligation_count evidence_modes required_stages source_required source_path implementation_status"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 2,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "bound-payload--dispatch--negative bound-payload dispatch negative 1 22 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/bound-payload--dispatch--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 3,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "bound-payload--dispatch--positive bound-payload dispatch positive 8 99 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/bound-payload--dispatch--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 4,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "bound-payload--finite-execution--positive bound-payload finite-execution positive 3 44 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/bound-payload--finite-execution--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 5,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "bound-payload--initialization--positive bound-payload initialization positive 2 53 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/bound-payload--initialization--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 6,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "bound-payload--payload-binding--positive bound-payload payload-binding positive 4 44 source-plus-formal-witness,source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/bound-payload--payload-binding--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 7,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "bound-payload--priority-selection--positive bound-payload priority-selection positive 1 20 source-plus-formal-witness source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc yes tests/benchmarks/bound-payload--priority-selection--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 8,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "core--dispatch--positive core dispatch positive 11 62 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/core--dispatch--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 9,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "core--initialization--positive core initialization positive 5 36 direct-source-translation,source-plus-formal-witness,source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/core--initialization--positive/source/model.rebeca implemented"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 10,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "core--one-step-execution--positive core one-step-execution positive 1 4 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/core--one-step-execution--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 11,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "core--priority-selection--positive core priority-selection positive 3 54 source-plus-formal-witness source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc yes tests/benchmarks/core--priority-selection--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 12,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "core--queue-correspondence--positive core queue-correspondence positive 3 23 source-plus-formal-witness source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc yes tests/benchmarks/core--queue-correspondence--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 13,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "core--runtime-semantics--positive core runtime-semantics positive 3 21 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/core--runtime-semantics--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 14,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "core--trace-execution--positive core trace-execution positive 1 4 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/core--trace-execution--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 15,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "core--weak-semantics--positive core weak-semantics positive 3 47 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/core--weak-semantics--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 16,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "core--well-formedness--negative core well-formedness negative 2 34 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/core--well-formedness--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 17,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "core--well-formedness--positive core well-formedness positive 3 7 source-plus-formal-witness source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc yes tests/benchmarks/core--well-formedness--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 18,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "finite-store--dispatch--positive finite-store dispatch positive 3 38 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/finite-store--dispatch--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 19,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "finite-store--frontend-decoding--negative finite-store frontend-decoding negative 1 11 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/finite-store--frontend-decoding--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 20,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "finite-store--initialization--positive finite-store initialization positive 3 18 direct-source-translation,source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/finite-store--initialization--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 21,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "finite-store--priority-selection--positive finite-store priority-selection positive 1 9 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/finite-store--priority-selection--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 22,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "finite-store--queue-correspondence--positive finite-store queue-correspondence positive 1 4 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/finite-store--queue-correspondence--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 23,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "finite-store--runtime-semantics--positive finite-store runtime-semantics positive 6 45 shared-formal-metadata,source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime,coverage-manifest,trust-report yes tests/benchmarks/finite-store--runtime-semantics--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 24,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "finite-store--trace-execution--positive finite-store trace-execution positive 1 4 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/finite-store--trace-execution--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 25,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "finite-store--well-formedness--positive finite-store well-formedness positive 2 28 direct-source-translation,source-plus-formal-witness source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc yes tests/benchmarks/finite-store--well-formedness--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 26,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "global-multi-actor-payload--external-send--negative global-multi-actor-payload external-send negative 1 56 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/global-multi-actor-payload--external-send--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 27,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "global-multi-actor-payload--external-send--positive global-multi-actor-payload external-send positive 2 35 source-plus-formal-witness,source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/global-multi-actor-payload--external-send--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 28,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "global-multi-actor-payload--external-send-frame--negative global-multi-actor-payload external-send-frame negative 1 27 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/global-multi-actor-payload--external-send-frame--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 29,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "global-multi-actor-payload--external-send-frame--positive global-multi-actor-payload external-send-frame positive 2 10 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/global-multi-actor-payload--external-send-frame--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 30,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "global-multi-actor-payload--external-send-statement--negative global-multi-actor-payload external-send-statement negative 1 24 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/global-multi-actor-payload--external-send-statement--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 31,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "global-multi-actor-payload--finite-execution--positive global-multi-actor-payload finite-execution positive 1 4 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/global-multi-actor-payload--finite-execution--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 32,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "global-multi-actor-payload--initialization--negative global-multi-actor-payload initialization negative 1 52 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/global-multi-actor-payload--initialization--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 33,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "global-multi-actor-payload--payload-binding--negative global-multi-actor-payload payload-binding negative 1 43 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/global-multi-actor-payload--payload-binding--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 34,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "global-multi-actor-payload--priority-selection--negative global-multi-actor-payload priority-selection negative 1 10 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/global-multi-actor-payload--priority-selection--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 35,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store--dispatch--negative multi-store dispatch negative 2 42 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/multi-store--dispatch--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 36,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store--dispatch--positive multi-store dispatch positive 15 110 direct-source-translation,source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/multi-store--dispatch--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 37,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store--finite-execution--positive multi-store finite-execution positive 4 29 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/multi-store--finite-execution--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 38,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store--initialization--positive multi-store initialization positive 2 12 direct-source-translation,source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/multi-store--initialization--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 39,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store--priority-selection--negative multi-store priority-selection negative 2 37 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/multi-store--priority-selection--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 40,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store--priority-selection--positive multi-store priority-selection positive 5 35 direct-source-translation,source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/multi-store--priority-selection--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 41,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store--queue-correspondence--positive multi-store queue-correspondence positive 2 26 direct-source-translation,source-plus-formal-witness source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc yes tests/benchmarks/multi-store--queue-correspondence--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 42,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store--runtime-semantics--positive multi-store runtime-semantics positive 1 2 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/multi-store--runtime-semantics--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 43,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store--weak-semantics--positive multi-store weak-semantics positive 5 37 source-plus-formal-witness,source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/multi-store--weak-semantics--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 44,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store--well-formedness--positive multi-store well-formedness positive 2 25 direct-source-translation,source-plus-formal-witness source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc yes tests/benchmarks/multi-store--well-formedness--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 45,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store-payload--dispatch--negative multi-store-payload dispatch negative 1 52 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/multi-store-payload--dispatch--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 46,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store-payload--dispatch--positive multi-store-payload dispatch positive 8 72 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/multi-store-payload--dispatch--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 47,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store-payload--finite-execution--positive multi-store-payload finite-execution positive 2 49 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/multi-store-payload--finite-execution--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 48,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store-payload--initialization--positive multi-store-payload initialization positive 5 90 direct-source-translation,source-plus-formal-witness,source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/multi-store-payload--initialization--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 49,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store-payload--payload-binding--negative multi-store-payload payload-binding negative 3 66 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/multi-store-payload--payload-binding--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 50,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store-payload--payload-binding--positive multi-store-payload payload-binding positive 5 62 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/multi-store-payload--payload-binding--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 51,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store-payload--priority-selection--negative multi-store-payload priority-selection negative 1 17 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/multi-store-payload--priority-selection--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 52,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store-payload--priority-selection--positive multi-store-payload priority-selection positive 3 23 source-capability,source-plus-formal-witness,source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/multi-store-payload--priority-selection--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 53,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "payload--dispatch--positive payload dispatch positive 3 46 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/payload--dispatch--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 54,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "payload--finite-execution--positive payload finite-execution positive 1 9 source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/payload--finite-execution--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 55,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "payload--initialization--positive payload initialization positive 1 12 direct-source-translation source,rmc,parser-json,decoded-dtr-ast,translated-lf-ast,lf-source,lfc yes tests/benchmarks/payload--initialization--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 56,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "payload--payload-binding--negative payload payload-binding negative 1 16 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/payload--payload-binding--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 57,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "payload--payload-binding--positive payload payload-binding positive 3 39 direct-source-translation,source-plus-runtime-observation source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc,runtime yes tests/benchmarks/payload--payload-binding--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 58,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "payload--priority-selection--positive payload priority-selection positive 2 28 source-plus-formal-witness source,rmc,parser-json,decoded-dtr-ast,formal-witness,translated-lf-ast,lf-source,lfc yes tests/benchmarks/payload--priority-selection--positive/source/model.rebeca planned"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 8,
+      "path": "tests/benchmarks/registry/coverage-audit.txt",
+      "source_line": "FINAL_SOURCE_BENCHMARK_COUNT=57"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 9,
+      "path": "tests/benchmarks/registry/coverage-audit.txt",
+      "source_line": "POSITIVE_BENCHMARK_COUNT=42"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 10,
+      "path": "tests/benchmarks/registry/coverage-audit.txt",
+      "source_line": "NEGATIVE_BENCHMARK_COUNT=15"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 5,
+      "path": "tests/benchmarks/registry/final-b1-summary.txt",
+      "source_line": "FINAL_SOURCE_BENCHMARK_COUNT=57"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 6,
+      "path": "tests/benchmarks/registry/final-b1-summary.txt",
+      "source_line": "FINAL_POSITIVE_BENCHMARK_COUNT=42"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 7,
+      "path": "tests/benchmarks/registry/final-b1-summary.txt",
+      "source_line": "FINAL_NEGATIVE_BENCHMARK_COUNT=15"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 13,
+      "path": "tests/benchmarks/registry/final-b1-summary.txt",
+      "source_line": "BENCHMARKS_IMPLEMENTED_BY_THIS_RUN=0"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 22,
+      "path": "tests/benchmarks/registry/final-b1-summary.txt",
+      "source_line": "NEXT_PHASE=implement benchmark directory schema and artifact-producing runner"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1,
+      "path": "tests/benchmarks/registry/legacy-script-migration.tsv",
+      "source_line": "legacy_script replacement_benchmark coverage_to_migrate removal_status removal_condition"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 2,
+      "path": "tests/benchmarks/registry/legacy-script-migration.tsv",
+      "source_line": "frontend/java-bridge/check-v0.sh core--initialization--positive parser JSON equality; LF startup and logical-action structure; lfc compilation planned replacement benchmark implemented and passing; README references replaced; zero tracked callers"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 3,
+      "path": "tests/benchmarks/registry/legacy-script-migration.tsv",
+      "source_line": "frontend/java-bridge/check-v0-runtime.sh core--initialization--positive finite generated runtime termination; state assignment; absence of recursive rescheduling planned replacement benchmark implemented and passing; README references replaced; zero tracked callers"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 4,
+      "path": "tests/benchmarks/registry/legacy-script-migration.tsv",
+      "source_line": "frontend/java-bridge/check-store.sh finite-store--runtime-semantics--positive two-variable lookup and update behavior; generated LF; lfc compilation; native runtime planned replacement benchmark implemented and passing; README references replaced; zero tracked callers"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 5,
+      "path": "tests/benchmarks/registry/legacy-script-migration.tsv",
+      "source_line": "frontend/java-bridge/check-multistore.sh multi-store--priority-selection--positive message-server priority ordering; equal-delay scheduling; generated LF; native runtime planned replacement benchmark implemented and passing; README references replaced; zero tracked callers"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 6,
+      "path": "tests/benchmarks/registry/legacy-script-migration.tsv",
+      "source_line": "frontend/check-multistore-payload-frontend.sh multi-store-payload--payload-binding--positive payload parser JSON contract and Lean decoder acceptance planned replacement benchmark implemented and passing; README references replaced; zero tracked callers"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 7,
+      "path": "tests/benchmarks/registry/legacy-script-migration.tsv",
+      "source_line": "frontend/check-multistore-payload-backend.sh multi-store-payload--payload-binding--positive payload-before-delay ordering; reaction-local parameter scope; generated LF; lfc and runtime planned replacement benchmark implemented and passing; README references replaced; zero tracked callers"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "obligation_id test_file line_number kind name_or_expression classification original_benchmark_candidate final_benchmark_id evidence_role mapping_status"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 26,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "BoundPayloadDispatchCorrectness:0006 Relico/Tests/BoundPayloadDispatchCorrectness.lean 150 theorem bound_payload_dispatch_forward_selects_expected_action proof_obligation test-bound-payload-dispatch-correctness bound-payload--dispatch--positive source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 27,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "BoundPayloadDispatchCorrectness:0007 Relico/Tests/BoundPayloadDispatchCorrectness.lean 159 theorem bound_payload_dispatch_backward_selects_expected_message proof_obligation test-bound-payload-dispatch-correctness bound-payload--dispatch--positive source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 77,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "CppBackend:0001 Relico/Tests/CppBackend.lean 9 def expectedCppSource test_fixture_or_helper test-cpp-backend core--initialization--positive source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 78,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "CppBackend:0002 Relico/Tests/CppBackend.lean 27 theorem expectedProgram_renders_as_cpp proof_obligation test-cpp-backend core--initialization--positive source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 683,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "ExecutableTranslation:0003 Relico/Tests/ExecutableTranslation.lean 22 theorem expectedProgramStartupRefl proof_obligation test-executable-translation core--initialization--positive source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 835,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "GlobalMultiStorePayloadExternalSendStatement:0003 Relico/Tests/GlobalMultiStorePayloadExternalSendStatement.lean 37 def positiveExpectedSuccess test_fixture_or_helper test-global-multi-store-payload-external-send-statement global-multi-actor-payload--external-send-statement--negative source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1076,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "MultiStoreFrontendDecoder:0006 Relico/Tests/MultiStoreFrontendDecoder.lean 119 def expectedDecodedMultiStoreModel test_fixture_or_helper test-multi-store-frontend-decoder multi-store--priority-selection--negative source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1167,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "MultiStorePayloadCppPrinter:0020 Relico/Tests/MultiStorePayloadCppPrinter.lean 225 def expectedSampleProgramSource test_fixture_or_helper test-multi-store-payload-cpp-printer multi-store-payload--initialization--positive source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1635,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "PayloadStatementTranslation:0009 Relico/Tests/PayloadStatementTranslation.lean 74 def expectedPayloadStatementProgramSource test_fixture_or_helper test-payload-statement-translation payload--initialization--positive source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1743,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "StoreCppBackend:0001 Relico/Tests/StoreCppBackend.lean 9 def expectedStoreCppSource test_fixture_or_helper test-store-cpp-backend finite-store--initialization--positive source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1785,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "StoreFrontendDecoder:0005 Relico/Tests/StoreFrontendDecoder.lean 71 def expectedDecodedStoreModel test_fixture_or_helper test-store-frontend-decoder finite-store--frontend-decoding--negative source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1792,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "StoreInitialization:0001 Relico/Tests/StoreInitialization.lean 8 def expectedTwoStateInitialStore test_fixture_or_helper test-store-initialization finite-store--initialization--positive source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1881,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "Translation:0001 Relico/Tests/Translation.lean 8 def expectedReactorName test_fixture_or_helper test-translation core--initialization--positive source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1882,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "Translation:0002 Relico/Tests/Translation.lean 11 def expectedActionName test_fixture_or_helper test-translation core--initialization--positive source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1883,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "Translation:0003 Relico/Tests/Translation.lean 14 def expectedStartupReaction test_fixture_or_helper test-translation core--initialization--positive source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1884,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "Translation:0004 Relico/Tests/Translation.lean 22 def expectedMessageReaction test_fixture_or_helper test-translation core--initialization--positive source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1885,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "Translation:0005 Relico/Tests/Translation.lean 30 def expectedReactor test_fixture_or_helper test-translation core--initialization--positive source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1886,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "Translation:0006 Relico/Tests/Translation.lean 37 def expectedReactorInstance test_fixture_or_helper test-translation core--initialization--positive source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1887,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "Translation:0007 Relico/Tests/Translation.lean 41 def expectedProgram test_fixture_or_helper test-translation core--initialization--positive source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1888,
+      "path": "tests/benchmarks/registry/obligations.tsv",
+      "source_line": "Translation:0008 Relico/Tests/Translation.lean 45 theorem validModel_translates_to_expectedProgram proof_obligation test-translation core--initialization--positive source-capability accepted"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1,
+      "path": "tests/benchmarks/registry/shared-formal-evidence.tsv",
+      "source_line": "test_file formal_capability anchor_benchmark obligation_count required_artifacts justification"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 1,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "benchmark_id benchmark_directory source_path polarity module_count obligation_count required_stage_count"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 2,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "bound-payload--dispatch--negative tests/benchmarks/bound-payload--dispatch--negative tests/benchmarks/bound-payload--dispatch--negative/source/model.rebeca negative 1 22 6"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 3,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "bound-payload--dispatch--positive tests/benchmarks/bound-payload--dispatch--positive tests/benchmarks/bound-payload--dispatch--positive/source/model.rebeca positive 8 99 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 4,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "bound-payload--finite-execution--positive tests/benchmarks/bound-payload--finite-execution--positive tests/benchmarks/bound-payload--finite-execution--positive/source/model.rebeca positive 3 44 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 5,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "bound-payload--initialization--positive tests/benchmarks/bound-payload--initialization--positive tests/benchmarks/bound-payload--initialization--positive/source/model.rebeca positive 2 53 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 6,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "bound-payload--payload-binding--positive tests/benchmarks/bound-payload--payload-binding--positive tests/benchmarks/bound-payload--payload-binding--positive/source/model.rebeca positive 4 44 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 7,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "bound-payload--priority-selection--positive tests/benchmarks/bound-payload--priority-selection--positive tests/benchmarks/bound-payload--priority-selection--positive/source/model.rebeca positive 1 20 8"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 8,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "core--dispatch--positive tests/benchmarks/core--dispatch--positive tests/benchmarks/core--dispatch--positive/source/model.rebeca positive 11 62 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 9,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "core--initialization--positive tests/benchmarks/core--initialization--positive tests/benchmarks/core--initialization--positive/source/model.rebeca positive 5 36 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 10,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "core--one-step-execution--positive tests/benchmarks/core--one-step-execution--positive tests/benchmarks/core--one-step-execution--positive/source/model.rebeca positive 1 4 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 11,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "core--priority-selection--positive tests/benchmarks/core--priority-selection--positive tests/benchmarks/core--priority-selection--positive/source/model.rebeca positive 3 54 8"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 12,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "core--queue-correspondence--positive tests/benchmarks/core--queue-correspondence--positive tests/benchmarks/core--queue-correspondence--positive/source/model.rebeca positive 3 23 8"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 13,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "core--runtime-semantics--positive tests/benchmarks/core--runtime-semantics--positive tests/benchmarks/core--runtime-semantics--positive/source/model.rebeca positive 3 21 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 14,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "core--trace-execution--positive tests/benchmarks/core--trace-execution--positive tests/benchmarks/core--trace-execution--positive/source/model.rebeca positive 1 4 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 15,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "core--weak-semantics--positive tests/benchmarks/core--weak-semantics--positive tests/benchmarks/core--weak-semantics--positive/source/model.rebeca positive 3 47 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 16,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "core--well-formedness--negative tests/benchmarks/core--well-formedness--negative tests/benchmarks/core--well-formedness--negative/source/model.rebeca negative 2 34 6"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 17,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "core--well-formedness--positive tests/benchmarks/core--well-formedness--positive tests/benchmarks/core--well-formedness--positive/source/model.rebeca positive 3 7 8"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 18,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "finite-store--dispatch--positive tests/benchmarks/finite-store--dispatch--positive tests/benchmarks/finite-store--dispatch--positive/source/model.rebeca positive 3 38 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 19,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "finite-store--frontend-decoding--negative tests/benchmarks/finite-store--frontend-decoding--negative tests/benchmarks/finite-store--frontend-decoding--negative/source/model.rebeca negative 1 11 6"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 20,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "finite-store--initialization--positive tests/benchmarks/finite-store--initialization--positive tests/benchmarks/finite-store--initialization--positive/source/model.rebeca positive 3 18 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 21,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "finite-store--priority-selection--positive tests/benchmarks/finite-store--priority-selection--positive tests/benchmarks/finite-store--priority-selection--positive/source/model.rebeca positive 1 9 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 22,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "finite-store--queue-correspondence--positive tests/benchmarks/finite-store--queue-correspondence--positive tests/benchmarks/finite-store--queue-correspondence--positive/source/model.rebeca positive 1 4 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 23,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "finite-store--runtime-semantics--positive tests/benchmarks/finite-store--runtime-semantics--positive tests/benchmarks/finite-store--runtime-semantics--positive/source/model.rebeca positive 6 45 11"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 24,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "finite-store--trace-execution--positive tests/benchmarks/finite-store--trace-execution--positive tests/benchmarks/finite-store--trace-execution--positive/source/model.rebeca positive 1 4 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 25,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "finite-store--well-formedness--positive tests/benchmarks/finite-store--well-formedness--positive tests/benchmarks/finite-store--well-formedness--positive/source/model.rebeca positive 2 28 8"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 26,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "global-multi-actor-payload--external-send--negative tests/benchmarks/global-multi-actor-payload--external-send--negative tests/benchmarks/global-multi-actor-payload--external-send--negative/source/model.rebeca negative 1 56 6"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 27,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "global-multi-actor-payload--external-send--positive tests/benchmarks/global-multi-actor-payload--external-send--positive tests/benchmarks/global-multi-actor-payload--external-send--positive/source/model.rebeca positive 2 35 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 28,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "global-multi-actor-payload--external-send-frame--negative tests/benchmarks/global-multi-actor-payload--external-send-frame--negative tests/benchmarks/global-multi-actor-payload--external-send-frame--negative/source/model.rebeca negative 1 27 6"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 29,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "global-multi-actor-payload--external-send-frame--positive tests/benchmarks/global-multi-actor-payload--external-send-frame--positive tests/benchmarks/global-multi-actor-payload--external-send-frame--positive/source/model.rebeca positive 2 10 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 30,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "global-multi-actor-payload--external-send-statement--negative tests/benchmarks/global-multi-actor-payload--external-send-statement--negative tests/benchmarks/global-multi-actor-payload--external-send-statement--negative/source/model.rebeca negative 1 24 6"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 31,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "global-multi-actor-payload--finite-execution--positive tests/benchmarks/global-multi-actor-payload--finite-execution--positive tests/benchmarks/global-multi-actor-payload--finite-execution--positive/source/model.rebeca positive 1 4 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 32,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "global-multi-actor-payload--initialization--negative tests/benchmarks/global-multi-actor-payload--initialization--negative tests/benchmarks/global-multi-actor-payload--initialization--negative/source/model.rebeca negative 1 52 6"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 33,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "global-multi-actor-payload--payload-binding--negative tests/benchmarks/global-multi-actor-payload--payload-binding--negative tests/benchmarks/global-multi-actor-payload--payload-binding--negative/source/model.rebeca negative 1 43 6"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 34,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "global-multi-actor-payload--priority-selection--negative tests/benchmarks/global-multi-actor-payload--priority-selection--negative tests/benchmarks/global-multi-actor-payload--priority-selection--negative/source/model.rebeca negative 1 10 6"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 35,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "multi-store--dispatch--negative tests/benchmarks/multi-store--dispatch--negative tests/benchmarks/multi-store--dispatch--negative/source/model.rebeca negative 2 42 6"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 36,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "multi-store--dispatch--positive tests/benchmarks/multi-store--dispatch--positive tests/benchmarks/multi-store--dispatch--positive/source/model.rebeca positive 15 110 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 37,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "multi-store--finite-execution--positive tests/benchmarks/multi-store--finite-execution--positive tests/benchmarks/multi-store--finite-execution--positive/source/model.rebeca positive 4 29 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 38,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "multi-store--initialization--positive tests/benchmarks/multi-store--initialization--positive tests/benchmarks/multi-store--initialization--positive/source/model.rebeca positive 2 12 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 39,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "multi-store--priority-selection--negative tests/benchmarks/multi-store--priority-selection--negative tests/benchmarks/multi-store--priority-selection--negative/source/model.rebeca negative 2 37 6"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 40,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "multi-store--priority-selection--positive tests/benchmarks/multi-store--priority-selection--positive tests/benchmarks/multi-store--priority-selection--positive/source/model.rebeca positive 5 35 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 41,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "multi-store--queue-correspondence--positive tests/benchmarks/multi-store--queue-correspondence--positive tests/benchmarks/multi-store--queue-correspondence--positive/source/model.rebeca positive 2 26 8"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 42,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "multi-store--runtime-semantics--positive tests/benchmarks/multi-store--runtime-semantics--positive tests/benchmarks/multi-store--runtime-semantics--positive/source/model.rebeca positive 1 2 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 43,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "multi-store--weak-semantics--positive tests/benchmarks/multi-store--weak-semantics--positive tests/benchmarks/multi-store--weak-semantics--positive/source/model.rebeca positive 5 37 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 44,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "multi-store--well-formedness--positive tests/benchmarks/multi-store--well-formedness--positive tests/benchmarks/multi-store--well-formedness--positive/source/model.rebeca positive 2 25 8"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 45,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "multi-store-payload--dispatch--negative tests/benchmarks/multi-store-payload--dispatch--negative tests/benchmarks/multi-store-payload--dispatch--negative/source/model.rebeca negative 1 52 6"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 46,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "multi-store-payload--dispatch--positive tests/benchmarks/multi-store-payload--dispatch--positive tests/benchmarks/multi-store-payload--dispatch--positive/source/model.rebeca positive 8 72 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 47,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "multi-store-payload--finite-execution--positive tests/benchmarks/multi-store-payload--finite-execution--positive tests/benchmarks/multi-store-payload--finite-execution--positive/source/model.rebeca positive 2 49 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 48,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "multi-store-payload--initialization--positive tests/benchmarks/multi-store-payload--initialization--positive tests/benchmarks/multi-store-payload--initialization--positive/source/model.rebeca positive 5 90 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 49,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "multi-store-payload--payload-binding--negative tests/benchmarks/multi-store-payload--payload-binding--negative tests/benchmarks/multi-store-payload--payload-binding--negative/source/model.rebeca negative 3 66 6"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 50,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "multi-store-payload--payload-binding--positive tests/benchmarks/multi-store-payload--payload-binding--positive tests/benchmarks/multi-store-payload--payload-binding--positive/source/model.rebeca positive 5 62 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 51,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "multi-store-payload--priority-selection--negative tests/benchmarks/multi-store-payload--priority-selection--negative tests/benchmarks/multi-store-payload--priority-selection--negative/source/model.rebeca negative 1 17 6"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 52,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "multi-store-payload--priority-selection--positive tests/benchmarks/multi-store-payload--priority-selection--positive tests/benchmarks/multi-store-payload--priority-selection--positive/source/model.rebeca positive 3 23 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 53,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "payload--dispatch--positive tests/benchmarks/payload--dispatch--positive tests/benchmarks/payload--dispatch--positive/source/model.rebeca positive 3 46 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 54,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "payload--finite-execution--positive tests/benchmarks/payload--finite-execution--positive tests/benchmarks/payload--finite-execution--positive/source/model.rebeca positive 1 9 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 55,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "payload--initialization--positive tests/benchmarks/payload--initialization--positive tests/benchmarks/payload--initialization--positive/source/model.rebeca positive 1 12 7"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 56,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "payload--payload-binding--negative tests/benchmarks/payload--payload-binding--negative tests/benchmarks/payload--payload-binding--negative/source/model.rebeca negative 1 16 6"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 57,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "payload--payload-binding--positive tests/benchmarks/payload--payload-binding--positive tests/benchmarks/payload--payload-binding--positive/source/model.rebeca positive 3 39 9"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 58,
+      "path": "tests/benchmarks/registry/source-model-plan.tsv",
+      "source_line": "payload--priority-selection--positive tests/benchmarks/payload--priority-selection--positive tests/benchmarks/payload--priority-selection--positive/source/model.rebeca positive 2 28 8"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 3,
+      "path": "tests/benchmarks/schema/benchmark-manifest.schema.json",
+      "source_line": "\"title\": \"ReLico benchmark manifest\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 7,
+      "path": "tests/benchmarks/schema/benchmark-manifest.schema.json",
+      "source_line": "\"benchmark_id\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 10,
+      "path": "tests/benchmarks/schema/benchmark-manifest.schema.json",
+      "source_line": "\"expected_terminal_stage\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 12,
+      "path": "tests/benchmarks/schema/benchmark-manifest.schema.json",
+      "source_line": "\"stages\""
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 18,
+      "path": "tests/benchmarks/schema/benchmark-manifest.schema.json",
+      "source_line": "\"benchmark_id\": {"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 32,
+      "path": "tests/benchmarks/schema/benchmark-manifest.schema.json",
+      "source_line": "\"expected_terminal_stage\": {"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 44,
+      "path": "tests/benchmarks/schema/benchmark-manifest.schema.json",
+      "source_line": "\"stages\": {"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 51,
+      "path": "tests/benchmarks/schema/benchmark-manifest.schema.json",
+      "source_line": "\"expected_artifacts\": {"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 94,
+      "path": "tests/benchmarks/schema/benchmark-manifest.schema.json",
+      "source_line": "\"expected_exit_codes\": {"
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 3,
+      "path": "tests/benchmarks/schema/stage-result.schema.json",
+      "source_line": "\"title\": \"ReLico benchmark stage result\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 7,
+      "path": "tests/benchmarks/schema/stage-result.schema.json",
+      "source_line": "\"benchmark_id\","
+    },
+    {
+      "category": "benchmark_execution",
+      "line": 18,
+      "path": "tests/benchmarks/schema/stage-result.schema.json",
+      "source_line": "\"benchmark_id\": {"
+    },
+    {
+      "category": "failure_oracle",
+      "line": 7,
+      "path": "tests/benchmarks/core--initialization--positive/expected/runtime/result.json",
+      "source_line": "\"exit_code\": 0,"
+    },
+    {
+      "category": "failure_oracle",
+      "line": 2,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "bound-payload--dispatch--negative bound-payload dispatch negative 1 22 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/bound-payload--dispatch--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "failure_oracle",
+      "line": 16,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "core--well-formedness--negative core well-formedness negative 2 34 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/core--well-formedness--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "failure_oracle",
+      "line": 19,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "finite-store--frontend-decoding--negative finite-store frontend-decoding negative 1 11 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/finite-store--frontend-decoding--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "failure_oracle",
+      "line": 26,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "global-multi-actor-payload--external-send--negative global-multi-actor-payload external-send negative 1 56 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/global-multi-actor-payload--external-send--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "failure_oracle",
+      "line": 28,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "global-multi-actor-payload--external-send-frame--negative global-multi-actor-payload external-send-frame negative 1 27 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/global-multi-actor-payload--external-send-frame--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "failure_oracle",
+      "line": 30,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "global-multi-actor-payload--external-send-statement--negative global-multi-actor-payload external-send-statement negative 1 24 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/global-multi-actor-payload--external-send-statement--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "failure_oracle",
+      "line": 32,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "global-multi-actor-payload--initialization--negative global-multi-actor-payload initialization negative 1 52 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/global-multi-actor-payload--initialization--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "failure_oracle",
+      "line": 33,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "global-multi-actor-payload--payload-binding--negative global-multi-actor-payload payload-binding negative 1 43 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/global-multi-actor-payload--payload-binding--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "failure_oracle",
+      "line": 34,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "global-multi-actor-payload--priority-selection--negative global-multi-actor-payload priority-selection negative 1 10 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/global-multi-actor-payload--priority-selection--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "failure_oracle",
+      "line": 35,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store--dispatch--negative multi-store dispatch negative 2 42 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/multi-store--dispatch--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "failure_oracle",
+      "line": 39,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store--priority-selection--negative multi-store priority-selection negative 2 37 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/multi-store--priority-selection--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "failure_oracle",
+      "line": 45,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store-payload--dispatch--negative multi-store-payload dispatch negative 1 52 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/multi-store-payload--dispatch--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "failure_oracle",
+      "line": 49,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store-payload--payload-binding--negative multi-store-payload payload-binding negative 3 66 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/multi-store-payload--payload-binding--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "failure_oracle",
+      "line": 51,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "multi-store-payload--priority-selection--negative multi-store-payload priority-selection negative 1 17 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/multi-store-payload--priority-selection--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "failure_oracle",
+      "line": 56,
+      "path": "tests/benchmarks/registry/benchmarks.tsv",
+      "source_line": "payload--payload-binding--negative payload payload-binding negative 1 16 expected-boundary-or-rejection source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics yes tests/benchmarks/payload--payload-binding--negative/source/model.rebeca planned"
+    },
+    {
+      "category": "failure_oracle",
+      "line": 94,
+      "path": "tests/benchmarks/schema/benchmark-manifest.schema.json",
+      "source_line": "\"expected_exit_codes\": {"
+    },
+    {
+      "category": "failure_oracle",
+      "line": 10,
+      "path": "tests/benchmarks/schema/stage-result.schema.json",
+      "source_line": "\"exit_code\","
+    },
+    {
+      "category": "failure_oracle",
+      "line": 34,
+      "path": "tests/benchmarks/schema/stage-result.schema.json",
+      "source_line": "\"exit_code\": {"
+    },
+    {
+      "category": "manifest_loading",
+      "line": 28,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "- manifest.json"
+    },
+    {
+      "category": "manifest_loading",
+      "line": 92,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "A benchmark with status `planned` must not contain `manifest.json`. A"
+    },
+    {
+      "category": "manifest_loading",
+      "line": 93,
+      "path": "tests/benchmarks/README.md",
+      "source_line": "benchmark with status `implemented` must contain `manifest.json`. Registry"
+    }
+  ],
+  "harness_paths": [
+    "tests/benchmarks/README.md",
+    "tests/benchmarks/core--initialization--positive/README.md",
+    "tests/benchmarks/core--initialization--positive/coverage.json",
+    "tests/benchmarks/core--initialization--positive/expected/formal-witness/result.json",
+    "tests/benchmarks/core--initialization--positive/expected/runtime/result.json",
+    "tests/benchmarks/core--initialization--positive/expected/source/result.json",
+    "tests/benchmarks/core--initialization--positive/manifest.json",
+    "tests/benchmarks/registry/PROVENANCE.md",
+    "tests/benchmarks/registry/benchmarks.tsv",
+    "tests/benchmarks/registry/coverage-audit.txt",
+    "tests/benchmarks/registry/final-b1-summary.txt",
+    "tests/benchmarks/registry/legacy-script-migration.tsv",
+    "tests/benchmarks/registry/obligations.tsv",
+    "tests/benchmarks/registry/shared-formal-evidence.tsv",
+    "tests/benchmarks/registry/source-model-plan.tsv",
+    "tests/benchmarks/schema/benchmark-manifest.schema.json",
+    "tests/benchmarks/schema/stage-result.schema.json"
+  ],
+  "implementation_ready": true,
+  "negative_expectation_schema_status": "RESOLVED",
+  "negative_manifest_candidates": [],
+  "phase": "phase3a-benchmark-and-harness-audit",
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "registry": {
+    "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/tests/benchmarks/registry/benchmarks.tsv",
+    "row_count": 57,
+    "sha256": "1c868039d4cc553bbc5251b69c5654f5ea035e97691673a230d6b44132694d2c",
+    "target_benchmark_id": "global-multi-actor-payload--priority-selection--negative",
+    "target_directory": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/tests/benchmarks/global-multi-actor-payload--priority-selection--negative",
+    "target_directory_exists": false,
+    "target_row": {
+      "benchmark_id": "global-multi-actor-payload--priority-selection--negative",
+      "evidence_modes": "expected-boundary-or-rejection",
+      "implementation_status": "planned",
+      "module_count": "1",
+      "obligation_count": "10",
+      "polarity": "negative",
+      "primary_capability": "priority-selection",
+      "required_stages": "source,rmc,parser-json,decoded-dtr-ast,expected-boundary-stage,diagnostics",
+      "semantic_layer": "global-multi-actor-payload",
+      "source_path": "tests/benchmarks/global-multi-actor-payload--priority-selection--negative/source/model.rebeca",
+      "source_required": "yes"
+    }
+  },
+  "schema_version": 1
+}

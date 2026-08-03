@@ -1,0 +1,13 @@
+contract_id	subject	required_value	status
+TB1	existing target transition	Relico.LF.GlobalMultiStorePayloadDispatch.Step	confirmed
+TB2	target actor selector	actorName : ActorName	confirmed
+TB3	numeric actor index	not used	confirmed
+TB4	target state	GlobalMultiStorePayloadState	confirmed
+TB5	selected target event	PendingAction	confirmed
+TB6	selected target reaction	MultiStorePayloadReaction	confirmed
+TB7	new wrapper module	Relico/LF/GlobalMultiStorePayloadActorOrder.lean	planned
+TB8	new wrapper relation	ActorOrderDispatchStep	planned
+TB9	wrapper premises	target actor-order eligibility plus existing GlobalMultiStorePayloadDispatch.Step	required
+TB10	compatibility	existing LF Step and theorems remain unchanged	required
+TB11	ordering representation	behaviorally equivalent actor order; literal actor-priority field optional	required
+TB12	next implementation	phase4d2b-target-global-actor-order-semantics-implementation	ready

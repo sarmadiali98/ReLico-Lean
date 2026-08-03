@@ -1,0 +1,13 @@
+family_id	expected_first	fire_delay	variant	source_sha256	rmc_generated	rmc_exit_code	rmc_timed_out	build_attempt_count	runtime_attempt_count	runtime_exit_signature	violation_observed	behavior_material_present	behavior_sha256	artifact_count	family_violation_differs	family_runtime_exit_differs	family_behavioral_output_differs	family_code_generation_differs	family_semantically_discriminating	rmc_stdout_excerpt	rmc_stderr_excerpt
+expected-1-delay-0	1	0	base	a65bcf32d21dad09e4b02fd502807d2a6aae0fbc6cc8413308c10fcce3d0686f	True	0	False	1	1	"[{""executable"":""relico-systematic-verifier"",""exit_code"":0,""timed_out"":false}]"	True	True	382ed1e4a26f4c08b4b9af2646b00677b2d4090eb1654ecf0bbf2fe0298f2787	29	False	False	True	True	True		"SLF4J: Failed to load class ""org.slf4j.impl.StaticLoggerBinder"".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+"
+expected-1-delay-0	1	0	reversed	70d5dbae3c5c0836d53ed5ca28ff153d48f2ad5dfcac988ed2c05368cbc2c8d2	True	0	False	1	1	"[{""executable"":""relico-systematic-verifier"",""exit_code"":0,""timed_out"":false}]"	True	True	baa4e9f2dd833e36f603ee7ebe59ac5dec88c77e7965795c020abbfd9f64e769	29	False	False	True	True	True		"SLF4J: Failed to load class ""org.slf4j.impl.StaticLoggerBinder"".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+"
+expected-1-delay-0	1	0	absent	6d8cfafc8fab2f3207a9193e1504f194cc22777b024b9e5dd4a9b431ac5aa005	True	0	False	1	1	"[{""executable"":""relico-systematic-verifier"",""exit_code"":0,""timed_out"":false}]"	True	True	8337d71872ffc5c61dca76a0a9148a78bd5765cfa8c69d7123482a5eafe1f780	29	False	False	True	True	True		"SLF4J: Failed to load class ""org.slf4j.impl.StaticLoggerBinder"".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+"

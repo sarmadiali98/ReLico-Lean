@@ -1,0 +1,8 @@
+claim_id	phase2a_provisional_classification	evidence_status	evidence_refs	reason	required_before_final
+A	OUTSIDE CURRENT FRAGMENT	STATIC_DOMAIN_EVIDENCE_ESTABLISHED	LEAN-AST-01|LEAN-STEP-01|LEAN-BOUNDARY-01	The current AST omits actor-priority metadata and the step relation receives actor choice as a witness.	Direct theorem elaboration and complete signature audit.
+B	NOT YET PROVED	DIRECT_ACTOR_ANNOTATION_ACCESS_FOUND	FRONTEND-SCHEMA-01|FRONTEND-JAVA-01|LEAN-BOUNDARY-01	Static schema and Java evidence cannot by itself prove all official actor-priority syntax is rejected before translation.	Dynamic parser and bridge probes for absent, nonempty, reversed, and explicit-empty declarations.
+C	NOT YET PROVED	UPSTREAM_SOURCE_ACQUIRED	UPSTREAM-01	The intended frontend acceptance surface has not yet been established dynamically.	Identify exact official syntax and execute parser probes.
+D	NOT YET PROVED	NO_DISCRIMINATING_EXPERIMENT_YET		No multi-actor RMC comparison has yet varied only actor priority.	Run discriminating and reversed-priority models.
+E	NOT YET PROVED	REGISTRY_RECORDS_EXTRACTED	BENCHMARK-01	Priority records have not yet been classified by semantic level.	Inspect every priority-related obligation and theorem mapping.
+F	NOT YET PROVED	PAGE_HITS_EXTRACTED	PAPER-01	Paper statements remain to be compared page by page with theorem assumptions and source semantics.	Produce a page-specific paper claim table.
+G	NOT YET PROVED	TARGET_STATIC_SOURCE_ACQUIRED	LEAN-AST-01|LEAN-STEP-01	The current target lacks an explicit actor-priority scheduler, but inclusion expressiveness is untested.	Prototype and execute an explicit cross-actor ordering mechanism.

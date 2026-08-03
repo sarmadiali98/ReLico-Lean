@@ -1,0 +1,122 @@
+{
+  "correction": {
+    "audited_signatures": 8,
+    "corrected_classification": "NO_EXPLICIT_ACTOR_PRIORITY_INTEGRATION_FOUND_ERASURE_IMPOSSIBILITY_THEOREM_READY",
+    "erasure_impossibility_theorem_ready": true,
+    "exact_core_hits": 3,
+    "historical_integration_flag_superseded": true,
+    "nonsemantic_core_hits": 3,
+    "production_actor_priority_integrated": false,
+    "semantic_core_hits": 0,
+    "signatures_with_actor_priority": 0
+  },
+  "correction_rows": [
+    {
+      "corrected_value": "all three are comment-only",
+      "evidence": "exact lexical review after comment and string removal",
+      "finding_id": "C1",
+      "historical_value": "semantic integration suspected",
+      "status": "corrected",
+      "subject": "three broad actor-priority hits"
+    },
+    {
+      "corrected_value": "0",
+      "evidence": "H1, H2, and H3 have zero code occurrences",
+      "finding_id": "C2",
+      "historical_value": "3",
+      "status": "corrected",
+      "subject": "semantic actor-priority core hits"
+    },
+    {
+      "corrected_value": "8 audited; 0 contain actor-priority parameters or terms",
+      "evidence": "Lean #check signature review",
+      "finding_id": "C3",
+      "historical_value": "not decisive",
+      "status": "corrected",
+      "subject": "audited production signatures"
+    },
+    {
+      "corrected_value": "false",
+      "evidence": "zero semantic core hits and zero signature occurrences",
+      "finding_id": "C4",
+      "historical_value": "true",
+      "status": "corrected",
+      "subject": "production actor-priority integration"
+    },
+    {
+      "corrected_value": "true",
+      "evidence": "discriminating RMC witness, isolated Lean selection result, and confirmed absence of production integration",
+      "finding_id": "C5",
+      "historical_value": "false",
+      "status": "advanced",
+      "subject": "erasure-impossibility theorem readiness"
+    }
+  ],
+  "current_evidence": {
+    "dispatch_and_selection_surface_present": true,
+    "explicit_actor_priority_in_production": false,
+    "local_priority_mechanism_present": true,
+    "priority_reversal_changes_isolated_selection": true,
+    "priority_reversal_changes_rmc_trace_language": true
+  },
+  "exact_review": {
+    "contexts": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4B-Exact-Hit-Review-20260802T202654+0330/PHASE4B_EXACT_HIT_CONTEXTS.txt",
+      "sha256": "ec8c6ff2cee180ffc97e7e30aee694f406caf7641f0d74f7e0fa864d3a4d4e5e"
+    },
+    "narrative": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4B-Exact-Hit-Review-20260802T202654+0330/PHASE4B_EXACT_HIT_REVIEW.md",
+      "sha256": "43f2744c8263820264aa31db0d231d2752386cd5360209f1fc871a313939daf8"
+    },
+    "report": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4B-Exact-Hit-Review-20260802T202654+0330/PHASE4B_EXACT_HIT_REVIEW.json",
+      "sha256": "685cf12e7372c93f2b679d7177dc429bf6ac92d24ae565ccfd77dd7e7ab9c5a3"
+    },
+    "table": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Phase4B-Exact-Hit-Review-20260802T202654+0330/PHASE4B_EXACT_HIT_REVIEW.tsv",
+      "sha256": "6d881ce1aeaaa138cfda7cc48f948952905ea8848454eaf094061b0f946a749b"
+    }
+  },
+  "historical_phase4b": {
+    "original_classification": "UNEXPECTED_EXPLICIT_ACTOR_PRIORITY_INTEGRATION_FOUND_REQUIRES_MANUAL_REVIEW",
+    "original_production_integration": true,
+    "preserved": true,
+    "proof_obligations": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase4b/PHASE4B_PROOF_OBLIGATIONS.md",
+      "sha256": "c6c6e019d55620cb661878c0ff4ba6d49c7e7d980afd68ce579dd8c62f661623"
+    },
+    "report": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase4b/PHASE4B_INTEGRATION_SURFACE_AUDIT.json",
+      "sha256": "1609a6f094478241a5a8ae8926af61b37af10ea19462137b01c30169d130a7cb"
+    },
+    "superseded_fields_only": true,
+    "surface_table": {
+      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/docs/actor-priority/phase4b/PHASE4B_INTEGRATION_SURFACE.tsv",
+      "sha256": "9cc473d09fac3bec9c3ec69c4494e14c172085455ae08b7da843d8f221c54d03"
+    }
+  },
+  "phase": "phase4b-false-positive-classification-correction",
+  "published_relico": {
+    "head": "57b87cf45eacf9c09af9fa9b45c2ae7d7fc2fc5f",
+    "tree": "49e178f2aeab5a46cb4a160f5dc20b5dd8aa1e92"
+  },
+  "result": {
+    "approach_a_status": "current_profile_exclusion_mechanically_enforced",
+    "approach_b_status": "integration_absence_confirmed_erasure_theorem_ready",
+    "classification": "PHASE4B_FALSE_POSITIVE_CLASSIFICATION_CORRECTED",
+    "final_actor_priority_necessity_conclusion": "not_yet_reached",
+    "next_phase": "phase4c-actor-priority-erasure-impossibility-theorem",
+    "passed": true
+  },
+  "schema_version": 1,
+  "target_conclusions": {
+    "conclusion_1": {
+      "statement": "actor-priority information is unnecessary",
+      "status": "proved only for actor-priority-excluded or independently priority-inert scopes"
+    },
+    "conclusion_2": {
+      "statement": "actor-ordering information must be preserved when it changes cross-actor selection",
+      "status": "decisive formal erasure-impossibility theorem ready to implement"
+    }
+  }
+}
