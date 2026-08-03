@@ -496,6 +496,294 @@ def runtime_stage(options: argparse.Namespace) -> None:
     )
 
 
+
+def load_json_object(
+    path: Path,
+    label: str,
+) -> dict[str, object]:
+    require_file(path, label)
+
+    try:
+        value = json.loads(
+            path.read_text(encoding="utf-8")
+        )
+    except (OSError, json.JSONDecodeError) as error:
+        raise StageError(
+            f"{label} is not valid JSON: {path}"
+        ) from error
+
+    if not isinstance(value, dict):
+        raise StageError(
+            f"{label} root is not an object: {path}"
+        )
+
+    return value
+
+
+def expected_absence_value(
+    *,
+    benchmark_id: str,
+    failed_stage: str,
+    stage_result: dict[str, object],
+    combined_output: str,
+    expected_exit_code: int,
+    required_diagnostic: str,
+    forbidden_artifact_count: int,
+    present_artifact_count: int,
+) -> dict[str, object]:
+    if stage_result.get("benchmark_id") != benchmark_id:
+        raise StageError(
+            "failed-stage result benchmark identifier differs"
+        )
+
+    if stage_result.get("stage") != failed_stage:
+        raise StageError(
+            "failed-stage result stage identifier differs"
+        )
+
+    if stage_result.get("status") != "pass":
+        raise StageError(
+            "failed-stage result was not accepted by the runner"
+        )
+
+    if stage_result.get("exit_code") != expected_exit_code:
+        raise StageError(
+            "failed-stage exit code differs: expected "
+            f"{expected_exit_code}, observed "
+            f"{stage_result.get('exit_code')!r}"
+        )
+
+    if not required_diagnostic:
+        raise StageError(
+            "required boundary diagnostic is empty"
+        )
+
+    if required_diagnostic not in combined_output:
+        raise StageError(
+            "required boundary diagnostic was not observed"
+        )
+
+    if forbidden_artifact_count < 1:
+        raise StageError(
+            "no forbidden post-rejection artifacts were declared"
+        )
+
+    if present_artifact_count != 0:
+        raise StageError(
+            "an artifact exists beyond the expected rejection boundary"
+        )
+
+    return {
+        "benchmark_id": benchmark_id,
+        "boundary_stage": failed_stage,
+        "expected_exit_code": expected_exit_code,
+        "forbidden_artifact_count": forbidden_artifact_count,
+        "observed_exit_code": expected_exit_code,
+        "required_diagnostic": required_diagnostic,
+        "schema_version": 1,
+        "status": "expected-rejection",
+    }
+
+
+def expected_absence_stage(
+    options: argparse.Namespace,
+) -> None:
+    stage_result_path = Path(
+        options.stage_result
+    ).resolve()
+
+    stdout_path = Path(options.stdout).resolve()
+    stderr_path = Path(options.stderr).resolve()
+
+    stage_result = load_json_object(
+        stage_result_path,
+        "failed-stage result",
+    )
+
+    require_file(
+        stdout_path,
+        "failed-stage stdout",
+    )
+
+    require_file(
+        stderr_path,
+        "failed-stage stderr",
+    )
+
+    forbidden_artifacts = [
+        Path(value).resolve()
+        for value in options.forbidden_artifact
+    ]
+
+    present_artifacts = [
+        path
+        for path in forbidden_artifacts
+        if path.exists()
+    ]
+
+    value = expected_absence_value(
+        benchmark_id=options.benchmark_id,
+        failed_stage=options.failed_stage,
+        stage_result=stage_result,
+        combined_output=(
+            stdout_path.read_text(
+                encoding="utf-8",
+                errors="replace",
+            )
+            + "\n"
+            + stderr_path.read_text(
+                encoding="utf-8",
+                errors="replace",
+            )
+        ),
+        expected_exit_code=options.expected_exit_code,
+        required_diagnostic=options.required_diagnostic,
+        forbidden_artifact_count=len(
+            forbidden_artifacts
+        ),
+        present_artifact_count=len(
+            present_artifacts
+        ),
+    )
+
+    write_json(
+        Path(options.output),
+        value,
+    )
+
+
+def expected_boundary_value(
+    benchmark_id: str,
+    rejection: dict[str, object],
+) -> dict[str, object]:
+    expected_diagnostic = (
+        "unsupported by the ReLico v0 parser bridge: "
+        "message-server parameters"
+    )
+
+    if rejection.get("benchmark_id") != benchmark_id:
+        raise StageError(
+            "rejection benchmark identifier differs"
+        )
+
+    if rejection.get("status") != "expected-rejection":
+        raise StageError(
+            "input does not record an expected rejection"
+        )
+
+    if rejection.get("boundary_stage") != "parser-json":
+        raise StageError(
+            "expected rejection did not occur at parser-json"
+        )
+
+    if rejection.get("observed_exit_code") != 1:
+        raise StageError(
+            "expected parser-json exit code 1"
+        )
+
+    if rejection.get("required_diagnostic") != expected_diagnostic:
+        raise StageError(
+            "expected rejection diagnostic differs"
+        )
+
+    if rejection.get("forbidden_artifact_count") != 2:
+        raise StageError(
+            "expected exactly two forbidden post-boundary artifacts"
+        )
+
+    return {
+        "benchmark_id": benchmark_id,
+        "boundary_code": (
+            "V0_PARSER_BRIDGE_MESSAGE_SERVER_PARAMETERS_UNSUPPORTED"
+        ),
+        "boundary_stage": "parser-json",
+        "expected_rejection": True,
+        "schema_version": 1,
+        "status": "pass",
+    }
+
+
+def expected_boundary_stage(
+    options: argparse.Namespace,
+) -> None:
+    rejection = load_json_object(
+        Path(options.input).resolve(),
+        "expected-absence result",
+    )
+
+    write_json(
+        Path(options.output),
+        expected_boundary_value(
+            options.benchmark_id,
+            rejection,
+        ),
+    )
+
+
+def diagnostics_value(
+    benchmark_id: str,
+    boundary: dict[str, object],
+) -> dict[str, object]:
+    expected_code = (
+        "V0_PARSER_BRIDGE_MESSAGE_SERVER_PARAMETERS_UNSUPPORTED"
+    )
+
+    if boundary.get("benchmark_id") != benchmark_id:
+        raise StageError(
+            "boundary benchmark identifier differs"
+        )
+
+    if boundary.get("status") != "pass":
+        raise StageError(
+            "boundary validation did not pass"
+        )
+
+    if boundary.get("boundary_code") != expected_code:
+        raise StageError(
+            "boundary diagnostic code differs"
+        )
+
+    if boundary.get("boundary_stage") != "parser-json":
+        raise StageError(
+            "boundary stage differs"
+        )
+
+    if boundary.get("expected_rejection") is not True:
+        raise StageError(
+            "boundary was not classified as expected"
+        )
+
+    return {
+        "benchmark_id": benchmark_id,
+        "diagnostic_code": expected_code,
+        "expected_rejection": True,
+        "message": (
+            "Bound-payload message-server parameters are "
+            "intentionally rejected by the current ReLico v0 "
+            "parser bridge."
+        ),
+        "schema_version": 1,
+        "status": "pass",
+    }
+
+
+def diagnostics_stage(
+    options: argparse.Namespace,
+) -> None:
+    boundary = load_json_object(
+        Path(options.input).resolve(),
+        "expected-boundary result",
+    )
+
+    write_json(
+        Path(options.output),
+        diagnostics_value(
+            options.benchmark_id,
+            boundary,
+        ),
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="relico-bench-stage")
     subparsers = parser.add_subparsers(dest="stage", required=True)
@@ -554,6 +842,90 @@ def build_parser() -> argparse.ArgumentParser:
     runtime.add_argument("--executable", required=True)
     runtime.add_argument("--output", required=True)
     runtime.set_defaults(handler=runtime_stage)
+
+
+    expected_absence = subparsers.add_parser(
+        "expected-absence"
+    )
+    expected_absence.add_argument(
+        "--benchmark-id",
+        required=True,
+    )
+    expected_absence.add_argument(
+        "--failed-stage",
+        required=True,
+    )
+    expected_absence.add_argument(
+        "--stage-result",
+        required=True,
+    )
+    expected_absence.add_argument(
+        "--stdout",
+        required=True,
+    )
+    expected_absence.add_argument(
+        "--stderr",
+        required=True,
+    )
+    expected_absence.add_argument(
+        "--expected-exit-code",
+        required=True,
+        type=int,
+    )
+    expected_absence.add_argument(
+        "--required-diagnostic",
+        required=True,
+    )
+    expected_absence.add_argument(
+        "--forbidden-artifact",
+        action="append",
+        default=[],
+    )
+    expected_absence.add_argument(
+        "--output",
+        required=True,
+    )
+    expected_absence.set_defaults(
+        handler=expected_absence_stage
+    )
+
+    expected_boundary = subparsers.add_parser(
+        "expected-boundary-stage"
+    )
+    expected_boundary.add_argument(
+        "--benchmark-id",
+        required=True,
+    )
+    expected_boundary.add_argument(
+        "--input",
+        required=True,
+    )
+    expected_boundary.add_argument(
+        "--output",
+        required=True,
+    )
+    expected_boundary.set_defaults(
+        handler=expected_boundary_stage
+    )
+
+    diagnostics = subparsers.add_parser(
+        "diagnostics"
+    )
+    diagnostics.add_argument(
+        "--benchmark-id",
+        required=True,
+    )
+    diagnostics.add_argument(
+        "--input",
+        required=True,
+    )
+    diagnostics.add_argument(
+        "--output",
+        required=True,
+    )
+    diagnostics.set_defaults(
+        handler=diagnostics_stage
+    )
 
     return parser
 

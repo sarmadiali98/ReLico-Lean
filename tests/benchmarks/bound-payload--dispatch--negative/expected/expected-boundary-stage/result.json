@@ -1,0 +1,8 @@
+{
+  "benchmark_id": "bound-payload--dispatch--negative",
+  "boundary_code": "V0_PARSER_BRIDGE_MESSAGE_SERVER_PARAMETERS_UNSUPPORTED",
+  "boundary_stage": "parser-json",
+  "expected_rejection": true,
+  "schema_version": 1,
+  "status": "pass"
+}

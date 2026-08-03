@@ -91,5 +91,114 @@ class FormalWitnessValueTest(unittest.TestCase):
             stage.formal_witness_value(coverage)
 
 
+class ExpectedBoundaryValueTest(unittest.TestCase):
+    def stage_result(self) -> dict[str, object]:
+        return {
+            "benchmark_id": (
+                "bound-payload--dispatch--negative"
+            ),
+            "stage": "parser-json",
+            "status": "pass",
+            "exit_code": 1,
+        }
+
+    def test_expected_rejection_chain_is_deterministic(
+        self,
+    ) -> None:
+        diagnostic = (
+            "unsupported by the ReLico v0 parser bridge: "
+            "message-server parameters"
+        )
+
+        rejection = stage.expected_absence_value(
+            benchmark_id=(
+                "bound-payload--dispatch--negative"
+            ),
+            failed_stage="parser-json",
+            stage_result=self.stage_result(),
+            combined_output=diagnostic,
+            expected_exit_code=1,
+            required_diagnostic=diagnostic,
+            forbidden_artifact_count=2,
+            present_artifact_count=0,
+        )
+
+        boundary = stage.expected_boundary_value(
+            "bound-payload--dispatch--negative",
+            rejection,
+        )
+
+        diagnostics = stage.diagnostics_value(
+            "bound-payload--dispatch--negative",
+            boundary,
+        )
+
+        self.assertEqual(
+            rejection["status"],
+            "expected-rejection",
+        )
+        self.assertEqual(
+            boundary["boundary_code"],
+            (
+                "V0_PARSER_BRIDGE_MESSAGE_SERVER_"
+                "PARAMETERS_UNSUPPORTED"
+            ),
+        )
+        self.assertEqual(
+            diagnostics["status"],
+            "pass",
+        )
+
+    def test_rejects_missing_required_diagnostic(
+        self,
+    ) -> None:
+        diagnostic = (
+            "unsupported by the ReLico v0 parser bridge: "
+            "message-server parameters"
+        )
+
+        with self.assertRaisesRegex(
+            stage.StageError,
+            "diagnostic was not observed",
+        ):
+            stage.expected_absence_value(
+                benchmark_id=(
+                    "bound-payload--dispatch--negative"
+                ),
+                failed_stage="parser-json",
+                stage_result=self.stage_result(),
+                combined_output="different failure",
+                expected_exit_code=1,
+                required_diagnostic=diagnostic,
+                forbidden_artifact_count=2,
+                present_artifact_count=0,
+            )
+
+    def test_rejects_post_boundary_artifact(
+        self,
+    ) -> None:
+        diagnostic = (
+            "unsupported by the ReLico v0 parser bridge: "
+            "message-server parameters"
+        )
+
+        with self.assertRaisesRegex(
+            stage.StageError,
+            "artifact exists beyond",
+        ):
+            stage.expected_absence_value(
+                benchmark_id=(
+                    "bound-payload--dispatch--negative"
+                ),
+                failed_stage="parser-json",
+                stage_result=self.stage_result(),
+                combined_output=diagnostic,
+                expected_exit_code=1,
+                required_diagnostic=diagnostic,
+                forbidden_artifact_count=2,
+                present_artifact_count=1,
+            )
+
+
 if __name__ == "__main__":
     unittest.main()

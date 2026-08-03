@@ -1,0 +1,8 @@
+{
+  "benchmark_id": "bound-payload--dispatch--negative",
+  "diagnostic_code": "V0_PARSER_BRIDGE_MESSAGE_SERVER_PARAMETERS_UNSUPPORTED",
+  "expected_rejection": true,
+  "message": "Bound-payload message-server parameters are intentionally rejected by the current ReLico v0 parser bridge.",
+  "schema_version": 1,
+  "status": "pass"
+}

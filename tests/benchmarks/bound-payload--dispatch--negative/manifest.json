@@ -1,0 +1,154 @@
+{
+  "benchmark_id": "bound-payload--dispatch--negative",
+  "description": "Negative bound-payload dispatch benchmark proving the current ReLico v0 parser-bridge boundary for message-server formal parameters.",
+  "expected_artifacts": [
+    {
+      "path": "source/result.json",
+      "required": true,
+      "sha256": "114116c4838d8f128067488cf490ae80a8f1fd1149ea1ad42b1f8fdf9fd8bb8a"
+    },
+    {
+      "path": "rmc/verdict.json",
+      "required": true,
+      "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
+    },
+    {
+      "path": "decoded-dtr-ast/rejection.json",
+      "required": true,
+      "sha256": "5468a2eff29503c056386f7a6f37ae6a97f3a9e72ae18cc56fe5a37b136daf48"
+    },
+    {
+      "path": "expected-boundary-stage/result.json",
+      "required": true,
+      "sha256": "89528ebec973e0e769c95b1c93ec35deb1ff883089b71eb7b8a43e5f9bda7d83"
+    },
+    {
+      "path": "diagnostics/result.json",
+      "required": true,
+      "sha256": "0ad105f63d3e6f732ca717a44bdc051f1fbffa63baa19dd3161704de60374d46"
+    }
+  ],
+  "expected_terminal_stage": "diagnostics",
+  "polarity": "negative",
+  "schema_version": 1,
+  "source_files": [
+    "source/model.rebeca"
+  ],
+  "stages": [
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "source",
+        "--benchmark-id",
+        "bound-payload--dispatch--negative",
+        "--source",
+        "{source}",
+        "--output",
+        "{actual}/source/result.json"
+      ],
+      "name": "source"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc/verdict.json"
+      ],
+      "name": "rmc",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "parser-json",
+        "--repo",
+        "{repo}",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--artifact-zip",
+        "/Users/ali/Desktop/LFStructuringNonDeterminism/ReLico-fmcad-2026-artifact-v1.zip",
+        "--maven",
+        "/opt/homebrew/Cellar/maven/3.9.16/bin/mvn",
+        "--output",
+        "{actual}/parser-json/model.json"
+      ],
+      "expected_exit_codes": [
+        1
+      ],
+      "name": "parser-json",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "expected-absence",
+        "--benchmark-id",
+        "bound-payload--dispatch--negative",
+        "--failed-stage",
+        "parser-json",
+        "--stage-result",
+        "{actual}/03-parser-json/stage-result.json",
+        "--stdout",
+        "{actual}/03-parser-json/stdout.txt",
+        "--stderr",
+        "{actual}/03-parser-json/stderr.txt",
+        "--expected-exit-code",
+        "1",
+        "--required-diagnostic",
+        "unsupported by the ReLico v0 parser bridge: message-server parameters",
+        "--forbidden-artifact",
+        "{actual}/parser-json/model.json",
+        "--forbidden-artifact",
+        "{actual}/decoded-dtr-ast/model.txt",
+        "--output",
+        "{actual}/decoded-dtr-ast/rejection.json"
+      ],
+      "name": "decoded-dtr-ast"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "expected-boundary-stage",
+        "--benchmark-id",
+        "bound-payload--dispatch--negative",
+        "--input",
+        "{actual}/decoded-dtr-ast/rejection.json",
+        "--output",
+        "{actual}/expected-boundary-stage/result.json"
+      ],
+      "name": "expected-boundary-stage"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "diagnostics",
+        "--benchmark-id",
+        "bound-payload--dispatch--negative",
+        "--input",
+        "{actual}/expected-boundary-stage/result.json",
+        "--output",
+        "{actual}/diagnostics/result.json"
+      ],
+      "name": "diagnostics"
+    }
+  ]
+}
