@@ -197,6 +197,13 @@ def parser_json_stage(options: argparse.Namespace) -> None:
     require_file(maven, "Apache Maven executable")
 
     script = repo / "frontend/java-bridge/run-from-zip.sh"
+    artifact_family = getattr(options, "family", "v0")
+    if artifact_family == "multi-store-payload":
+        script = repo / "frontend/java-bridge/run-multistore-payload-from-zip.sh"
+    elif artifact_family != "v0":
+        raise RuntimeError(
+            f"unsupported parser-json family: {artifact_family!r}"
+        )
     require_file(script, "parser bridge runner")
 
     version = run_checked(
@@ -247,6 +254,13 @@ def lean_export_stage(options: argparse.Namespace) -> None:
     require_file(input_path, "Lean exporter input")
     require_file(lake, "Lake executable")
     exporter = repo / "Relico/Benchmark/ArtifactExporter.lean"
+    artifact_family = getattr(options, "family", "v0")
+    if artifact_family == "multi-store-payload":
+        exporter = repo / "Relico/Benchmark/MultiStorePayloadArtifactExporter.lean"
+    elif artifact_family != "v0":
+        raise RuntimeError(
+            f"unsupported lean-export family: {artifact_family!r}"
+        )
     require_file(exporter, "Lean artifact exporter")
     output.parent.mkdir(parents=True, exist_ok=True)
 
@@ -256,7 +270,7 @@ def lean_export_stage(options: argparse.Namespace) -> None:
             "env",
             "lean",
             "--run",
-            "Relico/Benchmark/ArtifactExporter.lean",
+            str(exporter),
             options.mode,
             str(input_path),
             str(output),
@@ -804,6 +818,14 @@ def build_parser() -> argparse.ArgumentParser:
     rmc.set_defaults(handler=rmc_stage)
 
     parser_json = subparsers.add_parser("parser-json")
+    parser_json.add_argument(
+        "--family",
+        choices=[
+            "v0",
+            "multi-store-payload",
+        ],
+        default="v0",
+    )
     parser_json.add_argument("--repo", required=True)
     parser_json.add_argument("--source", required=True)
     parser_json.add_argument("--actual", required=True)
@@ -813,6 +835,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser_json.set_defaults(handler=parser_json_stage)
 
     lean_export = subparsers.add_parser("lean-export")
+    lean_export.add_argument(
+        "--family",
+        choices=[
+            "v0",
+            "multi-store-payload",
+        ],
+        default="v0",
+    )
     lean_export.add_argument(
         "--mode",
         required=True,
