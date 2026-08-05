@@ -4,7 +4,7 @@ bound-payload--dispatch--positive	tests/benchmarks/bound-payload--dispatch--posi
 bound-payload--finite-execution--positive	tests/benchmarks/bound-payload--finite-execution--positive	tests/benchmarks/bound-payload--finite-execution--positive/source/model.rebeca	positive	3	44	9
 bound-payload--initialization--positive	tests/benchmarks/bound-payload--initialization--positive	tests/benchmarks/bound-payload--initialization--positive/source/model.rebeca	positive	2	53	9
 bound-payload--payload-binding--positive	tests/benchmarks/bound-payload--payload-binding--positive	tests/benchmarks/bound-payload--payload-binding--positive/source/model.rebeca	positive	4	44	9
-bound-payload--priority-selection--positive	tests/benchmarks/bound-payload--priority-selection--positive	tests/benchmarks/bound-payload--priority-selection--positive/source/model.rebeca	positive	1	20	8
+bound-payload--priority-preservation--positive	tests/benchmarks/bound-payload--priority-preservation--positive	tests/benchmarks/bound-payload--priority-preservation--positive/source/model.rebeca	positive	1	20	8
 core--dispatch--positive	tests/benchmarks/core--dispatch--positive	tests/benchmarks/core--dispatch--positive/source/model.rebeca	positive	11	62	9
 core--initialization--positive	tests/benchmarks/core--initialization--positive	tests/benchmarks/core--initialization--positive/source/model.rebeca	positive	5	36	9
 core--one-step-execution--positive	tests/benchmarks/core--one-step-execution--positive	tests/benchmarks/core--one-step-execution--positive/source/model.rebeca	positive	1	4	9
