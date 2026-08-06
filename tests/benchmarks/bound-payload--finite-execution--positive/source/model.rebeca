@@ -1,0 +1,22 @@
+// Benchmark: bound-payload--finite-execution--positive
+// Exercises finite bound-payload execution witnesses over a recurring
+// source and a bounded LF runtime observation; no termination is claimed.
+reactiveclass Controller(10) {
+    statevars {
+        int x;
+    }
+
+    Controller() {
+        x = 0;
+        self.dispatch(1) after(1);
+    }
+
+    msgsrv dispatch(int payload) {
+        x = payload;
+        self.dispatch(payload) after(1);
+    }
+}
+
+main {
+    Controller controller():();
+}
