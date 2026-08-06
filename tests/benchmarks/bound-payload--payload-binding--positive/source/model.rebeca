@@ -1,0 +1,22 @@
+// Benchmark: bound-payload--payload-binding--positive
+// Exercises binding of a message payload to the dispatch parameter and state
+// assignment over a recurring source with formal and bounded runtime evidence.
+reactiveclass Controller(10) {
+    statevars {
+        int x;
+    }
+
+    Controller() {
+        x = 0;
+        self.dispatch(1) after(1);
+    }
+
+    msgsrv dispatch(int payload) {
+        x = payload;
+        self.dispatch(payload) after(1);
+    }
+}
+
+main {
+    Controller controller():();
+}
