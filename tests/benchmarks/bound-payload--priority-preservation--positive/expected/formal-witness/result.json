@@ -1,0 +1,31 @@
+{
+  "benchmark_id": "bound-payload--priority-preservation--positive",
+  "elaborated_modules": [
+    "Relico/Tests/BoundPayloadFoundation.lean"
+  ],
+  "obligation_count": 20,
+  "obligation_ids": [
+    "BoundPayloadFoundation:0001",
+    "BoundPayloadFoundation:0002",
+    "BoundPayloadFoundation:0003",
+    "BoundPayloadFoundation:0004",
+    "BoundPayloadFoundation:0005",
+    "BoundPayloadFoundation:0006",
+    "BoundPayloadFoundation:0007",
+    "BoundPayloadFoundation:0008",
+    "BoundPayloadFoundation:0009",
+    "BoundPayloadFoundation:0010",
+    "BoundPayloadFoundation:0011",
+    "BoundPayloadFoundation:0012",
+    "BoundPayloadFoundation:0013",
+    "BoundPayloadFoundation:0014",
+    "BoundPayloadFoundation:0015",
+    "BoundPayloadFoundation:0016",
+    "BoundPayloadFoundation:0017",
+    "BoundPayloadFoundation:0018",
+    "BoundPayloadFoundation:0019",
+    "BoundPayloadFoundation:0020"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

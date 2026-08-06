@@ -1,0 +1,23 @@
+// Benchmark: bound-payload--priority-preservation--positive
+// Exercises an RMC-valid recurring bound-payload dispatch through the
+// dedicated payload parser, decoder, translation, and LF/C++ backend.
+reactiveclass Controller(10) {
+    statevars {
+        int x;
+    }
+
+    Controller() {
+        x = 0;
+        self.dispatch(1) after(1);
+    }
+
+    @priority(2)
+    msgsrv dispatch(int payload) {
+        x = payload;
+        self.dispatch(payload) after(1);
+    }
+}
+
+main {
+    Controller controller():();
+}

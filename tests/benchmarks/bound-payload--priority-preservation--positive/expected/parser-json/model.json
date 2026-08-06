@@ -1,0 +1,64 @@
+{
+  "actorClass": "Controller",
+  "actorName": "controller",
+  "className": "Controller",
+  "constructorBody": [
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 0
+      },
+      "kind": "assign",
+      "target": "x"
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 1
+        }
+      ],
+      "delay": 1,
+      "kind": "selfSend",
+      "message": "dispatch"
+    }
+  ],
+  "family": "multiStorePayload",
+  "messageServers": [
+    {
+      "body": [
+        {
+          "expression": {
+            "kind": "parameterVar",
+            "name": "payload"
+          },
+          "kind": "assign",
+          "target": "x"
+        },
+        {
+          "arguments": [
+            {
+              "kind": "parameterVar",
+              "name": "payload"
+            }
+          ],
+          "delay": 1,
+          "kind": "selfSend",
+          "message": "dispatch"
+        }
+      ],
+      "name": "dispatch",
+      "parameters": [
+        "payload"
+      ],
+      "priority": 2
+    }
+  ],
+  "schemaVersion": 1,
+  "stateVariables": [
+    {
+      "initialValue": 0,
+      "name": "x"
+    }
+  ]
+}
