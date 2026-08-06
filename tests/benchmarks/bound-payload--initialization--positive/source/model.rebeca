@@ -1,0 +1,22 @@
+// Benchmark: bound-payload--initialization--positive
+// Exercises constructor initialization and invocation-entry invariants over a
+// recurring bound-payload source with bounded LF runtime observation.
+reactiveclass Controller(10) {
+    statevars {
+        int x;
+    }
+
+    Controller() {
+        x = 0;
+        self.dispatch(1) after(1);
+    }
+
+    msgsrv dispatch(int payload) {
+        x = payload;
+        self.dispatch(payload) after(1);
+    }
+}
+
+main {
+    Controller controller():();
+}
