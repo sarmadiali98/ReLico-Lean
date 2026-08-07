@@ -1,0 +1,15 @@
+{
+  "benchmark_id": "core--trace-execution--positive",
+  "elaborated_modules": [
+    "Relico/Tests/TraceSimulation.lean"
+  ],
+  "obligation_count": 4,
+  "obligation_ids": [
+    "TraceSimulation:0001",
+    "TraceSimulation:0002",
+    "TraceSimulation:0003",
+    "TraceSimulation:0004"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}
