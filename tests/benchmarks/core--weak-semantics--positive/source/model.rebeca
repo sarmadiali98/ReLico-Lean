@@ -1,0 +1,23 @@
+// Benchmark: core--weak-semantics--positive
+// Exercises recurring statement, time-advance, and consume phases.
+// Runtime success is a bounded observation.
+reactiveclass Controller(10) {
+statevars {
+int phase;
+}
+
+Controller() {
+phase = 0;
+self.tick() after(1);
+}
+
+msgsrv tick() {
+phase = 1;
+phase = 2;
+self.tick() after(1);
+}
+}
+
+main {
+Controller controller():();
+}

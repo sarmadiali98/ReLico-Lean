@@ -1,0 +1,16 @@
+{ reactiveClass := { name := { value := "Controller" },
+                     stateVar := { value := "phase" },
+                     constructor := { body := [Relico.DTR.Stmt.assign
+                                                 { value := "phase" }
+                                                 (Relico.DTR.Expr.intLiteral 0),
+                                               Relico.DTR.Stmt.selfSend { value := "tick" } { value := 1 }] },
+                     messageServer := { name := { value := "tick" },
+                                        body := [Relico.DTR.Stmt.assign
+                                                   { value := "phase" }
+                                                   (Relico.DTR.Expr.intLiteral 1),
+                                                 Relico.DTR.Stmt.assign
+                                                   { value := "phase" }
+                                                   (Relico.DTR.Expr.intLiteral 2),
+                                                 Relico.DTR.Stmt.selfSend { value := "tick" } { value := 1 }],
+                                        priority := none } },
+  actor := { name := { value := "controller" }, className := { value := "Controller" } } }
