@@ -1,0 +1,12 @@
+{ reactor := { name := { value := "Controller" },
+               stateVar := { value := "x" },
+               logicalAction := { value := "tick_action" },
+               startupReaction := { name := { value := "startup" },
+                                    trigger := Relico.LF.Trigger.startup,
+                                    body := [Relico.LF.Stmt.assign { value := "x" } (Relico.LF.Expr.intLiteral 0),
+                                             Relico.LF.Stmt.schedule { value := "tick_action" } { value := 1 }] },
+               messageReaction := { name := { value := "tick_reaction" },
+                                    trigger := Relico.LF.Trigger.logicalAction { value := "tick_action" },
+                                    body := [Relico.LF.Stmt.assign { value := "x" } (Relico.LF.Expr.intLiteral 1),
+                                             Relico.LF.Stmt.schedule { value := "tick_action" } { value := 1 }] } },
+  reactorInstance := { name := { value := "controller" }, reactorName := { value := "Controller" } } }

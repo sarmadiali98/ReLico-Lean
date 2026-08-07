@@ -1,0 +1,38 @@
+{
+  "actorClass": "Controller",
+  "actorName": "controller",
+  "className": "Controller",
+  "constructorBody": [
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 0
+      },
+      "kind": "assign",
+      "target": "x"
+    },
+    {
+      "delay": 1,
+      "kind": "selfSend",
+      "message": "tick"
+    }
+  ],
+  "messageServer": "tick",
+  "messageServerBody": [
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 1
+      },
+      "kind": "assign",
+      "target": "x"
+    },
+    {
+      "delay": 1,
+      "kind": "selfSend",
+      "message": "tick"
+    }
+  ],
+  "schemaVersion": 1,
+  "stateVar": "x"
+}

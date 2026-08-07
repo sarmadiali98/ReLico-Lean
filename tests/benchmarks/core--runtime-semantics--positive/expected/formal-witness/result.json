@@ -1,0 +1,34 @@
+{
+  "benchmark_id": "core--runtime-semantics--positive",
+  "elaborated_modules": [
+    "Relico/Tests/BackwardSimulation.lean",
+    "Relico/Tests/RuntimeInvariant.lean",
+    "Relico/Tests/SmallStep.lean"
+  ],
+  "obligation_count": 21,
+  "obligation_ids": [
+    "BackwardSimulation:0001",
+    "BackwardSimulation:0002",
+    "BackwardSimulation:0003",
+    "BackwardSimulation:0004",
+    "RuntimeInvariant:0001",
+    "RuntimeInvariant:0002",
+    "RuntimeInvariant:0003",
+    "RuntimeInvariant:0004",
+    "SmallStep:0001",
+    "SmallStep:0002",
+    "SmallStep:0003",
+    "SmallStep:0004",
+    "SmallStep:0005",
+    "SmallStep:0006",
+    "SmallStep:0007",
+    "SmallStep:0008",
+    "SmallStep:0009",
+    "SmallStep:0010",
+    "SmallStep:0011",
+    "SmallStep:0012",
+    "SmallStep:0013"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}
