@@ -1,0 +1,36 @@
+{
+  "benchmark_id": "core--queue-correspondence--positive",
+  "elaborated_modules": [
+    "Relico/Tests/Correspondence.lean",
+    "Relico/Tests/DirectLFBagQueueCorrespondence.lean",
+    "Relico/Tests/ForwardSimulation.lean"
+  ],
+  "obligation_count": 23,
+  "obligation_ids": [
+    "Correspondence:0001",
+    "Correspondence:0002",
+    "Correspondence:0003",
+    "Correspondence:0004",
+    "Correspondence:0005",
+    "Correspondence:0006",
+    "DirectLFBagQueueCorrespondence:0001",
+    "DirectLFBagQueueCorrespondence:0002",
+    "DirectLFBagQueueCorrespondence:0003",
+    "DirectLFBagQueueCorrespondence:0004",
+    "DirectLFBagQueueCorrespondence:0005",
+    "DirectLFBagQueueCorrespondence:0006",
+    "DirectLFBagQueueCorrespondence:0007",
+    "DirectLFBagQueueCorrespondence:0008",
+    "DirectLFBagQueueCorrespondence:0009",
+    "DirectLFBagQueueCorrespondence:0010",
+    "DirectLFBagQueueCorrespondence:0011",
+    "DirectLFBagQueueCorrespondence:0012",
+    "DirectLFBagQueueCorrespondence:0013",
+    "ForwardSimulation:0001",
+    "ForwardSimulation:0002",
+    "ForwardSimulation:0003",
+    "ForwardSimulation:0004"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}
