@@ -1,0 +1,31 @@
+// Benchmark: core--priority-selection--positive
+// Exercises simultaneous recurring core messages with distinct message-server
+// priorities through source, RMC, parser, decoder, formal witness, translation,
+// LF source generation, and LF/C++ compilation. Runtime evidence is not required.
+reactiveclass Controller(10) {
+statevars {
+int x;
+}
+
+Controller() {
+    x = 0;
+    self.low() after(1);
+    self.high() after(1);
+}
+
+@priority(1)
+msgsrv low() {
+    x = 1;
+    self.low() after(1);
+}
+
+@priority(2)
+msgsrv high() {
+    x = 2;
+    self.high() after(1);
+}
+}
+
+main {
+Controller controller():();
+}
