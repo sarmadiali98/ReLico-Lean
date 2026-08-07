@@ -1,0 +1,15 @@
+{
+  "benchmark_id": "core--one-step-execution--positive",
+  "elaborated_modules": [
+    "Relico/Tests/MachineTraceForward.lean"
+  ],
+  "obligation_count": 4,
+  "obligation_ids": [
+    "MachineTraceForward:0001",
+    "MachineTraceForward:0002",
+    "MachineTraceForward:0003",
+    "MachineTraceForward:0004"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

@@ -1,0 +1,20 @@
+target Cpp
+
+reactor Controller {
+  state x: int = 0
+  logical action step_action: void
+
+  reaction(startup) -> step_action {=
+    x = 0;
+    step_action.schedule(1ms);
+  =}
+
+  reaction(step_action) -> step_action {=
+    x = 1;
+    step_action.schedule(1ms);
+  =}
+}
+
+main reactor {
+  controller = new Controller()
+}

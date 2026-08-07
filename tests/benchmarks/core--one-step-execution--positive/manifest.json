@@ -1,0 +1,219 @@
+{
+  "benchmark_id": "core--one-step-execution--positive",
+  "description": "Tracked singleton initialization benchmark for the complete Timed Rebeca-to-native ReLico production pipeline.",
+  "expected_artifacts": [
+    {
+      "path": "source/result.json",
+      "required": true,
+      "sha256": "062eb56c091cc678dabc07e8c0ad2ab31ec4dbc16b5d351fadf3e1ab6d436ccb"
+    },
+    {
+      "path": "rmc/verdict.json",
+      "required": true,
+      "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
+    },
+    {
+      "path": "parser-json/model.json",
+      "required": true,
+      "sha256": "734d81dcdf344b83e524926b515e739f0a5c163a8a4ac3d3f71d26e74563a2d0"
+    },
+    {
+      "path": "decoded-dtr-ast/model.txt",
+      "required": true,
+      "sha256": "5106102994c7c0e5a6a2c74e9b115885dc8c5f18bdba8f71f36dae87373a32df"
+    },
+    {
+      "path": "formal-witness/result.json",
+      "required": true,
+      "sha256": "f22254a88443da354cbce87496b0b27624b1107c67bdda3333589c21662b3ca0"
+    },
+    {
+      "path": "translated-lf-ast/program.txt",
+      "required": true,
+      "sha256": "dc7d2a8b6c77f1ba332a13d1e55744939fe3fe2d686a6abc45cdc0e6b819876c"
+    },
+    {
+      "path": "lf-source/V0Controller.lf",
+      "required": true,
+      "sha256": "87bfc1c468a1780bf65d91425baad9e3c5bd9f00d3055a5399f193a9ed3ac2d5"
+    },
+    {
+      "path": "lfc/result.json",
+      "required": true,
+      "sha256": "2ee3d75e82d1daa3311d9c5f4f50fd35fb0ca8ce2ee5f542ce2d79451adcc059"
+    },
+    {
+      "path": "runtime/result.json",
+      "required": true,
+      "sha256": "98f94a1bb91705b98b1e45db395a59bc02ce8c115d7f2226c32fa551ed5e591a"
+    }
+  ],
+  "expected_terminal_stage": "runtime",
+  "polarity": "positive",
+  "schema_version": 1,
+  "source_files": [
+    "source/model.rebeca"
+  ],
+  "stages": [
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "source",
+        "--benchmark-id",
+        "core--one-step-execution--positive",
+        "--source",
+        "{source}",
+        "--output",
+        "{actual}/source/result.json"
+      ],
+      "name": "source"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc/verdict.json"
+      ],
+      "name": "rmc",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "parser-json",
+        "--repo",
+        "{repo}",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--artifact-zip",
+        "/Users/ali/Desktop/LFStructuringNonDeterminism/ReLico-fmcad-2026-artifact-v1.zip",
+        "--maven",
+        "/opt/homebrew/Cellar/maven/3.9.16/bin/mvn",
+        "--output",
+        "{actual}/parser-json/model.json"
+      ],
+      "name": "parser-json",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lean-export",
+        "--mode",
+        "decoded-dtr-ast",
+        "--repo",
+        "{repo}",
+        "--lake",
+        "/Users/ali/.elan/bin/lake",
+        "--input",
+        "{actual}/parser-json/model.json",
+        "--output",
+        "{actual}/decoded-dtr-ast/model.txt"
+      ],
+      "name": "decoded-dtr-ast",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "formal-witness",
+        "--repo",
+        "{repo}",
+        "--lake",
+        "/Users/ali/.elan/bin/lake",
+        "--coverage",
+        "{benchmark}/coverage.json",
+        "--output",
+        "{actual}/formal-witness/result.json"
+      ],
+      "name": "formal-witness",
+      "timeout_seconds": 1200
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lean-export",
+        "--mode",
+        "translated-lf-ast",
+        "--repo",
+        "{repo}",
+        "--lake",
+        "/Users/ali/.elan/bin/lake",
+        "--input",
+        "{actual}/parser-json/model.json",
+        "--output",
+        "{actual}/translated-lf-ast/program.txt"
+      ],
+      "name": "translated-lf-ast",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lean-export",
+        "--mode",
+        "lf-source",
+        "--repo",
+        "{repo}",
+        "--lake",
+        "/Users/ali/.elan/bin/lake",
+        "--input",
+        "{actual}/parser-json/model.json",
+        "--output",
+        "{actual}/lf-source/V0Controller.lf"
+      ],
+      "name": "lf-source",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lfc",
+        "--lf-source",
+        "{actual}/lf-source/V0Controller.lf",
+        "--work-directory",
+        "{actual}/work/lfc",
+        "--lfc",
+        "/Users/ali/.local/share/lingua-franca/cli/bin/lfc",
+        "--output",
+        "{actual}/lfc/result.json"
+      ],
+      "name": "lfc",
+      "timeout_seconds": 1200
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "runtime",
+        "--executable",
+        "{actual}/work/lfc/bin/V0Controller",
+        "--output",
+        "{actual}/runtime/result.json"
+      ],
+      "name": "runtime",
+      "timeout_seconds": 30
+    }
+  ]
+}

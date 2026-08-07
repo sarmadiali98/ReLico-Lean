@@ -1,0 +1,58 @@
+{
+  "benchmark_id": "core--one-step-execution--positive",
+  "obligation_count": 4,
+  "obligations": [
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "core--one-step-execution--positive",
+      "kind": "theorem",
+      "line_number": "8",
+      "mapping_status": "accepted",
+      "name_or_expression": "assignmentForwardExecutionCompatible",
+      "obligation_id": "MachineTraceForward:0001",
+      "original_benchmark_candidate": "test-machine-trace-forward",
+      "test_file": "Relico/Tests/MachineTraceForward.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "core--one-step-execution--positive",
+      "kind": "theorem",
+      "line_number": "28",
+      "mapping_status": "accepted",
+      "name_or_expression": "assignment_machine_trace_forward",
+      "obligation_id": "MachineTraceForward:0002",
+      "original_benchmark_candidate": "test-machine-trace-forward",
+      "test_file": "Relico/Tests/MachineTraceForward.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "core--one-step-execution--positive",
+      "kind": "theorem",
+      "line_number": "57",
+      "mapping_status": "accepted",
+      "name_or_expression": "dispatchForwardExecutionCompatible",
+      "obligation_id": "MachineTraceForward:0003",
+      "original_benchmark_candidate": "test-machine-trace-forward",
+      "test_file": "Relico/Tests/MachineTraceForward.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "core--one-step-execution--positive",
+      "kind": "theorem",
+      "line_number": "79",
+      "mapping_status": "accepted",
+      "name_or_expression": "dispatch_machine_trace_forward",
+      "obligation_id": "MachineTraceForward:0004",
+      "original_benchmark_candidate": "test-machine-trace-forward",
+      "test_file": "Relico/Tests/MachineTraceForward.lean"
+    }
+  ],
+  "schema_version": 1,
+  "test_modules": [
+    "Relico/Tests/MachineTraceForward.lean"
+  ]
+}

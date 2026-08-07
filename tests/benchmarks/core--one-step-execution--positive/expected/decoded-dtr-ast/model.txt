@@ -1,0 +1,9 @@
+{ reactiveClass := { name := { value := "Controller" },
+                     stateVar := { value := "x" },
+                     constructor := { body := [Relico.DTR.Stmt.assign { value := "x" } (Relico.DTR.Expr.intLiteral 0),
+                                               Relico.DTR.Stmt.selfSend { value := "step" } { value := 1 }] },
+                     messageServer := { name := { value := "step" },
+                                        body := [Relico.DTR.Stmt.assign { value := "x" } (Relico.DTR.Expr.intLiteral 1),
+                                                 Relico.DTR.Stmt.selfSend { value := "step" } { value := 1 }],
+                                        priority := none } },
+  actor := { name := { value := "controller" }, className := { value := "Controller" } } }

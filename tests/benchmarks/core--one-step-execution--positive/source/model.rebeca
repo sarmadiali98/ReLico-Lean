@@ -1,0 +1,22 @@
+// Benchmark: core--one-step-execution--positive
+// Exercises a formal one-step execution witness over a live bounded source.
+// Runtime evidence is a bounded observation; termination is not claimed.
+reactiveclass Controller(10) {
+statevars {
+int x;
+}
+
+Controller() {
+    x = 0;
+    self.step() after(1);
+}
+
+msgsrv step() {
+    x = 1;
+    self.step() after(1);
+}
+}
+
+main {
+Controller controller():();
+}
