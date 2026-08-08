@@ -1,0 +1,22 @@
+{ reactiveClass := { name := { value := "Controller" },
+                     stateVariables := [{ name := { value := "x" }, initialValue := 0 }],
+                     constructor := { body := [Relico.DTR.MultiStorePayloadStmt.assign
+                                                 { value := "x" }
+                                                 (Relico.DTR.MultiStorePayloadExpr.intLiteral 0),
+                                               Relico.DTR.MultiStorePayloadStmt.selfSend
+                                                 { value := "dispatch" }
+                                                 [Relico.DTR.MultiStorePayloadExpr.intLiteral 1]
+                                                 { value := 1 }] },
+                     messageServers := [{ name := { value := "dispatch" },
+                                          parameters := [{ value := "payload" }],
+                                          body := [Relico.DTR.MultiStorePayloadStmt.assign
+                                                     { value := "x" }
+                                                     (Relico.DTR.MultiStorePayloadExpr.parameterVar
+                                                       { value := "payload" }),
+                                                   Relico.DTR.MultiStorePayloadStmt.selfSend
+                                                     { value := "dispatch" }
+                                                     [Relico.DTR.MultiStorePayloadExpr.parameterVar
+                                                        { value := "payload" }]
+                                                     { value := 1 }],
+                                          priority := none }] },
+  actor := { name := { value := "controller" }, className := { value := "Controller" } } }

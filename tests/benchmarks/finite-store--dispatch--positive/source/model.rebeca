@@ -1,0 +1,23 @@
+// Benchmark: finite-store--dispatch--positive
+// Exercises recurring payload dispatch with a finite variable store update.
+// Source/backend execution is paired with finite-store dispatch, machine-step,
+// and trace-level formal witnesses; runtime evidence is bounded observation.
+reactiveclass Controller(10) {
+    statevars {
+        int x;
+    }
+
+    Controller() {
+        x = 0;
+        self.dispatch(1) after(1);
+    }
+
+    msgsrv dispatch(int payload) {
+        x = payload;
+        self.dispatch(payload) after(1);
+    }
+}
+
+main {
+    Controller controller():();
+}
