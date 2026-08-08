@@ -1,0 +1,96 @@
+{
+  "benchmark_id": "core--well-formedness--positive",
+  "obligation_count": 7,
+  "obligations": [
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "core--well-formedness--positive",
+      "kind": "example",
+      "line_number": "8",
+      "mapping_status": "accepted",
+      "name_or_expression": "example@8",
+      "obligation_id": "ExpressionCorrectness:0001",
+      "original_benchmark_candidate": "test-expression-correctness",
+      "test_file": "Relico/Tests/ExpressionCorrectness.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "core--well-formedness--positive",
+      "kind": "example",
+      "line_number": "21",
+      "mapping_status": "accepted",
+      "name_or_expression": "example@21",
+      "obligation_id": "ExpressionCorrectness:0002",
+      "original_benchmark_candidate": "test-expression-correctness",
+      "test_file": "Relico/Tests/ExpressionCorrectness.lean"
+    },
+    {
+      "classification": "test_fixture_or_helper",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "core--well-formedness--positive",
+      "kind": "def",
+      "line_number": "8",
+      "mapping_status": "accepted",
+      "name_or_expression": "inversionAssignmentBody",
+      "obligation_id": "Inversion:0001",
+      "original_benchmark_candidate": "test-inversion",
+      "test_file": "Relico/Tests/Inversion.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "core--well-formedness--positive",
+      "kind": "theorem",
+      "line_number": "17",
+      "mapping_status": "accepted",
+      "name_or_expression": "compiledAssignmentBody_can_be_inverted",
+      "obligation_id": "Inversion:0002",
+      "original_benchmark_candidate": "test-inversion",
+      "test_file": "Relico/Tests/Inversion.lean"
+    },
+    {
+      "classification": "test_fixture_or_helper",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "core--well-formedness--positive",
+      "kind": "def",
+      "line_number": "36",
+      "mapping_status": "accepted",
+      "name_or_expression": "inversionSendBody",
+      "obligation_id": "Inversion:0003",
+      "original_benchmark_candidate": "test-inversion",
+      "test_file": "Relico/Tests/Inversion.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "core--well-formedness--positive",
+      "kind": "theorem",
+      "line_number": "45",
+      "mapping_status": "accepted",
+      "name_or_expression": "compiledScheduleBody_can_be_inverted",
+      "obligation_id": "Inversion:0004",
+      "original_benchmark_candidate": "test-inversion",
+      "test_file": "Relico/Tests/Inversion.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "core--well-formedness--positive",
+      "kind": "theorem",
+      "line_number": "8",
+      "mapping_status": "accepted",
+      "name_or_expression": "validModel_generatedProgram_wellFormed",
+      "obligation_id": "StructuralCorrectness:0001",
+      "original_benchmark_candidate": "test-structural-correctness",
+      "test_file": "Relico/Tests/StructuralCorrectness.lean"
+    }
+  ],
+  "schema_version": 1,
+  "test_modules": [
+    "Relico/Tests/ExpressionCorrectness.lean",
+    "Relico/Tests/Inversion.lean",
+    "Relico/Tests/StructuralCorrectness.lean"
+  ]
+}

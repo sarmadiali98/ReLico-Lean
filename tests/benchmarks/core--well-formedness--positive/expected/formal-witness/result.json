@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "core--well-formedness--positive",
+  "elaborated_modules": [
+    "Relico/Tests/ExpressionCorrectness.lean",
+    "Relico/Tests/Inversion.lean",
+    "Relico/Tests/StructuralCorrectness.lean"
+  ],
+  "obligation_count": 7,
+  "obligation_ids": [
+    "ExpressionCorrectness:0001",
+    "ExpressionCorrectness:0002",
+    "Inversion:0001",
+    "Inversion:0002",
+    "Inversion:0003",
+    "Inversion:0004",
+    "StructuralCorrectness:0001"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}
