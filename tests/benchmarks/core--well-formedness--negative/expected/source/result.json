@@ -1,0 +1,6 @@
+{
+  "benchmark_id": "core--well-formedness--negative",
+  "schema_version": 1,
+  "sha256": "31646f8c73f449172386f70407c031455835eb4d6fbf3e45788cf70db9db6e76",
+  "status": "pass"
+}

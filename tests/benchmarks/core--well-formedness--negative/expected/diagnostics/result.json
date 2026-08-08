@@ -1,0 +1,9 @@
+{
+  "benchmark_id": "core--well-formedness--negative",
+  "boundary_stage": "rmc",
+  "diagnostic_code": "EXPECTED_REJECTION",
+  "expected_rejection": true,
+  "message": "The method missing() is undefined for the type Controller",
+  "schema_version": 1,
+  "status": "pass"
+}

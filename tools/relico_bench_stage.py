@@ -670,48 +670,81 @@ def expected_boundary_value(
     benchmark_id: str,
     rejection: dict[str, object],
 ) -> dict[str, object]:
-    expected_diagnostic = (
+    legacy_diagnostic = (
         "unsupported by the ReLico v0 parser bridge: "
         "message-server parameters"
     )
 
+    if (
+        rejection.get("boundary_stage") == "parser-json"
+        and rejection.get("required_diagnostic") == legacy_diagnostic
+    ):
+        if rejection.get("benchmark_id") != benchmark_id:
+            raise StageError("rejection benchmark identifier differs")
+        if rejection.get("status") != "expected-rejection":
+            raise StageError("input does not record an expected rejection")
+        if rejection.get("boundary_stage") != "parser-json":
+            raise StageError("expected rejection did not occur at parser-json")
+        if rejection.get("observed_exit_code") != 1:
+            raise StageError("expected rejection exit code differs")
+        if rejection.get("expected_exit_code") != 1:
+            raise StageError("declared expected rejection exit code differs")
+        if rejection.get("required_diagnostic") != legacy_diagnostic:
+            raise StageError("expected rejection diagnostic differs")
+
+        return {
+            "benchmark_id": benchmark_id,
+            "boundary_code": (
+                "V0_PARSER_BRIDGE_MESSAGE_SERVER_PARAMETERS_UNSUPPORTED"
+            ),
+            "boundary_stage": "parser-json",
+            "expected_rejection": True,
+            "schema_version": 1,
+            "status": "pass",
+        }
+
     if rejection.get("benchmark_id") != benchmark_id:
-        raise StageError(
-            "rejection benchmark identifier differs"
-        )
-
+        raise StageError("rejection benchmark identifier differs")
     if rejection.get("status") != "expected-rejection":
-        raise StageError(
-            "input does not record an expected rejection"
-        )
+        raise StageError("input does not record an expected rejection")
 
-    if rejection.get("boundary_stage") != "parser-json":
-        raise StageError(
-            "expected rejection did not occur at parser-json"
-        )
+    boundary_stage = rejection.get("boundary_stage")
+    if not isinstance(boundary_stage, str) or not boundary_stage.strip():
+        raise StageError("expected rejection boundary stage is missing")
 
-    if rejection.get("observed_exit_code") != 1:
-        raise StageError(
-            "expected parser-json exit code 1"
-        )
+    expected_exit_code = rejection.get("expected_exit_code")
+    observed_exit_code = rejection.get("observed_exit_code")
 
-    if rejection.get("required_diagnostic") != expected_diagnostic:
-        raise StageError(
-            "expected rejection diagnostic differs"
-        )
+    if (
+        not isinstance(expected_exit_code, int)
+        or isinstance(expected_exit_code, bool)
+    ):
+        raise StageError("expected rejection exit code is invalid")
 
-    if rejection.get("forbidden_artifact_count") != 2:
-        raise StageError(
-            "expected exactly two forbidden post-boundary artifacts"
-        )
+    if (
+        not isinstance(observed_exit_code, int)
+        or isinstance(observed_exit_code, bool)
+    ):
+        raise StageError("observed rejection exit code is invalid")
+
+    if observed_exit_code != expected_exit_code:
+        raise StageError("observed rejection exit code differs")
+
+    required_diagnostic = rejection.get("required_diagnostic")
+    if (
+        not isinstance(required_diagnostic, str)
+        or not required_diagnostic.strip()
+    ):
+        raise StageError("required rejection diagnostic is missing")
 
     return {
         "benchmark_id": benchmark_id,
-        "boundary_code": (
-            "V0_PARSER_BRIDGE_MESSAGE_SERVER_PARAMETERS_UNSUPPORTED"
-        ),
-        "boundary_stage": "parser-json",
+        "boundary_code": "EXPECTED_REJECTION",
+        "boundary_stage": boundary_stage,
+        "expected_exit_code": expected_exit_code,
         "expected_rejection": True,
+        "observed_exit_code": observed_exit_code,
+        "required_diagnostic": required_diagnostic,
         "schema_version": 1,
         "status": "pass",
     }
@@ -738,44 +771,61 @@ def diagnostics_value(
     benchmark_id: str,
     boundary: dict[str, object],
 ) -> dict[str, object]:
-    expected_code = (
+    legacy_code = (
         "V0_PARSER_BRIDGE_MESSAGE_SERVER_PARAMETERS_UNSUPPORTED"
     )
 
+    if boundary.get("boundary_code") == legacy_code:
+        if boundary.get("benchmark_id") != benchmark_id:
+            raise StageError("boundary benchmark identifier differs")
+        if boundary.get("status") != "pass":
+            raise StageError("boundary validation did not pass")
+        if boundary.get("boundary_code") != legacy_code:
+            raise StageError("boundary diagnostic code differs")
+        if boundary.get("boundary_stage") != "parser-json":
+            raise StageError("boundary stage differs")
+        if boundary.get("expected_rejection") is not True:
+            raise StageError("boundary does not record expected rejection")
+
+        return {
+            "benchmark_id": benchmark_id,
+            "diagnostic_code": legacy_code,
+            "expected_rejection": True,
+            "message": (
+                "Bound-payload message-server parameters are "
+                "intentionally rejected by the current ReLico v0 "
+                "parser bridge."
+            ),
+            "schema_version": 1,
+            "status": "pass",
+        }
+
     if boundary.get("benchmark_id") != benchmark_id:
-        raise StageError(
-            "boundary benchmark identifier differs"
-        )
-
+        raise StageError("boundary benchmark identifier differs")
     if boundary.get("status") != "pass":
-        raise StageError(
-            "boundary validation did not pass"
-        )
-
-    if boundary.get("boundary_code") != expected_code:
-        raise StageError(
-            "boundary diagnostic code differs"
-        )
-
-    if boundary.get("boundary_stage") != "parser-json":
-        raise StageError(
-            "boundary stage differs"
-        )
-
+        raise StageError("boundary validation did not pass")
+    if boundary.get("boundary_code") != "EXPECTED_REJECTION":
+        raise StageError("unsupported generic boundary code")
     if boundary.get("expected_rejection") is not True:
-        raise StageError(
-            "boundary was not classified as expected"
-        )
+        raise StageError("boundary does not record expected rejection")
+
+    boundary_stage = boundary.get("boundary_stage")
+    required_diagnostic = boundary.get("required_diagnostic")
+
+    if not isinstance(boundary_stage, str) or not boundary_stage.strip():
+        raise StageError("generic boundary stage is missing")
+    if (
+        not isinstance(required_diagnostic, str)
+        or not required_diagnostic.strip()
+    ):
+        raise StageError("generic boundary diagnostic is missing")
 
     return {
         "benchmark_id": benchmark_id,
-        "diagnostic_code": expected_code,
+        "boundary_stage": boundary_stage,
+        "diagnostic_code": "EXPECTED_REJECTION",
         "expected_rejection": True,
-        "message": (
-            "Bound-payload message-server parameters are "
-            "intentionally rejected by the current ReLico v0 "
-            "parser bridge."
-        ),
+        "message": required_diagnostic,
         "schema_version": 1,
         "status": "pass",
     }

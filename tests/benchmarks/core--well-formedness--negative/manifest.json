@@ -1,0 +1,165 @@
+{
+  "benchmark_id": "core--well-formedness--negative",
+  "description": "Negative core well-formedness benchmark preserving an expected RMC rejection for an undefined self-send target.",
+  "expected_artifacts": [
+    {
+      "path": "source/result.json",
+      "required": true,
+      "sha256": "8bf4240d5898981ec93ee9847d850ac27b23799d7e1889033767b1a269eeb2f8"
+    },
+    {
+      "path": "parser-json/rejection.json",
+      "required": true,
+      "sha256": "9f7f72e3e3d03a8880a7fad41fb6076cd6dea1a4fde3dbf901242e2cbc60f47e"
+    },
+    {
+      "path": "decoded-dtr-ast/rejection.json",
+      "required": true,
+      "sha256": "9f7f72e3e3d03a8880a7fad41fb6076cd6dea1a4fde3dbf901242e2cbc60f47e"
+    },
+    {
+      "path": "expected-boundary-stage/result.json",
+      "required": true,
+      "sha256": "4116fc40ef9b7de8e1eae5113e6b0b095fec38f7a301e71866655300683f61de"
+    },
+    {
+      "path": "diagnostics/result.json",
+      "required": true,
+      "sha256": "2261ec286f8be57a1d96a4f0b3e33727e58ea8b773590323a89b866bc3d94535"
+    }
+  ],
+  "expected_terminal_stage": "diagnostics",
+  "polarity": "negative",
+  "schema_version": 1,
+  "source_files": [
+    "source/model.rebeca"
+  ],
+  "stages": [
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "source",
+        "--benchmark-id",
+        "core--well-formedness--negative",
+        "--source",
+        "{source}",
+        "--output",
+        "{actual}/source/result.json"
+      ],
+      "name": "source"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc/verdict.json"
+      ],
+      "expected_exit_codes": [
+        1
+      ],
+      "name": "rmc",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "expected-absence",
+        "--benchmark-id",
+        "core--well-formedness--negative",
+        "--failed-stage",
+        "rmc",
+        "--stage-result",
+        "{actual}/02-rmc/stage-result.json",
+        "--stdout",
+        "{actual}/02-rmc/stdout.txt",
+        "--stderr",
+        "{actual}/02-rmc/stderr.txt",
+        "--expected-exit-code",
+        "1",
+        "--required-diagnostic",
+        "The method missing() is undefined for the type Controller",
+        "--forbidden-artifact",
+        "{actual}/rmc/verdict.json",
+        "--forbidden-artifact",
+        "{actual}/parser-json/model.json",
+        "--forbidden-artifact",
+        "{actual}/decoded-dtr-ast/model.txt",
+        "--output",
+        "{actual}/parser-json/rejection.json"
+      ],
+      "name": "parser-json"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "expected-absence",
+        "--benchmark-id",
+        "core--well-formedness--negative",
+        "--failed-stage",
+        "rmc",
+        "--stage-result",
+        "{actual}/02-rmc/stage-result.json",
+        "--stdout",
+        "{actual}/02-rmc/stdout.txt",
+        "--stderr",
+        "{actual}/02-rmc/stderr.txt",
+        "--expected-exit-code",
+        "1",
+        "--required-diagnostic",
+        "The method missing() is undefined for the type Controller",
+        "--forbidden-artifact",
+        "{actual}/rmc/verdict.json",
+        "--forbidden-artifact",
+        "{actual}/parser-json/model.json",
+        "--forbidden-artifact",
+        "{actual}/decoded-dtr-ast/model.txt",
+        "--output",
+        "{actual}/decoded-dtr-ast/rejection.json"
+      ],
+      "name": "decoded-dtr-ast"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "expected-boundary-stage",
+        "--benchmark-id",
+        "core--well-formedness--negative",
+        "--input",
+        "{actual}/decoded-dtr-ast/rejection.json",
+        "--output",
+        "{actual}/expected-boundary-stage/result.json"
+      ],
+      "name": "expected-boundary-stage"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "diagnostics",
+        "--benchmark-id",
+        "core--well-formedness--negative",
+        "--input",
+        "{actual}/expected-boundary-stage/result.json",
+        "--output",
+        "{actual}/diagnostics/result.json"
+      ],
+      "name": "diagnostics"
+    }
+  ]
+}

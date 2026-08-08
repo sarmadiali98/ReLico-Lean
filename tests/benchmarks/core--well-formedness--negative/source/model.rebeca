@@ -1,0 +1,21 @@
+// Benchmark: core--well-formedness--negative
+// Intentionally violates DTR well-formedness with an undefined self-send target.
+// Negative success is an expected semantic boundary/rejection, not execution success.
+reactiveclass Controller(10) {
+statevars {
+int phase;
+}
+
+Controller() {
+phase = 0;
+self.missing() after(1);
+}
+
+msgsrv tick() {
+phase = 1;
+}
+}
+
+main {
+Controller controller():();
+}
