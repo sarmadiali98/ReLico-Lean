@@ -1,0 +1,24 @@
+// Benchmark: finite-store--frontend-decoding--negative
+// Source-route fixture for the negative expected-boundary harness.
+// Its executable body intentionally reaches the current v0 parser-bridge
+// message-server-parameter boundary. Finite-store frontend-decoder semantics
+// are established separately by the mapped StoreFrontendDecoder Lean evidence.
+reactiveclass Controller(10) {
+    statevars {
+        int x;
+    }
+
+    Controller() {
+        x = 0;
+        self.dispatch(1) after(1);
+    }
+
+    msgsrv dispatch(int payload) {
+        x = payload;
+        self.dispatch(payload) after(1);
+    }
+}
+
+main {
+    Controller controller():();
+}

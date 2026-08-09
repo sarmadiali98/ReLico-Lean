@@ -1,0 +1,11 @@
+{
+  "benchmark_id": "finite-store--frontend-decoding--negative",
+  "boundary_code": "EXPECTED_REJECTION",
+  "boundary_stage": "parser-json",
+  "expected_exit_code": 1,
+  "expected_rejection": true,
+  "observed_exit_code": 1,
+  "required_diagnostic": "message-server parameters",
+  "schema_version": 1,
+  "status": "pass"
+}

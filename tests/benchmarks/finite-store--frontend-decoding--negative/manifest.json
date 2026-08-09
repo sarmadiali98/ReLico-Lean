@@ -1,0 +1,156 @@
+{
+  "benchmark_id": "finite-store--frontend-decoding--negative",
+  "description": "Negative finite-store frontend-decoding benchmark combining target-specific StoreFrontendDecoder formal evidence with the current v0 parser generic expected-rejection boundary harness.",
+  "expected_artifacts": [
+    {
+      "path": "source/result.json",
+      "required": true,
+      "sha256": "16eaf69b6e8e4a89221af4bca087f587b63b38d7723fc6b5b34b34fbb31788c7"
+    },
+    {
+      "path": "rmc/verdict.json",
+      "required": true,
+      "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
+    },
+    {
+      "path": "decoded-dtr-ast/rejection.json",
+      "required": true,
+      "sha256": "47effe23dd994254d580e9445c99fd9d89ea8625294e93640f9c13436bde3b3b"
+    },
+    {
+      "path": "expected-boundary-stage/result.json",
+      "required": true,
+      "sha256": "91845593930728b4152300f8b1d3f31ef37ded5e78bc3c5e552258bda5060b2c"
+    },
+    {
+      "path": "diagnostics/result.json",
+      "required": true,
+      "sha256": "6a8cb7c81d81c4794057d46785a4c58872eca375db989f5d140b430e3bbe7eb6"
+    }
+  ],
+  "expected_terminal_stage": "diagnostics",
+  "polarity": "negative",
+  "schema_version": 1,
+  "source_files": [
+    "source/model.rebeca"
+  ],
+  "stages": [
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "source",
+        "--benchmark-id",
+        "finite-store--frontend-decoding--negative",
+        "--source",
+        "{source}",
+        "--output",
+        "{actual}/source/result.json"
+      ],
+      "name": "source"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc/verdict.json"
+      ],
+      "name": "rmc",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "parser-json",
+        "--family",
+        "v0",
+        "--repo",
+        "{repo}",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--artifact-zip",
+        "/Users/ali/Desktop/LFStructuringNonDeterminism/ReLico-fmcad-2026-artifact-v1.zip",
+        "--maven",
+        "/opt/homebrew/Cellar/maven/3.9.16/bin/mvn",
+        "--output",
+        "{actual}/parser-json/model.json"
+      ],
+      "expected_exit_codes": [
+        1
+      ],
+      "name": "parser-json",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "expected-absence",
+        "--benchmark-id",
+        "finite-store--frontend-decoding--negative",
+        "--failed-stage",
+        "parser-json",
+        "--stage-result",
+        "{actual}/03-parser-json/stage-result.json",
+        "--stdout",
+        "{actual}/03-parser-json/stdout.txt",
+        "--stderr",
+        "{actual}/03-parser-json/stderr.txt",
+        "--expected-exit-code",
+        "1",
+        "--required-diagnostic",
+        "message-server parameters",
+        "--forbidden-artifact",
+        "{actual}/parser-json/model.json",
+        "--forbidden-artifact",
+        "{actual}/decoded-dtr-ast/model.txt",
+        "--output",
+        "{actual}/decoded-dtr-ast/rejection.json"
+      ],
+      "name": "decoded-dtr-ast"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "expected-boundary-stage",
+        "--benchmark-id",
+        "finite-store--frontend-decoding--negative",
+        "--input",
+        "{actual}/decoded-dtr-ast/rejection.json",
+        "--output",
+        "{actual}/expected-boundary-stage/result.json"
+      ],
+      "name": "expected-boundary-stage"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "diagnostics",
+        "--benchmark-id",
+        "finite-store--frontend-decoding--negative",
+        "--input",
+        "{actual}/expected-boundary-stage/result.json",
+        "--output",
+        "{actual}/diagnostics/result.json"
+      ],
+      "name": "diagnostics"
+    }
+  ]
+}

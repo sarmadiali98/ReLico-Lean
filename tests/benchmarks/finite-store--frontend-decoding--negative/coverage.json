@@ -1,0 +1,142 @@
+{
+  "benchmark_id": "finite-store--frontend-decoding--negative",
+  "obligation_count": 11,
+  "obligations": [
+    {
+      "classification": "test_fixture_or_helper",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "finite-store--frontend-decoding--negative",
+      "kind": "def",
+      "line_number": "9",
+      "mapping_status": "accepted",
+      "name_or_expression": "decoderStoreX",
+      "obligation_id": "StoreFrontendDecoder:0001",
+      "original_benchmark_candidate": "test-store-frontend-decoder",
+      "test_file": "Relico/Tests/StoreFrontendDecoder.lean"
+    },
+    {
+      "classification": "test_fixture_or_helper",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "finite-store--frontend-decoding--negative",
+      "kind": "def",
+      "line_number": "12",
+      "mapping_status": "accepted",
+      "name_or_expression": "decoderStoreY",
+      "obligation_id": "StoreFrontendDecoder:0002",
+      "original_benchmark_candidate": "test-store-frontend-decoder",
+      "test_file": "Relico/Tests/StoreFrontendDecoder.lean"
+    },
+    {
+      "classification": "test_fixture_or_helper",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "finite-store--frontend-decoding--negative",
+      "kind": "def",
+      "line_number": "15",
+      "mapping_status": "accepted",
+      "name_or_expression": "validRawStoreModel",
+      "obligation_id": "StoreFrontendDecoder:0003",
+      "original_benchmark_candidate": "test-store-frontend-decoder",
+      "test_file": "Relico/Tests/StoreFrontendDecoder.lean"
+    },
+    {
+      "classification": "test_fixture_or_helper",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "finite-store--frontend-decoding--negative",
+      "kind": "class",
+      "line_number": "20",
+      "mapping_status": "accepted",
+      "name_or_expression": "class@20",
+      "obligation_id": "StoreFrontendDecoder:0004",
+      "original_benchmark_candidate": "test-store-frontend-decoder",
+      "test_file": "Relico/Tests/StoreFrontendDecoder.lean"
+    },
+    {
+      "classification": "test_fixture_or_helper",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "finite-store--frontend-decoding--negative",
+      "kind": "def",
+      "line_number": "71",
+      "mapping_status": "accepted",
+      "name_or_expression": "expectedDecodedStoreModel",
+      "obligation_id": "StoreFrontendDecoder:0005",
+      "original_benchmark_candidate": "test-store-frontend-decoder",
+      "test_file": "Relico/Tests/StoreFrontendDecoder.lean"
+    },
+    {
+      "classification": "test_fixture_or_helper",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "finite-store--frontend-decoding--negative",
+      "kind": "class",
+      "line_number": "110",
+      "mapping_status": "accepted",
+      "name_or_expression": "class@110",
+      "obligation_id": "StoreFrontendDecoder:0006",
+      "original_benchmark_candidate": "test-store-frontend-decoder",
+      "test_file": "Relico/Tests/StoreFrontendDecoder.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "finite-store--frontend-decoding--negative",
+      "kind": "theorem",
+      "line_number": "112",
+      "mapping_status": "accepted",
+      "name_or_expression": "validRawStoreModel_decodes",
+      "obligation_id": "StoreFrontendDecoder:0007",
+      "original_benchmark_candidate": "test-store-frontend-decoder",
+      "test_file": "Relico/Tests/StoreFrontendDecoder.lean"
+    },
+    {
+      "classification": "test_fixture_or_helper",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "finite-store--frontend-decoding--negative",
+      "kind": "def",
+      "line_number": "118",
+      "mapping_status": "accepted",
+      "name_or_expression": "undeclaredAssignmentRawStoreModel",
+      "obligation_id": "StoreFrontendDecoder:0008",
+      "original_benchmark_candidate": "test-store-frontend-decoder",
+      "test_file": "Relico/Tests/StoreFrontendDecoder.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "finite-store--frontend-decoding--negative",
+      "kind": "theorem",
+      "line_number": "134",
+      "mapping_status": "accepted",
+      "name_or_expression": "undeclaredAssignment_is_rejected",
+      "obligation_id": "StoreFrontendDecoder:0009",
+      "original_benchmark_candidate": "test-store-frontend-decoder",
+      "test_file": "Relico/Tests/StoreFrontendDecoder.lean"
+    },
+    {
+      "classification": "test_fixture_or_helper",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "finite-store--frontend-decoding--negative",
+      "kind": "def",
+      "line_number": "144",
+      "mapping_status": "accepted",
+      "name_or_expression": "undeclaredReferenceRawStoreModel",
+      "obligation_id": "StoreFrontendDecoder:0010",
+      "original_benchmark_candidate": "test-store-frontend-decoder",
+      "test_file": "Relico/Tests/StoreFrontendDecoder.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "finite-store--frontend-decoding--negative",
+      "kind": "theorem",
+      "line_number": "160",
+      "mapping_status": "accepted",
+      "name_or_expression": "undeclaredReference_is_rejected",
+      "obligation_id": "StoreFrontendDecoder:0011",
+      "original_benchmark_candidate": "test-store-frontend-decoder",
+      "test_file": "Relico/Tests/StoreFrontendDecoder.lean"
+    }
+  ],
+  "schema_version": 1,
+  "test_modules": [
+    "Relico/Tests/StoreFrontendDecoder.lean"
+  ]
+}
