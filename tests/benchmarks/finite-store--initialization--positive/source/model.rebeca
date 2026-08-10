@@ -1,0 +1,26 @@
+// Benchmark: finite-store--initialization--positive
+// Two-state finite-store initialization route fixture.
+// The constructor prefix matches the mapped initialization evidence.
+// Recurring tick scheduling is route-only liveness scaffolding for bounded
+// RMC/LF runtime observation and is not claimed as formal body identity.
+reactiveclass TwoStateController(10) {
+    statevars {
+        int x;
+        int y;
+    }
+
+    TwoStateController() {
+        x = 1;
+        y = 2;
+        self.tick() after(1);
+    }
+
+    msgsrv tick() {
+        y = x;
+        self.tick() after(1);
+    }
+}
+
+main {
+    TwoStateController controller():();
+}

@@ -1,0 +1,31 @@
+{
+  "benchmark_id": "finite-store--initialization--positive",
+  "elaborated_modules": [
+    "Relico/Tests/StoreCppBackend.lean",
+    "Relico/Tests/StoreExecutableTranslation.lean",
+    "Relico/Tests/StoreInitialization.lean"
+  ],
+  "obligation_count": 18,
+  "obligation_ids": [
+    "StoreCppBackend:0001",
+    "StoreCppBackend:0002",
+    "StoreCppBackend:0003",
+    "StoreCppBackend:0004",
+    "StoreExecutableTranslation:0001",
+    "StoreExecutableTranslation:0002",
+    "StoreExecutableTranslation:0003",
+    "StoreInitialization:0001",
+    "StoreInitialization:0002",
+    "StoreInitialization:0003",
+    "StoreInitialization:0004",
+    "StoreInitialization:0005",
+    "StoreInitialization:0006",
+    "StoreInitialization:0007",
+    "StoreInitialization:0008",
+    "StoreInitialization:0009",
+    "StoreInitialization:0010",
+    "StoreInitialization:0011"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

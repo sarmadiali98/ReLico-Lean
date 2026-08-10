@@ -1,0 +1,64 @@
+{
+  "actorClass": "TwoStateController",
+  "actorName": "controller",
+  "className": "TwoStateController",
+  "constructorBody": [
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 1
+      },
+      "kind": "assign",
+      "target": "x"
+    },
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 2
+      },
+      "kind": "assign",
+      "target": "y"
+    },
+    {
+      "arguments": [],
+      "delay": 1,
+      "kind": "selfSend",
+      "message": "tick"
+    }
+  ],
+  "family": "multiStorePayload",
+  "messageServers": [
+    {
+      "body": [
+        {
+          "expression": {
+            "kind": "stateVar",
+            "name": "x"
+          },
+          "kind": "assign",
+          "target": "y"
+        },
+        {
+          "arguments": [],
+          "delay": 1,
+          "kind": "selfSend",
+          "message": "tick"
+        }
+      ],
+      "name": "tick",
+      "parameters": [],
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1,
+  "stateVariables": [
+    {
+      "initialValue": 0,
+      "name": "x"
+    },
+    {
+      "initialValue": 0,
+      "name": "y"
+    }
+  ]
+}
