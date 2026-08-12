@@ -1,0 +1,58 @@
+{
+  "benchmark_id": "finite-store--queue-correspondence--positive",
+  "obligation_count": 4,
+  "obligations": [
+    {
+      "obligation_id": "StoreForward:0001",
+      "test_file": "Relico/Tests/StoreForward.lean",
+      "line_number": "8",
+      "kind": "def",
+      "name_or_expression": "lfStoreCorrespondingBefore",
+      "classification": "test_fixture_or_helper",
+      "original_benchmark_candidate": "test-store-forward",
+      "final_benchmark_id": "finite-store--queue-correspondence--positive",
+      "evidence_role": "source-capability",
+      "mapping_status": "accepted"
+    },
+    {
+      "obligation_id": "StoreForward:0002",
+      "test_file": "Relico/Tests/StoreForward.lean",
+      "line_number": "13",
+      "kind": "def",
+      "name_or_expression": "def@13",
+      "classification": "test_fixture_or_helper",
+      "original_benchmark_candidate": "test-store-forward",
+      "final_benchmark_id": "finite-store--queue-correspondence--positive",
+      "evidence_role": "source-capability",
+      "mapping_status": "accepted"
+    },
+    {
+      "obligation_id": "StoreForward:0003",
+      "test_file": "Relico/Tests/StoreForward.lean",
+      "line_number": "24",
+      "kind": "theorem",
+      "name_or_expression": "crossVariableStatesCorrespond",
+      "classification": "proof_obligation",
+      "original_benchmark_candidate": "test-store-forward",
+      "final_benchmark_id": "finite-store--queue-correspondence--positive",
+      "evidence_role": "source-capability",
+      "mapping_status": "accepted"
+    },
+    {
+      "obligation_id": "StoreForward:0004",
+      "test_file": "Relico/Tests/StoreForward.lean",
+      "line_number": "48",
+      "kind": "theorem",
+      "name_or_expression": "compiled_cross_variable_step_exists",
+      "classification": "proof_obligation",
+      "original_benchmark_candidate": "test-store-forward",
+      "final_benchmark_id": "finite-store--queue-correspondence--positive",
+      "evidence_role": "source-capability",
+      "mapping_status": "accepted"
+    }
+  ],
+  "schema_version": 1,
+  "test_modules": [
+    "Relico/Tests/StoreForward.lean"
+  ]
+}

@@ -1,0 +1,24 @@
+{ reactiveClass := { name := { value := "Controller" },
+                     stateVariables := [{ name := { value := "x" }, initialValue := 0 }],
+                     constructor := { body := [Relico.DTR.MultiStorePayloadStmt.assign
+                                                 { value := "x" }
+                                                 (Relico.DTR.MultiStorePayloadExpr.intLiteral 0),
+                                               Relico.DTR.MultiStorePayloadStmt.selfSend
+                                                 { value := "tick" }
+                                                 []
+                                                 { value := 1 },
+                                               Relico.DTR.MultiStorePayloadStmt.selfSend
+                                                 { value := "tick" }
+                                                 []
+                                                 { value := 1 }] },
+                     messageServers := [{ name := { value := "tick" },
+                                          parameters := [],
+                                          body := [Relico.DTR.MultiStorePayloadStmt.assign
+                                                     { value := "x" }
+                                                     (Relico.DTR.MultiStorePayloadExpr.intLiteral 0),
+                                                   Relico.DTR.MultiStorePayloadStmt.selfSend
+                                                     { value := "tick" }
+                                                     []
+                                                     { value := 1 }],
+                                          priority := none }] },
+  actor := { name := { value := "controller" }, className := { value := "Controller" } } }
