@@ -1,0 +1,31 @@
+// Benchmark: finite-store--priority-selection--positive
+// Exercises two recurring same-time finite-store messages with distinct
+// message-server priorities. Actor priority is intentionally absent.
+// Runtime evidence is bounded observation and does not claim termination.
+reactiveclass Controller(10) {
+    statevars {
+        int x;
+    }
+
+    Controller() {
+        x = 0;
+        self.low() after(1);
+        self.high() after(1);
+    }
+
+    @priority(1)
+    msgsrv low() {
+        x = 1;
+        self.low() after(1);
+    }
+
+    @priority(2)
+    msgsrv high() {
+        x = 2;
+        self.high() after(1);
+    }
+}
+
+main {
+    Controller controller():();
+}

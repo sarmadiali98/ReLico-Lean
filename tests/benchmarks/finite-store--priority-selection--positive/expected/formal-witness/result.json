@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "finite-store--priority-selection--positive",
+  "elaborated_modules": [
+    "Relico/Tests/DirectLFRuntimeStateCorrespondence.lean"
+  ],
+  "obligation_count": 9,
+  "obligation_ids": [
+    "DirectLFRuntimeStateCorrespondence:0001",
+    "DirectLFRuntimeStateCorrespondence:0002",
+    "DirectLFRuntimeStateCorrespondence:0003",
+    "DirectLFRuntimeStateCorrespondence:0004",
+    "DirectLFRuntimeStateCorrespondence:0005",
+    "DirectLFRuntimeStateCorrespondence:0006",
+    "DirectLFRuntimeStateCorrespondence:0007",
+    "DirectLFRuntimeStateCorrespondence:0008",
+    "DirectLFRuntimeStateCorrespondence:0009"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

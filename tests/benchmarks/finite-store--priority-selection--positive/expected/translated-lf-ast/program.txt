@@ -1,0 +1,44 @@
+{ reactor := { name := { value := "Controller" },
+               stateVariables := [{ name := { value := "x" }, initialValue := 0 }],
+               logicalActions := [{ name := { value := "low_action" }, parameters := [] },
+                                  { name := { value := "high_action" }, parameters := [] }],
+               startupReaction := { name := { value := "startup" },
+                                    trigger := Relico.LF.MultiStorePayloadTrigger.startup,
+                                    parameters := [],
+                                    body := [Relico.LF.MultiStorePayloadStmt.assign
+                                               { value := "x" }
+                                               (Relico.LF.MultiStorePayloadExpr.intLiteral 0),
+                                             Relico.LF.MultiStorePayloadStmt.schedule
+                                               { value := "low_action" }
+                                               []
+                                               { value := 1 },
+                                             Relico.LF.MultiStorePayloadStmt.schedule
+                                               { value := "high_action" }
+                                               []
+                                               { value := 1 }],
+                                    priority := none },
+               messageReactions := [{ name := { value := "low_reaction" },
+                                      trigger := Relico.LF.MultiStorePayloadTrigger.logicalAction
+                                                   { value := "low_action" },
+                                      parameters := [],
+                                      body := [Relico.LF.MultiStorePayloadStmt.assign
+                                                 { value := "x" }
+                                                 (Relico.LF.MultiStorePayloadExpr.intLiteral 1),
+                                               Relico.LF.MultiStorePayloadStmt.schedule
+                                                 { value := "low_action" }
+                                                 []
+                                                 { value := 1 }],
+                                      priority := some 1 },
+                                    { name := { value := "high_reaction" },
+                                      trigger := Relico.LF.MultiStorePayloadTrigger.logicalAction
+                                                   { value := "high_action" },
+                                      parameters := [],
+                                      body := [Relico.LF.MultiStorePayloadStmt.assign
+                                                 { value := "x" }
+                                                 (Relico.LF.MultiStorePayloadExpr.intLiteral 2),
+                                               Relico.LF.MultiStorePayloadStmt.schedule
+                                                 { value := "high_action" }
+                                                 []
+                                                 { value := 1 }],
+                                      priority := some 2 }] },
+  reactorInstance := { name := { value := "controller" }, reactorName := { value := "Controller" } } }

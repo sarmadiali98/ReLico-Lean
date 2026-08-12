@@ -1,0 +1,34 @@
+{ reactiveClass := { name := { value := "Controller" },
+                     stateVariables := [{ name := { value := "x" }, initialValue := 0 }],
+                     constructor := { body := [Relico.DTR.MultiStorePayloadStmt.assign
+                                                 { value := "x" }
+                                                 (Relico.DTR.MultiStorePayloadExpr.intLiteral 0),
+                                               Relico.DTR.MultiStorePayloadStmt.selfSend
+                                                 { value := "low" }
+                                                 []
+                                                 { value := 1 },
+                                               Relico.DTR.MultiStorePayloadStmt.selfSend
+                                                 { value := "high" }
+                                                 []
+                                                 { value := 1 }] },
+                     messageServers := [{ name := { value := "low" },
+                                          parameters := [],
+                                          body := [Relico.DTR.MultiStorePayloadStmt.assign
+                                                     { value := "x" }
+                                                     (Relico.DTR.MultiStorePayloadExpr.intLiteral 1),
+                                                   Relico.DTR.MultiStorePayloadStmt.selfSend
+                                                     { value := "low" }
+                                                     []
+                                                     { value := 1 }],
+                                          priority := some 1 },
+                                        { name := { value := "high" },
+                                          parameters := [],
+                                          body := [Relico.DTR.MultiStorePayloadStmt.assign
+                                                     { value := "x" }
+                                                     (Relico.DTR.MultiStorePayloadExpr.intLiteral 2),
+                                                   Relico.DTR.MultiStorePayloadStmt.selfSend
+                                                     { value := "high" }
+                                                     []
+                                                     { value := 1 }],
+                                          priority := some 2 }] },
+  actor := { name := { value := "controller" }, className := { value := "Controller" } } }

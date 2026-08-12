@@ -1,0 +1,27 @@
+target Cpp
+
+reactor Controller {
+  state x: int = 0
+  logical action low_action: void
+  logical action high_action: void
+
+  reaction(startup) -> low_action, high_action {=
+    x = 0;
+    low_action.schedule(1ms);
+    high_action.schedule(1ms);
+  =}
+
+  reaction(low_action) -> low_action {=
+    x = 1;
+    low_action.schedule(1ms);
+  =}
+
+  reaction(high_action) -> high_action {=
+    x = 2;
+    high_action.schedule(1ms);
+  =}
+}
+
+main reactor {
+  controller = new Controller()
+}

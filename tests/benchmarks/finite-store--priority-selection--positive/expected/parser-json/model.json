@@ -1,0 +1,79 @@
+{
+  "actorClass": "Controller",
+  "actorName": "controller",
+  "className": "Controller",
+  "constructorBody": [
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 0
+      },
+      "kind": "assign",
+      "target": "x"
+    },
+    {
+      "arguments": [],
+      "delay": 1,
+      "kind": "selfSend",
+      "message": "low"
+    },
+    {
+      "arguments": [],
+      "delay": 1,
+      "kind": "selfSend",
+      "message": "high"
+    }
+  ],
+  "family": "multiStorePayload",
+  "messageServers": [
+    {
+      "body": [
+        {
+          "expression": {
+            "kind": "intLiteral",
+            "value": 1
+          },
+          "kind": "assign",
+          "target": "x"
+        },
+        {
+          "arguments": [],
+          "delay": 1,
+          "kind": "selfSend",
+          "message": "low"
+        }
+      ],
+      "name": "low",
+      "parameters": [],
+      "priority": 1
+    },
+    {
+      "body": [
+        {
+          "expression": {
+            "kind": "intLiteral",
+            "value": 2
+          },
+          "kind": "assign",
+          "target": "x"
+        },
+        {
+          "arguments": [],
+          "delay": 1,
+          "kind": "selfSend",
+          "message": "high"
+        }
+      ],
+      "name": "high",
+      "parameters": [],
+      "priority": 2
+    }
+  ],
+  "schemaVersion": 1,
+  "stateVariables": [
+    {
+      "initialValue": 0,
+      "name": "x"
+    }
+  ]
+}

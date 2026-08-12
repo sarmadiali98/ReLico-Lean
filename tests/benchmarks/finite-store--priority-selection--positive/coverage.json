@@ -1,0 +1,118 @@
+{
+  "benchmark_id": "finite-store--priority-selection--positive",
+  "obligation_count": 9,
+  "obligations": [
+    {
+      "obligation_id": "DirectLFRuntimeStateCorrespondence:0001",
+      "test_file": "Relico/Tests/DirectLFRuntimeStateCorrespondence.lean",
+      "line_number": "8",
+      "kind": "theorem",
+      "name_or_expression": "runtime_contains_structural_correspondence",
+      "classification": "proof_obligation",
+      "original_benchmark_candidate": "test-direct-lfruntime-state-correspondence",
+      "final_benchmark_id": "finite-store--priority-selection--positive",
+      "evidence_role": "source-capability",
+      "mapping_status": "accepted"
+    },
+    {
+      "obligation_id": "DirectLFRuntimeStateCorrespondence:0002",
+      "test_file": "Relico/Tests/DirectLFRuntimeStateCorrespondence.lean",
+      "line_number": "26",
+      "kind": "theorem",
+      "name_or_expression": "runtime_contains_pending_not_past",
+      "classification": "proof_obligation",
+      "original_benchmark_candidate": "test-direct-lfruntime-state-correspondence",
+      "final_benchmark_id": "finite-store--priority-selection--positive",
+      "evidence_role": "source-capability",
+      "mapping_status": "accepted"
+    },
+    {
+      "obligation_id": "DirectLFRuntimeStateCorrespondence:0003",
+      "test_file": "Relico/Tests/DirectLFRuntimeStateCorrespondence.lean",
+      "line_number": "42",
+      "kind": "#check",
+      "name_or_expression": "#check Correctness.DirectLFRuntimeStateCorresponds",
+      "classification": "type_or_api_check",
+      "original_benchmark_candidate": "test-direct-lfruntime-state-correspondence",
+      "final_benchmark_id": "finite-store--priority-selection--positive",
+      "evidence_role": "source-capability",
+      "mapping_status": "accepted"
+    },
+    {
+      "obligation_id": "DirectLFRuntimeStateCorrespondence:0004",
+      "test_file": "Relico/Tests/DirectLFRuntimeStateCorrespondence.lean",
+      "line_number": "45",
+      "kind": "#check",
+      "name_or_expression": "#check Correctness.DirectLFRuntimeStateCorresponds.toBagQueueCorresponds",
+      "classification": "type_or_api_check",
+      "original_benchmark_candidate": "test-direct-lfruntime-state-correspondence",
+      "final_benchmark_id": "finite-store--priority-selection--positive",
+      "evidence_role": "source-capability",
+      "mapping_status": "accepted"
+    },
+    {
+      "obligation_id": "DirectLFRuntimeStateCorrespondence:0005",
+      "test_file": "Relico/Tests/DirectLFRuntimeStateCorrespondence.lean",
+      "line_number": "48",
+      "kind": "#check",
+      "name_or_expression": "#check Correctness.DirectLFRuntimeStateCorresponds.selectionCompatible",
+      "classification": "type_or_api_check",
+      "original_benchmark_candidate": "test-direct-lfruntime-state-correspondence",
+      "final_benchmark_id": "finite-store--priority-selection--positive",
+      "evidence_role": "source-capability",
+      "mapping_status": "accepted"
+    },
+    {
+      "obligation_id": "DirectLFRuntimeStateCorrespondence:0006",
+      "test_file": "Relico/Tests/DirectLFRuntimeStateCorrespondence.lean",
+      "line_number": "51",
+      "kind": "#check",
+      "name_or_expression": "#check Correctness.directLF_multiStore_step_forward_runtime",
+      "classification": "type_or_api_check",
+      "original_benchmark_candidate": "test-direct-lfruntime-state-correspondence",
+      "final_benchmark_id": "finite-store--priority-selection--positive",
+      "evidence_role": "source-capability",
+      "mapping_status": "accepted"
+    },
+    {
+      "obligation_id": "DirectLFRuntimeStateCorrespondence:0007",
+      "test_file": "Relico/Tests/DirectLFRuntimeStateCorrespondence.lean",
+      "line_number": "54",
+      "kind": "#check",
+      "name_or_expression": "#check Correctness.directLF_multiStore_step_backward_runtime",
+      "classification": "type_or_api_check",
+      "original_benchmark_candidate": "test-direct-lfruntime-state-correspondence",
+      "final_benchmark_id": "finite-store--priority-selection--positive",
+      "evidence_role": "source-capability",
+      "mapping_status": "accepted"
+    },
+    {
+      "obligation_id": "DirectLFRuntimeStateCorrespondence:0008",
+      "test_file": "Relico/Tests/DirectLFRuntimeStateCorrespondence.lean",
+      "line_number": "57",
+      "kind": "#check",
+      "name_or_expression": "#check runtime_contains_structural_correspondence",
+      "classification": "type_or_api_check",
+      "original_benchmark_candidate": "test-direct-lfruntime-state-correspondence",
+      "final_benchmark_id": "finite-store--priority-selection--positive",
+      "evidence_role": "source-capability",
+      "mapping_status": "accepted"
+    },
+    {
+      "obligation_id": "DirectLFRuntimeStateCorrespondence:0009",
+      "test_file": "Relico/Tests/DirectLFRuntimeStateCorrespondence.lean",
+      "line_number": "59",
+      "kind": "#check",
+      "name_or_expression": "#check runtime_contains_pending_not_past",
+      "classification": "type_or_api_check",
+      "original_benchmark_candidate": "test-direct-lfruntime-state-correspondence",
+      "final_benchmark_id": "finite-store--priority-selection--positive",
+      "evidence_role": "source-capability",
+      "mapping_status": "accepted"
+    }
+  ],
+  "schema_version": 1,
+  "test_modules": [
+    "Relico/Tests/DirectLFRuntimeStateCorrespondence.lean"
+  ]
+}
