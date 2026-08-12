@@ -1,0 +1,15 @@
+{
+  "benchmark_id": "finite-store--trace-execution--positive",
+  "elaborated_modules": [
+    "Relico/Tests/StoreTrace.lean"
+  ],
+  "obligation_count": 4,
+  "obligation_ids": [
+    "StoreTrace:0001",
+    "StoreTrace:0002",
+    "StoreTrace:0003",
+    "StoreTrace:0004"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

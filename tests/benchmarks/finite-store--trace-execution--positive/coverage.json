@@ -1,0 +1,58 @@
+{
+  "benchmark_id": "finite-store--trace-execution--positive",
+  "obligation_count": 4,
+  "obligations": [
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "finite-store--trace-execution--positive",
+      "kind": "theorem",
+      "line_number": "12",
+      "mapping_status": "accepted",
+      "name_or_expression": "dtr_cross_variable_trace",
+      "obligation_id": "StoreTrace:0001",
+      "original_benchmark_candidate": "test-store-trace",
+      "test_file": "Relico/Tests/StoreTrace.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "finite-store--trace-execution--positive",
+      "kind": "theorem",
+      "line_number": "33",
+      "mapping_status": "accepted",
+      "name_or_expression": "lf_cross_variable_trace",
+      "obligation_id": "StoreTrace:0002",
+      "original_benchmark_candidate": "test-store-trace",
+      "test_file": "Relico/Tests/StoreTrace.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "finite-store--trace-execution--positive",
+      "kind": "theorem",
+      "line_number": "55",
+      "mapping_status": "accepted",
+      "name_or_expression": "compiled_cross_variable_trace_exists",
+      "obligation_id": "StoreTrace:0003",
+      "original_benchmark_candidate": "test-store-trace",
+      "test_file": "Relico/Tests/StoreTrace.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "finite-store--trace-execution--positive",
+      "kind": "theorem",
+      "line_number": "83",
+      "mapping_status": "accepted",
+      "name_or_expression": "compiled_cross_variable_trace_has_source",
+      "obligation_id": "StoreTrace:0004",
+      "original_benchmark_candidate": "test-store-trace",
+      "test_file": "Relico/Tests/StoreTrace.lean"
+    }
+  ],
+  "schema_version": 1,
+  "test_modules": [
+    "Relico/Tests/StoreTrace.lean"
+  ]
+}
