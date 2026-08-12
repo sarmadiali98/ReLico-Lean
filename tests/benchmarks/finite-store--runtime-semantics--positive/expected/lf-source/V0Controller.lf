@@ -1,0 +1,22 @@
+target Cpp
+
+reactor TwoStateController {
+  state x: int = 0
+  state y: int = 0
+  logical action tick_action: void
+
+  reaction(startup) -> tick_action {=
+    x = 1;
+    y = 2;
+    tick_action.schedule(1ms);
+  =}
+
+  reaction(tick_action) -> tick_action {=
+    y = x;
+    tick_action.schedule(1ms);
+  =}
+}
+
+main reactor {
+  controller = new TwoStateController()
+}

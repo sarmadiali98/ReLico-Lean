@@ -1,0 +1,74 @@
+{
+  "benchmark_id": "finite-store--runtime-semantics--positive",
+  "formal_modules": [
+    {
+      "lean_exit_code": 0,
+      "module": "Relico/Tests/StateStoreCoverage.lean",
+      "obligation_count": 5,
+      "source_sha256": "2aa5225db6859b84223e0ea80252a3aa16a4002253dc331cad3c8fd69b0f9122"
+    },
+    {
+      "lean_exit_code": 0,
+      "module": "Relico/Tests/Store.lean",
+      "obligation_count": 8,
+      "source_sha256": "e97255528eae287f8303c18611a71275a0ea03add7b444167bf29108045c0396"
+    },
+    {
+      "lean_exit_code": 0,
+      "module": "Relico/Tests/StoreBackward.lean",
+      "obligation_count": 2,
+      "source_sha256": "13318ea1ec0cb344128f02ca8217545a68bdf271bdaf435f1fb4f4da2e5958de"
+    },
+    {
+      "lean_exit_code": 0,
+      "module": "Relico/Tests/StoreSemantics.lean",
+      "obligation_count": 15,
+      "source_sha256": "3d5c0e1a0d479f376f3d698ab1765eec9ed3f63202a35cb7595cdfe0ca4dc4d9"
+    },
+    {
+      "lean_exit_code": 0,
+      "module": "Relico/Tests/StoreState.lean",
+      "obligation_count": 11,
+      "source_sha256": "8379f890e27690bed6a0356f733fad477ef8607b2b020e67931601359ea80be4"
+    },
+    {
+      "lean_exit_code": 0,
+      "module": "Relico/Tests/StoreStructural.lean",
+      "obligation_count": 4,
+      "source_sha256": "0ec5b5315678935aa644d6784bbd3ce6600f193311503e09b2c69ac6afe65327"
+    }
+  ],
+  "schema_version": 1,
+  "shared_formal_evidence": [
+    {
+      "formal_capability": "state-store-coverage",
+      "justification": "proves StateStore coverage, lookup existence, and coverage preservation under updates; no distinct Timed Rebeca source construct",
+      "obligation_count": 5,
+      "required_artifacts": [
+        "coverage-manifest",
+        "formal-witness",
+        "trust-report"
+      ],
+      "test_file": "Relico/Tests/StateStoreCoverage.lean"
+    },
+    {
+      "formal_capability": "store-operations",
+      "justification": "proves generic Store lookup and update laws; common formal infrastructure rather than a distinct Timed Rebeca source construct",
+      "obligation_count": 8,
+      "required_artifacts": [
+        "coverage-manifest",
+        "formal-witness",
+        "trust-report"
+      ],
+      "test_file": "Relico/Tests/Store.lean"
+    }
+  ],
+  "status": "pass",
+  "trust_boundary": {
+    "new_lean_theorem_required": false,
+    "shared_formal_metadata_rows": 2,
+    "shared_formal_obligations": 13,
+    "source_capability_obligations": 32,
+    "total_obligations": 45
+  }
+}

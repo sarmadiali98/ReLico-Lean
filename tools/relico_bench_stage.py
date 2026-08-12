@@ -1016,8 +1016,418 @@ def main(arguments: list[str]) -> int:
     return 0
 
 
+
+# BEGIN RELICO EXTENDED METADATA STAGES
+
+def _relico_extended_write_json(path, value):
+    import json as _json
+    from pathlib import Path as _Path
+
+    _path = _Path(path)
+    _path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+    _path.write_text(
+        _json.dumps(
+            value,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+def _relico_extended_read_json(path):
+    import json as _json
+    from pathlib import Path as _Path
+
+    return _json.loads(
+        _Path(path).read_text(
+            encoding="utf-8"
+        )
+    )
+
+
+def _relico_extended_read_shared(path, benchmark_id):
+    import csv as _csv
+    from pathlib import Path as _Path
+
+    with _Path(path).open(
+        "r",
+        encoding="utf-8",
+        newline="",
+    ) as _stream:
+        _rows = list(
+            _csv.DictReader(
+                _stream,
+                delimiter="\t",
+            )
+        )
+
+    return [
+        _row
+        for _row in _rows
+        if _row.get(
+            "anchor_benchmark",
+            "",
+        ).strip() == benchmark_id
+    ]
+
+
+def _relico_extended_coverage_manifest_main(argv):
+    import argparse as _argparse
+    from collections import Counter as _Counter
+
+    _parser = _argparse.ArgumentParser(
+        prog="relico_bench_stage.py coverage-manifest"
+    )
+    _parser.add_argument(
+        "--benchmark-id",
+        required=True,
+    )
+    _parser.add_argument(
+        "--coverage",
+        required=True,
+    )
+    _parser.add_argument(
+        "--shared-formal-registry",
+        required=True,
+    )
+    _parser.add_argument(
+        "--output",
+        required=True,
+    )
+
+    _args = _parser.parse_args(
+        argv
+    )
+
+    _coverage = _relico_extended_read_json(
+        _args.coverage
+    )
+
+    _obligations = _coverage.get(
+        "obligations",
+        [],
+    )
+
+    if not isinstance(
+        _obligations,
+        list,
+    ):
+        raise RuntimeError(
+            "coverage obligations must be a list"
+        )
+
+    _module_counts = _Counter(
+        _row.get(
+            "test_file",
+            _row.get(
+                "module",
+                "",
+            ),
+        ).strip()
+        for _row in _obligations
+    )
+
+    _evidence_counts = _Counter(
+        _row.get(
+            "evidence_role",
+            "",
+        ).strip()
+        for _row in _obligations
+    )
+
+    _shared = _relico_extended_read_shared(
+        _args.shared_formal_registry,
+        _args.benchmark_id,
+    )
+
+    _result = {
+        "benchmark_id":
+            _args.benchmark_id,
+        "schema_version":
+            1,
+        "status":
+            "pass",
+        "obligation_count":
+            len(
+                _obligations
+            ),
+        "module_count":
+            len(
+                _module_counts
+            ),
+        "obligation_ids": [
+            _row.get(
+                "obligation_id",
+                "",
+            )
+            for _row in _obligations
+        ],
+        "module_obligation_counts":
+            dict(
+                sorted(
+                    _module_counts.items()
+                )
+            ),
+        "evidence_role_counts":
+            dict(
+                sorted(
+                    _evidence_counts.items()
+                )
+            ),
+        "shared_formal_evidence":
+            _shared,
+    }
+
+    _relico_extended_write_json(
+        _args.output,
+        _result,
+    )
+
+    return 0
+
+
+def _relico_extended_trust_report_main(argv):
+    import argparse as _argparse
+    import hashlib as _hashlib
+    import subprocess as _subprocess
+    from collections import Counter as _Counter
+    from pathlib import Path as _Path
+
+    _parser = _argparse.ArgumentParser(
+        prog="relico_bench_stage.py trust-report"
+    )
+    _parser.add_argument(
+        "--benchmark-id",
+        required=True,
+    )
+    _parser.add_argument(
+        "--coverage",
+        required=True,
+    )
+    _parser.add_argument(
+        "--shared-formal-registry",
+        required=True,
+    )
+    _parser.add_argument(
+        "--lake",
+        required=True,
+    )
+    _parser.add_argument(
+        "--output",
+        required=True,
+    )
+
+    _args = _parser.parse_args(
+        argv
+    )
+
+    _coverage = _relico_extended_read_json(
+        _args.coverage
+    )
+
+    _obligations = _coverage.get(
+        "obligations",
+        [],
+    )
+
+    if not isinstance(
+        _obligations,
+        list,
+    ):
+        raise RuntimeError(
+            "coverage obligations must be a list"
+        )
+
+    _modules = _coverage.get(
+        "test_modules",
+        [],
+    )
+
+    if not isinstance(
+        _modules,
+        list,
+    ):
+        raise RuntimeError(
+            "coverage test_modules must be a list"
+        )
+
+    _module_counts = _Counter(
+        _row.get(
+            "test_file",
+            _row.get(
+                "module",
+                "",
+            ),
+        ).strip()
+        for _row in _obligations
+    )
+
+    _evidence_counts = _Counter(
+        _row.get(
+            "evidence_role",
+            "",
+        ).strip()
+        for _row in _obligations
+    )
+
+    _shared = _relico_extended_read_shared(
+        _args.shared_formal_registry,
+        _args.benchmark_id,
+    )
+
+    _shared_path = _Path(
+        _args.shared_formal_registry
+    ).resolve()
+
+    _repo = _shared_path.parents[
+        3
+    ]
+
+    _formal_modules = []
+
+    for _module in _modules:
+        _module_path = (
+            _repo
+            / _module
+        )
+
+        _lean = _subprocess.run(
+            [
+                _args.lake,
+                "env",
+                "lean",
+                _module,
+            ],
+            cwd=_repo,
+            text=True,
+            stdout=_subprocess.PIPE,
+            stderr=_subprocess.PIPE,
+        )
+
+        if _lean.returncode != 0:
+            if _lean.stdout:
+                print(
+                    _lean.stdout,
+                    end=""
+                    if _lean.stdout.endswith("\n")
+                    else "\n",
+                )
+
+            if _lean.stderr:
+                print(
+                    _lean.stderr,
+                    end=""
+                    if _lean.stderr.endswith("\n")
+                    else "\n",
+                )
+
+            return _lean.returncode
+
+        _formal_modules.append({
+            "module":
+                _module,
+            "lean_exit_code":
+                0,
+            "source_sha256":
+                _hashlib.sha256(
+                    _module_path.read_bytes()
+                ).hexdigest(),
+            "obligation_count":
+                _module_counts[
+                    _module
+                ],
+        })
+
+    _shared_formal_evidence = [
+        {
+            "test_file":
+                _row[
+                    "test_file"
+                ],
+            "formal_capability":
+                _row[
+                    "formal_capability"
+                ],
+            "obligation_count":
+                int(
+                    _row[
+                        "obligation_count"
+                    ]
+                ),
+            "required_artifacts":
+                _row[
+                    "required_artifacts"
+                ].split(","),
+            "justification":
+                _row[
+                    "justification"
+                ],
+        }
+        for _row in _shared
+    ]
+
+    _result = {
+        "benchmark_id":
+            _args.benchmark_id,
+        "schema_version":
+            1,
+        "status":
+            "pass",
+        "formal_modules":
+            _formal_modules,
+        "shared_formal_evidence":
+            _shared_formal_evidence,
+        "trust_boundary": {
+            "new_lean_theorem_required":
+                False,
+            "shared_formal_metadata_rows":
+                len(
+                    _shared
+                ),
+            "shared_formal_obligations":
+                _evidence_counts[
+                    "shared-formal-evidence"
+                ],
+            "source_capability_obligations":
+                _evidence_counts[
+                    "source-capability"
+                ],
+            "total_obligations":
+                len(
+                    _obligations
+                ),
+        },
+    }
+
+    _relico_extended_write_json(
+        _args.output,
+        _result,
+    )
+
+    return 0
+
+# END RELICO EXTENDED METADATA STAGES
+
+
 if __name__ == "__main__":
     try:
+        if len(sys.argv) > 1 and sys.argv[1] == "coverage-manifest":
+            raise SystemExit(
+                _relico_extended_coverage_manifest_main(
+                    sys.argv[2:]
+                )
+            )
+        if len(sys.argv) > 1 and sys.argv[1] == "trust-report":
+            raise SystemExit(
+                _relico_extended_trust_report_main(
+                    sys.argv[2:]
+                )
+            )
         raise SystemExit(main(sys.argv[1:]))
     except StageError as error:
         print(f"relico-bench-stage: {error}", file=sys.stderr)

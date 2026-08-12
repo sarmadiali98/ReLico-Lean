@@ -1,0 +1,24 @@
+{ reactiveClass := { name := { value := "TwoStateController" },
+                     stateVariables := [{ name := { value := "x" }, initialValue := 0 },
+                                        { name := { value := "y" }, initialValue := 0 }],
+                     constructor := { body := [Relico.DTR.MultiStorePayloadStmt.assign
+                                                 { value := "x" }
+                                                 (Relico.DTR.MultiStorePayloadExpr.intLiteral 1),
+                                               Relico.DTR.MultiStorePayloadStmt.assign
+                                                 { value := "y" }
+                                                 (Relico.DTR.MultiStorePayloadExpr.intLiteral 2),
+                                               Relico.DTR.MultiStorePayloadStmt.selfSend
+                                                 { value := "tick" }
+                                                 []
+                                                 { value := 1 }] },
+                     messageServers := [{ name := { value := "tick" },
+                                          parameters := [],
+                                          body := [Relico.DTR.MultiStorePayloadStmt.assign
+                                                     { value := "y" }
+                                                     (Relico.DTR.MultiStorePayloadExpr.stateVar { value := "x" }),
+                                                   Relico.DTR.MultiStorePayloadStmt.selfSend
+                                                     { value := "tick" }
+                                                     []
+                                                     { value := 1 }],
+                                          priority := none }] },
+  actor := { name := { value := "controller" }, className := { value := "TwoStateController" } } }
