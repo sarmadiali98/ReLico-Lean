@@ -1,0 +1,11 @@
+{
+  "benchmark_id": "global-multi-actor-payload--external-send-frame--negative",
+  "boundary": "source-grounded-external-send-frame-transition-witness-absent",
+  "decoded_dtr_ast_succeeded": true,
+  "expected_boundary_confirmed": true,
+  "last_supported_stage": "decoded-dtr-ast",
+  "legacy_multi_actor_parser_rejection_used": false,
+  "parser_json_succeeded": true,
+  "schema_version": 1,
+  "status": "pass"
+}

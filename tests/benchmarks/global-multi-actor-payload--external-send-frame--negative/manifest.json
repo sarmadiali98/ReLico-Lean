@@ -1,0 +1,143 @@
+{
+  "benchmark_id": "global-multi-actor-payload--external-send-frame--negative",
+  "description": "Negative source-grounded global multi-actor external-send frame boundary benchmark.",
+  "expected_artifacts": [
+    {
+      "path": "source/result.json",
+      "required": true,
+      "sha256": "7fd8938c69530d2c8b38443bc62907bdbf65f02cc50af5552d3926e7ad70b3c6"
+    },
+    {
+      "path": "rmc/verdict.json",
+      "required": true,
+      "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
+    },
+    {
+      "path": "parser-json/model.json",
+      "required": true,
+      "sha256": "5bf007e8ffc835f66c808c907aca28ee5847c6bda39e337e66257829944f99db"
+    },
+    {
+      "path": "decoded-dtr-ast/model.txt",
+      "required": true,
+      "sha256": "bf568f4813f11143cf1c6542ee70e5e1b3c715dd52917815222c43a357190fcf"
+    },
+    {
+      "path": "expected-boundary-stage/result.json",
+      "required": true,
+      "sha256": "7c9517625d435f4a68d91001dc3a866734c7adf97ae95cc471537fa10d30d27d"
+    },
+    {
+      "path": "diagnostics/result.json",
+      "required": true,
+      "sha256": "f8a996ee2dba172b502a599cc8b257839a36dbb56e11f08a9faf35f052645e1f"
+    }
+  ],
+  "expected_terminal_stage": "diagnostics",
+  "polarity": "negative",
+  "schema_version": 1,
+  "source_files": [
+    "source/model.rebeca"
+  ],
+  "stages": [
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "source",
+        "--benchmark-id",
+        "global-multi-actor-payload--external-send-frame--negative",
+        "--source",
+        "{source}",
+        "--output",
+        "{actual}/source/result.json"
+      ],
+      "name": "source"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc/verdict.json"
+      ],
+      "name": "rmc",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_global_multi_store_payload_stage.py",
+        "parser-json",
+        "--family",
+        "global-multi-store-payload",
+        "--source",
+        "{source}",
+        "--output",
+        "{actual}/parser-json/model.json"
+      ],
+      "name": "parser-json",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_global_multi_store_payload_stage.py",
+        "decoded-dtr-ast",
+        "--family",
+        "global-multi-store-payload",
+        "--input",
+        "{actual}/parser-json/model.json",
+        "--output",
+        "{actual}/decoded-dtr-ast/model.txt"
+      ],
+      "name": "decoded-dtr-ast",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_global_multi_store_payload_external_send_frame_stage.py",
+        "frame-boundary",
+        "--benchmark-id",
+        "global-multi-actor-payload--external-send-frame--negative",
+        "--repo",
+        "{repo}",
+        "--parser-json",
+        "{actual}/parser-json/model.json",
+        "--decoded",
+        "{actual}/decoded-dtr-ast/model.txt",
+        "--manifest",
+        "{benchmark}/manifest.json",
+        "--obligations",
+        "{repo}/tests/benchmarks/registry/obligations.tsv",
+        "--output",
+        "{actual}/expected-boundary-stage/result.json"
+      ],
+      "name": "expected-boundary-stage"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_global_multi_store_payload_external_send_frame_stage.py",
+        "diagnostics",
+        "--input",
+        "{actual}/expected-boundary-stage/result.json",
+        "--output",
+        "{actual}/diagnostics/result.json"
+      ],
+      "name": "diagnostics"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+reactiveclass Sender(100) {
+    knownrebecs{
+        Receiver receiver0;
+    }
+
+    Sender() {
+        self.sendMessage(1);
+        self.keepAlive() after(1);
+    }
+
+    @priority(1)
+    msgsrv sendMessage(int data){
+        receiver0.receiveMessage(data);
+    }
+
+    msgsrv keepAlive() {
+        self.keepAlive() after(1);
+    }
+}
+
+reactiveclass Receiver(100) {
+    @priority(1)
+    msgsrv receiveMessage(int data){
+        // Process data
+    }
+}
+
+main {
+    Sender sender0(receiver0):();
+    Receiver receiver0():();
+}

@@ -1,0 +1,28 @@
+{
+  "authoritative_module": "Relico/Tests/GlobalMultiStorePayloadExternalSendFrame.lean",
+  "benchmark_id": "global-multi-actor-payload--external-send-frame--negative",
+  "boundary": "source-grounded-external-send-frame-transition-witness-absent",
+  "decoded_dtr_ast_sha256": "bf568f4813f11143cf1c6542ee70e5e1b3c715dd52917815222c43a357190fcf",
+  "expected_absence": true,
+  "last_supported_stage": "decoded-dtr-ast",
+  "parser_family": "global-multi-store-payload",
+  "parser_json_sha256": "5bf007e8ffc835f66c808c907aca28ee5847c6bda39e337e66257829944f99db",
+  "required_frame_obligations": [
+    "positive_source_sender_continuation_installed",
+    "positive_source_sender_queue_is_unchanged",
+    "positive_source_receiver_update_survives",
+    "positive_target_sender_continuation_installed",
+    "positive_sender_states_after_correspond",
+    "positive_frame_transition_corresponds",
+    "positive_frame_history_is_unique",
+    "zero_delay_frame_attempt_succeeds",
+    "zero_delay_target_frame_applies",
+    "payload_evaluation_failure_performs_no_transition",
+    "duplicate_collision_performs_no_transition",
+    "self_resolution_performs_no_transition",
+    "arbitrary_unrelated_actor_is_preserved"
+  ],
+  "schema_version": 1,
+  "source_capability_obligation_count": 27,
+  "status": "pass"
+}
