@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "finite-store--well-formedness--positive",
+  "elaborated_modules": [
+    "Relico/Tests/StoreEvaluation.lean",
+    "Relico/Tests/StoreModelTranslation.lean"
+  ],
+  "obligation_count": 28,
+  "obligation_ids": [
+    "StoreEvaluation:0001",
+    "StoreEvaluation:0002",
+    "StoreEvaluation:0003",
+    "StoreEvaluation:0004",
+    "StoreEvaluation:0005",
+    "StoreEvaluation:0006",
+    "StoreEvaluation:0007",
+    "StoreEvaluation:0008",
+    "StoreEvaluation:0009",
+    "StoreModelTranslation:0001",
+    "StoreModelTranslation:0002",
+    "StoreModelTranslation:0003",
+    "StoreModelTranslation:0004",
+    "StoreModelTranslation:0005",
+    "StoreModelTranslation:0006",
+    "StoreModelTranslation:0007",
+    "StoreModelTranslation:0008",
+    "StoreModelTranslation:0009",
+    "StoreModelTranslation:0010",
+    "StoreModelTranslation:0011",
+    "StoreModelTranslation:0012",
+    "StoreModelTranslation:0013",
+    "StoreModelTranslation:0014",
+    "StoreModelTranslation:0015",
+    "StoreModelTranslation:0016",
+    "StoreModelTranslation:0017",
+    "StoreModelTranslation:0018",
+    "StoreModelTranslation:0019"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

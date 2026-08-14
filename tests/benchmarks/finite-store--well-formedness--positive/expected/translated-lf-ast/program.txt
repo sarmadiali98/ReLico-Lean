@@ -1,0 +1,31 @@
+{ reactor := { name := { value := "TwoStateController" },
+               stateVariables := [{ name := { value := "x" }, initialValue := 0 },
+                                  { name := { value := "y" }, initialValue := 0 }],
+               logicalActions := [{ name := { value := "tick_action" }, parameters := [] }],
+               startupReaction := { name := { value := "startup" },
+                                    trigger := Relico.LF.MultiStorePayloadTrigger.startup,
+                                    parameters := [],
+                                    body := [Relico.LF.MultiStorePayloadStmt.assign
+                                               { value := "x" }
+                                               (Relico.LF.MultiStorePayloadExpr.intLiteral 1),
+                                             Relico.LF.MultiStorePayloadStmt.assign
+                                               { value := "y" }
+                                               (Relico.LF.MultiStorePayloadExpr.intLiteral 2),
+                                             Relico.LF.MultiStorePayloadStmt.schedule
+                                               { value := "tick_action" }
+                                               []
+                                               { value := 1 }],
+                                    priority := none },
+               messageReactions := [{ name := { value := "tick_reaction" },
+                                      trigger := Relico.LF.MultiStorePayloadTrigger.logicalAction
+                                                   { value := "tick_action" },
+                                      parameters := [],
+                                      body := [Relico.LF.MultiStorePayloadStmt.assign
+                                                 { value := "y" }
+                                                 (Relico.LF.MultiStorePayloadExpr.stateVar { value := "x" }),
+                                               Relico.LF.MultiStorePayloadStmt.schedule
+                                                 { value := "tick_action" }
+                                                 []
+                                                 { value := 1 }],
+                                      priority := none }] },
+  reactorInstance := { name := { value := "controller" }, reactorName := { value := "TwoStateController" } } }
