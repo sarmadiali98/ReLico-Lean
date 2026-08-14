@@ -1,0 +1,9 @@
+{
+  "benchmark_id": "global-multi-actor-payload--external-send--negative",
+  "boundary_stage": "parser-json",
+  "diagnostic_code": "EXPECTED_REJECTION",
+  "expected_rejection": true,
+  "message": "unsupported by the ReLico multi-server parser bridge: expected exactly one reactive class, received 2",
+  "schema_version": 1,
+  "status": "pass"
+}
