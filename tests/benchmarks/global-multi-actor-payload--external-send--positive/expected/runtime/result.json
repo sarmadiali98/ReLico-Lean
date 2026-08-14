@@ -1,0 +1,1 @@
+{"arguments":["--timeout","5 msec","--fast"],"exit_code":0,"external_timeout":false,"marker":"RELICO_EXTERNAL_SEND_RECEIVED","marker_count":1,"schema_version":1,"status":"pass"}
