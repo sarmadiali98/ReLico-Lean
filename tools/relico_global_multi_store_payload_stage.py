@@ -174,7 +174,7 @@ def parse_parameters(text):
 
 
 def parse_statements(body):
-    pattern = re.compile(
+    send_pattern = re.compile(
         r"\b(self|[A-Za-z_][A-Za-z0-9_]*)"
         r"\s*\.\s*"
         r"([A-Za-z_][A-Za-z0-9_]*)"
@@ -184,36 +184,72 @@ def parse_statements(body):
         r"\s*;"
     )
 
-    statements = []
+    assign_pattern = re.compile(
+        r"\b([A-Za-z_][A-Za-z0-9_]*)"
+        r"\s*=\s*"
+        r"(-?[0-9]+|[A-Za-z_][A-Za-z0-9_]*)"
+        r"\s*;"
+    )
 
-    for match in pattern.finditer(body):
-        receiver = match.group(1)
-        message = match.group(2)
+    events = []
 
-        delay = (
-            int(match.group(4))
-            if match.group(4) is not None
-            else 0
+    for match in send_pattern.finditer(body):
+        events.append(
+            (match.start(), "send", match)
         )
 
-        statements.append({
-            "kind":
-                (
-                    "self-send"
-                    if receiver == "self"
-                    else "external-send"
-                ),
-            "receiver":
-                receiver,
-            "message":
-                message,
-            "payload":
-                parse_payload(
-                    match.group(3)
-                ),
-            "delay":
-                delay,
-        })
+    for match in assign_pattern.finditer(body):
+        events.append(
+            (match.start(), "assign", match)
+        )
+
+    events.sort(
+        key=lambda item: item[0]
+    )
+
+    statements = []
+
+    for (_, event_kind, match) in events:
+        if event_kind == "send":
+            receiver = match.group(1)
+            message = match.group(2)
+
+            delay = (
+                int(match.group(4))
+                if match.group(4) is not None
+                else 0
+            )
+
+            statements.append({
+                "kind":
+                    (
+                        "self-send"
+                        if receiver == "self"
+                        else "external-send"
+                    ),
+                "receiver":
+                    receiver,
+                "message":
+                    message,
+                "payload":
+                    parse_payload(
+                        match.group(3)
+                    ),
+                "delay":
+                    delay,
+            })
+
+        else:
+            statements.append({
+                "kind":
+                    "assignment",
+                "target":
+                    match.group(1),
+                "value":
+                    parse_expression(
+                        match.group(2)
+                    ),
+            })
 
     return statements
 
@@ -659,54 +695,82 @@ def parse_source(path):
         "Sender_known_rebec_mismatch",
     )
 
+    sender_servers = sender["message_servers"]
+
     require(
-        sender["message_servers"]
-        == [
-            {
-                "name":
-                    "sendMessage",
-                "parameters":
-                    ["data"],
-                "priority":
-                    1,
-                "statements": [
-                    {
-                        "kind":
-                            "external-send",
-                        "receiver":
-                            "receiver0",
-                        "message":
-                            "receiveMessage",
-                        "payload":
-                            ["data"],
-                        "delay":
-                            0,
-                    }
-                ],
-            },
-            {
-                "name":
-                    "keepAlive",
-                "parameters":
-                    [],
-                "priority":
-                    None,
-                "statements": [
-                    {
-                        "kind":
-                            "self-send",
-                        "receiver":
-                            "self",
-                        "message":
-                            "keepAlive",
-                        "payload":
-                            [],
-                        "delay":
-                            1,
-                    }
-                ],
-            },
-        ],
+        len(sender_servers) == 2,
+        "Sender_message_server_surface_mismatch",
+    )
+
+    send_server = sender_servers[0]
+    keepalive_server = sender_servers[1]
+
+    require(
+        send_server["name"]
+        == "sendMessage"
+        and send_server["parameters"]
+        == ["data"]
+        and send_server["priority"]
+        == 1,
+        "Sender_message_server_surface_mismatch",
+    )
+
+    send_statements = send_server[
+        "statements"
+    ]
+
+    require(
+        len(send_statements) >= 1
+        and send_statements[0]
+        == {
+            "kind":
+                "external-send",
+            "receiver":
+                "receiver0",
+            "message":
+                "receiveMessage",
+            "payload":
+                ["data"],
+            "delay":
+                0,
+        },
+        "Sender_message_server_surface_mismatch",
+    )
+
+    require(
+        all(
+            statement["kind"]
+            == "assignment"
+            for statement
+            in send_statements[1:]
+        ),
+        "Sender_continuation_must_be_assignments",
+    )
+
+    require(
+        keepalive_server
+        == {
+            "name":
+                "keepAlive",
+            "parameters":
+                [],
+            "priority":
+                None,
+            "statements": [
+                {
+                    "kind":
+                        "self-send",
+                    "receiver":
+                        "self",
+                    "message":
+                        "keepAlive",
+                    "payload":
+                        [],
+                    "delay":
+                        1,
+                }
+            ],
+        },
         "Sender_message_server_surface_mismatch",
     )
 
@@ -780,10 +844,51 @@ def validate_parser(model):
     )
 
 
+def extract_sender_continuation(model):
+    for reactive_class in model.get(
+        "reactive_classes",
+        [],
+    ):
+        if reactive_class.get(
+            "name"
+        ) != "Sender":
+            continue
+
+        for server in reactive_class.get(
+            "message_servers",
+            [],
+        ):
+            if server.get(
+                "name"
+            ) != "sendMessage":
+                continue
+
+            return [
+                {
+                    "kind":
+                        "assignment",
+                    "target":
+                        statement["target"],
+                    "value":
+                        statement["value"],
+                }
+                for statement
+                in server.get(
+                    "statements",
+                    [],
+                )[1:]
+                if statement.get(
+                    "kind"
+                ) == "assignment"
+            ]
+
+    return []
+
+
 def decode(model):
     validate_parser(model)
 
-    return {
+    decoded = {
         "schema_version": 1,
         "benchmark_fragment": FAMILY,
         "source_sha256": model["source_sha256"],
@@ -826,6 +931,17 @@ def decode(model):
         },
     }
 
+    continuation = extract_sender_continuation(
+        model
+    )
+
+    if continuation:
+        decoded[
+            "sender_continuation"
+        ] = continuation
+
+    return decoded
+
 
 def validate_decoded(model):
     require(
@@ -858,7 +974,7 @@ def validate_decoded(model):
 def translate(model):
     validate_decoded(model)
 
-    return {
+    translated = {
         "schema_version": 1,
         "benchmark_fragment": FAMILY,
         "source_sha256": model["source_sha256"],
@@ -889,6 +1005,32 @@ def translate(model):
         "priority_runtime_claim":
             "none",
     }
+
+    continuation = model.get(
+        "sender_continuation"
+    )
+
+    if continuation:
+        translated[
+            "sender_continuation"
+        ] = {
+            "realization":
+                "sender_state_update",
+            "assignments": [
+                {
+                    "state_variable":
+                        assignment["target"],
+                    "assigned_value":
+                        assignment["value"],
+                }
+                for assignment
+                in continuation
+            ],
+            "produces_external_output":
+                False,
+        }
+
+    return translated
 
 
 def validate_translated(model):
@@ -954,6 +1096,73 @@ main reactor {
     sender0.out -> receiver0.in after 0 msec
 }
 """
+
+
+def render_lf_source(translated):
+    continuation = translated.get(
+        "sender_continuation"
+    )
+
+    if not continuation:
+        return LF_SOURCE
+
+    assignments = continuation[
+        "assignments"
+    ]
+
+    state_lines = "".join(
+        "    state "
+        + assignment["state_variable"]
+        + ": int = 0\n"
+        for assignment in assignments
+    )
+
+    update_lines = "".join(
+        "        "
+        + assignment["state_variable"]
+        + " = "
+        + str(assignment["assigned_value"])
+        + ";\n"
+        for assignment in assignments
+    )
+
+    return (
+        "target Cpp\n"
+        "\n"
+        "public preamble {=\n"
+        "#include <cstdio>\n"
+        "=}\n"
+        "\n"
+        "reactor Sender {\n"
+        "    timer keepAlive(1 msec, 1 msec)\n"
+        "    output out: int\n"
+        + state_lines
+        + "\n"
+        "    reaction(startup) -> out {=\n"
+        "        out.set(1);\n"
+        + update_lines
+        + "    =}\n"
+        "\n"
+        "    reaction(keepAlive) {=\n"
+        "        // Preserve the recurring logical keepalive.\n"
+        "    =}\n"
+        "}\n"
+        "\n"
+        "reactor Receiver {\n"
+        "    input in: int\n"
+        "\n"
+        "    reaction(in) {=\n"
+        "        std::printf(\"RELICO_EXTERNAL_SEND_RECEIVED\\n\");\n"
+        "        std::fflush(stdout);\n"
+        "    =}\n"
+        "}\n"
+        "\n"
+        "main reactor {\n"
+        "    sender0 = new Sender()\n"
+        "    receiver0 = new Receiver()\n"
+        "    sender0.out -> receiver0.in after 0 msec\n"
+        "}\n"
+    )
 
 
 def main():
@@ -1095,12 +1304,14 @@ def main():
             "lf_source_input_missing",
         )
 
-        validate_translated(
-            load_json(
-                Path(
-                    args.input
-                )
+        translated = load_json(
+            Path(
+                args.input
             )
+        )
+
+        validate_translated(
+            translated
         )
 
         output.parent.mkdir(
@@ -1109,7 +1320,9 @@ def main():
         )
 
         output.write_text(
-            LF_SOURCE,
+            render_lf_source(
+                translated
+            ),
             encoding="utf-8",
         )
 

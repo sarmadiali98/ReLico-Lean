@@ -1,0 +1,22 @@
+{
+  "benchmark_id": "global-multi-actor-payload--external-send-frame--positive",
+  "elaborated_modules": [
+    "Relico/Tests/GlobalMultiStorePayloadOneStep.lean",
+    "Relico/Tests/GlobalMultiStorePayloadOneStepCorrespondence.lean"
+  ],
+  "obligation_count": 10,
+  "obligation_ids": [
+    "GlobalMultiStorePayloadOneStep:0001",
+    "GlobalMultiStorePayloadOneStep:0002",
+    "GlobalMultiStorePayloadOneStep:0003",
+    "GlobalMultiStorePayloadOneStep:0004",
+    "GlobalMultiStorePayloadOneStep:0005",
+    "GlobalMultiStorePayloadOneStep:0006",
+    "GlobalMultiStorePayloadOneStepCorrespondence:0001",
+    "GlobalMultiStorePayloadOneStepCorrespondence:0002",
+    "GlobalMultiStorePayloadOneStepCorrespondence:0003",
+    "GlobalMultiStorePayloadOneStepCorrespondence:0004"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

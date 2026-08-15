@@ -1,0 +1,35 @@
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Sender {
+    timer keepAlive(1 msec, 1 msec)
+    output out: int
+    state continuationValue: int = 0
+
+    reaction(startup) -> out {=
+        out.set(1);
+        continuationValue = 11;
+    =}
+
+    reaction(keepAlive) {=
+        // Preserve the recurring logical keepalive.
+    =}
+}
+
+reactor Receiver {
+    input in: int
+
+    reaction(in) {=
+        std::printf("RELICO_EXTERNAL_SEND_RECEIVED\n");
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    sender0 = new Sender()
+    receiver0 = new Receiver()
+    sender0.out -> receiver0.in after 0 msec
+}
