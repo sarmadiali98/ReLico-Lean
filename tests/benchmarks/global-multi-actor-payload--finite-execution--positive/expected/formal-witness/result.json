@@ -1,0 +1,15 @@
+{
+  "benchmark_id": "global-multi-actor-payload--finite-execution--positive",
+  "elaborated_modules": [
+    "Relico/Tests/GlobalMultiStorePayloadFiniteExecution.lean"
+  ],
+  "obligation_count": 4,
+  "obligation_ids": [
+    "GlobalMultiStorePayloadFiniteExecution:0001",
+    "GlobalMultiStorePayloadFiniteExecution:0002",
+    "GlobalMultiStorePayloadFiniteExecution:0003",
+    "GlobalMultiStorePayloadFiniteExecution:0004"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}
