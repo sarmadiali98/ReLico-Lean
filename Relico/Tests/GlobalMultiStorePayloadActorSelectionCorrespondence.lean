@@ -203,6 +203,61 @@ example :
     baseRequest
     readyBase
 
+
+/-
+Witnesses for the named results proved in the corresponding non-test module.
+`Relico/Tests/` is the only directory the obligation extractor scans, so each
+result is referenced here to register it as a benchmark obligation.
+-/
+
+#check
+  Correctness.GlobalMultiStorePayloadActorSelectionCorrespondence.all_compileReadyActors_eq
+
+#check
+  Correctness.GlobalMultiStorePayloadActorSelectionCorrespondence.filter_compileReadyActors_eq
+
+#check
+  Correctness.GlobalMultiStorePayloadActorSelectionCorrespondence.lookupActorOrder_compileActorPriorityAssignment_eq
+
+#check
+  Correctness.GlobalMultiStorePayloadActorSelectionCorrespondence.lookupReadyTargetActor_compileReadyActors_eq
+
+#check
+  Correctness.GlobalMultiStorePayloadActorSelectionCorrespondence.sameTimeReadyTargetActors_compileReadyActors_eq
+
+#check
+  Correctness.GlobalMultiStorePayloadActorSelectionCorrespondence.targetEarliestReady_compileReadyActors_eq
+
+#check
+  Correctness.GlobalMultiStorePayloadActorSelectionCorrespondence.targetOrderCoversReadyActors_compile_eq
+
+#check
+  Correctness.GlobalMultiStorePayloadActorSelectionCorrespondence.selectedHasMinimalActorOrder_compile_eq
+
+#print axioms
+  Correctness.GlobalMultiStorePayloadActorSelectionCorrespondence.all_compileReadyActors_eq
+
+#print axioms
+  Correctness.GlobalMultiStorePayloadActorSelectionCorrespondence.filter_compileReadyActors_eq
+
+#print axioms
+  Correctness.GlobalMultiStorePayloadActorSelectionCorrespondence.lookupActorOrder_compileActorPriorityAssignment_eq
+
+#print axioms
+  Correctness.GlobalMultiStorePayloadActorSelectionCorrespondence.lookupReadyTargetActor_compileReadyActors_eq
+
+#print axioms
+  Correctness.GlobalMultiStorePayloadActorSelectionCorrespondence.sameTimeReadyTargetActors_compileReadyActors_eq
+
+#print axioms
+  Correctness.GlobalMultiStorePayloadActorSelectionCorrespondence.targetEarliestReady_compileReadyActors_eq
+
+#print axioms
+  Correctness.GlobalMultiStorePayloadActorSelectionCorrespondence.targetOrderCoversReadyActors_compile_eq
+
+#print axioms
+  Correctness.GlobalMultiStorePayloadActorSelectionCorrespondence.selectedHasMinimalActorOrder_compile_eq
+
 end GlobalMultiStorePayloadActorSelectionCorrespondence
 end Tests
 end Relico

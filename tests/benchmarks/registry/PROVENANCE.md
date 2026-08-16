@@ -5,7 +5,7 @@ checkpoint a4201d942d7d30c00f34f135dfe024d9ae30c82c.
 
 The frozen registry contains:
 
-- 162 accepted Lean test modules
+- 172 accepted Lean test modules
 - 1,928 mapped test obligations
 - 57 planned source benchmarks
 - 42 positive benchmarks

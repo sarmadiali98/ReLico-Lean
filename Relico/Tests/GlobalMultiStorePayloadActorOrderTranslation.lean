@@ -198,6 +198,52 @@ example :
     compileActorPriorityAssignment_length
       sourceBaseAssignment
 
+
+/-
+Witnesses for the named results proved in the corresponding non-test module.
+`Relico/Tests/` is the only directory the obligation extractor scans, so each
+result is referenced here to register it as a benchmark obligation.
+-/
+
+#check
+  Translation.GlobalMultiStorePayloadActorOrder.compileActorPriorityAssignment_nil
+
+#check
+  Translation.GlobalMultiStorePayloadActorOrder.compileActorPriorityAssignment_cons
+
+#check
+  Translation.GlobalMultiStorePayloadActorOrder.compileActorPriorityAssignment_eq
+
+#check
+  Translation.GlobalMultiStorePayloadActorOrder.compileActorPriorityRequest_none
+
+#check
+  Translation.GlobalMultiStorePayloadActorOrder.compileActorPriorityRequest_some
+
+#check
+  Translation.GlobalMultiStorePayloadActorOrder.compileActorPriorityRequest_eq
+
+#check
+  Translation.GlobalMultiStorePayloadActorOrder.compileReadyActor_actorName
+
+#check
+  Translation.GlobalMultiStorePayloadActorOrder.compileReadyActor_logicalTime
+
+#check
+  Translation.GlobalMultiStorePayloadActorOrder.compileReadyActors_nil
+
+#check
+  Translation.GlobalMultiStorePayloadActorOrder.compileReadyActors_cons
+
+#check
+  Translation.GlobalMultiStorePayloadActorOrder.compileReadyActors_length
+
+#check
+  Translation.GlobalMultiStorePayloadActorOrder.compileReadyActors_actorNames
+
+#check
+  Translation.GlobalMultiStorePayloadActorOrder.compileReadyActors_logicalTimes
+
 end GlobalMultiStorePayloadActorOrderTranslation
 end Tests
 end Relico

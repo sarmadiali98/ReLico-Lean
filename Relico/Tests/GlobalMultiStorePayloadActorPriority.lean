@@ -217,6 +217,19 @@ example
 
 end WrapperTests
 
+
+/-
+Witnesses for the named results proved in the corresponding non-test module.
+`Relico/Tests/` is the only directory the obligation extractor scans, so each
+result is referenced here to register it as a benchmark obligation.
+-/
+
+#check
+  DTR.GlobalMultiStorePayloadActorPriority.ActorPriorityDispatchStep.eligible
+
+#check
+  DTR.GlobalMultiStorePayloadActorPriority.ActorPriorityDispatchStep.dispatch
+
 end GlobalMultiStorePayloadActorPriority
 end Tests
 end Relico
