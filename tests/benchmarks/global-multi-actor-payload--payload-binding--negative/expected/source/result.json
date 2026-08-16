@@ -1,0 +1,6 @@
+{
+  "benchmark_id": "global-multi-actor-payload--payload-binding--negative",
+  "schema_version": 1,
+  "sha256": "a581fd444aa5c6b491786f0d745919e2e7171646930d1f7939e3e417db7aac42",
+  "status": "pass"
+}

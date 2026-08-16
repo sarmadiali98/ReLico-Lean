@@ -1,0 +1,10 @@
+{
+  "benchmark_id": "global-multi-actor-payload--payload-binding--negative",
+  "boundary_stage": "parser-json",
+  "expected_exit_code": 1,
+  "forbidden_artifact_count": 2,
+  "observed_exit_code": 1,
+  "required_diagnostic": "unsupported_expression:data + 1",
+  "schema_version": 1,
+  "status": "expected-rejection"
+}

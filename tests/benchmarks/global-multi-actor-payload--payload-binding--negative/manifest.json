@@ -1,0 +1,148 @@
+{
+  "benchmark_id": "global-multi-actor-payload--payload-binding--negative",
+  "description": "Negative global multi-actor payload binding benchmark whose composite-payload source passes RMC before the family multi-store parser engine deterministically rejects it: the two-actor payload fragment is declared exactly as in the positive sibling, but sendMessage forwards the composite expression `data + 1` rather than the bare parameter reference `data`. RMC accepts the well-formed Timed Rebeca source (integer arithmetic is legal in a send argument), but the verified ReLico payload grammar is closed under exactly three atomic forms -- DTR.MultiStorePayloadExpr is intLiteral, stateVar, or parameterVar -- and carries no arithmetic constructor, so a composite argument is not representable in the certified source AST and the parser's expression recognizer refuses it rather than emitting an unverified translation.",
+  "expected_artifacts": [
+    {
+      "path": "source/result.json",
+      "required": true,
+      "sha256": "c84a3597e18f470b1f5cf5acfc852f7b0f9eba5dbbb61adef2976b00b1aeeea3"
+    },
+    {
+      "path": "rmc/verdict.json",
+      "required": true,
+      "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
+    },
+    {
+      "path": "decoded-dtr-ast/rejection.json",
+      "required": true,
+      "sha256": "7e285b02726d758fdb7196c6387f5b78630329b791df82e89d101346346d7a44"
+    },
+    {
+      "path": "expected-boundary-stage/result.json",
+      "required": true,
+      "sha256": "ba1e9086a96138f9a32e7b2c16e0040be7c529aeeadb094158266bf1d5c2a7df"
+    },
+    {
+      "path": "diagnostics/result.json",
+      "required": true,
+      "sha256": "6720329bd697ab8d0abf085d3d7fa878505e208f57c121401afbb86386d607e2"
+    }
+  ],
+  "expected_terminal_stage": "diagnostics",
+  "polarity": "negative",
+  "schema_version": 1,
+  "source_files": [
+    "source/model.rebeca"
+  ],
+  "stages": [
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "source",
+        "--benchmark-id",
+        "global-multi-actor-payload--payload-binding--negative",
+        "--source",
+        "{source}",
+        "--output",
+        "{actual}/source/result.json"
+      ],
+      "name": "source"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc/verdict.json"
+      ],
+      "name": "rmc",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_global_multi_store_payload_stage.py",
+        "parser-json",
+        "--family",
+        "global-multi-store-payload",
+        "--source",
+        "{source}",
+        "--output",
+        "{actual}/parser-json/model.json"
+      ],
+      "expected_exit_codes": [
+        1
+      ],
+      "name": "parser-json",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "expected-absence",
+        "--benchmark-id",
+        "global-multi-actor-payload--payload-binding--negative",
+        "--failed-stage",
+        "parser-json",
+        "--stage-result",
+        "{actual}/03-parser-json/stage-result.json",
+        "--stdout",
+        "{actual}/03-parser-json/stdout.txt",
+        "--stderr",
+        "{actual}/03-parser-json/stderr.txt",
+        "--expected-exit-code",
+        "1",
+        "--required-diagnostic",
+        "unsupported_expression:data + 1",
+        "--forbidden-artifact",
+        "{actual}/parser-json/model.json",
+        "--forbidden-artifact",
+        "{actual}/decoded-dtr-ast/model.txt",
+        "--output",
+        "{actual}/decoded-dtr-ast/rejection.json"
+      ],
+      "name": "decoded-dtr-ast"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "expected-boundary-stage",
+        "--benchmark-id",
+        "global-multi-actor-payload--payload-binding--negative",
+        "--input",
+        "{actual}/decoded-dtr-ast/rejection.json",
+        "--output",
+        "{actual}/expected-boundary-stage/result.json"
+      ],
+      "name": "expected-boundary-stage"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "diagnostics",
+        "--benchmark-id",
+        "global-multi-actor-payload--payload-binding--negative",
+        "--input",
+        "{actual}/expected-boundary-stage/result.json",
+        "--output",
+        "{actual}/diagnostics/result.json"
+      ],
+      "name": "diagnostics"
+    }
+  ]
+}

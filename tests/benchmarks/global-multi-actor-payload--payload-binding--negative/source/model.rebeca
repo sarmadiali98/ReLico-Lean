@@ -1,0 +1,48 @@
+// Payload-expression grammar boundary (composite payload argument).
+// The two-actor payload fragment is declared exactly as in the positive sibling:
+// the same Sender and Receiver classes, the same known rebec binding receiver0, the same
+// main-block instantiation order, and the same message-server surface. The ONLY difference
+// is that sendMessage forwards the composite expression `data + 1` rather than the bare
+// parameter reference `data`.
+//
+// This is well-formed Timed Rebeca and RMC accepts it (integer arithmetic is legal in a
+// send argument). The verified ReLico payload grammar, however, is CLOSED under exactly
+// three atomic forms: DTR.MultiStorePayloadExpr is intLiteral | stateVar | parameterVar
+// (Relico/DTR/MultiStorePayloadSyntax.lean) and carries no arithmetic constructor.
+// Payload compilation is proven faithful over exactly that grammar -- see
+// Correctness.compileMultiStorePayloadExpr_evaluate and
+// Correctness.compileMultiStorePayloadExprs_evaluateAll in
+// Relico/Correctness/MultiStorePayloadStatementCorrespondence.lean. A composite argument
+// is therefore not representable in the certified source AST, so the family parser's
+// expression recognizer refuses it rather than emitting an unverified translation.
+reactiveclass Sender(100) {
+    knownrebecs{
+        Receiver receiver0;
+    }
+
+    Sender() {
+        self.sendMessage(1);
+        self.keepAlive() after(1);
+    }
+
+    @priority(1)
+    msgsrv sendMessage(int data){
+        receiver0.receiveMessage(data + 1);
+    }
+
+    msgsrv keepAlive() {
+        self.keepAlive() after(1);
+    }
+}
+
+reactiveclass Receiver(100) {
+    @priority(1)
+    msgsrv receiveMessage(int data){
+        // Process data
+    }
+}
+
+main {
+    Sender sender0(receiver0):();
+    Receiver receiver0():();
+}
