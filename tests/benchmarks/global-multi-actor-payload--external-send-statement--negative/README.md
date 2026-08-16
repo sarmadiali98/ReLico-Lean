@@ -1,0 +1,11 @@
+# global-multi-actor-payload--external-send-statement--negative
+
+Negative global multi-actor payload external-send-statement benchmark.
+
+The source declares a single `Sender` reactive class that owns one known rebec `receiver0` and, from its constructor, performs the external send statement `receiver0.receiveMessage(data)`. In `main` the sole instance is bound to itself, `Sender sender0(sender0):();`, so the main-block topology resolves `receiver0` back to `sender0`. The external send therefore targets the sending actor: it is a self-send wearing the syntactic shape of an external send. A parameter-free local `keepAlive` message is added only to keep the otherwise finite model live, preventing the quiescent state that RMC would report as a deadlock.
+
+The source and RMC stages succeed; the RMC verdict is `satisfied` (byte-identical to the `external-send--negative` sibling verdict, since RMC accepts the self-binding and never reasons about endpoint separation). The family `global-multi-store-payload` parser engine then rejects the model with the deterministic diagnostic `external_send_self_resolution: known rebec 'receiver0' of actor 'sender0' resolves to the sending actor; endpoint separation is violated (self-send is not an external send)`. The remaining stages record this as canonical expected-absence, expected-boundary, and terminal diagnostic evidence, and no `parser-json/model.json` or decoded AST is produced.
+
+Formal coverage consists of the 24 accepted source-capability obligations in `Relico/Tests/GlobalMultiStorePayloadExternalSendStatement.lean`. Among them, the theorem `foundation_self_resolution_failure_is_retained` (obligation `GlobalMultiStorePayloadExternalSendStatement:0017`) establishes that the verified translation retains the self-resolution failure mode that this source exercises, so the parser rejection corresponds to a genuine formal obligation rather than a runner-fabricated boundary.
+
+This benchmark does not claim that the current source frontend decodes global actor topology. It does not claim that RMC distinguishes a self-send from an external send — RMC accepts the well-formed Timed Rebeca source, and the rejection is the ReLico translation's endpoint-separation check, not a source-language error. It does not claim unrestricted environmental send semantics or a global absence of priority requirements.

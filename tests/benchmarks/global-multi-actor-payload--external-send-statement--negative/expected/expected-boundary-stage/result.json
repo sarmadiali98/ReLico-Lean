@@ -1,0 +1,11 @@
+{
+  "benchmark_id": "global-multi-actor-payload--external-send-statement--negative",
+  "boundary_code": "EXPECTED_REJECTION",
+  "boundary_stage": "parser-json",
+  "expected_exit_code": 1,
+  "expected_rejection": true,
+  "observed_exit_code": 1,
+  "required_diagnostic": "resolves to the sending actor; endpoint separation is violated (self-send is not an external send)",
+  "schema_version": 1,
+  "status": "pass"
+}

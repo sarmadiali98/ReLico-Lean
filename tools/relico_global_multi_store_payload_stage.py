@@ -643,6 +643,44 @@ def parse_source(path):
             constructor,
     }
 
+    for actor in actors:
+        edges = topology.get(
+            actor["name"],
+            {},
+        )
+
+        servers = (
+            class_map[
+                actor["class"]
+            ][
+                "message_servers"
+            ]
+        )
+
+        for server in servers:
+            for statement in server.get(
+                "statements",
+                [],
+            ):
+                if (
+                    statement.get("kind")
+                    == "external-send"
+                    and edges.get(
+                        statement["receiver"]
+                    )
+                    == actor["name"]
+                ):
+                    require(
+                        False,
+                        "external_send_self_resolution: known rebec '"
+                        + statement["receiver"]
+                        + "' of actor '"
+                        + actor["name"]
+                        + "' resolves to the sending actor;"
+                        + " endpoint separation is violated"
+                        + " (self-send is not an external send)",
+                    )
+
     require(
         [
             item["name"]

@@ -1,0 +1,148 @@
+{
+  "benchmark_id": "global-multi-actor-payload--external-send-statement--negative",
+  "description": "Negative global multi-actor payload external-send-statement benchmark whose self-binding source passes RMC before the family multi-store parser engine deterministically rejects it: the sender's known rebec receiver0 is bound to the sending actor in main, so the external send receiver0.receiveMessage(data) resolves back to the sender and violates endpoint separation (a self-send is not an external send).",
+  "expected_artifacts": [
+    {
+      "path": "source/result.json",
+      "required": true,
+      "sha256": "38b45cec49aab2b587d0d052b89128b1067e65c13548d3e7647f503ad83bfb68"
+    },
+    {
+      "path": "rmc/verdict.json",
+      "required": true,
+      "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
+    },
+    {
+      "path": "decoded-dtr-ast/rejection.json",
+      "required": true,
+      "sha256": "ca4c5dad300ec5609ede2024afe0e10cf7df2b473bab8f75223f9623a57c0398"
+    },
+    {
+      "path": "expected-boundary-stage/result.json",
+      "required": true,
+      "sha256": "a9a33e2cc80e739292477f0c0fafc14ce6658e3499becbb69df71129f89a1a61"
+    },
+    {
+      "path": "diagnostics/result.json",
+      "required": true,
+      "sha256": "80fed0db49a59424a822502a970917532cbb28646a6b101cfb05a39cd5cbc133"
+    }
+  ],
+  "expected_terminal_stage": "diagnostics",
+  "polarity": "negative",
+  "schema_version": 1,
+  "source_files": [
+    "source/model.rebeca"
+  ],
+  "stages": [
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "source",
+        "--benchmark-id",
+        "global-multi-actor-payload--external-send-statement--negative",
+        "--source",
+        "{source}",
+        "--output",
+        "{actual}/source/result.json"
+      ],
+      "name": "source"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc/verdict.json"
+      ],
+      "name": "rmc",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_global_multi_store_payload_stage.py",
+        "parser-json",
+        "--family",
+        "global-multi-store-payload",
+        "--source",
+        "{source}",
+        "--output",
+        "{actual}/parser-json/model.json"
+      ],
+      "expected_exit_codes": [
+        1
+      ],
+      "name": "parser-json",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "expected-absence",
+        "--benchmark-id",
+        "global-multi-actor-payload--external-send-statement--negative",
+        "--failed-stage",
+        "parser-json",
+        "--stage-result",
+        "{actual}/03-parser-json/stage-result.json",
+        "--stdout",
+        "{actual}/03-parser-json/stdout.txt",
+        "--stderr",
+        "{actual}/03-parser-json/stderr.txt",
+        "--expected-exit-code",
+        "1",
+        "--required-diagnostic",
+        "resolves to the sending actor; endpoint separation is violated (self-send is not an external send)",
+        "--forbidden-artifact",
+        "{actual}/parser-json/model.json",
+        "--forbidden-artifact",
+        "{actual}/decoded-dtr-ast/model.txt",
+        "--output",
+        "{actual}/decoded-dtr-ast/rejection.json"
+      ],
+      "name": "decoded-dtr-ast"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "expected-boundary-stage",
+        "--benchmark-id",
+        "global-multi-actor-payload--external-send-statement--negative",
+        "--input",
+        "{actual}/decoded-dtr-ast/rejection.json",
+        "--output",
+        "{actual}/expected-boundary-stage/result.json"
+      ],
+      "name": "expected-boundary-stage"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "diagnostics",
+        "--benchmark-id",
+        "global-multi-actor-payload--external-send-statement--negative",
+        "--input",
+        "{actual}/expected-boundary-stage/result.json",
+        "--output",
+        "{actual}/diagnostics/result.json"
+      ],
+      "name": "diagnostics"
+    }
+  ]
+}

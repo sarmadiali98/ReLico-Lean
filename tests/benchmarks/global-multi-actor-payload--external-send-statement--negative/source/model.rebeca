@@ -1,0 +1,33 @@
+// Endpoint-separation boundary (self-send disguised as an external send).
+// sender0's known rebec receiver0 is bound to sender0 ITSELF in main, so the
+// external send receiver0.receiveMessage(data) resolves back to the sender.
+// This is well-formed Timed Rebeca (RMC-checkable); the verified translation
+// rejects it as a self-send, not an external send (endpoint separation).
+reactiveclass Sender(100) {
+    knownrebecs {
+        Sender receiver0;
+    }
+
+    Sender() {
+        self.sendMessage(1);
+        self.keepAlive() after(1);
+    }
+
+    @priority(1)
+    msgsrv sendMessage(int data){
+        receiver0.receiveMessage(data);
+    }
+
+    msgsrv keepAlive() {
+        self.keepAlive() after(1);
+    }
+
+    @priority(1)
+    msgsrv receiveMessage(int data){
+        // Self-delivered payload; no further action.
+    }
+}
+
+main {
+    Sender sender0(sender0):();
+}
