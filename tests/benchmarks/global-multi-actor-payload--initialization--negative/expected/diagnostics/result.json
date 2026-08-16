@@ -1,0 +1,9 @@
+{
+  "benchmark_id": "global-multi-actor-payload--initialization--negative",
+  "boundary_stage": "parser-json",
+  "diagnostic_code": "EXPECTED_REJECTION",
+  "expected_rejection": true,
+  "message": "reordered initialization has no valid source-to-target startup alignment",
+  "schema_version": 1,
+  "status": "pass"
+}

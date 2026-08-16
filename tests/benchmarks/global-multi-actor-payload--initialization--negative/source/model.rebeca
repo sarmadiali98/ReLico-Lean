@@ -1,0 +1,46 @@
+// Initialization-order precondition boundary (reordered per-actor initialization).
+// The two-actor payload fragment is declared exactly as in the positive sibling:
+// the same Sender and Receiver classes, the same known rebec binding receiver0, and
+// the same message-server surface. The ONLY difference is that main instantiates the
+// actors in the order [receiver0, sender0] rather than the declared topology order
+// [sender0, receiver0].
+//
+// This is well-formed Timed Rebeca and RMC accepts it (main-order carries no runtime
+// meaning in Rebeca; the rebecs form a concurrent set). The verified ReLico startup
+// construction, however, aligns per-actor initial stores POSITIONALLY: its
+// alignStartupEntries requires the initial-store domain to equal the actor domain in
+// declared order. A reordered initialization therefore falls outside the translation's
+// proven-correct input domain, and the family parser refuses it rather than emitting an
+// unverified translation. See Relico/Tests/GlobalMultiStorePayloadInitialization.lean:
+// reordered_initial_stores_rejected and reordered_alignment_is_none.
+reactiveclass Sender(100) {
+    knownrebecs{
+        Receiver receiver0;
+    }
+
+    Sender() {
+        self.sendMessage(1);
+        self.keepAlive() after(1);
+    }
+
+    @priority(1)
+    msgsrv sendMessage(int data){
+        receiver0.receiveMessage(data);
+    }
+
+    msgsrv keepAlive() {
+        self.keepAlive() after(1);
+    }
+}
+
+reactiveclass Receiver(100) {
+    @priority(1)
+    msgsrv receiveMessage(int data){
+        // Process data
+    }
+}
+
+main {
+    Receiver receiver0():();
+    Sender sender0(receiver0):();
+}

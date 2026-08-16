@@ -1,0 +1,148 @@
+{
+  "benchmark_id": "global-multi-actor-payload--initialization--negative",
+  "description": "Negative global multi-actor payload initialization benchmark whose reordered-initialization source passes RMC before the family multi-store parser engine deterministically rejects it: the two-actor payload fragment is declared exactly as in the positive sibling, but main instantiates the actors in the order [receiver0, sender0] rather than the declared topology order [sender0, receiver0]. RMC accepts the well-formed Timed Rebeca source (main-order carries no runtime meaning), but the verified ReLico startup construction aligns per-actor initial stores positionally, so a reordered initialization has no valid source-to-target startup alignment and falls outside the translation's proven-correct input domain.",
+  "expected_artifacts": [
+    {
+      "path": "source/result.json",
+      "required": true,
+      "sha256": "cb4ea36684831e0770c3afa2c16e2ac498e59c6db3607965c583b4fded8dc14e"
+    },
+    {
+      "path": "rmc/verdict.json",
+      "required": true,
+      "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
+    },
+    {
+      "path": "decoded-dtr-ast/rejection.json",
+      "required": true,
+      "sha256": "ab0f08504af156838f77d16721c1d987dd1b655a079b74dff7a357160fa0486f"
+    },
+    {
+      "path": "expected-boundary-stage/result.json",
+      "required": true,
+      "sha256": "cb4e1b304168669268efb92df3f8687c04d0bab515e75d53300dd4b89693bf42"
+    },
+    {
+      "path": "diagnostics/result.json",
+      "required": true,
+      "sha256": "99ec0e3273696e9a7805ceecb26a52a4c93efb3e5c7f28670cdb46086317e4c7"
+    }
+  ],
+  "expected_terminal_stage": "diagnostics",
+  "polarity": "negative",
+  "schema_version": 1,
+  "source_files": [
+    "source/model.rebeca"
+  ],
+  "stages": [
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "source",
+        "--benchmark-id",
+        "global-multi-actor-payload--initialization--negative",
+        "--source",
+        "{source}",
+        "--output",
+        "{actual}/source/result.json"
+      ],
+      "name": "source"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc/verdict.json"
+      ],
+      "name": "rmc",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_global_multi_store_payload_stage.py",
+        "parser-json",
+        "--family",
+        "global-multi-store-payload",
+        "--source",
+        "{source}",
+        "--output",
+        "{actual}/parser-json/model.json"
+      ],
+      "expected_exit_codes": [
+        1
+      ],
+      "name": "parser-json",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "expected-absence",
+        "--benchmark-id",
+        "global-multi-actor-payload--initialization--negative",
+        "--failed-stage",
+        "parser-json",
+        "--stage-result",
+        "{actual}/03-parser-json/stage-result.json",
+        "--stdout",
+        "{actual}/03-parser-json/stdout.txt",
+        "--stderr",
+        "{actual}/03-parser-json/stderr.txt",
+        "--expected-exit-code",
+        "1",
+        "--required-diagnostic",
+        "reordered initialization has no valid source-to-target startup alignment",
+        "--forbidden-artifact",
+        "{actual}/parser-json/model.json",
+        "--forbidden-artifact",
+        "{actual}/decoded-dtr-ast/model.txt",
+        "--output",
+        "{actual}/decoded-dtr-ast/rejection.json"
+      ],
+      "name": "decoded-dtr-ast"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "expected-boundary-stage",
+        "--benchmark-id",
+        "global-multi-actor-payload--initialization--negative",
+        "--input",
+        "{actual}/decoded-dtr-ast/rejection.json",
+        "--output",
+        "{actual}/expected-boundary-stage/result.json"
+      ],
+      "name": "expected-boundary-stage"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "diagnostics",
+        "--benchmark-id",
+        "global-multi-actor-payload--initialization--negative",
+        "--input",
+        "{actual}/expected-boundary-stage/result.json",
+        "--output",
+        "{actual}/diagnostics/result.json"
+      ],
+      "name": "diagnostics"
+    }
+  ]
+}

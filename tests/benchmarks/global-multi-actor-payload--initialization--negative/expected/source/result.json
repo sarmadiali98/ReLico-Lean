@@ -1,0 +1,6 @@
+{
+  "benchmark_id": "global-multi-actor-payload--initialization--negative",
+  "schema_version": 1,
+  "sha256": "b151a35b57a3cfbf9a87b8b135d1ba724a44798496ef9d6f02b02beaae27fd99",
+  "status": "pass"
+}

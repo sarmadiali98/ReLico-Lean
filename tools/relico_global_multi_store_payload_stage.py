@@ -693,11 +693,36 @@ def parse_source(path):
         "supported_fragment_class_set_mismatch",
     )
 
+    actor_names = [
+        item["name"]
+        for item in actors
+    ]
+
     require(
-        [
-            item["name"]
-            for item in actors
-        ]
+        not (
+            sorted(actor_names)
+            == [
+                "receiver0",
+                "sender0",
+            ]
+            and actor_names
+            != [
+                "sender0",
+                "receiver0",
+            ]
+        ),
+        "global_multi_store_payload_initialization_order:"
+        + " actors are initialized in main as "
+        + repr(actor_names)
+        + ", which does not match the declared topology"
+        + " order ['sender0', 'receiver0']; per-actor initial"
+        + " stores must share the actor domain in declared"
+        + " order (reordered initialization has no valid"
+        + " source-to-target startup alignment)",
+    )
+
+    require(
+        actor_names
         == [
             "sender0",
             "receiver0",
