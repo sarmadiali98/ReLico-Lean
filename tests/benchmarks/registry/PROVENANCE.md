@@ -1,14 +1,17 @@
 # Benchmark registry provenance
 
-This registry freezes the reviewed benchmark plan at repository
-checkpoint a4201d942d7d30c00f34f135dfe024d9ae30c82c.
+This registry was frozen from the reviewed benchmark plan at repository
+checkpoint a4201d942d7d30c00f34f135dfe024d9ae30c82c, and has been amended
+since. The counts below are the CURRENT registry contents, not the
+checkpoint's; `tools/relico_bench_registry.py --validate` enforces them
+against benchmarks.tsv and obligations.tsv on every run.
 
-The frozen registry contains:
+The registry currently contains:
 
 - 172 accepted Lean test modules
-- 1,928 mapped test obligations
-- 57 planned source benchmarks
-- 42 positive benchmarks
+- 2,129 mapped test obligations
+- 58 planned source benchmarks
+- 43 positive benchmarks
 - 15 negative benchmarks
 - zero unresolved modules
 - zero unmapped obligations

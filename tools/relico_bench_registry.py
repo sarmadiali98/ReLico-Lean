@@ -5,6 +5,7 @@ from pathlib import Path
 import argparse
 import csv
 import json
+import re
 import sys
 
 
@@ -98,6 +99,114 @@ def validate_implementation_status(
             f"{benchmark_id}: manifest.json exists but "
             "registry status is planned"
         )
+
+
+# Every human-readable restatement of a registry counter, and which computed
+# value it must equal. The triple-lock below (EXPECTED_* constants, the
+# obligation_count column sum, the per-benchmark tallies) guards three integers;
+# these files restate the same numbers in prose and in audit output where
+# nothing checked them, which is how commit d3cbf63 shipped a narrative saying
+# 1,928 obligations against a registry holding 2,129.
+#
+# NOTE "planned source benchmarks" is historical phrasing for "benchmarks in the
+# plan", i.e. ALL rows -- not the subset with implementation_status 'planned'.
+NARRATIVE_COUNTER_CHECKS = (
+    ("tests/benchmarks/registry/PROVENANCE.md",
+     r"^- (\S+) accepted Lean test modules$", "modules"),
+    ("tests/benchmarks/registry/PROVENANCE.md",
+     r"^- (\S+) mapped test obligations$", "obligations"),
+    ("tests/benchmarks/registry/PROVENANCE.md",
+     r"^- (\S+) planned source benchmarks$", "benchmarks"),
+    ("tests/benchmarks/registry/PROVENANCE.md",
+     r"^- (\S+) positive benchmarks$", "positive"),
+    ("tests/benchmarks/registry/PROVENANCE.md",
+     r"^- (\S+) negative benchmarks$", "negative"),
+    ("tests/benchmarks/README.md",
+     r"records the (\S+) planned source benchmarks", "benchmarks"),
+    ("tests/benchmarks/README.md",
+     r"maps all (\S+) Lean test obligations", "obligations"),
+    ("tests/benchmarks/registry/coverage-audit.txt",
+     r"^TEST_FILE_COUNT=(\d+)$", "modules"),
+    ("tests/benchmarks/registry/coverage-audit.txt",
+     r"^TEST_OBLIGATION_COUNT=(\d+)$", "obligations"),
+    ("tests/benchmarks/registry/coverage-audit.txt",
+     r"^ACCEPTED_TEST_FILE_COUNT=(\d+)$", "modules"),
+    ("tests/benchmarks/registry/coverage-audit.txt",
+     r"^ACCEPTED_OBLIGATION_COUNT=(\d+)$", "obligations"),
+    ("tests/benchmarks/registry/coverage-audit.txt",
+     r"^FINAL_SOURCE_BENCHMARK_COUNT=(\d+)$", "benchmarks"),
+    ("tests/benchmarks/registry/coverage-audit.txt",
+     r"^POSITIVE_BENCHMARK_COUNT=(\d+)$", "positive"),
+    ("tests/benchmarks/registry/coverage-audit.txt",
+     r"^NEGATIVE_BENCHMARK_COUNT=(\d+)$", "negative"),
+    ("tests/benchmarks/registry/final-b1-summary.txt",
+     r"^INPUT_TEST_FILE_COUNT=(\d+)$", "modules"),
+    ("tests/benchmarks/registry/final-b1-summary.txt",
+     r"^INPUT_TEST_OBLIGATION_COUNT=(\d+)$", "obligations"),
+    ("tests/benchmarks/registry/final-b1-summary.txt",
+     r"^FINAL_SOURCE_BENCHMARK_COUNT=(\d+)$", "benchmarks"),
+    ("tests/benchmarks/registry/final-b1-summary.txt",
+     r"^FINAL_POSITIVE_BENCHMARK_COUNT=(\d+)$", "positive"),
+    ("tests/benchmarks/registry/final-b1-summary.txt",
+     r"^FINAL_NEGATIVE_BENCHMARK_COUNT=(\d+)$", "negative"),
+)
+
+
+def validate_narrative_counters(
+    registry: dict[str, list[dict[str, str]]],
+) -> list[str]:
+    benchmarks = registry["benchmarks"]
+    obligations = registry["obligations"]
+
+    computed = {
+        "benchmarks": len(benchmarks),
+        "obligations": len(obligations),
+        "modules": len({row["test_file"] for row in obligations}),
+        "positive": sum(
+            row["polarity"] == "positive" for row in benchmarks
+        ),
+        "negative": sum(
+            row["polarity"] == "negative" for row in benchmarks
+        ),
+    }
+
+    checked = 0
+
+    for relative_path, pattern, key in NARRATIVE_COUNTER_CHECKS:
+        path = REPOSITORY_ROOT / relative_path
+
+        if not path.is_file():
+            raise RegistryError(
+                f"missing narrative file: {relative_path}"
+            )
+
+        matches = re.findall(
+            pattern,
+            path.read_text(encoding="utf-8"),
+            re.MULTILINE,
+        )
+
+        if not matches:
+            raise RegistryError(
+                f"{relative_path}: nothing matches {pattern!r} -- a narrative "
+                "counter was renamed or removed, so it is no longer checked"
+            )
+
+        for raw in matches:
+            stated = int(raw.replace(",", ""))
+
+            if stated != computed[key]:
+                raise RegistryError(
+                    f"{relative_path}: states {raw} for {key}, but the "
+                    f"registry computes {computed[key]}"
+                )
+
+            checked += 1
+
+    return [
+        f"NARRATIVE_COUNTERS_CHECKED={checked}",
+        "NARRATIVE_COUNTERS_CONSISTENT=yes",
+    ]
 
 
 def validate(registry: dict[str, list[dict[str, str]]]) -> list[str]:
@@ -314,6 +423,8 @@ def validate(registry: dict[str, list[dict[str, str]]]) -> list[str]:
         for row in benchmarks
     )
 
+    narrative = validate_narrative_counters(registry)
+
     return [
         f"BENCHMARK_COUNT={len(benchmarks)}",
         f"IMPLEMENTED_BENCHMARK_COUNT={implemented_count}",
@@ -325,6 +436,7 @@ def validate(registry: dict[str, list[dict[str, str]]]) -> list[str]:
         "UNMAPPED_OBLIGATION_COUNT=0",
         f"SHARED_FORMAL_EVIDENCE_COUNT={len(shared)}",
         f"LEGACY_MIGRATION_COUNT={len(legacy)}",
+        *narrative,
         "REGISTRY_VALID=yes",
     ]
 

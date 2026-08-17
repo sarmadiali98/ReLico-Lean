@@ -7,8 +7,8 @@ Timed Rebeca programs and generated Lingua Franca and C++ artifacts.
 
 The registry directory contains the reviewed coverage plan:
 
-- benchmarks.tsv records the 57 planned source benchmarks
-- obligations.tsv maps all 1,928 Lean test obligations
+- benchmarks.tsv records the 58 planned source benchmarks
+- obligations.tsv maps all 2,129 Lean test obligations
 - shared-formal-evidence.tsv records formal evidence that shares a
   concrete source benchmark
 - source-model-plan.tsv records planned source locations
