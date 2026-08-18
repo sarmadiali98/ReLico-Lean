@@ -1,0 +1,17 @@
+reactiveclass Ticker(9) {
+    statevars {
+        int beats;
+    }
+    Ticker() {
+        beats = 0;
+        self.keepAlive() after(1);
+    }
+    msgsrv keepAlive() {
+        beats = beats + 1;
+        self.keepAlive() after(1);
+    }
+}
+
+main {
+    Ticker ticker0():();
+}

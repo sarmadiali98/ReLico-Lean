@@ -1,0 +1,18 @@
+reactiveclass Consumer(2) {
+    msgsrv accept(int value) {
+    }
+}
+
+reactiveclass Producer(3) {
+    knownrebecs {
+        Consumer sink;
+    }
+    msgsrv tick(int delay) {
+        sink.accept(1) after(delay);
+    }
+}
+
+main {
+    Producer producer0(consumer0):();
+    Consumer consumer0():();
+}

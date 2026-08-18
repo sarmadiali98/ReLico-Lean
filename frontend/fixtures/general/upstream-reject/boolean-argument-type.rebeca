@@ -1,0 +1,15 @@
+reactiveclass Configured(4) {
+    statevars {
+        int limit;
+    }
+    Configured(int bound) {
+        limit = bound;
+    }
+    msgsrv reconfigure(int bound) {
+        limit = bound;
+    }
+}
+
+main {
+    Configured configured0():(true);
+}

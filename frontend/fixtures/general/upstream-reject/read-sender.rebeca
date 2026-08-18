@@ -1,0 +1,12 @@
+reactiveclass Consumer(2) {
+    statevars {
+        int origin;
+    }
+    msgsrv accept(int value) {
+        origin = sender;
+    }
+}
+
+main {
+    Consumer consumer0():();
+}

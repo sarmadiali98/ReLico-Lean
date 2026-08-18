@@ -1,0 +1,103 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 6,
+            "target": "beats",
+            "value": {
+              "kind": "intLiteral",
+              "line": 6,
+              "value": 0
+            }
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 1
+            },
+            "arguments": [],
+            "kind": "send",
+            "line": 7,
+            "messageServer": "keepAlive",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Ticker"
+          }
+        ],
+        "line": 5,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 1,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 10,
+              "target": "beats",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 10,
+                  "name": "beats"
+                },
+                "line": 10,
+                "operator": "+",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 10,
+                  "value": 1
+                }
+              }
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 11,
+              "messageServer": "keepAlive",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Ticker"
+            }
+          ],
+          "line": 9,
+          "name": "keepAlive",
+          "parameters": [],
+          "priority": null
+        }
+      ],
+      "name": "Ticker",
+      "queueBound": 9,
+      "stateVariables": [
+        {
+          "line": 3,
+          "name": "beats",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Ticker",
+      "line": 16,
+      "name": "ticker0",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

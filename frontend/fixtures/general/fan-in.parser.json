@@ -1,0 +1,246 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 9,
+            "target": "reading",
+            "value": {
+              "kind": "variable",
+              "line": 9,
+              "name": "seed"
+            }
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 1
+            },
+            "arguments": [],
+            "kind": "send",
+            "line": 10,
+            "messageServer": "sample",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Sensor"
+          }
+        ],
+        "line": 8,
+        "parameters": [
+          {
+            "line": 8,
+            "name": "seed",
+            "type": "int"
+          }
+        ]
+      },
+      "knownRebecs": [
+        {
+          "className": "Gateway",
+          "line": 3,
+          "name": "gateway"
+        }
+      ],
+      "line": 1,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 13,
+                  "name": "reading"
+                }
+              ],
+              "kind": "send",
+              "line": 13,
+              "messageServer": "collect",
+              "target": {
+                "kind": "knownRebec",
+                "name": "gateway"
+              },
+              "targetClassName": "Gateway"
+            }
+          ],
+          "line": 12,
+          "name": "sample",
+          "parameters": [],
+          "priority": null
+        }
+      ],
+      "name": "Sensor",
+      "queueBound": 3,
+      "stateVariables": [
+        {
+          "line": 6,
+          "name": "reading",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 23,
+            "target": "samples",
+            "value": {
+              "kind": "intLiteral",
+              "line": 23,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 24,
+            "target": "latest",
+            "value": {
+              "kind": "intLiteral",
+              "line": 24,
+              "value": 0
+            }
+          }
+        ],
+        "line": 22,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 17,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 27,
+              "target": "samples",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 27,
+                  "name": "samples"
+                },
+                "line": 27,
+                "operator": "+",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 27,
+                  "value": 1
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 28,
+              "target": "latest",
+              "value": {
+                "kind": "variable",
+                "line": 28,
+                "name": "value"
+              }
+            }
+          ],
+          "line": 26,
+          "name": "collect",
+          "parameters": [
+            {
+              "line": 26,
+              "name": "value",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Gateway",
+      "queueBound": 12,
+      "stateVariables": [
+        {
+          "line": 19,
+          "name": "samples",
+          "type": "int"
+        },
+        {
+          "line": 20,
+          "name": "latest",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 10
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Gateway",
+          "instance": "gateway0",
+          "knownRebec": "gateway"
+        }
+      ],
+      "className": "Sensor",
+      "line": 34,
+      "name": "sensorFirst",
+      "priority": 1
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 20
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Gateway",
+          "instance": "gateway0",
+          "knownRebec": "gateway"
+        }
+      ],
+      "className": "Sensor",
+      "line": 36,
+      "name": "sensorSecond",
+      "priority": 2
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 30
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Gateway",
+          "instance": "gateway0",
+          "knownRebec": "gateway"
+        }
+      ],
+      "className": "Sensor",
+      "line": 38,
+      "name": "sensorThird",
+      "priority": 3
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Gateway",
+      "line": 39,
+      "name": "gateway0",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

@@ -1,0 +1,33 @@
+reactiveclass Worker(5) {
+    knownrebecs {
+        Collector hub;
+    }
+    statevars {
+        int identifier;
+    }
+    Worker(int assigned) {
+        identifier = assigned;
+        self.work() after(1);
+    }
+    msgsrv work() {
+        hub.report(identifier) after(2);
+    }
+}
+
+reactiveclass Collector(8) {
+    statevars {
+        int received;
+    }
+    Collector() {
+        received = 0;
+    }
+    msgsrv report(int sourceId) {
+        received = received + 1;
+    }
+}
+
+main {
+    Worker workerAlpha(collector0):(1);
+    Worker workerBeta(collector0):(2);
+    Collector collector0():();
+}

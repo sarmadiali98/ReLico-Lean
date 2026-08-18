@@ -1,0 +1,8 @@
+reactiveclass Inert(1) {
+    statevars {
+    }
+}
+
+main {
+    Inert inert0():();
+}

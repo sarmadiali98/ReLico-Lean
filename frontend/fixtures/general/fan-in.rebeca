@@ -1,0 +1,40 @@
+reactiveclass Sensor(3) {
+    knownrebecs {
+        Gateway gateway;
+    }
+    statevars {
+        int reading;
+    }
+    Sensor(int seed) {
+        reading = seed;
+        self.sample() after(1);
+    }
+    msgsrv sample() {
+        gateway.collect(reading);
+    }
+}
+
+reactiveclass Gateway(12) {
+    statevars {
+        int samples;
+        int latest;
+    }
+    Gateway() {
+        samples = 0;
+        latest = 0;
+    }
+    msgsrv collect(int value) {
+        samples = samples + 1;
+        latest = value;
+    }
+}
+
+main {
+    @priority(1)
+    Sensor sensorFirst(gateway0):(10);
+    @priority(2)
+    Sensor sensorSecond(gateway0):(20);
+    @priority(3)
+    Sensor sensorThird(gateway0):(30);
+    Gateway gateway0():();
+}

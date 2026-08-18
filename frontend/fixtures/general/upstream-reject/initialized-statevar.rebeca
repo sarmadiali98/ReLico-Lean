@@ -1,0 +1,12 @@
+reactiveclass Counter(2) {
+    statevars {
+        int total = 0;
+    }
+    msgsrv step() {
+        total = total + 1;
+    }
+}
+
+main {
+    Counter counter0():();
+}

@@ -1,0 +1,189 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 9,
+            "target": "sent",
+            "value": {
+              "kind": "intLiteral",
+              "line": 9,
+              "value": 0
+            }
+          },
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 10,
+            "messageServer": "tick",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Producer"
+          }
+        ],
+        "line": 8,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Consumer",
+          "line": 3,
+          "name": "sink"
+        }
+      ],
+      "line": 1,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 13,
+              "target": "sent",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 13,
+                  "name": "sent"
+                },
+                "line": 13,
+                "operator": "+",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 13,
+                  "value": 1
+                }
+              }
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 14,
+                  "name": "sent"
+                }
+              ],
+              "kind": "send",
+              "line": 14,
+              "messageServer": "accept",
+              "target": {
+                "kind": "knownRebec",
+                "name": "sink"
+              },
+              "targetClassName": "Consumer"
+            }
+          ],
+          "line": 12,
+          "name": "tick",
+          "parameters": [],
+          "priority": null
+        }
+      ],
+      "name": "Producer",
+      "queueBound": 3,
+      "stateVariables": [
+        {
+          "line": 6,
+          "name": "sent",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 23,
+            "target": "total",
+            "value": {
+              "kind": "intLiteral",
+              "line": 23,
+              "value": 0
+            }
+          }
+        ],
+        "line": 22,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 18,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 27,
+              "target": "total",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 27,
+                  "name": "total"
+                },
+                "line": 27,
+                "operator": "+",
+                "right": {
+                  "kind": "variable",
+                  "line": 27,
+                  "name": "amount"
+                }
+              }
+            }
+          ],
+          "line": 26,
+          "name": "accept",
+          "parameters": [
+            {
+              "line": 26,
+              "name": "amount",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        }
+      ],
+      "name": "Consumer",
+      "queueBound": 2,
+      "stateVariables": [
+        {
+          "line": 20,
+          "name": "total",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Consumer",
+          "instance": "consumer0",
+          "knownRebec": "sink"
+        }
+      ],
+      "className": "Producer",
+      "line": 32,
+      "name": "producer0",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Consumer",
+      "line": 33,
+      "name": "consumer0",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

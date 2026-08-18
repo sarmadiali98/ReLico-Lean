@@ -1,0 +1,138 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 7,
+            "target": "limit",
+            "value": {
+              "kind": "variable",
+              "line": 7,
+              "name": "bound"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 8,
+            "target": "enabled",
+            "value": {
+              "kind": "variable",
+              "line": 8,
+              "name": "active"
+            }
+          }
+        ],
+        "line": 6,
+        "parameters": [
+          {
+            "line": 6,
+            "name": "bound",
+            "type": "int"
+          },
+          {
+            "line": 6,
+            "name": "active",
+            "type": "boolean"
+          }
+        ]
+      },
+      "knownRebecs": [],
+      "line": 1,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 11,
+              "target": "limit",
+              "value": {
+                "kind": "variable",
+                "line": 11,
+                "name": "bound"
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 12,
+              "target": "enabled",
+              "value": {
+                "kind": "variable",
+                "line": 12,
+                "name": "active"
+              }
+            }
+          ],
+          "line": 10,
+          "name": "reconfigure",
+          "parameters": [
+            {
+              "line": 10,
+              "name": "bound",
+              "type": "int"
+            },
+            {
+              "line": 10,
+              "name": "active",
+              "type": "boolean"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Configured",
+      "queueBound": 4,
+      "stateVariables": [
+        {
+          "line": 3,
+          "name": "limit",
+          "type": "int"
+        },
+        {
+          "line": 4,
+          "name": "enabled",
+          "type": "boolean"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 7
+        },
+        {
+          "kind": "boolLiteral",
+          "value": true
+        }
+      ],
+      "bindings": [],
+      "className": "Configured",
+      "line": 17,
+      "name": "configuredOn",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        }
+      ],
+      "bindings": [],
+      "className": "Configured",
+      "line": 18,
+      "name": "configuredOff",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

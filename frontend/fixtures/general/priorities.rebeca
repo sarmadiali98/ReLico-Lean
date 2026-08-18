@@ -1,0 +1,27 @@
+reactiveclass Arbiter(1) {
+    statevars {
+        int served;
+    }
+    Arbiter() {
+        served = 0;
+        self.urgent();
+        self.routine();
+    }
+    @priority(1)
+    msgsrv urgent() {
+        served = served + 1;
+    }
+    @priority(2)
+    msgsrv routine() {
+        served = served + 2;
+    }
+    msgsrv unranked() {
+        served = 0;
+    }
+}
+
+main {
+    @priority(3)
+    Arbiter arbiterHigh():();
+    Arbiter arbiterPlain():();
+}

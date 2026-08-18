@@ -1,0 +1,333 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 8,
+            "target": "total",
+            "value": {
+              "kind": "intLiteral",
+              "line": 8,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 9,
+            "target": "cursor",
+            "value": {
+              "kind": "intLiteral",
+              "line": 9,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 10,
+            "target": "ready",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 10,
+              "value": false
+            }
+          }
+        ],
+        "line": 7,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 1,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "body": [
+                {
+                  "kind": "assign",
+                  "line": 14,
+                  "target": "total",
+                  "value": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 14,
+                      "name": "total"
+                    },
+                    "line": 14,
+                    "operator": "+",
+                    "right": {
+                      "kind": "variable",
+                      "line": 14,
+                      "name": "index"
+                    }
+                  }
+                }
+              ],
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 13,
+                  "name": "index"
+                },
+                "line": 13,
+                "operator": "<",
+                "right": {
+                  "kind": "variable",
+                  "line": 13,
+                  "name": "bound"
+                }
+              },
+              "init": {
+                "kind": "declare",
+                "line": 13,
+                "name": "index",
+                "type": "int",
+                "value": {
+                  "kind": "intLiteral",
+                  "line": 13,
+                  "value": 0
+                }
+              },
+              "kind": "for",
+              "line": 13,
+              "update": {
+                "kind": "assign",
+                "line": 13,
+                "target": "index",
+                "value": {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "variable",
+                    "line": 13,
+                    "name": "index"
+                  },
+                  "line": 13,
+                  "operator": "+",
+                  "right": {
+                    "kind": "intLiteral",
+                    "line": 13,
+                    "value": 1
+                  }
+                }
+              }
+            },
+            {
+              "body": [
+                {
+                  "kind": "assign",
+                  "line": 17,
+                  "target": "total",
+                  "value": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 17,
+                      "name": "total"
+                    },
+                    "line": 17,
+                    "operator": "-",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 17,
+                      "value": 1
+                    }
+                  }
+                }
+              ],
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 16,
+                  "name": "cursor"
+                },
+                "line": 16,
+                "operator": "<",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 16,
+                  "value": 2
+                }
+              },
+              "init": {
+                "kind": "assign",
+                "line": 16,
+                "target": "cursor",
+                "value": {
+                  "kind": "intLiteral",
+                  "line": 16,
+                  "value": 0
+                }
+              },
+              "kind": "for",
+              "line": 16,
+              "update": {
+                "kind": "assign",
+                "line": 16,
+                "target": "cursor",
+                "value": {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "variable",
+                    "line": 16,
+                    "name": "cursor"
+                  },
+                  "line": 16,
+                  "operator": "+",
+                  "right": {
+                    "kind": "intLiteral",
+                    "line": 16,
+                    "value": 1
+                  }
+                }
+              }
+            }
+          ],
+          "line": 12,
+          "name": "scan",
+          "parameters": [
+            {
+              "line": 12,
+              "name": "bound",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 21,
+                  "name": "value"
+                },
+                "line": 21,
+                "operator": ">",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 21,
+                  "value": 0
+                }
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 24,
+                  "target": "ready",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 24,
+                    "value": false
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 25,
+                  "target": "total",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 25,
+                    "value": 0
+                  }
+                }
+              ],
+              "kind": "if",
+              "line": 21,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 22,
+                  "target": "ready",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 22,
+                    "value": true
+                  }
+                }
+              ]
+            },
+            {
+              "condition": {
+                "kind": "variable",
+                "line": 27,
+                "name": "ready"
+              },
+              "else": [],
+              "kind": "if",
+              "line": 27,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 28,
+                  "target": "total",
+                  "value": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 28,
+                      "name": "total"
+                    },
+                    "line": 28,
+                    "operator": "+",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 28,
+                      "value": 1
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "line": 20,
+          "name": "decide",
+          "parameters": [
+            {
+              "line": 20,
+              "name": "value",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Looper",
+      "queueBound": 6,
+      "stateVariables": [
+        {
+          "line": 3,
+          "name": "total",
+          "type": "int"
+        },
+        {
+          "line": 4,
+          "name": "cursor",
+          "type": "int"
+        },
+        {
+          "line": 5,
+          "name": "ready",
+          "type": "boolean"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Looper",
+      "line": 34,
+      "name": "looper0",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

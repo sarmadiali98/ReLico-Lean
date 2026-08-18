@@ -1,0 +1,19 @@
+reactiveclass Configured(4) {
+    statevars {
+        int limit;
+        boolean enabled;
+    }
+    Configured(int bound, boolean active) {
+        limit = bound;
+        enabled = active;
+    }
+    msgsrv reconfigure(int bound, boolean active) {
+        limit = bound;
+        enabled = active;
+    }
+}
+
+main {
+    Configured configuredOn():(7, true);
+    Configured configuredOff():(0, false);
+}

@@ -1,0 +1,37 @@
+reactiveclass Calculator(4) {
+    statevars {
+        int accumulator;
+        boolean flag;
+    }
+    Calculator() {
+        accumulator = 0;
+        flag = false;
+    }
+    msgsrv arithmetic(int left, int right) {
+        accumulator = left + right;
+        accumulator = left - right;
+        accumulator = left * right;
+        accumulator = left / right;
+        accumulator = left % right;
+        accumulator = -left;
+        accumulator = left + right * 2 - 1;
+    }
+    msgsrv comparisons(int left, int right) {
+        flag = left == right;
+        flag = left != right;
+        flag = left < right;
+        flag = left <= right;
+        flag = left > right;
+        flag = left >= right;
+    }
+    msgsrv logic(boolean first, boolean second) {
+        flag = first && second;
+        flag = first || second;
+        flag = !first;
+        flag = !(first && second) || true;
+    }
+}
+
+main {
+    Calculator calculator0():();
+}

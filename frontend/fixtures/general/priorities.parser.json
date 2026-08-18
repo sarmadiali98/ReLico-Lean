@@ -1,0 +1,151 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 6,
+            "target": "served",
+            "value": {
+              "kind": "intLiteral",
+              "line": 6,
+              "value": 0
+            }
+          },
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 7,
+            "messageServer": "urgent",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Arbiter"
+          },
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 8,
+            "messageServer": "routine",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Arbiter"
+          }
+        ],
+        "line": 5,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 1,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 12,
+              "target": "served",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 12,
+                  "name": "served"
+                },
+                "line": 12,
+                "operator": "+",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 12,
+                  "value": 1
+                }
+              }
+            }
+          ],
+          "line": 11,
+          "name": "urgent",
+          "parameters": [],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 16,
+              "target": "served",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 16,
+                  "name": "served"
+                },
+                "line": 16,
+                "operator": "+",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 16,
+                  "value": 2
+                }
+              }
+            }
+          ],
+          "line": 15,
+          "name": "routine",
+          "parameters": [],
+          "priority": 2
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 19,
+              "target": "served",
+              "value": {
+                "kind": "intLiteral",
+                "line": 19,
+                "value": 0
+              }
+            }
+          ],
+          "line": 18,
+          "name": "unranked",
+          "parameters": [],
+          "priority": null
+        }
+      ],
+      "name": "Arbiter",
+      "queueBound": 1,
+      "stateVariables": [
+        {
+          "line": 3,
+          "name": "served",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Arbiter",
+      "line": 25,
+      "name": "arbiterHigh",
+      "priority": 3
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Arbiter",
+      "line": 26,
+      "name": "arbiterPlain",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

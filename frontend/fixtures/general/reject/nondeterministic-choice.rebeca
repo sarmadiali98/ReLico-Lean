@@ -1,0 +1,12 @@
+reactiveclass Chooser(2) {
+    statevars {
+        int picked;
+    }
+    msgsrv choose() {
+        picked = ?(1, 2);
+    }
+}
+
+main {
+    Chooser chooser0():();
+}

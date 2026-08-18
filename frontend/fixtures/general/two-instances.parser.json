@@ -1,0 +1,205 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 9,
+            "target": "identifier",
+            "value": {
+              "kind": "variable",
+              "line": 9,
+              "name": "assigned"
+            }
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 1
+            },
+            "arguments": [],
+            "kind": "send",
+            "line": 10,
+            "messageServer": "work",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Worker"
+          }
+        ],
+        "line": 8,
+        "parameters": [
+          {
+            "line": 8,
+            "name": "assigned",
+            "type": "int"
+          }
+        ]
+      },
+      "knownRebecs": [
+        {
+          "className": "Collector",
+          "line": 3,
+          "name": "hub"
+        }
+      ],
+      "line": 1,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 2
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 13,
+                  "name": "identifier"
+                }
+              ],
+              "kind": "send",
+              "line": 13,
+              "messageServer": "report",
+              "target": {
+                "kind": "knownRebec",
+                "name": "hub"
+              },
+              "targetClassName": "Collector"
+            }
+          ],
+          "line": 12,
+          "name": "work",
+          "parameters": [],
+          "priority": null
+        }
+      ],
+      "name": "Worker",
+      "queueBound": 5,
+      "stateVariables": [
+        {
+          "line": 6,
+          "name": "identifier",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 22,
+            "target": "received",
+            "value": {
+              "kind": "intLiteral",
+              "line": 22,
+              "value": 0
+            }
+          }
+        ],
+        "line": 21,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 17,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 25,
+              "target": "received",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 25,
+                  "name": "received"
+                },
+                "line": 25,
+                "operator": "+",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 25,
+                  "value": 1
+                }
+              }
+            }
+          ],
+          "line": 24,
+          "name": "report",
+          "parameters": [
+            {
+              "line": 24,
+              "name": "sourceId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Collector",
+      "queueBound": 8,
+      "stateVariables": [
+        {
+          "line": 19,
+          "name": "received",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 1
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Collector",
+          "instance": "collector0",
+          "knownRebec": "hub"
+        }
+      ],
+      "className": "Worker",
+      "line": 30,
+      "name": "workerAlpha",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 2
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Collector",
+          "instance": "collector0",
+          "knownRebec": "hub"
+        }
+      ],
+      "className": "Worker",
+      "line": 31,
+      "name": "workerBeta",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Collector",
+      "line": 32,
+      "name": "collector0",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

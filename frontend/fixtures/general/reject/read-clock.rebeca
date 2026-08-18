@@ -1,0 +1,12 @@
+reactiveclass Stamper(2) {
+    statevars {
+        int stamp;
+    }
+    msgsrv capture() {
+        stamp = now;
+    }
+}
+
+main {
+    Stamper stamper0():();
+}

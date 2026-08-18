@@ -1,0 +1,35 @@
+reactiveclass Looper(6) {
+    statevars {
+        int total;
+        int cursor;
+        boolean ready;
+    }
+    Looper() {
+        total = 0;
+        cursor = 0;
+        ready = false;
+    }
+    msgsrv scan(int bound) {
+        for (int index = 0; index < bound; index = index + 1) {
+            total = total + index;
+        }
+        for (cursor = 0; cursor < 2; cursor = cursor + 1) {
+            total = total - 1;
+        }
+    }
+    msgsrv decide(int value) {
+        if (value > 0) {
+            ready = true;
+        } else {
+            ready = false;
+            total = 0;
+        }
+        if (ready) {
+            total = total + 1;
+        }
+    }
+}
+
+main {
+    Looper looper0():();
+}
