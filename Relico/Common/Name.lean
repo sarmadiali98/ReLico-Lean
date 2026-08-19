@@ -30,6 +30,10 @@ structure ActionName where
   value : String
 deriving Repr, DecidableEq, BEq, Inhabited
 
+structure PortName where
+  value : String
+deriving Repr, DecidableEq, BEq, Inhabited
+
 instance : ToString ClassName where
   toString name := name.value
 
@@ -49,6 +53,9 @@ instance : ToString ReactionName where
   toString name := name.value
 
 instance : ToString ActionName where
+  toString name := name.value
+
+instance : ToString PortName where
   toString name := name.value
 
 namespace ClassName
@@ -99,5 +106,12 @@ def isValid (name : ActionName) : Prop :=
   name.value ≠ ""
 
 end ActionName
+
+namespace PortName
+
+def isValid (name : PortName) : Prop :=
+  name.value ≠ ""
+
+end PortName
 
 end Relico

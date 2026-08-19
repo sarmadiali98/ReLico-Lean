@@ -444,6 +444,170 @@ main reactor {
 }
 LF
 
+# ---------------------------------------------------------------------------
+# 10. THE CONNECTION `after` CLAUSE: TIME UNIT SPELLING, AND SELF-CONNECTIONS.
+#
+# Added for stage C (LF ports and connections). Two independent questions.
+#
+# (a) WHICH TIME SPELLING DOES A CONNECTION ACCEPT? The repo's three committed
+#     port-bearing fixtures write `after 0 msec`. The paper's Fig. 1b line 22
+#     and Fig. 2b lines 41-42 write `after 2ms`. The existing `renderDelay`
+#     produces `1ms`, but every one of its call sites is INSIDE a `{= ... =}`
+#     block, where the text is C++ and `1ms` is a std::chrono literal -- which
+#     says nothing about LF's own time syntax. Running the tight and spaced
+#     forms separately is what separates "unknown unit" (both fail) from
+#     "whitespace required" (only the tight form fails).
+#
+# (b) MAY AN INSTANCE CONNECT TO ITSELF? A DTR known rebec may be bound to the
+#     sending actor, so the translation can produce `a.out -> a.in`. Split in
+#     two, because they are different questions: self_acyclic asks only whether
+#     the topology is legal, while self_cyclic builds a real causality loop
+#     (reaction(in) -> out, connected back to in) that is broken only by the
+#     `after` delay. SS III-E claims exactly that: "LF connections without
+#     `after` are instantaneous ... and cycles cause compiler rejection".
+#     self_cyclic is therefore a direct test of a paper claim, not just of a
+#     syntax question.
+# ---------------------------------------------------------------------------
+probe unit_msec 'compiles and prints RELICO_RECEIVED -- the committed fixture spelling' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Sender {
+    output out: int
+    reaction(startup) -> out {=
+        out.set(1);
+    =}
+}
+
+reactor Receiver {
+    input in: int
+    reaction(in) {=
+        std::printf("RELICO_RECEIVED\n");
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    sender0 = new Sender()
+    receiver0 = new Receiver()
+    sender0.out -> receiver0.in after 0 msec
+}
+LF
+
+probe unit_ms_tight 'the paper spelling, no space -- compiles?' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Sender {
+    output out: int
+    reaction(startup) -> out {=
+        out.set(1);
+    =}
+}
+
+reactor Receiver {
+    input in: int
+    reaction(in) {=
+        std::printf("RELICO_RECEIVED\n");
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    sender0 = new Sender()
+    receiver0 = new Receiver()
+    sender0.out -> receiver0.in after 0ms
+}
+LF
+
+probe unit_ms_spaced 'the `ms` alias with a space -- isolates unit from whitespace' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Sender {
+    output out: int
+    reaction(startup) -> out {=
+        out.set(1);
+    =}
+}
+
+reactor Receiver {
+    input in: int
+    reaction(in) {=
+        std::printf("RELICO_RECEIVED\n");
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    sender0 = new Sender()
+    receiver0 = new Receiver()
+    sender0.out -> receiver0.in after 0 ms
+}
+LF
+
+probe self_acyclic 'one instance connected to itself, no cycle -- legal topology?' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Node {
+    input in: int
+    output out: int
+    reaction(startup) -> out {=
+        out.set(1);
+    =}
+    reaction(in) {=
+        std::printf("RELICO_SELF_ACYCLIC\n");
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    a = new Node()
+    a.out -> a.in after 0 msec
+}
+LF
+
+probe self_cyclic 'a real causality loop broken only by `after 0 msec` -- prints 3 lines?' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Node {
+    input in: int
+    output out: int
+    state n: int = 0
+    reaction(startup) -> out {=
+        out.set(1);
+    =}
+    reaction(in) -> out {=
+        n = n + 1;
+        std::printf("RELICO_SELF_CYCLIC %d\n", n);
+        std::fflush(stdout);
+        if (n < 3) { out.set(n + 1); }
+    =}
+}
+
+main reactor {
+    a = new Node()
+    a.out -> a.in after 0 msec
+}
+LF
+
 printf '\n\n========== HOW TO READ THIS ==========\n'
 cat <<'NOTE'
   The single most important line in this log is whether
@@ -460,6 +624,15 @@ cat <<'NOTE'
 
   Third: many_to_one_rejected SHOULD have failed to compile. Paste its
   diagnostic -- our own fan-in error message should echo lfc's wording.
+
+  Fourth, from section 10, measured 2026-08-19 against lfc 0.11.0: all three
+  of `after 0 msec`, `after 0ms` and `after 0 ms` compile and run, so the unit
+  spelling is free and the paper's `2ms` in Fig. 1b is NOT a compile error. The
+  printer keeps ` msec` only to stay byte-identical with the committed
+  fixtures. Both self-connection cases also compile, and self_cyclic printing
+  three lines confirms SS III-E's claim that an `after` delay breaks a
+  causality loop -- a paper claim measured TRUE, which is worth as much as the
+  corrections.
 
   Nothing in the repo was read or written. Scratch tree: /tmp/relico_lf_probe
 NOTE

@@ -21,3 +21,6 @@ tmp/
 # Benchmark execution evidence
 tests/benchmarks/*/actual/
 tests/benchmarks/*/.expected-regeneration/
+
+# Python bytecode
+__pycache__/

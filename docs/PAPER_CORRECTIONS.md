@@ -572,3 +572,187 @@ sender/receiver mix-up is a type error rather than a notation slip. The state al
 to be stuck in (see P16). Time progress itself is not implemented at this stage, so the premise this entry
 corrects has no counterpart in the development yet. It will in stage D, and the entry exists partly so that
 it is transcribed from a corrected rule.
+
+---
+
+## P18 — Appendix A and Fig. 5 disagree about whether the LF syntax is complete
+
+**Claim in the paper:** §II-B says *"the complete LF syntax is provided in Appendix A"*, Appendix A is
+titled *"Complete Syntax"* and opens *"we give the complete syntax for Deterministic Timed Rebeca and
+Lingua Franca"*. Fig. 5's own preamble says *"This fragment is not intended to be the complete LF language
+syntax. It includes only the constructs needed by our translation."*
+
+**Why it matters:** this is the entry that decides the standing of every other "the grammar admits X"
+finding, so it is filed first among the new ones even though it is the least interesting on its own. If
+Fig. 5 is a complete syntax of the fragment, then a production it contains that the translation never
+emits and `lfc` rejects is a defect in the grammar — that is P2, and it is P19. If Fig. 5 is only an
+illustration, those are not defects, but then Appendix A's title and §II-B's sentence are wrong instead.
+One of the two has to give. The figure's internal evidence points one way: it contains productions the
+translation demonstrably does not need, indexed ports (P2) and an optional `after` (P19), so the *"only
+the constructs needed by our translation"* half of the preamble is already false on its own terms,
+independently of the completeness question.
+
+**Evidence:** grade (c) — §II-B's sentence, Appendix A's title and Fig. 5's preamble, all quoted from the
+PDF.
+
+**Suggested edit:** pick one. Either retitle Appendix A to name the fragment rather than claim
+completeness and drop *"complete"* from §II-B, keeping Fig. 5's disclaimer; or promote Fig. 5 to a real
+complete grammar of the fragment and prune the productions the translation cannot produce. The first is
+far cheaper and is all the surrounding argument needs.
+
+**What the tool does:** takes the strict reading for itself. The development's LF AST is closed under what
+the printer emits, so a Fig. 5 production with no constructor is a recorded omission rather than an
+oversight — `docs/STAGE_C_DESIGN.md` §7 lists stage C's, one line per production, with the stage that owes
+each. That discipline is only possible against a grammar that claims to be exact, which is the practical
+reason to want the ambiguity resolved rather than tolerated.
+
+---
+
+## P19 — `Connection`'s `after` clause is optional in Fig. 5 and mandatory in §III-E
+
+**Claim in the paper:** Fig. 5 gives
+`Connection ::= ins.outPort([Expr])? → ins.inPort([Expr])? (after delay)? ;`, making the delay optional.
+§III-E says *"An external send in DTR with no explicit `after` is treated as delay 0. Our tool translates
+it to an LF connection with `after 0ms`… This avoids causality loops: LF connections without `after` are
+instantaneous (same tag (t, m)), and cycles cause compiler rejection."*
+
+**Why it is wrong:** §III-E does not merely prefer the delayed form, it states why the delay-free form is
+unusable — it is what produces the causality cycles that make `lfc` reject the program. So the grammar's
+`(after delay)?` describes a connection the translation must never emit, and a reader implementing from
+Fig. 5 alone would emit it. The contrast with P2 is what makes this the more dangerous of the two: there
+the surplus production is rejected by `lfc` outright, so the mistake announces itself. Here the surplus
+production compiles fine in the acyclic cases and fails only once a cycle exists, which may be a model the
+implementer never tries.
+
+**Evidence:** grade (c), both passages quoted from the PDF. The mandatory direction is corroborated at
+grade (a) by the three committed port-bearing LF fixtures, whose every connection is spelled
+`after 0 msec` and which `lfc 0.11.0` accepts.
+
+Probe 10 of `tools/paper-measurements/lf_semantics_probe.sh`, run on 2026-08-19, isolates the defect from
+two things it could be mistaken for. First, the **unit spelling is not the problem**: `after 0 msec`,
+`after 0ms` and `after 0 ms` all compile and run under `lfc 0.11.0`, so the paper's `0ms` and `2ms` are
+valid LF and this entry is about the `?` alone. Second, §III-E's *reason* is **measured true, not merely
+quoted**: the `self_cyclic` case builds a real causality loop — `reaction(in) -> out` connected back to
+`in` — and it is schedulable precisely because the connection carries `after 0 msec`, printing
+`RELICO_SELF_CYCLIC 1`, `2`, `3` at increasing microsteps. The paper's justification for making the delay
+mandatory therefore holds; only the grammar contradicts it.
+
+**Suggested edit:** drop the `?` —
+`Connection ::= ins.outPort([Expr])? → ins.inPort([Expr])? after delay ;` — and keep §III-E's sentence as
+the justification for it. If a delay-free connection is wanted in an example, say in the figure that the
+translation never produces one. This is separable from P18: the `?` is wrong on either reading, because a
+grammar for *"the constructs needed by our translation"* should not include one the translation is
+forbidden to use.
+
+**What the tool does:** stage C's `GeneralConnection` carries `delay : Delay`, not `Option Delay`, so the
+delay-free connection is unrepresentable rather than merely unused, and `Delay`'s single `value : Nat`
+field (`Relico/Common/Time.lean:15`) makes the delay static and non-negative structurally. The staticness
+half of that is P15's subject, not this entry's.
+
+---
+
+## P20 — no rule is given for naming the generated ports, and the two figures disagree
+
+**Claim in the paper:** Table III maps `knownrebecs` to *"port declarations and connections in main"* and
+`r.m() after(t)` to *"output/input ports and a connection after t"*. Nothing anywhere says what those
+ports are called.
+
+**Why it matters:** for a translation whose §III-D argument turns on each sender getting *a unique input
+port on the target reactor*, the naming function is not cosmetic — it is the thing that has to be
+injective, and uniqueness of the generated ports is the whole mechanism. The two worked examples use two
+different schemes. Fig. 1b gives `Controller` an `input receiveReading:int;`, named after the DTR msgsrv.
+Fig. 2b gives `Controller` an `input readingFromTemp:int;` and an `input readingFromSmoke:int;`, named
+after the output port plus `From` plus the capitalized sender *instance*. Neither scheme accounts for the
+output port: both figures declare `output reading:int;` on the sender while the msgsrv being called is
+`receiveReading`, so the sender-side name follows no stated rule at all. A reader cannot reproduce any of
+the three names from the paper.
+
+**Evidence:** grade (c), Fig. 1b and Fig. 2b transcribed from the PDF and compared name by name.
+
+**Suggested edit:** state the naming function once, inside §III-D's construction, and make its injectivity
+explicit — for instance target input port `= <msgsrv> ++ "From" ++ capitalize(<sender instance>)` and
+source output port `= <msgsrv> ++ "To" ++ capitalize(<receiver instance>)`, or one output port per msgsrv
+broadcast to every receiver. Injectivity then follows from DTR instance names being distinct, which they
+are. Then redraw Fig. 1b so its single-sender case is that same function's output instead of a second
+scheme, since a reader will reasonably read the simpler figure as the general rule.
+
+**What the tool does:** nothing yet, deliberately. Stage C prints only port names it is handed and invents
+none (`docs/STAGE_C_DESIGN.md` §7), because a naming scheme chosen inside the printer would be
+unreviewable — it belongs to the translation, where it can be stated once and proved injective. This entry
+is the reason stage E and stage F are blocked on a paper decision and not only on code, and it is the
+cleanest example in this file of a gap that a prose proof can leave open and an implementation cannot.
+
+---
+
+## P21 — both figures render DTR state variables as LF parameters, contradicting Table III
+
+**Claim in the paper:** Table III maps `statevars ↦ state variables`. Fig. 1b writes
+`reactor TempSensor(v:int=0)` and `reactor Controller(v:int=0)` with
+`main reactor { sensor = new TempSensor(v=1); controller = new Controller(v=2); … }`, and declares no
+`state` anywhere. Fig. 2b does the same.
+
+**Why it is wrong:** an LF parameter and an LF state variable are different constructs. A parameter is
+fixed per instance at instantiation; a state variable is mutable across reactions. DTR `statevars` are
+assigned by message servers — Fig. 4's own `var = Expr;`, exercised in Fig. 1a — so they have to become
+state, exactly as Table III says. As drawn, the figures' reactions could not assign `v` at all, which
+means the figures cannot be an instance of the mapping the table states.
+
+A second, smaller problem falls out of the same lines: `ArgList ::= Expr (, Expr)*` cannot derive `v=1`.
+The named-argument form both figures use is not in Fig. 5, which is a grammar gap of the same kind as P22.
+Taken with P10, where Fig. 4 rejects Fig. 1a and Fig. 2a on three independent counts, the pattern is that
+the figures and the grammars were written against each other only loosely on both sides of the
+translation — which is worth one sentence in the paper's own terms, because a reader calibrates on the
+figures.
+
+**Evidence:** grade (c), the Table III row and both figures quoted from the PDF.
+
+**Suggested edit:** redraw both figures per the table — a `state v:int = <initial>;` declaration inside the
+reactor and `new TempSensor()` in main — and state explicitly where per-instance initial values go, since
+that is the job the parameters appear to be doing. DTR constructor arguments are already that mechanism,
+so the natural sentence is that `statevars` become `state` declarations and a constructor's argument
+values are applied in the startup reaction. If instead a parameter really is wanted alongside the state
+variable, the named-argument form still needs adding to `ArgList`.
+
+**What the tool does:** follows Table III rather than the figures, and this is measured, not asserted. The
+committed `lfc`-accepted output in
+`tests/benchmarks/bound-payload--dispatch--positive/expected/lf-source/V0Controller.lf` declares
+`state x: int = 0`, replays the constructor as `x = 0;` inside `reaction(startup)`, and instantiates with
+`main reactor { controller = new Controller() }` — no parameter list, no arguments. Stage C keeps
+argument-free instantiation for this reason (`docs/STAGE_C_DESIGN.md` §6.5); adopting the figures' shape
+would be a translation change, and one that would lose assignability.
+
+---
+
+## P22 — `act.schedule(delay)` has no payload slot, so §III-C's own example is underivable
+
+**Claim in the paper:** Fig. 5 gives `LFStmt ::= … | act.schedule(delay); | …`, with one argument. §III-C
+prints `sendReading.schedule(v, 0ms)`, with two.
+
+**Why it is wrong:** Fig. 5 deliberately admits a *typed* logical action —
+`ActionDecl ::= logical action act(: Type)? ;` — and a typed action exists precisely to carry a value that
+nothing in `LFStmt` can then supply. The optional action type and the single-argument `schedule`
+contradict each other inside one figure, and the paper's own worked translation of a payload-carrying
+self-send uses the two-argument form. This is P19's mirror image: there the grammar is too permissive for
+what §III-E requires, here it is too restrictive for what §III-C does.
+
+**Evidence:** grade (c) for the contradiction — Fig. 5's `LFStmt` and `ActionDecl` productions and
+§III-C's statement, quoted from the PDF. Corroborated at grade (a) by the committed fixture
+`bound-payload--dispatch--positive`, whose `lfc`-accepted output is `dispatch_action.schedule(1, 1ms);`,
+so the two-argument form is the one that compiles.
+
+**Suggested edit:** `act.schedule((Expr ,)? delay) ;`, matching how the rest of Fig. 5 marks optional
+parts. While fixing it, the read side is worth a sentence too: the payload has to be recovered in the
+receiving reaction, and `LFStmt`'s `var = Expr;` is the only candidate production, but nothing says whether
+`Expr` may mention an action or a port — and `Expr` has no production at all, which is P11. So this is a
+*not stated* rather than a prohibition, and it is noted here instead of filed separately because the fix is
+one clause in the same production the payload slot lands in.
+
+**What the tool does:** emits the two-argument form, and refuses more than one payload value with
+*"has more than one payload value; the current C++ printer foundation supports at most one integer
+payload"* (`Relico/LF/MultiStorePayloadCppPrinter.lean:93-96`). So the implementation sits strictly
+between the two: more than Fig. 5 can derive, less than a general payload. Stage C inherits the refusal at
+the same layer rather than widening it (`docs/STAGE_C_DESIGN.md` §6.6), so the limit stays in one place and
+stays visible.
+
+
+
