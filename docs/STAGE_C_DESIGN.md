@@ -1,11 +1,15 @@
 # Stage C design: concrete LF ports and connections
 
-**Status: implemented and green.** All seven files of §4 exist;
+**Status: implemented and green, on two gates.** All seven files of §4 exist;
 `bash frontend/check-general-lean.sh` reports `GENERAL_LEAN_GATE_OK` with
-`lake build` at 506 jobs and 45 assertions (20 frontend, 25 general-LF). Six
-divergences from this document were found while implementing it and are recorded
-in §9 rather than folded back into the sections above, so that the design and what
-was actually built can still be compared.
+`lake build` at 506 jobs and 45 assertions (20 frontend, 25 general-LF), and
+`bash frontend/check-general-lf-target.sh` reports `GENERAL_LF_TARGET_OK`, which is
+real `lfc 0.11.0` accepting, compiling and running the text the printer emits. The
+second gate is the one the staged plan actually asked for, and §8 below had quietly
+dropped it — see §9.9, which also records the two constructs it caught as
+unprecedented. Six divergences from this document were found while implementing it
+and are recorded in §9 rather than folded back into the sections above, so that the
+design and what was actually built can still be compared.
 
 Stage C gives the Lean LF layer the two constructs it has never had: ports and
 connections. It is a representation and printing stage. Nothing in it translates
@@ -969,3 +973,58 @@ non-globbed module is not a resolvable target.
 frontend (9 positive documents + 11 lean-reject documents) and 25 general-LF. The
 whole-program expected text, derived by hand from the printer source rather than measured,
 matched on the first run.
+
+### 9.9 This document had quietly relaxed the plan's gate, and `lfc` has now been run
+
+The staged plan states stage C's gate as *"LF ports/connections layer (gate: real `lfc`
+accepts every emitted program)"*. Section 8 above does not contain an `lfc` step. It gates
+Lean assertions plus probe 10, and probe 10 compiled **hand-written** LF to settle
+connection-delay spellings and self-connections — it never saw the printer's output. So the
+gate that ran was weaker than the gate that was agreed, and the weakening happened here, in
+the design document, not in the implementation.
+
+The exposure was specific rather than theoretical. Measured across all 24 committed
+`lfc`-accepted fixtures under `tests/benchmarks/*/expected/lf-source/*.lf`:
+
+| construct the printer emits | occurrences in the accepted fixtures |
+|---|---|
+| `target Cpp` | 24 |
+| `input in: int` · `output out: int` | 3 each |
+| `state x: int = 0` · `state y: int = 0` | 20 · 4 |
+| `logical action …: int` | 6 |
+| `out.set(1);` · `reaction(in) {=` | present |
+| `…schedule(payload, 1ms);` · `auto payload = *dispatch_action.get();` | 6 each |
+| `sender0.out -> receiver0.in after 0 msec` | 3 |
+| **`auto v = *in.get();`** — a value read off an input **port** | **0** |
+| **`reaction(in) -> deliver {=`** — port trigger, logical-action effect | **0** |
+
+Two constructs in the emitted program had therefore never been through any compiler in this
+project, and no amount of string equality in Lean can find that class of error: the printer
+and the expected string can agree with each other and both be wrong about LF.
+
+**Closed by measurement on 2026-08-19.** `emit-program` was added to
+`frontend/lean-bridge/GeneralLfPrinterTestMain.lean` so that the text handed to `lfc` is
+`renderGeneralProgram` applied to the same program the assertions pin, rather than a
+transcription of it. 32 lines emitted, `lfc 0.11.0` exit 0 through code generation, C++
+build and link, binary exit 0. Both unprecedented constructs are legal: the port read
+compiles, and a port-triggered reaction may carry a logical action as an effect.
+
+Made re-runnable as `frontend/check-general-lf-target.sh`, marker
+`GENERAL_LF_TARGET_OK`. It is a **separate script on purpose**.
+`frontend/check-general-lean.sh` needs no Maven, no artifact zip and no network — a clean
+checkout plus a Lean toolchain is enough, and that is what keeps the Lean layer checkable
+when the upstream artifact is unavailable. `lfc` plus a C++ toolchain is a heavier
+dependency, so folding it in would charge every future run of the cheaper gate for it.
+
+Two smaller things the measurement surfaced, neither an error:
+
+1. **`lfc` exits 0 with warnings, and one warning is unavoidable.** The generated C++ warns
+   `private field 'x' is not used` for any state variable no reaction reads. A DTR state
+   variable must exist whether or not the model reads it, so warnings must not be treated as
+   failure — the new script reports them and continues.
+2. **Byte-identity with the committed fixtures was never fully attainable.** Section 6.1
+   keeps `renderLfTime`'s `" msec"` spelling partly for byte-identity, but the fixtures
+   indent with **four** spaces and this printer indents with **two**. LF is not
+   indentation-sensitive so nothing breaks, and the general family emits fresh programs
+   rather than reproducing those fixtures — but the byte-identity argument covers the time
+   unit only, not the surrounding layout, and should not be cited more broadly than that.

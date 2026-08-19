@@ -1019,19 +1019,60 @@ def runGeneralLfPrinterTests :
 
     pure 1
 
+/--
+Print the exact text the printer produces for `baseProgram`, and nothing else.
+
+This exists so that the emitted program can be handed to a real `lfc` instead of
+only being compared against a string written in this file. The `PROGRAM`
+assertion above pins the text; `lfc` is what decides whether that text is a legal
+LF program at all. Those are two different questions, and only the second one can
+catch a construct that this file and the printer agree on and the compiler does
+not accept.
+
+Nothing is printed but the program, so the caller can redirect straight into a
+`.lf` file. A refusal goes to stderr and exits non-zero, because an empty `.lf`
+file would otherwise reach `lfc` and fail there with a misleading diagnostic.
+-/
+def emitBaseProgram :
+    IO UInt32 :=
+  match
+    LF.CppPrinter.renderGeneralProgram
+      baseProgram with
+
+  | .ok programText => do
+      IO.print programText
+
+      pure 0
+
+  | .error reason => do
+      IO.eprintln
+        ("the printer refused the base program: " ++
+          reason)
+
+      pure 1
+
 end GeneralLfPrinterTests
 end Relico
 
 def main
     (arguments : List String) :
     IO UInt32 :=
+  -- The emit selector carries no leading dashes on purpose. This module runs
+  -- under `lake env lean --run`, which reads its own flags before handing the
+  -- rest to `main`, so a `--`-prefixed argument would be ambiguous with the
+  -- driver's own options. The sibling runner already proves that a bare
+  -- positional argument arrives intact, since that is how it receives its
+  -- fixture directory.
   match arguments with
 
   | [] =>
       Relico.GeneralLfPrinterTests.runGeneralLfPrinterTests
 
+  | ["emit-program"] =>
+      Relico.GeneralLfPrinterTests.emitBaseProgram
+
   | _ => do
       IO.eprintln
-        "usage: GeneralLfPrinterTestMain"
+        "usage: GeneralLfPrinterTestMain [emit-program]"
 
       pure 2
