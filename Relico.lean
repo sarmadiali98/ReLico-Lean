@@ -628,3 +628,7 @@ import Relico.Frontend.GeneralDiagnostic
 import Relico.Frontend.GeneralElaborator
 import Relico.Frontend.GeneralDecoder
 import Relico.Frontend.GeneralBridgeCheck
+
+import Relico.LF.GeneralSyntax
+import Relico.LF.GeneralWellFormed
+import Relico.LF.GeneralCppPrinter

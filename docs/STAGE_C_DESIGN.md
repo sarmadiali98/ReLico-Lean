@@ -1,6 +1,11 @@
 # Stage C design: concrete LF ports and connections
 
-**Status: proposed, awaiting approval. No Lean has been written against it.**
+**Status: implemented and green.** All seven files of §4 exist;
+`bash frontend/check-general-lean.sh` reports `GENERAL_LEAN_GATE_OK` with
+`lake build` at 506 jobs and 45 assertions (20 frontend, 25 general-LF). Six
+divergences from this document were found while implementing it and are recorded
+in §9 rather than folded back into the sections above, so that the design and what
+was actually built can still be compared.
 
 Stage C gives the Lean LF layer the two constructs it has never had: ports and
 connections. It is a representation and printing stage. Nothing in it translates
@@ -891,3 +896,76 @@ identity and would forge the author.
 
 The `.gitignore` `__pycache__/` line (task #49) is already in the working tree and is the
 only other dirty path; it goes into this commit rather than being stranded.
+
+## 9. What implementing it changed — six divergences and one process correction
+
+Written after the gate went green, and kept as an appendix rather than folded back into
+§4-§6, so that this document still records what was designed and this section records
+what was built. Nothing below was discovered by reasoning about the design; each came
+from a compiler, a keyword clash, or a missing dependency.
+
+**9.1 The eight program-level conjuncts are named `def`s, not inlined.** §5 writes
+`wellFormed` as one expression. Each conjunct is now its own `def` — `reactorsNonEmpty`,
+`instancesNonEmpty`, `reactorsWellFormed`, `reactorNamesUnique`, `instanceNamesUnique`,
+`instancesResolve`, `connectionsWellFormed`, `targetEndpointsUnique`. This is what makes
+the two extraction lemmas independent of how `&&` associates: a proof by case analysis on
+a *named* clause cannot silently retarget, whereas a projection chain into an anonymous
+conjunction reads a fixed nesting shape and, under the other associativity, proves a
+different clause while still compiling. §5's own stated intent — that every conjunct be
+separately checkable — is better served this way, and the stage-B sibling already did it.
+
+**9.2 §5's snippet applies a list-level finder to a program.** `findReactor? program
+connection.sourceInstance` does not typecheck: §4.2's prose says the finders mirror
+`findKnownRebec?`, and that is `List X → Name → Option X`. Resolved as the DTR side is
+built — list-level `LF.findReactor?` and `LF.findInstance?`, plus `GeneralProgram.reactor?`
+and `.instance?` wrappers mirroring `GeneralModel.class?` / `.actor?`, plus
+`GeneralProgram.reactorOfInstance?`, the exact mirror of `GeneralModel.classOfActor?`,
+which is also what makes the theorem name `reactorOfInstance_isSome` mean anything.
+
+**9.3 `instance` cannot be a binder name.** It is a Lean command keyword, so §5's
+`fun instance => instance.name.value != ""` will not parse. Every binder is
+`reactorInstance`. A *trailing* `?` does make an identifier, so `def instance?` is fine —
+precedent is `def class?` in `Relico/DTR/GeneralSyntax.lean`.
+
+**9.4 Printer totality is deliberately not proved.** This looks like an omission and is
+not. The printer's only failure mode is the inherited multi-value-payload refusal, and
+well-formedness does not — and must not — exclude a multi-value payload: the refusal is a
+limit of the current C++ foundation, not a property of a legal LF program. A totality
+theorem would therefore have to assume away a case the AST is meant to keep representable.
+
+**9.5 The two `GeneralExpr` types are asymmetric, and stage D inherits the debt.**
+`DTR.GeneralExpr` carries `boolLiteral`, `binary` and `unary`; `LF.GeneralExpr` carries
+only `intLiteral`, `stateVar` and `parameterVar`, exactly as §4.2 specifies. So a stage D
+translation **cannot be total** on a well-formed general DTR model, which contradicts
+§4.2's own "total function on a well-formed model" rationale. Not resolved here, because no
+printer in this development can emit an operator and widening now would create an
+unprintable construct. It is recorded in the `GeneralExpr` docstring as a choice stage D
+has to make in the open rather than inside a default branch.
+
+**9.6 File 5 carries the well-formedness assertions too.** §4 names it a printer test main.
+It runs 25 assertions: 16 printing and 9 well-formedness. Both are pure total functions
+over the same hand-built reactors, and a second main would double the gate's cost to assert
+nothing the first could not. The alternative — `GeneralWellFormed.lean` with no executable
+assertion at all, its two theorems only ever ranging over an arbitrary program — is worse.
+Four of the nine are *accept* cases, and they are the point: an unconnected port, a
+self-connection and one output feeding two inputs are each legal for a measured reason, and
+each is easy to forbid by accident while strengthening something else.
+
+**9.7 Process: `lake env lean <path>` reaches exactly one module past the build closure.**
+§8.2's plan to typecheck each new file standalone works for the first one and fails for the
+second, because `lake env lean` writes no `.olean` and requires one for every import. The
+signature is a single diagnostic at position `1:0` saying *"object file … does not exist"* —
+it points at the import, not at any code, and it is not a defect in the file being checked.
+The procedure that works, and that was used for files 3 and 4: land each module's import in
+`Relico.lean` as soon as that module is green, then use plain `lake build`, which gives the
+olean, typechecks the new file, and yields a falsifiable job count in one command.
+`lake build <Module.Name>` is not the fix — the default `Glob.one "Relico"` means a
+non-globbed module is not a resolvable target.
+
+### 9.8 The gate as measured
+
+`bash frontend/check-general-lean.sh` → `GENERAL_LEAN_GATE_OK`, exit 0. `lake build` at
+**506 jobs**, the predicted 503 + 3 new modules, with 0 error lines. 45 assertions: 20
+frontend (9 positive documents + 11 lean-reject documents) and 25 general-LF. The
+whole-program expected text, derived by hand from the printer source rather than measured,
+matched on the first run.

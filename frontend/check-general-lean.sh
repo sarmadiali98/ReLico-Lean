@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Stage B frontend gate. Checks that the Lean side of the general family agrees
-# with the committed fixtures: every document decodes to the model it should, or
-# is refused for the reason it should be.
+# The Lean gate for the general family. Two runners, one build.
+#
+# Stage B's part checks that the Lean side agrees with the committed fixtures:
+# every document decodes to the model it should, or is refused for the reason it
+# should be. Stage C's part checks the generated-LF side, which has no fixtures at
+# all -- it asserts the exact text the printer produces for a hand-built two-reactor
+# program, and the exact accept-or-reject verdict well-formedness returns for nine
+# variations on it.
+#
+# Both live here rather than in two scripts because they share the one expensive
+# step, `lake build`, and neither can run against stale oleans.
 #
 # Deliberately does NOT run the Java exporter. frontend/java-bridge/check-general.sh
 # already owns the Rebeca-to-JSON boundary -- it regenerates all nine positives
@@ -28,11 +36,13 @@ LEAN_REJECT_DIRECTORY="$FIXTURE_DIRECTORY/lean-reject"
 
 BRIDGE_MAIN="$REPO/frontend/lean-bridge/GeneralBridgeMain.lean"
 TEST_MAIN="$REPO/frontend/lean-bridge/GeneralFrontendTestMain.lean"
+PRINTER_TEST_MAIN="$REPO/frontend/lean-bridge/GeneralLfPrinterTestMain.lean"
 
 test -d "$FIXTURE_DIRECTORY"
 test -d "$LEAN_REJECT_DIRECTORY"
 test -f "$BRIDGE_MAIN"
 test -f "$TEST_MAIN"
+test -f "$PRINTER_TEST_MAIN"
 
 cd "$REPO"
 
@@ -154,6 +164,67 @@ fi
 if ! printf '%s\n' "$TEST_OUTPUT" | grep -q '^GENERAL_FRONTEND_TESTS_OK$'; then
   echo
   echo "the test runner did not print its completion marker"
+  exit 1
+fi
+
+echo
+echo "=== the general LF printer and well-formedness assertions"
+
+# Same capture-then-check shape as above, and for the same reason: the count is
+# taken from what the run actually printed.
+#
+# Unlike the fixture expectations, the expected count here is a literal. There is
+# nothing on disk to count -- this runner reads no fixtures, because the general LF
+# family has no exporter and no decoder yet, so every value it asserts on is built
+# in Lean. The literal is what lets the gate notice an assertion that stopped
+# running: the completion marker alone cannot, since a `try` block that skipped
+# twenty assertions still reaches its final `IO.println`.
+EXPECTED_PRINTER_ASSERTIONS=25
+
+set +e
+PRINTER_OUTPUT="$(
+  lake env lean \
+    --run \
+    "$PRINTER_TEST_MAIN"
+)"
+PRINTER_STATUS=$?
+set -e
+
+printf '%s\n' "$PRINTER_OUTPUT"
+
+if [ "$PRINTER_STATUS" -ne 0 ]; then
+  echo
+  echo "the printer assertions failed (exit $PRINTER_STATUS); see the diagnostic above"
+  exit 1
+fi
+
+ACTUAL_PRINTER_ASSERTIONS="$(
+  printf '%s\n' "$PRINTER_OUTPUT" |
+    grep -c '^PASS_' ||
+    true
+)"
+
+if [ -z "$ACTUAL_PRINTER_ASSERTIONS" ]; then
+  ACTUAL_PRINTER_ASSERTIONS=0
+fi
+
+echo
+echo "printer assertions the run reported: $ACTUAL_PRINTER_ASSERTIONS"
+
+if [ "$ACTUAL_PRINTER_ASSERTIONS" -ne "$EXPECTED_PRINTER_ASSERTIONS" ]; then
+  echo
+  echo "expected $EXPECTED_PRINTER_ASSERTIONS printer assertions, but the run"
+  echo "reported $ACTUAL_PRINTER_ASSERTIONS."
+  echo
+  echo "The count is stated in the docstring of runGeneralLfPrinterTests in"
+  echo "frontend/lean-bridge/GeneralLfPrinterTestMain.lean. Adding an assertion"
+  echo "means changing both, on purpose."
+  exit 1
+fi
+
+if ! printf '%s\n' "$PRINTER_OUTPUT" | grep -q '^GENERAL_LF_PRINTER_TESTS_OK$'; then
+  echo
+  echo "the printer test runner did not print its completion marker"
   exit 1
 fi
 
