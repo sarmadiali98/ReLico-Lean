@@ -98,7 +98,7 @@ The Lean version is pinned in `lean-toolchain`.
 
 ## End-to-end integration checks
 
-The integration checks require Java, Apache Maven, Lingua Franca `lfc`, CMake, a C++ compiler, and the ReLico artifact ZIP containing the existing Timed Rebeca parser.
+Most of the integration checks require Java, Apache Maven, Lingua Franca `lfc`, CMake, a C++ compiler, and the ReLico artifact ZIP containing the existing Timed Rebeca parser. The one exception is `frontend/check-general-lean.sh`, which needs only a Lean toolchain.
 
 When another command shadows Apache Maven, set `RELICO_MAVEN` explicitly:
 
@@ -123,6 +123,30 @@ Run the generalized two-variable parser-to-native check:
 ```bash
 frontend/java-bridge/check-store.sh /path/to/ReLico-fmcad-2026-artifact-v1.zip
 ```
+
+Run the multi-actor and payload-carrying family checks:
+
+```bash
+frontend/java-bridge/check-multistore.sh /path/to/ReLico-fmcad-2026-artifact-v1.zip
+frontend/check-multistore-payload-frontend.sh /path/to/ReLico-fmcad-2026-artifact-v1.zip
+frontend/check-multistore-payload-backend.sh /path/to/ReLico-fmcad-2026-artifact-v1.zip
+```
+
+Run the general family's two frontend gates. These are split by boundary rather
+than by family: the first regenerates every `general-v1` document from its Rebeca
+source and compares it against the committed fixture, and the second feeds those
+same committed documents to the Lean decoder and checks the models and the
+rejections they produce.
+
+```bash
+frontend/java-bridge/check-general.sh /path/to/ReLico-fmcad-2026-artifact-v1.zip
+frontend/check-general-lean.sh
+```
+
+The second takes no argument and is the one check in this list that needs neither
+Java, Maven, nor the artifact ZIP — only a Lean toolchain. Keeping it independent
+of the upstream artifact is deliberate, so that the Lean frontend stays checkable
+without it.
 
 ## Verification boundary
 
@@ -162,7 +186,8 @@ The integration tests exercise these components but do not formally verify them.
 - `Relico/Tests`: Lean regression tests
 - `frontend/fixtures`: checked Timed Rebeca and JSON fixtures
 - `frontend/java-bridge`: trusted adapters around the existing Java parser
-- `docs`: decisions, scope, claims, and proof boundaries
+- `frontend/lean-bridge`: Lean entry points the integration checks run
+- `docs`: decisions, scope, claims, proof boundaries, the paper-corrections ledger, and per-stage design and findings records
 
 ## Reproducible fixtures
 

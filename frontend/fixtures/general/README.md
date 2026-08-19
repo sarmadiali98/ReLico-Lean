@@ -1,16 +1,31 @@
 # `general-v1` frontend fixtures
 
-These models are the acceptance surface of
-`frontend/java-bridge/RebecaGeneralJsonExporter.java`. Between them the nine
-positives exercise every production the exporter admits, and the nineteen
-negatives pin one rejection diagnostic each. Nothing here reaches Lean; this
-directory is entirely about the Rebeca-to-JSON boundary.
+These models are the acceptance surface of the general family's two frontend
+layers. Between them the nine positives exercise every production
+`frontend/java-bridge/RebecaGeneralJsonExporter.java` admits, and the thirty
+negatives pin one rejection each — nineteen against the exporter and the Rebeca
+compiler upstream of it, eleven against the Lean decoder.
 
-The negatives are split across two directories by *which layer* rejects them:
-eleven in `reject/` that this exporter refuses, and eight in `upstream-reject/`
+Two gates read this directory, and they read different parts of it.
+`frontend/java-bridge/check-general.sh` owns the Rebeca-to-JSON boundary: it runs
+the `.rebeca` sources through the exporter and checks what comes out.
+`frontend/check-general-lean.sh` owns the JSON-to-Lean boundary: it feeds the
+committed `.parser.json` documents to the Lean decoder and checks the models they
+produce. The documents in this directory are the contract between the two, which
+is why neither gate regenerates what the other one checks.
+
+The negatives are split across three directories by *which layer* rejects them:
+eleven in `reject/` that this exporter refuses, eight in `upstream-reject/`
 that the Rebeca parser and typechecker refuse before the exporter is handed an
-AST. That split was measured, not guessed, and the reason it is worth recording
+AST, and eleven in `lean-reject/` that the Lean decoder refuses. That split was
+measured, not guessed, and the reason it is worth recording
 is in "Which layer enforces what" below.
+
+`lean-reject/` holds `.json` rather than `.rebeca`, because its cases are
+documents **no producer emits** — a broken envelope, a missing field, a duplicated
+class name. No source model can carry those across the boundary, since a document
+the exporter would refuse to emit is one it never hands to Lean. That directory
+has its own README covering what it does and does not cover.
 
 ## Layout
 
@@ -163,6 +178,32 @@ upgraded, or because a rejection site was added or removed here — fails the ga
 with `CAUGHT UPSTREAM` or `NOT CAUGHT UPSTREAM` instead of silently changing
 what the fixture proves.
 
+### The third layer
+
+`lean-reject/` is the same idea one boundary further on, and it is where the
+argument above finishes. The eight relocated restrictions had to be re-enforced
+on the Lean side because nothing typechecks JSON; that re-enforcement is what
+`GeneralModel.wellFormed` and the decoder's four steps are, and until stage B's
+tests existed none of it had ever been run.
+
+It differs from the other two in one respect worth stating. Those hold `.rebeca`
+sources, because there is a compiler upstream to feed them to. This one holds
+`.json`, because there is not: a document the exporter would refuse to emit is a
+document it never hands to Lean, so no source model can express these cases. Each
+fixture is instead a single mutation of `minimal-class.parser.json`, so the
+mutation is the claim and `diff` shows it.
+
+Layer is pinned by *reason* rather than by log grepping here, because the Lean
+side has something the Java side does not: `GeneralDiagnosticReason` derives
+`BEq`, so a test can compare the reason as a value instead of searching a rendered
+message for a substring. That is a stronger check than the table above, and it is
+available only because the diagnostic vocabulary is an inductive type rather than
+a string.
+
+`lean-reject/README.md` records each fixture's mutation and, importantly, what
+the corpus does **not** cover: eight of the thirty-two diagnostic reasons are
+asserted, and twenty-four are not.
+
 ## A fixture that cannot parse proves nothing
 
 `read-clock` spent its whole first life asserting nothing. It declared
@@ -194,9 +235,24 @@ python3 frontend/validate_general_v1.py frontend/fixtures/general/*.parser.json
 python3 frontend/test_validate_general_v1.py
 python3 frontend/test_compare_general_v1.py
 frontend/java-bridge/check-general.sh <artifact.zip>
+frontend/check-general-lean.sh
 ```
 
 The first three need nothing but a Python interpreter and run in any
 environment. The fourth needs Maven, a JDK, and the upstream parser artifact, so
 it runs on the machine that holds the toolchain; it re-runs the other three
 first, because a green gate resting on an unchecked checker is worth nothing.
+
+The fifth needs a Lean toolchain and nothing else — no Maven, no JDK, no
+artifact. That is deliberate rather than incidental: it means the Lean side of
+this boundary stays checkable when the upstream artifact is unavailable, and it is
+why the two gates split the way they do. `check-general.sh` regenerates the
+`.parser.json` documents from source and compares them; `check-general-lean.sh`
+takes those same committed documents as given and checks what Lean makes of them.
+Neither re-does the other's work, and the documents in this directory are the
+contract between them.
+
+Note that the glob on the first line matches only the nine positives. The eleven
+documents in `lean-reject/` are deliberately invalid against `general-v1` — one of
+them is not even JSON — so validating them would fail by design. They are named
+`invalid-*.json` rather than `*.parser.json` partly for that reason.

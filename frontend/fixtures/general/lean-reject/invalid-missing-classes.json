@@ -1,0 +1,14 @@
+{
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Inert",
+      "line": 7,
+      "name": "inert0",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

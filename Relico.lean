@@ -619,3 +619,12 @@ import Relico.Tests.GlobalMultiStorePayloadActorObservableProjection
 import Relico.Tests.GlobalMultiStorePayloadFrontend
 import Relico.Tests.ActorPriorityIsolatedScheduler
 import Relico.Tests.ActorPriorityErasureImpossibility
+
+import Relico.DTR.GeneralSyntax
+import Relico.DTR.GeneralWellFormed
+import Relico.DTR.GeneralState
+import Relico.Frontend.GeneralSchema
+import Relico.Frontend.GeneralDiagnostic
+import Relico.Frontend.GeneralElaborator
+import Relico.Frontend.GeneralDecoder
+import Relico.Frontend.GeneralBridgeCheck

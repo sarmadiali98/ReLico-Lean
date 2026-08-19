@@ -12,10 +12,16 @@ the 49-model upstream corpus, or (c) quoted directly from the PDF at
 `docs/actor-priority/phase2/*.tsv` or from this repository's own summaries of the paper. Each entry
 states its evidence, and inferences are labelled as inferences.
 
+A fourth grade was added on 2026-08-19: **(d) stated authoritatively by the project lead** about a system
+this project does not control. Exactly one entry rests on it — P15, on LF connection delays — and it says
+so in place. The grade exists because the alternative was worse: leaving a real finding unfiled because
+the only available evidence was authoritative rather than mechanical. It is not a licence to promote
+guesses, and an entry at grade (d) should be re-graded if a measurement later becomes available.
+
 Fig. 4 and Fig. 5 are transcribed in full, once, in
 [`docs/dtr-fragment/PAPER_FRAGMENT_RESTRICTIONS.md`](dtr-fragment/PAPER_FRAGMENT_RESTRICTIONS.md),
 alongside the numbered restrictions R1-R24 that the frontend enforces and the deliberate divergences
-D1-D6. Entries here cite that document rather than re-quoting the grammar, so that a delimiter fix
+D1-D9. Entries here cite that document rather than re-quoting the grammar, so that a delimiter fix
 lands in one place. That precaution is not hypothetical: P5 below previously misquoted a production.
 
 **Reproducing the measured entries.** The three scripts that produced every corpus and `lfc` number
@@ -399,4 +405,170 @@ with Rebeca tooling and that overflow-freedom is a hypothesis discharged externa
 checker. The second is cheaper and honest; the first is what makes Theorem 1's hypothesis meaningful.
 
 **What the tool does:** carries `queueBound` into the JSON without enforcing it, and records
-overflow-freedom as a documented assumption rather than a checked property (design §5.6).
+overflow-freedom as a documented assumption rather than a checked property (design §5.6). The general
+frontend does the same and the repository-side detail is recorded as F18 in
+[`STAGE_B_FINDINGS.md`](STAGE_B_FINDINGS.md): `queueBound` is decoded from the wire and then dropped,
+because `DTR.GeneralModel` has no field for it and no rule of the semantics could consult one.
+
+---
+
+## P15 — an external send's delay is a run-time expression in DTR and a compile-time constant in LF, and the mapping does not say so
+
+**Claim in the paper:** §III-E p. 6, in full: *"DTR's `after(d)` maps to LF timing in two ways. For
+internal sends, delay d becomes a `schedule()` call on a logical action: `self.sendReading(v) after(5)`
+(Fig. 2a, line 11) → `sendReading.schedule(v, 5ms)` (line 10). For external sends, delay maps to an
+`after` clause on the connection: `c.receiveReading(v) after(2)` (line 10) → LF connection with
+`after 2ms` (line 38)."* Table III states the same mapping in one row: `r.m() after(t)` ↦ *"output/input
+ports and a connection `after t`"*. Fig. 4 writes the source production as `(after(Expr))?`.
+
+**Why it is a gap:** the two halves of §III-E are presented as symmetric, and they are not. The internal
+half is sound for any delay; the external half is sound only for a constant one, and no restriction to
+constants appears anywhere.
+
+- Fig. 4 admits an arbitrary `Expr` as the delay. On the DTR side that delay is a value carried into the
+  bag: Table I's SEND rule adds `(x, y, ms, v⃗, e_y(now) + d)`, quoted in P14 above from p. 3. That `d` is
+  an *expression* under Fig. 4 and a *value* in the rule means an evaluation happens at send time, in the
+  sender's state — **inferred**, from the two together rather than from a rule that says so.
+- The LF side takes its delay from somewhere else entirely. Table II's EXTERNAL SEND rule reads the delay
+  out of `portMap(out) = (z, in, d)` — that is, `d` is a property of the **connection**, fixed when the
+  program is elaborated, not a value the sending reaction computes. The paper's own semantics therefore
+  exhibits the mismatch it does not mention.
+- So `c.receiveReading(v) after(delayVar)`, legal under Fig. 4, has **no image** under §III-E's external
+  mapping. There is no LF connection to write it as, because there is one connection and it needs one
+  delay while the source can produce a different delay per send.
+- The asymmetry is what makes this easy to miss: the identical construct on the internal path translates
+  without trouble, since `schedule(v, d)` takes its delay as a run-time argument. Every delay in every
+  example in the paper is a literal, so the distinction never surfaces.
+- §III-G *Translation Limitations* is the natural place to state it and does not: it lists exactly two
+  exclusions — models with unresolved observable choices, and multiple identical messages from one sender
+  to one receiver at the same logical time. A reader who checks their model against §III-G will conclude a
+  computed external-send delay is supported.
+
+**Evidence:** all quotations taken directly from the PDF, pp. 6-7 — §III-E, Table II's EXTERNAL SEND rule,
+Table III's `r.m() after(t)` row, and §III-G in full. The Fig. 4 production is cited from
+[`docs/dtr-fragment/PAPER_FRAGMENT_RESTRICTIONS.md`](dtr-fragment/PAPER_FRAGMENT_RESTRICTIONS.md) D9 per
+this file's convention. The claim that an LF connection delay is fixed at elaboration time is grade **(d)**
+— stated by the project lead, 2026-08-19: *"lf delay has to be static"* — and is the one thing here not
+measured against `lfc 0.11.0`; an `lfc` probe would upgrade it. See F13.
+
+**Suggested edit:** add one sentence to §III-E restricting the external-send delay to a compile-time
+constant, and one line to §III-G recording it as a third limitation. The internal-send half needs no
+change, and saying so explicitly is worth the words, because the restriction looks like it should apply to
+both and does not.
+
+**What the tool does:** enforces the restriction (D9) — an `after` delay must be a non-negative integer
+literal — and represents it as `Delay : Nat` in `GeneralStmt`, so a non-constant delay is unrepresentable
+rather than merely rejected. The restriction is applied to internal sends too, which is stricter than this
+finding requires; that is deliberate for now, since stage D translates neither, and it is the kind of
+over-restriction that should be revisited when internal sends acquire a translation rather than left to
+harden by default.
+
+---
+
+## P16 — both TAKE rules are guarded by a predicate the paper never defines, and without it time cannot advance
+
+**Claim in the paper:** Table I's TAKE rule is guarded by `enabled_m((y, x, ms, v⃗, ar_m), b_x)`, and Table
+II's LF TAKE rule by `enabled_tr((r, ep, ν⃗, ar_r), q_r)`. Neither predicate is defined anywhere in the
+paper, including both appendices.
+
+**Why it matters:** everything that decides *which* pending message an actor takes lives inside that
+predicate. TAKE's only other premises are that the message is in the bag and that the actor is between
+message servers (`π_x = ε`); **no premise mentions time.** Read literally, Table I therefore lets an actor
+take any message in its bag, including one whose arrival is still in the future.
+
+That is not a slack reading, it is a fatal one, and the reason is TIME PROGRESS. TIME PROGRESS fires only
+when `s ̸--ms-->` and `s ̸--τ-->`, i.e. when no TAKE is available anywhere. If `enabled_m` does not compare
+`ar_m` against the clock, then every actor with a non-empty bag has a TAKE available, so TIME PROGRESS can
+fire only once all bags are empty — at which point its own premise takes a minimum over the empty set.
+**The semantics as printed has no time progress at all**, and the entire timed behaviour of DTR rests on a
+clock comparison that appears nowhere except inside an undefined symbol.
+
+**The description is not missing — it is in the prose, three times.** §II-A: *"A rebec takes a message with
+the earliest arrival time from its message bag and executes its corresponding message server ... atomically
+(without interruption)"*, then *"in the case of having messages with the same earliest arrival time, the
+order of the execution of their corresponding message servers is non-deterministically chosen"*, which p. 3
+narrows to *"We use DTR, where designer-specified actor and message-server priorities resolve observable
+same-time choices."* The LF side gets the same treatment in §III-B: *"The TAKE rule expresses that a
+reactor can take a trigger from its queue when the trigger has the minimum arrival time."* So the rule is
+stated three times in words and zero times in the semantics. The gap is easy to miss precisely because the
+prose is complete: `enabled_m` reads as a forward reference to a definition that never arrives.
+
+**It is load-bearing for the proof.** Lemma 1's inductive step reasons about the missing content directly:
+*"The DTR take rule removes the earliest pending message and executes the associated reaction body. The
+corresponding LF take rule removes the earliest pending trigger."* The word "earliest" is doing real work
+there — the bijection needs both sides to pick corresponding elements — and it is imported from §II-A's
+prose, not from the rule the sentence names. The singular *"the earliest"* additionally presumes uniqueness,
+which §II-A has already said may fail; what happens when it does is P4.
+
+**Evidence:** grade (c), quoted directly from the PDF. Measured lexically over the extracted text of the
+whole paper: `enabled_m` occurs **once** (Table I, p. 4) and `enabled_tr` **once** (Table II, p. 6); the
+string "Definition" occurs twice, both introducing Definition 1 (Weak Bisimilarity). There is no third
+occurrence of either predicate at which it could be defined. The consequence for TIME PROGRESS is
+**inferred**, from TIME PROGRESS's own premises together with the absence of a clock premise in TAKE.
+
+**Suggested edit:** define it once, beside Table I, as the conjunction of the two conditions the prose
+already gives — `ar_m` minimal among the arrival times of `b_x ∪ {m}`, **and** `ar_m ≤ e_x(now)` — and say
+that a tie among minima is resolved by message-server priority (see P4 for the case where priorities tie
+too). The LF counterpart needs the same treatment with `q_r` and the current tag. Both are one line each,
+and stating them is what makes TIME PROGRESS applicable.
+
+**What the tool does:** defines it, in `Relico/DTR/GeneralState.lean`, and makes both halves explicit.
+`earliestDueArrival b now` is the minimum `arrival` among the messages of `b` with `arrival ≤ now`, or
+`none`; `GeneralActorState.dueArrival` is that at the actor level; `GeneralConfiguration.readyActors` is the
+cohort of actors with something due, each tagged with the arrival it would take, in the model's instance
+order. The tie half is deliberately *not* supplied: `readyActors` returns the cohort and selects nothing,
+because selection is what priority decides and priority arrives in stage G. So the implementation is
+strictly **more specified** than the paper on dueness and exactly as unspecified on ties, which is the
+honest split rather than a convenient one. A divergence in the direction of precision is the easiest kind to
+leave unrecorded and the most misleading to.
+
+Two smaller divergences fall out of that and are recorded here rather than given entries of their own.
+First, the repo's actor state is `(valuation, bag)` with no counterpart of the paper's third component
+`π_x`, so TAKE's `π_x = ε` premise is currently inexpressible: statement execution is stage H, and until
+then `readyActors` characterises an actor that *has something due*, not one that *may take it now*. Second,
+the guard is written `arrival ≤ now` where the paper's own rules only ever produce `=`: every arrival is at
+least `now`, since SEND adds `e_y(now) + d` with `d ≥ 0` and TIME PROGRESS advances to the global minimum,
+so an actor's earliest due arrival equals `now` whenever it has one. That invariant is **inferred** from the
+rules and is not stated in the paper; the strict inequality is therefore unreachable rather than wrong, and
+it is kept because no type in the development enforces reachability.
+
+---
+
+## P17 — TIME PROGRESS writes the message tuple with sender and receiver transposed
+
+**Claim in the paper:** Table I, TIME PROGRESS, premise:
+`ar_min = min_{x∈AID} {ar_m | s(x) = (e_x, (x, y, ms, v⃗, ar_m) ∪ b_x, ϵ)}`.
+
+**Why it is wrong:** p. 3 defines a message of `b_x` as `(y, x, ms, v⃗, ar_m)`, *"where y is the sender, x is
+the receiver"*, and TAKE uses exactly that order two rules earlier. Here the same bag's message is written
+`(x, y, …)`, which puts the bag's owner in the **sender** slot. Read literally the minimum ranges over
+messages that `x` sent, and those are in no bag at all; `y` is also left free in the comprehension with
+nothing to bind it. The intended reading is not in doubt and the fix is one transposition, which is the whole
+of the finding — but it sits in the premise that determines every logical time the system ever visits, so it
+is worth fixing rather than leaving for a reader to repair silently.
+
+**Evidence:** grade (c), quoted directly from the PDF — the tuple definition on p. 3, the TAKE premise and
+the TIME PROGRESS premise on p. 4, all three compared side by side.
+
+**Suggested edit:** write the premise as
+`ar_min = min_{x∈AID} {ar_m | s(x) = (e_x, (y, x, ms, v⃗, ar_m) ∪ b_x, ϵ)}`, and bind `y` explicitly if the
+notation elsewhere in the table is tightened the same way.
+
+**One further thing to check while fixing it.** The comprehension is restricted to actors with `π_x = ϵ`, so
+an actor part-way through a message server contributes no arrival to `ar_min`. With rules for every statement
+form that is harmless, because such an actor has a `τ`-transition and TIME PROGRESS could not have fired.
+Table I has no rule for `for`, though, while Fig. 4's grammar admits one — P12 — so an actor whose remaining
+statements begin with a loop has neither a `τ`-transition nor a place in the minimum. Whether that is
+reachable depends on how P12 is resolved, which is why it is noted here rather than filed: it is **inferred**,
+and the inference is contingent on another open entry.
+
+**What the tool does:** cannot exhibit either problem, and for a reason worth stating because it is a third
+divergence rather than a defence. `GeneralMessage` has fields `sender`, `messageName`, `payload`, `arrival`
+and **no receiver at all**: a message's receiver is the bag it sits in, since the configuration keys bags by
+actor name. The paper's tuple carries the receiver redundantly with the bag containing it, and the
+development drops the redundancy instead of cross-checking it — the same choice F10 records for two
+redundant schema fields. So there is nothing to transpose, and the position-free field names mean a
+sender/receiver mix-up is a type error rather than a notation slip. The state also has no `π_x` for an actor
+to be stuck in (see P16). Time progress itself is not implemented at this stage, so the premise this entry
+corrects has no counterpart in the development yet. It will in stage D, and the entry exists partly so that
+it is transcribed from a corrected rule.

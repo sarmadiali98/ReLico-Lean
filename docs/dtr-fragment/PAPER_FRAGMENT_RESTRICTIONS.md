@@ -297,13 +297,25 @@ time, so a delay computed from a state variable at run time has nothing to trans
 carried through as null rather than rewritten to zero, because R19's default is a fact about the
 translation and this schema is an abstract syntax tree; the Lean side applies the default.
 
-**A caveat on D9, and a measurement that is still owed.** The first half of that argument is quoted;
+**A caveat on D9, resolved 2026-08-19.** The first half of that argument is quoted;
 the second half is not. That an LF connection's `after` delay must be static is a claim about Lingua
 Franca that this project has not measured. The `lfc 0.11.0` probe established three other things —
 `reaction(in[0])` is rejected, reaction declaration order decides same-tag order, and unconnected
-input ports are legal — but it never tested a non-constant connection delay. Until it does, D9 stands
-as an implementation restriction and **must not** be filed against the paper, because the finding it
-would support depends on the unmeasured half.
+input ports are legal — but it never tested a non-constant connection delay. While that half was unsupported, D9 stood
+as an implementation restriction only, and was explicitly barred from being filed against the paper,
+because the finding it would support depended on the unmeasured half.
+
+**The resolution.** The project lead, 2026-08-19: *"lf delay has to be static."* That is an
+authoritative statement about the target language rather than an `lfc` measurement, and it is recorded at
+that grade — see [`STAGE_B_FINDINGS.md`](../STAGE_B_FINDINGS.md) F13. Both halves of D9's argument are
+now supported, so the bar is lifted and the finding is filed as **P15** in
+[`PAPER_CORRECTIONS.md`](../PAPER_CORRECTIONS.md). An `lfc 0.11.0` probe of a non-constant connection
+delay would upgrade the evidence grade and remains worth running, but no current claim waits on it.
+
+One consequence for the implementation, and it is narrow: D9's *restriction* stands unchanged, because a
+static delay is exactly what the tool enforces. What does not stand is the exporter's *wording* in the
+negative case, which reports `after(-2)` as "a non-literal" when the objection is that the delay is
+negative. That is task #66 and finding F17.
 
 Every divergence here except D9 is also filed against the paper in `docs/PAPER_CORRECTIONS.md`, since
 the project's standing position is that a divergence found by building the tool is a result to write up

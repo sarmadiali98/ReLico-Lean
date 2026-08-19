@@ -1,0 +1,28 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [],
+        "line": null,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 1,
+      "messageServers": [],
+      "name": "Inert",
+      "stateVariables": []
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Inert",
+      "line": 7,
+      "name": "inert0",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}
