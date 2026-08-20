@@ -10,6 +10,17 @@ Stage D is closed at `3290ad4`; its groundwork commits `15b5172` and `fe63c6f` a
 `b14809b`/`687c00e` are landed and remote-verified. Nothing in stage D is outstanding except the
 `ActionDecl` reading owed to F26, which is noted in §11 and does not block this design.
 
+**Revision 2, 2026-08-20.** Revision 1 landed at `6298284` and keyed ports on the (known rebec, message)
+pair. That was wrong, in a way review caught and this revision repairs: two sends to one pair became two
+`set()`s on one port at one tag, so one Rebeca message was silently lost, and no sound syntactic refusal
+can separate that case from the legal per-statement-delay case. Ports are now keyed on the **send site**,
+which makes the hazard structurally unreachable and per-statement delays representable. §6 is rewritten
+end to end and §4.1, §4.2, §4.3, §7.1, §7.2, §7.3, §8, §10.2, §10.3 and §11 are amended; the four
+decisions §11.3 put to the user are answered and recorded there. The defect itself is written up as F40
+rather than quietly overwritten, and F35 is weakened to what survives of it. Revision 1's text is not
+otherwise altered, so `git diff 6298284 -- docs/STAGE_E_DESIGN.md` is a faithful record of what changed
+and why.
+
 ## 1. What stage E is, and exactly where its boundary falls
 
 Stage E replaces one refusal with a translation. `Relico/Translation/GeneralBasic.lean` currently
@@ -27,7 +38,7 @@ Concretely, stage E delivers four things that do not exist today:
 | output ports on the sending reactor | `assembleGeneralReactor.outputPorts` | `[]`, hardwired at `GeneralBasic.lean:1180` |
 | input ports on the receiving reactor | `assembleGeneralReactor.inputPorts` | `[]`, hardwired at `:1177` |
 | connections in `main reactor` | `assembleGeneralProgram.connections` | `[]`, hardwired at `:1487` |
-| one reaction per (sender instance, message) on the receiver | `assembleGeneralReactor.messageReactions` | one reaction per message server, sender-blind |
+| one reaction per (sender instance, send site) on the receiver | `assembleGeneralReactor.messageReactions` | one reaction per message server, sender-blind |
 
 What stage E does **not** deliver, and the boundary is worth stating precisely because the previous
 stages' boundaries were each misread once:
@@ -40,7 +51,8 @@ stages' boundaries were each misread once:
   program, and the ordering claim is a statement about executions.
 - **It does not deliver control flow.** A send inside an `if` or a `for` is still refused, by the
   same `iterationNotSupported` and `branchingNotSupported` reasons, at the frontend. Stage H owns
-  that. So every send stage E sees is at the top level of a message-server body.
+  that. So every send stage E sees is at the top level of a message-server body — which is load-bearing
+  for §6's central invariant, and §6.3 states the obligation stage H inherits because of it.
 - **It does not touch local message-server priority.** `assembleGeneralMessageReaction_priority`
   (`:850`) still proves `priority = none`, and stage G still owns it. This matters more in stage E
   than it did in stage D, because stage E multiplies the receiver's reactions, so it multiplies the
@@ -188,16 +200,23 @@ the set of arrows landing on one receiver instance has one element per *sending 
 known rebec to it and whose class sends on that rebec. So each arrival needs its own port, and the port
 name must distinguish the sending instance.
 
-It must also distinguish the known rebec, which is less obvious and is why the key is a triple rather
-than a pair. `knownrebecs { Collector hub1; Collector hub2; }` with both bound to `collector0` and a
-body containing `hub1.report(x)` and `hub2.report(x)` is legal DTR. That sender declares **two** output
-ports, both connecting to `collector0`, and two arrows into one instance may not share a target port.
-So:
+It must also distinguish the known rebec, which is less obvious. `knownrebecs { Collector hub1;
+Collector hub2; }` with both bound to `collector0` and a body containing `hub1.report(x)` and
+`hub2.report(x)` is legal DTR. That sender declares **two** output ports, both connecting to
+`collector0`, and two arrows into one instance may not share a target port.
+
+And it must distinguish the **send site** — the individual send statement — which §6 derives at length
+and which is the reason this key is not the (rebec, message) pair it looks like it should be. Two sends
+to one pair are two Rebeca messages and must remain two `set()`s on two ports, because one LF port
+carries one value per tag; and each carries its own `after`, because DTR delays a statement. The site
+is class-level data, so this respects the class-level constraint above. Concretely the key is the
+statement's index within the class, counting external sends only, in body order — constructor first,
+then message servers in declaration order. So:
 
 | | key | declared on |
 | --- | --- | --- |
-| output port | (known-rebec name, message name) | the **sending** reactor |
-| input port | (sending instance name, known-rebec name, message name) | the **receiving** reactor |
+| output port | (known-rebec name, message name, **send site**) | the **sending** reactor |
+| input port | (sending instance name, known-rebec name, message name, **send site**) | the **receiving** reactor |
 
 The receiving reactor's input-port list is therefore a **union over every sending instance in the
 model**, and an instance of that reactor which some sender never targets simply carries an idle port.
@@ -209,19 +228,32 @@ Two consequences worth naming now because they surface again later. First, the m
 endpoint to target endpoint is a **function**: a known-rebec name binds to exactly one actor per
 instance, so (sending instance, output port) determines the receiver instance and hence the whole
 connection. That is what makes `targetEndpointsUnique` — already in `GeneralWellFormed.lean:454` and
-deliberately silent about sources — the right existing predicate, and it is what §6's delay conflict
-violates. Second, two send statements in one body naming the same (rebec, message) pair generate the
-*same* output port and the *same* connection, so connection generation must **deduplicate**; §7 says
-where.
+deliberately silent about sources — the right existing predicate, and the site index simply extends the
+key it ranges over. Second, with the site in the key **no deduplication is needed anywhere**: distinct
+send statements generate distinct output ports, distinct connections and distinct input ports, so the
+routing table is a straight walk of the model with nothing to merge. An earlier version of this design
+keyed on the pair and required connection generation to deduplicate; that requirement is gone.
 
 ### 4.2 The spelling
 
 Fig. 2b's rule is adopted verbatim for the receiver and extended minimally for the sender:
 
 ```
-outputPortNameFor  (rebec, message)          = message ++ "To"   ++ capitalize rebec
+outputPortNameFor  (rebec, message, site)    = message ++ "To"   ++ capitalize rebec ++ siteSuffix
 inputPortNameFor   (senderInstance, outPort) = outPort ++ "From" ++ capitalize senderInstance
 ```
+
+The site index carries no source identifier and so is pure noise in the common case. It is therefore
+**omitted when the class has exactly one send to that (rebec, message) pair**, and appended as
+`ordinal`-style digits from `2` upward, in body order, when it has more:
+
+```
+siteSuffix = ""            if this is the class's only send to (rebec, message)
+           = toString n    otherwise, n = 1, 2, 3, … in body order
+```
+
+The receiver's rule needs no change: it wraps whatever the sender's port is called, so the suffix
+propagates for free and both ends stay derivable from the same data.
 
 On the three inherited fixtures that reads:
 
@@ -231,10 +263,16 @@ On the three inherited fixtures that reads:
 | `two-instances` | `Worker.reportToHub` | `Collector.reportToHubFromWorkerAlpha`, `…FromWorkerBeta` |
 | `fan-in` | `Sensor.collectToGateway` | `Gateway.collectToGatewayFromSensorFirst`, `…FromSensorSecond`, `…FromSensorThird` |
 
+Every one of those classes sends exactly once to its pair, so the suffix is empty and **all three tables
+are byte-identical to what the pair-keyed version of this design produced**. Nothing inherited changes
+name; only a class that earns the proliferation pays for it, and then it reads
+`reportToHub1` / `reportToHub2`.
+
 Long, and readable: every component is a source identifier and the two infixes read as English in the
 direction the arrow points. `readingFromTemp` in the paper's own figure is the same idiom with one
 factor fewer. Recorded, as P20 requires, as **this project's rule with no paper basis for the output
-half** — the same category as the `<Reactor>_<Action>_Args` struct name (F25).
+half** — the same category as the `<Reactor>_<Action>_Args` struct name (F25). The suffix is a third
+such invention, and the paper cannot arbitrate it because no figure sends one message twice.
 
 ### 4.3 Concatenation is not injective, so uniqueness is stated about programs and not about the function
 
@@ -249,11 +287,13 @@ message = "reportTo", rebec = "hub"    ⟶  "reportTo" ++ "To" ++ "Hub"    = "re
 message = "report",   rebec = "toHub"  ⟶  "report"   ++ "To" ++ "ToHub"  = "reportToToHub"
 ```
 
-Both are legal Rebeca identifiers, so this is a real collision and not a hypothetical one. Every
-readable separator has this property; underscore joining has it too (`my_msg`+`hub` versus
-`my`+`msg_hub`), which is why the standard fix is to escape the separator in each component — double
-every `_` and join with a single one. That does buy genuine injectivity, and it is recorded here as the
-known alternative, but its cost is a string-decoding proof in Lean and names like `my__msg_hub`.
+Both are legal Rebeca identifiers, so this is a real collision and not a hypothetical one. The site
+suffix opens a second channel of the same kind: `report`/`hub` at site 2 and `report`/`hub2` at its
+class's only site both give `reportToHub2`. Every readable separator has this property; underscore
+joining has it too (`my_msg`+`hub` versus `my`+`msg_hub`), which is why the standard fix is to escape
+the separator in each component — double every `_` and join with a single one. That does buy genuine
+injectivity, and it is recorded here as the known alternative, but its cost is a string-decoding proof
+in Lean and names like `my__msg_hub`.
 
 The resolution is to move the guarantee rather than to weaken it. Uniqueness of the generated names is
 already a conjunct of the LF side's own well-formedness: `declaredNames`
@@ -394,46 +434,90 @@ unmeasured declaration is guessing, and this project's whole method is that it d
 `fan-in` all translate through the scalar arm and the struct machinery above is exercised only by a
 new fixture written for it.
 
-## 6. The delay conflict: DTR delays a send, LF delays a connection
+## 6. The delay, and the collision that makes send sites the unit of translation
+
+**Revised 2026-08-20, after the first version of this section got it backwards.** The original text, at
+`6298284:docs/STAGE_E_DESIGN.md:408–409`, read: *"Two sends to the same (rebec, message) with the
+**same** delay: fine. They deduplicate to one connection, and the second statement is a second `set()`
+on the same port."* — and refused only the case where the delays differed. That is exactly inverted, and
+the error is recorded as F40 rather than quietly corrected, because the case it blessed is the one that
+loses a message.
 
 In DTR the delay is a property of a **statement**: `hub.report(x) after 2` and `hub.report(y) after 5`
-are two well-formed sends in one body. In LF, following the paper's own figures, the delay is a
+are two well-formed sends in one body, and `hub.report(1); hub.report(2);` enqueues **two** messages, so
+the receiver's `report` runs **twice**. In LF, following the paper's own figures, the delay is a
 property of a **connection**: Fig. 1b line 22 and Fig. 2b lines 41–42 write `after 2ms` on the arrow in
-`main reactor`, and `after 0 msec` / `after 0ms` / `after 0 ms` are all measured acceptable spellings.
+`main reactor`.
 
-Those two placements do not compose. §4.1 established that a body's sends to one (known rebec, message)
-pair all name the **same** output port, and that (sending instance, output port) determines a single
-connection. So the two statements above generate one arrow, which can carry one `after`. Concretely:
+### 6.1 Why one port per (rebec, message) is wrong
 
-- Two sends to the same (rebec, message) with the **same** delay: fine. They deduplicate to one
-  connection, and the second statement is a second `set()` on the same port.
-- Two sends to the same (rebec, message) with **different** delays: **unrepresentable**. Emitting two
-  connections with identical endpoints and different delays is not a way out — it is exactly what
-  `targetEndpointsUnique` (`GeneralWellFormed.lean:454`) forbids, and `lfc` forbids it too, because the
-  target port would appear twice on the right of a connection.
-- Sends to different messages, different known rebecs, or from different classes: fine, different
-  connections, independent delays.
+An LF port carries **one value per tag**. If both statements name the same output port, the translated
+sender performs two `set()` calls in one reaction at one tag, and the receiver's reaction fires **once**.
+Either the second `set` overwrites the first and one message is silently lost, or it is a runtime error;
+which of the two is **unmeasured**, and the design does not need to know, because both are wrong. So the
+same-delay case is not the easy one — it is the broken one.
 
-Stage E therefore **refuses a class whose body sends the same message to the same known rebec with two
-different delays**, with a named diagnostic that says so in those terms. Note that the check is
-class-level, not instance-level: two instances of one class share one body and so cannot disagree.
+The refusal the original section proposed cannot be repaired by widening it, either. "Two sends arrive
+at the same tag" is a property of **executions**, not of syntax: `hub.report(x) after 2` in one message
+server and `hub.report(y) after 5` in another coincide whenever the first fires three time units after
+the second, which no static rule decides. A *sound* syntactic refusal would therefore have to reject any
+class containing two sends to one (rebec, message) pair **regardless of delay** — which would reject
+precisely the differing-delay case that must work.
 
-The alternative is recorded because it is real and may become the right answer later. Per-send delays
-*are* expressible in LF: give the sender a logical action per (rebec, message, delay), schedule it with
-that delay, do the `set()` in the action's reaction, and leave the connection at `after 0 msec`. The
-logical time of arrival is unchanged, since delay `d` on the action plus `0` on the arrow is still `d`.
-It is not adopted now for three reasons: it costs one action and one reaction per distinct delay, it
-inserts an extra microstep on the sender side which is precisely the kind of thing stage F's ordering
-argument will have to reason about, and it departs from the figures the paper actually draws. Adopting
-it later is additive — the refusal becomes a translation — which is the same shape as every stage
-boundary in this plan.
+### 6.2 The send site is the unit
 
-**This looks like a paper finding and it is being written down as a conditional one.** If the paper's
-translation puts the delay on the connection and its DTR fragment allows per-statement delays without
-stating a restriction, then the translation as presented is incomplete on a legal input, and that is a
-P-series correction. What is missing before the finding can be asserted is a reading of the paper's
-own statement of the send rule, and §11 records that as an owed check rather than letting the claim
-stand on inference from two figures.
+Both requirements are met at once by keying ports on the **send site** — the individual send statement —
+rather than on the (rebec, message) pair:
+
+- Each send statement gets its own output port on the sending reactor, its own connection, and its own
+  input port on the receiving reactor.
+- One statement performs **at most one `set()` per reaction per tag**, because a reaction fires at most
+  once per tag and, control flow being stage H's business, each statement in a body executes at most
+  once per firing.
+- Two statements are two different ports, so no tag can carry two values on one port.
+
+Two sets on one output port at one tag therefore becomes **structurally impossible rather than
+checked** — an invariant to state as a theorem (§10.2), not a refusal to exercise. Three further
+consequences follow, and every one of them simplifies the design:
+
+1. **Per-statement delays are representable.** Each site's own connection carries that site's own
+   `after`, which is DTR's placement exactly. So the delay conflict of the original §6 does not exist,
+   the sender-side logical-action workaround it recorded as the alternative is **not needed**, and no
+   extra action, reaction or microstep is spent.
+2. **Nothing legal is refused on delay grounds.** The refusal count drops from three to two (§8).
+3. **F35 dissolves.** What looked like an unrepresentable mismatch between a statement-level and a
+   connection-level delay was an artifact of choosing the wrong key. The finding survives only in
+   weakened form: the paper's figures show one send per pair and so never expose the choice.
+
+Deduplication also disappears rather than moving. The original §4.1 required connection generation to
+deduplicate two sends naming one pair; with sites as the key there is nothing to deduplicate, and the
+routing table is simply longer.
+
+### 6.3 What it costs, and what stays owed
+
+The cost is proliferation: a class with *k* sends to one pair declares *k* output ports, and the
+receiver declares *k* input ports per sending instance. Since the site index carries no source
+identifier, it is appended **only when a class has more than one send to the same (rebec, message)
+pair** (§4.2), so every one of the three inherited fixtures — each with exactly one external send —
+keeps byte-identical names, and the ugliness is confined to models that earn it.
+
+**The invariant is conditional on the fragment, and stage H is where it comes due.** "One statement
+executes at most once per firing" is true only because bodies are flat: a send inside a `for` runs many
+times in one reaction and so sets one port many times, which is the message-losing case again, arriving
+by a different road. Stage H therefore inherits a real obligation and this design records it in advance
+rather than letting stage H discover it: either a loop containing an external send is refused, or the
+loop is compiled so that each iteration reaches its own tag — which is what a sender-side logical action
+buys, the mechanism §6.1's rewrite made unnecessary here but which stage H may well need. The theorem in
+§10.2 must be stated so that adding loop constructors **breaks its proof loudly** rather than silently
+weakening its meaning, in the same style as stage D's deliberate tripwires (§10.1).
+
+One measurement stays owed, and it is now about **stage D's landed self-send path** rather than about
+stage E. `self.tick(); self.tick();` in one body emits two `tick_action.schedule(0ms)` calls at one tag.
+Two invocations of one action at one tag are understood to be acceptable in LF, which is why this is not
+being treated as a defect — but it is **unmeasured**, no committed fixture exercises it (`priorities`
+self-sends twice from its constructor, to two *different* message servers, so nothing collides), and
+stage E's external-send path deliberately does not rely on it. §11.2 carries the probe.
+
 
 ## 7. The translation, function by function
 
@@ -449,13 +533,31 @@ Rejected: passing `DTR.GeneralModel` down to statement level. It couples the sma
 largest type and makes every statement lemma mention a model when only two lookups are used.
 
 Adopted: **resolve once per class, then compile against the resolution.** One new function builds a
-class's output-port environment, and `compileGeneralStmt` takes that environment and nothing else:
+class's output-port environment, and `compileGeneralStmt` takes that environment plus the address of the
+statement it is compiling, and nothing else:
 
 ```
+inductive GeneralBodyKey where
+  | constructor  : GeneralBodyKey
+  | messageServer : MsgName → GeneralBodyKey
+
+structure SendSite where
+  body  : GeneralBodyKey
+  index : Nat            -- position within that body's statement list
+
 outputPortEnvOf : List GeneralReactiveClass → GeneralReactiveClass → Except String OutputPortEnv
-OutputPortEnv  := List (KnownRebecName × MsgName × PortName × LF.GeneralPortPayload × Delay)
-compileGeneralStmt : OutputPortEnv → DTR.GeneralStmt → Except String LF.GeneralStmt
+OutputPortEnv  := List (SendSite × KnownRebecName × MsgName × PortName × LF.GeneralPortPayload × Delay)
+compileGeneralStmt : OutputPortEnv → GeneralBodyKey → Nat → DTR.GeneralStmt → Except String LF.GeneralStmt
 ```
+
+The site is an **address, not a counter**, and that is a deliberate choice with a proof cost attached to
+the alternative. Numbering the class's external sends with a running total would force every body
+compiler to thread the count and every statement lemma to carry an arithmetic side condition. Naming a
+site by its body and its position within that body is unique class-wide for free — a message-server name
+occurs once per class and the constructor is unique — so each body compiler already knows its own key,
+`List.zipIdx` supplies the index, and no state is threaded. Bodies are flat lists until stage H, at
+which point a nested statement needs a path rather than an index, and this is the shape that extends to
+one.
 
 Every interesting refusal then happens in `outputPortEnvOf`, once per class, where the diagnostic can
 say something specific; `compileGeneralStmt`'s `.knownRebec` arm becomes a lookup whose failure means
@@ -466,16 +568,21 @@ rather than as the stage boundary it is today.
 
 `outputPortEnvOf` is where §5 and §6 are enforced. It walks every message-server body **and the
 constructor body** — a constructor may send, and `assembleGeneralStartupReaction` already compiles its
-statements — collecting `(rebec, message, delay)` triples in first-occurrence order, then:
+statements — in canonical order, constructor first and then message servers in declaration order,
+producing one entry per external send site with **nothing merged**, then for each entry:
 
-1. deduplicates on `(rebec, message)`, refusing when two occurrences carry different delays (§6);
-2. resolves `rebec` through the class's `knownRebecs` to a class name, and that name through the class
+1. resolves `rebec` through the class's `knownRebecs` to a class name, and that name through the class
    table, refusing on an undeclared rebec or an unknown class;
-3. finds the message server of that name on the target class, refusing when it has none;
-4. builds the payload from the target server's parameters — `scalar` at arity 1, `struct` at arity ≥ 2
+2. finds the message server of that name on the target class, refusing when it has none;
+3. builds the payload from the target server's parameters — `scalar` at arity 1, `struct` at arity ≥ 2
    named by `generalPayloadStructName` on the **receiving** reactor and the message (§5.2), and a
    refusal at arity 0 (§5.3);
-5. names the port `outputPortNameFor rebec message` (§4.2).
+4. names the port `outputPortNameFor rebec message siteSuffix` (§4.2), where the suffix is empty when
+   this is the class's only entry for that (rebec, message) pair and its 1-based ordinal among the
+   pair's entries in canonical order otherwise;
+5. keeps the site's **own** delay, unexamined — no comparison against any other site, because two sites
+   are two ports and two connections, so differing delays are not a conflict and equal delays are not a
+   collision (§6).
 
 ### 7.2 Output ports come from the class; input ports and connections come from the model
 
@@ -491,10 +598,12 @@ The model-level object is a **routing table**, and everything about the topology
 structure GeneralRoute where
   senderInstance   : ActorName
   senderClass      : ClassName
+  site             : SendSite
   knownRebec       : KnownRebecName
   message          : MsgName
   receiverInstance : ActorName
   receiverClass    : ClassName
+  outputPort       : PortName
   payload          : LF.GeneralPortPayload
   delay            : Delay
 
@@ -502,25 +611,32 @@ routesOf : DTR.GeneralModel → Except String (List GeneralRoute)
 ```
 
 built by walking `model.instances` in **main-block declaration order**, and for each instance, its
-class's output-port environment in first-occurrence order, resolving each `knownRebec` through
+class's output-port environment in canonical site order, resolving each `knownRebec` through
 `Store.lookup actor.bindings` — which is exactly what
 `DTR.GeneralModel.resolve_topology_of_actor` (`Relico/DTR/GeneralSyntax.lean:685`) proves agrees with
 resolution through the derived topology. Refusals: an unbound known rebec, or a binding naming an
 instance the model does not declare.
+
+`outputPort` is carried rather than recomputed, so that the two ends of a connection are built from one
+string and cannot drift; `site` is carried because it is what makes routes distinguishable, and because
+stage F will want to say which statement an arrow came from.
 
 The four projections:
 
 | target | projection |
 | --- | --- |
 | `reactor C .outputPorts` | `outputPortEnvOf classes C`, mapped to port name and payload |
-| `reactor C .inputPorts` | routes with `receiverClass = C`, mapped to `inputPortNameFor senderInstance (outputPortNameFor knownRebec message)` and payload |
-| `program.connections` | every route, mapped to `⟨senderInstance, outPort, receiverInstance, inPort, delay⟩` |
+| `reactor C .inputPorts` | routes with `receiverClass = C`, mapped to `inputPortNameFor senderInstance route.outputPort` and payload |
+| `program.connections` | every route, mapped to `⟨senderInstance, outputPort, receiverInstance, inPort, delay⟩` |
 | `reactor C .messageReactions` | see §7.3 |
 
-`targetEndpointsUnique` then follows from the routes being distinct in `(senderInstance, knownRebec,
-message)`, because the input-port name is built from the sender instance and those two components, and
-distinctness of that key is what step 1 of `outputPortEnvOf` establishes per class and the
-instance-order walk preserves across instances.
+`targetEndpointsUnique` then follows from the routes being distinct in `(senderInstance, site)`, because
+the input-port name is built from the sender instance and the sender's output-port name, and the
+output-port name determines the site within its class: step 4 of `outputPortEnvOf` (§7.1) assigns
+distinct pairs distinct names or refuses (§4.3), and assigns the same pair's several sites distinct
+ordinals. That is the point of the site key — under the old (rebec, message) key two sites collapsed to
+one port and uniqueness had to be bought with a deduplication step and a delay refusal; now it is
+carried by construction.
 
 ### 7.3 The receiver's reactions, and the order they are declared in
 
@@ -534,6 +650,13 @@ Each message server `m` on class `C` produces, in this order:
 2. one reaction per route into `C` for `m`, in **route order**, named `<inputPortName>_reaction`,
    triggered by `.inputPort inputPortName`, with the message server's parameter names as its
    `parameters` and the same compiled body as (1).
+
+Because routes are keyed by send site, a sender class with two sends to one (rebec, message) pair
+contributes **two** reactions here per instance, not one, both compiling the same message-server body.
+That is the intended reading of Rebeca's semantics rather than duplication for its own sake: two sends
+enqueue two messages and the body runs twice, and since each arrives on its own port it can arrive at
+its own tag. What the two reactions must never do is fire at one tag with one of them losing its value,
+which is exactly the hazard §6.1 rules out structurally.
 
 Grouping by message server rather than emitting all action reactions and then all port reactions is
 deliberate: stage F's ordering argument is about the port reactions of *one* message server, so keeping
@@ -571,9 +694,10 @@ exist.
 
 ## 8. Totality, and where each refusal lives
 
-Stage E has five refusals that stage D did not, and they do not all belong in the same layer. Sorting
-them properly is what keeps the translator's refusal surface honest, because two of the five are
-already someone else's job.
+Stage E has four refusals that stage D did not, and they do not all belong in the same layer. Sorting
+them properly is what keeps the translator's refusal surface honest, because two of the four are
+already someone else's job. (It was five until §6 was rewritten; the conflicting-delay refusal is gone
+because per-site ports make conflicting delays representable.)
 
 **Already guaranteed upstream, so defensive in the translation.** `Frontend.GeneralDiagnosticReason`
 already contains `sendTargetsDeclaredFailed` — every external send names a known rebec its class
@@ -590,27 +714,34 @@ Those two reasons are also, as far as the fixture set shows, **unexercised**: no
 exists at all, so it is the first stage in which they are reachable, and §10 makes two new
 `lean-reject` fixtures a deliverable rather than a nice-to-have.
 
-**Genuinely new, and genuinely the translation's own.** Three refusals have no upstream owner because
-none of them is a malformedness — each is a legal DTR model that this target mapping cannot carry:
+**Genuinely new, and genuinely the translation's own.** Two refusals have no upstream owner because
+neither is a malformedness — each is a legal DTR model that this target mapping cannot carry:
 
-1. **Conflicting delays** on two sends to one (rebec, message) pair (§6). The model is well formed; the
-   connection can hold one `after`.
-2. **An arity-zero external send** (§5.3). The model is well formed; the port declaration it needs is
+1. **An arity-zero external send** (§5.3). The model is well formed; the port declaration it needs is
    unmeasured, and the project does not guess about `lfc`.
-3. **A generated-name collision** (§4.3), when two distinct (rebec, message) pairs on one class
-   concatenate to one port name. The model is well formed; the naming rule is not injective.
+2. **A generated-name collision** (§4.3), when two distinct sites on one class concatenate to one port
+   name — either two distinct (rebec, message) pairs colliding outright, or a pair's ordinal suffix
+   colliding with another pair spelled to end in that digit. The model is well formed; the naming rule
+   is not injective.
 
-All three stay `Except String` rather than becoming `GeneralDiagnosticReason` constructors, which is
+Both stay `Except String` rather than becoming `GeneralDiagnosticReason` constructors, which is
 the existing division of labour — reasons describe what is wrong with a *document*, and these describe
-what this *translation* cannot represent — and each message must say which of the three it is in those
-terms. Refusal 2 additionally names the missing measurement, so that the day the probe runs, the
+what this *translation* cannot represent — and each message must say which of the two it is in those
+terms. Refusal 1 additionally names the missing measurement, so that the day the probe runs, the
 person reading the message knows the refusal is provisional.
+
+**And one refusal that was designed and then designed away.** Two sends to one (rebec, message) pair
+with different delays was to be refused; §6 shows the refusal would have been both unsound as stated and
+an obstacle to a legal model, and that keying on the send site removes the need for it. It is recorded
+here rather than deleted because the surviving §9 guard is the only thing in stage E that now stands
+between a legal DTR model and a mistranslation, and a reader comparing this section against the
+implementation should be able to see that the missing refusal is missing on purpose.
 
 **What replaces stage D's characterisation.** `compileGeneralModel_ok_iff_selfSendOnly` (`:3181`) proves
 acceptance and self-send-onlyness are the same condition, and stage E deletes that biconditional on
 purpose — it is the theorem whose falsification *is* the stage. It is not replaced by another
 biconditional, and the reason is worth stating rather than eliding: acceptance now depends on
-cross-class resolution, payload arity, delay agreement and rendered-name distinctness, so a faithful
+cross-class resolution, payload arity and rendered-name distinctness, so a faithful
 characterising predicate would be a mirror of the resolution pipeline, and a mirror is the shape of
 defect this development keeps finding elsewhere in the repo. Instead stage E owes two statements that
 are together more useful and separately provable:
@@ -621,10 +752,11 @@ are together more useful and separately provable:
   the direction that protects the printer and `lfc`, and it subsumes P20's uniqueness requirement
   (§4.3).
 - **A sufficient condition for acceptance.** A decidable predicate over DTR models — no arity-zero
-  external send, no conflicting delays, no colliding generated names, and DTR well-formedness — that
+  external send, no colliding generated names, and DTR well-formedness — that
   implies `.ok`. It is deliberately *sufficient* and not *necessary*, and saying so in the theorem's
   own docstring is the difference between an honest lemma and stage D's biconditional overreaching
-  into a stage that had not happened yet.
+  into a stage that had not happened yet. Note that delay agreement is **not** a conjunct: it was one
+  until §6 was rewritten, and per-site ports removed it.
 
 ## 9. How F32 is discharged, and why the answer is neither of the two options offered
 
@@ -749,11 +881,29 @@ receiver's port reactions for one message server appear in main-block instance-d
 paired with a docstring saying in as many words that this is *not* a priority result and that stage F
 owns that claim.
 
+And one more, which is the theorem the whole of §6 exists to make provable: **no reaction of an emitted
+reactor sets one output port twice.** Stated over the compiled body of a single reaction — for any
+class `C` accepted by the translation and any reaction of the emitted `reactor C`, the list of port names
+appearing in that reaction's `setPort` statements is `Nodup`. It follows from the site being an address
+(§7.1): two `setPort`s in one compiled body come from two statements at two indices of one body, so their
+sites differ, so `outputPortEnvOf` gave them different port names or refused. This is the invariant that
+under the pair-keyed design could not be stated at all, and it is worth writing as a theorem rather than
+leaving implicit precisely because it is the guarantee that a message cannot be silently dropped. It
+also has a reachability obligation of the same kind as §9's guard: a fixture whose class sends the same
+message twice to the same rebec must exist, or the theorem is about a case nothing exercises (§10.3).
+
 ### 10.3 Fixtures, counts and the documents that must move together
 
-- One **new positive**: an external send to a message server of arity ≥ 2, which is the only way the
-  struct-typed port of §5.2 gets exercised. Positives go 9 → 10, so `EXPECTED_ASSERTIONS` — computed at
-  `frontend/check-general-lean.sh:132` as `POSITIVE_COUNT + LEAN_REJECT_COUNT` — moves on its own.
+- One **new positive**, carrying three things at once: an external send to a message server of arity ≥ 2,
+  which is the only way the struct-typed port of §5.2 gets exercised; **two sends from one body to the
+  same (rebec, message) pair**, which is the only way the site key, the ordinal suffix and the §10.2
+  `Nodup` invariant get exercised; and **two different `after` values on those two sends**, which is the
+  case the pair-keyed design refused and this one must translate. One fixture rather than three is
+  chosen deliberately — it keeps positives at 9 → 10 and so leaves the advance prediction intact, and
+  diagnosability lives in the assertion granularity rather than the fixture granularity, since each
+  bridge assertion names the one property it checks. Positives 9 → 10 means `EXPECTED_ASSERTIONS` —
+  computed at `frontend/check-general-lean.sh:132` as `POSITIVE_COUNT + LEAN_REJECT_COUNT` — moves on its
+  own.
 - Two **new `lean-reject`** documents for `sendTargetsDeclaredFailed` and
   `sendsResolveToMessageServersFailed` (§8), taking `lean-reject` 12 → 14 and reason coverage 9 → 11 of
   32. These are the first two reasons in the whole vocabulary that *require* a send to another actor to
@@ -805,10 +955,15 @@ and the D-numbers became uncitable. Do not cite these elsewhere yet.
   concatenation rule without either escaping the separator or checking the result is wrong. Ledger P20
   stands independently: the paper's two figures disagree about port names, and neither offers a rule
   that survives this.
-- **F35 — DTR delays a statement, LF delays a connection.** Two sends to one (known rebec, message)
-  pair with different `after` values cannot be represented, because they generate one arrow. Refused in
-  stage E; the sender-side logical-action route is recorded as the known alternative. Whether this is
-  *also* a P-series correction depends on a paper reading that has not been done (§11.2).
+- **F35 — DTR delays a statement, LF delays a connection, and that is a naming problem rather than an
+  expressiveness one.** *Weakened on 2026-08-20; the original claim was that two sends to one (known
+  rebec, message) pair with different `after` values are **unrepresentable**, and it was wrong.* They are
+  representable, by giving each send site its own port and its own connection (§6.2); what is true is
+  only that the paper's figures place the delay on the arrow and never show two sends to one pair, so
+  they never confront the choice, and an implementation that keys ports on the pair — the obvious
+  reading of those figures — is forced either to lose messages or to refuse legal models. That is worth
+  recording as a finding about the figures. Whether it is *also* a P-series correction depends on a
+  paper reading that has not been done (§11.2).
 - **F36 — the port layer still has the type erasure stage D removed from the action layer.**
   `LF.GeneralPortDecl.declaredType : LF.GeneralType` with `GeneralType = int | boolean` cannot type a
   port that carries two values, which is the same shape of gap as `initialValue : Int` and
@@ -827,6 +982,32 @@ and the D-numbers became uncitable. Do not cite these elsewhere yet.
 - **F39 — stage E is not conservative over stage D.** The well-formedness guard refuses models stage D
   accepted. Every such model had ill-formed LF output, so this is a bug fix, but a stage that removes
   inputs while adding capability should say so out loud.
+- **F40 — a design document's own defect: one port per (rebec, message) silently drops messages, and
+  the refusal that seems to fix it cannot.** This is recorded against §6 of this document as committed at
+  `6298284`, not against the paper, because a design that was reviewed and landed is exactly the kind of
+  artifact whose errors are worth keeping visible. Three parts, each independently reusable:
+  1. **The blessed case was the broken one.** §6 said of two sends to one pair with the *same* delay:
+     *"fine. They deduplicate to one connection, and the second statement is a second `set()` on the same
+     port."* An LF port carries one value per
+     tag, so `hub.report(1); hub.report(2);` — two Rebeca messages, two runs of `report` — becomes one
+     reaction firing. A message is lost with no error anywhere, which is the worst possible failure mode
+     for a translator that carries a preservation theorem.
+  2. **A sound syntactic refusal refuses the wrong thing.** "Two sends arrive at one tag" is a property
+     of executions. `report after 2` and `report after 5` in two message servers coincide whenever the
+     first fires three units after the second, so any sound static rule must refuse *every* class with
+     two sends to one pair, delay-independent — which refuses the differing-delay case that must work.
+     There is no refusal that satisfies both requirements, and finding that out is what forced the
+     redesign rather than a patch.
+  3. **The key was the error.** Keying on (rebec, message) is the natural reading of the paper's figures
+     and it is what makes the hazard exist at all. Keyed on the send site, the invariant is structural
+     (§10.2) and the delay question dissolves (§6.2). Two Rebeca messages become two ports; the target
+     model was never short of expressiveness.
+
+  The user's requirement that drove the redesign is on the record in these terms: two sets on one output
+  port at one time must not be allowed in LF, two invocations of the same action are acceptable, and DTR
+  source that would produce the first must be rejected with the reason stated clearly — mechanism
+  delegated. Making it structurally unreachable satisfies that requirement more strongly than rejecting
+  it would, since there is no source program left to reject.
 
 ### 11.2 Owed measurements and readings
 
@@ -854,26 +1035,51 @@ Each is stated with its prediction now, so the prediction cannot be adjusted aft
    `limit` or `enabled` in `widenedModel` and assert what `DTR.GeneralModel.wellFormed`,
    `compileGeneralModel` and `LF.GeneralProgram.wellFormed` each say. It now tells us whether §9's
    guard is reachable rather than whether a soundness gap exists.
+7. **What does a second `schedule()` of one logical action at one tag do?** This one is owed by **stage
+   D's landed self-send path**, not by stage E: `self.tick(); self.tick();` emits two
+   `tick_action.schedule(0ms)` calls in one reaction, and no committed fixture exercises it —
+   `priorities` self-sends twice from its constructor but to two *different* message servers, so nothing
+   coincides. Probe the three candidate behaviours (the reaction fires twice at successive microsteps,
+   fires once, or `lfc`/reactor-cpp errors) and probe `policy: defer` with a minimum spacing alongside,
+   since deferring a coincident schedule to the next microstep is the mechanism that would reproduce
+   Rebeca's queue faithfully and this design never considered it. *Prediction: the default policy fires
+   the reaction twice at successive microsteps and neither the validator nor clang complains; `defer`
+   changes the spacing but not the count.* Confidence moderate. Stage E's external-send path deliberately
+   does not depend on the answer — §6.2 gives each site its own port — so this is a stage D debt being
+   recorded rather than a stage E blocker. Note also what is **not** owed: the corresponding question for
+   ports, what a second `set()` on one port at one tag does, is now unreachable by construction (§10.2),
+   so it stays unmeasured on purpose.
 
-### 11.3 Decisions this design cannot make for you
+### 11.3 Decisions this design cannot make for you — all four answered on 2026-08-20
 
-The port-name **spelling** is not on this list: that was delegated with the criterion *readable and
-unique*, and §4.2 exercises the delegation rather than re-asking. Four things genuinely are:
+The port-name **spelling** was never on this list: it was delegated with the criterion *readable and
+unique*, and §4.2 exercises the delegation rather than re-asking. Four things genuinely were, and each
+now records the answer given rather than the question asked, so that a later reader can tell a decision
+from an assumption:
 
-1. **Payload arity.** Support arity ≥ 1 now — widening `GeneralPortDecl` per §5.2 so a multi-parameter
-   message server can be reached externally — or restrict stage E to arity 1, keep the LF layer
-   untouched, and defer the struct-typed port to its own stage. The corpus needs only arity 1, so the
-   narrow choice costs no fixture; the wide choice spends a measurement (`struct_as_port_type`) that is
-   already paid for and avoids leaving `GeneralPortDecl` structurally unable to express a port the
-   target demonstrably accepts. This design assumes the wide choice.
-2. **F32's resolution.** §9 takes a third road — the translation validates its own output — where the
-   F32 note says to choose between an extra hypothesis and a cross-layer proof. The reasoning is in §9
-   and it includes why attempting the cross-layer proof would *fail*, which is itself worth having; but
-   it does override a written instruction, so it should be confirmed rather than assumed.
-3. **The delay conflict.** Refuse two different delays to one (rebec, message) pair, as §6 proposes, or
-   implement the sender-side logical-action route now and keep every legal model translatable at the
-   cost of an extra action, an extra reaction and an extra microstep that stage F will have to reason
-   about.
-4. **Non-conservativity.** F39 means stage E refuses inputs stage D accepted. The alternative is to make
-   §9's guard a warning rather than a refusal, which keeps every stage D input working and lets ill-formed
-   LF reach `lfc`. This design chose the refusal.
+1. **Payload arity — ANSWERED: arity ≥ 1 now.** `GeneralPortDecl` is widened per §5.2 so a
+   multi-parameter message server can be reached externally. The alternative was restricting stage E to
+   arity 1, keeping the LF layer untouched, and deferring the struct-typed port to its own stage; the
+   corpus needs only arity 1, so the narrow choice would have cost no fixture. The wide choice spends a
+   measurement (`struct_as_port_type`) that is already paid for and avoids leaving `GeneralPortDecl`
+   structurally unable to express a port the target demonstrably accepts. As designed.
+2. **F32's resolution — ANSWERED: road (c), the translation validates its own output.** §9 stands. The
+   F32 note had said to choose between an extra hypothesis and a cross-layer proof; the answer overrode
+   that written instruction knowingly, after the three roads were compared on the `Ticker` witness
+   (`statevars { int tick_action; }` with `msgsrv tick()`): road (a)'s hypothesis is true but
+   undischargeable, since `GeneralDecoder` establishes only `DTR.wellFormed`, which relates state
+   variables to nothing; road (b) reaches three quarters of the `Nodup` union and then sticks on actions
+   versus state variables, with `Ticker` as the counterexample; road (c) needs no DTR import, which
+   matters because the translator imports DTR syntax only.
+3. **The delay conflict — ANSWERED, and the answer inverted the section.** The rule given was *implement
+   it when the delays differ, refuse when they coincide*, which is the opposite of what §6 had written.
+   Working out how to satisfy it produced the per-send-site design, and with that the "refuse when they
+   coincide" half needs no refusal at all: coincidence on one port is structurally unreachable (§6.2,
+   §10.2). Both halves of the answer are therefore honoured, one by translation and one by construction,
+   and F40 records what was wrong.
+4. **Non-conservativity — ANSWERED: keep the refusal.** §9's guard refuses rather than warns, so stage E
+   refuses inputs stage D accepted (F39). The alternative would have kept every stage D input working and
+   let ill-formed LF reach `lfc`. As designed.
+
+Nothing on this list blocks implementation any longer. What remains open is measurement, not decision,
+and §11.2 holds it.
