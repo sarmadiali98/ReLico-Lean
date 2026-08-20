@@ -1,6 +1,7 @@
 import Relico.LF.GeneralWellFormed
 import Relico.LF.GeneralCppPrinter
 import Relico.Translation.GeneralBasic
+import Relico.DTR.GeneralWellFormed
 
 set_option autoImplicit false
 set_option maxRecDepth 8192
@@ -1515,6 +1516,110 @@ private def externalSendModel :
     ]
 
 /--
+The constructor of `configuredClass` with its first formal renamed to `limit`,
+which is already one of that class's state variables.
+
+`limitStateName` is reused rather than a fresh `"limit"` written out, so the
+collision holds by construction instead of by two spellings happening to agree.
+The body and the self-send are renamed with it: a `.parameterVar` naming a formal
+that no longer exists would be a *different* defect, and `sendsResolveToMessageServers`
+does not look inside expressions, so it would pass unnoticed and the assertion
+below would be measuring the wrong thing.
+-/
+private def collisionConstructor :
+    DTR.GeneralConstructor where
+
+  parameters :=
+    [
+      {
+        name :=
+          limitStateName
+
+        declaredType :=
+          .int
+      },
+
+      {
+        name :=
+          activeParameter
+
+        declaredType :=
+          .boolean
+      }
+    ]
+
+  body :=
+    [
+      .assign
+        limitStateName
+        (.parameterVar limitStateName),
+
+      .assign
+        enabledStateName
+        (.parameterVar activeParameter),
+
+      .send
+        .selfTarget
+        adjustMessageName
+        [
+          .parameterVar limitStateName,
+          .intLiteral 2,
+          .parameterVar activeParameter
+        ]
+        ⟨0⟩
+    ]
+
+/--
+Finding F32's counterexample, as a model rather than as a paragraph.
+
+A structure update on `widenedModel`, so the constructor is the only difference and
+the three assertions cannot be explained by anything else. `widenedModel` itself is
+asserted well-formed, translating and LF-well-formed above, which is what makes this
+model's third outcome a divergence rather than an isolated fact.
+
+`DTR.GeneralModel.wellFormed` accepts it: none of its five clauses mentions state
+variables, and `namesUniqueAndValid` says so deliberately at
+`Relico/DTR/GeneralWellFormed.lean:319-321`, on the ground that scope uniqueness is
+"the elaborator's concern". `LF.GeneralReactor.wellFormed` rejects the result, because
+`declaredNames` puts parameters and state variables in one union and requires it
+`Nodup`.
+
+**This model cannot come from a `.rebeca` file, and that is the point.**
+`Relico/Frontend/GeneralElaborator.lean:793-796` rejects a constructor formal that
+shadows a state variable, with its own `.parameterShadowsStateVariable` diagnostic, so
+the delegation quoted above is honoured and the *tool* is protected one layer above
+`wellFormed`. What is not protected is the *theorem*: its hypothesis is `m.wellFormed`,
+which does not imply what the LF side checks, and a hand-built model is enough to
+refute it. The gap is therefore a missing proof that the elaborator's guarantee and
+the LF predicate agree -- not a missing clause in `wellFormed`, which would duplicate
+the elaborator's check and collapse a layering three docstrings agree on.
+
+If such a model ever did reach `lfc`, the outcome is measured rather than assumed:
+`tools/paper-measurements/lf_semantics_probe.sh` probe `param_state_name_collision`
+shows the LF validator accepting the collision and the generated C++ then failing on a
+reference member bound to a temporary. That is why the LF-side `Nodup` requirement is
+worth keeping, and it is the whole of what the probe licenses.
+-/
+private def collisionModel :
+    DTR.GeneralModel where
+
+  classes :=
+    [
+      {
+        configuredClass with
+
+        constructor :=
+          collisionConstructor
+      }
+    ]
+
+  instances :=
+    [
+      configuredOnActor,
+      configuredOffActor
+    ]
+
+/--
 The refusal a known-rebec send earns in stage D.
 
 Asserted on its exact text, not merely on being an error. The message names the
@@ -2217,7 +2322,66 @@ private def translationAssertions :
           widenedInstanceWithWrongArity)
 
 /--
-Run every assertion: 34 printing, then 10 well-formedness, then 12 translation, 56 in all.
+Finding F32, asserted rather than argued: the well-formedness preservation theorem
+that stage E was to prove is **false**, and these four assertions are the witness.
+
+Kept as its own group so that the number that breaks says which claim broke. Three
+assertions state the divergence and the fourth exists to stop the third passing for
+the wrong reason: `LF.GeneralProgram.wellFormed` is a conjunction, so a rejection
+proves only that *some* clause failed, and asserting that the instance-argument
+clause still holds narrows it to the name clause.
+
+These assertions are about the theorem, not about the tool. The frontend rejects this
+collision before a model reaches the translator -- see `collisionModel` -- so nothing
+here says the pipeline is unsound. What they say is that `m.wellFormed` is too weak a
+hypothesis to carry the conclusion, and any fix must either strengthen the hypothesis
+or prove the elaborator's guarantee implies the LF predicate.
+
+Whichever fix lands, the first assertion is the one that changes meaning, and this
+group must be rewritten in the same commit rather than deleted: a counterexample that
+stops being a counterexample is worth a line saying why.
+-/
+private def collisionAssertions :
+    IO Unit := do
+
+  expectBool
+    "DTR_ACCEPTS_PARAMETER_STATE_COLLISION"
+    true
+    collisionModel.wellFormed
+
+  -- Not refused, so reaching `.ok` below is a fact about the model rather than an
+  -- accident of the one refusal stage D has.
+  expectBool
+    "COLLISION_MODEL_IS_SELF_SEND_ONLY"
+    true
+    (Translation.generalModelSelfSendOnly
+      collisionModel)
+
+  match Translation.compileGeneralModel
+    collisionModel
+  with
+
+  | .error diagnostic =>
+      testFailure
+        ("the collision model must translate for F32 to be a counterexample, " ++
+          "but it was refused: " ++
+          diagnostic)
+
+  | .ok program => do
+
+      -- The counterexample itself.
+      expectIllFormed
+        "TRANSLATED_COLLISION_PROGRAM_ILL_FORMED"
+        program
+
+      expectBool
+        "COLLISION_PROGRAM_INSTANCE_ARGUMENTS_STILL_MATCH"
+        true
+        program.instanceArgumentsMatch
+
+/--
+Run every assertion: 34 printing, then 10 well-formedness, then 12 translation, then
+4 for finding F32's counterexample, 60 in all.
 
 The count is stated here because `frontend/check-general-lean.sh` compares the
 number of `PASS_` lines against a literal. There are no fixtures to count, so a
@@ -2237,6 +2401,8 @@ def runGeneralLfPrinterTests :
     wellFormednessAssertions
 
     translationAssertions
+
+    collisionAssertions
 
     IO.println
       "GENERAL_LF_PRINTER_TESTS_OK"

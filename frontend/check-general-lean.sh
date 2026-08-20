@@ -180,11 +180,13 @@ echo "=== the general LF printer, well-formedness and translation assertions"
 # running: the completion marker alone cannot, since a `try` block that skipped
 # twenty assertions still reaches its final `IO.println`.
 #
-# 34 printing, 10 well-formedness, 12 translation. Stage C ran 25, in two blocks;
-# the third block is the one that mentions `Relico.Translation`, so a translation
-# that stopped being called would drop this count by twelve rather than pass
-# quietly.
-EXPECTED_PRINTER_ASSERTIONS=56
+# 34 printing, 10 well-formedness, 12 translation, 4 for finding F32's counterexample.
+# Stage C ran 25, in two blocks; the third block is the one that mentions
+# `Relico.Translation`, so a translation that stopped being called would drop this
+# count by twelve rather than pass quietly. The fourth block asserts that the
+# well-formedness preservation theorem is false; when the DTR-side clause lands it
+# must be rewritten, and this literal is what forces that to be deliberate.
+EXPECTED_PRINTER_ASSERTIONS=60
 
 set +e
 PRINTER_OUTPUT="$(

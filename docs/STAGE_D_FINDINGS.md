@@ -382,6 +382,27 @@ late rises there rather than staying flat.
 > the missing DTR clause from bookkeeping to a soundness fix, and it means the clause is required whether or
 > not the preservation theorem is ever stated. The Lean half is still unwritten and is still what settles it.
 
+> **Correction, same day, before the above was acted on.** The paragraph above is **wrong**, and it is left
+> standing because the reasoning that produced it is the kind worth being able to recognise later. It
+> inferred a pipeline-level conclusion from a toolchain-level measurement without checking the layer in
+> between. `Relico/Frontend/GeneralElaborator.lean:793–796` rejects a constructor formal that shadows a state
+> variable, with a dedicated `.parameterShadowsStateVariable` diagnostic. A `.rebeca` file therefore cannot
+> deliver this collision to the translator, `namesUniqueAndValid`'s delegation to "the elaborator's concern"
+> is honoured rather than betrayed, and **there is no soundness gap**.
+>
+> What survives is narrower and still blocks stage E: the preservation theorem is false *as stated*, because
+> its hypothesis `m.wellFormed` does not imply the LF-side `Nodup`, and a hand-built model witnesses that.
+> The fix is therefore **not** a new clause in `DTR.GeneralModel.wellFormed` — that would duplicate the
+> elaborator's check and collapse a two-layer partition that `GeneralWellFormed.lean:319–321`,
+> `GeneralElaborator.lean:820–823` and `GeneralDecoder.lean:30` all state deliberately. It is either an
+> explicit extra hypothesis on the theorem, or a proof that the elaborator's guarantee implies the LF
+> predicate. Stage E's design must choose between those two and say why.
+>
+> One consequence worth its own line: nothing in the twelve lean-reject fixtures exercises
+> `.parameterShadowsStateVariable`. The guarantee this correction leans on is **untested**, which is the
+> shape of the `PrioritiesDistinct` defect from stage B — a predicate that exists and is never reached.
+> A fixture for it is now the cheapest thing on this list.
+
 **Blocking stage E — measure whether a preamble struct can be a port's type.** F30's candidate answer for a
 multi-parameter message server reached by an external send is `input in: Receiver_m_Args`. Nothing has
 measured that `lfc` accepts a preamble struct in that position; the struct probe covered actions only. If it
