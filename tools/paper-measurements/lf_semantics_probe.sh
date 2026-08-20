@@ -608,6 +608,105 @@ main reactor {
 }
 LF
 
+# ---------------------------------------------------------------------------
+# 11. STAGE E PREREQUISITES, added 2026-08-20 after stage D landed at 3290ad4.
+# Three questions, each of which changes what a later document may claim.
+#
+# 11a decides F30. Stage D's printer refuses a reaction that declares two or
+# more parameters for an INPUT PORT, on the true ground that a port carries one
+# value of one type. The candidate fix for stage E is to give the port the
+# payload struct as its type, which makes the refusal unreachable rather than
+# merely unreached. Route A measured struct payloads on ACTIONS only, and an
+# action type and a port type are different positions in the grammar.
+#
+# 11b bears on F32. `LF.GeneralReactor.declaredNames` puts parameters into the
+# same uniqueness union as state variables, and the file admits at :81 that
+# whether lfc actually rejects the collision was never measured -- including
+# them was the conservative side of an unmeasured question. If lfc REJECTS,
+# the conservatism is a measured requirement and the DTR side owes the mirror
+# clause. If lfc ACCEPTS, this repository is deliberately stricter than its
+# target and must say so in those words. The reaction body deliberately does
+# not mention `x`, so only the DECLARATION is under test.
+#
+# 11c pays a debt. The named-argument and parameter-default forms were measured
+# ad hoc in stage D and only prose recorded it; a fresh clone could not re-run
+# it. Cross-reactor print order has no guarantee in the Cpp target, so the
+# expectation is stated as a SET of lines, not a sequence.
+# ---------------------------------------------------------------------------
+
+probe struct_as_port_type 'a preamble struct as a PORT type -- compiles and prints RELICO_STRUCT_PORT 9 1?' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+struct Receiver_m_Args { int left; int right; bool flag; };
+=}
+
+reactor Sender {
+    output out: Receiver_m_Args
+    reaction(startup) -> out {=
+        out.set(Receiver_m_Args{7, 2, true});
+    =}
+}
+
+reactor Receiver {
+    input in: Receiver_m_Args
+    reaction(in) {=
+        auto p = *in.get();
+        std::printf("RELICO_STRUCT_PORT %d %d\n", p.left + p.right, p.flag ? 1 : 0);
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    s = new Sender()
+    r = new Receiver()
+    s.out -> r.in after 0 msec
+}
+LF
+
+probe param_state_name_collision 'parameter and state variable SHARING a name -- does lfc reject it? either answer is informative' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor R(x: int = 3) {
+    state x: int = 0
+    reaction(startup) {=
+        std::printf("RELICO_COLLIDE\n");
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    r = new R(x=7)
+}
+LF
+
+probe parameter_defaults_named_args 'reactor parameters with defaults and per-instance named arguments -- both RELICO_PARAM 0 0 and RELICO_PARAM 7 1, in either order?' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Configured(bound: int = 0, active: bool = false) {
+    state limit: int = 0
+    reaction(startup) {=
+        limit = bound;
+        std::printf("RELICO_PARAM %d %d\n", limit, active ? 1 : 0);
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    off = new Configured()
+    on = new Configured(bound=7, active=true)
+}
+LF
+
 printf '\n\n========== HOW TO READ THIS ==========\n'
 cat <<'NOTE'
   The single most important line in this log is whether
@@ -633,6 +732,18 @@ cat <<'NOTE'
   three lines confirms SS III-E's claim that an `after` delay breaks a
   causality loop -- a paper claim measured TRUE, which is worth as much as the
   corrections.
+
+  Fifth, section 11 exists to unblock stage E, and its three probes are read
+  differently from the rest. struct_as_port_type compiling means F30's refusal
+  can be made unreachable by giving a port the payload struct as its type;
+  failing means the payload-arity limit becomes a stated restriction on the
+  accepted fragment and must be documented as such rather than as a printer
+  detail. param_state_name_collision is informative EITHER way: rejection makes
+  our name-uniqueness union a measured requirement and obliges the DTR side to
+  mirror it, while acceptance means this repository is deliberately stricter
+  than its target and must say so in those words -- see F32.
+  parameter_defaults_named_args simply repays a debt: that form was measured ad
+  hoc in stage D with no committed script, and a fresh clone can now re-run it.
 
   Nothing in the repo was read or written. Scratch tree: /tmp/relico_lf_probe
 NOTE

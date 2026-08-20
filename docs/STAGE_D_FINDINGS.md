@@ -375,11 +375,23 @@ distinct as one set, and it needs it *before* the well-formedness preservation t
 that theorem is false without it. Stage E is where ports join the same union, so the cost of discovering this
 late rises there rather than staying flat.
 
+> **The compiler half is now measured (2026-08-20) and it raises the stakes.** See the `declaredNames` item
+> below: the collision survives `lfc`'s validator and dies in the generated C++. So if the Lean-level
+> counterexample stands, the pipeline does not merely fail to prove a theorem — it can take a model this
+> repository certifies as DTR-well-formed and emit an LF program that **does not build**. That reclassifies
+> the missing DTR clause from bookkeeping to a soundness fix, and it means the clause is required whether or
+> not the preservation theorem is ever stated. The Lean half is still unwritten and is still what settles it.
+
 **Blocking stage E — measure whether a preamble struct can be a port's type.** F30's candidate answer for a
 multi-parameter message server reached by an external send is `input in: Receiver_m_Args`. Nothing has
 measured that `lfc` accepts a preamble struct in that position; the struct probe covered actions only. If it
 fails, the arity limit becomes a stated restriction on the accepted fragment rather than a printer detail, and
 that changes what stage E can claim.
+
+> **Measured 2026-08-20, and it succeeds.** `lf_semantics_probe.sh` section 11, probe `struct_as_port_type`:
+> a `public preamble` struct used as both an `output` and an `input` type, carried across an `after 0 msec`
+> connection, compiled and printed `RELICO_STRUCT_PORT 9 1`. So the candidate answer is available and this
+> item is closed as evidence; what remains is a stage E *design* decision, not a measurement.
 
 **Blocking nothing, cheap, and stale the moment it is deferred — read Fig. 5's `ActionDecl` production.** F26
 has been provisional across two stages. The paper is at
@@ -400,12 +412,42 @@ argument-list syntax, so this is a new entry rather than an extension.
 re-measures the instance form on every green run, so nothing rests on the missing script, but the probe should
 join its sibling.
 
+> **Done 2026-08-20.** `lf_semantics_probe.sh` section 11, probe `parameter_defaults_named_args`: one reactor
+> `Configured(bound: int = 0, active: bool = false)` instantiated both bare and with named arguments, printing
+> `RELICO_PARAM 0 0` and `RELICO_PARAM 7 1`. A fresh clone can now re-run what `STAGE_D_DESIGN.md:341` merely
+> asserts.
+
 **Measure the conservatism in `declaredNames`.** Parameters were added to the reactor's name-uniqueness union
 on the stated ground that including them is the conservative side of an *unverified* question —
 `Relico/LF/GeneralWellFormed.lean:81` says so outright. The probe is two lines of LF: does `lfc` reject
 `reactor R(x: int = 0) { state x: int = 0 ... }`? If it accepts it, this repository is stricter than its
 target on purpose and should say so; if it rejects it, the conservatism becomes a measured requirement and
 F32's counterexample becomes a bug with a compiler behind it.
+
+> **Measured 2026-08-20, and the answer is *both*.** `lf_semantics_probe.sh` section 11, probe
+> `param_state_name_collision`: `lfc`'s own validator **accepts** the collision — it emits no error and
+> proceeds to code generation — and the *generated C++* then fails to compile. So `declaredNames` is stricter
+> than the LF validator and **not** stricter than the toolchain, and the conservatism is justified on
+> toolchain grounds rather than validator grounds. Both halves matter and they point opposite ways, which is
+> why the item was worth measuring rather than arguing.
+>
+> The diagnostic is not the one predicted, and the difference is informative:
+>
+> ```
+> lfc: error: reference member 'x' binds to a temporary object whose lifetime would be
+>      shorter than the lifetime of the constructed object [R.cc:50:7]
+>  --> src/V0Controller.lf:1:1
+> ```
+>
+> Not a redeclared member. **The Cpp target emits a reactor parameter as a C++ reference member**, so a
+> parameter colliding with a state variable does not produce a duplicate name — it produces a reference bound
+> to a dead temporary. That is a fact about the target worth carrying into stage E independently of this
+> finding: a parameter's storage is a reference into the instantiation expression, not a copy.
+>
+> Note also where `lfc` attributes the failure: `src/V0Controller.lf:1:1`, the top of the file. A clang error
+> inside generated code cannot be mapped back to the declaration that caused it, so the user-visible symptom
+> of this bug is a lifetime error pointing at nothing. Catching it in our own predicate is not merely
+> equivalent to letting the toolchain catch it.
 
 **Consider splitting `LF.GeneralReaction.parameters`.** F33's underlying cause is one field meaning two
 things. Splitting it touches every reaction construction site in the family, so it is not a stage D change,
