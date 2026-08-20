@@ -484,6 +484,26 @@ does not move it has added fixtures rather than coverage.
 `inductive GeneralDiagnosticReason where` and `deriving Repr` in `Relico/Frontend/GeneralDiagnostic.lean:83-210`
 and differencing them against the reasons the runner names.
 
+**Update 2026-08-20 (stage E), and this supersedes every "8 of 32" in this file, including the one in
+"What these findings ask for" below.** The count moved to **9 of 32** at `b14809b`, which added
+`frontend/fixtures/general/lean-reject/invalid-parameter-shadows-state.json` and asserted
+`parameterShadowsStateVariable`. The corpus is twelve fixtures, not eleven, and twenty-three reasons are
+unexercised, not twenty-four. The finding's text above is left as written because it records what was true
+at the end of stage B; only the live number has moved.
+
+Two details of that move are worth carrying, because neither is what this finding's "twenty-one are reachable
+from a hand-written document" phrasing would suggest. First, the fixture that closed it is **not** a mutation
+of `minimal-class.parser.json` — that document has an empty `stateVariables` and an empty parameter list, so
+the collision cannot be expressed there in one change. It mutates `constructor-arguments.parser.json` instead,
+which preserves the one-mutation property by changing the base rather than growing the diff. Second, the reason
+was picked ahead of the other nineteen on a criterion this finding does not state: `parameterShadowsStateVariable`
+was the only unexercised reason that another predicate's correctness argument depended on, since
+`DTR.GeneralModel.namesUniqueAndValid` (`Relico/DTR/GeneralWellFormed.lean:319-321`) and two docstrings
+(`Relico/Frontend/GeneralElaborator.lean:820-823`, `Relico/Frontend/GeneralDecoder.lean:30`) justify **not**
+checking parameter/state distinctness by naming the elaborator as the layer that does. Until `b14809b` that
+delegation rested on a read of the source rather than on a green assertion. Prefer that criterion — an
+unexercised reason some other layer is relying on — to working down the list in order.
+
 ---
 
 ## What these findings ask for
@@ -499,7 +519,8 @@ Most of the twenty are records, not requests. Five carry an action:
   exists. Whoever writes one should read that finding first.
 - **F20** — twenty-one of the twenty-four unexercised reasons need only another fixture in
   `frontend/fixtures/general/lean-reject/`, and `branchingNotSupported` needs an `if`-only source model. Both
-  are cheap and neither is done. The count to move is 8 of 32.
+  are cheap and neither is done. The count to move is 8 of 32. *(Superseded — one of them is now done and the
+  count is 9 of 32; see F20's 2026-08-20 update.)*
 
 **F19** asks for nothing now, and that is the point of recording it: the decision it documents — that stage B
 adds no module under `Relico/Tests/` — looks like an omission from the outside, and a later session tidying up
