@@ -168,7 +168,7 @@ if ! printf '%s\n' "$TEST_OUTPUT" | grep -q '^GENERAL_FRONTEND_TESTS_OK$'; then
 fi
 
 echo
-echo "=== the general LF printer and well-formedness assertions"
+echo "=== the general LF printer, well-formedness and translation assertions"
 
 # Same capture-then-check shape as above, and for the same reason: the count is
 # taken from what the run actually printed.
@@ -179,7 +179,12 @@ echo "=== the general LF printer and well-formedness assertions"
 # in Lean. The literal is what lets the gate notice an assertion that stopped
 # running: the completion marker alone cannot, since a `try` block that skipped
 # twenty assertions still reaches its final `IO.println`.
-EXPECTED_PRINTER_ASSERTIONS=25
+#
+# 34 printing, 10 well-formedness, 12 translation. Stage C ran 25, in two blocks;
+# the third block is the one that mentions `Relico.Translation`, so a translation
+# that stopped being called would drop this count by twelve rather than pass
+# quietly.
+EXPECTED_PRINTER_ASSERTIONS=56
 
 set +e
 PRINTER_OUTPUT="$(

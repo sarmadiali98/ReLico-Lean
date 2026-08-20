@@ -1,5 +1,6 @@
 import Relico.LF.GeneralWellFormed
 import Relico.LF.GeneralCppPrinter
+import Relico.Translation.GeneralBasic
 
 set_option autoImplicit false
 set_option maxRecDepth 8192
@@ -10,20 +11,27 @@ namespace GeneralLfPrinterTests
 /-!
 # Executable assertions for the general generated-LF family
 
-Every value here is built by hand in Lean. Unlike `GeneralFrontendTestMain`, this
-runner reads no fixtures and takes no arguments: there is no exporter and no
-decoder for this family yet, so there is nothing on disk to read. What is being
-pinned is the exact text `renderGeneralProgram` produces and the exact accept or
-reject verdict `wellFormed` returns.
+Every value here is built by hand in Lean, with one deliberate exception that is
+the point of stage D: the *widened* program is not built at all, it is
+`Translation.compileGeneralModel` applied to a hand-built DTR model. A printer
+assertion over a hand-built LF program checks the printer; the same assertion
+over a translated one checks the printer, the translation and their agreement,
+and only the second can fail when the two drift apart.
+
+This runner reads no fixtures. There is no exporter and no decoder for this
+family yet, so there is nothing on disk to read, and what is being pinned is the
+exact text `renderGeneralProgram` produces and the exact accept or reject verdict
+`wellFormed` returns.
 
 Two departures from the stage design are recorded rather than buried.
 
-**This one file covers both printing and well-formedness**, though §4 names it a
-printer test. Both are pure total functions over hand-built values, both need the
-same handful of reactors to exercise, and a second main would double the gate's
-cost to assert nothing the first could not. The alternative — leaving
-`GeneralWellFormed.lean` with no executable assertion at all while its two
-theorems only ever range over an arbitrary program — is worse.
+**This one file covers printing, well-formedness and translation**, though §4 of
+the stage C design names it a printer test. All three are pure total functions
+over hand-built values, all three need the same handful of reactors to exercise,
+and a second main would double the gate's cost to assert nothing the first could
+not. The alternative — leaving `GeneralWellFormed.lean` with no executable
+assertion at all while its two theorems only ever range over an arbitrary
+program — is worse.
 
 **It lives in `frontend/lean-bridge/`, not `Relico/Tests/`.** Every one of
 `obligations.tsv`'s 2129 rows carries a `test_file` under `Relico/Tests/`, so a
@@ -37,6 +45,16 @@ hold open a door that a tightening of `wellFormed` would quietly shut: an
 unconnected port, a self-connection, and one output feeding two inputs are each
 legal for a measured reason, and each would be easy to forbid by accident while
 strengthening something else.
+-/
+
+/-!
+## Names of the base family
+
+The base program is stage C's, unchanged in what it prints. Its values are
+retyped for stage D's widened syntax — a port is a declaration rather than a
+name, a state variable carries a type instead of an initial value — and the
+pinned text below is byte-for-byte the text stage C pinned. That is the whole
+claim of §8.2: existing output does not move.
 -/
 
 private def senderReactorName :
@@ -108,6 +126,96 @@ private def deliverReactionName :
   ⟨"deliver_reaction"⟩
 
 /--
+An integer input port.
+-/
+private def inPortDecl :
+    LF.GeneralPortDecl where
+
+  name :=
+    inPort
+
+  declaredType :=
+    .int
+
+/--
+An integer output port.
+-/
+private def outPortDecl :
+    LF.GeneralPortDecl where
+
+  name :=
+    outPort
+
+  declaredType :=
+    .int
+
+/--
+The sender's own input port, used by the unconnected-port and self-connection cases.
+-/
+private def backPortDecl :
+    LF.GeneralPortDecl where
+
+  name :=
+    backPort
+
+  declaredType :=
+    .int
+
+/--
+A boolean input port.
+
+Declared for one assertion and used in no program. Stage D emits no ports at all,
+so a boolean port cannot reach the `lfc` gate through the translation, and the
+alternative to asserting it on the port renderer directly is not asserting it —
+which would leave `renderGeneralType`'s boolean arm exercised in two of its three
+positions and claimed in the third.
+-/
+private def flagInPortDecl :
+    LF.GeneralPortDecl where
+
+  name :=
+    ⟨"flagIn"⟩
+
+  declaredType :=
+    .boolean
+
+/--
+A port declaration colliding with the receiver's state variable.
+
+Spelled out here rather than reusing `receiverStateName`, because the two are
+different *types* — `PortName` and `VarName` — and it is exactly that type-level
+separation which makes the collision invisible to anything but the union check.
+-/
+private def collidingPortDecl :
+    LF.GeneralPortDecl where
+
+  name :=
+    ⟨"y"⟩
+
+  declaredType :=
+    .int
+
+/--
+A reactor parameter colliding with the receiver's state variable.
+
+The stage D half of the same check: `GeneralReactor.declaredNames` gained the
+parameter list, and a predicate that gained a case nobody exercises is the defect
+stage B found in `PrioritiesDistinct` one step earlier.
+-/
+private def collidingParameter :
+    LF.GeneralTypedParameter where
+
+  name :=
+    ⟨"y"⟩
+
+  declaredType :=
+    .int
+
+/-!
+## Assertion helpers
+-/
+
+/--
 Fail the run, and fail it loudly.
 
 The runner catches this once and returns a nonzero status, so the first failing
@@ -144,6 +252,30 @@ private def expectString
         actual)
 
 /--
+Assert a `Bool` predicate's exact verdict.
+
+Takes the expected verdict as an argument rather than coming in accept and reject
+flavours, because the two assertions this exists for — one instance argument list
+that matches its parameters and one that does not — differ in nothing else, and a
+pair of helpers would let the negative one be quietly pointed at the positive
+value.
+-/
+private def expectBool
+    (label : String)
+    (expected actual : Bool) :
+    IO Unit :=
+  if actual == expected then
+    IO.println
+      ("PASS_" ++ label)
+  else
+    testFailure
+      (label ++
+        ": expected " ++
+        toString expected ++
+        " but got " ++
+        toString actual)
+
+/--
 Assert that a rendering succeeds, with exactly the expected text.
 -/
 private def expectRendered
@@ -169,9 +301,9 @@ Assert that a rendering is refused, with exactly the expected message.
 
 The message is compared in full, unlike the frontend runner which compares a
 structured reason. There is no reason value here to compare: a printer refusal is
-a `String`, and the whole point of these three assertions is that the inherited
-payload limits are refused in the same words the sibling printers use, so that a
-reader of the generated-artifact log sees one vocabulary rather than four.
+a `String`, and the point of these assertions is that the refusals are worded in
+the same vocabulary the sibling printers use, so that a reader of the
+generated-artifact log sees one vocabulary rather than four.
 -/
 private def expectRefused
     (label expected : String)
@@ -184,6 +316,35 @@ private def expectRefused
         (label ++
           ": expected a refusal, but it rendered:\n" ++
           text)
+
+  | .error diagnostic =>
+      expectString
+        label
+        expected
+        diagnostic
+
+/--
+Assert that a computation over some other type is refused, with exactly the
+expected message.
+
+Separate from `expectRefused` rather than replacing it: the translation refuses
+with `Except String LF.GeneralStmt` and `Except String LF.GeneralProgram`, and
+folding all three into one polymorphic helper would cost the `String` case its
+readable failure output, which is the case a printer author reads most often.
+-/
+private def expectRefusedTerm
+    {α : Type}
+    [Repr α]
+    (label expected : String)
+    (actual : Except String α) :
+    IO Unit :=
+  match actual with
+
+  | .ok value =>
+      testFailure
+        (label ++
+          ": expected a refusal, but it produced\n" ++
+          toString (repr value))
 
   | .error diagnostic =>
       expectString
@@ -221,6 +382,14 @@ private def expectIllFormed
     IO.println
       ("PASS_" ++ label)
 
+/-!
+## The base family
+
+Stage C's program, retyped. Every reactor here has an empty parameter list and no
+action of arity two or more, which is what makes it the witness for "no preamble,
+no argument list, no bytes moved".
+-/
+
 /--
 The sender's startup reaction: it sets its output port.
 -/
@@ -251,17 +420,21 @@ self-connection case are the same reactor with one field changed. A second
 hand-written copy could drift from this one and the assertions would still pass.
 -/
 private def senderReactorWith
-    (inputPortList : List PortName) :
+    (inputPortList :
+      List LF.GeneralPortDecl) :
     LF.GeneralReactor where
 
   name :=
     senderReactorName
 
+  parameters :=
+    []
+
   inputPorts :=
     inputPortList
 
   outputPorts :=
-    [outPort]
+    [outPortDecl]
 
   stateVariables :=
     [
@@ -269,8 +442,8 @@ private def senderReactorWith
         name :=
           senderStateName
 
-        initialValue :=
-          0
+        declaredType :=
+          .int
       }
     ]
 
@@ -306,6 +479,29 @@ private def receiverStartupReaction :
     []
 
 /--
+A startup reaction that declares parameters.
+
+This shape is what `assembleGeneralStartupReaction` produces for a constructor with
+formals, and stage C's printer refused it. See finding F33: the names in that list
+are the *reactor's* parameters, readable with no binder, so the correct emission is
+nothing at all.
+-/
+private def parameterisedStartupReaction :
+    LF.GeneralReaction where
+
+  name :=
+    senderStartupReactionName
+
+  trigger :=
+    .startup
+
+  parameters :=
+    [arrivedParameter]
+
+  body :=
+    []
+
+/--
 The receiving reaction: triggered by an input port, forwarding to a logical action.
 
 This is the shape the whole family exists to make expressible — no earlier LF
@@ -330,6 +526,30 @@ private def receiveReaction :
         [.parameterVar arrivedParameter]
         ⟨0⟩
     ]
+
+/--
+A port-triggered reaction declaring two parameters.
+
+The one refusal left in the parameter reader, and unreachable in stage D: a
+`GeneralPortDecl` carries a single declared type and so delivers one value.
+-/
+private def twoParameterPortReaction :
+    LF.GeneralReaction where
+
+  name :=
+    receiveReactionName
+
+  trigger :=
+    .inputPort inPort
+
+  parameters :=
+    [
+      arrivedParameter,
+      payloadParameter
+    ]
+
+  body :=
+    []
 
 /--
 The action-triggered reaction, storing its payload.
@@ -358,7 +578,7 @@ A reaction that writes to an **input** port.
 
 Representable in the syntax and refused by well-formedness. Direction is not
 carried in `PortName`, so the only thing standing between a translation bug and a
-program `lfc` rejects is the `outputPorts.contains` check this pins.
+program `lfc` rejects is the `outputPorts` check this pins.
 -/
 private def setInputPortReaction :
     LF.GeneralReaction where
@@ -383,13 +603,17 @@ private def setInputPortReaction :
 The receiver, parameterised by its input ports and its message reactions.
 -/
 private def receiverReactorWith
-    (inputPortList : List PortName)
+    (inputPortList :
+      List LF.GeneralPortDecl)
     (messageReactionList :
       List LF.GeneralReaction) :
     LF.GeneralReactor where
 
   name :=
     receiverReactorName
+
+  parameters :=
+    []
 
   inputPorts :=
     inputPortList
@@ -403,8 +627,8 @@ private def receiverReactorWith
         name :=
           receiverStateName
 
-        initialValue :=
-          0
+        declaredType :=
+          .int
       }
     ]
 
@@ -415,7 +639,15 @@ private def receiverReactorWith
           deliverAction
 
         parameters :=
-          [arrivedParameter]
+          [
+            {
+              name :=
+                arrivedParameter
+
+              declaredType :=
+                .int
+            }
+          ]
       }
     ]
 
@@ -433,19 +665,94 @@ private def senderReactor :
 private def senderReactorWithInputPort :
     LF.GeneralReactor :=
   senderReactorWith
-    [backPort]
+    [backPortDecl]
 
 private def receiverReactor :
     LF.GeneralReactor :=
   receiverReactorWith
-    [inPort]
+    [inPortDecl]
     [
       receiveReaction,
       deliverReaction
     ]
 
+/--
+A two-parameter logical action, used for the struct assertions.
+
+Declared on no reactor. The struct spellings it pins are reached by the widened
+program through the translation; this value is what lets each of the three sites
+that must agree — declaration, `schedule`, destructuring — be asserted on its own
+rather than only inside a whole program, where one wrong site is a diff in a
+33-line string.
+-/
+private def twoParameterDeliverAction :
+    LF.GeneralAction where
+
+  name :=
+    deliverAction
+
+  parameters :=
+    [
+      {
+        name :=
+          arrivedParameter
+
+        declaredType :=
+          .int
+      },
+
+      {
+        name :=
+          payloadParameter
+
+        declaredType :=
+          .boolean
+      }
+    ]
+
+/--
+A single-parameter boolean logical action.
+-/
+private def booleanDeliverAction :
+    LF.GeneralAction where
+
+  name :=
+    deliverAction
+
+  parameters :=
+    [
+      {
+        name :=
+          arrivedParameter
+
+        declaredType :=
+          .boolean
+      }
+    ]
+
+/--
+A reaction destructuring a two-value payload.
+-/
+private def twoParameterDeliverReaction :
+    LF.GeneralReaction where
+
+  name :=
+    deliverReactionName
+
+  trigger :=
+    .logicalAction deliverAction
+
+  parameters :=
+    [
+      arrivedParameter,
+      payloadParameter
+    ]
+
+  body :=
+    []
+
 private def senderInstance :
-    LF.ReactorInstance where
+    LF.GeneralReactorInstance where
 
   name :=
     senderInstanceName
@@ -453,14 +760,20 @@ private def senderInstance :
   reactorName :=
     senderReactorName
 
+  arguments :=
+    []
+
 private def receiverInstance :
-    LF.ReactorInstance where
+    LF.GeneralReactorInstance where
 
   name :=
     receiverInstanceName
 
   reactorName :=
     receiverReactorName
+
+  arguments :=
+    []
 
 /--
 A second instance of the *same* receiver reactor.
@@ -470,7 +783,7 @@ family: Table III maps a reactive class to a reactor, so a per-instance reactor
 would make the paper's own mapping unrepresentable.
 -/
 private def secondReceiverInstance :
-    LF.ReactorInstance where
+    LF.GeneralReactorInstance where
 
   name :=
     secondReceiverInstanceName
@@ -478,11 +791,14 @@ private def secondReceiverInstance :
   reactorName :=
     receiverReactorName
 
+  arguments :=
+    []
+
 /--
 An instance of a reactor nobody declares.
 -/
 private def ghostInstance :
-    LF.ReactorInstance where
+    LF.GeneralReactorInstance where
 
   name :=
     ⟨"ghost"⟩
@@ -490,16 +806,8 @@ private def ghostInstance :
   reactorName :=
     ⟨"Missing"⟩
 
-/--
-A port name colliding with the receiver's state variable.
-
-Spelled out here rather than reusing `receiverStateName`, because the two are
-different *types* — `PortName` and `VarName` — and it is exactly that type-level
-separation which makes the collision invisible to anything but the union check.
--/
-private def collidingPort :
-    PortName :=
-  ⟨"y"⟩
+  arguments :=
+    []
 
 private def senderToReceiver :
     LF.GeneralConnection where
@@ -583,7 +891,7 @@ private def programWith
     (reactorList :
       List LF.GeneralReactor)
     (instanceList :
-      List LF.ReactorInstance)
+      List LF.GeneralReactorInstance)
     (connectionList :
       List LF.GeneralConnection) :
     LF.GeneralProgram where
@@ -598,14 +906,14 @@ private def programWith
     connectionList
 
 private def baseInstances :
-    List LF.ReactorInstance :=
+    List LF.GeneralReactorInstance :=
   [
     senderInstance,
     receiverInstance
   ]
 
 /--
-The program every printer assertion renders and the accept assertion accepts.
+The program every base printer assertion renders and the accept assertion accepts.
 -/
 private def baseProgram :
     LF.GeneralProgram :=
@@ -674,7 +982,7 @@ private def programSettingInputPort :
     [
       senderReactor,
       receiverReactorWith
-        [inPort]
+        [inPortDecl]
         [
           receiveReaction,
           setInputPortReaction
@@ -716,8 +1024,8 @@ private def programWithPortStateCollision :
       senderReactor,
       receiverReactorWith
         [
-          inPort,
-          collidingPort
+          inPortDecl,
+          collidingPortDecl
         ]
         [
           receiveReaction,
@@ -725,6 +1033,36 @@ private def programWithPortStateCollision :
         ]
     ]
     baseInstances
+    [senderToReceiver]
+
+/--
+A reactor parameter colliding with a state variable of the same reactor.
+
+The instance is given a matching argument on purpose. Adding a parameter to a
+reactor whose instance supplies none would fail `instanceArgumentsMatch` as well,
+and a reject assertion that holds for two reasons pins neither.
+-/
+private def programWithParameterStateCollision :
+    LF.GeneralProgram :=
+  programWith
+    [
+      senderReactor,
+      {
+        receiverReactor with
+
+        parameters :=
+          [collidingParameter]
+      }
+    ]
+    [
+      senderInstance,
+      {
+        receiverInstance with
+
+        arguments :=
+          [.int 0]
+      }
+    ]
     [senderToReceiver]
 
 private def programWithDanglingInstance :
@@ -751,7 +1089,9 @@ newline, not a separator.
 
 Read top to bottom this is the whole claim of stage C: a port declaration block
 before state, two reactors in one file, a port-triggered reaction, and a main
-reactor whose connections carry `after`.
+reactor whose connections carry `after`. **Not one byte of it changed in stage D**,
+which is the assertion form of §8.2 — no parameter list on either reactor, no
+preamble, and `new Sender()` still empty-handed.
 -/
 private def expectedProgramText :
     String :=
@@ -793,6 +1133,544 @@ private def expectedProgramText :
     ] ++
     "\n"
 
+/-!
+## The widened family, as the output of the translation
+
+Everything below is stage D's actual claim. The LF program is never written down:
+it is `Translation.compileGeneralModel` applied to `widenedModel`, and the text
+pinned below is what the printer makes of *that*. A hand-built LF program would
+pin the printer alone, and the printer has already been pinned by the base
+program.
+
+One class covers every widening at once — boolean state, a boolean constructor
+parameter, a three-value mixed-type payload, nested fully-parenthesized
+arithmetic, comparison and boolean operators, an arity-zero action, and two
+instances of one parameterised reactor with different arguments.
+
+It also terminates. The constructor self-sends `adjust` at `after(0)`, `adjust`
+self-sends `settle` at `after(5)`, and `settle` sends nothing, so the event queue
+empties and the generated binary exits on its own. That is not a stylistic point:
+`frontend/check-general-lf-target.sh` *runs* the binary, and a model that kept
+scheduling would hang the gate rather than fail it.
+-/
+
+private def configuredClassName :
+    ClassName :=
+  ⟨"Configured"⟩
+
+private def limitStateName :
+    VarName :=
+  ⟨"limit"⟩
+
+private def enabledStateName :
+    VarName :=
+  ⟨"enabled"⟩
+
+private def boundParameter :
+    VarName :=
+  ⟨"bound"⟩
+
+private def activeParameter :
+    VarName :=
+  ⟨"active"⟩
+
+private def adjustMessageName :
+    MsgName :=
+  ⟨"adjust"⟩
+
+private def settleMessageName :
+    MsgName :=
+  ⟨"settle"⟩
+
+private def leftParameter :
+    VarName :=
+  ⟨"left"⟩
+
+private def rightParameter :
+    VarName :=
+  ⟨"right"⟩
+
+private def flagParameter :
+    VarName :=
+  ⟨"flag"⟩
+
+private def configuredOnInstanceName :
+    ActorName :=
+  ⟨"configuredOn"⟩
+
+private def configuredOffInstanceName :
+    ActorName :=
+  ⟨"configuredOff"⟩
+
+private def peerKnownRebecName :
+    KnownRebecName :=
+  ⟨"peer"⟩
+
+private def pingMessageName :
+    MsgName :=
+  ⟨"ping"⟩
+
+/-!
+### The LF names the translation derives
+
+Taken from `Translation`'s own name generators rather than written as string
+literals. The literals appear once, in the pinned program text, and an assertion
+that spelled them a second time here would agree with itself while disagreeing
+with the translator.
+-/
+
+private def configuredReactorName :
+    ReactorName :=
+  Translation.reactorNameFor
+    configuredClassName
+
+private def adjustActionName :
+    ActionName :=
+  Translation.actionNameFor
+    adjustMessageName
+
+private def settleActionName :
+    ActionName :=
+  Translation.actionNameFor
+    settleMessageName
+
+/--
+The constructor: it initialises both state variables from its formals, then
+self-sends the three-value message.
+
+The payload mixes a parameter read, a literal and a boolean parameter read, which
+is what makes the emitted `Args{bound, 2, active}` an aggregate initialisation of a
+mixed struct rather than of three integers.
+-/
+private def configuredConstructor :
+    DTR.GeneralConstructor where
+
+  parameters :=
+    [
+      {
+        name :=
+          boundParameter
+
+        declaredType :=
+          .int
+      },
+
+      {
+        name :=
+          activeParameter
+
+        declaredType :=
+          .boolean
+      }
+    ]
+
+  body :=
+    [
+      .assign
+        limitStateName
+        (.parameterVar boundParameter),
+
+      .assign
+        enabledStateName
+        (.parameterVar activeParameter),
+
+      .send
+        .selfTarget
+        adjustMessageName
+        [
+          .parameterVar boundParameter,
+          .intLiteral 2,
+          .parameterVar activeParameter
+        ]
+        ⟨0⟩
+    ]
+
+/--
+The three-parameter message server.
+
+Its first statement is `left + right * 2 - 1`, the expression
+`frontend/fixtures/general/expressions.rebeca` uses, written here with the
+precedence the elaborator would give it. Fully parenthesized output is what the
+printer owes, and this is the assertion that says so end to end rather than on one
+expression in isolation.
+-/
+private def adjustMessageServer :
+    DTR.GeneralMessageServer where
+
+  name :=
+    adjustMessageName
+
+  parameters :=
+    [
+      {
+        name :=
+          leftParameter
+
+        declaredType :=
+          .int
+      },
+
+      {
+        name :=
+          rightParameter
+
+        declaredType :=
+          .int
+      },
+
+      {
+        name :=
+          flagParameter
+
+        declaredType :=
+          .boolean
+      }
+    ]
+
+  body :=
+    [
+      .assign
+        limitStateName
+        (.binary
+          .sub
+          (.binary
+            .add
+            (.parameterVar leftParameter)
+            (.binary
+              .mul
+              (.parameterVar rightParameter)
+              (.intLiteral 2)))
+          (.intLiteral 1)),
+
+      .assign
+        enabledStateName
+        (.binary
+          .logicalAnd
+          (.parameterVar flagParameter)
+          (.binary
+            .gt
+            (.stateVar limitStateName)
+            (.intLiteral 0))),
+
+      .send
+        .selfTarget
+        settleMessageName
+        []
+        ⟨5⟩
+    ]
+
+/--
+The arity-zero message server, which is also what stops the program.
+-/
+private def settleMessageServer :
+    DTR.GeneralMessageServer where
+
+  name :=
+    settleMessageName
+
+  parameters :=
+    []
+
+  body :=
+    [
+      .assign
+        enabledStateName
+        (.boolLiteral false)
+    ]
+
+private def configuredClass :
+    DTR.GeneralReactiveClass where
+
+  name :=
+    configuredClassName
+
+  knownRebecs :=
+    []
+
+  stateVariables :=
+    [
+      {
+        name :=
+          limitStateName
+
+        declaredType :=
+          .int
+      },
+
+      {
+        name :=
+          enabledStateName
+
+        declaredType :=
+          .boolean
+      }
+    ]
+
+  constructor :=
+    configuredConstructor
+
+  messageServers :=
+    [
+      adjustMessageServer,
+      settleMessageServer
+    ]
+
+private def configuredOnActor :
+    DTR.GeneralActorInstance where
+
+  name :=
+    configuredOnInstanceName
+
+  className :=
+    configuredClassName
+
+  bindings :=
+    []
+
+  arguments :=
+    [
+      .int 7,
+      .bool true
+    ]
+
+private def configuredOffActor :
+    DTR.GeneralActorInstance where
+
+  name :=
+    configuredOffInstanceName
+
+  className :=
+    configuredClassName
+
+  bindings :=
+    []
+
+  arguments :=
+    [
+      .int 0,
+      .bool false
+    ]
+
+private def widenedModel :
+    DTR.GeneralModel where
+
+  classes :=
+    [configuredClass]
+
+  instances :=
+    [
+      configuredOnActor,
+      configuredOffActor
+    ]
+
+/--
+The same model with one message server replaced by an external send.
+
+Written as a structure update so that the only difference from `widenedModel` is
+the construct under test. A second hand-written class could differ in some other
+way and the refusal would still be reported, which would make this assertion pass
+for the wrong reason.
+-/
+private def externalSendModel :
+    DTR.GeneralModel where
+
+  classes :=
+    [
+      {
+        configuredClass with
+
+        knownRebecs :=
+          [
+            {
+              name :=
+                peerKnownRebecName
+
+              className :=
+                configuredClassName
+            }
+          ]
+
+        messageServers :=
+          [
+            {
+              settleMessageServer with
+
+              body :=
+                [
+                  .send
+                    (.knownRebec peerKnownRebecName)
+                    pingMessageName
+                    []
+                    ⟨0⟩
+                ]
+            }
+          ]
+      }
+    ]
+
+  instances :=
+    [
+      configuredOnActor,
+      configuredOffActor
+    ]
+
+/--
+The refusal a known-rebec send earns in stage D.
+
+Asserted on its exact text, not merely on being an error. The message names the
+stage that will implement the construct, and a diagnostic that decays into a bare
+`.error` later would still be an error and would no longer tell a reader where the
+work went.
+-/
+private def externalSendDiagnostic :
+    String :=
+  "send to known rebec `peer`.`ping` is an external send; " ++
+    "stage D translates self-sends only, and external sends are stage E"
+
+/--
+The exact text the translation of `widenedModel` must print.
+
+Every line here is derived, not chosen: the reactor name from `reactorNameFor`, the
+action names from `actionNameFor`, the struct name and the payload binder from the
+printer's two naming functions, the initial values from `GeneralType.initialValue`,
+and the two argument lists from the actors' own values.
+
+Two lines are worth reading twice. `limit = ((left + (right * 2)) - 1);` is full
+parenthesization, so the target's precedence never has to agree with Rebeca's. And
+`adjust_action.schedule(Configured_adjust_action_Args{bound, 2, active}, 0ms);`
+reads a reactor parameter inside a payload with no binder, which is the measured
+fact §5.5 rests on and finding F33's whole subject.
+-/
+private def expectedWidenedProgramText :
+    String :=
+  String.intercalate
+    "\n"
+    [
+      "target Cpp",
+      "",
+      "public preamble {=",
+      "  struct Configured_adjust_action_Args { int left; int right; bool flag; };",
+      "=}",
+      "",
+      "reactor Configured(bound: int = 0, active: bool = false) {",
+      "  state limit: int = 0",
+      "  state enabled: bool = false",
+      "  logical action adjust_action: Configured_adjust_action_Args",
+      "  logical action settle_action: void",
+      "",
+      "  reaction(startup) -> adjust_action {=",
+      "    limit = bound;",
+      "    enabled = active;",
+      "    adjust_action.schedule(Configured_adjust_action_Args{bound, 2, active}, 0ms);",
+      "  =}",
+      "",
+      "  reaction(adjust_action) -> settle_action {=",
+      "    auto adjust_action_payload = *adjust_action.get();",
+      "    auto left = adjust_action_payload.left;",
+      "    auto right = adjust_action_payload.right;",
+      "    auto flag = adjust_action_payload.flag;",
+      "    limit = ((left + (right * 2)) - 1);",
+      "    enabled = (flag && (limit > 0));",
+      "    settle_action.schedule(5ms);",
+      "  =}",
+      "",
+      "  reaction(settle_action) {=",
+      "    enabled = false;",
+      "  =}",
+      "}",
+      "",
+      "main reactor {",
+      "  configuredOn = new Configured(bound=7, active=true)",
+      "  configuredOff = new Configured(bound=0, active=false)",
+      "}"
+    ] ++
+    "\n"
+
+/--
+Translate the widened model and print it, in one `Except`.
+
+The emitter and the assertion call this same function, so the bytes `lfc` compiles
+are the bytes the assertion pinned. Two paths that each recompute the program would
+be two chances to compile something no assertion ever checked.
+-/
+private def widenedProgramText :
+    Except String String := do
+
+  let program ←
+    Translation.compileGeneralModel
+      widenedModel
+
+  LF.CppPrinter.renderGeneralProgram
+    program
+
+/--
+An instance of the translated reactor, written out rather than taken from the
+translation's own output.
+
+Hand-built on purpose, and only for the three assertions that need an instance the
+translation would never produce. The named-argument *form* is a printer question — finding
+F31, a divergence from Fig. 5's positional `ArgList` — and pinning it on a value this file
+controls keeps it separable from the translation, which is pinned whole by
+`expectedWidenedProgramText`. The arguments match `configuredOn`'s so that the positive
+rendering is the same text that appears there.
+-/
+private def widenedInstanceWithNamedArguments :
+    LF.GeneralReactorInstance where
+
+  name :=
+    configuredOnInstanceName
+
+  reactorName :=
+    configuredReactorName
+
+  arguments :=
+    [
+      .int 7,
+      .bool true
+    ]
+
+/--
+The same instance with one argument too few.
+
+A structure update, so arity is the only difference from the positive case.
+-/
+private def widenedInstanceWithWrongArity :
+    LF.GeneralReactorInstance :=
+  {
+    widenedInstanceWithNamedArguments with
+
+    arguments :=
+      [.int 7]
+  }
+
+/--
+The same instance with its two arguments transposed.
+
+Right count, wrong types, which is the half of `argumentsMatchParameters` that an arity
+test alone would leave unexercised: `bool` for `bound: int` and `int` for `active: bool`.
+-/
+private def widenedInstanceWithWrongTypes :
+    LF.GeneralReactorInstance :=
+  {
+    widenedInstanceWithNamedArguments with
+
+    arguments :=
+      [
+        .bool true,
+        .int 7
+      ]
+  }
+
+/-!
+## Assertions
+
+Three blocks, and the split is not cosmetic. The first pins the printer on values written
+in this file, the second pins well-formedness on programs written in this file, and the
+third pins the translation on a *model*, taking whatever LF program it produces. Only the
+third can fail because `Relico/Translation/GeneralBasic.lean` changed, so a failure in the
+first two localises without reading the label.
+-/
+
 private def printerAssertions :
     IO Unit := do
 
@@ -818,19 +1696,176 @@ private def printerAssertions :
     "INPUT_PORT_DECL"
     "  input in: int"
     (LF.CppPrinter.renderInputPortDecl
-      inPort)
+      inPortDecl)
 
   expectString
     "OUTPUT_PORT_DECL"
     "  output out: int"
     (LF.CppPrinter.renderOutputPortDecl
-      outPort)
+      outPortDecl)
+
+  -- Stage D's widening at the port declaration site. Nothing in the translation can
+  -- reach it, so without this assertion `renderGeneralType`'s boolean arm would be
+  -- exercised in two of its three positions and claimed in the third.
+  expectString
+    "BOOL_PORT_DECL"
+    "  input flagIn: bool"
+    (LF.CppPrinter.renderInputPortDecl
+      flagInPortDecl)
 
   expectString
     "PORT_DECLS_INPUTS_BEFORE_OUTPUTS"
     "  input back: int\n  output out: int"
     (LF.CppPrinter.renderGeneralPortDecls
       senderReactorWithInputPort)
+
+  expectString
+    "INT_STATE_DECL"
+    "  state y: int = 0"
+    (LF.CppPrinter.renderGeneralStateVariableDecl
+      {
+        name :=
+          receiverStateName
+
+        declaredType :=
+          .int
+      })
+
+  -- The initial value is not written here either: it comes from
+  -- `GeneralType.initialValue`, so this pins the composition rather than a literal.
+  expectString
+    "BOOL_STATE_DECL"
+    "  state enabled: bool = false"
+    (LF.CppPrinter.renderGeneralStateVariableDecl
+      {
+        name :=
+          enabledStateName
+
+        declaredType :=
+          .boolean
+      })
+
+  -- All thirteen spellings in one assertion, in the declaration order of the type.
+  -- Individually they are one string each and collectively they are the operator set
+  -- this project chose (the paper gives none), so the audit that matters is reading
+  -- the whole row at once.
+  expectString
+    "BINARY_OPERATOR_SPELLINGS"
+    "+ - * / % == != < <= > >= && ||"
+    (String.intercalate
+      " "
+      (([
+        .add,
+        .sub,
+        .mul,
+        .div,
+        .mod,
+        .eq,
+        .ne,
+        .lt,
+        .le,
+        .gt,
+        .ge,
+        .logicalAnd,
+        .logicalOr
+      ] : List LF.GeneralBinaryOp).map
+        LF.CppPrinter.renderGeneralBinaryOp))
+
+  expectString
+    "UNARY_OPERATOR_SPELLINGS"
+    "-|!"
+    (LF.CppPrinter.renderGeneralUnaryOp
+        .negate ++
+      "|" ++
+      LF.CppPrinter.renderGeneralUnaryOp
+        .logicalNot)
+
+  -- Every operator node is parenthesized, so the target's precedence never has to
+  -- agree with Rebeca's. This is the same expression the widened program prints, and
+  -- asserting it here as well is what tells a reader that the parentheses in that
+  -- 37-line string are the rule and not that model's own bracketing.
+  expectString
+    "FULL_PARENTHESIZATION"
+    "((left + (right * 2)) - 1)"
+    (LF.CppPrinter.renderGeneralExpr
+      (.binary
+        .sub
+        (.binary
+          .add
+          (.parameterVar leftParameter)
+          (.binary
+            .mul
+            (.parameterVar rightParameter)
+            (.intLiteral 2)))
+        (.intLiteral 1)))
+
+  expectString
+    "BOOL_LITERALS_AND_NEGATION"
+    "(false || (!true))"
+    (LF.CppPrinter.renderGeneralExpr
+      (.binary
+        .logicalOr
+        (.boolLiteral false)
+        (.unary
+          .logicalNot
+          (.boolLiteral true))))
+
+  expectString
+    "VOID_ACTION_DECL"
+    "  logical action deliver: void"
+    (LF.CppPrinter.renderGeneralActionDecl
+      receiverReactorName
+      {
+        name :=
+          deliverAction
+
+        parameters :=
+          []
+      })
+
+  expectString
+    "TYPED_ACTION_DECL"
+    "  logical action deliver: bool"
+    (LF.CppPrinter.renderGeneralActionDecl
+      receiverReactorName
+      booleanDeliverAction)
+
+  -- Arity two or more is a struct, which stage C refused outright. Finding F23: real
+  -- `lfc 0.11.0` compiled and ran it, so the limit was this printer's and not the
+  -- target's.
+  expectString
+    "STRUCT_ACTION_DECL"
+    "  logical action deliver: Receiver_deliver_Args"
+    (LF.CppPrinter.renderGeneralActionDecl
+      receiverReactorName
+      twoParameterDeliverAction)
+
+  expectString
+    "PREAMBLE_OMITTED_WITHOUT_STRUCT"
+    ""
+    (LF.CppPrinter.renderGeneralPreamble
+      (LF.CppPrinter.generalProgramStructDecls
+        baseProgram.reactors))
+
+  -- Derived from the reactors, never stored, so a struct the actions do not need is
+  -- not expressible. The declaration is reached through `generalProgramStructDecls`
+  -- rather than asserted on `generalActionStructDecl?` directly, which keeps the
+  -- assertion on the composition the program actually calls.
+  expectString
+    "PREAMBLE_DECLARES_ONE_STRUCT"
+    ("public preamble {=\n" ++
+      "  struct Receiver_deliver_Args { int v; bool w; };\n" ++
+      "=}\n\n")
+    (LF.CppPrinter.renderGeneralPreamble
+      (LF.CppPrinter.generalProgramStructDecls
+        [
+          {
+            receiverReactor with
+
+            logicalActions :=
+              [twoParameterDeliverAction]
+          }
+        ]))
 
   expectString
     "EFFECTS_OMITTED_WHEN_EMPTY"
@@ -871,15 +1906,119 @@ private def printerAssertions :
       ])
 
   expectString
+    "VOID_PAYLOAD_SCHEDULE"
+    "deliver.schedule(0ms);"
+    (LF.CppPrinter.renderGeneralStmt
+      receiverReactorName
+      (.schedule
+        deliverAction
+        []
+        ⟨0⟩))
+
+  expectString
+    "SINGLE_VALUE_PAYLOAD_SCHEDULE"
+    "deliver.schedule(1, 0ms);"
+    (LF.CppPrinter.renderGeneralStmt
+      receiverReactorName
+      (.schedule
+        deliverAction
+        [.intLiteral 1]
+        ⟨0⟩))
+
+  -- The struct is *constructed* here and *declared* by the preamble above and *named*
+  -- by the action declaration above that, all three through
+  -- `generalPayloadStructName`. Three assertions on one function, which is why the
+  -- reactor name has to be threaded this far.
+  expectString
+    "MULTI_VALUE_PAYLOAD_SCHEDULE"
+    "deliver.schedule(Receiver_deliver_Args{1, true}, 0ms);"
+    (LF.CppPrinter.renderGeneralStmt
+      receiverReactorName
+      (.schedule
+        deliverAction
+        [
+          .intLiteral 1,
+          .boolLiteral true
+        ]
+        ⟨0⟩))
+
+  expectRendered
+    "SINGLE_VALUE_PAYLOAD_BINDER"
+    "    auto w = *deliver.get();"
+    (LF.CppPrinter.renderGeneralParameterRead
+      deliverReaction)
+
+  expectRendered
+    "MULTI_VALUE_PAYLOAD_BINDERS"
+    ("    auto deliver_payload = *deliver.get();\n" ++
+      "    auto v = deliver_payload.v;\n" ++
+      "    auto w = deliver_payload.w;")
+    (LF.CppPrinter.renderGeneralParameterRead
+      twoParameterDeliverReaction)
+
+  -- Finding F33, as an assertion. Stage C refused this shape; it is what
+  -- `assembleGeneralStartupReaction` produces for every constructor with formals, and
+  -- those names are the reactor's own parameters, readable with no binder. The right
+  -- emission is nothing at all.
+  expectRendered
+    "STARTUP_PARAMETERS_READ_NOTHING"
+    ""
+    (LF.CppPrinter.renderGeneralParameterRead
+      parameterisedStartupReaction)
+
+  -- The one refusal left in the parameter reader, and a recorded disagreement with
+  -- `docs/STAGE_D_DESIGN.md` §6, which said all three go. A `GeneralPortDecl` carries
+  -- one declared type and so delivers one value: there is no struct to name and no
+  -- second value to bind. Finding F30.
+  expectRefused
+    "MULTI_PARAMETER_PORT_REFUSED"
+    ("reaction `receive_reaction` for input port `in` declares more than one parameter; " ++
+      "a port declares one type and so carries one value, " ++
+      "and unlike a logical action it has no parameter list to destructure")
+    (LF.CppPrinter.renderGeneralParameterRead
+      twoParameterPortReaction)
+
+  -- Fig. 5 spells the production `reactor R (ParamList?)`, so the absent form is the
+  -- grammar's own — and it is what keeps every stage C fixture byte-identical.
+  expectString
+    "PARAMETER_LIST_OMITTED_WHEN_EMPTY"
+    ""
+    (LF.CppPrinter.renderGeneralParameterList
+      [])
+
+  expectString
+    "PARAMETER_LIST_DECL"
+    "(bound: int = 0, active: bool = false)"
+    (LF.CppPrinter.renderGeneralParameterList
+      [
+        {
+          name :=
+            boundParameter
+
+          declaredType :=
+            .int
+        },
+
+        {
+          name :=
+            activeParameter
+
+          declaredType :=
+            .boolean
+        }
+      ])
+
+  expectString
     "CONNECTION_CARRIES_AFTER"
     "  sender0.out -> receiver0.in after 0 msec"
     (LF.CppPrinter.renderGeneralConnection
       senderToReceiver)
 
-  expectString
+  expectRendered
     "INSTANCE_IS_ARGUMENT_FREE"
     "  sender0 = new Sender()"
     (LF.CppPrinter.renderGeneralInstance
+      baseProgram
       senderInstance)
 
   expectRendered
@@ -895,6 +2034,7 @@ private def printerAssertions :
       "    deliver.schedule(v, 0ms);\n" ++
       "  =}")
     (LF.CppPrinter.renderGeneralReaction
+      receiverReactorName
       receiveReaction)
 
   expectRendered
@@ -902,53 +2042,6 @@ private def printerAssertions :
     expectedProgramText
     (LF.CppPrinter.renderGeneralProgram
       baseProgram)
-
-  expectRefused
-    "MULTI_VALUE_PAYLOAD_REFUSED"
-    ("logical action `deliver` has more than one payload value; " ++
-      "the current C++ printer foundation supports at most one integer payload")
-    (LF.CppPrinter.renderGeneralStmt
-      (.schedule
-        deliverAction
-        [
-          .intLiteral 1,
-          .intLiteral 2
-        ]
-        ⟨0⟩))
-
-  expectRefused
-    "MULTI_PARAMETER_ACTION_REFUSED"
-    ("logical action `deliver` declares more than one parameter; " ++
-      "the current C++ printer foundation supports at most one integer payload")
-    (LF.CppPrinter.renderGeneralActionDecl
-      {
-        name :=
-          deliverAction
-
-        parameters :=
-          [
-            arrivedParameter,
-            payloadParameter
-          ]
-      })
-
-  expectRefused
-    "STARTUP_WITH_PARAMETERS_REFUSED"
-    "startup reaction `sender_startup` must not declare payload parameters"
-    (LF.CppPrinter.renderGeneralParameterRead
-      {
-        name :=
-          senderStartupReactionName
-
-        trigger :=
-          .startup
-
-        parameters :=
-          [arrivedParameter]
-
-        body :=
-          []
-      })
 
 private def wellFormednessAssertions :
     IO Unit := do
@@ -988,17 +2081,152 @@ private def wellFormednessAssertions :
     "REJECT_PORT_STATE_COLLISION"
     programWithPortStateCollision
 
+  -- Stage D's own case: `declaredNames` gained the parameter list, and a predicate
+  -- that gains a case nobody exercises is the defect stage B found one step earlier
+  -- in `PrioritiesDistinct`. The instance supplies a matching argument on purpose, so
+  -- the union check is the only conjunct that can fail.
+  expectIllFormed
+    "REJECT_PARAMETER_STATE_COLLISION"
+    programWithParameterStateCollision
+
   expectIllFormed
     "REJECT_DANGLING_INSTANCE"
     programWithDanglingInstance
 
+private def translationAssertions :
+    IO Unit := do
+
+  -- Stage D's whole claim in one assertion: a DTR model in, an LF file out, byte for
+  -- byte. Everything after it is a narrowing, added because a 37-line diff does not
+  -- say *which* rule broke.
+  expectRendered
+    "TRANSLATED_WIDENED_PROGRAM"
+    expectedWidenedProgramText
+    widenedProgramText
+
+  expectBool
+    "SELF_SEND_ONLY_ACCEPTS_WIDENED_MODEL"
+    true
+    (Translation.generalModelSelfSendOnly
+      widenedModel)
+
+  expectBool
+    "SELF_SEND_ONLY_REJECTS_EXTERNAL_SEND"
+    false
+    (Translation.generalModelSelfSendOnly
+      externalSendModel)
+
+  -- The refusal is asserted on its exact text at both levels. The statement level is
+  -- where it is produced and the model level is where a caller meets it, and
+  -- `compileGeneralModel_ok_iff_selfSendOnly` is what makes the second follow from the
+  -- first — a theorem about a diagnostic nobody pinned would be a theorem about a
+  -- string that could quietly become `.error ""`.
+  expectRefusedTerm
+    "EXTERNAL_SEND_STATEMENT_REFUSED"
+    externalSendDiagnostic
+    (Translation.compileGeneralStmt
+      (.send
+        (.knownRebec peerKnownRebecName)
+        pingMessageName
+        []
+        ⟨0⟩))
+
+  expectRefusedTerm
+    "EXTERNAL_SEND_MODEL_REFUSED"
+    externalSendDiagnostic
+    (Translation.compileGeneralModel
+      externalSendModel)
+
+  expectRefused
+    "INSTANCE_UNKNOWN_REACTOR_REFUSED"
+    ("instance `ghost` names reactor `Missing`, " ++
+      "which this program does not declare")
+    (LF.CppPrinter.renderGeneralInstance
+      baseProgram
+      ghostInstance)
+
+  match Translation.compileGeneralModel
+    widenedModel
+  with
+
+  | .error diagnostic =>
+      testFailure
+        ("the widened model must translate, but it was refused: " ++
+          diagnostic)
+
+  | .ok program => do
+
+      -- The translation's output is fed to the predicate the printer's own refusals
+      -- are excluded by. Without this, "the printer never refuses a translated
+      -- program" would rest on the printer having happened not to refuse this one.
+      expectWellFormed
+        "ACCEPT_TRANSLATED_WIDENED_PROGRAM"
+        program
+
+      expectBool
+        "INSTANCE_ARGUMENTS_MATCH_POSITIVE"
+        true
+        program.instanceArgumentsMatch
+
+      let programWithTransposedArguments :
+          LF.GeneralProgram :=
+        {
+          program with
+
+          instances :=
+            [widenedInstanceWithWrongTypes]
+        }
+
+      expectBool
+        "INSTANCE_ARGUMENTS_MATCH_NEGATIVE_TYPE"
+        false
+        programWithTransposedArguments.instanceArgumentsMatch
+
+      let programWithMissingArgument :
+          LF.GeneralProgram :=
+        {
+          program with
+
+          instances :=
+            [widenedInstanceWithWrongArity]
+        }
+
+      expectBool
+        "INSTANCE_ARGUMENTS_MATCH_NEGATIVE_ARITY"
+        false
+        programWithMissingArgument.instanceArgumentsMatch
+
+      -- Named arguments, recovered from the reactor's own parameter list. Fig. 5's
+      -- `ArgList ::= Expr (, Expr)*` admits only positional arguments, so this form is
+      -- a divergence from the grammar rather than an instance of it: finding F31.
+      expectRendered
+        "INSTANCE_WITH_NAMED_ARGUMENTS"
+        "  configuredOn = new Configured(bound=7, active=true)"
+        (LF.CppPrinter.renderGeneralInstance
+          program
+          widenedInstanceWithNamedArguments)
+
+      -- Refused, not truncated. A `zip` here would drop the surplus and emit a program
+      -- that compiles and is wrong, which is the worst outcome available.
+      expectRefused
+        "INSTANCE_ARITY_REFUSED"
+        ("instance `configuredOn` supplies 1 argument(s) to reactor `Configured`, " ++
+          "which declares 2 parameter(s)")
+        (LF.CppPrinter.renderGeneralInstance
+          program
+          widenedInstanceWithWrongArity)
+
 /--
-Run every assertion: 16 printing, then 9 well-formedness, 25 in all.
+Run every assertion: 34 printing, then 10 well-formedness, then 12 translation, 56 in all.
 
 The count is stated here because `frontend/check-general-lean.sh` compares the
 number of `PASS_` lines against a literal. There are no fixtures to count, so a
 literal is the only way the gate can notice an assertion that stopped running —
 which is the failure a marker check alone cannot see.
+
+Stage C ran 25 of these, in two blocks. The third block is new and is the one that
+mentions `Relico.Translation`: everything above it would still pass if
+`compileGeneralModel` did not exist.
 -/
 def runGeneralLfPrinterTests :
     IO UInt32 := do
@@ -1007,6 +2235,8 @@ def runGeneralLfPrinterTests :
     printerAssertions
 
     wellFormednessAssertions
+
+    translationAssertions
 
     IO.println
       "GENERAL_LF_PRINTER_TESTS_OK"
@@ -1051,13 +2281,42 @@ def emitBaseProgram :
 
       pure 1
 
+/--
+Print the text the *translation* of `widenedModel` produces, and nothing else.
+
+The second emitter, and the reason stage D's `lfc` gate compiles two programs rather
+than one. The base program above is hand-built LF and answers "is this printer's output
+legal LF". This one starts from a Timed Rebeca model and answers the question stage D
+exists for: does what the translator produces compile and run. A gate that only ran the
+first could go green with a translation that emits nothing at all.
+
+`widenedProgramText` is shared with `TRANSLATED_WIDENED_PROGRAM`, so the bytes `lfc`
+compiles are the bytes that assertion pinned. Two paths each recomputing the program
+would be two chances to compile something no assertion checked.
+-/
+def emitWidenedProgram :
+    IO UInt32 :=
+  match widenedProgramText with
+
+  | .ok programText => do
+      IO.print programText
+
+      pure 0
+
+  | .error reason => do
+      IO.eprintln
+        ("the translation or the printer refused the widened model: " ++
+          reason)
+
+      pure 1
+
 end GeneralLfPrinterTests
 end Relico
 
 def main
     (arguments : List String) :
     IO UInt32 :=
-  -- The emit selector carries no leading dashes on purpose. This module runs
+  -- The emit selectors carry no leading dashes on purpose. This module runs
   -- under `lake env lean --run`, which reads its own flags before handing the
   -- rest to `main`, so a `--`-prefixed argument would be ambiguous with the
   -- driver's own options. The sibling runner already proves that a bare
@@ -1071,8 +2330,11 @@ def main
   | ["emit-program"] =>
       Relico.GeneralLfPrinterTests.emitBaseProgram
 
+  | ["emit-widened"] =>
+      Relico.GeneralLfPrinterTests.emitWidenedProgram
+
   | _ => do
       IO.eprintln
-        "usage: GeneralLfPrinterTestMain [emit-program]"
+        "usage: GeneralLfPrinterTestMain [emit-program|emit-widened]"
 
       pure 2

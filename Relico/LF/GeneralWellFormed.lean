@@ -70,20 +70,29 @@ namespace GeneralReactor
 /--
 Every name a reactor declares, as strings, in one list.
 
-Ports, state variables and logical actions are four fields but **one** LF name
-scope: `input v` and `state v` in the same reactor are two declarations of one
-name. Uniqueness is therefore one check over this union rather than four per-list
+Parameters, ports, state variables and logical actions are five fields but **one** LF
+name scope: `input v` and `state v` in the same reactor are two declarations of one
+name. Uniqueness is therefore one check over this union rather than five per-list
 checks, which would accept a program no LF compiler will.
+
+Parameters joined this union in stage D, on the measured ground that a reactor
+parameter is readable in a reaction body with no trigger and no local declaration —
+it is a member exactly as a state variable is, so `reactor R(x: int) { state x: int
+= 0 }` declares one name twice. Whether `lfc` rejects that spelling is unverified,
+and including parameters is the conservative side of that uncertainty.
 -/
 def declaredNames
     (reactor : LF.GeneralReactor) :
     List String :=
-  (reactor.inputPorts.map
-    (fun port =>
-      port.value)) ++
+  (reactor.parameters.map
+    (fun parameter =>
+      parameter.name.value)) ++
+    (reactor.inputPorts.map
+      (fun port =>
+        port.name.value)) ++
     (reactor.outputPorts.map
       (fun port =>
-        port.value)) ++
+        port.name.value)) ++
     (reactor.stateVariables.map
       (fun declaration =>
         declaration.name.value)) ++
@@ -108,11 +117,32 @@ def triggerWellFormed
           declared.name == action)
 
   | .inputPort port =>
-      reactor.inputPorts.contains port
+      reactor.inputPorts.any
+        (fun declared =>
+          declared.name == port)
 
 /--
 An expression resolves against this reactor's state and the enclosing reaction's
 parameters.
+
+This is **name resolution only**, and stage D deliberately left it that way even
+though types now exist on both sides. Two reasons, in order of weight. First, the DTR
+side does not type expressions either — `DTR/GeneralWellFormed.lean` places no
+restriction on expressions at all — so a type check here would refuse programs this
+repository's own frontend accepts, which is the same trap that killed the
+domain-restriction option in `docs/STAGE_D_DESIGN.md` §3. Second, typing an expression
+needs the types of the parameters in scope, and a reaction's parameters are bare
+names by design, their types being fixed by the action that triggers the reaction.
+The residual gap is the narrowed finding F28.
+
+`.parameterVar` resolves against the enclosing reaction's parameter list and **not**
+against the reactor's parameters, which is stricter than the target requires and
+intentionally so. A reactor parameter is readable anywhere in generated C++, but a
+Rebeca constructor's formals are not in scope in a message server, so admitting them
+here would accept a translation of a source program that never existed. The startup
+reaction reaches them because `compileGeneralConstructor` puts those very names into its
+own parameter list, which is not left as a reading of that function:
+`Translation.compileGeneralReactiveClass_startupParameters` states it.
 -/
 def exprWellFormed
     (reactor : LF.GeneralReactor)
@@ -123,6 +153,9 @@ def exprWellFormed
   | .intLiteral _ =>
       true
 
+  | .boolLiteral _ =>
+      true
+
   | .stateVar name =>
       reactor.stateVariables.any
         (fun declaration =>
@@ -130,6 +163,22 @@ def exprWellFormed
 
   | .parameterVar name =>
       parameters.contains name
+
+  | .binary _ left right =>
+      exprWellFormed
+          reactor
+          parameters
+          left &&
+        exprWellFormed
+          reactor
+          parameters
+          right
+
+  | .unary _ operand =>
+      exprWellFormed
+        reactor
+        parameters
+        operand
 
 /--
 A statement resolves, and a scheduled action is given the arity it declares.
@@ -163,7 +212,9 @@ def stmtWellFormed
               argument)
 
   | .setPort port value =>
-      reactor.outputPorts.contains port &&
+      reactor.outputPorts.any
+          (fun declared =>
+            declared.name == port) &&
         reactor.exprWellFormed
           parameters
           value
@@ -239,10 +290,12 @@ def connectionWellFormed
           false
 
       | some targetReactor =>
-          sourceReactor.outputPorts.contains
-              connection.sourcePort &&
-            targetReactor.inputPorts.contains
-              connection.targetPort
+          sourceReactor.outputPorts.any
+              (fun declared =>
+                declared.name == connection.sourcePort) &&
+            targetReactor.inputPorts.any
+              (fun declared =>
+                declared.name == connection.targetPort)
 
 /--
 At least one reactor is declared.
@@ -310,6 +363,75 @@ def instancesResolve
         (program.reactor?
           reactorInstance.reactorName).isSome)
 
+end GeneralProgram
+
+/--
+One instance's arguments match one reactor's parameters, in count and in type.
+
+Count and type agreement are **one** recursion rather than a length comparison
+followed by a pairwise walk, mirroring `DTR.argumentsMatchParameters` exactly. The
+reason is the one that side records: a length disagreement can then never be reported
+as a type disagreement.
+
+This check is possible at all only because instance arguments are *values*. Payload
+arguments on a `schedule` are expressions, and they are checked for arity alone —
+`stmtWellFormed` does that — since typing an expression would need the types of the
+parameters in scope, which reactions deliberately do not carry.
+-/
+def argumentsMatchParameters :
+    List LF.GeneralValue →
+    List LF.GeneralTypedParameter →
+    Bool
+
+  | [], [] =>
+      true
+
+  | value :: remainingValues, parameter :: remainingParameters =>
+      LF.GeneralValue.hasType
+          value
+          parameter.declaredType &&
+        argumentsMatchParameters
+          remainingValues
+          remainingParameters
+
+  | _, _ =>
+      false
+
+namespace GeneralProgram
+
+/--
+Every instance's arguments match the parameters of the reactor it instantiates.
+
+The LF mirror of `DTR.GeneralModel.argumentsMatchConstructor`, and stage D's reason
+for existing at this layer: before stage D a reactor had no parameters and an instance
+had no arguments, so there was nothing to agree about.
+
+An instance whose reactor does not resolve is **false** here rather than vacuously
+true. `instancesResolve` already requires resolution, so a program failing that
+conjunct fails this one too, and the redundancy is deliberate: a predicate that
+returned `true` for an unresolvable instance would be one whose meaning depended on
+another conjunct being checked first, and conjuncts get reordered.
+
+Asserted in the bridge test main with a positive **and** a negative case. Stage B
+found `PrioritiesDistinct` defined and never enforced anywhere, which is
+indistinguishable from not having written it, and an unexercised predicate is the
+same defect one step earlier.
+-/
+def instanceArgumentsMatch
+    (program : LF.GeneralProgram) :
+    Bool :=
+  program.instances.all
+    (fun reactorInstance =>
+      match program.reactor? reactorInstance.reactorName with
+
+      | none =>
+          false
+
+      | some reactor =>
+          LF.argumentsMatchParameters
+            reactorInstance.arguments
+            reactor.parameters)
+
 /--
 Every connection resolves.
 -/
@@ -352,6 +474,7 @@ def wellFormed
     program.reactorNamesUnique &&
     program.instanceNamesUnique &&
     program.instancesResolve &&
+    program.instanceArgumentsMatch &&
     program.connectionsWellFormed &&
     program.targetEndpointsUnique
 
@@ -481,7 +604,7 @@ program they can run.
 -/
 theorem reactorOfInstance_isSome
     (program : LF.GeneralProgram)
-    (reactorInstance : LF.ReactorInstance)
+    (reactorInstance : LF.GeneralReactorInstance)
     (hWellFormed :
       program.wellFormed =
         true)

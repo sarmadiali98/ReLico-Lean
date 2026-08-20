@@ -12,9 +12,21 @@ several instances.
 Every earlier LF family in this development has exactly one reactor and exactly
 one instance, so nothing in it can express the two structures Table III's
 `knownrebecs ↦ "port declarations and connections in main"` row requires. This
-family adds them, and nothing else. It does not add control flow, it does not
-widen the value domain, and it does not touch `Relico.Payload`, which is
-load-bearing for the proofs the earlier families already carry.
+family adds them, and stage D widens its value domain. It still does not add
+control flow, and it still does not touch `Relico.Payload`, which is load-bearing
+for the proofs the earlier families already carry.
+
+The widening was forced by evidence rather than chosen for symmetry. The LF half of
+this family was assembled from an earlier integer-only, single-payload,
+parameterless family, so "general" described its ports and connections and never
+its data: there was no type at all, the printer hardwired the string `": int"` in
+three places, payload arity above one was refused, and Fig. 5's `ParamList?` was
+missing. Meanwhile `frontend/fixtures/general/expressions.rebeca` is a committed
+*positive* fixture of this very family using every arithmetic and boolean operator
+and a `boolean` state variable, the elaborator really constructs those nodes, and
+DTR well-formedness restricts expressions not at all. Restricting the translation's
+domain instead would have refused this repository's own frontend on this
+repository's own fixture. The reasoning is recorded in `docs/STAGE_D_DESIGN.md` §3.
 
 The shape difference worth naming is that a `GeneralProgram` holds a *list* of
 reactors and a separate *list* of instances, rather than one reactor paired with
@@ -36,9 +48,194 @@ unrepresentable rather than merely unused. The divergence is filed as P19.
 -/
 
 /--
+A declared type in generated LF.
+
+Two constructors, mirroring `DTR.GeneralType`. The mirror is deliberate and the
+translation of types is therefore an identity-shaped map with no failure case; a
+type the DTR side can write and this side cannot would be a refusal the translation
+would have to carry a diagnostic for.
+
+`int` and `boolean` are the Lean-side names, and they are *not* the emitted
+spellings. LF writes `int` and `bool`, and the single place that knows this is
+`renderGeneralType` in the printer. Keeping the emitted string out of the syntax
+tree is what let stage D remove three hardwired `": int"` literals rather than add a
+fourth.
+
+Both spellings are measured, not assumed: `state flag: bool = false`, a `bool`-typed
+port and a `bool`-typed action payload all compile and run under real `lfc 0.11.0`.
+-/
+inductive GeneralType where
+  | int
+
+  | boolean
+
+deriving Repr, DecidableEq, BEq, Inhabited
+
+/--
+A value in generated LF.
+
+Needed because an instance's constructor arguments are values rather than
+expressions: `new Configured(bound=7, active=true)` carries `7` and `true`, and
+nothing about an instance argument is an expression over state.
+-/
+inductive GeneralValue where
+  | int :
+      Int →
+      GeneralValue
+
+  | bool :
+      Bool →
+      GeneralValue
+
+deriving Repr, DecidableEq, BEq, Inhabited
+
+namespace GeneralValue
+
+/--
+The type of a value.
+-/
+def typeOf :
+    LF.GeneralValue →
+    LF.GeneralType
+
+  | .int _ =>
+      .int
+
+  | .bool _ =>
+      .boolean
+
+/--
+A value has an expected type.
+
+Defined as `typeOf` followed by decidable equality rather than as a second pattern
+match over value and type together, which is how `DTR.GeneralValue.hasType` is
+written. One pattern match means the two cannot drift: a definition that matched
+independently could accept a pair `typeOf` disagrees with, and nothing would notice.
+
+Unlike the DTR side, this exists because a caller needs it —
+`GeneralProgram.instanceArgumentsMatch` — and not for symmetry. An earlier draft of
+this file recorded that no `hasType` was wanted here precisely because it would have
+no caller; writing the instance-argument check gave it one.
+-/
+def hasType
+    (value : LF.GeneralValue)
+    (expected : LF.GeneralType) :
+    Bool :=
+  value.typeOf == expected
+
+end GeneralValue
+
+namespace GeneralType
+
+/--
+The value a declaration of this type starts at.
+
+This is why `GeneralStateVariableDecl` carries a type and no initial value. A stored
+initial value could disagree with its own declared type — `boolean` beside `0` is
+representable and printable — whereas deriving it makes the disagreement
+unstateable. The DTR side already fixes these two choices, so the translation of a
+state variable stays an identity-shaped map.
+
+There is deliberately no separate initial-value field to disagree with this, and the
+`hasType` predicate that sits beside `typeOf` above is here because the
+instance-argument check consults it, not for symmetry with the DTR side.
+-/
+def initialValue :
+    LF.GeneralType →
+    LF.GeneralValue
+
+  | .int =>
+      .int 0
+
+  | .boolean =>
+      .bool false
+
+end GeneralType
+
+/--
+The type of a type's own initial value is that type.
+
+The mirror of `DTR.GeneralType.typeOf_initialValue`, and the reason it is worth
+proving on this side too is that stage D's type-preservation lemma composes the two:
+a DTR declaration and its translation must start at values of corresponding types,
+and this is the LF half of that statement.
+-/
+@[simp]
+theorem typeOf_initialValue
+    (declaredType : LF.GeneralType) :
+    (LF.GeneralType.initialValue declaredType).typeOf = declaredType := by
+
+  cases declaredType
+
+  · rfl
+
+  · rfl
+
+/--
+A binary operator in generated LF.
+
+Thirteen constructors, mirroring `DTR.GeneralBinaryOp` one for one, so
+`compileGeneralBinaryOp` is total.
+
+No precedence and no associativity is recorded here, and none is needed: the printer
+fully parenthesizes every operator application, so the emitted C++ cannot depend on
+a precedence claim this development has not verified. The fixture
+`accumulator = left + right * 2 - 1;` is exactly the case that would punish a
+printer that emitted bare infix.
+
+The operator spellings themselves needed no probe and never will. Every reaction
+body is emitted inside `{= … =}`, where the text is verbatim C++, so `+ - * / %`,
+`== != < <= > >=` and `&& || !` are guaranteed by the target language rather than by
+LF. The only LF-level risk was ever the *type* positions, and those are measured.
+-/
+inductive GeneralBinaryOp where
+  | add
+
+  | sub
+
+  | mul
+
+  | div
+
+  | mod
+
+  | eq
+
+  | ne
+
+  | lt
+
+  | le
+
+  | gt
+
+  | ge
+
+  | logicalAnd
+
+  | logicalOr
+
+deriving Repr, DecidableEq, BEq, Inhabited
+
+/--
+A unary operator in generated LF.
+
+Mirroring `DTR.GeneralUnaryOp`. `negate` is arithmetic negation and `logicalNot` is
+boolean negation; both appear in the committed fixture, as `-left` and as
+`!(first && second) || true`.
+-/
+inductive GeneralUnaryOp where
+  | negate
+
+  | logicalNot
+
+deriving Repr, DecidableEq, BEq, Inhabited
+
+/--
 A general expression in generated LF.
 
-Three constructors, the same three the payload family already carries. There is
+Six constructors: the three the payload family already carried, plus the boolean
+literal and the two operator forms stage D added. There is
 no port-read expression, and that is a measured omission rather than an
 oversight: the paper never exhibits one, because every receiving reaction in both
 of its figures has an empty body — Fig. 1b line 16 and Fig. 2b lines 28 and 31
@@ -54,17 +251,22 @@ syntactic. Semantics for the general family is a later stage, and that is where 
 evaluator acquires a caller. Shipping one now would be dead code, which is a thing
 this project has already had to write findings about.
 
-The asymmetry with `DTR.GeneralExpr` — which carries boolean literals, binary
-operators and unary operators — is deliberate, and the debt it creates is recorded
-here rather than pre-empted. No printer in this development can emit an operator,
-so widening this type now would produce a construct nothing can print. The stage
-that writes the translation is the one that has to either widen this type or
-restrict its own domain, and leaving the two sides visibly unequal is what forces
-that choice to be made in the open instead of inside a default branch.
+The asymmetry with `DTR.GeneralExpr` that this docstring used to record as an open
+debt is **closed**, and closed the way the debt itself demanded: in the open, by
+widening this type rather than by restricting the translation's domain. The old
+argument for waiting was that no printer in this development could emit an operator,
+so a widened expression would be a construct nothing could print. Stage D removes
+that objection by teaching the printer operators in the same change, which is why
+the two halves land together and neither is dead code. `docs/STAGE_D_DESIGN.md` §3
+records the evidence that decided it, and §5.3 the shape.
 -/
 inductive GeneralExpr where
   | intLiteral :
       Int →
+      GeneralExpr
+
+  | boolLiteral :
+      Bool →
       GeneralExpr
 
   | stateVar :
@@ -73,6 +275,17 @@ inductive GeneralExpr where
 
   | parameterVar :
       VarName →
+      GeneralExpr
+
+  | binary :
+      LF.GeneralBinaryOp →
+      GeneralExpr →
+      GeneralExpr →
+      GeneralExpr
+
+  | unary :
+      LF.GeneralUnaryOp →
+      GeneralExpr →
       GeneralExpr
 
 deriving Repr, DecidableEq, BEq, Inhabited
@@ -84,11 +297,27 @@ A general reaction statement.
 `setPort` takes one expression while `schedule` takes a list, and that asymmetry
 is the paper's: `LFStmt ::= outPort([Expr])?.set(Expr);` admits exactly one value,
 while a typed logical action's payload arity follows the parameter list of the
-message server it was derived from. Keeping `schedule`'s argument list unbounded
-also keeps the translation total and the printer partial, which is the split this
-repository already has — a multi-value action payload is refused in the C++
-printer, so the external-send stage inherits that refusal site instead of having
-to make its translation return `Except`.
+message server it was derived from. `schedule`'s argument list is unbounded, and as of stage D that is genuinely
+supported rather than merely representable. This docstring used to say that a
+multi-value payload was refused in the C++ printer, and the printer said the same in
+three places — *"the current C++ printer foundation supports at most one integer
+payload"*. That was **our** limitation and not the target's, which is a measured
+correction rather than an opinion: a program-level `public preamble` struct carrying
+three fields including a `bool`, and a code-block action type
+`{= std::pair<int,int> =}`, were compiled separately by real `lfc 0.11.0` and both
+ran and delivered their values. Stage D removes the refusal and emits a struct
+derived from the action's own parameter list, per `docs/STAGE_D_DESIGN.md` §5.4. The
+finding is filed as F23.
+
+What is *not* fixed, and is recorded rather than hidden: nothing in this **type**
+relates this argument list to the parameter list of the action it names. The
+well-formedness layer does — `stmtWellFormed` requires
+`declared.parameters.length == arguments.length` — so arity disagreement is caught for
+any program that passed the predicate, and a printer may rely on it only for such
+programs. What remains genuinely open after stage D is *type* agreement: an argument
+whose type differs from the declared parameter's is well-formed by that check, and
+checking it would require typing a reaction's parameters, which this family
+deliberately does not do. The corrected finding is F28.
 
 The delay on `schedule` is a `Delay` rather than an optional one, matching the DTR
 side: an absent `after` has already had the zero default applied by the time a
@@ -128,17 +357,92 @@ abbrev GeneralBody :=
   List LF.GeneralStmt
 
 /--
+A declared port of a reactor.
+
+Stage C carried ports as bare `PortName`s and let the printer supply `": int"`. That
+made the *type* of every port a fact about the printer rather than about the program,
+which is precisely the kind of claim a syntax tree exists to hold.
+
+There is still no width field. Fig. 5's `PortDecl` admits a multiport width
+`([intLiteral])?`, but `lfc 0.11.0` rejects `reaction(in[0])` and a whole-multiport
+trigger fires once per tag regardless of channel count, so multiports cannot
+implement the paper's receiver-side fan-in. Omitting the field keeps the rejected
+construct unrepresentable rather than merely unused.
+-/
+structure GeneralPortDecl where
+  name :
+    PortName
+
+  declaredType :
+    LF.GeneralType
+
+deriving Repr, DecidableEq, BEq, Inhabited
+
+/--
+A declared state variable of a reactor.
+
+A type and **no** initial value, which is the one place this family deliberately
+departs from the shape of `LF.StateVariableDecl` it would otherwise have reused.
+That inherited structure carries `initialValue : Int` and no type at all — it comes
+from `Relico/LF/StoreSyntax.lean`, an integer-only family — so a `boolean` state
+variable was not translatable at the level of its *declaration*, quite apart from any
+expression: its initial value is `false`, which has no `Int` counterpart.
+
+Carrying the type alone rather than both is what makes a declaration that disagrees
+with itself unstateable. `boolean` beside `0` would be representable and printable,
+and no well-formedness check would be looking. The initial value is instead derived
+by `GeneralType.initialValue`, which also fixes the emitted `= 0` and `= false`
+in one place.
+
+`LF.StateVariableDecl` is left untouched for the earlier families that use it.
+-/
+structure GeneralStateVariableDecl where
+  name :
+    VarName
+
+  declaredType :
+    LF.GeneralType
+
+deriving Repr, DecidableEq, BEq, Inhabited
+
+/--
+A typed parameter, used for both message-server payloads and reactor parameters.
+
+One structure for both because both are the same thing on the DTR side —
+`DTR.GeneralTypedParameter` serves a message server's formals and a constructor's
+formals alike — and mirroring that keeps `Translation.compileGeneralTypedParameter` a
+single identity-shaped map.
+-/
+structure GeneralTypedParameter where
+  name :
+    VarName
+
+  declaredType :
+    LF.GeneralType
+
+deriving Repr, DecidableEq, BEq, Inhabited
+
+/--
 A generated typed logical-action declaration.
 
-The ordered field names mirror source formal-parameter order, and the value domain
-is integer-only, as in the payload family this borrows its shape from.
+The ordered parameters mirror source formal-parameter order, and they are typed. The
+docstring here used to say *"the value domain is integer-only, as in the payload
+family this borrows its shape from"*, and that inheritance is exactly what stage D
+had to undo: a `msgsrv logic(boolean first, boolean second)` had nowhere to record
+that its parameters are booleans, so the printer could only ever have guessed.
+
+The parameter *names* are load-bearing beyond declaration order. For an action of
+arity two or more the printer emits a struct whose field names are these names, and
+binds one C++ local per parameter, so a reaction body can refer to a payload
+component by its source identifier and the translation of expressions needs no
+renaming pass.
 -/
 structure GeneralAction where
   name :
     ActionName
 
   parameters :
-    List VarName
+    List LF.GeneralTypedParameter
 
 deriving Repr, DecidableEq, BEq, Inhabited
 
@@ -175,6 +479,14 @@ makes priority observable has somewhere to attach it.
 anonymous in concrete syntax: a printer emits `reaction(<trigger>)` and never the
 name, so uniqueness of this field is deliberately not required anywhere. Requiring
 it would constrain an identifier the target language never sees.
+
+`parameters` stays a list of bare names while `GeneralAction.parameters` gained types,
+and the asymmetry is deliberate rather than an omission stage D missed. A reaction's
+parameters are the binders its emitted body opens over the arriving payload, and the
+printer opens them with C++ `auto`, so their types are already determined by the
+action the reaction is triggered by. Typing them here would create a second place for
+the same fact to live, and two places that can disagree with nothing checking is the
+shape of defect this development keeps finding.
 -/
 structure GeneralReaction where
   name :
@@ -198,21 +510,45 @@ deriving Repr, DecidableEq, BEq, Inhabited
 /--
 A generated reactor.
 
-Ports are plain `List PortName`: no width field and no payload field. Fig. 5's
-`PortDecl` admits a multiport width `([intLiteral])?`, but `lfc 0.11.0` rejects
-`reaction(in[0])` and a whole-multiport trigger fires once per tag regardless of
-channel count, so multiports cannot implement the paper's receiver-side fan-in and
-named ports are forced. Omitting the width field is what makes the rejected
-construct unrepresentable rather than merely unused. There is no payload field
-because every port in the paper and in the fixtures carries exactly one integer —
-Fig. 1b writes `reading.set(0)` for a *parameterless* message, and §II-B explains
-that *"the value 0 is a dummy value used only to trigger the parameterless
-destination reaction"*, so there is no zero-payload port to distinguish.
+`parameters` restores a production the paper has and stage C dropped:
+`Reactor ::= reactor R (ParamList?) {PortDecl* StateDecl* ActionDecl* ReactionDecl*}`.
+Without it, `Configured configuredOn():(7, true)` and
+`Configured configuredOff():(0, false)` — both in the committed fixture
+`constructor-arguments.rebeca` — are indistinguishable once translated, because a
+constructor's arguments have nowhere to land. A reactor parameter is the LF mechanism
+for exactly this, and it is measured working in all three respects the design needed:
+`reactor Configured(bound: int = 0, active: bool = false)` declares it,
+`new Configured(bound=7, active=true)` supplies it per instance, and a parameter is
+readable directly in a reaction body with no trigger and no further declaration.
+
+Defaults are not stored. Every parameter's declared default is
+`GeneralType.initialValue` of its type, so the declaration never needs to consult the
+instance list, and a parameter without a default — which would make an argumentless
+instantiation illegal — is unrepresentable.
+
+The tempting alternative was to specialize one reactor per *instance* and inline its
+arguments as constants, which would need no parameter list at all. It is rejected
+because Table III maps a reactive **class** to a reactor and this family's whole shape
+depends on instances of one class sharing one reactor declaration, whose port set is
+the union over those instances — which is the object §III-F's cost bound ranges over.
+Specializing per instance would quietly change what that bound is about.
+
+Ports and state variables carry their declared types, and the reasons the port
+structure has no width field and no payload field are recorded on
+`GeneralPortDecl` itself.
 
 Input ports, output ports, state variables and logical actions are four lists but
 **one** name scope. An LF reactor does not let `input v` and `state v` coexist, so
 the uniqueness obligation over them is a single check over the union rather than
 four per-list checks; four checks would accept a program no LF compiler will.
+
+Stage D adds `parameters` as a fifth list in that same scope, on the same reasoning:
+a parameter becomes a reactor member exactly as a state variable does — measured, in
+that a parameter is readable in a reaction body with no trigger and no local
+declaration — so `reactor R(x: int) { state x: int = 0 }` names one member twice.
+Whether `lfc` rejects that spelling is **unverified**, and the union check is the
+conservative side of the uncertainty: it refuses a program the compiler might have
+accepted, rather than emitting one it might reject.
 
 A declared port need not be connected, and that is load-bearing rather than a
 tolerated gap. Because one reactor is shared by every instance of its class, its
@@ -229,14 +565,17 @@ structure GeneralReactor where
   name :
     ReactorName
 
+  parameters :
+    List LF.GeneralTypedParameter
+
   inputPorts :
-    List PortName
+    List LF.GeneralPortDecl
 
   outputPorts :
-    List PortName
+    List LF.GeneralPortDecl
 
   stateVariables :
-    List LF.StateVariableDecl
+    List LF.GeneralStateVariableDecl
 
   logicalActions :
     List LF.GeneralAction
@@ -246,6 +585,37 @@ structure GeneralReactor where
 
   messageReactions :
     List LF.GeneralReaction
+
+deriving Repr, DecidableEq, BEq, Inhabited
+
+/--
+An instance declaration in the main reactor.
+
+`LF.ReactorInstance`, which stage C used here, carries a name and a reactor name and
+nothing else, so it cannot distinguish two instances of one class that were
+constructed with different arguments. This structure adds the arguments, and
+`LF.ReactorInstance` is left untouched for the earlier families.
+
+`arguments` are **values**, not expressions: a constructor argument in Rebeca is a
+literal, and there is no state to read at instantiation time. They are **positional**,
+while the emitted LF is named. That direction is deliberate — positional is the shape
+the source has, and the names are recovered at print time from the reactor's own
+parameter list, so a *name* disagreement is unrepresentable rather than merely
+unchecked. What remains checkable is the arity and, since a value carries its type and
+a parameter declares one, the type of each argument; both are checked together by
+`LF.GeneralProgram.instanceArgumentsMatch`. One list of names, authoritative, checked
+once; two independently stored name lists could contradict each other and nothing would
+notice.
+-/
+structure GeneralReactorInstance where
+  name :
+    ActorName
+
+  reactorName :
+    ReactorName
+
+  arguments :
+    List LF.GeneralValue
 
 deriving Repr, DecidableEq, BEq, Inhabited
 
@@ -322,7 +692,7 @@ structure GeneralProgram where
     List LF.GeneralReactor
 
   instances :
-    List LF.ReactorInstance
+    List LF.GeneralReactorInstance
 
   connections :
     List LF.GeneralConnection
@@ -358,9 +728,9 @@ def findReactor? :
 Find a reactor instance by name.
 -/
 def findInstance? :
-    List LF.ReactorInstance →
+    List LF.GeneralReactorInstance →
     ActorName →
-    Option LF.ReactorInstance
+    Option LF.GeneralReactorInstance
 
   | [], _ =>
       none
@@ -392,7 +762,7 @@ Find an instance this program's main reactor declares.
 def instance?
     (program : LF.GeneralProgram)
     (instanceName : ActorName) :
-    Option LF.ReactorInstance :=
+    Option LF.GeneralReactorInstance :=
   LF.findInstance?
     program.instances
     instanceName

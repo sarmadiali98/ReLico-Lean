@@ -31,6 +31,20 @@ set -euo pipefail
 # asked for `emit-program`, which prints `renderGeneralProgram` applied to the
 # same program the assertions pin, and nothing else -- so this gate cannot pass
 # against a hand-transcribed variant that drifted from what the printer does.
+#
+# TWO programs are emitted, compiled and run, and the second one is what stage D
+# added. `emit-program` prints a hand-built LF program and so asks only whether
+# this printer's output is legal LF. `emit-widened` prints the translation of a
+# Timed Rebeca model -- `compileGeneralModel` then the printer -- and so asks the
+# question stage D exists for: does what the translator produces compile and run.
+# A gate that ran only the first would stay green against a translation that
+# emitted nothing at all, because no hand-built program passes through it.
+#
+# The widened model terminates on its own: its constructor self-sends at
+# `after(0)`, that message server self-sends at `after(5)`, and the last one sends
+# nothing, so the event queue empties and the binary exits. That is a requirement
+# of this gate rather than a property of the model -- a model that kept scheduling
+# would hang here instead of failing.
 
 REPO="$(
   cd "$(dirname "$0")/.." &&
@@ -45,9 +59,14 @@ LFC="${LFC:-/Users/ali/.local/share/lingua-franca/cli/bin/lfc}"
 PRINTER_TEST_MAIN="$REPO/frontend/lean-bridge/GeneralLfPrinterTestMain.lean"
 
 # The file basename becomes the target name, because the emitted main reactor is
-# anonymous -- `main reactor {`, with no name of its own. So this constant also
-# names the binary that gets run below.
-PROGRAM_NAME="GeneralPrinterProgram"
+# anonymous -- `main reactor {`, with no name of its own. So each name below also
+# names the binary that gets run.
+#
+# Two names, and each program gets its own work directory. Sharing one would let a
+# binary left by the first run satisfy the second even if its own compile step had
+# quietly produced nothing.
+BASE_PROGRAM_NAME="GeneralPrinterProgram"
+WIDENED_PROGRAM_NAME="GeneralTranslatedProgram"
 
 WORK="${TMPDIR:-/tmp}/relico_general_lf_target"
 
@@ -75,97 +94,125 @@ echo "=== building the Lean closure the printer lives in"
 # either fails on a missing olean or, worse, emits text from a stale printer.
 lake build
 
-echo
-echo "=== emitting the program from the printer"
+# One emit-compile-run cycle, parameterised by the runner's selector and the
+# program name.
+#
+# A function rather than the block it replaces, because stage D needs the cycle
+# twice and the two copies would be identical except for two words. Written for
+# bash 3.2, which is what /bin/bash is on this machine: positional parameters and
+# `local`, no name references and no associative arrays.
+check_program() {
+  local selector="$1"
+  local program_name="$2"
+  local description="$3"
+
+  local work="$WORK/$program_name"
+  local emitted="$work/src/$program_name.lf"
+
+  echo
+  echo "=== emitting $description"
+
+  mkdir -p "$work/src"
+
+  set +e
+  lake env lean \
+    --run \
+    "$PRINTER_TEST_MAIN" \
+    "$selector" \
+    > "$emitted"
+  local emit_status=$?
+  set -e
+
+  if [ "$emit_status" -ne 0 ]; then
+    echo "the runner refused to emit $description (exit $emit_status); see the diagnostic above"
+    exit 1
+  fi
+
+  # An empty file would otherwise reach lfc and fail there, with a diagnostic
+  # about an empty program rather than about the emit step that actually broke.
+  if [ ! -s "$emitted" ]; then
+    echo "the runner emitted nothing for $description"
+    exit 1
+  fi
+
+  # A cheap shape check before paying for a C++ build: if the first line is not the
+  # target declaration then something other than a program reached the file, and
+  # lfc's complaint would be about the stray text rather than about that.
+  if [ "$(head -1 "$emitted")" != "target Cpp" ]; then
+    echo "the emitted text for $description does not begin with a target declaration:"
+    head -3 "$emitted"
+    exit 1
+  fi
+
+  cat "$emitted"
+
+  echo
+  echo "=== compiling $description with lfc"
+
+  # From the work directory with a src/-relative path, which is the layout lfc
+  # expects and the one the probe script uses.
+  set +e
+  (
+    cd "$work" &&
+    "$LFC" "src/$program_name.lf"
+  ) > "$work/lfc.log" 2>&1
+  local lfc_status=$?
+  set -e
+
+  if [ "$lfc_status" -ne 0 ]; then
+    echo "lfc rejected $description (exit $lfc_status)"
+    echo
+    tail -30 "$work/lfc.log"
+    exit 1
+  fi
+
+  echo "lfc accepted it"
+
+  # Warnings are reported and not treated as failure. The generated C++ warns about
+  # an unused private field for any state variable a reaction never reads, and a
+  # DTR state variable is required to exist whether or not the model reads it -- so
+  # treating lfc log content as failure would reject correct output.
+  if grep -q 'warning' "$work/lfc.log"; then
+    echo
+    echo "compiler warnings, reported and not fatal:"
+    grep 'warning' "$work/lfc.log" | head -10
+  fi
+
+  echo
+  echo "=== running $description"
+
+  # Compiling proves the text parses and the generated C++ builds. Running proves
+  # it links and that the reactions can actually fire, which is the part a
+  # code-generation check alone leaves open.
+  set +e
+  "$work/bin/$program_name" > "$work/run.log" 2>&1
+  local run_status=$?
+  set -e
+
+  if [ "$run_status" -ne 0 ]; then
+    echo "$description failed at run time (exit $run_status)"
+    echo
+    tail -20 "$work/run.log"
+    exit 1
+  fi
+
+  echo "it ran and exited cleanly"
+}
 
 rm -rf "$WORK"
-mkdir -p "$WORK/src"
 
-EMITTED="$WORK/src/$PROGRAM_NAME.lf"
-
-set +e
-lake env lean \
-  --run \
-  "$PRINTER_TEST_MAIN" \
+# The hand-built program first. It is the cheaper failure to read: if the printer
+# emits something lfc rejects, that shows up here without the translation in the
+# picture at all.
+check_program \
   emit-program \
-  > "$EMITTED"
-EMIT_STATUS=$?
-set -e
+  "$BASE_PROGRAM_NAME" \
+  "the hand-built program from the printer"
 
-if [ "$EMIT_STATUS" -ne 0 ]; then
-  echo "the printer refused to emit (exit $EMIT_STATUS); see the diagnostic above"
-  exit 1
-fi
-
-# An empty file would otherwise reach lfc and fail there, with a diagnostic
-# about an empty program rather than about the emit step that actually broke.
-if [ ! -s "$EMITTED" ]; then
-  echo "the printer emitted nothing"
-  exit 1
-fi
-
-# A cheap shape check before paying for a C++ build: if the first line is not the
-# target declaration then something other than a program reached the file, and
-# lfc's complaint would be about the stray text rather than about that.
-if [ "$(head -1 "$EMITTED")" != "target Cpp" ]; then
-  echo "the emitted text does not begin with a target declaration:"
-  head -3 "$EMITTED"
-  exit 1
-fi
-
-cat "$EMITTED"
-
-echo
-echo "=== compiling it with lfc"
-
-# From the work directory with a src/-relative path, which is the layout lfc
-# expects and the one the probe script uses.
-set +e
-(
-  cd "$WORK" &&
-  "$LFC" "src/$PROGRAM_NAME.lf"
-) > "$WORK/lfc.log" 2>&1
-LFC_STATUS=$?
-set -e
-
-if [ "$LFC_STATUS" -ne 0 ]; then
-  echo "lfc rejected the emitted program (exit $LFC_STATUS)"
-  echo
-  tail -30 "$WORK/lfc.log"
-  exit 1
-fi
-
-echo "lfc accepted it"
-
-# Warnings are reported and not treated as failure. The generated C++ warns about
-# an unused private field for any state variable a reaction never reads, and a
-# DTR state variable is required to exist whether or not the model reads it -- so
-# treating lfc log content as failure would reject correct output.
-if grep -q 'warning' "$WORK/lfc.log"; then
-  echo
-  echo "compiler warnings, reported and not fatal:"
-  grep 'warning' "$WORK/lfc.log" | head -10
-fi
-
-echo
-echo "=== running the compiled binary"
-
-# Compiling proves the text parses and the generated C++ builds. Running proves
-# it links and that the reactions can actually fire, which is the part a
-# code-generation check alone leaves open.
-set +e
-"$WORK/bin/$PROGRAM_NAME" > "$WORK/run.log" 2>&1
-RUN_STATUS=$?
-set -e
-
-if [ "$RUN_STATUS" -ne 0 ]; then
-  echo "the compiled program failed at run time (exit $RUN_STATUS)"
-  echo
-  tail -20 "$WORK/run.log"
-  exit 1
-fi
-
-echo "it ran and exited cleanly"
+check_program \
+  emit-widened \
+  "$WIDENED_PROGRAM_NAME" \
+  "the translated program from the widened Rebeca model"
 
 echo
 echo "GENERAL_LF_TARGET_OK"

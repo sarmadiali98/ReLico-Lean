@@ -77,26 +77,26 @@ describes its ports and connections, not its data.**
 
 Gap by gap, with the evidence:
 
-**D-gap 1 — expressions.** `LF.GeneralExpr` cannot represent `boolLiteral`, `binary` or `unary`.
+**Gap 1 — expressions.** `LF.GeneralExpr` cannot represent `boolLiteral`, `binary` or `unary`.
 `renderGeneralExpr` (`GeneralCppPrinter` :66) has exactly three arms to match.
 
-**D-gap 2 — type erasure.** There is no LF type. `renderInputPortDecl` (:204), `renderOutputPortDecl`
+**Gap 2 — type erasure.** There is no LF type. `renderInputPortDecl` (:204), `renderOutputPortDecl`
 (:214) and `renderGeneralActionDecl` (:255) each hardwire the *string literal* `": int"`. And
 `LF.StateVariableDecl` — which `GeneralReactor.stateVariables` reuses — is defined in
 `Relico/LF/StoreSyntax.lean:12` with `initialValue : Int`. A DTR `boolean flag` has initial value
 `.bool false`, which has no `Int` counterpart, so stage D cannot translate the **declaration**, quite
 apart from any expression.
 
-**D-gap 3 — payload arity.** `renderGeneralActionDecl` (:257), and `renderGeneralParameterRead` at
+**Gap 3 — payload arity.** `renderGeneralActionDecl` (:257), and `renderGeneralParameterRead` at
 :339 and :360, all refuse more than one parameter with *"the current C++ printer foundation supports at
 most one integer payload"*. A message server with two parameters therefore cannot be printed — and
 `msgsrv arithmetic(int left, int right)` is in the committed fixture.
 
-**D-gap 4 — untyped action parameters.** `GeneralAction.parameters : List VarName` with a docstring
+**Gap 4 — untyped action parameters.** `GeneralAction.parameters : List VarName` with a docstring
 stating *"the value domain is integer-only, as in the payload family this borrows its shape from"*. A
 `msgsrv logic(boolean first, boolean second)` has nowhere to record that its parameters are booleans.
 
-**D-gap 5 — no reactor parameters, so instances of one class are indistinguishable.** `GeneralReactor`
+**Gap 5 — no reactor parameters, so instances of one class are indistinguishable.** `GeneralReactor`
 has no parameter list and `renderGeneralInstance` (:553) emits `name ++ " = new " ++ reactorName ++ "()"`.
 The committed fixture `frontend/fixtures/general/constructor-arguments.rebeca` declares
 `Configured(int bound, boolean active)` and instantiates it **twice with different arguments** —
@@ -201,7 +201,7 @@ message reads as though it were reporting a target constraint.
 parameter names, its arity is unbounded, and mixed types are natural. Route B forces positional
 `std::get<i>` access for arity above two and discards the parameter names, which would make the emitted
 body harder to relate to the source and would put an index where the source has an identifier. Route A
-also supplies the per-parameter type that D-gap 4 needs, so one mechanism closes gaps 2, 3 and 4.
+also supplies the per-parameter type that Gap 4 needs, so one mechanism closes gaps 2, 3 and 4.
 
 **Precedence is a claim the printer would be making.** The fixture contains
 `accumulator = left + right * 2 - 1;`. A printer that emits infix operators without parentheses is
@@ -314,7 +314,7 @@ Action type selection, arity by arity:
 
 ### 5.5 Reactor parameters — restoring Fig. 5's `ParamList?`
 
-D-gap 5 needs no new mechanism, it needs a restored one. Two fields:
+Gap 5 needs no new mechanism, it needs a restored one. Two fields:
 
 ```
 structure GeneralReactor where
@@ -705,45 +705,63 @@ gate exercising only the old capability would be the exact failure mode the `lfc
 
 The corrections ledger currently runs P1–P22 for the paper plus F1–F20 from stage B, and it still lives under
 a gitignored `tmp/` path — which means the project's most reusable artefact is the one thing a fresh clone
-does not get. Stage D's findings are written here in the meantime, numbered **D1–D9**, and graduating the
+does not get. Stage D's findings are written here in the meantime, numbered **F21–F29**, and graduating the
 ledger into the repository is a task in its own right rather than something to keep postponing.
+
+**These findings were numbered D1–D9 when this document was first committed, and that was a collision.**
+`docs/dtr-fragment/PAPER_FRAGMENT_RESTRICTIONS.md` already defines a `D1–D9` series meaning *divergences
+from the paper's DTR fragment restrictions*, and those labels are cited from Lean source —
+`Relico/DTR/GeneralWellFormed.lean` says *"One class satisfies D6"* at line 92 and *"D8 for one argument
+list"* at line 108. The old D8 there is *"instance arguments may be boolean literals, not only integer
+literals"*, which is close enough in subject matter to this document's original D8 to mislead a reader
+badly. Continuing stage B's single findings series as F21–F29 is the fix; the mapping was
+D1→F21 … D9→F29, applied uniformly, and no reference to the fragment series was touched.
 
 Findings about **this repository**:
 
-- **D1.** The LF half of the "general" family was assembled from an earlier integer-only, single-payload,
+- **F21.** The LF half of the "general" family was assembled from an earlier integer-only, single-payload,
   parameterless family. Five distinct gaps (§2), one cause. "General" described its ports and connections,
   never its data.
-- **D2.** Stage C dropped Fig. 5's `Reactor ::= reactor R (ParamList?)` production while quoting that very
+- **F22.** Stage C dropped Fig. 5's `Reactor ::= reactor R (ParamList?)` production while quoting that very
   grammar line in its own docstring, so two instances of one class with different constructor arguments are
   currently indistinguishable in LF (§5.5).
-- **D3.** `GeneralCppPrinter`'s three refusals saying *"the current C++ printer foundation supports at most one
+- **F23.** `GeneralCppPrinter`'s three refusals saying *"the current C++ printer foundation supports at most one
   integer payload"* describe **our** limit and not the target's. Measured: a preamble struct and a
   `{= std::pair<int,int> =}` code-block type both compile, run and carry their values, including a mixed
   `bool` field. The comment is accurate about the foundation and misleading about the cause; it should be
   reworded when the refusal is removed.
-- **D4.** A correction to our own record: `-Wunused-private-field` fires only for a field neither read **nor**
+- **F24.** A correction to our own record: `-Wunused-private-field` fires only for a field neither read **nor**
   written. Stage C's warning was about a state variable no reaction touched at all. The warning is narrower
   than previously recorded — still reachable, so the gate's non-fatal-warning policy stays justified.
-- **D8.** `LF.GeneralStmt.schedule` carries a list of expressions and `LF.GeneralAction` carries a list of
-  typed parameters, and nothing in the representation relates the two. Arity agreement between a send and its
-  action is therefore not merely unchecked but **unstateable** at the LF level (§8.3). This is the one gap
-  stage D leaves open by construction, and it is recorded rather than papered over.
-- **D9.** The generated binder `<action>_payload` shares a C++ scope with source-derived identifiers.
+- **F28, corrected during implementation — the original wording was wrong.** This document first claimed that
+  arity agreement between a `schedule` and its action is *"not merely unchecked but unstateable at the LF
+  level"*. Reading the source refutes it: `LF/GeneralWellFormed.lean` `stmtWellFormed` lines 154–158 already
+  require `declared.parameters.length == arguments.length`, so arity **is** checked for any program that
+  passed well-formedness, and stage D inherits that guarantee rather than owing it. The claim survives only
+  in the weaker form that the *type* `GeneralStmt` does not relate the two lists, which is true of every
+  name-resolution obligation in this layer and is not a finding on its own.
+  What is genuinely open is *type* agreement: an argument whose type differs from its declared parameter's
+  passes that check. Closing it needs a typing judgment on `LF.GeneralExpr`, which in turn needs a reaction's
+  parameters to carry types — deliberately not done, since their types are already fixed by the action the
+  reaction triggers on and duplicating them creates a second version of the same fact. Filed in this
+  narrowed form, and the wrong version is left visible above rather than quietly rewritten, because a design
+  document that silently repairs itself is not evidence of anything.
+- **F29.** The generated binder `<action>_payload` shares a C++ scope with source-derived identifiers.
   Inherited, not introduced — the payload family emits a bare `auto payload = …` — and properly fixed by a
   freshness condition in well-formedness, not in a printer (§6.1).
 
 Findings about **the paper**:
 
-- **D5.** The paper supplies no naming rule for a multi-value payload carrier. §5.4's
+- **F25.** The paper supplies no naming rule for a multi-value payload carrier. §5.4's
   `<ReactorName>_<ActionName>_Args` is this project's invention, exactly like the port-naming rule of P20. It
   is filed as a finding so that the rule is visibly ours rather than silently attributed to Table III.
-- **D7.** Local message-server priority appears in neither SOS table and the paper gives no tie rule, so what
+- **F27.** Local message-server priority appears in neither SOS table and the paper gives no tie rule, so what
   a translation should *do* with `msgsrv m(...) : 3` has no source of truth. Stage D therefore drops it
   deliberately (§7.3) rather than guessing, and the drop is itself the divergence.
-- **D6, provisional and not yet filed.** Whether Fig. 5's `ActionDecl` production admits a *typed* action at
+- **F26, provisional and not yet filed.** Whether Fig. 5's `ActionDecl` production admits a *typed* action at
   all, and whether it admits more than one payload value, has **not** been checked against the PDF in this
   session. It is written down as an open check, not as a finding, because filing a paper fault on an unread
-  production is exactly the failure this project's trust order exists to prevent. It must be read before D6
+  production is exactly the failure this project's trust order exists to prevent. It must be read before F26
   is claimed either way.
 
 ### 10.2 Open questions — these are decisions, not tasks
@@ -760,11 +778,11 @@ Findings about **the paper**:
    run per gate invocation — a real cost in Mac round trips. Declining it leaves the widened printer output
    never compiled by a real compiler, which is the situation the `lfc` gate was created to end (§9.4).
 3. **Approve dropping local message-server priority to stage G** (`priority := none`), on the grounds that
-   realizing it means choosing a reaction declaration order and the paper supplies no tie rule (D7).
+   realizing it means choosing a reaction declaration order and the paper supplies no tie rule (F27).
 4. **Confirm P20 stays deferred.** Stage D emits no ports, so the port-naming disagreement between Fig. 1b
    (`receiveReading`) and Fig. 2b (`readingFromTemp`) does not block it. It blocks E and F, and it is a paper
    decision that only you can make.
-5. **Decide whether D5 and D7 are filed as paper findings or as project conventions.** Both are places where
+5. **Decide whether F25 and F27 are filed as paper findings or as project conventions.** Both are places where
    we must invent a rule the paper does not give. Filing them makes the paper revisable, which is the stated
    goal; not filing them makes this document the only record.
 

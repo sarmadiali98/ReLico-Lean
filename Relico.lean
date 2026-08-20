@@ -632,3 +632,5 @@ import Relico.Frontend.GeneralBridgeCheck
 import Relico.LF.GeneralSyntax
 import Relico.LF.GeneralWellFormed
 import Relico.LF.GeneralCppPrinter
+
+import Relico.Translation.GeneralBasic
