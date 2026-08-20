@@ -17,7 +17,7 @@ is why neither gate regenerates what the other one checks.
 The negatives are split across three directories by *which layer* rejects them:
 eleven in `reject/` that this exporter refuses, eight in `upstream-reject/`
 that the Rebeca parser and typechecker refuse before the exporter is handed an
-AST, and eleven in `lean-reject/` that the Lean decoder refuses. That split was
+AST, and twelve in `lean-reject/` that the Lean decoder refuses. That split was
 measured, not guessed, and the reason it is worth recording
 is in "Which layer enforces what" below.
 

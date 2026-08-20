@@ -58,7 +58,7 @@ project would notice.
 it is what makes the fixture tree unable to encode this layer's verdict on its
 own.
 
-The eleven fixtures in `frontend/fixtures/general/lean-reject/` are the other
+The twelve fixtures in `frontend/fixtures/general/lean-reject/` are the other
 kind: documents **no producer emits**. They exist because nothing else in the
 project can reach the decoder's rejection paths. The Java gate cannot — a
 document the exporter would refuse to emit is a document it never hands to Lean.
@@ -68,11 +68,16 @@ for these checks, it is the only possible one, and without them the four decode
 steps and the five well-formedness clauses are unexecuted code that happens to
 elaborate.
 
-Each of the eleven is a single mutation of `minimal-class.parser.json` — the
+Eleven of the twelve are a single mutation of `minimal-class.parser.json` — the
 document the first assertion in this run accepts. That is deliberate: the
 mutation *is* the claim, so `diff` against the accepted document shows exactly
 what is being tested, and a fixture cannot drift into failing for an unrelated
-second reason without the diff growing. `frontend/fixtures/general/lean-reject/README.md`
+second reason without the diff growing. The twelfth,
+`invalid-parameter-shadows-state.json`, is one rename away from
+`constructor-arguments.parser.json` instead, because its claim needs a class with
+both a state variable and a constructor formal and `minimal-class` has neither;
+the base changed rather than the mutation growing.
+`frontend/fixtures/general/lean-reject/README.md`
 lists each mutation.
 -/
 
@@ -265,6 +270,27 @@ def runGeneralFrontendTests
       "UNSUPPORTED_SCHEMA_VERSION"
       (fixtureDirectory ++ "/lean-reject/invalid-schema-version.json")
       .unsupportedSchemaVersion
+
+    -- Elaboration, which runs between the envelope and the clauses
+    -- (`GeneralDecoder.lean:236–239`). An elaborator reason therefore pre-empts
+    -- every well-formedness reason, and this fixture is the only one here that
+    -- reaches that layer at all.
+    --
+    -- It is also the only fixture not derived from `minimal-class.parser.json`:
+    -- the claim needs a class that has both a state variable and a constructor
+    -- formal, and `minimal-class` deliberately has neither. Its base is
+    -- `constructor-arguments.parser.json`, one rename away.
+    --
+    -- Why this one is worth a fixture rather than left to the twenty-three other
+    -- unexercised reasons: `namesUniqueAndValid` does not look at state variables
+    -- at all, and the docstrings at `GeneralWellFormed.lean:319–321`,
+    -- `GeneralElaborator.lean:820–823` and `GeneralDecoder.lean:30` justify that
+    -- omission by pointing here. Until this ran, the half of that partition the
+    -- other half defers to was unexecuted code.
+    expectReject
+      "PARAMETER_SHADOWS_STATE_VARIABLE"
+      (fixtureDirectory ++ "/lean-reject/invalid-parameter-shadows-state.json")
+      .parameterShadowsStateVariable
 
     -- Step 4, the assembled model. `bindingsMatchDeclarations` is the first
     -- clause the classifier tries, and it is where a missing class is caught:

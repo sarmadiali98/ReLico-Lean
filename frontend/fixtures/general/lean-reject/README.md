@@ -1,6 +1,6 @@
 # `lean-reject` — documents no producer emits
 
-Eleven malformed `general-v1` documents, each of which the Lean decoder must
+Twelve malformed `general-v1` documents, each of which the Lean decoder must
 refuse, and each paired in
 `frontend/lean-bridge/GeneralFrontendTestMain.lean` with the exact
 `GeneralDiagnosticReason` it must be refused for.
@@ -33,7 +33,8 @@ ran.
 
 ## Every fixture is one mutation of an accepted document
 
-Each file is `minimal-class.parser.json` with a single change. That document is
+Each file is an accepted document with a single change. Eleven of the twelve
+mutate `minimal-class.parser.json`; that document is
 accepted by the same test run that rejects these, so the pair is a controlled
 experiment: the mutation is the claim being tested, and
 
@@ -46,11 +47,28 @@ shows exactly what that claim is. A fixture that later starts failing for a
 second, unrelated reason cannot do so quietly, because the diff would have to
 grow first.
 
+`invalid-parameter-shadows-state.json` is the exception, and the exception is
+about the base rather than the rule. Its claim is that a constructor formal may
+not be named after a state variable, which needs a class that has one of each;
+`minimal-class` has an empty `stateVariables` and an empty parameter list, so
+expressing the collision there would mean adding two declarations *and* colliding
+them — three changes, of which only the third is the claim. Mutating
+`constructor-arguments.parser.json` instead keeps the mutation at one thing, so
+the controlled-experiment property is preserved by changing the base:
+
+```
+diff frontend/fixtures/general/constructor-arguments.parser.json \
+     frontend/fixtures/general/lean-reject/invalid-parameter-shadows-state.json
+```
+
+is two lines, both the same rename. Prefer this move to a growing mutation if a
+future fixture needs a richer base than `minimal-class` provides.
+
 The documents are formatted the way the exporter formats its own output — two
 space indentation, keys sorted, one trailing newline — so a diff shows the
 mutation and nothing else.
 
-## The eleven, by the decode step each one reaches
+## The twelve, by the decode step each one reaches
 
 `decodeGeneralModelText` runs four steps in order, and a fixture can only test a
 step the previous three let it reach. That ordering is why, for instance, the
@@ -90,6 +108,70 @@ someone later makes optional without noticing anything depends on it.
 against is a real one: four sibling families emit documents of their own, and
 handing one of theirs to this decoder must fail on the envelope rather than
 half-decode.
+
+### Elaboration, which runs before any clause
+
+`decodeRawGeneralModel` calls `elaborateGeneralModel` and only then
+`requireGeneralWellFormed` (`Relico/Frontend/GeneralDecoder.lean:236–239`), so an
+elaborator reason pre-empts all five clause reasons. This is the only fixture here
+that reaches that layer.
+
+| fixture | mutation | reason |
+| --- | --- | --- |
+| `invalid-parameter-shadows-state.json` | the constructor's first formal renamed `bound` → `limit`, the name of an existing state variable, at its declaration and its one use | `parameterShadowsStateVariable` |
+
+Both sites are renamed rather than only the declaration. Renaming just the
+declaration would leave the body reading a `bound` that no longer exists, giving
+the document a second defect and making the test depend on the elaborator checking
+shadowing before it elaborates bodies. It does — `elaborateConstructor` returns at
+`GeneralElaborator.lean:793–796`, before any statement is looked at — but a
+fixture that passes *because* of a check order it does not assert is a fixture that
+starts lying the moment that order changes. The same reasoning is why
+`invalid-empty-class-name.json` blanks the instance's `className` too.
+
+The message server `reconfigure` keeps its own formal named `bound`, untouched.
+That is not an oversight: `elaborateMessageServer` runs the identical
+`firstShadowedName?` check at `GeneralElaborator.lean:746`, so renaming it as well
+would have produced a document with two independent collisions, of which the
+constructor's is raised first because `elaborateClass` reaches it first
+(`:849` before `:854`). One collision, one reason.
+
+Why this document belongs here rather than as a `.rebeca` source, measured in the
+artifact's own compiler rather than assumed, because the obvious guess is wrong:
+
+- **Timed Rebeca permits the collision.** `semanticCheckOfMethod` pushes a fresh
+  scope *before* declaring the formals (`CoreRebecaCompleteCompilerFacade.java:391`,
+  reached for constructors at `:344`), state variables having been added to the
+  enclosing `REACTIVE_CLASS` scope at `:278`; and `addVariableToCurrentScope`
+  rejects a redeclaration only within `scopeStack.peek()`
+  (`ScopeHandler.java:54–75`). The compiler contains no hiding check of any kind.
+  So the typechecker accepts `Configured(int limit)` alongside `statevars { int
+  limit; }`, and inside the body `limit` resolves to the formal.
+- **`RebecaGeneralJsonExporter` refuses it.** `declareParameters` runs
+  `Scope.declare` over every constructor and message-server formal
+  (`:1124`, `:1158`), and `declare` throws `unsupported("a local name shadowing
+  state variable …")` when the name is a state variable (`:417–421`).
+
+The second is what licenses this directory: the exporter never emits a document
+carrying the collision, so no source fixture can deliver one to the decoder. The
+first is why the fixture is interesting at all — the pipeline narrows a construct
+the source language allows, and the narrowing is the exporter's and this layer's,
+not Rebeca's.
+
+Note that the exporter's own parameter-shadowing branch is, as of this fixture,
+**unexercised**: `reject/` holds eleven sources and none of them shadows a state
+variable with a formal. `local-declaration.rebeca` reaches `Scope.declare` by the
+`declare`-statement path only. A `reject/` source for the formal path would close
+that on the Java side, and it is the natural companion to this file.
+
+Note that `PASS_REJECT_PARAMETER_SHADOWS_STATE_VARIABLE` here and stage D's
+`PASS_REJECT_PARAMETER_STATE_COLLISION` in the printer runner are different
+claims about the same shape of mistake, and both are wanted. This one says a
+*document* carrying the collision never becomes a model. That one says a
+hand-built model carrying it is refused by `LF.GeneralProgram.wellFormed` after
+translation — which is finding F32, and is only interesting because
+`DTR.GeneralModel.wellFormed` accepts what this fixture proves the elaborator
+rejects.
 
 ### Step 4, the assembled model
 
@@ -140,29 +222,37 @@ duplication is of a name, not of a whole record.
 
 ## What this corpus does not cover
 
-Eleven fixtures is not coverage of the decoder, and it would be easy to read a
+Twelve fixtures is not coverage of the decoder, and it would be easy to read a
 directory of negatives as if it were. Measured: `GeneralDiagnosticReason` declares
-**32** reasons, and the runner asserts **8** of them — the five reached from here
+**32** reasons, and the runner asserts **9** of them — the six reached from here
 plus `iterationNotSupported`, which `control-flow` reaches, and the two
-model-level clauses above. **Twenty-four are asserted nowhere.**
+model-level clauses above. **Twenty-three are asserted nowhere.**
 
-One of the twenty-four, `modelNotWellFormed`, is unreachable by construction and
+One of the twenty-three, `modelNotWellFormed`, is unreachable by construction and
 documented as such: `wellFormed` is exactly the conjunction of the five clauses,
 so nothing is left over. It exists so that classification is total without the
 classifier being trusted to agree with the gate.
 
-The other twenty-three are reachable and untested. They fall into three groups,
+The other twenty-two are reachable and untested. They fall into three groups,
 which matters because the groups need different work:
 
 Reachable from a document, so a fixture here would test them:
 `unknownDeclaredType`, `emptyName`, `duplicateStateVariable`,
-`duplicateParameter`, `parameterShadowsStateVariable`,
+`duplicateParameter`,
 `unsupportedExpressionKind`, `missingField`, `expectedIntegerLiteral`,
 `expectedBooleanLiteral`, `unknownBinaryOperator`, `unknownUnaryOperator`,
 `undeclaredVariable`, `unsupportedStatementKind`, `expectedAssignTargetName`,
 `assignmentTargetNotStateVariable`, `unsupportedSendTargetKind`,
 `nonConstantDelay`, `negativeDelay`, `nonLiteralInstanceArgument`,
 `sendTargetsDeclaredFailed`, `sendsResolveToMessageServersFailed`.
+
+`parameterShadowsStateVariable` was in this group until
+`invalid-parameter-shadows-state.json` landed. It was taken first, ahead of the
+nineteen still listed, for a reason that does not apply to most of them: two
+other predicates are written to *not* check what it checks, and their docstrings
+name the elaborator as the reason that is safe. It was the only unexercised reason
+another layer's correctness argument depended on. That is the criterion for
+picking the next one, rather than working down the list in order.
 
 Reachable only from a document the exporter really emits, so testing it needs a
 new *source* fixture rather than one here: `branchingNotSupported`. The exporter
@@ -178,7 +268,7 @@ finding F12.
 
 Nothing here should be taken to mean the untested reasons are wrong. It means
 they are unexercised, which is a different and smaller claim, and the honest one.
-The number to watch is 8 of 32: if a future change to this directory does not
+The number to watch is 9 of 32: if a future change to this directory does not
 move it, the change added fixtures rather than coverage.
 
 ## Adding to this directory
