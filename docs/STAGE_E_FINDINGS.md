@@ -652,6 +652,29 @@ closure that `frontend/check-general-lean.sh` compiles. What is *not* done is th
 that is carried below rather than smuggled into #50, because assertions move
 `EXPECTED_PRINTER_ASSERTIONS` and every docstring that states the breakdown.
 
+> **The six are asserted as of task #56 — the sentence above about "the other six" is therefore false
+> from this commit onward, and is kept because it is the measurement that produced the work.** All eight
+> texts in the table now have a label. The six added, in the table's row order, are
+> `PASS_KNOWN_REBEC_UNDECLARED_REFUSED`, `PASS_KNOWN_REBEC_CLASS_UNDECLARED_REFUSED`,
+> `PASS_KNOWN_REBEC_UNBOUND_REFUSED`, `PASS_BINDING_TARGET_NOT_INSTANTIATED_REFUSED`,
+> `PASS_BINDING_TARGET_CLASS_MISMATCH_REFUSED` and `PASS_INSTANCE_CLASS_UNDECLARED_REFUSED`, in a new
+> `routedRefusalAssertions` block. Gate evidence: `GENERAL_LEAN_GATE_OK`, `gate_exit=0`, 508 jobs,
+> `printer assertions the run reported: 76` against 70, `pass_lines_total=99`.
+>
+> **Three things the writing measured that the table did not say.** First, the assertions are against
+> `Translation.routesOf` rather than `compileGeneralModel`: `routesOf` is the function all eight causes
+> reach, and asserting through the outer function would silently add the claim that no arm of *its* own
+> fires first. Second, the conjunct that closes each cause, read off `wellFormed`'s five at
+> `Relico/DTR/GeneralWellFormed.lean:359` — `sendTargetsDeclared` closes row one,
+> `sendsResolveToMessageServers` closes row two (and `bindingsMatchDeclarations` does **not**, because a
+> class nobody instantiates has no bindings to check), and `bindingsMatchDeclarations` closes rows five
+> through eight, three of them through `bindingsMatchClass` at `:162`, `:168` and `:172` and the last
+> through its own `none` arm at `:189`. Third, two facts that had to be derived rather than observed and
+> then held under the gate: `generalOutputPortEntriesOf` recurses left to right and returns the first
+> `.error`, so a class with three offending sends reports the first one — statement index 1, not 2 — and
+> the port named in row seven's message is `reportToHub1`, which makes that assertion the only place the
+> naming rule and a refusal are checked against each other.
+
 ---
 
 ## What is left open, and who owns it
@@ -740,3 +763,12 @@ restriction on the accepted fragment and is reachable from a document the fronte
 moves `EXPECTED_PRINTER_ASSERTIONS` and the two docstrings that state the breakdown, so it is its own task
 and must not be folded into a fixture commit. Blocks nothing; the reason to do it soon is that F47's table is
 the only place the mapping from cause to text currently exists.
+
+> **Closed in task #56** — see the addendum under F47 for the six labels and the gate evidence. Kept, not
+> deleted, because this list is ordered by what blocks what. Two corrections to the item as written. The
+> instrument is `expectRefusedTerm`, not `expectString` directly: it takes the `Except` value, fails if it
+> is `.ok`, and delegates to `expectString` on the diagnostic, so a refusal that stopped being a refusal
+> fails differently from one whose text drifted. And the escape hatch this item offered was not taken for
+> any of the six, including the bindings group where it was permitted — the models cost about a dozen lines
+> each, being one-field structure updates on `routedModel`, and a written record of deliberate untestedness
+> would have been another prose claim about the suite, which is the failure this whole family is about.

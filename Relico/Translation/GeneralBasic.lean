@@ -1899,11 +1899,14 @@ at all; what those two fixtures establish is that `sendTargetsDeclared` and
 and third causes here are unreachable from frontend output — not evidence that these branches
 were taken. The distinction is the whole point of the paragraph in §8 that calls these branches
 defensive. Recorded as finding F47 in `docs/STAGE_E_FINDINGS.md`, together with the measurement
-that of the eight refusal causes reachable through `routesOf`, exactly two have their text
-asserted anywhere: `UNDECLARED_MESSAGE_SERVER_SEND_REFUSED` and
-`PARAMETERLESS_EXTERNAL_SEND_REFUSED`, both in
-`frontend/lean-bridge/GeneralLfPrinterTestMain.lean`, both against hand-built models, which is
-the only way a translation refusal can be reached.
+that of the eight refusal causes reachable through `routesOf`, exactly two had their text
+asserted anywhere when the finding was written. All eight are asserted now, in
+`frontend/lean-bridge/GeneralLfPrinterTestMain.lean` and only there, because a hand-built model
+is the only way a translation refusal can be reached. The four causes this lemma covers are
+`KNOWN_REBEC_UNDECLARED_REFUSED`, `KNOWN_REBEC_CLASS_UNDECLARED_REFUSED`,
+`UNDECLARED_MESSAGE_SERVER_SEND_REFUSED` and `PARAMETERLESS_EXTERNAL_SEND_REFUSED`, in the order
+listed above; those are literal `PASS_` labels, so this sentence is falsifiable by `grep`, which
+is the property the sentence it replaced did not have.
 -/
 theorem compileGeneralReactiveClass_error_env
     {classes : List DTR.GeneralReactiveClass}
@@ -2511,7 +2514,11 @@ an instance the model does not instantiate; a binding names an instance whose cl
 declared known rebec's class; or an instance instantiates a class the model does not declare.
 Eight causes, one `Except String`, which is why the message text is the only thing that
 distinguishes them and why §10's inversion has to go through the text rather than a constructor.
-Two of the eight have their text asserted; the other six do not.
+All eight texts are asserted, which was not true when finding F47 measured them: two were.
+The four this lemma adds are `KNOWN_REBEC_UNBOUND_REFUSED`,
+`BINDING_TARGET_NOT_INSTANTIATED_REFUSED`, `BINDING_TARGET_CLASS_MISMATCH_REFUSED` and
+`INSTANCE_CLASS_UNDECLARED_REFUSED`, in the order listed above, in
+`routedRefusalAssertions` in `frontend/lean-bridge/GeneralLfPrinterTestMain.lean`.
 
 **An earlier version of this docstring said "the three the two new `lean-reject` documents
 exercise", named the payload cause among the three, and omitted both the binding-lookup cause and

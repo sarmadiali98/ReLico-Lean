@@ -2390,6 +2390,262 @@ private def routedModel :
       spareActor
     ]
 
+/-!
+### The six refusals routing can reach and no document can produce
+
+`Relico/Translation/GeneralRouting.lean` has exactly eight causes that reach `routesOf`,
+and all eight share one `Except String`. Two are pinned in `translationAssertions` above,
+against `compileGeneralModel`: the arity-zero payload and the undeclared message server.
+The other six are pinned here. The inventory, and the line that *decides* each cause as
+distinct from the line that raises it, is finding F47 in `docs/STAGE_E_FINDINGS.md`. That
+finding exists because two docstrings in `Relico/Translation/GeneralBasic.lean` credited
+this coverage to `lean-reject` fixtures — documents the *frontend* refuses, which
+therefore never reach a translation function at all.
+
+Each of the six is a structure update on `routedModel` changing one field, so a refusal
+cannot be explained by anything but the construct under test, the discipline
+`externalSendModel` follows against `widenedModel`. `routedModel` is the base rather than
+`widenedModel` because four of the six are arms a model only gets close enough to raise
+once it actually routes.
+
+None of the six can be written as a document, and the conjunct that stops each one is
+worth naming rather than gesturing at, since "well-formedness rules it out" is the kind of
+sentence F47 was made of. Measured against `wellFormed`'s five conjuncts in
+`Relico/DTR/GeneralWellFormed.lean:359`: `sendTargetsDeclared` closes the undeclared known
+rebec; `sendsResolveToMessageServers` closes the undeclared *class* of a declared known
+rebec, and `bindingsMatchDeclarations` does **not**, because a class that is never
+instantiated has no bindings to check; and `bindingsMatchDeclarations` closes the remaining
+four — three through `bindingsMatchClass`, whose `none` arms are at `:162` and `:168` and
+whose class comparison is at `:172`, and the fourth through its own `none` arm at `:189`.
+
+The assertions call `Translation.routesOf` rather than `compileGeneralModel`, one layer in,
+because `routesOf` is the function all eight causes reach. Going through the outer function
+would additionally assert that no arm of *its* own fires first, which is a different claim,
+and one that would quietly absorb these six if it ever stopped holding.
+-/
+
+private def relayClassName :
+    ClassName :=
+  ⟨"Relay"⟩
+
+private def absentHubInstanceName :
+    ActorName :=
+  ⟨"absentHub"⟩
+
+/--
+`Sensor` with its one known-rebec declaration removed.
+
+`poll` still sends three times to `hub`, so every send now names a rebec the class does
+not declare, and `generalOutputPortEntryFor` refuses at step 1. The refusal reported is
+the *first* send's, because `generalOutputPortEntriesOf` recurses left to right and
+returns the first `.error` it meets; that is why the expected text names statement index
+1 and not 2.
+-/
+private def undeclaredKnownRebecModel :
+    DTR.GeneralModel :=
+  {
+    routedModel with
+
+    classes :=
+      [
+        {
+          sensorClass with
+
+          knownRebecs :=
+            []
+        },
+
+        gatewayClass
+      ]
+  }
+
+/--
+`Sensor` declaring `hub` to be a `Relay`, which this model does not declare.
+
+Step 2, and the cause the earlier docstring in `GeneralBasic.lean` omitted entirely.
+`Relay` is declared nowhere in this file but here, so the class table genuinely lacks it
+rather than having it under another name.
+-/
+private def undeclaredRebecClassModel :
+    DTR.GeneralModel :=
+  {
+    routedModel with
+
+    classes :=
+      [
+        {
+          sensorClass with
+
+          knownRebecs :=
+            [
+              {
+                name :=
+                  hubKnownRebecName
+
+                className :=
+                  relayClassName
+              }
+            ]
+        },
+
+        gatewayClass
+      ]
+  }
+
+/--
+`probe` binding nothing at all, while its class still declares and sends to `hub`.
+
+The first of the four `generalRouteFor` reaches, and the one the note on
+`externalSendModel` above predicts in passing: *"it would fail one layer later in
+`generalRouteFor`, on the missing binding"*. That prediction is asserted here rather than
+left as prose — which is the whole of what finding F47 asks for.
+
+Only the sending instance changes. `stationActor` and `spareActor` are repeated verbatim
+because the update is on the list, not on an element of it, and a list literal is the only
+way Lean lets one element differ.
+-/
+private def unboundKnownRebecModel :
+    DTR.GeneralModel :=
+  {
+    routedModel with
+
+    instances :=
+      [
+        {
+          probeActor with
+
+          bindings :=
+            []
+        },
+
+        stationActor,
+        spareActor
+      ]
+  }
+
+/--
+`probe` binding `hub` to an instance name the model never instantiates.
+
+`absentHub` is not a typo of `station`: it is spelled to be obviously absent, so a reader
+who meets this diagnostic in the wild is not left wondering whether two similar names were
+confused.
+-/
+private def bindingNotInstantiatedModel :
+    DTR.GeneralModel :=
+  {
+    routedModel with
+
+    instances :=
+      [
+        {
+          probeActor with
+
+          bindings :=
+            [(hubKnownRebecName, absentHubInstanceName)]
+        },
+
+        stationActor,
+        spareActor
+      ]
+  }
+
+/--
+`probe` binding `hub` to itself, so the bound instance is a `Sensor` where `Sensor`
+declares a `Gateway`.
+
+A self-binding rather than a third class, because it makes the mismatch out of what the
+model already has: no new class means nothing else about the model moved, and the
+diagnostic's two class names come from the two places that genuinely disagree.
+
+This is the cause whose message names a port, and the port it names is `reportToHub1` —
+the first entry in canonical site order, carrying the site suffix `routedSiteSuffixes`
+pins independently. So this assertion is also the only place the naming rule and a refusal
+are checked against each other.
+-/
+private def bindingClassMismatchModel :
+    DTR.GeneralModel :=
+  {
+    routedModel with
+
+    instances :=
+      [
+        {
+          probeActor with
+
+          bindings :=
+            [(hubKnownRebecName, probeInstanceName)]
+        },
+
+        stationActor,
+        spareActor
+      ]
+  }
+
+/--
+`probe` instantiating `Relay`, a class the model does not declare.
+
+The only one of the eight raised by `routesOfInstances` itself rather than by a callee, and
+the only one that fails before any send is looked at.
+-/
+private def instanceClassUndeclaredModel :
+    DTR.GeneralModel :=
+  {
+    routedModel with
+
+    instances :=
+      [
+        {
+          probeActor with
+
+          className :=
+            relayClassName
+        },
+
+        stationActor,
+        spareActor
+      ]
+  }
+
+/--
+The six expected refusals, one per cause, written out rather than derived.
+
+Derived expectations are the failure this whole section exists to avoid: a text built by
+calling the same concatenation the translator calls would agree with any edit to it,
+including one that dropped a name. These are literals, and the class, rebec, message,
+instance and port names in them are the ones the models above carry.
+-/
+private def undeclaredKnownRebecDiagnostic :
+    String :=
+  "class `Sensor` sends to `hub` at " ++
+    "message server `poll`, statement at index 1 counting from zero, " ++
+    "but declares no known rebec of that name"
+
+private def undeclaredRebecClassDiagnostic :
+    String :=
+  "known rebec `hub` of class `Sensor` is declared to have class `Relay`, " ++
+    "which the model does not declare"
+
+private def unboundKnownRebecDiagnostic :
+    String :=
+  "instance `probe` binds no known rebec named `hub`, " ++
+    "which its class `Sensor` declares and sends to"
+
+private def bindingNotInstantiatedDiagnostic :
+    String :=
+  "instance `probe` binds `hub` to `absentHub`, " ++
+    "which the model does not instantiate"
+
+private def bindingClassMismatchDiagnostic :
+    String :=
+  "instance `probe` binds `hub` to `probe` of class `Sensor`, " ++
+    "but its own class declares that rebec to have class `Gateway`, " ++
+    "so the payload of port `reportToHub1` was built from the wrong message server"
+
+private def instanceClassUndeclaredDiagnostic :
+    String :=
+  "instance `probe` instantiates class `Relay`, " ++
+    "which the model does not declare"
+
 /--
 The site suffixes routing computes for `Sensor`, as one auditable string.
 
@@ -3065,14 +3321,19 @@ private def translationAssertions :
     expectedWidenedProgramText
     widenedProgramText
 
-  -- Three refusals, and between them they are the whole of what stage E will not carry.
+  -- Three refusals reached through `compileGeneralModel` and `compileGeneralStmt`. They
+  -- are *not* the whole of what stage E will not carry, which is what this comment said
+  -- until finding F47 counted: routing alone has eight refusal causes, and the six of
+  -- them not covered here are asserted in `routedRefusalAssertions` below. What these
+  -- three are is the whole of what is reachable at *this* layer — one construct routing
+  -- cannot spell, one hand-built model shape routing catches on the way past, and one arm
+  -- that can only fire if this translator is wrong.
+  --
   -- Stage D asserted two refusals here as well, and it is worth being clear that these
   -- are not those two moved: stage D refused every external send and pinned the sentence
-  -- that said so, and both that predicate and that sentence are gone. What is asserted
-  -- now is the residue — one construct routing cannot spell, one hand-built model shape
-  -- routing catches on the way past, and one arm that can only fire if this translator
-  -- is wrong. Each is pinned on its exact text, because all three are `.error` and a
-  -- test that asked only for `.error` would pass on any of the three for any of them.
+  -- that said so, and both that predicate and that sentence are gone. Each is pinned on
+  -- its exact text, because all three are `.error` and a test that asked only for
+  -- `.error` would pass on any of the three for any of them.
   expectRefusedTerm
     "PARAMETERLESS_EXTERNAL_SEND_REFUSED"
     parameterlessPortDiagnostic
@@ -3515,9 +3776,75 @@ private def routedAssertions :
         routedSpecifiedReactionOrder
 
 /--
+The six refusals `routesOf` can reach that `translationAssertions` does not cover.
+
+Kept as its own block for a reason that is not organisational. `routedAssertions` above
+asserts what routing *does*, and every assertion in it would still pass if all eight
+refusal messages were replaced by the empty string. This block asserts what routing *says*
+when it stops, and nothing else in the file does: a count that drops by six says the
+refusal texts stopped being checked, which is a smaller and much quieter failure than
+routing itself stopping.
+
+The order is the order of finding F47's table, which is the order the causes are reached
+in: the two from `generalOutputPortEntryFor`'s steps 1 and 2, then the three from
+`generalRouteFor`, then the one from `routesOfInstances`. Reading them top to bottom is
+reading a send being resolved from the class table inward.
+-/
+private def routedRefusalAssertions :
+    IO Unit := do
+
+  -- Step 1 of five. `sendTargetsDeclared` — D6 — is what stops this upstream, and the
+  -- fixture `frontend/fixtures/general/lean-reject/invalid-send-target-undeclared.json`
+  -- asserts that it does. These two are not the same assertion: that one says a document
+  -- never arrives here, this one says what happens if one somehow does.
+  expectRefusedTerm
+    "KNOWN_REBEC_UNDECLARED_REFUSED"
+    undeclaredKnownRebecDiagnostic
+    (Translation.routesOf
+      undeclaredKnownRebecModel)
+
+  -- Step 2. Closed by `sendsResolveToMessageServers` through
+  -- `DTR.GeneralModel.receivingClass?`, which returns `none` exactly when the declared
+  -- class is missing from the table — not by `bindingsMatchDeclarations`, which never
+  -- looks at a class nobody instantiates.
+  expectRefusedTerm
+    "KNOWN_REBEC_CLASS_UNDECLARED_REFUSED"
+    undeclaredRebecClassDiagnostic
+    (Translation.routesOf
+      undeclaredRebecClassModel)
+
+  -- The binding lookup, and the arm `externalSendModel`'s note says a model that stopped
+  -- refusing arity-zero payloads would fall into next.
+  expectRefusedTerm
+    "KNOWN_REBEC_UNBOUND_REFUSED"
+    unboundKnownRebecDiagnostic
+    (Translation.routesOf
+      unboundKnownRebecModel)
+
+  expectRefusedTerm
+    "BINDING_TARGET_NOT_INSTANTIATED_REFUSED"
+    bindingNotInstantiatedDiagnostic
+    (Translation.routesOf
+      bindingNotInstantiatedModel)
+
+  -- The one refusal of the eight whose message names a generated port, so it is also the
+  -- one an edit to the naming rule would move without touching routing at all.
+  expectRefusedTerm
+    "BINDING_TARGET_CLASS_MISMATCH_REFUSED"
+    bindingClassMismatchDiagnostic
+    (Translation.routesOf
+      bindingClassMismatchModel)
+
+  expectRefusedTerm
+    "INSTANCE_CLASS_UNDECLARED_REFUSED"
+    instanceClassUndeclaredDiagnostic
+    (Translation.routesOf
+      instanceClassUndeclaredModel)
+
+/--
 Run every assertion: 34 printing, then 10 well-formedness, then 11 translation, then
 3 for the port-name collisions F34 and F42, then 5 for finding F32's counterexample,
-then 7 for the routed model, 70 in all.
+then 7 for the routed model, then 6 for the refusals routing reaches, 76 in all.
 
 The count is stated here because `frontend/check-general-lean.sh` compares the
 number of `PASS_` lines against a literal. There are no fixtures to count, so a
@@ -3530,7 +3857,9 @@ not exist. The fourth is the only one that calls into
 `Relico.Translation.NameGeneration` directly, rather than reading names off a program
 something else built. The sixth is the one that mentions
 `Relico.Translation.GeneralRouting`, and everything above *it* would still pass if
-routing did not exist.
+routing did not exist. The seventh reads routing's **diagnostics** rather than its
+output, and it is the only block in the file that would survive routing returning a
+correct answer for the wrong reason and still fail if the reasons were mislabelled.
 
 Stage E moved this number in both directions, and the down direction is the one worth
 recording. It first went **60 to 59**: stage D asserted `generalModelSelfSendOnly`'s
@@ -3546,6 +3875,15 @@ assertions are not new coverage, they are coverage `Relico/Translation/NameGener
 had already claimed in prose while the assertions did not exist. That is finding F44. The
 count moving is the cheap part; what was actually repaired is a docstring that had been
 telling readers a gap was discharged.
+
+Then **70 to 76**, which is the same repair a second time and by now not a coincidence.
+`Relico/Translation/GeneralBasic.lean` credited eight translation refusals to two
+`lean-reject` documents that structurally cannot reach a translation function; measuring
+the inventory found eight causes with two texts asserted. That is finding F47, and the six
+here are the missing six. F44 and F47 are two of the four instances
+`docs/STAGE_E_FINDINGS.md` records of one root cause: a claim about this suite written as
+prose instead of as a label a `grep` can falsify. Every assertion added in both rounds is
+named, and the names are the point.
 -/
 def runGeneralLfPrinterTests :
     IO UInt32 := do
@@ -3562,6 +3900,8 @@ def runGeneralLfPrinterTests :
     collisionAssertions
 
     routedAssertions
+
+    routedRefusalAssertions
 
     IO.println
       "GENERAL_LF_PRINTER_TESTS_OK"

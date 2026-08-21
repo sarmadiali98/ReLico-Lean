@@ -198,8 +198,12 @@ echo "=== the general LF printer, well-formedness and translation assertions"
 # F43. Then up to 70 for three port-name collision witnesses that
 # `Relico/Translation/NameGeneration.lean` had already claimed were asserted here while they
 # did not exist, which is finding F44. A literal that is only ever raised is a literal being
-# maintained by addition rather than by reading.
-EXPECTED_PRINTER_ASSERTIONS=70
+# maintained by addition rather than by reading. Then up to 76 for the six translation
+# refusals `Relico/Translation/GeneralBasic.lean` had credited to two `lean-reject` documents
+# that cannot reach a translation function at all, which is finding F47 -- the same failure
+# as F44 in a second module, and the reason both numbers are worth reading rather than
+# bumping.
+EXPECTED_PRINTER_ASSERTIONS=76
 
 set +e
 PRINTER_OUTPUT="$(
