@@ -4186,11 +4186,227 @@ private def aliasedEndpointAssertions :
         true
         program.connectionsWellFormed
 
+/-!
+## Finding F49's witness: the ninth clause, on its own
+
+Hand-built LF rather than a translated model, and that is the point of the group. F48's witness
+came out of `compileGeneralModel` and answered "can routing produce a repeated target endpoint".
+This one answers a different question — "is `targetEndpointsUnique` derivable from the other eight
+clauses of `LF.GeneralProgram.wellFormed`" — and no translated program can answer it, because on
+translation output the relative statement is *true*: routing that duplicates an endpoint
+duplicates an input port name too, so `reactorsWellFormed` fails alongside it, which is exactly
+what F48 measured. Building the program by hand is what separates a fact about programs from a
+fact about programs the translator assembles.
+
+The construction is minimal on purpose. One sender declaring two **different** output ports, one
+receiver declaring **one** input port, and two connections from the two different outputs both
+landing on that one port. Every connection resolves, since `connectionWellFormed` finds each
+source in the sender's output list and each target in the receiver's input list; the receiver's
+`declaredNames` holds `incoming` exactly once; both reactors are well-formed. Eight clauses hold
+and the ninth does not.
+
+Both startup reactions have empty bodies, which keeps `reactionWellFormed` down to
+`triggerWellFormed`, and `.startup` satisfies that outright. Nothing here is contrived except the
+one thing under test.
+-/
+
+private def sharedTargetSenderReactorName :
+    ReactorName :=
+  ⟨"SharedSender"⟩
+
+private def sharedTargetReceiverReactorName :
+    ReactorName :=
+  ⟨"SharedReceiver"⟩
+
+private def sharedTargetSenderInstanceName :
+    ActorName :=
+  ⟨"sharedSenderActor"⟩
+
+private def sharedTargetReceiverInstanceName :
+    ActorName :=
+  ⟨"sharedReceiverActor"⟩
+
+private def sharedTargetFirstOutputPortName :
+    PortName :=
+  ⟨"outOne"⟩
+
+private def sharedTargetSecondOutputPortName :
+    PortName :=
+  ⟨"outTwo"⟩
+
+private def sharedTargetInputPortName :
+    PortName :=
+  ⟨"incoming"⟩
+
+private def sharedTargetStartupReaction
+    (label : ReactionName) :
+    LF.GeneralReaction where
+  name := label
+  trigger := .startup
+  parameters := []
+  body := []
+
+private def sharedTargetSenderReactor :
+    LF.GeneralReactor where
+  name := sharedTargetSenderReactorName
+  parameters := []
+  inputPorts := []
+  outputPorts :=
+    [ { name := sharedTargetFirstOutputPortName,
+        payload := .scalar .int },
+      { name := sharedTargetSecondOutputPortName,
+        payload := .scalar .int } ]
+  stateVariables := []
+  logicalActions := []
+  startupReaction :=
+    sharedTargetStartupReaction
+      ⟨"shared_sender_startup"⟩
+  messageReactions := []
+
+private def sharedTargetReceiverReactor :
+    LF.GeneralReactor where
+  name := sharedTargetReceiverReactorName
+  parameters := []
+  inputPorts :=
+    [ { name := sharedTargetInputPortName,
+        payload := .scalar .int } ]
+  outputPorts := []
+  stateVariables := []
+  logicalActions := []
+  startupReaction :=
+    sharedTargetStartupReaction
+      ⟨"shared_receiver_startup"⟩
+  messageReactions := []
+
+/--
+One connection onto the receiver's only input port, parameterised by the source port.
+
+Parameterised rather than written twice so that the two connections cannot drift in any field
+but the one that must differ. Two hand-written copies could come to disagree about the target,
+and the group would then be asserting something else.
+-/
+private def sharedTargetConnectionFrom
+    (sourcePortName : PortName) :
+    LF.GeneralConnection where
+  sourceInstance := sharedTargetSenderInstanceName
+  sourcePort := sourcePortName
+  targetInstance := sharedTargetReceiverInstanceName
+  targetPort := sharedTargetInputPortName
+  delay := ⟨0⟩
+
+private def sharedTargetProgram :
+    LF.GeneralProgram where
+  reactors :=
+    [ sharedTargetSenderReactor,
+      sharedTargetReceiverReactor ]
+  instances :=
+    [ { name := sharedTargetSenderInstanceName,
+        reactorName := sharedTargetSenderReactorName,
+        arguments := [] },
+      { name := sharedTargetReceiverInstanceName,
+        reactorName := sharedTargetReceiverReactorName,
+        arguments := [] } ]
+  connections :=
+    [ sharedTargetConnectionFrom
+        sharedTargetFirstOutputPortName,
+      sharedTargetConnectionFrom
+        sharedTargetSecondOutputPortName ]
+
+/--
+The eight clauses other than `targetEndpointsUnique`, each named with its own verdict.
+
+Rendered as a string rather than folded into one `Bool` so that a failure names the clause that
+moved. A conjunction would report `false` for any of the eight and leave the reader to find out
+which, and the whole content of F49 is *which*.
+-/
+private def sharedTargetOtherClauses :
+    String :=
+  String.intercalate
+    " "
+    [
+      "reactorsNonEmpty=" ++
+        toString sharedTargetProgram.reactorsNonEmpty,
+      "instancesNonEmpty=" ++
+        toString sharedTargetProgram.instancesNonEmpty,
+      "reactorsWellFormed=" ++
+        toString sharedTargetProgram.reactorsWellFormed,
+      "reactorNamesUnique=" ++
+        toString sharedTargetProgram.reactorNamesUnique,
+      "instanceNamesUnique=" ++
+        toString sharedTargetProgram.instanceNamesUnique,
+      "instancesResolve=" ++
+        toString sharedTargetProgram.instancesResolve,
+      "instanceArgumentsMatch=" ++
+        toString sharedTargetProgram.instanceArgumentsMatch,
+      "connectionsWellFormed=" ++
+        toString sharedTargetProgram.connectionsWellFormed
+    ]
+
+/--
+Finding F49, asserted rather than argued: `targetEndpointsUnique` is **independent** of the other
+eight clauses, so it cannot be dropped from `LF.GeneralProgram.wellFormed`, and these four
+assertions are what say so.
+
+The claim these replace was two docstrings in `Relico/Translation/GeneralRouting.lean` — one
+arguing that `generalInputPortsOf` needs no deduplication, on two premises F48 had already
+refuted, and one stating flatly that `targetEndpointsUnique` "holds by construction rather than
+by check". The second cited a real theorem, `inputPortNameFor_outputPort_injective`, which is
+true and does not carry the weight: it rules out one sender's two *different* output ports
+yielding one input port name, and says nothing about two routes sharing one output port *name*.
+Both are rewritten. This group is the part a `grep` can falsify.
+
+`SHARED_TARGET_ISOLATED_REFUSAL` is the one that could not be folded into F48's group, and it is
+the reason four assertions rather than three. F48's model fails two clauses, so its refusal text
+is two sentences joined, and it pins `generalProgramExplanation` at the *multiple* end of its
+range. Here exactly one clause fails, so the text is one sentence with no reactor prefix, which
+pins the *singleton* end. Together they establish that the explanation enumerates precisely the
+failing clauses; until this assertion existed the singleton case was assumed, and the assumption
+is the kind that a first-failure-only rewrite would break without any gate noticing.
+
+If a future tightening makes this program ill-formed for some further reason, the first assertion
+fails and names the clause that moved, which is the outcome to want: the witness stops being a
+witness loudly rather than by becoming vacuous.
+-/
+private def sharedTargetAssertions :
+    IO Unit := do
+
+  -- The load-bearing half. Every clause but the ninth, each by name, so that a failure here
+  -- says which one and this group does not quietly weaken into "some clause holds".
+  expectString
+    "SHARED_TARGET_EIGHT_CLAUSES_HOLD"
+    ("reactorsNonEmpty=true instancesNonEmpty=true reactorsWellFormed=true " ++
+      "reactorNamesUnique=true instanceNamesUnique=true instancesResolve=true " ++
+      "instanceArgumentsMatch=true connectionsWellFormed=true")
+    sharedTargetOtherClauses
+
+  -- What separates F49 from F48: there the receiver declared its input port twice, so the
+  -- endpoint collision was visible as a name collision. Here it is not.
+  expectBool
+    "SHARED_TARGET_RECEIVER_NAMES_NODUP"
+    true
+    (decide
+      sharedTargetReceiverReactor.declaredNames.Nodup)
+
+  expectBool
+    "SHARED_TARGET_UNIQUENESS_FALSE"
+    false
+    sharedTargetProgram.targetEndpointsUnique
+
+  -- One failing clause, one sentence, no "some reactor is not well-formed" prefix. The other
+  -- end of the range `ALIASED_ENDPOINT_COLLISION_REFUSED` pins.
+  expectRefusedTerm
+    "SHARED_TARGET_ISOLATED_REFUSAL"
+    ("the translated LF program is not well-formed: two connections target the same " ++
+      "input port of the same instance, which the LF compiler rejects as a many-to-one " ++
+      "connection")
+    (Translation.guardGeneralProgram
+      sharedTargetProgram)
+
 /--
 Run every assertion: 34 printing, then 10 well-formedness, then 11 translation, then
 3 for the port-name collisions F34 and F42, then 5 for finding F32's counterexample,
 then 7 for the routed model, then 6 for the refusals routing reaches, then 6 for finding
-F48's aliased endpoints, 82 in all.
+F48's aliased endpoints, then 4 for finding F49's shared target endpoint, 86 in all.
 
 The count is stated here because `frontend/check-general-lean.sh` compares the
 number of `PASS_` lines against a literal. There are no fixtures to count, so a
@@ -4235,9 +4451,20 @@ Then **76 to 82**, which is the same root cause a fifth time and the first insta
 was not about this suite. F44 and F47 were docstrings claiming coverage that did not exist;
 F48 is a docstring claiming a *theorem* was merely deferred when the property it would prove is
 false, which is the more expensive kind, because a deferred proof gets scheduled and a false
-one cannot be. The six here are the witness. The eighth block is also the only one that asserts
+one cannot be. The six here are the witness. The eighth block is also the first one that asserts
 a named clause of `LF.GeneralProgram.wellFormed` to be **false**: everything above it either
 accepts a program or reads a refusal's text, and neither can say which clause failed.
+
+Then **82 to 86**, and this rise is not another instance of that root cause — it is the first
+time in stage E that a number moved because a *theorem* was refuted rather than because a
+docstring had over-claimed. F48's own entry recorded a relative statement as provable;
+`reactorsWellFormed` and `instancesResolve` do **not** imply `targetEndpointsUnique` over an
+arbitrary program, and the four assertions here are the counterexample, which is finding F49.
+What they buy is the reverse of what a counterexample usually buys: the clause is independent of
+the other eight, so it must **stay** in `wellFormed`, and independence is a stronger reason to
+keep it than the absence of a construction proof was. The ninth block is also the only one whose
+program is built by hand *for a clause*, rather than to be printed or to be refused — the eighth
+block's model has to go through the translation to be a witness, and this one has to not.
 -/
 def runGeneralLfPrinterTests :
     IO UInt32 := do
@@ -4258,6 +4485,8 @@ def runGeneralLfPrinterTests :
     routedRefusalAssertions
 
     aliasedEndpointAssertions
+
+    sharedTargetAssertions
 
     IO.println
       "GENERAL_LF_PRINTER_TESTS_OK"

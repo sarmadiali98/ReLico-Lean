@@ -1,9 +1,9 @@
-# Stage E findings — F34 through F48
+# Stage E findings — F34 through F49
 
 **Why this file exists.**
 Stage E added external sends, ports and connections to the general translator, and in doing so it
-produced fifteen findings about *this repository* — its own code, its own design document, and its own
-test harness. They are numbered F34 through F48, continuing the single `F` series that
+produced sixteen findings about *this repository* — its own code, its own design document, and its own
+test harness. They are numbered F34 through F49, continuing the single `F` series that
 `docs/STAGE_B_FINDINGS.md` opened at F1–F20 and `docs/STAGE_D_FINDINGS.md` carried to F21–F33.
 
 The `F` series and the `P` series answer different questions, and keeping them apart is the whole
@@ -55,7 +55,7 @@ F34 through F40 were first written in `docs/STAGE_E_DESIGN.md` §11.1, under an 
 they were *"provisional until the findings file lands"* and *"do not cite these elsewhere yet"*. That
 warning was earned: stage D's design had numbered its own findings D1 through D9, they became F21
 through F29 when the stage D findings file landed, and the D-numbers became uncitable. **This file is
-what makes F34–F48 citable.** Nothing below is provisional any more.
+what makes F34–F49 citable.** Nothing below is provisional any more.
 
 F41 and F42 were never in the design document. They were found during implementation and recorded
 only on the declarations they concern — F41 across `Relico/Translation/GeneralRouting.lean:47`,
@@ -80,6 +80,10 @@ together are line 1, the "Why this file exists" paragraph, and the numbering-his
 finding added without touching all three should be treated as a defect in the commit, not a tidy-up owed
 later. No gate checks this, which is the standing reason to prefer a `grep`-able label over a written count
 wherever the choice exists.
+
+F49 was added in task #59, and its commit moved all four places in the same edit rather than leaving them
+owed — the first time in this file's history that a finding arrived without dragging a stale count behind
+it. Recorded because a convention that has held once is not yet a convention: the next finding is the test.
 
 **One trap.** The number F34 was considered once before, in stage D, for a different thing entirely,
 and rejected — `docs/STAGE_D_FINDINGS.md:289` records that it would have duplicated an obligation F32
@@ -793,6 +797,14 @@ that class and `generalInputPortsOf` maps over exactly those routes, so the shar
 receiver's `declaredNames`. That is carried below as its own item rather than folded in here, because it is a
 proof and this is a documentation fix.
 
+> **That relative statement is FALSE as written, and F49 measured it.** Read as an implication over an
+> arbitrary `LF.GeneralProgram` it fails: F49's witness satisfies all eight other clauses and fails only the
+> ninth. The reasoning quoted above is sound but every step of it is about a program the translation
+> *assembled* — "come from two distinct routes" is not a property programs have, it is a property of programs
+> built from a routing table. The sentence is kept unedited because it is what the proof attempt was aimed at,
+> and because the way it reads as general while arguing from assembly is the whole mechanism of the mistake.
+> The correctly scoped statement is in F49.
+
 **The instrument, following the convention F47's fixes adopted: name the label and let `grep` be the
 witness.** The witness model and its refusal are asserted in
 `frontend/lean-bridge/GeneralLfPrinterTestMain.lean` under `PASS_ALIASED_ENDPOINT_COLLISION_REFUSED`, which
@@ -835,6 +847,141 @@ have caught and the most embarrassing to have written, since the gate exists pre
 maintained by addition rather than by reading goes stale. The general rule the five now support: **any number
 stated in more than one place needs one of the statements to be the one a check reads, and the others to be
 short enough that reading them is not optional.**
+
+---
+
+## F49 — the ninth clause is independent of the other eight, and two more docstrings argue it away
+
+<!-- F49_BODY_MARKER -->
+
+**Grade: measured.** Method: the same shape as F48 — a self-contained witness elaborated against the built
+package with `lake env lean`, from a file deliberately *outside* the repository so no untracked Lean lands in
+the tree. Exit 0. Seven `#eval`s: the nine clauses of `LF.GeneralProgram.wellFormed` in two groups of five and
+four, the program's own `wellFormed`, each reactor's `wellFormed` separately, the receiver's `declaredNames`
+with its `Nodup` verdict, the mapped list of target endpoints, and `guardGeneralProgram`'s refusal.
+
+**The claim under test**, taken from F48's own entry, is that `reactorsWellFormed` together with
+`instancesResolve` implies `targetEndpointsUnique`. If that holds as an implication over programs, no program
+can satisfy the first two and fail the third.
+
+**The witness, in full.** Two reactors. `Sender` declares two output ports `outOne` and `outTwo`, both
+`scalar int`, no inputs, and a startup reaction with an empty body. `Receiver` declares **one** input port
+`incoming`, also `scalar int`, and a startup reaction with an empty body. Neither has parameters, state
+variables, logical actions or message reactions — an empty body makes `reactionWellFormed` reduce to
+`triggerWellFormed`, which `.startup` satisfies outright, so the reactors are minimal rather than contrived.
+One instance of each, `senderActor` and `receiverActor`, with no arguments. Two connections, both with delay
+zero: `senderActor.outOne → receiverActor.incoming` and `senderActor.outTwo → receiverActor.incoming`.
+
+The point of two *different* source ports is that `connectionWellFormed` resolves each source against the
+sender's output list, so both connections resolve, in the right direction, with agreeing payloads. Nothing
+about the program is degenerate except the one thing under test.
+
+```
+F49_CLAUSES_ONE reactorsNonEmpty=true instancesNonEmpty=true reactorsWellFormed=true
+                reactorNamesUnique=true instanceNamesUnique=true
+F49_CLAUSES_TWO instancesResolve=true instanceArgumentsMatch=true connectionsWellFormed=true
+                targetEndpointsUnique=false
+F49_PROGRAM_WELLFORMED false
+F49_REACTORS sender=true receiver=true
+F49_RECEIVER_DECLARED_NAMES incoming  nodup=true
+F49_TARGET_ENDPOINTS receiverActor.incoming | receiverActor.incoming
+F49_GUARD_REFUSED the translated LF program is not well-formed: two connections target the same
+  input port of the same instance, which the LF compiler rejects as a many-to-one connection
+```
+
+**What that establishes, in order of usefulness.**
+
+1. **`targetEndpointsUnique` is independent of the other eight clauses.** Eight hold and it fails, so it is
+   not derivable from their conjunction and cannot be dropped from `wellFormed`. This is a *better* argument
+   for keeping the clause than the one F48's entry offers, which was that a construction proof does not exist:
+   absence of a proof is an absence, whereas independence is a fact.
+2. **The relative theorem, as F48 recorded it, is false.** Not too weak, not unproved — false. Its
+   justification is sound and its scope is not: "two connections sharing a target endpoint come from two
+   distinct routes into that class" is true of programs the translation assembles and of no others. Written as
+   an implication about `LF.GeneralProgram`, it quantifies over programs nobody built.
+3. **The receiver being well-formed is the load-bearing half.** `declaredNames` is `[incoming]`, `Nodup` holds,
+   and that is precisely what F48's counterexample did *not* exhibit: there the receiver duplicated its input
+   port, so both clauses failed together. Two connections can share a target endpoint while the receiver
+   declares that port exactly once, and there is no way to see that from a name-level fact.
+
+**The correctly scoped statement**, which is what task #58 will prove: for a program whose `connections` are
+`generalConnectionsOf routes` and whose reactor input ports are `generalInputPortsOf className routes` for the
+*same* `routes`, `reactorsWellFormed` implies `targetEndpointsUnique`. The argument is the one F48 gave, now
+with its hypothesis stated: `generalConnectionsOf` is a `map` over routes, so one connection per route and two
+connections sharing a target endpoint are two distinct rows; `generalRoutesIntoClass` filters by receiver class
+and two routes to one instance are two routes to one class, so both rows survive the filter; and
+`generalInputPortsOf` maps over the filtered list with no dedup, so the shared input port name appears twice in
+`declaredNames` and that reactor's `Nodup` conjunct fails. This is a theorem about `compileGeneralModel` rather
+than about `assembleGeneralProgram`, because `assembleGeneralProgram` receives `compiledReactors` as an opaque
+argument and nothing in its own body ties those reactors to the routes it builds connections from.
+
+The pair of results is the honest account of why the clause exists: **independent in general, redundant on
+translation output.** It cannot be removed from `wellFormed`, and it should never fire alone for a program the
+translator produced — which is exactly what F48's witness showed, where it failed together with
+`reactorsWellFormed` rather than alone.
+
+**The third docstring, which is the part that could have cost a soundness property.**
+`Relico/Translation/GeneralRouting.lean:1253` argues that `generalInputPortsOf` needs no deduplication, and
+writes the argument out deliberately, *"as an argument rather than leaving as a silence"*. It has two premises
+and F48's measurement refutes both. The first — *"a sender instance's output port names are distinct within its
+class by step 4 of the environment"* — is what `F48_OUTPUT_PORTS reportToToHub | reportToToHub` disproved, two
+entries with one name in a single class's port environment. The second — *"one instance binds one known rebec to
+one instance, so one (sender instance, output port) pair contributes exactly one arrow"* — is true of a single
+binding and false of the pair, because `bindingsMatchClass` permits two *different* known rebecs to bind to the
+same actor, which is exactly the aliasing F48 used. So the conclusion *"two rows with equal input port names on
+one class would therefore have to be one row"* does not follow.
+
+What saved it is its last sentence: *"if that argument is ever wrong, the `Nodup` guard says so by name at the
+point of failure — which is the reason to rely on the guard rather than on the argument."* That hedge is
+correct, and it is why no soundness property was ever at risk. But an argument that deduplication is
+unnecessary is precisely the licence a later reader would need to delete the guard clause, and F48's entry
+already named that as the load-bearing harm. **Fixed here**: the premises are replaced by F48's counterexample
+and the conclusion is restated as resting on the guard alone, so the file no longer contains a refuted
+argument for a conclusion it reaches by other means.
+
+**A fourth site, found by fixing the third.** The paragraph above was written saying "the third docstring",
+because three was the count when the search that found F48 stopped. Editing `generalInputPortsOf`'s docstring
+put `generalConnectionsOf`'s on the screen sixty lines below it, and it says the thing the other three only
+imply: *"`targetEndpointsUnique` holds by construction rather than by check"* — flatly, as a fact about the
+function, citing `Relico/Translation/NameGeneration.lean:294`'s `inputPortNameFor_outputPort_injective` as the
+step that makes it a theorem. This is the most directly refuted of the four, because F48's witness *is*
+translation output and its two target endpoints are equal, so a claim about what this function constructs is
+contradicted by a measurement of what it constructed.
+
+The cited theorem is true, and the interesting part is how it fails to help. It says one sender's two
+*different* output **ports** cannot produce one input port name — injectivity with the sender instance fixed.
+The gap is that two routes can share one output port **name**, which is what non-injectivity of
+`outputPortNameFor` permits and what `F48_OUTPUT_PORTS reportToToHub | reportToToHub` is. So both wrong sites
+in this module rest on the same unstated premise, that a (sender instance, output port name) pair identifies at
+most one route, and both were written as though a theorem about names supplied it. **Fixed here too**, on the
+same terms: the false claim is replaced by the refutation, the relative statement is written out with its
+hypothesis, and the docstring says which module owns it.
+
+That makes **four** mentions across three modules, three of them wrong and all three on *consumers* of the
+naming rule, while the module that owns the rule states it correctly. `GeneralBasic.lean:4366` said the routing
+cannot produce a repeated target and called the proof deferred; `GeneralRouting.lean:1253` argued the input
+ports cannot repeat; `GeneralRouting.lean:1303` said the clause holds by construction. Against them,
+`NameGeneration.lean:107` says plainly that the naming rule is not injective, lists both collision channels by
+finding number, and concludes that uniqueness is *decided on the program the translation builds*. And two
+places in `GeneralBasic.lean` get it right as well — `:135` calls the corollary *"true, but checked rather than
+earned by construction"* and names it an instance of the F37 weakening, and `:2416` routes the many-to-one
+property through `guardGeneralProgram_wellFormed`. So the repository held both answers at once, in one build,
+five documented mentions apart, with nothing comparing them.
+
+The lesson is narrower than "docstrings drift" and worth stating precisely: **the correct statement was on the
+definition, and the wrong ones were on its callers.** A reader of `outputPortNameFor` could not have gone
+wrong. A reader of `generalInputPortsOf` or `generalConnectionsOf` had no reason to look one module over.
+Whatever the fix for this family turns out to be, it has to work in the direction callers actually read.
+
+**The instrument.** Following the convention F47 and F48 adopted, the witness is asserted rather than left in
+prose: `frontend/lean-bridge/GeneralLfPrinterTestMain.lean` gains a `sharedTargetAssertions` block with four
+labels — `PASS_SHARED_TARGET_EIGHT_CLAUSES_HOLD`, `PASS_SHARED_TARGET_RECEIVER_NAMES_NODUP`,
+`PASS_SHARED_TARGET_UNIQUENESS_FALSE` and `PASS_SHARED_TARGET_ISOLATED_REFUSAL` — taking
+`EXPECTED_PRINTER_ASSERTIONS` from 82 to 86 and the gate's block enumeration from eight to nine. The fourth is
+the reason the block cannot be folded into F48's: it pins the refusal text for the case where **one** clause
+fails, and F48's pins it for the case where two do. Together they establish that
+`generalProgramExplanation` enumerates exactly the failing clauses, at both ends of its range — which was
+measured for the multiple case and, until this run, merely assumed for the singleton.
 
 ---
 

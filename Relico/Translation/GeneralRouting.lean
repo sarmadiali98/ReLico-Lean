@@ -1250,14 +1250,29 @@ from two different senders declares both ports. Every instance then has an input
 nothing connects to, and that is legal — measured, not assumed, in the probe that also
 measured a struct as a port type.
 
-No deduplication, and the argument that none is needed is worth writing down as an argument
-rather than leaving as a silence. An input port's name is built from the sender instance and
-the sender's output port name; a sender instance's output port names are distinct within its
-class by step 4 of the environment; and one instance binds one known rebec to one instance, so
-one (sender instance, output port) pair contributes exactly one arrow. Two rows with equal
-input port names on one class would therefore have to be one row. If that argument is ever
-wrong, the `Nodup` guard says so by name at the point of failure — which is the reason to
-rely on the guard rather than on the argument.
+No deduplication. The argument that none is needed used to be written out here as an argument
+rather than left as a silence, which is what made it checkable — and it did not survive the
+check. It ran: an input port's name is built from the sender instance and the sender's output
+port name; a sender instance's output port names are distinct within its class by step 4 of the
+environment; and one instance binds one known rebec to one instance, so one (sender instance,
+output port) pair contributes exactly one arrow. Two rows with equal input port names on one
+class would therefore have to be one row.
+
+**Both of those premises are false, and finding F48 measured them.** `outputPortNameFor` is not
+injective — `Relico/Translation/NameGeneration.lean` says so on the function itself, listing two
+independent collision channels — so two send sites of one class can carry one output port name,
+and F48's model produced exactly that: an output port environment whose two entries are both
+`reportToToHub`. And `bindingsMatchClass` permits aliasing, two different known rebecs bound to
+one actor, so a (sender instance, output port) pair does not determine the arrow either. Two rows
+with equal input port names on one class are therefore possible, and F48 exhibits them.
+
+The conclusion the argument was aimed at is still the right one, reached by the other route the
+argument already gave: the `Nodup` guard says so by name at the point of failure, so rely on the
+guard and not on a claim about names. Deduplicating here would not even be a fix — it would merge
+the two colliding declarations while `generalConnectionsOf` went on mapping over the same routes,
+so the program would carry two arrows onto one input port with nothing on this side left to
+notice, which is the many-to-one connection `lfc 0.11.0` rejects. A collision has to be refused,
+not absorbed.
 -/
 def generalInputPortsOf
     (className : ClassName)
@@ -1300,11 +1315,29 @@ def generalConnectionOf
 /--
 The model's connections, one per route, in route order.
 
-`targetEndpointsUnique` holds by construction rather than by check, and the shape of the
-argument is exactly the shape of the one for input ports: a target endpoint is a receiver
-instance together with an input port name, the input port name determines the sender instance
-and that sender's output port name, and `inputPortNameFor_outputPort_injective` is the
-cancellation that turns "determines" into a theorem for the second of those.
+`targetEndpointsUnique` does **not** hold by construction, and this docstring said it did until
+finding F49. The claim was that a target endpoint is a receiver instance together with an input
+port name, that the input port name determines the sender instance and that sender's output port
+name, and that `inputPortNameFor_outputPort_injective` is the cancellation turning "determines"
+into a theorem for the second of those.
+
+That theorem is true and does not carry the weight asked of it. It says one sender's two
+*different* output ports cannot yield one input port name. It says nothing about two routes that
+share one output port *name*, which is exactly what `outputPortNameFor`'s non-injectivity permits
+and what F48 measured on translation output. So two rows can share a target endpoint,
+`compileGeneralModel` can assemble a program with a many-to-one connection in it, and
+`guardGeneralProgram` is what refuses it — checked, not earned, which is how
+`Relico/Translation/GeneralBasic.lean` states it in both of the places that state it correctly.
+
+The clause cannot be dropped as redundant either. F49 exhibits a program satisfying the other
+eight clauses of `LF.GeneralProgram.wellFormed` and failing this one, so it is independent of
+them, and independence is a stronger reason to keep a clause than the absence of a construction
+proof is. What is true is *relative*: for connections and input ports built from the **same**
+routes, two connections sharing a target endpoint are two distinct rows, both survive
+`generalRoutesIntoClass`, and `generalInputPortsOf` does not deduplicate, so the shared name
+duplicates in the receiver's `declaredNames` and `reactorsWellFormed` fails first. That is a
+statement about `compileGeneralModel` rather than about this function, and it is where the
+by-construction intuition actually belongs.
 -/
 def generalConnectionsOf
     (routes : List GeneralRoute) :
