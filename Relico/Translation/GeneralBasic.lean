@@ -4356,12 +4356,39 @@ reason input ports are keyed by *route* rather than by receiving class — so th
 that stands between a translated program and a target compiler error, and the only one whose
 failure the Lean layer would otherwise discover second-hand from the `lfc` gate.
 
-Stated as a consequence of the guard rather than proved by construction, which is the weaker of
-the two available statements and is deliberate at this point in the development. A construction
-proof would say the routing *cannot* produce a repeated target and would therefore let the
-guard's clause be retired as dead; that proof needs the same site-totality induction the
-sufficient condition needs, and is deferred with it. Until then a repeated target is a refusal
-with a diagnostic naming the clause, not a miscompilation, and this theorem is what says so.
+Stated as a consequence of the guard, which is not a weaker placeholder for a construction
+proof but the strongest form available: **a construction proof does not exist.**
+
+An earlier version of this docstring said such a proof "would say the routing *cannot* produce
+a repeated target and would therefore let the guard's clause be retired as dead", and deferred
+it behind the site-totality induction below. Finding **F48** in `docs/STAGE_E_FINDINGS.md`
+refutes all three parts, by evaluation rather than by argument. Routing *can* produce a repeated
+target from a model `DTR.GeneralModel.wellFormed` accepts: a class that sends `reportTo` to a
+declared known rebec `hub` and `report` to a declared known rebec `toHub`, instantiated with
+both rebecs bound to one actor, yields two connections onto
+`hubActor.reportToToHubFromProbe`, because `outputPortNameFor` does not escape its separator
+and the site suffix is empty when a pair has one site. Site totality is also the wrong
+instrument — it governs send sites, output ports and the reachability of the defensive arm at
+`compileGeneralStmt`, whereas a repeated endpoint is a fact about the *receiver's* input ports —
+so the deferral was parked behind work that could never have discharged it. And the clause must
+**not** be retired: it is what turns that collision into a refusal rather than emitted LF that
+`lfc 0.11.0` rejects as a many-to-one connection.
+
+The naming rule's own docstring at `Relico/Translation/NameGeneration.lean:107` had said the
+right thing all along — that the function is not injective, and that uniqueness of generated
+names is "decided on the program the translation builds". This docstring contradicted it. Two
+prose paragraphs in one build closure disagreeing is not something any gate can catch, which is
+why the standing preference is a label a `grep` can check.
+
+So a repeated target is a refusal with a diagnostic naming the clause, permanently and by
+design, and this theorem is what says so. That refusal is asserted under
+`PASS_ALIASED_ENDPOINT_COLLISION_REFUSED` in
+`frontend/lean-bridge/GeneralLfPrinterTestMain.lean`, so F48's witness is checked on every gate
+run instead of being described here. What remains achievable is a strictly weaker *relative*
+statement — `reactorsWellFormed` together with `instancesResolve` implies this clause, since
+`generalInputPortsOf` maps over exactly the routes `generalConnectionsOf` does — carried as item
+15 of that findings file's open list. It would derive one guard clause from another rather than
+from the construction, so it licenses retiring nothing either.
 -/
 theorem compileGeneralModel_targetEndpointsUnique
     {model : DTR.GeneralModel}

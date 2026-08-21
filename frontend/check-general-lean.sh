@@ -181,7 +181,18 @@ echo "=== the general LF printer, well-formedness and translation assertions"
 # twenty assertions still reaches its final `IO.println`.
 #
 # 34 printing, 10 well-formedness, 11 translation, 3 for the port-name collisions F34
-# and F42, 5 for finding F32's counterexample, 7 for the routed model.
+# and F42, 5 for finding F32's counterexample, 7 for the routed model, 6 for the
+# refusals routing reaches, 6 for finding F48's aliased endpoints. Eight blocks, 82,
+# the same breakdown the runner's own docstring gives.
+#
+# That enumeration was itself stale until 2026-08-22, when it listed six blocks summing
+# to 70 under a literal reading 82: F47's six and F48's six had been added to the
+# paragraph below it and never to the list above it. Which is the same
+# prose-instead-of-a-greppable-label failure as F44, F46 and F47, occurring in the file
+# whose job is to catch exactly that, and recorded as its fifth instance in
+# docs/STAGE_E_FINDINGS.md. Nothing executable reads this list, so only reading it
+# against the literal finds a drift; do that whenever the literal moves.
+#
 # Stage C ran 25, in two blocks; the third block is the one that mentions
 # `Relico.Translation`, so a translation that stopped being called would drop this
 # count by eleven rather than pass quietly. The fourth is the only block that calls a
@@ -202,8 +213,12 @@ echo "=== the general LF printer, well-formedness and translation assertions"
 # refusals `Relico/Translation/GeneralBasic.lean` had credited to two `lean-reject` documents
 # that cannot reach a translation function at all, which is finding F47 -- the same failure
 # as F44 in a second module, and the reason both numbers are worth reading rather than
-# bumping.
-EXPECTED_PRINTER_ASSERTIONS=76
+# bumping. Then up to 82 for finding F48's six: a well-formed source model whose routing
+# collides two target endpoints, which refutes a docstring that had called the construction
+# proof of `targetEndpointsUnique` deferred rather than false. The eighth block is the only
+# one that asserts a named clause of `LF.GeneralProgram.wellFormed` to be false, so a drop of
+# six here means the repository has stopped holding a witness for a property it claims.
+EXPECTED_PRINTER_ASSERTIONS=82
 
 set +e
 PRINTER_OUTPUT="$(

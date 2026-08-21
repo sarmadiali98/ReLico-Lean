@@ -1,9 +1,9 @@
-# Stage E findings — F34 through F44
+# Stage E findings — F34 through F48
 
 **Why this file exists.**
 Stage E added external sends, ports and connections to the general translator, and in doing so it
-produced eleven findings about *this repository* — its own code, its own design document, and its own
-test harness. They are numbered F34 through F44, continuing the single `F` series that
+produced fifteen findings about *this repository* — its own code, its own design document, and its own
+test harness. They are numbered F34 through F48, continuing the single `F` series that
 `docs/STAGE_B_FINDINGS.md` opened at F1–F20 and `docs/STAGE_D_FINDINGS.md` carried to F21–F33.
 
 The `F` series and the `P` series answer different questions, and keeping them apart is the whole
@@ -55,7 +55,7 @@ F34 through F40 were first written in `docs/STAGE_E_DESIGN.md` §11.1, under an 
 they were *"provisional until the findings file lands"* and *"do not cite these elsewhere yet"*. That
 warning was earned: stage D's design had numbered its own findings D1 through D9, they became F21
 through F29 when the stage D findings file landed, and the D-numbers became uncitable. **This file is
-what makes F34–F44 citable.** Nothing below is provisional any more.
+what makes F34–F48 citable.** Nothing below is provisional any more.
 
 F41 and F42 were never in the design document. They were found during implementation and recorded
 only on the declarations they concern — F41 across `Relico/Translation/GeneralRouting.lean:47`,
@@ -69,6 +69,17 @@ a finding number with nothing to cite. It is recorded rather than tidied away, b
 that caused it (a green gate is a strong incentive to land) will recur.
 
 F44 is stated here first and nowhere else yet, which is the intended order.
+
+F45, F46 and F47 were added after this file first landed, each in its own task (#53, #54, #55), and F48 in
+task #57. **All four were added without updating this file's title, its "fifteen findings" count, or the
+range on the line above** — which were left reading *"F34 through F44"* and *"eleven findings"* for three
+findings running, until F48's commit corrected all three. That is not a footnote: it is the failure family
+F44–F48 are *about*, occurring in the file that documents it, and it happened because the numbers live in
+prose at the top of a long document while the work happens at the bottom. The three places that have to move
+together are line 1, the "Why this file exists" paragraph, and the numbering-history line above; a fourth
+finding added without touching all three should be treated as a defect in the commit, not a tidy-up owed
+later. No gate checks this, which is the standing reason to prefer a `grep`-able label over a written count
+wherever the choice exists.
 
 **One trap.** The number F34 was considered once before, in stage D, for a different thing entirely,
 and rejected — `docs/STAGE_D_FINDINGS.md:289` records that it would have duplicated an obligation F32
@@ -647,6 +658,11 @@ label a gate could check. Prose coverage claims are unfalsifiable by any gate th
 four were found by reading source in order to write documentation — not by any check. That is the argument
 for the convention the fixes adopt: **name the label, and let `grep` be the witness.**
 
+> **"Four" is false from F48's commit onward, and is kept because it is the count that was true when the
+> root was identified.** The family is **five**: F48 added a prose claim about what is *provable*, and
+> raising the literal for F48 exposed a fifth in `frontend/check-general-lean.sh` itself. Both are set out
+> at the end of F48's entry, which is the one place this document states the family's size as a live number.
+
 **Both docstrings are rewritten in task #50**, which is what puts this entry's citations inside the build
 closure that `frontend/check-general-lean.sh` compiles. What is *not* done is the six unasserted causes;
 that is carried below rather than smuggled into #50, because assertions move
@@ -674,6 +690,151 @@ that is carried below rather than smuggled into #50, because assertions move
 > `.error`, so a class with three offending sends reports the first one — statement index 1, not 2 — and
 > the port named in row seven's message is `reportToHub1`, which makes that assertion the only place the
 > naming rule and a refusal are checked against each other.
+
+---
+
+## F48 — a docstring defers a proof that cannot exist, and the module that owns the naming rule already said so
+
+**Grade: measured.** Method: a self-contained witness elaborated against the built package with `lake env
+lean`, from a file deliberately *outside* the repository so that no untracked Lean lands in the tree. Exit 0.
+Seven `#eval`s: source well-formedness and each of its five conjuncts; the sending class's output port
+environment; the target endpoints of the derived connections; all nine `LF.GeneralProgram.wellFormed` clauses
+evaluated **separately on the pre-guard program**, rebuilt through `assembleGeneralProgram` because the guard
+collapses nine clauses into one `String`; every reactor's `declaredNames`; and `compileGeneralModel`'s
+verdict. The model is described in full below, so the run is repeatable from this entry alone.
+
+**The claim under test.** `compileGeneralModel_targetEndpointsUnique`
+(`Relico/Translation/GeneralBasic.lean:4366`) carried this docstring paragraph:
+
+> Stated as a consequence of the guard rather than proved by construction, which is the weaker of the two
+> available statements and is deliberate at this point in the development. A construction proof would say the
+> routing *cannot* produce a repeated target and would therefore let the guard's clause be retired as dead;
+> that proof needs the same site-totality induction the sufficient condition needs, and is deferred with it.
+
+That is three claims, and they fail in three different ways.
+
+1. **"The routing *cannot* produce a repeated target" is false.** The witness below is a source model that
+   `DTR.GeneralModel.wellFormed` accepts and whose routing produces two connections with the same
+   `(targetInstance, targetPort)`.
+2. **"Needs the same site-totality induction" is false, and not merely unnecessary.** Site totality is about
+   the *sending* side — send sites, output ports, and the reachability of `compileGeneralStmt:587`. A repeated
+   target endpoint is about the *receiving* side's input ports. The two share no lemma, so the deferral was
+   parked behind work that would never have discharged it: site totality landed in task #47 commit 1 and
+   brought this no closer.
+3. **"Would therefore let the guard's clause be retired as dead" is the load-bearing harm.** It is an
+   instruction to a later stage to delete `targetEndpointsUnique` from `LF.GeneralProgram.wellFormed`. That
+   clause is the only thing standing between this collision and emitted LF that `lfc 0.11.0` rejects as a
+   many-to-one connection. A finding that only corrected the first two claims and left this one would have
+   left the dangerous sentence in place.
+
+**The witness.** Class `Hub` declares state variable `seen` and two message servers `report` and `reportTo`,
+each taking one `int`. Class `Probe` declares two known rebecs of class `Hub`, named `hub` and `toHub`, and a
+constructor that sends `hub.reportTo(1)` and `toHub.report(2)`. Instances are `probe : Probe` with **both**
+known rebecs bound to the same actor, and `hubActor : Hub`. Three separately measured facts compose to make
+this collide, which is why no single earlier finding predicted it: `outputPortNameFor` does not escape its
+separator, so `reportTo`+`hub` and `report`+`toHub` both spell `reportToToHub` (**F34**);
+`generalSiteSuffixFor` returns the empty suffix when a (rebec, message) pair has exactly one site, so neither
+send is disambiguated by an ordinal; and `bindingsMatchClass` constrains only that binding keys match declared
+names and that each bound actor exists with the declared class, so **aliasing two known rebecs onto one actor
+is well-formed source**. Both message servers take one parameter because an arity-zero external send is a
+refusal cause in its own right (**F36**) and would have masked the effect.
+
+**What ran**, verbatim from the `#eval` output:
+
+```
+F48_SOURCE_WELLFORMED true
+F48_SOURCE_CONJUNCTS bindings=true arguments=true sendTargets=true sendsResolve=true names=true
+F48_OUTPUT_PORTS reportToToHub | reportToToHub
+F48_TARGET_ENDPOINTS hubActor.reportToToHubFromProbe | hubActor.reportToToHubFromProbe
+F48_PROGRAM_CLAUSES reactorsNonEmpty=true instancesNonEmpty=true reactorsWellFormed=false
+  reactorNamesUnique=true instanceNamesUnique=true instancesResolve=true
+  instanceArgumentsMatch=true connectionsWellFormed=true targetEndpointsUnique=false
+F48_DECLARED_NAMES Probe: reportToToHub reportToToHub tick_action
+                ;; Hub: reportToToHubFromProbe reportToToHubFromProbe seen report_action reportTo_action
+F48_TRANSLATION_REFUSED the translated LF program is not well-formed: some reactor is not well-formed,
+  which for stage E most often means a generated name collided with another name in the same reactor, or
+  a port was set that the reactor does not declare; two connections target the same input port of the
+  same instance, which the LF compiler rejects as a many-to-one connection
+```
+
+**Three things the run measured that were predicted wrongly or not at all**, recorded because each one would
+have become a false sentence in this entry had it been written from the argument instead of the run.
+
+* **The collision is over-determined across both reactors.** It was predicted on the receiver only. In fact
+  `generalOutputPortsOf` maps over the sending class's own environment, whose two entries share a name, so
+  `Probe` duplicates an *output* port at the same time as `Hub` duplicates an *input* port. Two independent
+  causes for one `reactorsWellFormed=false`, which matters for any later proof that tries to attribute it.
+* **`generalProgramExplanation` enumerates every failing clause, not the first.** It was predicted that the
+  guard's single `String` would hide the endpoint collision behind the reactor one, and that this was the
+  reason the pre-guard program had to be rebuilt. The text names both. The rebuild is still what makes the
+  clauses individually scoreable, but the stated justification for it was wrong.
+* **`connectionsWellFormed=true`.** It requires each connection's ports to be *declared*, not declared once,
+  so it does not catch this and was never going to.
+
+**The strongest part of this finding is not the counterexample.**
+`Relico/Translation/NameGeneration.lean:107` already says, on `outputPortNameFor` itself, *"This function is
+not injective and no theorem below claims that it is"*, lists F34 and F42 as two independent collision
+channels, and concludes at `:117` that *"uniqueness of generated names is therefore **decided on the program
+the translation builds** — `LF.GeneralReactor.declaredNames` must be `Nodup` — and refused with a diagnostic
+when it fails. That is strictly stronger than injectivity of this function would be."* So two docstrings in
+the same build closure gave opposite answers to the same question, and the one that was right sat on the
+function while the one that was wrong sat on the theorem that would have consumed it. Neither gate can
+compare two prose paragraphs, which puts F48 in the same family as F44 through F47 — a claim about this
+development written as prose rather than as something a check could falsify — with one difference worth
+naming: F44–F47 were claims about the *test suite*, and this is a claim about *what is provable*. That is the
+more expensive kind, because it schedules work.
+
+**What changes.** `targetEndpointsUnique` **stays** a guard clause and the guard-corollary form at
+`:4337`/`:4366` is the correct shape, not a placeholder; only the docstring is rewritten, and the sentence
+inviting the clause's retirement is removed rather than softened. The achievable statement is not the
+construction proof but a *relative* one — `reactorsWellFormed` together with `instancesResolve` should imply
+`targetEndpointsUnique`, since two connections sharing a target endpoint come from two distinct routes into
+that class and `generalInputPortsOf` maps over exactly those routes, so the shared name must duplicate in the
+receiver's `declaredNames`. That is carried below as its own item rather than folded in here, because it is a
+proof and this is a documentation fix.
+
+**The instrument, following the convention F47's fixes adopted: name the label and let `grep` be the
+witness.** The witness model and its refusal are asserted in
+`frontend/lean-bridge/GeneralLfPrinterTestMain.lean` under `PASS_ALIASED_ENDPOINT_COLLISION_REFUSED`, which
+is why this entry's central claim is checked by `frontend/check-general-lean.sh` on every run rather than
+resting on a run recorded in prose here. Six labels in all —
+`PASS_ALIASED_ENDPOINT_SOURCE_WELLFORMED`, `PASS_ALIASED_ENDPOINT_OUTPUT_PORTS_COLLIDE`,
+`PASS_ALIASED_ENDPOINT_TARGETS_COLLIDE`, `PASS_ALIASED_ENDPOINT_COLLISION_REFUSED`,
+`PASS_ALIASED_ENDPOINT_TARGET_UNIQUENESS_FALSE` and `PASS_ALIASED_ENDPOINT_CONNECTIONS_WELLFORMED` — taking
+`EXPECTED_PRINTER_ASSERTIONS` from 76 to 82. The fifth is the first assertion anywhere in this repository
+that a named clause of `LF.GeneralProgram.wellFormed` is **false**; every earlier assertion either accepts a
+program, rejects one as a whole, or reads a refusal's text, and none of those can say which clause failed.
+
+**Why an assertion already in this suite did not catch it, which is the reusable part.**
+`PASS_PORT_NAME_UNESCAPED_SEPARATOR_COLLIDES` has asserted `reportToToHub = reportToToHub` since F34 was
+first measured. It is a **name-level** assertion: it calls `outputPortNameFor` twice with hand-written
+arguments and says the two calls agree. F48's `PASS_ALIASED_ENDPOINT_OUTPUT_PORTS_COLLIDE` reads the same
+pair of names out of `outputPortEnvOf`, so it is a **route-level** assertion: it says one program the
+translator accepts reaches both calls. The gap between those two statements is exactly where the wrong
+docstring lived for as long as it did — a name-level collision is consistent with no program ever exhibiting
+it, which is what "the routing cannot produce a repeated target" was implicitly claiming. Whenever a finding
+records that two generated names can coincide, the follow-on question is whether one accepted model reaches
+both, and that question needs its own label.
+
+**A fifth instance of the family, found while raising the literal for this entry — in the gate script
+itself.** `frontend/check-general-lean.sh` explains `EXPECTED_PRINTER_ASSERTIONS` twice: an enumeration of
+the assertion blocks, then a paragraph narrating every move the literal has made. Raising the literal to 82
+meant reading both, and the enumeration turned out to list six blocks summing to **70** while the literal
+beneath it read 82 — F47's six routed refusals and this entry's six had each been appended to the narrating
+paragraph and to no list. So the file whose entire purpose is to catch a count that stopped matching its
+description was carrying a description that did not match its count, and had been for two findings running.
+Fixed in the same commit as this entry: the enumeration is now eight blocks, `34 / 10 / 11 / 3 / 5 / 7 / 6 /
+6`, identical to the breakdown in `runGeneralLfPrinterTests`'s docstring, with a note that nothing
+executable reads the list so the only way to find a drift is to read it against the literal whenever the
+literal moves.
+
+That makes the count of this family five, and the shape of the fifth is worth separating from the other
+four. F44 through F47 were prose claims about the *test suite* and F48 is a prose claim about *what is
+provable*; this one is a prose claim about *the gate's own invariant*, which is the cheapest of the five to
+have caught and the most embarrassing to have written, since the gate exists precisely because a literal
+maintained by addition rather than by reading goes stale. The general rule the five now support: **any number
+stated in more than one place needs one of the statements to be the one a check reads, and the others to be
+short enough that reading them is not optional.**
 
 ---
 
@@ -772,3 +933,17 @@ the only place the mapping from cause to text currently exists.
 > any of the six, including the bindings group where it was permitted — the models cost about a dozen lines
 > each, being one-field structure updates on `routedModel`, and a written record of deliberate untestedness
 > would have been another prose claim about the suite, which is the failure this whole family is about.
+
+**15. The relative endpoint-uniqueness theorem, which F48 leaves as the only achievable form of the proof
+`:4366` had deferred.** Statement: for the program `assembleGeneralProgram` builds, `reactorsWellFormed`
+together with `instancesResolve` implies `targetEndpointsUnique`. The argument to formalise is a counting
+one and does not need site totality: two connections sharing a `(targetInstance, targetPort)` arise from two
+distinct routes into the receiving class, `generalInputPortsOf` maps over exactly the routes into that class
+with no deduplication, so the shared port name occurs twice in that reactor's `inputPorts` and hence twice in
+its `declaredNames`, contradicting `Nodup`. The closing instrument is a Lean proof, not a run, and the
+obstacle is that `eq_of_nodup_map` is `private` at `Relico/LF/GeneralWellFormed.lean:562`, so this needs its
+own copy — the same obstacle §10.2's per-reaction `setPort` `Nodup` faces, which is why the two belong in one
+task. **This is strictly weaker than what `:4366` promised and that is the point:** it derives one guard
+clause from another rather than from the construction, so it does *not* license retiring the clause, and any
+future attempt to strengthen it to a construction proof is refuted by F48's witness before it starts. Blocks
+nothing; worth doing because it converts a nine-clause predicate's redundancy from a belief into a theorem.

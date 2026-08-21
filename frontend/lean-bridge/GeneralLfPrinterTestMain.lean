@@ -3842,9 +3842,355 @@ private def routedRefusalAssertions :
       instanceClassUndeclaredModel)
 
 /--
+Finding F48's model: two known rebecs aliased onto one actor, whose two sends collide.
+
+The literals below are deliberately **not** shared with any other fixture in this file, and
+that is the only unusual thing about this group. The collision depends on the exact spellings
+`report`, `reportTo`, `hub` and `toHub` — reading them as `reportTo` + `hub` and as `report` +
+`toHub` is what produces one name — so a fixture that reused a shared literal would lose the
+effect under test the first time somebody renamed a rebec for an unrelated reason. Here a
+rename fails `ALIASED_ENDPOINT_TARGET_UNIQUENESS_FALSE` loudly instead.
+
+Three separately measured facts compose to lift F34's *name* collision to a *route* collision,
+and none of the three is a defect on its own:
+
+* `outputPortNameFor` concatenates the message, the literal `To`, the capitalized known rebec
+  and the site suffix without escaping the separator, so the two pairs above spell
+  `reportToToHub` (F34);
+* `generalSiteSuffixFor` returns the empty string for a (rebec, message) pair the class sends
+  to exactly once, so neither send here carries a disambiguating ordinal; and
+* `bindingsMatchClass` constrains only that the binding keys are the declared known rebecs and
+  that each bound actor exists with the declared class, so **binding two known rebecs to one
+  actor is legal Rebeca** — which is what puts both arrows on one receiver instance.
+
+Both message servers take one `int` because an arity-zero external send is a refusal cause in
+its own right (see `externalSendModel`) and would mask this one.
+-/
+private def aliasedHubClassName :
+    ClassName :=
+  ⟨"Hub"⟩
+
+private def aliasedProbeClassName :
+    ClassName :=
+  ⟨"Probe"⟩
+
+private def aliasedReportMessageName :
+    MsgName :=
+  ⟨"report"⟩
+
+private def aliasedReportToMessageName :
+    MsgName :=
+  ⟨"reportTo"⟩
+
+private def aliasedTickMessageName :
+    MsgName :=
+  ⟨"tick"⟩
+
+private def aliasedHubKnownRebecName :
+    KnownRebecName :=
+  ⟨"hub"⟩
+
+private def aliasedToHubKnownRebecName :
+    KnownRebecName :=
+  ⟨"toHub"⟩
+
+private def aliasedSeenStateName :
+    VarName :=
+  ⟨"seen"⟩
+
+private def aliasedValueParameterName :
+    VarName :=
+  ⟨"value"⟩
+
+private def aliasedHubActorName :
+    ActorName :=
+  ⟨"hubActor"⟩
+
+private def aliasedProbeActorName :
+    ActorName :=
+  ⟨"probe"⟩
+
+private def aliasedReportServer :
+    DTR.GeneralMessageServer where
+  name := aliasedReportMessageName
+  parameters :=
+    [ { name := aliasedValueParameterName,
+        declaredType := .int } ]
+  body :=
+    [ .assign
+        aliasedSeenStateName
+        (.parameterVar aliasedValueParameterName) ]
+
+private def aliasedReportToServer :
+    DTR.GeneralMessageServer where
+  name := aliasedReportToMessageName
+  parameters :=
+    [ { name := aliasedValueParameterName,
+        declaredType := .int } ]
+  body :=
+    [ .assign
+        aliasedSeenStateName
+        (.parameterVar aliasedValueParameterName) ]
+
+private def aliasedHubClass :
+    DTR.GeneralReactiveClass where
+  name := aliasedHubClassName
+  knownRebecs := []
+  stateVariables :=
+    [ { name := aliasedSeenStateName,
+        declaredType := .int } ]
+  constructor :=
+    { parameters := []
+      body := [] }
+  messageServers :=
+    [ aliasedReportServer,
+      aliasedReportToServer ]
+
+private def aliasedTickServer :
+    DTR.GeneralMessageServer where
+  name := aliasedTickMessageName
+  parameters :=
+    [ { name := aliasedValueParameterName,
+        declaredType := .int } ]
+  body := []
+
+private def aliasedProbeClass :
+    DTR.GeneralReactiveClass where
+  name := aliasedProbeClassName
+  knownRebecs :=
+    [ { name := aliasedHubKnownRebecName,
+        className := aliasedHubClassName },
+      { name := aliasedToHubKnownRebecName,
+        className := aliasedHubClassName } ]
+  stateVariables := []
+  constructor :=
+    { parameters := []
+      body :=
+        [ .send
+            (.knownRebec aliasedHubKnownRebecName)
+            aliasedReportToMessageName
+            [.intLiteral 1]
+            ⟨0⟩,
+          .send
+            (.knownRebec aliasedToHubKnownRebecName)
+            aliasedReportMessageName
+            [.intLiteral 2]
+            ⟨0⟩ ] }
+  messageServers :=
+    [ aliasedTickServer ]
+
+private def aliasedHubActor :
+    DTR.GeneralActorInstance where
+  name := aliasedHubActorName
+  className := aliasedHubClassName
+  bindings := []
+  arguments := []
+
+/--
+The aliasing itself, in two lines: both known rebecs are bound to `hubActor`.
+-/
+private def aliasedProbeActor :
+    DTR.GeneralActorInstance where
+  name := aliasedProbeActorName
+  className := aliasedProbeClassName
+  bindings :=
+    [ (aliasedHubKnownRebecName, aliasedHubActorName),
+      (aliasedToHubKnownRebecName, aliasedHubActorName) ]
+  arguments := []
+
+private def aliasedEndpointModel :
+    DTR.GeneralModel where
+  classes :=
+    [ aliasedProbeClass,
+      aliasedHubClass ]
+  instances :=
+    [ aliasedProbeActor,
+      aliasedHubActor ]
+
+/--
+The aliased-endpoint model's translated program, assembled but not guarded.
+
+Built for the reason `assembledCollisionProgram` is built and in the same three steps: the
+guard collapses nine clauses into one `String`, and `reactorsWellFormed` precedes
+`targetEndpointsUnique` in `LF.GeneralProgram.wellFormed`'s `&&` chain, so a claim about the
+second clause cannot be read off the guarded result. Two separate definitions rather than one
+parameterised helper, because each is a witness for a different finding and folding them would
+make a change made for F32's sake silently change F48's.
+-/
+private def assembledAliasedEndpointProgram :
+    Except String LF.GeneralProgram :=
+  match Translation.routesOf
+    aliasedEndpointModel
+  with
+
+  | .error message =>
+      .error message
+
+  | .ok routes =>
+      match
+          Translation.compileGeneralReactiveClasses
+            aliasedEndpointModel.classes
+            routes
+            aliasedEndpointModel.classes with
+
+      | .error message =>
+          .error message
+
+      | .ok compiledReactors =>
+          .ok
+            (Translation.assembleGeneralProgram
+              aliasedEndpointModel
+              routes
+              compiledReactors)
+
+/--
+The sending class's output port names, read off the environment routing actually builds.
+
+Not `outputPortNameFor` applied to two pairs by hand — that assertion already exists three
+blocks above as `PORT_NAME_UNESCAPED_SEPARATOR_COLLIDES`, and it has existed since the name
+collisions were first measured. It is precisely why the *route*-level consequence went
+unnoticed for as long as it did: a name-level collision says two calls agree, and says nothing
+about whether one program can reach both calls. This reads the pair out of
+`outputPortEnvOf`, so it says the translator reaches both.
+-/
+private def aliasedEndpointOutputPortNames :
+    String :=
+  match
+      Translation.outputPortEnvOf
+        aliasedEndpointModel.classes
+        aliasedProbeClass with
+
+  | .error diagnostic =>
+      "the sending class did not route: " ++
+        diagnostic
+
+  | .ok environment =>
+      String.intercalate
+        " | "
+        (environment.map
+          (fun (entry : Translation.GeneralOutputPortEntry) =>
+            entry.outputPort.value))
+
+/--
+The endpoints the generated connections land on, as `instance.port`.
+
+The two halves being equal is the many-to-one connection `lfc 0.11.0` rejects, and it arises
+here without any port being declared twice by hand: `generalConnectionsOf` maps over the routes
+into the receiving class with no dedup, so two routes that agree on the target give two
+connections that agree on the endpoint.
+-/
+private def aliasedEndpointTargetEndpoints :
+    String :=
+  match Translation.routesOf
+    aliasedEndpointModel
+  with
+
+  | .error diagnostic =>
+      "the model did not route: " ++
+        diagnostic
+
+  | .ok routes =>
+      String.intercalate
+        " | "
+        ((Translation.generalConnectionsOf routes).map
+          (fun (connection : LF.GeneralConnection) =>
+            connection.targetInstance.value ++
+              "." ++
+              connection.targetPort.value))
+
+/--
+Finding F48, asserted rather than argued: routing **can** produce a repeated target endpoint,
+so `targetEndpointsUnique` cannot be retired as a dead clause, and these six assertions are
+what say so.
+
+The claim these replace was a docstring on
+`Relico/Translation/GeneralBasic.lean`'s `compileGeneralModel_targetEndpointsUnique`, which
+said a construction proof "would say the routing *cannot* produce a repeated target" and was
+"deferred" with the site-totality induction. Both halves were wrong: no such proof exists,
+because the property is false, and site totality is the wrong instrument anyway — it governs
+the sending side and statement compilation, while an endpoint collision is about *input* ports
+on the receiver. That the docstring was wrong is not the interesting part.
+`Relico/Translation/NameGeneration.lean` had documented the correct story all along, so two
+docstrings in one build closure gave opposite answers and no gate could compare them. This
+group is the answer that a `grep` can falsify.
+
+The refusal is asserted before the match rather than inside it, because the match's `.error`
+arm is a `testFailure` and not an assertion: if a step before assembly ever refuses this model,
+the count drops and the reason is printed, which is the behaviour `collisionAssertions` chose
+for the same reason.
+
+Two clauses fail here, not one, and the last two assertions are what keep the attribution
+narrow. `reactorsWellFormed` fails independently — the collision is over-determined, since the
+sender duplicates its own output port while the receiver duplicates its input port — so a bare
+refusal check would pass on the reactor clause alone and say nothing about endpoints.
+`ALIASED_ENDPOINT_TARGET_UNIQUENESS_FALSE` is the first witness anywhere in this repository
+that this clause can fail at all, and `ALIASED_ENDPOINT_CONNECTIONS_WELLFORMED` records the
+neighbouring clause that still holds: `connectionsWellFormed` asks that an endpoint be
+*declared*, not that it be declared once.
+
+If a future change to the naming rule makes the two names differ, four of these six fail
+together and the fix is to record why rather than to delete them — a counterexample that stops
+being a counterexample is worth a line saying so.
+-/
+private def aliasedEndpointAssertions :
+    IO Unit := do
+
+  -- Without this the group proves nothing: a source model the frontend would reject makes the
+  -- refusal downstream a fact about the frontend. All five conjuncts of
+  -- `DTR.GeneralModel.wellFormed` hold, aliasing included.
+  expectBool
+    "ALIASED_ENDPOINT_SOURCE_WELLFORMED"
+    true
+    aliasedEndpointModel.wellFormed
+
+  expectString
+    "ALIASED_ENDPOINT_OUTPUT_PORTS_COLLIDE"
+    "reportToToHub | reportToToHub"
+    aliasedEndpointOutputPortNames
+
+  expectString
+    "ALIASED_ENDPOINT_TARGETS_COLLIDE"
+    "hubActor.reportToToHubFromProbe | hubActor.reportToToHubFromProbe"
+    aliasedEndpointTargetEndpoints
+
+  -- The whole text, both clauses. `generalProgramExplanation` enumerates every failing clause
+  -- rather than the first, which is worth pinning: a change that made it report only the first
+  -- would silently stop reporting the endpoint collision, and nothing else here would notice.
+  expectRefusedTerm
+    "ALIASED_ENDPOINT_COLLISION_REFUSED"
+    ("the translated LF program is not well-formed: some reactor is not well-formed, " ++
+      "which for stage E most often means a generated name collided with another name " ++
+      "in the same reactor, or a port was set that the reactor does not declare; " ++
+      "two connections target the same input port of the same instance, which the LF " ++
+      "compiler rejects as a many-to-one connection")
+    (Translation.compileGeneralModel
+      aliasedEndpointModel)
+
+  match assembledAliasedEndpointProgram with
+
+  | .error diagnostic =>
+      testFailure
+        ("the aliased-endpoint model must route and compile for F48 to be a witness, " ++
+          "but a step before assembly refused it: " ++
+          diagnostic)
+
+  | .ok program => do
+
+      expectBool
+        "ALIASED_ENDPOINT_TARGET_UNIQUENESS_FALSE"
+        false
+        program.targetEndpointsUnique
+
+      expectBool
+        "ALIASED_ENDPOINT_CONNECTIONS_WELLFORMED"
+        true
+        program.connectionsWellFormed
+
+/--
 Run every assertion: 34 printing, then 10 well-formedness, then 11 translation, then
 3 for the port-name collisions F34 and F42, then 5 for finding F32's counterexample,
-then 7 for the routed model, then 6 for the refusals routing reaches, 76 in all.
+then 7 for the routed model, then 6 for the refusals routing reaches, then 6 for finding
+F48's aliased endpoints, 82 in all.
 
 The count is stated here because `frontend/check-general-lean.sh` compares the
 number of `PASS_` lines against a literal. There are no fixtures to count, so a
@@ -3884,6 +4230,14 @@ here are the missing six. F44 and F47 are two of the four instances
 `docs/STAGE_E_FINDINGS.md` records of one root cause: a claim about this suite written as
 prose instead of as a label a `grep` can falsify. Every assertion added in both rounds is
 named, and the names are the point.
+
+Then **76 to 82**, which is the same root cause a fifth time and the first instance of it that
+was not about this suite. F44 and F47 were docstrings claiming coverage that did not exist;
+F48 is a docstring claiming a *theorem* was merely deferred when the property it would prove is
+false, which is the more expensive kind, because a deferred proof gets scheduled and a false
+one cannot be. The six here are the witness. The eighth block is also the only one that asserts
+a named clause of `LF.GeneralProgram.wellFormed` to be **false**: everything above it either
+accepts a program or reads a refusal's text, and neither can say which clause failed.
 -/
 def runGeneralLfPrinterTests :
     IO UInt32 := do
@@ -3902,6 +4256,8 @@ def runGeneralLfPrinterTests :
     routedAssertions
 
     routedRefusalAssertions
+
+    aliasedEndpointAssertions
 
     IO.println
       "GENERAL_LF_PRINTER_TESTS_OK"
