@@ -58,7 +58,7 @@ project would notice.
 it is what makes the fixture tree unable to encode this layer's verdict on its
 own.
 
-The twelve fixtures in `frontend/fixtures/general/lean-reject/` are the other
+The fourteen fixtures in `frontend/fixtures/general/lean-reject/` are the other
 kind: documents **no producer emits**. They exist because nothing else in the
 project can reach the decoder's rejection paths. The Java gate cannot — a
 document the exporter would refuse to emit is a document it never hands to Lean.
@@ -68,15 +68,19 @@ for these checks, it is the only possible one, and without them the four decode
 steps and the five well-formedness clauses are unexecuted code that happens to
 elaborate.
 
-Eleven of the twelve are a single mutation of `minimal-class.parser.json` — the
+Eleven of the fourteen are a single mutation of `minimal-class.parser.json` — the
 document the first assertion in this run accepts. That is deliberate: the
 mutation *is* the claim, so `diff` against the accepted document shows exactly
 what is being tested, and a fixture cannot drift into failing for an unrelated
-second reason without the diff growing. The twelfth,
-`invalid-parameter-shadows-state.json`, is one rename away from
-`constructor-arguments.parser.json` instead, because its claim needs a class with
+second reason without the diff growing. The other three change the *base* rather
+than growing the mutation, which is the trade this directory prefers whenever
+`minimal-class` lacks the shape a claim needs:
+`invalid-parameter-shadows-state.json` is one rename away from
+`constructor-arguments.parser.json`, because its claim needs a class with
 both a state variable and a constructor formal and `minimal-class` has neither;
-the base changed rather than the mutation growing.
+and the two send-clause fixtures are one line away from
+`two-classes.parser.json`, because their claims are about sends and
+`minimal-class` contains none.
 `frontend/fixtures/general/lean-reject/README.md`
 lists each mutation.
 -/
@@ -235,8 +239,9 @@ def runGeneralFrontendTests
       (fixtureDirectory ++ "/control-flow.parser.json")
       .iterationNotSupported
 
-    -- Documents no producer emits. Each is a single mutation of
-    -- `minimal-class.parser.json`, which this same run accepts; see
+    -- Documents no producer emits. Eleven are a single mutation of
+    -- `minimal-class.parser.json`, which this same run accepts; the three that
+    -- use another base say so where they appear. See
     -- `frontend/fixtures/general/lean-reject/README.md`.
 
     -- Step 1, the parse.
@@ -276,12 +281,14 @@ def runGeneralFrontendTests
     -- every well-formedness reason, and this fixture is the only one here that
     -- reaches that layer at all.
     --
-    -- It is also the only fixture not derived from `minimal-class.parser.json`:
-    -- the claim needs a class that has both a state variable and a constructor
-    -- formal, and `minimal-class` deliberately has neither. Its base is
-    -- `constructor-arguments.parser.json`, one rename away.
+    -- It was also the first fixture here not derived from
+    -- `minimal-class.parser.json`: the claim needs a class that has both a state
+    -- variable and a constructor formal, and `minimal-class` deliberately has
+    -- neither. Its base is `constructor-arguments.parser.json`, one rename away.
+    -- The two send-clause fixtures below took the same escape route afterwards,
+    -- from a third base, so this is no longer the sole exception — only the first.
     --
-    -- Why this one is worth a fixture rather than left to the twenty-three other
+    -- Why this one is worth a fixture rather than left to the twenty-one other
     -- unexercised reasons: `namesUniqueAndValid` does not look at state variables
     -- at all, and the docstrings at `GeneralWellFormed.lean:319–321`,
     -- `GeneralElaborator.lean:820–823` and `GeneralDecoder.lean:30` justify that
@@ -306,6 +313,45 @@ def runGeneralFrontendTests
       "ARGUMENT_ARITY"
       (fixtureDirectory ++ "/lean-reject/invalid-argument-arity.json")
       .argumentsMatchConstructorFailed
+
+    -- Clauses three and four, reached here for the first time. Both fixtures are
+    -- one line away from `two-classes.parser.json`, which is a **third** base for
+    -- this directory, and the base had to change: these clauses are about sends,
+    -- and `minimal-class` contains none. Changing the base is the move the
+    -- directory README prefers over growing a mutation.
+    --
+    -- The two are ordered, and that is the whole design. `invalid-send-target-
+    -- undeclared` fails clause four as well — an undeclared known rebec has no
+    -- receiving class, so no message server can be found on it — and it receives
+    -- clause three's reason only because the classifier tries clause three first,
+    -- exactly as `invalid-unknown-class` receives clause one's.
+    --
+    -- `invalid-send-message-server-unknown` is therefore the fixture that isolates
+    -- clause four: its target stays `sink`, which Producer does declare, so clause
+    -- three genuinely passes and the refusal can only come from the message-server
+    -- lookup. Asserting clause four without it would be asserting nothing.
+    --
+    -- Neither reaches an elaborator reason first, which is what makes them
+    -- fixtures for this layer at all: there is no diagnostic for an unknown
+    -- known-rebec name, and `targetClassName` is decoded and then never read
+    -- (`GeneralSchema.lean:141`). That is also why the undeclared-target fixture
+    -- leaves `targetClassName` saying `Consumer` — correcting it would be a second
+    -- edit that changes no behaviour.
+    --
+    -- Still uncovered, and named rather than left implicit: clause four's other
+    -- channel, a send whose payload length disagrees with the message server's
+    -- parameter count (`GeneralWellFormed.lean:282`). `invalid-argument-arity`
+    -- above is *constructor* argument arity, a different clause. One reason, two
+    -- ways to fail it, one of them exercised.
+    expectReject
+      "SEND_TARGET_UNDECLARED"
+      (fixtureDirectory ++ "/lean-reject/invalid-send-target-undeclared.json")
+      .sendTargetsDeclaredFailed
+
+    expectReject
+      "SEND_MESSAGE_SERVER_UNKNOWN"
+      (fixtureDirectory ++ "/lean-reject/invalid-send-message-server-unknown.json")
+      .sendsResolveToMessageServersFailed
 
     -- The fifth clause, the one that was not in the approved design. Four
     -- fixtures share its reason because the reason is per-clause and the clause

@@ -504,6 +504,26 @@ checking parameter/state distinctness by naming the elaborator as the layer that
 delegation rested on a read of the source rather than on a green assertion. Prefer that criterion — an
 unexercised reason some other layer is relying on — to working down the list in order.
 
+**Second update 2026-08-21 (stage E), and this supersedes the "9 of 32" above.** The count moved again to
+**11 of 32**, in the commit that added
+`frontend/fixtures/general/lean-reject/invalid-send-target-undeclared.json` and
+`invalid-send-message-server-unknown.json` and asserted `sendTargetsDeclaredFailed` and
+`sendsResolveToMessageServersFailed`. The corpus is **fourteen** fixtures and **twenty-one** reasons are
+unexercised. Both departures from this finding's list are still governed by the criterion the first update
+added rather than by list order, but the criterion applied differently: these two were taken because the
+clauses they name are reached only by a *send*, and the directory's original base contains none, so they were
+the two entries on this finding's list that no amount of mutating `minimal-class.parser.json` could ever have
+reached. They were also taken as a pair by necessity rather than convenience — an undeclared send target fails
+clause four as well as clause three, so the fixture that names clause four has to be a different document with
+a declared target, or clause four's assertion asserts nothing.
+
+One residue is recorded rather than closed. `sendsResolveToMessageServers` has **two** ways to fail — an
+unresolvable message-server name and a payload length that disagrees with the message server's parameter count
+(`Relico/DTR/GeneralWellFormed.lean:282`) — and only the first is now exercised. So "11 of 32" counts *reasons*,
+and one of the eleven is a reason with a tested channel and an untested one. That is a limit of counting
+reasons, not a defect in the count, and it is the second time this finding has run into it: the four
+`namesUniqueAndValid` fixtures share one reason across four requirements for the same structural cause.
+
 ---
 
 ## What these findings ask for
@@ -519,8 +539,8 @@ Most of the twenty are records, not requests. Five carry an action:
   exists. Whoever writes one should read that finding first.
 - **F20** — twenty-one of the twenty-four unexercised reasons need only another fixture in
   `frontend/fixtures/general/lean-reject/`, and `branchingNotSupported` needs an `if`-only source model. Both
-  are cheap and neither is done. The count to move is 8 of 32. *(Superseded — one of them is now done and the
-  count is 9 of 32; see F20's 2026-08-20 update.)*
+  are cheap and neither is done. The count to move is 8 of 32. *(Superseded twice — three of them are now done
+  and the count is 11 of 32; see F20's two updates. The `if`-only source model is still owed.)*
 
 **F19** asks for nothing now, and that is the point of recording it: the decision it documents — that stage B
 adds no module under `Relico/Tests/` — looks like an omission from the outside, and a later session tidying up

@@ -2,9 +2,9 @@
 
 These models are the acceptance surface of the general family's two frontend
 layers. Between them the nine positives exercise every production
-`frontend/java-bridge/RebecaGeneralJsonExporter.java` admits, and the thirty-one
+`frontend/java-bridge/RebecaGeneralJsonExporter.java` admits, and the thirty-three
 negatives pin one rejection each — nineteen against the exporter and the Rebeca
-compiler upstream of it, twelve against the Lean decoder.
+compiler upstream of it, fourteen against the Lean decoder.
 
 Two gates read this directory, and they read different parts of it.
 `frontend/java-bridge/check-general.sh` owns the Rebeca-to-JSON boundary: it runs
@@ -17,7 +17,7 @@ is why neither gate regenerates what the other one checks.
 The negatives are split across three directories by *which layer* rejects them:
 eleven in `reject/` that this exporter refuses, eight in `upstream-reject/`
 that the Rebeca parser and typechecker refuse before the exporter is handed an
-AST, and twelve in `lean-reject/` that the Lean decoder refuses. That split was
+AST, and fourteen in `lean-reject/` that the Lean decoder refuses. That split was
 measured, not guessed, and the reason it is worth recording
 is in "Which layer enforces what" below.
 
@@ -191,10 +191,12 @@ sources, because there is a compiler upstream to feed them to. This one holds
 `.json`, because there is not: a document the exporter would refuse to emit is a
 document it never hands to Lean, so no source model can express these cases. Each
 fixture is instead a single mutation of an accepted document — eleven of them
-mutate `minimal-class.parser.json`, and the twelfth mutates
-`constructor-arguments.parser.json`, because its claim needs a class that has both
-a state variable and a constructor formal and `minimal-class` has neither — so the
-mutation is the claim and `diff` shows it.
+mutate `minimal-class.parser.json`, one mutates
+`constructor-arguments.parser.json`, and two mutate `two-classes.parser.json` — so
+the mutation is the claim and `diff` shows it. The base varies because the rule is
+one mutation, not one base: a claim about a constructor formal shadowing a state
+variable needs a class that has both, and a claim about a send needs a model that
+contains one, neither of which `minimal-class` provides.
 
 Layer is pinned by *reason* rather than by log grepping here, because the Lean
 side has something the Java side does not: `GeneralDiagnosticReason` derives
@@ -204,8 +206,8 @@ available only because the diagnostic vocabulary is an inductive type rather tha
 a string.
 
 `lean-reject/README.md` records each fixture's mutation and, importantly, what
-the corpus does **not** cover: nine of the thirty-two diagnostic reasons are
-asserted, and twenty-three are not.
+the corpus does **not** cover: eleven of the thirty-two diagnostic reasons are
+asserted, and twenty-one are not.
 
 ## A fixture that cannot parse proves nothing
 
@@ -255,7 +257,7 @@ takes those same committed documents as given and checks what Lean makes of them
 Neither re-does the other's work, and the documents in this directory are the
 contract between them.
 
-Note that the glob on the first line matches only the nine positives. The twelve
+Note that the glob on the first line matches only the nine positives. The fourteen
 documents in `lean-reject/` are deliberately invalid against `general-v1` — one of
 them is not even JSON — so validating them would fail by design. They are named
 `invalid-*.json` rather than `*.parser.json` partly for that reason.

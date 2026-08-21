@@ -1880,10 +1880,30 @@ theorem compileGeneralReactiveClass_ok
 The failure stage E adds to this function, and the only one that is not about a body.
 
 Stated separately from the other two rather than folded into a single error lemma, because the
-three failures have different causes and §10's inversion lemma has to be able to say which one
-it ruled out. `outputPortEnvOf` fails when a send names a known rebec the class never declared,
-when a known rebec's class has no message server of that name, or when a payload cannot be
-typed — the three diagnostics the two new `lean-reject` fixtures of #45 exercise.
+failures have different causes and §10's inversion lemma has to be able to say which one it
+ruled out. `outputPortEnvOf` has **four** such causes, none of them raised in its own body: all
+four come from `generalOutputPortEntryFor`, the callee it maps over every numbered send. Measured
+by reading the branch that *decides* each one, at `Relico/Translation/GeneralRouting.lean:686`,
+`:699`, `:712` and `:730`. Those are the discriminating `match`es, not the `.error` expressions,
+which sit three lines below the first three; the fourth is a call, and its refusal text is built
+at `:507` in `generalPortPayloadFor`. In order: a send names a known rebec the sending class never
+declared; a declared known rebec's class is not a class the model declares; the receiving class
+has no message server of the sent name; or the receiving message server's parameters admit no
+port payload.
+
+**An earlier version of this docstring said three, omitted the second, and credited all of them
+to "the two new `lean-reject` fixtures".** That last part cannot be true of any document. A
+`lean-reject` fixture is one the *frontend refuses*, so it never reaches a translation function
+at all; what those two fixtures establish is that `sendTargetsDeclared` and
+`sendsResolveToMessageServers` reject such a document upstream, which is the reason the first
+and third causes here are unreachable from frontend output — not evidence that these branches
+were taken. The distinction is the whole point of the paragraph in §8 that calls these branches
+defensive. Recorded as finding F47 in `docs/STAGE_E_FINDINGS.md`, together with the measurement
+that of the eight refusal causes reachable through `routesOf`, exactly two have their text
+asserted anywhere: `UNDECLARED_MESSAGE_SERVER_SEND_REFUSED` and
+`PARAMETERLESS_EXTERNAL_SEND_REFUSED`, both in
+`frontend/lean-bridge/GeneralLfPrinterTestMain.lean`, both against hand-built models, which is
+the only way a translation refusal can be reached.
 -/
 theorem compileGeneralReactiveClass_error_env
     {classes : List DTR.GeneralReactiveClass}
@@ -2480,10 +2500,29 @@ theorem compileGeneralModel_ok
 /--
 Routing failed, so the model does not translate.
 
-The failure stage E adds at model level. `routesOf` refuses a binding that names an instance
-the main block never declared, a binding that names an instance of a class that is not the
-declared known rebec's class, and a send whose payload cannot be typed — the three the two
-new `lean-reject` documents exercise.
+The failure stage E adds at model level. `routesOf` composes the per-class port environment with
+a per-instance row builder, so it inherits all four causes listed on
+`compileGeneralReactiveClass_error_env` above and adds four of its own — three from
+`generalRouteFor`, at `Relico/Translation/GeneralRouting.lean:931`, `:944` and `:957`, and one
+from `routesOfInstances`, at `:1058`. As above these are the deciding branches rather than the
+`.error` expressions; `:957`'s is the furthest from its refusal, whose `else` is at `:991`. In
+order: an instance binds no known rebec of a name its class declares and sends to; a binding names
+an instance the model does not instantiate; a binding names an instance whose class is not the
+declared known rebec's class; or an instance instantiates a class the model does not declare.
+Eight causes, one `Except String`, which is why the message text is the only thing that
+distinguishes them and why §10's inversion has to go through the text rather than a constructor.
+Two of the eight have their text asserted; the other six do not.
+
+**An earlier version of this docstring said "the three the two new `lean-reject` documents
+exercise", named the payload cause among the three, and omitted both the binding-lookup cause and
+the undeclared-instantiated-class one.** The claim fails twice over, in two different ways worth
+keeping apart. Two of the three it named are bindings-and-topology failures that
+`bindingsMatchDeclarations` already refuses upstream, so no document reaches them because the
+frontend stops it first. The third, the payload cause, is not a malformedness at all — it is this
+translation's own limit on an arity-zero send — so a model carrying it is well formed, the
+frontend *accepts* it, and the refusal happens here rather than there. Either way a `lean-reject`
+document is the wrong instrument: the first group is unreachable because such documents are
+refused earlier, and the third is unreachable because it is refused later. See finding F47.
 -/
 theorem compileGeneralModel_error_routes
     {model : DTR.GeneralModel}

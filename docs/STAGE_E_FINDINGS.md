@@ -512,6 +512,148 @@ count moves rather than on its own; it is assigned below.
 
 ---
 
+## F45 — a findings file denies a test that exists, which is F44 pointing the other way
+
+**Grade: measured.** Method: `ls` of `frontend/fixtures/general/lean-reject/`, which contains
+`invalid-parameter-shadows-state.json`, and `grep -n` of
+`frontend/lean-bridge/GeneralFrontendTestMain.lean`, which asserts `.parameterShadowsStateVariable` at
+`:300` under the label `PARAMETER_SHADOWS_STATE_VARIABLE` printed at `:298`.
+
+`docs/STAGE_D_FINDINGS.md:401` says:
+
+> One consequence worth its own line: nothing in the twelve lean-reject fixtures exercises
+> `.parameterShadowsStateVariable`. The guarantee this correction leans on is **untested**, which is the
+> shape of the `PrioritiesDistinct` defect from stage B — a predicate that exists and is never reached.
+> A fixture for it is now the cheapest thing on this list.
+
+Task **#35** added exactly that fixture and exactly that assertion. The sentence has been false since, and
+as of task #50 it is false twice over: the corpus is fourteen documents, not twelve.
+
+**Why this costs something.** The paragraph it closes is the argument that F32 is **not** a soundness gap —
+the elaborator rejects a shadowing formal, so a `.rebeca` file cannot deliver the collision to the
+translator. That argument leans on the elaborator's guarantee, and this line is the flag saying the
+guarantee is unchecked. With the flag stale, a reader either re-does work that is done, or discounts an
+argument that is in fact now backed by a running assertion. The flag also nominates itself as "the cheapest
+thing on this list", so it actively solicits the duplicated effort.
+
+**The mechanism, and how it differs from F44.** F44 promised a test that did not exist; this denies a test
+that does. The root is the same and is the reusable part: **coverage stated in prose is unfalsifiable by
+the gate, and coverage stated as a label is checkable by `grep`.** The costs differ in shape rather than in
+size. A false claim of coverage removes the signal that would have found the gap; a false denial of
+coverage manufactures phantom work and quietly undermines a correct argument. Neither is visible to any
+count the gate maintains, because the gate counts assertions, not sentences about assertions.
+
+**Fixed by addendum, not by rewriting.** The original paragraph stays as written, with a `>` block beneath
+it recording that #35 discharged it — the convention F40 relies on, and for the same reason: the stale
+sentence is the argument that produced the fixture, so deleting it would erase the reason the fixture
+exists.
+
+---
+
+## F46 — a count that was false the moment it was written, which is not drift
+
+**Grade: measured.** Method: `git show` of `frontend/fixtures/general/lean-reject/README.md` at two
+revisions, counting the list entries at each, rather than reading the sentence and believing it.
+
+Before task #50, that file said the corpus covers a set of reasons "ahead of the **nineteen** still listed"
+while the list beneath it held **twenty** entries.
+
+**The history is the finding.** At `dddf04b` the list held twenty-one entries and the surrounding prose said
+twenty-four and twenty-three; those three numbers agreed with each other and with the list. `b14809b` then
+removed one entry, leaving twenty, and **correctly** decremented both inherited aggregates. In the same
+commit it wrote a *new* sentence naming the list's length, and got it wrong by subtracting one from a list
+it had itself already shortened — arithmetic on the pre-edit value, applied to a post-edit list.
+
+**So this is not the failure the doc-count rule guards against.** That rule exists because a count in file A
+goes stale when file B changes, and it says: grep the spelled-out words rather than the numerals, and move
+every occurrence in one commit. `b14809b` obeyed that rule and the rule worked — the two aggregates it
+inherited are right. What the rule cannot catch is a number that never matched anything, because there is no
+earlier revision in which it was true and therefore no diff in which it became false. **Drift is
+true-then-stale; this was born stale.**
+
+**What would actually catch it.** Only adjacency: a count stated in its own sentence, immediately beside the
+thing it counts, so that verifying it is reading one screen rather than reconciling two. #50's replacement
+does that — the aggregate and the list length are now separate sentences, each naming which set it measures,
+because the two genuinely differ: twenty-one reasons are unexercised, and the enumerated subset of those
+that are *reachable* now has eighteen names in it. Conflating a subset's length with its superset's is the
+second way this sentence could have gone wrong, and stating both is what makes the difference visible
+instead of arguable.
+
+**Fixed textually in task #50**, in the same commit as this file.
+
+---
+
+## F47 — two built-module docstrings credit coverage to fixtures that cannot reach the code
+
+**Grade: measured.** Method: every originating `.error` site in `Relico/Translation/GeneralRouting.lean`
+located by `grep -n`, each one attributed to its enclosing `def` by the `def` line above it, and each
+diagnostic string searched for in both Lean test runners.
+
+`compileGeneralReactiveClass_error_env` and `compileGeneralModel_error_routes` in
+`Relico/Translation/GeneralBasic.lean` each ended with a clause of the form "— the three diagnostics the two
+new `lean-reject` fixtures of #45 exercise". **No `lean-reject` fixture can exercise any of them.** Such a
+fixture is a document the *frontend* refuses; it never reaches a translation function at all. What those two
+fixtures establish is the opposite and complementary fact: that `sendTargetsDeclared` and
+`sendsResolveToMessageServers` stop such a document upstream, which is precisely why two of these branches
+are unreachable from frontend output — evidence that they are defensive, not evidence that they run.
+
+**Three defects, of increasing seriousness.**
+
+1. *Attribution to an impossible instrument*, above.
+2. *Miscounts.* The first said three where there are four; the second said three where the function reaches
+   eight.
+3. *Misclassification.* The second grouped the arity-zero payload refusal with two bindings failures as
+   things "refused upstream". It is not a malformedness at all — it is this translation's own limit, so a
+   model carrying it is well formed, the frontend **accepts** it, and the refusal happens *later*. The two
+   groups are unreachable from a `lean-reject` document for opposite reasons, and collapsing them hides that
+   the second group is a restriction on the accepted fragment.
+
+**Why it is load-bearing rather than cosmetic.** The first docstring's enumeration is the stated
+justification for splitting `compileGeneralReactiveClass_error_env` out as its own theorem — *"§10's
+inversion lemma has to be able to say which one it ruled out"*. Task **#47** owns that inversion. It would
+have inherited a three-way case analysis of a four-way branch: either a proof that fails late, or worse, a
+proof of a weaker statement that looks complete.
+
+**The measurement worth keeping, since it is the real content.** Eight refusal causes are reachable through
+`routesOf`, all sharing one `Except String`, so the message text is the only thing that distinguishes them:
+
+| reached via | deciding branch | `.error` | cause |
+|---|---|---|---|
+| `generalOutputPortEntryFor` | `:686` | `:689` | send names a known rebec the sending class never declared |
+| `generalOutputPortEntryFor` | `:699` | `:702` | declared known rebec's class is not a declared class |
+| `generalOutputPortEntryFor` | `:712` | `:715` | receiving class has no message server of that name |
+| `generalPortPayloadFor` | `:730` (call) | `:507` | receiving message server admits no port payload |
+| `generalRouteFor` | `:931` | `:934` | instance binds no known rebec of a declared, sent-to name |
+| `generalRouteFor` | `:944` | `:947` | binding names an instance the model does not instantiate |
+| `generalRouteFor` | `:957` | `:991` | binding names an instance of the wrong class |
+| `routesOfInstances` | `:1058` | `:1058` | instance instantiates a class the model does not declare |
+
+**Exactly two of the eight have their text asserted anywhere**, both in
+`frontend/lean-bridge/GeneralLfPrinterTestMain.lean` and both against hand-built models — the only
+instrument that can reach a translation refusal — under `PARAMETERLESS_EXTERNAL_SEND_REFUSED` (`:3077`) and
+`UNDECLARED_MESSAGE_SERVER_SEND_REFUSED` (`:3083`). The other six are asserted nowhere.
+
+**A probe trap that nearly became a fourth false claim in this entry.** Grepping that runner for the
+sentence built at `:507` returns nothing, which reads as "zero of the eight are asserted". The runner
+asserts it through named `String` terms — `parameterlessPortDiagnostic` and
+`undeclaredMessageServerDiagnostic` — that split the same concatenation at different points, so the
+sentence never appears contiguously. **Grep the named term, not the message.** The same trap applies to any
+future audit of this table.
+
+**The family, which is now four findings with one root.** F44 promised a test that did not exist; F45 denied
+a test that did; F46 wrote a count that was false on arrival; F47 credited coverage to an instrument that
+cannot provide it. In every case a claim about the test suite was written as **prose** rather than as a
+label a gate could check. Prose coverage claims are unfalsifiable by any gate this repository runs, and all
+four were found by reading source in order to write documentation — not by any check. That is the argument
+for the convention the fixes adopt: **name the label, and let `grep` be the witness.**
+
+**Both docstrings are rewritten in task #50**, which is what puts this entry's citations inside the build
+closure that `frontend/check-general-lean.sh` compiles. What is *not* done is the six unasserted causes;
+that is carried below rather than smuggled into #50, because assertions move
+`EXPECTED_PRINTER_ASSERTIONS` and every docstring that states the breakdown.
+
+---
+
 ## What is left open, and who owns it
 
 Ordered by what blocks something later, not by finding number. Each item names the experiment or reading
@@ -586,3 +728,15 @@ rewrites those sites". Stage E rewrote port sites, not those.
 construction, and still carries the *"provisional until the findings file lands"* warning that this file
 discharges. Both should be corrected the next time that document is touched, with a pointer here rather
 than a rewrite of its history — the same convention F40 relies on.
+
+**14. F47's six unasserted refusal causes.** Two of the eight causes in F47's table have their message text
+asserted; six do not. The closing instrument is not an argument, it is six `expectString` assertions in
+`frontend/lean-bridge/GeneralLfPrinterTestMain.lean` against hand-built models — the same shape as the two
+that exist, and available for all six precisely because a hand-built `DTR.GeneralModel` need not satisfy
+`wellFormed`, so the four causes that the frontend makes unreachable are still reachable there. The
+alternative is a written, per-cause record that the branch is unreachable and deliberately untested; that is
+acceptable for the bindings group and **not** acceptable for the arity-zero payload cause, which is a
+restriction on the accepted fragment and is reachable from a document the frontend accepts. Either way it
+moves `EXPECTED_PRINTER_ASSERTIONS` and the two docstrings that state the breakdown, so it is its own task
+and must not be folded into a fixture commit. Blocks nothing; the reason to do it soon is that F47's table is
+the only place the mapping from cause to text currently exists.

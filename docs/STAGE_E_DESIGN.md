@@ -714,6 +714,19 @@ Those two reasons are also, as far as the fixture set shows, **unexercised**: no
 exists at all, so it is the first stage in which they are reachable, and §10 makes two new
 `lean-reject` fixtures a deliverable rather than a nice-to-have.
 
+> **Discharged 2026-08-21.** Both reasons are now asserted, by
+> `invalid-send-target-undeclared.json` and `invalid-send-message-server-unknown.json`, and the
+> corpus is fourteen documents rather than twelve. The paragraph above is kept as written because it
+> is the argument that produced the deliverable, and because the claim it makes is the one this
+> section exists to justify: these conjuncts are checked upstream, so the translation's steps 2 and 3
+> are unreachable from frontend output *and* were, until now, unreachable from the test corpus too —
+> defensive code guarded by an untested predicate. Only the second half of that has changed.
+>
+> One qualification the deliverable did not meet, stated here because §10 counted fixtures rather
+> than channels: `sendsResolveToMessageServers` also fails when a send's payload length disagrees
+> with the message server's parameter count (`Relico/DTR/GeneralWellFormed.lean:282`), and no
+> document exercises that. The reason is asserted; one of its two channels is not.
+
 **Genuinely new, and genuinely the translation's own.** Two refusals have no upstream owner because
 neither is a malformedness — each is a legal DTR model that this target mapping cannot carry:
 

@@ -1,6 +1,6 @@
 # `lean-reject` — documents no producer emits
 
-Twelve malformed `general-v1` documents, each of which the Lean decoder must
+Fourteen malformed `general-v1` documents, each of which the Lean decoder must
 refuse, and each paired in
 `frontend/lean-bridge/GeneralFrontendTestMain.lean` with the exact
 `GeneralDiagnosticReason` it must be refused for.
@@ -33,7 +33,7 @@ ran.
 
 ## Every fixture is one mutation of an accepted document
 
-Each file is an accepted document with a single change. Eleven of the twelve
+Each file is an accepted document with a single change. Eleven of the fourteen
 mutate `minimal-class.parser.json`; that document is
 accepted by the same test run that rejects these, so the pair is a controlled
 experiment: the mutation is the claim being tested, and
@@ -47,7 +47,8 @@ shows exactly what that claim is. A fixture that later starts failing for a
 second, unrelated reason cannot do so quietly, because the diff would have to
 grow first.
 
-`invalid-parameter-shadows-state.json` is the exception, and the exception is
+`invalid-parameter-shadows-state.json` was the first of the three exceptions, and
+the exception is
 about the base rather than the rule. Its claim is that a constructor formal may
 not be named after a state variable, which needs a class that has one of each;
 `minimal-class` has an empty `stateVariables` and an empty parameter list, so
@@ -64,11 +65,31 @@ diff frontend/fixtures/general/constructor-arguments.parser.json \
 is two lines, both the same rename. Prefer this move to a growing mutation if a
 future fixture needs a richer base than `minimal-class` provides.
 
+The two send-clause fixtures took that advice, from a third base. Their claims are
+about the *targets* of sends, and `minimal-class` contains no send at all, so a
+mutation there would have had to add a known rebec, a binding, a message server on
+some second class and a send statement before it could break anything — four
+additions in service of one claim. `two-classes.parser.json` already has all four,
+so each fixture is a single line away from it:
+
+```
+diff frontend/fixtures/general/two-classes.parser.json \
+     frontend/fixtures/general/lean-reject/invalid-send-target-undeclared.json
+diff frontend/fixtures/general/two-classes.parser.json \
+     frontend/fixtures/general/lean-reject/invalid-send-message-server-unknown.json
+```
+
+is one changed line each. Three bases is not drift: the rule this directory keeps
+is *one mutation*, and the base is whichever accepted document makes one mutation
+sufficient. A directory with a single base and multi-step mutations would be
+following the letter of the convention while giving up the property the convention
+exists for.
+
 The documents are formatted the way the exporter formats its own output — two
 space indentation, keys sorted, one trailing newline — so a diff shows the
 mutation and nothing else.
 
-## The twelve, by the decode step each one reaches
+## The fourteen, by the decode step each one reaches
 
 `decodeGeneralModelText` runs four steps in order, and a fixture can only test a
 step the previous three let it reach. That ordering is why, for instance, the
@@ -178,18 +199,51 @@ rejects.
 The five well-formedness clauses are tried in a fixed order and the first false
 one names the reason, so which reason a document receives is decided by clause
 order and not by which clause is the most specific description of the mistake.
-Both fixtures here depend on that, and say so.
+All four fixtures here depend on that, and say so — and they are two pairs of the
+same shape. In each pair one document breaks several clauses at once and receives
+the earliest one's reason, and the other is built so that exactly one clause can
+fail, which is what makes the later clause's assertion mean anything.
 
 | fixture | mutation | reason |
 | --- | --- | --- |
 | `invalid-unknown-class.json` | the instance's `className` set to `Missing` | `bindingsMatchDeclarationsFailed` |
 | `invalid-argument-arity.json` | one `intLiteral` argument added to an instance whose class takes none | `argumentsMatchConstructorFailed` |
+| `invalid-send-target-undeclared.json` | the class's known rebec renamed `sink` → `drain`, so the send's target is not declared | `sendTargetsDeclaredFailed` |
+| `invalid-send-message-server-unknown.json` | the send's `messageServer` changed `accept` → `absorb`, a name the receiving class does not define | `sendsResolveToMessageServersFailed` |
 
 A dangling `className` fails four of the five clauses, since each looks the class
 up; `bindingsMatchDeclarations` is simply the one tried first. The arity fixture
 reaches the model at all only because `intLiteral` is a shape the elaborator
 accepts — arity is not an elaborator question, so a well-shaped argument list of
-the wrong length must survive elaboration to be caught here.
+the wrong length must survive elaboration to be caught here. It is also the
+document that isolates clause two, which the unknown-class fixture masks.
+
+The send pair repeats that division one clause later. Renaming the known rebec
+breaks clause three *and* clause four — a known rebec that is not declared has no
+receiving class, so no message server can be found on it either — and it receives
+clause three's reason purely because clause three is tried first, exactly as the
+unknown-class fixture receives clause one's. So it cannot be the evidence that
+clause four works. `invalid-send-message-server-unknown.json` is: its target stays
+`sink`, which `Producer` does declare, so clause three genuinely passes and the
+only remaining source of a refusal is the message-server lookup itself.
+
+Neither send fixture is pre-empted by an elaborator reason, which is what makes
+them fixtures for *this* layer rather than that one. There is no diagnostic for an
+unknown known-rebec name — the elaborator resolves a send target by looking for the
+name among the declared known rebecs and simply reports nothing when it is absent —
+and `targetClassName` is decoded at `GeneralSchema.lean:141` and then read nowhere,
+so a `targetClassName` that disagrees with the topology cannot be noticed. That
+second fact is also why `invalid-send-target-undeclared.json` still says
+`Consumer` there: correcting it would be a second changed line that alters no
+behaviour, and this directory's rule is one line.
+
+One channel of clause four is still unexercised, and is named here rather than left
+to be discovered: a send whose payload length disagrees with the message server's
+parameter count (`GeneralWellFormed.lean:282`). `invalid-argument-arity.json` above
+is *constructor* argument arity, which is a different clause entirely. So clause
+four has one reason and two ways to fail it, of which one is tested. A third
+document would close it; it is deliberately not added here, because the assertion
+totals for this round were predicted before the round began.
 
 ### Step 4, the fifth clause
 
@@ -222,18 +276,18 @@ duplication is of a name, not of a whole record.
 
 ## What this corpus does not cover
 
-Twelve fixtures is not coverage of the decoder, and it would be easy to read a
+Fourteen fixtures is not coverage of the decoder, and it would be easy to read a
 directory of negatives as if it were. Measured: `GeneralDiagnosticReason` declares
-**32** reasons, and the runner asserts **9** of them — the six reached from here
-plus `iterationNotSupported`, which `control-flow` reaches, and the two
-model-level clauses above. **Twenty-three are asserted nowhere.**
+**32** reasons, and the runner asserts **11** of them — the six reached from here
+plus `iterationNotSupported`, which `control-flow` reaches, and the four
+model-level clauses above. **Twenty-one are asserted nowhere.**
 
-One of the twenty-three, `modelNotWellFormed`, is unreachable by construction and
+One of the twenty-one, `modelNotWellFormed`, is unreachable by construction and
 documented as such: `wellFormed` is exactly the conjunction of the five clauses,
 so nothing is left over. It exists so that classification is total without the
 classifier being trusted to agree with the gate.
 
-The other twenty-two are reachable and untested. They fall into three groups,
+The other twenty are reachable and untested. They fall into three groups,
 which matters because the groups need different work:
 
 Reachable from a document, so a fixture here would test them:
@@ -243,16 +297,31 @@ Reachable from a document, so a fixture here would test them:
 `expectedBooleanLiteral`, `unknownBinaryOperator`, `unknownUnaryOperator`,
 `undeclaredVariable`, `unsupportedStatementKind`, `expectedAssignTargetName`,
 `assignmentTargetNotStateVariable`, `unsupportedSendTargetKind`,
-`nonConstantDelay`, `negativeDelay`, `nonLiteralInstanceArgument`,
-`sendTargetsDeclaredFailed`, `sendsResolveToMessageServersFailed`.
+`nonConstantDelay`, `negativeDelay`, `nonLiteralInstanceArgument`.
 
-`parameterShadowsStateVariable` was in this group until
-`invalid-parameter-shadows-state.json` landed. It was taken first, ahead of the
-nineteen still listed, for a reason that does not apply to most of them: two
-other predicates are written to *not* check what it checks, and their docstrings
-name the elaborator as the reason that is safe. It was the only unexercised reason
-another layer's correctness argument depended on. That is the criterion for
-picking the next one, rather than working down the list in order.
+That list has eighteen names in it, and the count is worth stating separately from
+the list because the last time this paragraph was edited the two disagreed. The
+sentence below used to say the group held nineteen when the list held twenty: the
+edit that removed `parameterShadowsStateVariable` decremented the two aggregate
+counts above correctly, because those were adjusted from an existing number, and
+got this one wrong because it was computed fresh by subtracting one from a list
+that had already been shortened. That is finding F46, and the lesson is narrow
+enough to state: a count introduced in the same commit as the edit it describes
+must be obtained by counting the file as it will be, never by arithmetic on the
+number the file used to justify.
+
+Three reasons have left this group so far. `parameterShadowsStateVariable` went
+first, when `invalid-parameter-shadows-state.json` landed, and it was taken ahead
+of the rest for a reason that does not apply to most of them: two other predicates
+are written to *not* check what it checks, and their docstrings name the elaborator
+as the reason that is safe. It was the only unexercised reason another layer's
+correctness argument depended on. Then `sendTargetsDeclaredFailed` and
+`sendsResolveToMessageServersFailed` went together, because a clause reached only
+by a send could not be tested from this directory's original base at all, and
+because clause order means the pair had to be taken as a pair or not at all.
+
+Both departures were driven by what some other claim rests on, not by list order,
+and that is the criterion for picking the next one.
 
 Reachable only from a document the exporter really emits, so testing it needs a
 new *source* fixture rather than one here: `branchingNotSupported`. The exporter
@@ -268,7 +337,7 @@ finding F12.
 
 Nothing here should be taken to mean the untested reasons are wrong. It means
 they are unexercised, which is a different and smaller claim, and the honest one.
-The number to watch is 9 of 32: if a future change to this directory does not
+The number to watch is 11 of 32: if a future change to this directory does not
 move it, the change added fixtures rather than coverage.
 
 ## Adding to this directory

@@ -403,6 +403,18 @@ late rises there rather than staying flat.
 > shape of the `PrioritiesDistinct` defect from stage B — a predicate that exists and is never reached.
 > A fixture for it is now the cheapest thing on this list.
 
+> **Discharged in task #35, and this paragraph has been false since — recorded as F45 in
+> `docs/STAGE_E_FINDINGS.md`.** `frontend/fixtures/general/lean-reject/invalid-parameter-shadows-state.json`
+> exists, and `frontend/lean-bridge/GeneralFrontendTestMain.lean:300` asserts
+> `.parameterShadowsStateVariable` by value, under the label `PARAMETER_SHADOWS_STATE_VARIABLE` at `:298`.
+> The guarantee this correction leans on is therefore tested, and the argument above that F32 is not a
+> soundness gap now rests on a running assertion rather than on an unchecked claim about the elaborator.
+>
+> The count in the sentence is also stale twice: the corpus was twelve documents when this was written and is
+> **fourteen** as of task #50, which added the two send-clause fixtures. The paragraph is kept as written
+> because it is the argument that produced the fixture — deleting it would erase the reason the fixture
+> exists — but nothing here should be read as an outstanding request.
+
 **Blocking stage E — measure whether a preamble struct can be a port's type.** F30's candidate answer for a
 multi-parameter message server reached by an external send is `input in: Receiver_m_Args`. Nothing has
 measured that `lfc` accepts a preamble struct in that position; the struct probe covered actions only. If it
