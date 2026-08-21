@@ -35,10 +35,22 @@ in the target cares, and consistency inside this repo is worth more than typogra
 agreement with one figure.
 
 An input-port trigger's parameter is read as `*p.get()`, by analogy with the logical-action
-read that this repo already emits and `lfc` already accepts. That analogy is **not** itself
-measured: probe 10 compiled a hand-written `reaction(in) -> out`, not generated C++ that
-dereferences a port. The stage that runs `lfc` over a generated port-bearing file owns
-confirming it.
+read that this repo already emits and `lfc` already accepts. Stage C wrote here that the
+analogy was **not** measured, on the ground that probe 10 compiled a hand-written
+`reaction(in) -> out` that never dereferenced a port. That is now half false, and the two
+halves are worth separating rather than replacing with a blanket claim.
+
+The **struct** form is measured. Probe `struct_as_port_type` — section 11 of
+`tools/paper-measurements/lf_semantics_probe.sh`, run 2026-08-20 — compiles and runs
+`auto p = *in.get();` followed by `p.left`, `p.right` and `p.flag` on a port typed by a
+`public preamble` struct, and prints `RELICO_STRUCT_PORT 9 1`. That is the shape
+`renderGeneralParameterRead` emits at arity ≥ 2, field reads included.
+
+The **scalar** form — `auto x = *in.get();` on an `input in: int` — is measured by no probe
+at all, and that is the narrower gap stage C's paragraph should have named. Both halves are
+hand-written LF rather than generated LF in any case, so `GENERAL_LF_TARGET_OK` running over
+a generated port-bearing file is still what closes them, and stage E is the stage that owns
+it.
 
 Nothing here sorts anything, and no `wellFormed` hypothesis is taken.
 
@@ -309,23 +321,49 @@ Render one general statement.
 payload"`; it now constructs the payload struct, `<Struct>{<e1>, <e2>, …}`, in the form
 measured under real `lfc`: `argsAction.schedule(Args2{1, 2, true}, 0ms);`.
 
-`reactorName` is here only to name that struct, and passing the name rather than the whole
-reactor is deliberate — it states the entire dependency. The name is the *declaring*
-reactor's, which is the same reactor as the scheduling one: `stmtWellFormed` requires a
-scheduled action to be declared on the reactor whose body schedules it, and stage D emits
-self-sends only.
+**`Except` again as of stage E**, and not because a set became fallible: a set of arity ≥ 2
+must name a C++ struct that this function cannot compute. That struct is named from the
+**receiving** reactor and the message (`LF.GeneralPortPayload.struct`), because the two ends
+of a connection have different port names and different declaring reactors and the receiver
+is the only thing they share, so the name has to be read off the port declaration. Hence the
+output-port list, and hence a refusal channel for a set of a port the reactor does not
+declare.
+
+`reactorName` and `outputPorts` are two parameters rather than one `reactor`, continuing
+what stage D wrote here about passing the name: together they state the entire dependency,
+and separately they say something the collapsed form would hide. `reactorName` names a
+*scheduled* action's struct, which belongs to the declaring reactor — `stmtWellFormed`
+requires a scheduled action to be declared on the reactor whose body schedules it.
+`outputPorts` names a *set* port's struct, which belongs to somebody else's reactor
+entirely. That the two payload struct names come from two different reactors is §4.1's
+asymmetry reaching the printer.
+
+The `setPort` arms enumerate the payload constructor and the argument list *together*, with
+no wildcard on the payload. `docs/STAGE_E_DESIGN.md` §5.3 records that `input p: void` is
+unmeasured under `lfc 0.11.0` and that the day the probe runs `GeneralPortPayload` gains a
+constructor; a wildcard here would print something plausible for it instead of failing to
+build.
+
+Four of those six arms refuse. Each is unreachable from a well-formed program — the
+`.setPort` arm of `stmtWellFormed` checks the argument count against
+`LF.GeneralPortPayload.arity` — which is what lets them be refusals with distinct messages
+rather than bytes chosen by guesswork. A struct payload of arity 0 or 1 is representable and
+never built, since the translation emits `scalar` at arity 1 and refuses arity 0.
 -/
 def renderGeneralStmt
-    (reactorName : ReactorName) :
+    (reactorName : ReactorName)
+    (outputPorts :
+      List LF.GeneralPortDecl) :
     LF.GeneralStmt →
-    String
+    Except String String
 
   | .assign target expression =>
-      target.value ++
-        " = " ++
-        renderGeneralExpr
-          expression ++
-        ";"
+      .ok
+        (target.value ++
+          " = " ++
+          renderGeneralExpr
+            expression ++
+          ";")
 
   | .schedule
       action
@@ -335,40 +373,110 @@ def renderGeneralStmt
       match payloadExpressions with
 
       | [] =>
-          action.value ++
-            ".schedule(" ++
-            renderDelay delay ++
-            ");"
+          .ok
+            (action.value ++
+              ".schedule(" ++
+              renderDelay delay ++
+              ");")
 
       | [payloadExpression] =>
-          action.value ++
-            ".schedule(" ++
-            renderGeneralExpr
-              payloadExpression ++
-            ", " ++
-            renderDelay delay ++
-            ");"
+          .ok
+            (action.value ++
+              ".schedule(" ++
+              renderGeneralExpr
+                payloadExpression ++
+              ", " ++
+              renderDelay delay ++
+              ");")
 
       | first :: second :: remaining =>
-          action.value ++
-            ".schedule(" ++
-            generalPayloadStructName
-              reactorName
-              action ++
-            "{" ++
-            String.intercalate
-              ", "
-              ((first :: second :: remaining).map
-                renderGeneralExpr) ++
-            "}, " ++
-            renderDelay delay ++
-            ");"
+          .ok
+            (action.value ++
+              ".schedule(" ++
+              generalPayloadStructName
+                reactorName
+                action ++
+              "{" ++
+              String.intercalate
+                ", "
+                ((first :: second :: remaining).map
+                  renderGeneralExpr) ++
+              "}, " ++
+              renderDelay delay ++
+              ");")
 
-  | .setPort port value =>
-      port.value ++
-        ".set(" ++
-        renderGeneralExpr value ++
-        ");"
+  | .setPort port arguments =>
+
+      match
+          outputPorts.find?
+            (fun declared =>
+              declared.name == port)
+      with
+
+      | none =>
+          .error
+            ("statement sets port `" ++
+              port.value ++
+              "`, which is not declared as an output of the reactor being rendered")
+
+      | some declared =>
+
+          match declared.payload,
+              arguments
+          with
+
+          | .scalar _, [] =>
+              .error
+                ("statement sets port `" ++
+                  port.value ++
+                  "` with no value, but that port declares a scalar payload " ++
+                  "and so carries exactly one")
+
+          | .scalar _, [argument] =>
+              .ok
+                (port.value ++
+                  ".set(" ++
+                  renderGeneralExpr
+                    argument ++
+                  ");")
+
+          | .scalar _, _ :: _ :: _ =>
+              .error
+                ("statement sets port `" ++
+                  port.value ++
+                  "` with more than one value, but that port declares a scalar " ++
+                  "payload and so carries exactly one")
+
+          | .struct _ _ _, [] =>
+              .error
+                ("statement sets port `" ++
+                  port.value ++
+                  "` with no value; whether a payload-struct port of arity zero is " ++
+                  "accepted by lfc 0.11.0 is unmeasured, so the translation refuses " ++
+                  "to build one (see the stage E design, section 5.3)")
+
+          | .struct _ _ _, [_] =>
+              .error
+                ("statement sets port `" ++
+                  port.value ++
+                  "` with one value, but that port declares a payload struct; the " ++
+                  "translation emits a scalar payload at arity one, so a one-field " ++
+                  "struct is representable and never built")
+
+          | .struct receiver message _,
+              first :: second :: remaining =>
+              .ok
+                (port.value ++
+                  ".set(" ++
+                  generalPayloadStructName
+                    receiver
+                    message ++
+                  "{" ++
+                  String.intercalate
+                    ", "
+                    ((first :: second :: remaining).map
+                      renderGeneralExpr) ++
+                  "});")
 
 /--
 Collect the names a body has effects on, in first-occurrence order.
@@ -429,6 +537,38 @@ def renderGeneralEffects
           effectNames
 
 /--
+The LF type a port declaration prints.
+
+`renderGeneralActionDecl` derives an action's printed type from its **arity** — `void`, the
+bare scalar, or the payload struct — and a port cannot be done that way, because a port
+stores *what it carries* rather than a parameter list. So this dispatches on the payload
+constructor, which is the port-side analogue and not the same rule.
+
+The consequence is worth stating because it looks like an inconsistency and is not one: a
+`struct` payload prints the struct name at every arity, including the arities the
+translation never builds, whereas an action of arity 1 prints its parameter's own type. Two
+declarations disagreeing about one struct is therefore impossible from this direction —
+whatever the payload names is what gets printed, and `generalPortStructDecl?` declares
+exactly that struct from the same field.
+
+There is no `void` arm because `GeneralPortPayload` has no `void` constructor, and that
+absence is a measurement gap rather than a judgment: see the type's own docstring and
+`docs/STAGE_E_DESIGN.md` §5.3.
+-/
+def renderGeneralPortPayloadType :
+    LF.GeneralPortPayload →
+    String
+
+  | .scalar declaredType =>
+      renderGeneralType
+        declaredType
+
+  | .struct receiver message _ =>
+      generalPayloadStructName
+        receiver
+        message
+
+/--
 Render one input-port declaration.
 -/
 def renderInputPortDecl
@@ -437,8 +577,8 @@ def renderInputPortDecl
   "  input " ++
     port.name.value ++
     ": " ++
-    renderGeneralType
-      port.declaredType
+    renderGeneralPortPayloadType
+      port.payload
 
 /--
 Render one output-port declaration.
@@ -449,8 +589,8 @@ def renderOutputPortDecl
   "  output " ++
     port.name.value ++
     ": " ++
-    renderGeneralType
-      port.declaredType
+    renderGeneralPortPayloadType
+      port.payload
 
 /--
 Render a reactor's port block: inputs first, then outputs.
@@ -571,23 +711,29 @@ def renderGeneralTrigger :
 /--
 The C++ local that a multi-value payload is bound to before its fields are destructured.
 
-`<action>_payload`. Derived from the action name rather than fixed, and the reason is a
+`<trigger>_payload`. Derived from the trigger's name rather than fixed, and the reason is a
 recorded exposure rather than a preference: this identifier shares a scope with the
 source-derived parameter binders below it, and nothing proves a source model has no
 message-server parameter called `arithmetic_payload`. The inherited payload family emits a
 bare `auto payload = …`, so the exposure is not introduced here, and deriving from the
-action name narrows a collision to a source identifier that mentions an action name.
+trigger name narrows a collision to a source identifier that mentions a trigger name.
 
 Fixing it properly means a freshness condition over the union of all source identifiers in
 a reactor, which is a well-formedness obligation and does not belong inside a printer. It
 is filed as F29 rather than patched here.
 
+Takes a `String` as of stage E, because both trigger kinds that can carry a multi-value
+payload now reach it: a logical action for a self-send and an input port for an external
+one. Naming the parameter `triggerName` and not `actionName` is the whole of the change —
+the spelling was never about actions, it was about whatever the reaction is triggered by,
+and stage D simply had only one such thing.
+
 One function so that the binding site and every field read cannot disagree.
 -/
 def generalPayloadBinderName
-    (action : ActionName) :
+    (triggerName : String) :
     String :=
-  action.value ++
+  triggerName ++
     "_payload"
 
 /--
@@ -608,8 +754,9 @@ component by the identifier the source used and the translation of expressions n
 renaming pass. The struct's own name is never mentioned — `auto` infers it — which is why
 this function needs no reactor name.
 
-A port is read the same way an action is, `*p.get()`; see the module note on why that
-analogy is not yet measured.
+A port is read the same way an action is, `*p.get()`, and as of stage E the arity-≥2 arm
+for a port is a destructuring rather than an error. The module note above records which half
+of that analogy is measured and which is not, and by which probe.
 
 Every trigger-and-arity combination is enumerated, with one exception that is deliberate
 rather than economical: a startup reaction emits no read **at any arity**, so its two
@@ -621,9 +768,19 @@ body with no binder at all. Emitting nothing is therefore the whole job here. Se
 module note and finding F33; the arms are not collapsed by a wildcard, so the stage that
 adds a fourth trigger still gets a build error.
 
-An input port with two or more parameters is an error because a `GeneralPortDecl` declares
-one type and so delivers one value: unlike an action, it carries no parameter list to
-destructure. Unreachable in stage D, which emits no ports.
+An input port with two or more parameters was an error through stage D, on the ground that a
+`GeneralPortDecl` declares one type and so delivers one value and, unlike an action, has no
+parameter list to destructure. §5.2 of `docs/STAGE_E_DESIGN.md` makes the first half of that
+sentence false — a port now declares a payload — and the second half was never the obstacle:
+the parameter list being destructured is the *reaction's*, and a port-triggered reaction gets
+it from the message server exactly as an action-triggered one does. So the arm is now the
+struct-destructuring arm, and the two multi-value arms differ in nothing but which name they
+pass to `generalPayloadBinderName`.
+
+That makes this function **total as of stage E**: every one of its seven arms succeeds. The
+`Except` is kept rather than narrowed to `String` because `renderGeneralBody` is `Except`
+regardless — a `setPort` it renders can refuse — so narrowing here would move a `←` to a
+`let` in one caller and buy nothing.
 -/
 def renderGeneralParameterRead
     (reaction :
@@ -655,7 +812,7 @@ def renderGeneralParameterRead
           "\n"
           (("    auto " ++
             generalPayloadBinderName
-              action ++
+              action.value ++
             " = *" ++
             action.value ++
             ".get();") ::
@@ -665,7 +822,7 @@ def renderGeneralParameterRead
                   parameter.value ++
                   " = " ++
                   generalPayloadBinderName
-                    action ++
+                    action.value ++
                   "." ++
                   parameter.value ++
                   ";"))))
@@ -683,24 +840,39 @@ def renderGeneralParameterRead
           ".get();")
 
   | .inputPort port,
-      _ :: _ :: _ =>
-      .error
-        ("reaction `" ++
-          reaction.name.value ++
-          "` for input port `" ++
-          port.value ++
-          "` declares more than one parameter; " ++
-          "a port declares one type and so carries one value, " ++
-          "and unlike a logical action it has no parameter list to destructure")
+      first :: second :: remaining =>
+      .ok
+        (String.intercalate
+          "\n"
+          (("    auto " ++
+            generalPayloadBinderName
+              port.value ++
+            " = *" ++
+            port.value ++
+            ".get();") ::
+            ((first :: second :: remaining).map
+              (fun parameter =>
+                "    auto " ++
+                  parameter.value ++
+                  " = " ++
+                  generalPayloadBinderName
+                    port.value ++
+                  "." ++
+                  parameter.value ++
+                  ";"))))
 
 /--
 Render one reaction body, including trigger-payload extraction when required.
 
 `reactorName` is threaded only so that a `schedule` of a multi-value payload can name its
-struct.
+struct, and `outputPorts` only so that a `set` of one can name *its* struct — which is a
+different reactor's. Both are the declaring reactor's own data; see `renderGeneralStmt` for
+why the two are not one argument.
 -/
 def renderGeneralBody
     (reactorName : ReactorName)
+    (outputPorts :
+      List LF.GeneralPortDecl)
     (reaction :
       LF.GeneralReaction) :
     Except String String := do
@@ -709,10 +881,11 @@ def renderGeneralBody
     renderGeneralParameterRead
       reaction
 
-  let statements :=
-    reaction.body.map
+  let statements ←
+    reaction.body.mapM
       (renderGeneralStmt
-        reactorName)
+        reactorName
+        outputPorts)
 
   let statementLines :=
     statements.map
@@ -737,6 +910,8 @@ Render one reaction.
 -/
 def renderGeneralReaction
     (reactorName : ReactorName)
+    (outputPorts :
+      List LF.GeneralPortDecl)
     (reaction :
       LF.GeneralReaction) :
     Except String String := do
@@ -744,6 +919,7 @@ def renderGeneralReaction
   let body ←
     renderGeneralBody
       reactorName
+      outputPorts
       reaction
 
   pure
@@ -762,10 +938,14 @@ Render message reactions in their existing declaration order.
 
 Order is preserved and nothing is sorted: reaction declaration order is what decides
 same-tag execution order in the target, so a sort inserted here would be a silent semantic
-change.
+change. Stage E makes that sentence load-bearing rather than cautionary: a receiver now has
+one reaction per sending instance for the same message server, and which of them runs first
+at one tag is decided here and nowhere else.
 -/
 def renderGeneralMessageReactions
-    (reactorName : ReactorName) :
+    (reactorName : ReactorName)
+    (outputPorts :
+      List LF.GeneralPortDecl) :
     List LF.GeneralReaction →
     Except String String
 
@@ -775,17 +955,20 @@ def renderGeneralMessageReactions
   | [reaction] =>
       renderGeneralReaction
         reactorName
+        outputPorts
         reaction
 
   | reaction :: remaining => do
       let renderedReaction ←
         renderGeneralReaction
           reactorName
+          outputPorts
           reaction
 
       let renderedRemaining ←
         renderGeneralMessageReactions
           reactorName
+          outputPorts
           remaining
 
       pure
@@ -801,6 +984,10 @@ constructor neither assigns nor sends produces exactly that case. Printing
 `reaction(startup) {= =}` instead has no precedent to lean on: all 24 committed
 `expected/lf-source/*.lf` files have a startup reaction with a non-empty body, so the empty
 one is untested territory and a stage about ports is not the place to explore it.
+
+This one takes the whole reactor and so needs no port argument, which is not an
+inconsistency with its siblings but the reason they have one: they are called with a
+reactor's name and its ports where the reactor itself is not in scope.
 -/
 def renderGeneralStartupReaction
     (reactor : LF.GeneralReactor) :
@@ -813,6 +1000,7 @@ def renderGeneralStartupReaction
   | _ :: _ =>
       renderGeneralReaction
         reactor.name
+        reactor.outputPorts
         reactor.startupReaction
 
 /--
@@ -870,7 +1058,8 @@ two reaction blocks, so the nested form would need eight cases and would get one
 this form is the same code whichever blocks happen to be empty, including all of them.
 
 The reactor's own name is passed down to every reaction, where it is needed to name a
-multi-value payload struct.
+multi-value payload struct, and as of stage E so is its output-port list, which names the
+payload struct of a `set`. The distinction between the two is in `renderGeneralStmt`.
 -/
 def renderGeneralReactor
     (reactor : LF.GeneralReactor) :
@@ -883,6 +1072,7 @@ def renderGeneralReactor
   let messageReactions ←
     renderGeneralMessageReactions
       reactor.name
+      reactor.outputPorts
       reactor.messageReactions
 
   let actionDeclarations :=
@@ -1123,17 +1313,43 @@ def generalStructFields
           ";"))
 
 /--
-The struct declaration one action needs, if it needs one.
+One payload struct declaration, from the name it declares and the fields it carries.
+
+Split out in stage E because three kinds of declaration now reach it — a logical action's, an
+input port's and an output port's — and the alternative was the same string fragments written
+three times, which is how two of the three would eventually have drifted. The two-space indent
+belongs to the preamble, not to the struct, and is kept here so that every caller inherits it.
+-/
+def generalPayloadStructDecl
+    (structName : String)
+    (parameters :
+      List LF.GeneralTypedParameter) :
+    String :=
+  "  struct " ++
+    structName ++
+    " { " ++
+    generalStructFields
+      parameters ++
+    " };"
+
+/--
+The struct declaration one action needs, paired with the name it declares, if it needs one.
 
 `none` for arity 0 and 1, which are `: void` and a primitive type and so need no carrier.
 The `Option` is what lets the program-level collection be derived by filtering rather than
 by a separate arity test that could disagree with
 `renderGeneralActionDecl`'s.
+
+The declared **name is carried alongside** the declaration as of stage E, and only because the
+program-level collection deduplicates on it. One struct is now named by up to three kinds of
+declaration — the receiver's logical action when the message is also self-sent, the sender's
+output port, and one input port per sending instance — and recovering a name by parsing a
+rendered C++ declaration back out would be a worse answer to the same question.
 -/
-def generalActionStructDecl?
+def generalActionStructEntry?
     (reactorName : ReactorName)
     (action : LF.GeneralAction) :
-    Option String :=
+    Option (String × String) :=
   match action.parameters with
 
   | [] =>
@@ -1143,71 +1359,214 @@ def generalActionStructDecl?
       none
 
   | first :: second :: remaining =>
+      let structName :=
+        generalPayloadStructName
+          reactorName
+          action.name
+
       some
-        ("  struct " ++
-          generalPayloadStructName
-            reactorName
-            action.name ++
-          " { " ++
-          generalStructFields
-            (first :: second :: remaining) ++
-          " };")
+        (structName,
+          generalPayloadStructDecl
+            structName
+            (first :: second :: remaining))
 
 /--
-Every struct declaration one reactor's actions need.
+The struct declaration one port needs, paired with the name it declares, if it needs one.
+
+Dispatches on the **payload constructor** and not on arity, which is the one difference from
+`generalActionStructEntry?` and is forced rather than chosen: `renderGeneralPortPayloadType`
+prints the struct name whenever the payload is a `struct`, so a declaration has to exist
+whenever the payload is a `struct`, including at the arities the translation never builds. An
+arity test here would let a port declare a type the preamble does not declare, which is the
+single failure the derived-never-stored rule exists to prevent.
+
+One function serves both directions. An input port and an output port declare the same struct
+from the same field, so a walk per direction would be two copies of one rule.
+-/
+def generalPortStructEntry?
+    (port : LF.GeneralPortDecl) :
+    Option (String × String) :=
+  match port.payload with
+
+  | .scalar _ =>
+      none
+
+  | .struct receiver message parameters =>
+      let structName :=
+        generalPayloadStructName
+          receiver
+          message
+
+      some
+        (structName,
+          generalPayloadStructDecl
+            structName
+            parameters)
+
+/--
+Every struct entry one reactor's actions need.
 
 Explicit recursion rather than `List.filterMap`, matching this development's practice of
 depending on no list combinator whose name has churned across Lean releases.
 -/
-def generalReactorStructDecls
+def generalActionStructEntries
     (reactorName : ReactorName) :
     List LF.GeneralAction →
-    List String
+    List (String × String)
 
   | [] =>
       []
 
   | action :: remaining =>
 
-      match generalActionStructDecl?
+      match generalActionStructEntry?
         reactorName
         action
       with
 
       | none =>
-          generalReactorStructDecls
+          generalActionStructEntries
             reactorName
             remaining
 
-      | some declaration =>
-          declaration ::
-            generalReactorStructDecls
+      | some entry =>
+          entry ::
+            generalActionStructEntries
               reactorName
               remaining
 
 /--
-Every struct declaration a program needs, in reactor then action order.
+Every struct entry one list of ports needs.
+
+Same explicit recursion, and no reactor name parameter: a port's struct is named by the
+**receiving** reactor, which the payload already carries, and the reactor a port is declared
+on is the sender for one direction and the receiver for the other. Passing the declaring
+reactor's name in would therefore be passing in the wrong name half the time.
 -/
-def generalProgramStructDecls :
+def generalPortStructEntries :
+    List LF.GeneralPortDecl →
+    List (String × String)
+
+  | [] =>
+      []
+
+  | port :: remaining =>
+
+      match generalPortStructEntry?
+        port
+      with
+
+      | none =>
+          generalPortStructEntries
+            remaining
+
+      | some entry =>
+          entry ::
+            generalPortStructEntries
+              remaining
+
+/--
+Every struct entry one reactor needs: its actions, then its inputs, then its outputs.
+
+Actions first keeps every committed fixture's preamble byte-identical, since no fixture that
+exists today has a struct-typed port and so the port walks contribute nothing to them. Inputs
+before outputs is the order `renderGeneralPortDecls` prints in, so that the preamble and the
+port block of one reactor tell the same story in the same sequence.
+-/
+def generalReactorStructEntries
+    (reactor : LF.GeneralReactor) :
+    List (String × String) :=
+  generalActionStructEntries
+      reactor.name
+      reactor.logicalActions ++
+    generalPortStructEntries
+        reactor.inputPorts ++
+      generalPortStructEntries
+        reactor.outputPorts
+
+/--
+Every struct entry a program needs, in reactor order, with duplicates still present.
+-/
+def generalProgramStructEntries :
     List LF.GeneralReactor →
-    List String
+    List (String × String)
 
   | [] =>
       []
 
   | reactor :: remaining =>
-      generalReactorStructDecls
-        reactor.name
-        reactor.logicalActions ++
-        generalProgramStructDecls
+      generalReactorStructEntries
+        reactor ++
+        generalProgramStructEntries
           remaining
+
+/--
+Drop every entry whose struct name has already been declared, keeping the first.
+
+The deduplication is **by name**, not by rendered declaration, and the difference is
+load-bearing in both directions.
+
+Identical declarations must collapse. A message server that is both self-sent and externally
+received is named by one logical action and by two or more ports, and `lfc` compiles a
+`public preamble` containing one `struct Collector_report_Args`, not three copies of it.
+Deduplicating on the rendered string would handle this case too, and only this case.
+
+Declarations that share a name and differ must also collapse, because C++ rejects a file that
+declares one struct twice with different fields, so emitting both would trade a wrong preamble
+for no build at all. Keeping the first is the only behaviour here that leaves a *legal* file.
+
+That second half has a cost worth writing down rather than leaving for a reader to find: when
+two declarations share a name and differ in their fields, this silently keeps the first, and
+nothing in this printer notices. It cannot arise from the translation, where the name is a
+function of the receiving reactor and the message while the fields are a function of that same
+message server's formals, and DTR well-formedness makes message-server names unique within a
+class. It can arise from a hand-built `LF.GeneralProgram`, and no LF-side predicate rules it
+out: `connectionWellFormed` compares the two ends of one *connection*, which is not the same
+as comparing two declarations of one struct name across a whole program. That gap is finding
+**F41**, and the reason it is not closed here is that a printer is the wrong layer to discover
+it in — a well-formedness clause quantifying over every declaration of a name is the right one.
+-/
+def generalDedupStructDecls :
+    List String →
+    List (String × String) →
+    List String
+
+  | _, [] =>
+      []
+
+  | declared, (structName, declaration) :: remaining =>
+      if declared.contains structName then
+        generalDedupStructDecls
+          declared
+          remaining
+      else
+        declaration ::
+          generalDedupStructDecls
+            (structName :: declared)
+            remaining
+
+/--
+Every struct declaration a program needs, in reactor then action then port order, each
+declared exactly once.
+-/
+def generalProgramStructDecls
+    (reactors : List LF.GeneralReactor) :
+    List String :=
+  generalDedupStructDecls
+    []
+    (generalProgramStructEntries
+      reactors)
 
 /--
 Render the program-level preamble, or nothing at all when no struct is needed.
 
 **Derived from the reactors, never stored.** This follows the rule `generalEffectNames`
-states above: a stored struct list could declare a struct no action uses, or omit one an
-action needs, and both are printable. Derived, neither is expressible.
+states above: a stored struct list could declare a struct nothing uses, or omit one an
+action or a port needs, and both are printable. Derived, neither is expressible. Stage E is
+where that stops being a matter of taste — a struct is now named by an action and by ports on
+two *different* reactors, so a stored list would have to be kept in agreement with three
+declarations at once, and the failure would be a program that names a type its own preamble
+does not declare.
 
 The empty case emits the empty string, so a program with no multi-value payload — which
 includes every existing fixture and the byte-pinned base program of the `lfc` gate — gets no

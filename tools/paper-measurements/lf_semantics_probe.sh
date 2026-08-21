@@ -628,6 +628,13 @@ LF
 # target and must say so in those words. The reaction body deliberately does
 # not mention `x`, so only the DECLARATION is under test.
 #
+# 11b ANSWERED, and the two sentences above are kept as the question that was
+# asked rather than rewritten into the answer. lfc ACCEPTS at the validator and
+# the generated C++ then fails to compile, so both branches fire at different
+# layers; stage E acts on it in docs/STAGE_E_DESIGN.md section 9. The `:81`
+# citation above is also stale -- that docstring was rewritten in stage E to
+# carry this result, and it moved down the file when it grew.
+#
 # 11c pays a debt. The named-argument and parameter-default forms were measured
 # ad hoc in stage D and only prose recorded it; a fresh clone could not re-run
 # it. Cross-reactor print order has no guarantee in the Cpp target, so the

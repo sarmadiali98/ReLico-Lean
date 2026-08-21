@@ -32,19 +32,40 @@ set -euo pipefail
 # same program the assertions pin, and nothing else -- so this gate cannot pass
 # against a hand-transcribed variant that drifted from what the printer does.
 #
-# TWO programs are emitted, compiled and run, and the second one is what stage D
-# added. `emit-program` prints a hand-built LF program and so asks only whether
-# this printer's output is legal LF. `emit-widened` prints the translation of a
-# Timed Rebeca model -- `compileGeneralModel` then the printer -- and so asks the
-# question stage D exists for: does what the translator produces compile and run.
-# A gate that ran only the first would stay green against a translation that
-# emitted nothing at all, because no hand-built program passes through it.
+# THREE programs are emitted, compiled and run. `emit-program` prints a hand-built
+# LF program and so asks only whether this printer's output is legal LF.
+# `emit-widened` prints the translation of a single-actor Timed Rebeca model --
+# `compileGeneralModel` then the printer -- and so asks the question stage D exists
+# for: does what the translator produces compile and run. A gate that ran only the
+# first would stay green against a translation that emitted nothing at all, because
+# no hand-built program passes through it.
+#
+# `emit-routed` is stage E's, and it is the first program here with more than one
+# reactor. Ports, connections and instances of two classes cannot appear in the
+# other two: the widened model's every send is aimed at itself, so its `main
+# reactor` body is nothing but instances. Three of its constructs reach a real
+# compiler here for the first time in this repository, each having previously been
+# argued for rather than measured:
+#
+#   * a connection with a NONZERO `after` delay. Every probe under
+#     tools/paper-measurements/ writes `after 0 msec`; the routed program writes
+#     `after 3 msec` and `after 7 msec` as well.
+#   * a reactor with NO startup reaction, which is what an empty Rebeca constructor
+#     body translates to. All 24 committed expected/lf-source/*.lf files have one
+#     with a non-empty body.
+#   * an instance whose input ports NO connection reaches. Input ports are a
+#     projection of the receiving class rather than of the instance, because
+#     lfc 0.11.0 rejects many-to-one connections, so a second instance of a
+#     receiving class declares ports nothing feeds. §7.2 of the stage E design
+#     needs that to be legal.
 #
 # The widened model terminates on its own: its constructor self-sends at
 # `after(0)`, that message server self-sends at `after(5)`, and the last one sends
-# nothing, so the event queue empties and the binary exits. That is a requirement
-# of this gate rather than a property of the model -- a model that kept scheduling
-# would hang here instead of failing.
+# nothing, so the event queue empties and the binary exits. The routed model
+# terminates for the same kind of reason: its sender self-sends once from startup
+# and the class it then sends to sends nothing. That is a requirement of this gate
+# rather than a property of the models -- a model that kept scheduling would hang
+# here instead of failing.
 
 REPO="$(
   cd "$(dirname "$0")/.." &&
@@ -62,11 +83,12 @@ PRINTER_TEST_MAIN="$REPO/frontend/lean-bridge/GeneralLfPrinterTestMain.lean"
 # anonymous -- `main reactor {`, with no name of its own. So each name below also
 # names the binary that gets run.
 #
-# Two names, and each program gets its own work directory. Sharing one would let a
-# binary left by the first run satisfy the second even if its own compile step had
+# Three names, and each program gets its own work directory. Sharing one would let a
+# binary left by an earlier run satisfy a later one even if its own compile step had
 # quietly produced nothing.
 BASE_PROGRAM_NAME="GeneralPrinterProgram"
 WIDENED_PROGRAM_NAME="GeneralTranslatedProgram"
+ROUTED_PROGRAM_NAME="GeneralRoutedProgram"
 
 WORK="${TMPDIR:-/tmp}/relico_general_lf_target"
 
@@ -97,10 +119,10 @@ lake build
 # One emit-compile-run cycle, parameterised by the runner's selector and the
 # program name.
 #
-# A function rather than the block it replaces, because stage D needs the cycle
-# twice and the two copies would be identical except for two words. Written for
-# bash 3.2, which is what /bin/bash is on this machine: positional parameters and
-# `local`, no name references and no associative arrays.
+# A function rather than the block it replaces, because stage D needed the cycle
+# twice and stage E needs it three times; the copies would be identical except for
+# two words. Written for bash 3.2, which is what /bin/bash is on this machine:
+# positional parameters and `local`, no name references and no associative arrays.
 check_program() {
   local selector="$1"
   local program_name="$2"
@@ -213,6 +235,15 @@ check_program \
   emit-widened \
   "$WIDENED_PROGRAM_NAME" \
   "the translated program from the widened Rebeca model"
+
+# Last, because it is the most expensive failure to read: two reactors, three
+# instances and three connections, so an lfc complaint here has the most places to
+# have come from. By the time it runs, the printer and the single-actor translation
+# have both already been cleared.
+check_program \
+  emit-routed \
+  "$ROUTED_PROGRAM_NAME" \
+  "the translated program from the routed two-class Rebeca model"
 
 echo
 echo "GENERAL_LF_TARGET_OK"

@@ -135,8 +135,9 @@ private def inPortDecl :
   name :=
     inPort
 
-  declaredType :=
-    .int
+  payload :=
+    .scalar
+      .int
 
 /--
 An integer output port.
@@ -147,8 +148,9 @@ private def outPortDecl :
   name :=
     outPort
 
-  declaredType :=
-    .int
+  payload :=
+    .scalar
+      .int
 
 /--
 The sender's own input port, used by the unconnected-port and self-connection cases.
@@ -159,17 +161,25 @@ private def backPortDecl :
   name :=
     backPort
 
-  declaredType :=
-    .int
+  payload :=
+    .scalar
+      .int
 
 /--
 A boolean input port.
 
-Declared for one assertion and used in no program. Stage D emits no ports at all,
-so a boolean port cannot reach the `lfc` gate through the translation, and the
-alternative to asserting it on the port renderer directly is not asserting it —
-which would leave `renderGeneralType`'s boolean arm exercised in two of its three
-positions and claimed in the third.
+Kept, and its reason for existing has changed. Stage D emitted no ports at all, so a
+boolean port could not reach the `lfc` gate through the translation and asserting it on
+the renderer directly was the only option. Stage E's routed model *does* carry one — a
+message server of arity one taking a `boolean` compiles to a `.scalar .boolean` payload —
+so the claim now holds at two layers.
+
+Both are worth keeping because they fail for different reasons. This one fails if
+`renderGeneralType`'s boolean arm is wrong in the port position. The routed model's fails
+if the *translation* picks the wrong payload arm, which it can do while the renderer is
+perfect. Deleting this one on the grounds that the translation covers it would leave the
+renderer's boolean port position asserted only through a path that has to be right about
+arity, receiving class and payload selection first.
 -/
 private def flagInPortDecl :
     LF.GeneralPortDecl where
@@ -177,8 +187,9 @@ private def flagInPortDecl :
   name :=
     ⟨"flagIn"⟩
 
-  declaredType :=
-    .boolean
+  payload :=
+    .scalar
+      .boolean
 
 /--
 A port declaration colliding with the receiver's state variable.
@@ -193,8 +204,9 @@ private def collidingPortDecl :
   name :=
     ⟨"y"⟩
 
-  declaredType :=
-    .int
+  payload :=
+    .scalar
+      .int
 
 /--
 A reactor parameter colliding with the receiver's state variable.
@@ -410,7 +422,7 @@ private def senderStartupReaction :
     [
       .setPort
         outPort
-        (.intLiteral 1)
+        [.intLiteral 1]
     ]
 
 /--
@@ -531,8 +543,16 @@ private def receiveReaction :
 /--
 A port-triggered reaction declaring two parameters.
 
-The one refusal left in the parameter reader, and unreachable in stage D: a
-`GeneralPortDecl` carries a single declared type and so delivers one value.
+Stage D's one remaining refusal in the parameter reader, and stage E's newest total arm.
+The refusal rested on a sentence with two halves — a `GeneralPortDecl` carries a single
+declared type and so delivers one value, and unlike a logical action a port has no
+parameter list to destructure — and stage E falsified the first and exposed the second as
+never having been the obstacle. A port now carries a payload, and the parameter list being
+destructured was always the *reaction's*, which a port-triggered reaction gets from its
+message server exactly as an action-triggered one does.
+
+Kept under its old name because the shape it names has not changed, only the verdict on it.
+The assertion that consumes it is the evidence for F30's retraction.
 -/
 private def twoParameterPortReaction :
     LF.GeneralReaction where
@@ -597,7 +617,7 @@ private def setInputPortReaction :
     [
       .setPort
         inPort
-        (.parameterVar payloadParameter)
+        [.parameterVar payloadParameter]
     ]
 
 /--
@@ -1465,14 +1485,93 @@ private def widenedModel :
     ]
 
 /--
-The same model with one message server replaced by an external send.
+The same model with one message server's body replaced by an external send that
+routing refuses.
 
 Written as a structure update so that the only difference from `widenedModel` is
 the construct under test. A second hand-written class could differ in some other
 way and the refusal would still be reported, which would make this assertion pass
 for the wrong reason.
+
+The send targets `settle`, and `settle` is where it is written. That is not a
+self-send: the target is `.knownRebec peer`, so it leaves the reactor and needs a
+port, and the coincidence of names is because `settle` is the only message server
+`configuredClass` declares that takes no parameters — which is the whole point.
+Steps 1 to 3 of `generalOutputPortEntryFor` all succeed here, and step 4 refuses,
+so this model reaches stage E's one refusal that a *well-formed* model can reach
+rather than one of routing's defensive arms.
+
+Both instances still carry `bindings := []` while the class now declares `peer`.
+That is deliberate and it is also a limit on what this model witnesses: it is a
+refusal witness only. Were the arity-zero arm ever to start accepting, this model
+would not begin to translate — it would fail one layer later in
+`generalRouteFor`, on the missing binding, and an assertion that merely demanded
+*some* refusal would not notice the difference. Hence the exact text.
 -/
 private def externalSendModel :
+    DTR.GeneralModel where
+
+  classes :=
+    [
+      {
+        configuredClass with
+
+        knownRebecs :=
+          [
+            {
+              name :=
+                peerKnownRebecName
+
+              className :=
+                configuredClassName
+            }
+          ]
+
+        messageServers :=
+          [
+            {
+              settleMessageServer with
+
+              body :=
+                [
+                  .send
+                    (.knownRebec peerKnownRebecName)
+                    settleMessageName
+                    []
+                    ⟨0⟩
+                ]
+            }
+          ]
+      }
+    ]
+
+  instances :=
+    [
+      configuredOnActor,
+      configuredOffActor
+    ]
+
+/--
+The same shape again, with the send aimed at a message server no class declares.
+
+`ping` is not a message server of `configuredClass`, so this one stops at step 3
+of `generalOutputPortEntryFor` instead of step 4. Kept as a second model rather
+than folded into `externalSendModel` because the two refusals are answers to
+different questions. Stage E's boundary is *"a port with no payload has no
+measured spelling"*, and that is a statement about the target language. Step 3's
+refusal is *"you sent a message that does not exist"*, and that is a statement
+about a hand-built model — a document could never carry it, because
+`sendsResolveToMessageServers` rejects it at the frontend
+(`Relico/DTR/GeneralWellFormed.lean`), which is exactly why the only place it can
+be exercised is here.
+
+`GeneralRouting.lean:664–673` claims steps 1 to 3 are unreachable from a
+well-formed model and names the conjunct closing each. This asserts that the arm
+so justified still produces the text it says it does. An unreachable arm whose
+message has rotted is worse than no message: it is read only by whoever has
+already lost an afternoon.
+-/
+private def undeclaredServerSendModel :
     DTR.GeneralModel where
 
   classes :=
@@ -1620,17 +1719,70 @@ private def collisionModel :
     ]
 
 /--
-The refusal a known-rebec send earns in stage D.
+The refusal a send to a parameterless message server earns in stage E.
 
-Asserted on its exact text, not merely on being an error. The message names the
-stage that will implement the construct, and a diagnostic that decays into a bare
-`.error` later would still be an error and would no longer tell a reader where the
-work went.
+Asserted on its exact text, not merely on being an error. Stage D's version of this
+def pinned the refusal of *every* external send and said so; stage E deletes that
+refusal, and what is left is narrower and more interesting. The message names a
+missing measurement rather than a defect in the model, because the model is fine:
+`msgsrv settle() {}` is ordinary Rebeca and stage D translated it into a logical
+action without complaint. It is the *port* that has no measured spelling, and
+§11.2 records the probe that would remove this refusal as owed.
+
+A diagnostic that decays into a bare `.error` later would still be an error, and
+would no longer tell a reader that the obstacle is a measurement nobody has taken.
 -/
-private def externalSendDiagnostic :
+private def parameterlessPortDiagnostic :
     String :=
-  "send to known rebec `peer`.`ping` is an external send; " ++
-    "stage D translates self-sends only, and external sends are stage E"
+  "message server `Configured`.`settle` takes no parameters, " ++
+    "so the port that would carry it has no payload; " ++
+    "whether the target accepts a port with no value type is unmeasured, " ++
+    "so this translation refuses rather than guesses"
+
+/--
+The refusal a send to an undeclared message server earns.
+
+Step 3 of `generalOutputPortEntryFor`, one of the three arms that file argues a
+well-formed model never reaches. The text carries the send's address, and the
+address is rendered by `renderGeneralSendSite`, so the two halves of this literal
+that look like prose — *"message server `settle`"* and *"statement at index 0
+counting from zero"* — are the two halves of that function's output and will move
+if it moves.
+
+Both class names in the text are `Configured`, and that is not a copy-paste slip:
+`peer` is declared to have the sending class's own class, so the class that sends
+and the class that fails to declare `ping` are the same one. A reader who sees one
+name twice should be able to check that against the model rather than against this
+comment, which is why `undeclaredServerSendModel` binds `peer` to
+`configuredClassName`.
+-/
+private def undeclaredMessageServerDiagnostic :
+    String :=
+  "class `Configured` sends `ping` to `peer` at message server `settle`, " ++
+    "statement at index 0 counting from zero, " ++
+    "but class `Configured` declares no message server of that name"
+
+/--
+The refusal a send site with no resolved port earns.
+
+The only failure `compileGeneralStmt` can still produce, and by design it is a
+statement about this translator rather than about any model: `outputPortEnvOf`
+walks the very sites `externalSendsOf` produces, so a site missing from its own
+class's environment is a defect. #47 will discharge the arm by induction, at which
+point this assertion becomes the last executable trace of a diagnostic no run can
+reach.
+
+That is a reason to keep it, not to drop it. It is pinned here by handing
+`compileGeneralStmt` an empty environment, which no caller inside the translator
+ever does and which is the whole trick: the arm is unreachable *through
+`compileGeneralModel`*, not unreachable through its own interface.
+-/
+private def unresolvedSendSiteDiagnostic :
+    String :=
+  "no output port was resolved for the send `peer`.`ping` " ++
+    "in message server `settle`, statement at index 0 counting from zero; " ++
+    "every external send site is resolved by outputPortEnvOf, " ++
+    "so this is a defect in the translator and not in the model"
 
 /--
 The exact text the translation of `widenedModel` must print.
@@ -1765,6 +1917,703 @@ private def widenedInstanceWithWrongTypes :
         .int 7
       ]
   }
+
+/-!
+## The routed family
+
+Stage E's own model, and the first one in this file whose translation has ports,
+connections and two reactors. `widenedModel` above is one class with two instances and
+every send aimed at itself, so it exercises the whole of stages C and D and none of
+stage E: no known rebec resolves, `routesOf` returns the empty list, and the printed
+`main reactor` body is nothing but instances.
+
+Two classes, three instances, three send sites, three connections. Every one of those
+numbers is load-bearing, and each is a claim §7 of the stage E design argues for:
+
+**Two sends to one message server** of one receiver, so `generalSiteSuffixFor` has to
+suffix both — `reportToHub1` and `reportToHub2` — while a third send to a *different*
+server of the same receiver stays bare. That is §4.2's table; §4.2's prose says
+something else, and this model is where the disagreement becomes a byte.
+
+**A leading assignment in the sending body**, so the three sends sit at statement
+indices 1, 2 and 3 rather than 0, 1 and 2. `SendSite.index` is a statement position
+(§7.1) and not a send ordinal (§4.1). Without a non-send statement in front of them the
+two readings compute the same list and nothing here could say which one is implemented.
+
+**A receiver whose constructor body is empty**, so its reactor has no startup reaction at
+all. All **24** committed `expected/lf-source/*.lf` files have a startup reaction with a
+non-empty body, so `renderGeneralStartupReaction`'s empty arm has never reached a real
+`lfc` — stage C's design says so at `docs/STAGE_C_DESIGN.md:750` and leaves it owed.
+
+**A second instance of the receiving class that nothing sends to**, so its three input
+ports are declared and unconnected. Input ports are a projection of the *class*
+(`generalInputPortsOf`) rather than of the instance, because `lfc 0.11.0` rejects
+many-to-one connections; the price of that asymmetry is exactly this instance, and §7.2
+rests on unconnected input ports being legal. The probe measured that on hand-written
+LF. This is what measures it on generated LF.
+
+**Payload arities one and two**, so both `setPort` arms and both parameter-read arms run:
+an aggregate `Args{...}` beside a bare `false`, a destructured struct beside a bare
+`*get()`.
+
+The model terminates, and that is a requirement rather than a remark.
+`frontend/check-general-lf-target.sh` *runs* the compiled binary, so a model whose
+reactions re-armed themselves would hang the gate rather than fail it. `poll` fires once
+from startup and schedules nothing further; the sends it makes reach a class that sends
+nothing.
+-/
+
+private def sensorClassName :
+    ClassName :=
+  ⟨"Sensor"⟩
+
+private def gatewayClassName :
+    ClassName :=
+  ⟨"Gateway"⟩
+
+private def hubKnownRebecName :
+    KnownRebecName :=
+  ⟨"hub"⟩
+
+private def readingStateName :
+    VarName :=
+  ⟨"reading"⟩
+
+private def lastLevelStateName :
+    VarName :=
+  ⟨"lastLevel"⟩
+
+private def alarmStateName :
+    VarName :=
+  ⟨"alarm"⟩
+
+private def startParameter :
+    VarName :=
+  ⟨"start"⟩
+
+private def levelParameter :
+    VarName :=
+  ⟨"level"⟩
+
+private def urgentParameter :
+    VarName :=
+  ⟨"urgent"⟩
+
+private def fullParameter :
+    VarName :=
+  ⟨"full"⟩
+
+private def pollMessageName :
+    MsgName :=
+  ⟨"poll"⟩
+
+private def reportMessageName :
+    MsgName :=
+  ⟨"report"⟩
+
+private def resetMessageName :
+    MsgName :=
+  ⟨"reset"⟩
+
+private def probeInstanceName :
+    ActorName :=
+  ⟨"probe"⟩
+
+private def stationInstanceName :
+    ActorName :=
+  ⟨"station"⟩
+
+private def spareInstanceName :
+    ActorName :=
+  ⟨"spare"⟩
+
+/--
+The sensor's constructor: it seeds its one state variable from its one formal and
+self-sends `poll`.
+
+The self-send is what makes the model run at all. `poll` is where every external send
+lives, and a reaction triggered by a logical action nothing schedules is dead code that
+`lfc` compiles and never executes — which would leave the three `set()` calls asserted
+in this file and unexecuted by the target gate.
+-/
+private def sensorConstructor :
+    DTR.GeneralConstructor where
+
+  parameters :=
+    [
+      {
+        name :=
+          startParameter
+
+        declaredType :=
+          .int
+      }
+    ]
+
+  body :=
+    [
+      .assign
+        readingStateName
+        (.parameterVar startParameter),
+
+      .send
+        .selfTarget
+        pollMessageName
+        []
+        ⟨0⟩
+    ]
+
+/--
+The one message server that sends: an assignment and then three external sends.
+
+The assignment is first on purpose — see the family note above on §7.1 against §4.1.
+It also reads and writes the state variable the next send's payload reads, so the
+emitted order of the two statements is observable in the generated C++ rather than only
+in the `.lf` file.
+
+The three delays are all different and two of them are nonzero. No probe under
+`tools/paper-measurements/` has ever compiled a *connection* with a nonzero `after` —
+`after 0 msec` is measured many times over and `after 3 msec` is not measured at all —
+so `after 3 msec` and `after 7 msec` are first established by the target gate this
+model feeds. That is the right place for them: they are a claim about `lfc`, and a
+probe asserting them would be a second, weaker copy of a gate that compiles and runs
+the real thing.
+-/
+private def pollMessageServer :
+    DTR.GeneralMessageServer where
+
+  name :=
+    pollMessageName
+
+  parameters :=
+    []
+
+  body :=
+    [
+      .assign
+        readingStateName
+        (.binary
+          .add
+          (.stateVar readingStateName)
+          (.intLiteral 1)),
+
+      .send
+        (.knownRebec hubKnownRebecName)
+        reportMessageName
+        [
+          .stateVar readingStateName,
+          .boolLiteral true
+        ]
+        ⟨0⟩,
+
+      .send
+        (.knownRebec hubKnownRebecName)
+        reportMessageName
+        [
+          .binary
+            .mul
+            (.stateVar readingStateName)
+            (.intLiteral 2),
+          .boolLiteral false
+        ]
+        ⟨3⟩,
+
+      .send
+        (.knownRebec hubKnownRebecName)
+        resetMessageName
+        [.boolLiteral false]
+        ⟨7⟩
+    ]
+
+/--
+The sending class. One known rebec, one state variable, one message server.
+-/
+private def sensorClass :
+    DTR.GeneralReactiveClass where
+
+  name :=
+    sensorClassName
+
+  knownRebecs :=
+    [
+      {
+        name :=
+          hubKnownRebecName
+
+        className :=
+          gatewayClassName
+      }
+    ]
+
+  stateVariables :=
+    [
+      {
+        name :=
+          readingStateName
+
+        declaredType :=
+          .int
+      }
+    ]
+
+  constructor :=
+    sensorConstructor
+
+  messageServers :=
+    [pollMessageServer]
+
+/--
+The receiver's two-parameter message server, and the reason a struct payload exists in
+this model at all.
+
+Its two formals have different types, so the emitted struct is mixed and the two
+destructuring reads are of different types too. Its body assigns both formals to state
+variables, which is what stops the reactor's generated C++ from having two unread
+locals — `-Wunused-variable` is not fatal, but the target gate greps for
+`-Wunused-private-field` and a body that read nothing would be a poor witness for the
+parameter-read arms.
+-/
+private def reportMessageServer :
+    DTR.GeneralMessageServer where
+
+  name :=
+    reportMessageName
+
+  parameters :=
+    [
+      {
+        name :=
+          levelParameter
+
+        declaredType :=
+          .int
+      },
+
+      {
+        name :=
+          urgentParameter
+
+        declaredType :=
+          .boolean
+      }
+    ]
+
+  body :=
+    [
+      .assign
+        lastLevelStateName
+        (.parameterVar levelParameter),
+
+      .assign
+        alarmStateName
+        (.parameterVar urgentParameter)
+    ]
+
+/--
+The receiver's one-parameter message server: the arity-one, `boolean` case.
+
+Arity one is what makes `generalPortPayloadFor` emit `.scalar` rather than a
+one-field struct, so this server is the whole of the difference between
+`resetToHub: bool` and `resetToHub: Gateway_reset_action_Args`. It is also the second
+layer at which the boolean port type is now pinned; the note on `flagInPortDecl` above
+says why both are kept.
+-/
+private def resetMessageServer :
+    DTR.GeneralMessageServer where
+
+  name :=
+    resetMessageName
+
+  parameters :=
+    [
+      {
+        name :=
+          fullParameter
+
+        declaredType :=
+          .boolean
+      }
+    ]
+
+  body :=
+    [
+      .assign
+        alarmStateName
+        (.parameterVar fullParameter)
+    ]
+
+/--
+The receiving class, whose constructor is empty.
+
+The empty constructor is written as an inline literal rather than as a named def
+because there is nothing in it to name. It is also the one field of this class that an
+edit could change without breaking anything visible, so: an empty body is what makes
+`renderGeneralStartupReaction` return `""` and `renderGeneralReactor` filter the
+reaction away, and the pinned text below has `reactor Gateway {` with no
+`reaction(startup)` under it. Giving this constructor a statement would silently
+retire that coverage.
+
+It declares no known rebecs and sends nothing. A receiver that also sent would make
+route order and reaction order harder to read off the expected text, and fan-in is
+stage F's subject, not this one's.
+-/
+private def gatewayClass :
+    DTR.GeneralReactiveClass where
+
+  name :=
+    gatewayClassName
+
+  knownRebecs :=
+    []
+
+  stateVariables :=
+    [
+      {
+        name :=
+          lastLevelStateName
+
+        declaredType :=
+          .int
+      },
+
+      {
+        name :=
+          alarmStateName
+
+        declaredType :=
+          .boolean
+      }
+    ]
+
+  constructor :=
+    {
+      parameters :=
+        []
+
+      body :=
+        []
+    }
+
+  messageServers :=
+    [
+      reportMessageServer,
+      resetMessageServer
+    ]
+
+/--
+The sending instance, and the first non-empty `bindings` store in this file.
+
+`bindings` is a `Store KnownRebecName ActorName`, so this is a list of pairs rather
+than a record. Every model above it carries `bindings := []`, which is why every model
+above it routes nothing.
+
+Its one argument is what `Sensor`'s one constructor formal is checked against, and it is
+nonzero so that `start=4` in the pinned text cannot be confused with
+`GeneralType.initialValue`'s `int` default.
+-/
+private def probeActor :
+    DTR.GeneralActorInstance where
+
+  name :=
+    probeInstanceName
+
+  className :=
+    sensorClassName
+
+  bindings :=
+    [(hubKnownRebecName, stationInstanceName)]
+
+  arguments :=
+    [.int 4]
+
+/--
+The bound receiver.
+
+No arguments, because `Gateway`'s constructor has no formals — which also means the
+reactor is printed without a parameter list, so `new Gateway()` in the pinned text is
+`instanceArgumentsMatch` holding vacuously rather than by agreement.
+-/
+private def stationActor :
+    DTR.GeneralActorInstance where
+
+  name :=
+    stationInstanceName
+
+  className :=
+    gatewayClassName
+
+  bindings :=
+    []
+
+  arguments :=
+    []
+
+/--
+A second `Gateway` nobody sends to.
+
+A structure update on `stationActor`, so the name is the only difference and the three
+unconnected input ports it declares cannot be explained by anything else. This is the
+instance §7.2's asymmetry costs: input ports come from `generalInputPortsOf className`,
+a projection of the class, so every instance of `Gateway` declares all three whether or
+not a connection reaches it.
+-/
+private def spareActor :
+    DTR.GeneralActorInstance :=
+  {
+    stationActor with
+
+    name :=
+      spareInstanceName
+  }
+
+/--
+The routed model.
+
+Class order fixes reactor order, and instance order fixes both instance order and route
+order, so this is where the expected text's ordering comes from. `routesOf` walks
+instances in declaration order and, within an instance, sites in canonical order:
+`probe` contributes all three routes, `station` and `spare` contribute none.
+-/
+private def routedModel :
+    DTR.GeneralModel where
+
+  classes :=
+    [
+      sensorClass,
+      gatewayClass
+    ]
+
+  instances :=
+    [
+      probeActor,
+      stationActor,
+      spareActor
+    ]
+
+/--
+The site suffixes routing computes for `Sensor`, as one auditable string.
+
+`"1|2|"` and not `"|2|"`. §4.2's *table* suffixes every site of a pair that has more than
+one, and §4.2's *prose* leaves the first of several bare; the table wins, because
+`reportToHub` would otherwise mean "the first of several" in one class and "the only one"
+in another, with nothing in the generated code able to tell them apart. The empty third
+entry is the other half of the rule: `reset` is sent once, so its port is unsuffixed.
+
+Computed from `numberedExternalSendsOfClass` rather than from the port names, so this
+assertion fails if the *rule* changes even when the names happen to survive.
+-/
+private def routedSiteSuffixes :
+    String :=
+  String.intercalate
+    "|"
+    ((Translation.numberedExternalSendsOfClass
+      sensorClass).map
+      (fun numbered =>
+        Translation.generalSiteSuffixFor
+          (Translation.externalSendsOfClass
+            sensorClass)
+          numbered.fst
+          numbered.snd))
+
+/--
+The statement indices of `Sensor`'s three external sends.
+
+`"1|2|3"`, because `poll`'s first statement is the assignment. §4.1 of the design reads
+the index as a send ordinal and would compute `"0|1|2"`; §7.1 reads it as a position over
+*all* statements and is what `externalSendsFromIndex` implements. The two readings are
+distinguishable only in a body that mixes sends with something else, which is why this
+model has one.
+
+The consequence is that `SendSite.index` is sparse — no site here has index 0 — and any
+future code that treats it as a dense counter over sends will disagree with this string.
+-/
+private def routedSendSiteIndices :
+    String :=
+  String.intercalate
+    "|"
+    ((Translation.externalSendsOfClass
+      sensorClass).map
+      (fun send =>
+        toString
+          send.site.index))
+
+/--
+The reaction order the *specification* function assigns, one class per group.
+
+`generalReactionNamesOf` is the function §7.3's two replacement theorems are stated
+against, and `compileGeneralMessageServerReactionGroup` is what actually builds the
+reactions. They are separate pieces of code that must agree, and the assertion below
+compares this against the reaction names of the program the translation produced.
+
+Nothing here is spelled as a literal, so a rename in `NameGeneration.lean` moves both
+sides at once and this assertion stays silent — correctly, because it is about *order*.
+The names themselves are pinned once, in the program text.
+
+The routes come from `routesOf`, and a failure to route surfaces as a refusal rather than
+as an empty list: an empty list would drop every port reaction from the specified order
+and the comparison would fail loudly anyway, but a refusal names the reason.
+-/
+private def routedSpecifiedReactionOrder :
+    Except String String := do
+
+  let routes ←
+    Translation.routesOf
+      routedModel
+
+  pure
+    (String.intercalate
+      "|"
+      (routedModel.classes.map
+        (fun reactiveClass =>
+          String.intercalate
+            ","
+            ((Translation.generalReactionNamesOf
+              routes
+              reactiveClass.name
+              reactiveClass.messageServers).map
+              (fun reactionName =>
+                reactionName.value)))))
+
+/--
+The exact text the translation of `routedModel` must print.
+
+Read against the widened program above, everything new in stage E is on this page: a
+preamble struct reached from a *port* rather than from an action, an output-port block, an
+input-port block, a `set()` whose argument is an aggregate initialisation, a `set()` whose
+argument is a bare literal, five reactions in one reactor, a reactor with no startup
+reaction, three instances of two reactors, and a `main reactor` body with connections in
+it.
+
+Six lines repay a second reading.
+
+`  struct Gateway_report_action_Args { int level; bool urgent; };` appears **once**,
+though five declarations claim it: `Gateway`'s own `report_action` and both of `Sensor`'s
+`reportTo…` output ports and both of `Gateway`'s matching input ports. They agree because
+`generalPortPayloadFor` names the struct after the *receiving* reactor and the receiving
+action, which is the same pair `renderGeneralActionDecl` uses. The dedup that collapses
+them keeps the first and does not compare the rest — finding F41 — and here the survivor
+comes from `Sensor`'s first output port rather than from `Gateway`'s action.
+
+`  reaction(poll_action) -> reportToHub1, reportToHub2, resetToHub {=` is the effect
+clause derived from the body, so a send this file forgot could not be smuggled into the
+clause and a clause this printer forgot could not be smuggled past `lfc`.
+
+`    reportToHub2.set(Gateway_report_action_Args{(reading * 2), false});` is the
+arity-two `setPort` arm: full parenthesization inside an aggregate initialiser, and a
+mixed struct built from an expression and a literal.
+
+`    resetToHub.set(false);` is the arity-one arm — no struct name, because the payload
+is a `.scalar` and not a one-field struct.
+
+`reactor Gateway {` carries no `reaction(startup)`, because its constructor body is
+empty. That is `renderGeneralStartupReaction`'s empty arm, reaching a real `lfc` for the
+first time.
+
+`  spare = new Gateway()` declares three input ports that no connection reaches, which
+§7.2 needs to be legal and which the probe measured only on hand-written LF.
+-/
+private def expectedRoutedProgramText :
+    String :=
+  String.intercalate
+    "\n"
+    [
+      "target Cpp",
+      "",
+      "public preamble {=",
+      "  struct Gateway_report_action_Args { int level; bool urgent; };",
+      "=}",
+      "",
+      "reactor Sensor(start: int = 0) {",
+      "  output reportToHub1: Gateway_report_action_Args",
+      "  output reportToHub2: Gateway_report_action_Args",
+      "  output resetToHub: bool",
+      "  state reading: int = 0",
+      "  logical action poll_action: void",
+      "",
+      "  reaction(startup) -> poll_action {=",
+      "    reading = start;",
+      "    poll_action.schedule(0ms);",
+      "  =}",
+      "",
+      "  reaction(poll_action) -> reportToHub1, reportToHub2, resetToHub {=",
+      "    reading = (reading + 1);",
+      "    reportToHub1.set(Gateway_report_action_Args{reading, true});",
+      "    reportToHub2.set(Gateway_report_action_Args{(reading * 2), false});",
+      "    resetToHub.set(false);",
+      "  =}",
+      "}",
+      "",
+      "reactor Gateway {",
+      "  input reportToHub1FromProbe: Gateway_report_action_Args",
+      "  input reportToHub2FromProbe: Gateway_report_action_Args",
+      "  input resetToHubFromProbe: bool",
+      "  state lastLevel: int = 0",
+      "  state alarm: bool = false",
+      "  logical action report_action: Gateway_report_action_Args",
+      "  logical action reset_action: bool",
+      "",
+      "  reaction(report_action) {=",
+      "    auto report_action_payload = *report_action.get();",
+      "    auto level = report_action_payload.level;",
+      "    auto urgent = report_action_payload.urgent;",
+      "    lastLevel = level;",
+      "    alarm = urgent;",
+      "  =}",
+      "",
+      "  reaction(reportToHub1FromProbe) {=",
+      "    auto reportToHub1FromProbe_payload = *reportToHub1FromProbe.get();",
+      "    auto level = reportToHub1FromProbe_payload.level;",
+      "    auto urgent = reportToHub1FromProbe_payload.urgent;",
+      "    lastLevel = level;",
+      "    alarm = urgent;",
+      "  =}",
+      "",
+      "  reaction(reportToHub2FromProbe) {=",
+      "    auto reportToHub2FromProbe_payload = *reportToHub2FromProbe.get();",
+      "    auto level = reportToHub2FromProbe_payload.level;",
+      "    auto urgent = reportToHub2FromProbe_payload.urgent;",
+      "    lastLevel = level;",
+      "    alarm = urgent;",
+      "  =}",
+      "",
+      "  reaction(reset_action) {=",
+      "    auto full = *reset_action.get();",
+      "    alarm = full;",
+      "  =}",
+      "",
+      "  reaction(resetToHubFromProbe) {=",
+      "    auto full = *resetToHubFromProbe.get();",
+      "    alarm = full;",
+      "  =}",
+      "}",
+      "",
+      "main reactor {",
+      "  probe = new Sensor(start=4)",
+      "  station = new Gateway()",
+      "  spare = new Gateway()",
+      "  probe.reportToHub1 -> station.reportToHub1FromProbe after 0 msec",
+      "  probe.reportToHub2 -> station.reportToHub2FromProbe after 3 msec",
+      "  probe.resetToHub -> station.resetToHubFromProbe after 7 msec",
+      "}"
+    ] ++
+    "\n"
+
+/--
+Translate the routed model and print it, in one `Except`.
+
+Shared between the emitter and the assertion, for the reason `widenedProgramText` is:
+the bytes `lfc` compiles have to be the bytes an assertion pinned, and two paths that
+each recompute the program would be two chances to compile something unchecked.
+-/
+private def routedProgramText :
+    Except String String := do
+
+  let program ←
+    Translation.compileGeneralModel
+      routedModel
+
+  LF.CppPrinter.renderGeneralProgram
+    program
 
 /-!
 ## Assertions
@@ -1952,10 +2801,11 @@ private def printerAssertions :
       (LF.CppPrinter.generalProgramStructDecls
         baseProgram.reactors))
 
-  -- Derived from the reactors, never stored, so a struct the actions do not need is
-  -- not expressible. The declaration is reached through `generalProgramStructDecls`
-  -- rather than asserted on `generalActionStructDecl?` directly, which keeps the
-  -- assertion on the composition the program actually calls.
+  -- Derived from the reactors, never stored, so a struct nothing needs is not
+  -- expressible. The declaration is reached through `generalProgramStructDecls`
+  -- rather than asserted on `generalActionStructEntry?` directly, which keeps the
+  -- assertion on the composition the program actually calls -- and as of stage E that
+  -- composition includes the deduplication, which asserting on the entry would skip.
   expectString
     "PREAMBLE_DECLARES_ONE_STRUCT"
     ("public preamble {=\n" ++
@@ -1988,7 +2838,7 @@ private def printerAssertions :
       [
         .setPort
           outPort
-          (.intLiteral 0),
+          [.intLiteral 0],
 
         .schedule
           deliverAction
@@ -2003,28 +2853,30 @@ private def printerAssertions :
       [
         .setPort
           outPort
-          (.intLiteral 0),
+          [.intLiteral 0],
 
         .setPort
           outPort
-          (.intLiteral 1)
+          [.intLiteral 1]
       ])
 
-  expectString
+  expectRendered
     "VOID_PAYLOAD_SCHEDULE"
     "deliver.schedule(0ms);"
     (LF.CppPrinter.renderGeneralStmt
       receiverReactorName
+      receiverReactor.outputPorts
       (.schedule
         deliverAction
         []
         ⟨0⟩))
 
-  expectString
+  expectRendered
     "SINGLE_VALUE_PAYLOAD_SCHEDULE"
     "deliver.schedule(1, 0ms);"
     (LF.CppPrinter.renderGeneralStmt
       receiverReactorName
+      receiverReactor.outputPorts
       (.schedule
         deliverAction
         [.intLiteral 1]
@@ -2034,11 +2886,12 @@ private def printerAssertions :
   -- by the action declaration above that, all three through
   -- `generalPayloadStructName`. Three assertions on one function, which is why the
   -- reactor name has to be threaded this far.
-  expectString
+  expectRendered
     "MULTI_VALUE_PAYLOAD_SCHEDULE"
     "deliver.schedule(Receiver_deliver_Args{1, true}, 0ms);"
     (LF.CppPrinter.renderGeneralStmt
       receiverReactorName
+      receiverReactor.outputPorts
       (.schedule
         deliverAction
         [
@@ -2071,15 +2924,17 @@ private def printerAssertions :
     (LF.CppPrinter.renderGeneralParameterRead
       parameterisedStartupReaction)
 
-  -- The one refusal left in the parameter reader, and a recorded disagreement with
-  -- `docs/STAGE_D_DESIGN.md` §6, which said all three go. A `GeneralPortDecl` carries
-  -- one declared type and so delivers one value: there is no struct to name and no
-  -- second value to bind. Finding F30.
-  expectRefused
-    "MULTI_PARAMETER_PORT_REFUSED"
-    ("reaction `receive_reaction` for input port `in` declares more than one parameter; " ++
-      "a port declares one type and so carries one value, " ++
-      "and unlike a logical action it has no parameter list to destructure")
+  -- F30, retracted, with the retraction as an assertion rather than a note. Stage D
+  -- refused this shape and recorded a disagreement with `docs/STAGE_D_DESIGN.md` §6,
+  -- which had said all three go; §6 was right and F30 was wrong. The binder is derived
+  -- from the *port* name, so the emitted text differs from the action case above in
+  -- exactly one identifier — which is the sharpest available statement that a port and an
+  -- action are read the same way, and the reason the two assertions are adjacent.
+  expectRendered
+    "MULTI_PARAMETER_PORT_DESTRUCTURED"
+    ("    auto in_payload = *in.get();\n" ++
+      "    auto v = in_payload.v;\n" ++
+      "    auto w = in_payload.w;")
     (LF.CppPrinter.renderGeneralParameterRead
       twoParameterPortReaction)
 
@@ -2140,6 +2995,7 @@ private def printerAssertions :
       "  =}")
     (LF.CppPrinter.renderGeneralReaction
       receiverReactorName
+      receiverReactor.outputPorts
       receiveReaction)
 
   expectRendered
@@ -2209,38 +3065,42 @@ private def translationAssertions :
     expectedWidenedProgramText
     widenedProgramText
 
-  expectBool
-    "SELF_SEND_ONLY_ACCEPTS_WIDENED_MODEL"
-    true
-    (Translation.generalModelSelfSendOnly
-      widenedModel)
-
-  expectBool
-    "SELF_SEND_ONLY_REJECTS_EXTERNAL_SEND"
-    false
-    (Translation.generalModelSelfSendOnly
+  -- Three refusals, and between them they are the whole of what stage E will not carry.
+  -- Stage D asserted two refusals here as well, and it is worth being clear that these
+  -- are not those two moved: stage D refused every external send and pinned the sentence
+  -- that said so, and both that predicate and that sentence are gone. What is asserted
+  -- now is the residue — one construct routing cannot spell, one hand-built model shape
+  -- routing catches on the way past, and one arm that can only fire if this translator
+  -- is wrong. Each is pinned on its exact text, because all three are `.error` and a
+  -- test that asked only for `.error` would pass on any of the three for any of them.
+  expectRefusedTerm
+    "PARAMETERLESS_EXTERNAL_SEND_REFUSED"
+    parameterlessPortDiagnostic
+    (Translation.compileGeneralModel
       externalSendModel)
 
-  -- The refusal is asserted on its exact text at both levels. The statement level is
-  -- where it is produced and the model level is where a caller meets it, and
-  -- `compileGeneralModel_ok_iff_selfSendOnly` is what makes the second follow from the
-  -- first — a theorem about a diagnostic nobody pinned would be a theorem about a
-  -- string that could quietly become `.error ""`.
   expectRefusedTerm
-    "EXTERNAL_SEND_STATEMENT_REFUSED"
-    externalSendDiagnostic
+    "UNDECLARED_MESSAGE_SERVER_SEND_REFUSED"
+    undeclaredMessageServerDiagnostic
+    (Translation.compileGeneralModel
+      undeclaredServerSendModel)
+
+  -- The empty environment is the point. Inside `compileGeneralModel` this argument is
+  -- always `outputPortEnvOf`'s output and so always contains the site, which is why #47
+  -- can retire the arm; reaching it from here means calling the function directly with
+  -- an environment the translator would never build.
+  expectRefusedTerm
+    "UNRESOLVED_SEND_SITE_IS_A_TRANSLATOR_DEFECT"
+    unresolvedSendSiteDiagnostic
     (Translation.compileGeneralStmt
+      []
+      (.messageServer settleMessageName)
+      0
       (.send
         (.knownRebec peerKnownRebecName)
         pingMessageName
         []
         ⟨0⟩))
-
-  expectRefusedTerm
-    "EXTERNAL_SEND_MODEL_REFUSED"
-    externalSendDiagnostic
-    (Translation.compileGeneralModel
-      externalSendModel)
 
   expectRefused
     "INSTANCE_UNKNOWN_REACTOR_REFUSED"
@@ -2322,14 +3182,71 @@ private def translationAssertions :
           widenedInstanceWithWrongArity)
 
 /--
+The collision model's translated program, assembled but not guarded.
+
+This is `Translation.compileGeneralModel` with its last step left off, and it exists
+because that last step is `guardGeneralProgram`: the program finding F32 is about is
+exactly the program the guard refuses, so it cannot be obtained from the function that
+refuses it.
+
+Written as the guarded function's own three steps, in its own order and with its own
+diagnostics, rather than as anything shorter. That is what keeps this a witness about the
+translator: a hand-built ill-formed program would assert nothing at all, and a witness
+built from a *different* routing or a *different* class compilation would stop tracking
+`compileGeneralModel` the first time either changed.
+-/
+private def assembledCollisionProgram :
+    Except String LF.GeneralProgram :=
+  match Translation.routesOf
+    collisionModel
+  with
+
+  | .error message =>
+      .error message
+
+  | .ok routes =>
+      match
+          Translation.compileGeneralReactiveClasses
+            collisionModel.classes
+            routes
+            collisionModel.classes with
+
+      | .error message =>
+          .error message
+
+      | .ok compiledReactors =>
+          .ok
+            (Translation.assembleGeneralProgram
+              collisionModel
+              routes
+              compiledReactors)
+
+/--
 Finding F32, asserted rather than argued: the well-formedness preservation theorem
-that stage E was to prove is **false**, and these four assertions are the witness.
+that stage E was to prove is **false**, and these five assertions are the witness.
+
+Stage E moved the layer the witness has to be taken at, which is the rewrite the last
+paragraph of this docstring asked for in advance. `Translation.compileGeneralModel` now
+ends in `guardGeneralProgram`, so it returns `.ok` only for a program that is already
+well-formed: an ill-formed translation comes back as a refusal instead of as output, and
+the counterexample cannot be read off its result at all any more. So the three assertions
+that exhibit it are taken against the program `Translation.assembleGeneralProgram` builds
+-- see `assembledCollisionProgram` -- and the refusal itself is pinned as its own
+assertion, which is finding F43.
+
+That is a narrowing of F32 rather than a repair of it, and the distinction is the whole
+reason the refusal is asserted instead of worked around. What the guard buys is that no
+ill-formed LF text is ever emitted. What it does not buy is the theorem: the theorem says
+a well-formed DTR model translates to a well-formed LF program, and a refusal is a witness
+that this one does not. The visible cost is that `compileGeneralModel` is now partial on
+models `DTR.GeneralModel.wellFormed` accepts, which the first assertion below and the
+second read together state exactly.
 
 Kept as its own group so that the number that breaks says which claim broke. Three
-assertions state the divergence and the fourth exists to stop the third passing for
-the wrong reason: `LF.GeneralProgram.wellFormed` is a conjunction, so a rejection
-proves only that *some* clause failed, and asserting that the instance-argument
-clause still holds narrows it to the name clause.
+assertions state the divergence and one exists to stop another passing for the wrong
+reason: `LF.GeneralProgram.wellFormed` is a conjunction, so a rejection proves only that
+*some* clause failed, and asserting that the instance-argument clause still holds narrows
+it to the name clause.
 
 These assertions are about the theorem, not about the tool. The frontend rejects this
 collision before a model reaches the translator -- see `collisionModel` -- so nothing
@@ -2337,9 +3254,9 @@ here says the pipeline is unsound. What they say is that `m.wellFormed` is too w
 hypothesis to carry the conclusion, and any fix must either strengthen the hypothesis
 or prove the elaborator's guarantee implies the LF predicate.
 
-Whichever fix lands, the first assertion is the one that changes meaning, and this
-group must be rewritten in the same commit rather than deleted: a counterexample that
-stops being a counterexample is worth a line saying why.
+Whichever fix lands, `TRANSLATED_COLLISION_PROGRAM_ILL_FORMED` is the assertion that
+changes meaning, and this group must be rewritten in the same commit rather than deleted:
+a counterexample that stops being a counterexample is worth a line saying why.
 -/
 private def collisionAssertions :
     IO Unit := do
@@ -2349,22 +3266,25 @@ private def collisionAssertions :
     true
     collisionModel.wellFormed
 
-  -- Not refused, so reaching `.ok` below is a fact about the model rather than an
-  -- accident of the one refusal stage D has.
-  expectBool
-    "COLLISION_MODEL_IS_SELF_SEND_ONLY"
-    true
-    (Translation.generalModelSelfSendOnly
+  -- F43. The exact text matters more than the fact of a refusal: `guardGeneralProgram`
+  -- reports which clause of `LF.GeneralProgram.wellFormed` failed, and this pins that it
+  -- is the reactor clause. A refusal for any other reason -- a routing failure, say, or a
+  -- class that stopped compiling -- would satisfy a bare `.error` check while quietly
+  -- meaning the model no longer reaches the guard at all.
+  expectRefusedTerm
+    "COLLISION_MODEL_REFUSED_BY_THE_GUARD"
+    ("the translated LF program is not well-formed: some reactor is not well-formed, " ++
+      "which for stage E most often means a generated name collided with another name " ++
+      "in the same reactor, or a port was set that the reactor does not declare")
+    (Translation.compileGeneralModel
       collisionModel)
 
-  match Translation.compileGeneralModel
-    collisionModel
-  with
+  match assembledCollisionProgram with
 
   | .error diagnostic =>
       testFailure
-        ("the collision model must translate for F32 to be a counterexample, " ++
-          "but it was refused: " ++
+        ("the collision model must route and compile for F32 to be a counterexample, " ++
+          "but a step before assembly refused it: " ++
           diagnostic)
 
   | .ok program => do
@@ -2379,18 +3299,156 @@ private def collisionAssertions :
         true
         program.instanceArgumentsMatch
 
+      -- F32 is a claim about the reactor layer, and this says so in the one way that
+      -- cannot drift: the counterexample program has no connections, so it has no
+      -- routes, so nothing stage E added is holding it up. It replaces a stage D
+      -- assertion that made the same point through `generalModelSelfSendOnly` — the
+      -- model was self-send-only, so its translating was a fact about the model rather
+      -- than an accident of the blanket refusal. That predicate is gone, and the
+      -- property it was standing in for is better read off the output than off the
+      -- input anyway. If a future edit gives this model an external send, the defect
+      -- under test stops being isolated and this line fails first.
+      expectBool
+        "COLLISION_PROGRAM_HAS_NO_CONNECTIONS"
+        true
+        program.connections.isEmpty
+
 /--
-Run every assertion: 34 printing, then 10 well-formedness, then 12 translation, then
-4 for finding F32's counterexample, 60 in all.
+Stage E's own claims: the model that routes, asserted as a translation.
+
+Kept apart from `translationAssertions` for the reason that block is kept apart from the
+two above it. Everything there translates a model with no external sends and would still
+pass with `Relico/Translation/GeneralRouting.lean` deleted; nothing here would. A count
+that drops by seven says *routing* stopped, and that is a different morning from a
+printer that stopped.
+
+The first two assertions come before the program text on purpose. Both are decisions this
+file cannot restate — a statement index and a name suffix — and both are visible in the
+pinned text only as consequences. If the rule underneath one of them moves, the text
+assertion fails too, and reading a diff of ninety lines to discover which of two rules
+changed is exactly the work these two save.
+-/
+private def routedAssertions :
+    IO Unit := do
+
+  -- §7.1 against §4.1: a statement position, not a send ordinal. `"0|1|2"` is what the
+  -- other reading computes, and `poll`'s leading assignment is the only reason the two
+  -- can be told apart at all.
+  expectString
+    "ROUTED_SEND_SITE_INDICES"
+    "1|2|3"
+    routedSendSiteIndices
+
+  -- §4.2's table against §4.2's prose. The trailing empty entry is not a formatting
+  -- accident: `reset` is sent once, so its port carries no ordinal.
+  expectString
+    "ROUTED_SITE_SUFFIXES"
+    "1|2|"
+    routedSiteSuffixes
+
+  expectRendered
+    "TRANSLATED_ROUTED_PROGRAM"
+    expectedRoutedProgramText
+    routedProgramText
+
+  match Translation.compileGeneralModel
+    routedModel
+  with
+
+  | .error diagnostic =>
+      testFailure
+        ("the routed model must translate, but it was refused: " ++
+          diagnostic)
+
+  | .ok program => do
+
+      -- Not implied by the text assertion above. The printer's refusals are excluded by
+      -- this predicate, so a program it prints happily could still be one no theorem in
+      -- `GeneralWellFormed.lean` ranges over. Its nine conjuncts are what say the three
+      -- connections resolve at both ends, agree on payload at both ends, and land on
+      -- three distinct target endpoints.
+      expectWellFormed
+        "ACCEPT_TRANSLATED_ROUTED_PROGRAM"
+        program
+
+      -- §7.2's asymmetry as two numbers per reactor. Output ports are a projection of the
+      -- sending class and input ports of the *receiving* class, so `Gateway` declares
+      -- three inputs and `spare` gets all three whether or not a connection reaches it.
+      -- Symmetrising this — input ports per instance — is the change `lfc 0.11.0`'s
+      -- refusal of many-to-one connections rules out, and it would show up here first.
+      expectString
+        "ROUTED_PORT_COUNTS_BY_REACTOR"
+        "0/3|3/0"
+        (String.intercalate
+          "|"
+          (program.reactors.map
+            (fun reactor =>
+              toString
+                reactor.inputPorts.length ++
+                "/" ++
+                toString
+                  reactor.outputPorts.length)))
+
+      -- Which payload *arm* the translation picked, as distinct from how the printer
+      -- spells it. `bool` against `Gateway_report_action_Args` in the text is
+      -- `renderGeneralPortType`; this is `generalPortPayloadFor` choosing `.scalar` at
+      -- arity one and `.struct` at arity two, and the two halves being equal is the input
+      -- port carrying the same payload as the output port that feeds it.
+      expectString
+        "ROUTED_PAYLOAD_ARITIES"
+        "2,2,1|2,2,1"
+        (String.intercalate
+          "|"
+          (program.reactors.map
+            (fun reactor =>
+              String.intercalate
+                ","
+                ((reactor.outputPorts ++
+                  reactor.inputPorts).map
+                  (fun port =>
+                    toString
+                      port.payload.arity)))))
+
+      -- Construction against specification. `generalReactionNamesOf` is the function
+      -- §7.3's two replacement theorems are stated against;
+      -- `compileGeneralMessageServerReactionGroup` is what builds the reactions. Reaction
+      -- declaration order decides same-tag order in `lfc`, so these two agreeing is the
+      -- executable half of the ordering claim the theorems make.
+      expectRendered
+        "ROUTED_REACTION_ORDER_MATCHES_SPECIFICATION"
+        (String.intercalate
+          "|"
+          (program.reactors.map
+            (fun reactor =>
+              String.intercalate
+                ","
+                (reactor.messageReactions.map
+                  (fun reaction =>
+                    reaction.name.value)))))
+        routedSpecifiedReactionOrder
+
+/--
+Run every assertion: 34 printing, then 10 well-formedness, then 11 translation, then
+5 for finding F32's counterexample, then 7 for the routed model, 67 in all.
 
 The count is stated here because `frontend/check-general-lean.sh` compares the
 number of `PASS_` lines against a literal. There are no fixtures to count, so a
 literal is the only way the gate can notice an assertion that stopped running —
 which is the failure a marker check alone cannot see.
 
-Stage C ran 25 of these, in two blocks. The third block is new and is the one that
-mentions `Relico.Translation`: everything above it would still pass if
-`compileGeneralModel` did not exist.
+Stage C ran 25 of these, in two blocks. The third block is the one that mentions
+`Relico.Translation`: everything above it would still pass if `compileGeneralModel` did
+not exist. The fifth is the one that mentions `Relico.Translation.GeneralRouting`, and
+everything above *it* would still pass if routing did not exist.
+
+Stage E moved this number in both directions, and the down direction is the one worth
+recording. It first went **60 to 59**: stage D asserted `generalModelSelfSendOnly`'s
+verdict on two models and the text of its one refusal, stage E deletes the predicate, so
+three of those four assertions had nothing left to call, and the three that replaced them
+are two refusals plus one statement about the collision program's connections. Then the
+routed model took it to 66, and the F32 group's move to the assembly layer added the
+refusal assertion F43 records, taking it to 67. A number that only ever rises is a number
+nobody is reading.
 -/
 def runGeneralLfPrinterTests :
     IO UInt32 := do
@@ -2403,6 +3461,8 @@ def runGeneralLfPrinterTests :
     translationAssertions
 
     collisionAssertions
+
+    routedAssertions
 
     IO.println
       "GENERAL_LF_PRINTER_TESTS_OK"
@@ -2476,6 +3536,41 @@ def emitWidenedProgram :
 
       pure 1
 
+/--
+Print the text the translation of `routedModel` produces, and nothing else.
+
+The third emitter, and the one the stage E gate exists for. The base program answers
+"is this printer's output legal LF"; the widened program answers "does a translated
+single-actor model compile and run"; this one answers the question no earlier stage
+could ask, because no earlier stage emitted a port: does a translated *multi-actor*
+model compile and run.
+
+Three of its claims are established here and nowhere else in this repository. Nonzero
+connection delays — `after 3 msec` and `after 7 msec` — have never been compiled by any
+probe under `tools/paper-measurements/`, which has only ever written `after 0 msec`. A
+reactor with no startup reaction has never reached `lfc` either. Nor has an instance
+whose input ports no connection reaches. All three are ordinary LF and all three are
+now compiled and run rather than assumed.
+
+`routedProgramText` is shared with `TRANSLATED_ROUTED_PROGRAM`, so the bytes `lfc`
+compiles are the bytes that assertion pinned.
+-/
+def emitRoutedProgram :
+    IO UInt32 :=
+  match routedProgramText with
+
+  | .ok programText => do
+      IO.print programText
+
+      pure 0
+
+  | .error reason => do
+      IO.eprintln
+        ("the translation or the printer refused the routed model: " ++
+          reason)
+
+      pure 1
+
 end GeneralLfPrinterTests
 end Relico
 
@@ -2499,8 +3594,11 @@ def main
   | ["emit-widened"] =>
       Relico.GeneralLfPrinterTests.emitWidenedProgram
 
+  | ["emit-routed"] =>
+      Relico.GeneralLfPrinterTests.emitRoutedProgram
+
   | _ => do
       IO.eprintln
-        "usage: GeneralLfPrinterTestMain [emit-program|emit-widened]"
+        "usage: GeneralLfPrinterTestMain [emit-program|emit-widened|emit-routed]"
 
       pure 2

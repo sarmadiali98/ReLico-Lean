@@ -1,5 +1,7 @@
 import Relico.DTR.GeneralSyntax
 import Relico.LF.GeneralSyntax
+import Relico.LF.GeneralWellFormed
+import Relico.Translation.GeneralRouting
 import Relico.Translation.NameGeneration
 
 set_option autoImplicit false
@@ -8,17 +10,20 @@ namespace Relico
 namespace Translation
 
 /-!
-# Stage D: translating the general DTR family into the general LF family
+# Stage E: translating the general DTR family into the general LF family
 
-Everything a general DTR model contains except one statement form. A `.send` to a
-*known rebec* is refused with a diagnostic that names stage E; a `.send` to `self`
-becomes a `schedule` on a logical action, which is §III-E's own rule for a self-send.
-Ports and connections are consequently empty here, and §9.1's three boundary theorems
-state that as arithmetic rather than as prose: the stage that adds external sends has
-to break `compileGeneralModel_connections` before it can compile.
+Everything a general DTR model contains, with no statement form left refused. A `.send` to
+`self` becomes a `schedule` on a logical action, which is §III-E's own rule for a self-send; a
+`.send` to a *known rebec* becomes a `setPort` on the output port that belongs to that
+individual **send site**, and the arrow that carries it is a row in the routing table
+`Relico/Translation/GeneralRouting.lean` builds.
 
-Four things in this file differ from `docs/STAGE_D_DESIGN.md` §7, and each is recorded
-here rather than left for a reader to discover by diffing.
+Stage D wrote of its three boundary theorems that *"the stage that adds external sends has to
+break `compileGeneralModel_connections` before it can compile"*. It did, on schedule. All three
+are restated below as the projections they have become; the empty-list forms are **gone** rather
+than weakened, because a theorem saying that ports may be empty would be worth nothing.
+
+## What stage D put here that stage E leaves alone
 
 **Every function carries `General`, including the four whose names the design's table
 spells without it.** `Relico.Translation.compileStateVariableDecl` already exists, at
@@ -41,28 +46,95 @@ the one inside the definition the proof then leans on silently. `_cons_ok`,
 statement, and each is separately usable in a rewrite.
 
 **The reactions, reactors and program are built by total `assemble` helpers.** Each
-partial function computes its sub-results and hands them to a total assembler, so
-`inputPorts = []`, `outputPorts = []`, `connections = []` and `priority = none` become
-`rfl` facts about a function that cannot fail, and every inversion lemma has exactly one
-right-hand side to name.
+partial function computes its sub-results and hands them to a total assembler, so every
+structural field becomes an `rfl` fact about a function that cannot fail and every
+inversion lemma has exactly one right-hand side to name. Stage E gains from this twice
+over: the fields that used to be `rfl`-empty are now `rfl`-equal to a routing projection,
+and no inversion lemma changed shape to say so.
 
 Nothing here sorts anything, which is the difference worth stating against
 `Relico/Translation/MultiStoreBasic.lean`: that family compiles message servers in
 `priorityOrderedMessageServers` order. Reaction declaration order is observable in the
 target — measured, not assumed — so the sort that would realize local message-server
 priority is a semantic act, and it belongs to the stage that also proves what it
-achieves. Stage D emits source order and drops `DTR.GeneralMessageServer.priority`.
+achieves. Source order is emitted and `DTR.GeneralMessageServer.priority` is dropped.
 `assembleGeneralMessageReaction_priority` records that drop as a theorem, so stage G
 cannot wire the field without breaking a proof.
 
-One obligation is discharged nowhere yet, and is filed as **F32**: nothing proves that a
-program this file produces satisfies `LF.GeneralProgram.wellFormed`. The printer's
-refusals are justified in the design by appeal to well-formedness — an unresolvable
-instance, an argument list that disagrees with its parameter list — so until that
-theorem exists, *"the printer never refuses a translated program"* is an argument and
-not a fact. The `lfc` gate narrows it to one witness rather than closing it: the bridge
-test main asserts `wellFormed` of the program this file produces from its widened model,
-so the claim is checked for that model on every build and unproved for every other.
+## What stage E changed, and why each choice was forced
+
+**Statement compilation is parameterized by a resolution rather than performing a lookup.**
+§7.1: *"resolve once per class, then compile against the resolution"*. `compileGeneralStmt`
+takes the sending class's `GeneralOutputPortEnv` and the **address** of the statement it is
+compiling, and reads the port out of the environment. Resolving inside the `.send` arm would
+make every statement-level lemma quantify over a whole class, and would recompute the port
+name at each of the four sites that have to agree on it.
+
+The address is `GeneralBodyKey` plus the statement's 0-based position in its body's statement
+list — a position, *not* a count of the sends before it, so the indices that name send sites
+are sparse and no `cons` lemma acquires an arithmetic side condition.
+`docs/STAGE_E_DESIGN.md` §4.1 says instead that the index *"counts external sends only"*;
+§7.1, which is the section that fixes the interface, says position; the code follows §7.1 and
+the divergence is recorded here because §4.1 is the more quotable of the two. Both readings
+agree on every body with at most one external send, which is every fixture inherited from
+stage D, so no committed port name moves.
+
+**A receiving class gets one reaction per incoming arrow** (§7.3), named after the input port
+that triggers it, in route order, grouped immediately behind the action reaction of the same
+message server. This is not an optimization or a convenience: without these reactions the
+input ports this file now declares would have no consumer, every external send would set a
+port nothing reads, and the translation would deliver nothing while passing every check.
+
+Two stage D theorems are **false** as a consequence, and they are replaced rather than
+weakened. `compileGeneralMessageServerReactions_names` and
+`compileGeneralReactiveClass_reactionNames` both said that a class's reaction names are
+`messageServers.map messageReactionNameFor`. The replacements are stated per *group* — the
+names of one message server's reactions, and route order within them — because the
+class-level statement now needs a flattening combinator, and `List.flatMap` is exactly the
+kind of core name this development has twice paid for trusting: see the notes on
+`String.capitalize` in `Relico/Translation/NameGeneration.lean` and on `List.enum` in the
+routing module. The concatenation lemma that composes the groups is the existing
+`_cons_ok`-shaped one, which needs no combinator at all.
+
+**The translation decides `LF.GeneralProgram.wellFormed` on its own output and refuses.**
+F32's third road, chosen by the user from the three the design set out. `guardGeneralProgram`
+is the last step of `compileGeneralModel`, so preservation becomes a theorem with no extra
+hypothesis and no cross-layer import: this file still imports DTR **syntax** only. It costs
+one new import, `Relico.LF.GeneralWellFormed`, which imports LF syntax alone and therefore
+cannot cycle.
+
+Two details of that guard are deliberate. The decision is written `match program.wellFormed
+with` rather than `if program.wellFormed then`, so the discriminant stays a `Bool` with no
+`Bool → Prop` coercion and each branch gives an inversion lemma one equation to name. And the
+*explanation* is a separate total function, `generalProgramExplanation`, which walks a list
+mirroring `wellFormed`'s nine conjuncts and returns the first that fails: §9 requires a
+message that says which conjunct failed, and the decision on its own yields one bit. The
+mirror can drift from what it mirrors, and rather than leave that as a silence it has a
+fallback string that names its own drift, so a tenth conjunct added upstream and not here
+reports itself in the gate log instead of producing an empty complaint. What the mirror
+cannot do is make the guard unsound, because the guard does not consult it.
+
+**The self-send characterization chain is deleted, not weakened.** Some twenty-two
+declarations, ending in `compileGeneralModel_ok_iff_selfSendOnly`, said that this file accepts
+a model exactly when every send in it targets `self`. The left-to-right direction is now false
+in the intended direction, and there is no honest weakening of it, because the predicate it
+was stated about has stopped being a property this file has any interest in. §10.1 lists the
+whole chain. What takes its place is §8's sufficient condition for acceptance, a statement
+about the guard rather than about send targets.
+
+**Two theorems the design asks for are deliberately not in this commit**, and the reason is
+diagnosability rather than difficulty. §10.2's headline invariant — no reaction sets one
+output port twice — and §8's sufficient condition both rest on a single induction: every
+external send site of a class has an entry in that class's environment, so
+`compileGeneralStmt`'s defensive refusal is unreachable. That induction is long, and landing
+it beside the definitions it is about would mean debugging it against a module that has never
+elaborated, where a gate failure cannot be attributed. Definitions and cheap theorems land
+first, the module goes green, and the induction lands against something that compiles. The
+defensive arm's own refusal text says as much, by name.
+
+`compileGeneralModel_targetEndpointsUnique` is therefore present in its guard-corollary form:
+true, but *checked* rather than earned by construction. That is the F37 weakening turning up
+in a new place, and it is worth naming as a weakening each time it does.
 -/
 
 /-!
@@ -81,24 +153,16 @@ functions that have to change, which a wildcard would convert into a silently wr
 translation.
 -/
 
-/--
-Translate a declared type.
+/-!
+### Two of the nine are defined in `Relico/Translation/GeneralRouting.lean`
 
-Total and injective in the only sense that matters here: the two DTR constructors map
-to the two LF constructors of the same name, and neither side has a type the other
-cannot express. The emitted spellings differ — LF writes `bool` where this writes
-`boolean` — and the single place that knows this is `renderGeneralType` in the printer.
+`compileGeneralType` and `compileGeneralTypedParameter` are not in this file. Stage E moved
+them, because a port's payload is built from a message server's formals and the routing
+layer cannot import this one. The namespace is the same, so every call below still reads
+`compileGeneralType` and `compileGeneralTypedParameter` unqualified, and the simp lemmas
+about them are still stated here. This note stands where the first of the two used to be,
+so that a reader following the count above finds out where they went.
 -/
-def compileGeneralType :
-    DTR.GeneralType →
-    LF.GeneralType
-
-  | .int =>
-      .int
-
-  | .boolean =>
-      .boolean
-
 /--
 Translate a value.
 
@@ -237,23 +301,6 @@ def compileGeneralStateVariableDecl
 
   declaredType :=
     compileGeneralType declaration.declaredType
-
-/--
-Translate a typed parameter.
-
-One function for both uses, because one structure serves both on each side: a message
-server's formals and a constructor's formals are the same shape in DTR, and stage D made
-them the same shape in LF.
--/
-def compileGeneralTypedParameter
-    (parameter : DTR.GeneralTypedParameter) :
-    LF.GeneralTypedParameter where
-
-  name :=
-    parameter.name
-
-  declaredType :=
-    compileGeneralType parameter.declaredType
 
 /--
 Derive the logical action that carries one message server's arrivals.
@@ -413,171 +460,35 @@ theorem compileGeneralActorInstance_arguments_length
   simp
 
 /-!
-## The refusal surface, as an executable predicate
+## Where the fragment predicate used to be
 
-§9.3 pins the refusal surface with an `iff`, and this family of `Bool` predicates is its
-right-hand side. Three properties of that choice are deliberate.
+Stage D kept a family of six executable `Bool` predicates here — `generalStmtSelfSendOnly`,
+`generalBodySelfSendOnly`, `generalMessageServersSelfSendOnly`, `generalClassSelfSendOnly`,
+`generalClassesSelfSendOnly` and `generalModelSelfSendOnly` — and §9.3 of its design pinned
+the refusal surface with an `iff` between the last of them and acceptance by this file. Stage
+E deletes all six, along with the proof chain at the end of this file that related them to
+compilation. `docs/STAGE_E_DESIGN.md` §10.1 lists every deleted name.
 
-**It is `Bool` and not `Prop`.** The predicate is then executable, so the bridge test main
-can assert it on a fixture and the gate can watch the two halves of the `iff` agree on
-real input rather than only in the abstract.
+The deletion gets a paragraph because weakening was available and would have been worse. The
+predicates remain definable and one direction of the `iff` remains provable, so a reader may
+fairly ask why they were not simply kept in a weaker form. Because the property they name —
+every send in the model targets `self` — has stopped describing anything about this
+translation. It *was* the refusal surface. The refusal surface is now a guard on the
+translated program's own well-formedness: a different predicate, about a different object, at
+a different layer. A weakened implication left behind here would be a definition whose purpose
+a later reader would have to reconstruct out of a proof, and reconstructing purpose from
+proofs is precisely how a stale handoff sends a session chasing work that has already landed.
 
-**It is phrased positively.** `SelfSendOnly` rather than `¬ isExternalSend` means every
-proof below needs `Bool.and_eq_true`, which this repository already uses in
-`Relico/LF/GeneralWellFormed.lean`, and never needs `Bool.and_eq_false`,
-`Bool.not_eq_true` or any other name from the `false` side of Bool algebra. The content is
-identical; the tactic risk is not.
-
-**It recurses explicitly instead of using `List.all`.** The `nil` and `cons` equations then
-hold by `rfl`, and the induction in §9.3 walks the same shape the compilation walks, so
-the two sides of the `iff` are structurally aligned at every level rather than related
-through a combinator.
-
-The DTR side is asked no questions here beyond this one. A body may assign anything to
-anything, nest operators arbitrarily and delay a self-send; none of that is a refusal, and
-§8.1 lists the seven such non-refusals that the `iff` proves all at once.
+Three things those predicates carried are not lost with them. That a class may *declare*
+known rebecs and send on none of them stays true, stays deliberate, and stays exercised by
+committed fixtures — a known rebec becomes a port only when something sends on it. That the
+DTR side is asked no questions here beyond the ones this file can answer from syntax stays
+true and is now visible in the import list rather than argued in a docstring. And the reason
+those predicates were `Bool` rather than `Prop` — so that the bridge test main could assert
+the two halves of an `iff` on real input instead of only in the abstract — is inherited
+wholesale by `LF.GeneralProgram.wellFormed`, which the guard below decides and the bridge main
+already evaluates on every build.
 -/
-
-/--
-A statement is not an external send.
-
-Written over `GeneralSendTarget` rather than over a `isExternalSend` helper on the DTR
-side, because the refusal belongs to *this translation stage* and not to the source
-language: an external send is a perfectly well-formed DTR statement, and a predicate
-living on the DTR side would suggest otherwise.
--/
-def generalStmtSelfSendOnly :
-    DTR.GeneralStmt →
-    Bool
-
-  | .assign _ _ =>
-      true
-
-  | .send .selfTarget _ _ _ =>
-      true
-
-  | .send (.knownRebec _) _ _ _ =>
-      false
-
-/--
-No statement in a body is an external send.
--/
-def generalBodySelfSendOnly :
-    DTR.GeneralBody →
-    Bool
-
-  | [] =>
-      true
-
-  | statement :: remaining =>
-      generalStmtSelfSendOnly statement &&
-        generalBodySelfSendOnly remaining
-
-@[simp]
-theorem generalBodySelfSendOnly_nil :
-    generalBodySelfSendOnly [] =
-      true := by
-  rfl
-
-@[simp]
-theorem generalBodySelfSendOnly_cons
-    (statement : DTR.GeneralStmt)
-    (remaining : DTR.GeneralBody) :
-    generalBodySelfSendOnly
-        (statement :: remaining) =
-      (generalStmtSelfSendOnly statement &&
-        generalBodySelfSendOnly remaining) := by
-  rfl
-
-/--
-No message server's body contains an external send.
--/
-def generalMessageServersSelfSendOnly :
-    List DTR.GeneralMessageServer →
-    Bool
-
-  | [] =>
-      true
-
-  | server :: remaining =>
-      generalBodySelfSendOnly server.body &&
-        generalMessageServersSelfSendOnly remaining
-
-@[simp]
-theorem generalMessageServersSelfSendOnly_nil :
-    generalMessageServersSelfSendOnly [] =
-      true := by
-  rfl
-
-@[simp]
-theorem generalMessageServersSelfSendOnly_cons
-    (server : DTR.GeneralMessageServer)
-    (remaining : List DTR.GeneralMessageServer) :
-    generalMessageServersSelfSendOnly
-        (server :: remaining) =
-      (generalBodySelfSendOnly server.body &&
-        generalMessageServersSelfSendOnly remaining) := by
-  rfl
-
-/--
-Neither a class's constructor nor any of its message servers sends externally.
-
-`knownRebecs` is not consulted. A class may *declare* known rebecs and remain
-translatable in stage D, and that is not an oversight: a known rebec becomes a port only
-when something sends on it. Several committed fixtures declare known rebecs they never
-use, and §8.1 requires that they pass rather than fail.
--/
-def generalClassSelfSendOnly
-    (reactiveClass : DTR.GeneralReactiveClass) :
-    Bool :=
-  generalBodySelfSendOnly
-      reactiveClass.constructor.body &&
-    generalMessageServersSelfSendOnly
-      reactiveClass.messageServers
-
-/--
-No class sends externally.
--/
-def generalClassesSelfSendOnly :
-    List DTR.GeneralReactiveClass →
-    Bool
-
-  | [] =>
-      true
-
-  | reactiveClass :: remaining =>
-      generalClassSelfSendOnly reactiveClass &&
-        generalClassesSelfSendOnly remaining
-
-@[simp]
-theorem generalClassesSelfSendOnly_nil :
-    generalClassesSelfSendOnly [] =
-      true := by
-  rfl
-
-@[simp]
-theorem generalClassesSelfSendOnly_cons
-    (reactiveClass : DTR.GeneralReactiveClass)
-    (remaining : List DTR.GeneralReactiveClass) :
-    generalClassesSelfSendOnly
-        (reactiveClass :: remaining) =
-      (generalClassSelfSendOnly reactiveClass &&
-        generalClassesSelfSendOnly remaining) := by
-  rfl
-
-/--
-A model lies inside stage D's fragment.
-
-Only the classes are examined. The instance list cannot contain a statement, so a model
-with any number of instances, any arguments and any bindings is inside the fragment
-exactly when its classes are — which is what makes the empty connection list a
-consequence of the fragment rather than an additional restriction on it.
--/
-def generalModelSelfSendOnly
-    (model : DTR.GeneralModel) :
-    Bool :=
-  generalClassesSelfSendOnly
-    model.classes
 
 /-!
 ## The partial layer
@@ -585,26 +496,57 @@ def generalModelSelfSendOnly
 `Except String` from here down, and exactly one function introduces a failure. Everything
 below `compileGeneralStmt` only propagates one, which §10 states as theorems rather than
 leaving as a reading of the code.
+
+Stage E keeps that shape exactly and changes what the one failure *is*. Stage D's failure was
+the external send itself, reachable from any model with an `r.m()` anywhere in it. Stage E's is
+a send site with no entry in its own class's resolved environment, which §7.2's construction
+makes unreachable and which #47 proves unreachable. Not one propagation theorem had to change
+to accommodate that swap, and that is the payoff of stage D having stated propagation
+separately from the thing being propagated.
 -/
 
 /--
-Translate a statement.
+Translate a statement, at the address it occupies in its body.
 
 A self-send becomes a `schedule` on the logical action derived from the message name,
 which is §III-E's rule and not a choice: a self-send has to arrive at a later tag in the
 same reactor, and a logical action is the only construct that does that without a
 connection.
 
-The `.knownRebec` arm is the entire refusal surface of stage D. Its message names the stage
-that will implement the construct rather than merely reporting that this one will not,
-following stage B's diagnostic style, and the gate asserts on that text so the naming
-cannot decay into a bare `.error` later.
+An external send becomes a `setPort` on the port belonging to **this send site**, read out of
+the sending class's already-resolved environment. §7.1 fixes that interface — *"resolve once
+per class, then compile against the resolution"* — and the two arguments carrying the address
+are what let this stay a total function of local data. Resolving inside this arm instead would
+make every statement-level lemma quantify over an entire class, and would recompute the port
+name at one of the four sites that have to agree on it letter for letter.
 
 The delay crosses unchanged in the self-send case. A `Delay` wraps a `Nat`, so static and
-non-negative travel along structurally, and `after 0` is representable on both sides
-because a zero-delay self-send is a microstep and not a causality loop.
+non-negative travel along structurally, and `after 0` is representable on both sides because a
+zero-delay self-send is a microstep and not a causality loop.
+
+The delay is **deliberately dropped in the external case**, which is the one place in this
+file where discarding source information is correct rather than suspicious. DTR delays a
+statement; LF delays a connection — finding F35. This site's delay is already carried by the
+row `routesOf` built for it and lands as that connection's `after`. LF cannot delay a `set` at
+all, so a second copy here would have nowhere to go and could only invite the two to disagree.
+
+The `none` arm is a defensive refusal rather than a language limitation, and its text says so
+in as many words. `outputPortEnvOf` walks the very send sites `externalSendsOf` produces, so
+an external send whose site is missing from its own class's environment is a defect in this
+translator and not something a user wrote. #47 discharges it by induction; until then the arm
+is reachable in principle, and its message is written for whoever reaches it.
+
+It names the address by building a `SendSite` and handing it to `renderGeneralSendSite`, the
+function the routing refusals already use, rather than by a renderer private to this file.
+An earlier draft had the private one, and it rendered the same address as *"message server
+`settle` at statement 0"* where routing renders it *"message server `settle`, statement at
+index 0 counting from zero"*. Both are accurate; a reader comparing two diagnostics about one
+send would have had to work out that they were about one send.
 -/
-def compileGeneralStmt :
+def compileGeneralStmt
+    (env : GeneralOutputPortEnv)
+    (bodyKey : GeneralBodyKey)
+    (index : Nat) :
     DTR.GeneralStmt →
     Except String LF.GeneralStmt
 
@@ -622,14 +564,42 @@ def compileGeneralStmt :
             compileGeneralExpr)
           delay)
 
-  | .send (.knownRebec rebec) message _ _ =>
-      .error
-        ("send to known rebec `" ++
-          rebec.value ++
-          "`.`" ++
-          message.value ++
-          "` is an external send; " ++
-          "stage D translates self-sends only, and external sends are stage E")
+  | .send (.knownRebec rebec) message arguments _ =>
+      match
+          generalEntryAtSite?
+            env
+            {
+              body :=
+                bodyKey
+
+              index :=
+                index
+            } with
+
+      | some entry =>
+          .ok
+            (.setPort
+              entry.outputPort
+              (arguments.map
+                compileGeneralExpr))
+
+      | none =>
+          .error
+            ("no output port was resolved for the send `" ++
+              rebec.value ++
+              "`.`" ++
+              message.value ++
+              "` in " ++
+              renderGeneralSendSite
+                {
+                  body :=
+                    bodyKey
+
+                  index :=
+                    index
+                } ++
+              "; every external send site is resolved by outputPortEnvOf, " ++
+              "so this is a defect in the translator and not in the model")
 
 /--
 Translate a statement sequence, in order, stopping at the first refusal.
@@ -640,25 +610,46 @@ The `nil` and `cons` equations then hold by `rfl`, so the lemmas below are `rfl`
 rather than unfoldings of a monadic combinator; and order preservation is provable by an
 induction that walks the same shape this walks, which is what §9.2's later stages need.
 
+The index sits in the *matched* position, because it varies in the recursive call and a
+parameter written before the colon may not. That is the same shape — and the same reason —
+as `externalSendsFromIndex`, which is the traversal this one has to stay in step with: both
+advance the index once per statement regardless of what the statement is, so a send's position
+here and its position there are the same number. If one of them ever skips, ports are assigned
+to the wrong sends and every downstream check still passes, so the alignment is worth stating
+even though no theorem in this commit needs it.
+
 First refusal wins, and the diagnostic that survives is the earliest one in source order.
 That is a deliberate property of a translator whose refusals name a future stage: the
 message a user sees is about the first construct they wrote that this stage cannot carry.
 -/
-def compileGeneralBody :
+def compileGeneralBody
+    (env : GeneralOutputPortEnv)
+    (bodyKey : GeneralBodyKey) :
+    Nat →
     DTR.GeneralBody →
     Except String LF.GeneralBody
 
-  | [] =>
+  | _, [] =>
       .ok []
 
-  | statement :: remaining =>
-      match compileGeneralStmt statement with
+  | index, statement :: remaining =>
+      match
+          compileGeneralStmt
+            env
+            bodyKey
+            index
+            statement with
 
       | .error message =>
           .error message
 
       | .ok compiledStatement =>
-          match compileGeneralBody remaining with
+          match
+              compileGeneralBody
+                env
+                bodyKey
+                (index + 1)
+                remaining with
 
           | .error message =>
               .error message
@@ -669,8 +660,15 @@ def compileGeneralBody :
                   compiledRemaining)
 
 @[simp]
-theorem compileGeneralBody_nil :
-    compileGeneralBody [] =
+theorem compileGeneralBody_nil
+    (env : GeneralOutputPortEnv)
+    (bodyKey : GeneralBodyKey)
+    (index : Nat) :
+    compileGeneralBody
+        env
+        bodyKey
+        index
+        [] =
       .ok [] := by
   rfl
 
@@ -684,20 +682,38 @@ rests on that constant agreeing definitionally with the one inside the definitio
 is exactly the kind of dependency a build cannot report on when it breaks. These three
 lemmas carry the same content with no matcher in any statement, and each is separately
 usable as a rewrite — which is what the inversion lemmas of §10 actually need.
+
+Stage E adds three explicit arguments to each and changes nothing else about them. In
+particular the tail hypothesis is at `index + 1`, so the arithmetic that threads addresses
+through a body appears in these three statements and nowhere else in the file.
 -/
 
 theorem compileGeneralBody_cons_ok
+    {env : GeneralOutputPortEnv}
+    {bodyKey : GeneralBodyKey}
+    {index : Nat}
     {statement : DTR.GeneralStmt}
     {remaining : DTR.GeneralBody}
     {compiledStatement : LF.GeneralStmt}
     {compiledRemaining : LF.GeneralBody}
     (hStatement :
-      compileGeneralStmt statement =
+      compileGeneralStmt
+          env
+          bodyKey
+          index
+          statement =
         .ok compiledStatement)
     (hRemaining :
-      compileGeneralBody remaining =
+      compileGeneralBody
+          env
+          bodyKey
+          (index + 1)
+          remaining =
         .ok compiledRemaining) :
     compileGeneralBody
+        env
+        bodyKey
+        index
         (statement :: remaining) =
       .ok
         (compiledStatement ::
@@ -709,13 +725,23 @@ theorem compileGeneralBody_cons_ok
   ]
 
 theorem compileGeneralBody_cons_error_head
+    {env : GeneralOutputPortEnv}
+    {bodyKey : GeneralBodyKey}
+    {index : Nat}
     {statement : DTR.GeneralStmt}
     {remaining : DTR.GeneralBody}
     {message : String}
     (hStatement :
-      compileGeneralStmt statement =
+      compileGeneralStmt
+          env
+          bodyKey
+          index
+          statement =
         .error message) :
     compileGeneralBody
+        env
+        bodyKey
+        index
         (statement :: remaining) =
       .error message := by
   simp [
@@ -724,17 +750,31 @@ theorem compileGeneralBody_cons_error_head
   ]
 
 theorem compileGeneralBody_cons_error_tail
+    {env : GeneralOutputPortEnv}
+    {bodyKey : GeneralBodyKey}
+    {index : Nat}
     {statement : DTR.GeneralStmt}
     {remaining : DTR.GeneralBody}
     {compiledStatement : LF.GeneralStmt}
     {message : String}
     (hStatement :
-      compileGeneralStmt statement =
+      compileGeneralStmt
+          env
+          bodyKey
+          index
+          statement =
         .ok compiledStatement)
     (hRemaining :
-      compileGeneralBody remaining =
+      compileGeneralBody
+          env
+          bodyKey
+          (index + 1)
+          remaining =
         .error message) :
     compileGeneralBody
+        env
+        bodyKey
+        index
         (statement :: remaining) =
       .error message := by
   simp [
@@ -751,15 +791,40 @@ body and cannot fail, and a partial wrapper that compiles the body and hands it 
 split is what makes `priority = none` a `rfl` fact about a total function rather than a
 claim about one branch of a partial one, and it gives every inversion lemma in §10 a
 single right-hand side to name.
+
+Stage E turns one reaction per message server into a **group**: the action reaction, kept
+unconditionally, followed by one port reaction per route that lands on this class for this
+message server, in route order (§7.3). Three consequences are worth stating here rather than
+leaving them to be inferred from three separate definitions.
+
+The compiled body is shared by every reaction in the group, and shared *literally* — one call
+to `compileGeneralBody`, one `LF.GeneralBody`, handed to each assembler. A message server
+reached by a self-send and by two external senders therefore has three reactions that cannot
+drift apart, and the refusal a bad body would produce is emitted once rather than three times.
+
+The group is contiguous. `compileGeneralMessageServerReactions` appends whole groups, so the
+reaction list of a class is its message servers in declaration order with each server's own
+arrivals kept together. Stage F has to argue about same-tag ordering, and that argument stays
+compositional only if the unit it argues about is a group; interleaving groups would make the
+ordering claim quantify over the whole class at once.
+
+The action reaction is present even for a message server nothing self-sends. Its trigger is a
+logical action that is declared regardless, `lfc` accepts a reaction on an action nothing ever
+schedules, and the alternative — emitting it only when some body schedules it — is a
+whole-model analysis in exchange for a few unused lines of C++.
 -/
 
 /--
-Assemble the reaction that handles one message server's arrivals.
+Assemble the reaction that handles one message server's arrivals *on its logical action*.
 
 The trigger is the logical action derived from the same message name, so the two halves of
 §III-E's self-send rule — `schedule` in a body, `reaction(m_action)` in the header — are
 generated from one source name by one function each, and `actionNameFor_injective` is what
 stops two message servers from sharing an action.
+
+Arrivals from *outside* the reactor do not come through this reaction. They come through a
+port, and each one gets its own reaction below, with the same parameters and the same body.
+Two delivery mechanisms with one behaviour is what §7.3's grouping is for.
 
 The reaction's parameters are the message server's parameter *names*, in source order.
 Their types are not repeated here and that is not an omission: a payload's types are fixed
@@ -857,14 +922,254 @@ theorem assembleGeneralMessageReaction_priority
   rfl
 
 /--
-Translate one message server into its reaction.
+Assemble the reaction that handles one message server's arrivals on one incoming port.
+
+Triggered by the input port the route lands on, and named after that port (§7.3). The
+parameters and the body are the action reaction's, verbatim: a message server does one thing,
+and which mechanism delivered the message is not something its body can observe.
+
+`priority := none`, for the same reason as on the action reaction and with a sharper
+consequence. These are exactly the reactions §III-D's fan-in ordering is about — two senders
+reaching one receiver's message server produce two of them — and which runs first at one tag is
+decided by the order `assembleGeneralPortReactions` emits them in, because reaction declaration
+order is the target's only ordering hook. Stage F has to prove that order realizes something.
+This stage has only to make it deterministic, and to make it visible in one place.
+-/
+def assembleGeneralPortReaction
+    (server : DTR.GeneralMessageServer)
+    (route : GeneralRoute)
+    (compiledBody : LF.GeneralBody) :
+    LF.GeneralReaction where
+
+  name :=
+    portReactionNameFor
+      (generalInputPortOfRoute route)
+
+  trigger :=
+    .inputPort
+      (generalInputPortOfRoute route)
+
+  parameters :=
+    server.parameters.map
+      (fun parameter =>
+        parameter.name)
+
+  body :=
+    compiledBody
+
+  priority :=
+    none
+
+@[simp]
+theorem assembleGeneralPortReaction_name
+    (server : DTR.GeneralMessageServer)
+    (route : GeneralRoute)
+    (compiledBody : LF.GeneralBody) :
+    (assembleGeneralPortReaction
+        server
+        route
+        compiledBody).name =
+      portReactionNameFor
+        (generalInputPortOfRoute route) := by
+  rfl
+
+@[simp]
+theorem assembleGeneralPortReaction_trigger
+    (server : DTR.GeneralMessageServer)
+    (route : GeneralRoute)
+    (compiledBody : LF.GeneralBody) :
+    (assembleGeneralPortReaction
+        server
+        route
+        compiledBody).trigger =
+      .inputPort
+        (generalInputPortOfRoute route) := by
+  rfl
+
+@[simp]
+theorem assembleGeneralPortReaction_parameters
+    (server : DTR.GeneralMessageServer)
+    (route : GeneralRoute)
+    (compiledBody : LF.GeneralBody) :
+    (assembleGeneralPortReaction
+        server
+        route
+        compiledBody).parameters =
+      server.parameters.map
+        (fun parameter =>
+          parameter.name) := by
+  rfl
+
+@[simp]
+theorem assembleGeneralPortReaction_body
+    (server : DTR.GeneralMessageServer)
+    (route : GeneralRoute)
+    (compiledBody : LF.GeneralBody) :
+    (assembleGeneralPortReaction
+        server
+        route
+        compiledBody).body =
+      compiledBody := by
+  rfl
+
+@[simp]
+theorem assembleGeneralPortReaction_priority
+    (server : DTR.GeneralMessageServer)
+    (route : GeneralRoute)
+    (compiledBody : LF.GeneralBody) :
+    (assembleGeneralPortReaction
+        server
+        route
+        compiledBody).priority =
+      none := by
+  rfl
+
+/--
+Assemble one message server's port reactions, in route order.
+
+A `map` over `generalRoutesIntoMessageServer` rather than a recursion with the filter inlined,
+and the reason is the same one that made the filter a named function: the reactions and the
+input ports of a class must range over the same routes, and writing both as projections of one
+filter makes that agreement structural instead of a coincidence between two conditions. It
+also means the theorem below is an ordinary statement about `List.map` rather than an induction
+over a bespoke recursion.
+
+Route order is the order `routesOf` walked the main block in. Nothing sorts, and in particular
+nothing sorts by the sender's actor priority, which is what stage G would need — recorded here
+because a reader who knows §III-D will expect a sort and its absence should be a decision they
+can find rather than an omission they discover.
+-/
+def assembleGeneralPortReactions
+    (className : ClassName)
+    (server : DTR.GeneralMessageServer)
+    (compiledBody : LF.GeneralBody)
+    (routes : List GeneralRoute) :
+    List LF.GeneralReaction :=
+  (generalRoutesIntoMessageServer
+    className
+    server.name
+    routes).map
+      (fun route =>
+        assembleGeneralPortReaction
+          server
+          route
+          compiledBody)
+
+private theorem mapNames_map_assembleGeneralPortReaction
+    (server : DTR.GeneralMessageServer)
+    (compiledBody : LF.GeneralBody) :
+    ∀ (routes : List GeneralRoute),
+      (routes.map
+          (fun candidate =>
+            assembleGeneralPortReaction
+              server
+              candidate
+              compiledBody)).map
+          (fun reaction =>
+            reaction.name) =
+        routes.map
+          (fun candidate =>
+            portReactionNameFor
+              (generalInputPortOfRoute candidate)) := by
+
+  intro routes
+  induction routes with
+
+  | nil =>
+      rfl
+
+  | cons route remaining inductionHypothesis =>
+      change
+        portReactionNameFor
+              (generalInputPortOfRoute route) ::
+            (remaining.map
+                (fun candidate =>
+                  assembleGeneralPortReaction
+                    server
+                    candidate
+                    compiledBody)).map
+                (fun reaction =>
+                  reaction.name) =
+          portReactionNameFor
+              (generalInputPortOfRoute route) ::
+            remaining.map
+              (fun candidate =>
+                portReactionNameFor
+                  (generalInputPortOfRoute candidate))
+
+      exact
+        congrArg
+          (List.cons
+            (portReactionNameFor
+              (generalInputPortOfRoute route)))
+          inductionHypothesis
+
+/--
+One message server's port reactions are named after the ports that trigger them, in route
+order.
+
+This is one of the two theorems that replace stage D's `compileGeneralMessageServerReactions_names`,
+which port reactions falsified. It is stated at the level of a single message server's group on
+purpose: the class-level statement would need a flattening combinator over groups, and
+`List.flatMap` is a core name this development has twice been burned by trusting. The
+concatenation of groups is covered by `compileGeneralMessageServerReactions_cons_ok`, which
+needs no combinator at all, so the two together say what the deleted theorem said and each half
+is provable without one.
+-/
+theorem assembleGeneralPortReactions_names
+    (className : ClassName)
+    (server : DTR.GeneralMessageServer)
+    (compiledBody : LF.GeneralBody)
+    (routes : List GeneralRoute) :
+    (assembleGeneralPortReactions
+        className
+        server
+        compiledBody
+        routes).map
+        (fun reaction =>
+          reaction.name) =
+      (generalRoutesIntoMessageServer
+        className
+        server.name
+        routes).map
+        (fun candidate =>
+          portReactionNameFor
+            (generalInputPortOfRoute candidate)) :=
+  mapNames_map_assembleGeneralPortReaction
+    server
+    compiledBody
+    (generalRoutesIntoMessageServer
+      className
+      server.name
+      routes)
+
+/--
+Translate one message server into its group of reactions.
+
+The action reaction first, then one port reaction per incoming route, which is §7.3's order and
+also the only order that keeps a self-send's delivery ahead of an external one at the same tag
+for a message server that has both. That last point is an observation and not a claim: nothing
+in this stage proves anything about it, and stage F is where it becomes a statement.
+
+The body is compiled **once**, at the address `(.messageServer server.name, 0)` — the message
+server's own body key, starting from statement zero — and shared by every reaction in the
+group. Compiling it per reaction would be the same result by determinism and a different
+program by accident the first time a body compilation grew a dependency on its reaction.
 
 No new failure: the only thing that can go wrong is a refusal inside the body.
 -/
-def compileGeneralMessageServerReaction
+def compileGeneralMessageServerReactionGroup
+    (env : GeneralOutputPortEnv)
+    (routes : List GeneralRoute)
+    (className : ClassName)
     (server : DTR.GeneralMessageServer) :
-    Except String LF.GeneralReaction :=
-  match compileGeneralBody server.body with
+    Except String (List LF.GeneralReaction) :=
+  match
+      compileGeneralBody
+        env
+        (.messageServer server.name)
+        0
+        server.body with
 
   | .error message =>
       .error message
@@ -872,35 +1177,67 @@ def compileGeneralMessageServerReaction
   | .ok compiledBody =>
       .ok
         (assembleGeneralMessageReaction
-          server
-          compiledBody)
+            server
+            compiledBody ::
+          assembleGeneralPortReactions
+            className
+            server
+            compiledBody
+            routes)
 
-theorem compileGeneralMessageServerReaction_ok
+theorem compileGeneralMessageServerReactionGroup_ok
+    {env : GeneralOutputPortEnv}
+    {routes : List GeneralRoute}
+    {className : ClassName}
     {server : DTR.GeneralMessageServer}
     {compiledBody : LF.GeneralBody}
     (hBody :
-      compileGeneralBody server.body =
+      compileGeneralBody
+          env
+          (.messageServer server.name)
+          0
+          server.body =
         .ok compiledBody) :
-    compileGeneralMessageServerReaction server =
+    compileGeneralMessageServerReactionGroup
+        env
+        routes
+        className
+        server =
       .ok
         (assembleGeneralMessageReaction
-          server
-          compiledBody) := by
+            server
+            compiledBody ::
+          assembleGeneralPortReactions
+            className
+            server
+            compiledBody
+            routes) := by
   simp [
-    compileGeneralMessageServerReaction,
+    compileGeneralMessageServerReactionGroup,
     hBody
   ]
 
-theorem compileGeneralMessageServerReaction_error
+theorem compileGeneralMessageServerReactionGroup_error
+    {env : GeneralOutputPortEnv}
+    {routes : List GeneralRoute}
+    {className : ClassName}
     {server : DTR.GeneralMessageServer}
     {message : String}
     (hBody :
-      compileGeneralBody server.body =
+      compileGeneralBody
+          env
+          (.messageServer server.name)
+          0
+          server.body =
         .error message) :
-    compileGeneralMessageServerReaction server =
+    compileGeneralMessageServerReactionGroup
+        env
+        routes
+        className
+        server =
       .error message := by
   simp [
-    compileGeneralMessageServerReaction,
+    compileGeneralMessageServerReactionGroup,
     hBody
   ]
 
@@ -993,11 +1330,30 @@ theorem assembleGeneralStartupReaction_priority
 
 /--
 Translate a constructor into the startup reaction.
+
+The body is compiled at the address `(.constructor, 0)`, which is the same body key
+`externalSendsOfClass` walks first, so a constructor's sends own the same ports here as they
+were given there.
+
+A constructor *may* contain an external send, and stage E makes that translate rather than
+refuse: it becomes a `setPort` inside `reaction(startup)`, and the printer derives the effect
+clause from the body, so the emitted reaction is `reaction(startup) -> port`. Whether `lfc`
+accepts setting an output port from a startup reaction is **not measured** by any committed
+fixture. It is ordinary LF and expected to hold, but the distinction between expected and
+measured is one this development keeps, so it is written here at the site rather than assumed
+silently — and #45 is the place to close it, since a fixture that sends from a constructor costs
+nothing beyond deciding to write one.
 -/
 def compileGeneralConstructor
+    (env : GeneralOutputPortEnv)
     (classConstructor : DTR.GeneralConstructor) :
     Except String LF.GeneralReaction :=
-  match compileGeneralBody classConstructor.body with
+  match
+      compileGeneralBody
+        env
+        .constructor
+        0
+        classConstructor.body with
 
   | .error message =>
       .error message
@@ -1009,12 +1365,19 @@ def compileGeneralConstructor
           compiledBody)
 
 theorem compileGeneralConstructor_ok
+    {env : GeneralOutputPortEnv}
     {classConstructor : DTR.GeneralConstructor}
     {compiledBody : LF.GeneralBody}
     (hBody :
-      compileGeneralBody classConstructor.body =
+      compileGeneralBody
+          env
+          .constructor
+          0
+          classConstructor.body =
         .ok compiledBody) :
-    compileGeneralConstructor classConstructor =
+    compileGeneralConstructor
+        env
+        classConstructor =
       .ok
         (assembleGeneralStartupReaction
           classConstructor
@@ -1025,12 +1388,19 @@ theorem compileGeneralConstructor_ok
   ]
 
 theorem compileGeneralConstructor_error
+    {env : GeneralOutputPortEnv}
     {classConstructor : DTR.GeneralConstructor}
     {message : String}
     (hBody :
-      compileGeneralBody classConstructor.body =
+      compileGeneralBody
+          env
+          .constructor
+          0
+          classConstructor.body =
         .error message) :
-    compileGeneralConstructor classConstructor =
+    compileGeneralConstructor
+        env
+        classConstructor =
       .error message := by
   simp [
     compileGeneralConstructor,
@@ -1038,14 +1408,22 @@ theorem compileGeneralConstructor_error
   ]
 
 /--
-Translate every message server into its reaction, in source order.
+Translate every message server into its group of reactions, in source order.
 
 Explicit recursion and no sort. `Relico/Translation/MultiStoreBasic.lean` compiles this
-list in `priorityOrderedMessageServers` order; stage D deliberately does not, because
+list in `priorityOrderedMessageServers` order; this family deliberately does not, because
 declaration order is observable in the target and the sort that realizes priority is stage
 G's, together with the theorem that says what it achieves.
+
+Groups are **appended**, not consed, which is the one structural change stage E makes to this
+function. A class's reaction list is therefore its message servers in declaration order with
+each server's arrivals contiguous behind it, and `compileGeneralMessageServerReactions_cons_ok`
+says exactly that in one `++`.
 -/
-def compileGeneralMessageServerReactions :
+def compileGeneralMessageServerReactions
+    (env : GeneralOutputPortEnv)
+    (routes : List GeneralRoute)
+    (className : ClassName) :
     List DTR.GeneralMessageServer →
     Except String (List LF.GeneralReaction)
 
@@ -1053,43 +1431,74 @@ def compileGeneralMessageServerReactions :
       .ok []
 
   | server :: remaining =>
-      match compileGeneralMessageServerReaction server with
+      match
+          compileGeneralMessageServerReactionGroup
+            env
+            routes
+            className
+            server with
 
       | .error message =>
           .error message
 
-      | .ok reaction =>
-          match compileGeneralMessageServerReactions remaining with
+      | .ok group =>
+          match
+              compileGeneralMessageServerReactions
+                env
+                routes
+                className
+                remaining with
 
           | .error message =>
               .error message
 
           | .ok compiledRemaining =>
               .ok
-                (reaction ::
+                (group ++
                   compiledRemaining)
 
 @[simp]
-theorem compileGeneralMessageServerReactions_nil :
-    compileGeneralMessageServerReactions [] =
+theorem compileGeneralMessageServerReactions_nil
+    (env : GeneralOutputPortEnv)
+    (routes : List GeneralRoute)
+    (className : ClassName) :
+    compileGeneralMessageServerReactions
+        env
+        routes
+        className
+        [] =
       .ok [] := by
   rfl
 
 theorem compileGeneralMessageServerReactions_cons_ok
+    {env : GeneralOutputPortEnv}
+    {routes : List GeneralRoute}
+    {className : ClassName}
     {server : DTR.GeneralMessageServer}
     {remaining : List DTR.GeneralMessageServer}
-    {reaction : LF.GeneralReaction}
+    {group : List LF.GeneralReaction}
     {compiledRemaining : List LF.GeneralReaction}
     (hServer :
-      compileGeneralMessageServerReaction server =
-        .ok reaction)
+      compileGeneralMessageServerReactionGroup
+          env
+          routes
+          className
+          server =
+        .ok group)
     (hRemaining :
-      compileGeneralMessageServerReactions remaining =
+      compileGeneralMessageServerReactions
+          env
+          routes
+          className
+          remaining =
         .ok compiledRemaining) :
     compileGeneralMessageServerReactions
+        env
+        routes
+        className
         (server :: remaining) =
       .ok
-        (reaction ::
+        (group ++
           compiledRemaining) := by
   simp [
     compileGeneralMessageServerReactions,
@@ -1098,13 +1507,23 @@ theorem compileGeneralMessageServerReactions_cons_ok
   ]
 
 theorem compileGeneralMessageServerReactions_cons_error_head
+    {env : GeneralOutputPortEnv}
+    {routes : List GeneralRoute}
+    {className : ClassName}
     {server : DTR.GeneralMessageServer}
     {remaining : List DTR.GeneralMessageServer}
     {message : String}
     (hServer :
-      compileGeneralMessageServerReaction server =
+      compileGeneralMessageServerReactionGroup
+          env
+          routes
+          className
+          server =
         .error message) :
     compileGeneralMessageServerReactions
+        env
+        routes
+        className
         (server :: remaining) =
       .error message := by
   simp [
@@ -1113,17 +1532,31 @@ theorem compileGeneralMessageServerReactions_cons_error_head
   ]
 
 theorem compileGeneralMessageServerReactions_cons_error_tail
+    {env : GeneralOutputPortEnv}
+    {routes : List GeneralRoute}
+    {className : ClassName}
     {server : DTR.GeneralMessageServer}
     {remaining : List DTR.GeneralMessageServer}
-    {reaction : LF.GeneralReaction}
+    {group : List LF.GeneralReaction}
     {message : String}
     (hServer :
-      compileGeneralMessageServerReaction server =
-        .ok reaction)
+      compileGeneralMessageServerReactionGroup
+          env
+          routes
+          className
+          server =
+        .ok group)
     (hRemaining :
-      compileGeneralMessageServerReactions remaining =
+      compileGeneralMessageServerReactions
+          env
+          routes
+          className
+          remaining =
         .error message) :
     compileGeneralMessageServerReactions
+        env
+        routes
+        className
         (server :: remaining) =
       .error message := by
   simp [
@@ -1135,14 +1568,24 @@ theorem compileGeneralMessageServerReactions_cons_error_tail
 /-!
 ## Reactors and the program
 
-The same two-step shape, and the place where stage D's boundary is written down: two empty
-port lists on every reactor and one empty connection list on the program. §9.1 turns each
-of the three into a theorem, so the stage that adds external sends has to break a proof
-before it can compile.
+The same two-step shape, and the place where stage D's boundary used to be written down: two
+empty port lists on every reactor and one empty connection list on the program. All three are
+now routing projections, and the three theorems that stated the empty forms are restated in
+§9.1's section below rather than deleted, so the arithmetic still says what the shape of the
+target is — it just no longer says zero.
+
+Where the two port lists come from is asymmetric, and the asymmetry is forced rather than
+chosen. Output ports come from the sending class's **environment**, so a class with no
+instances still declares the ports its bodies set, which `stmtWellFormed` requires of every
+`setPort`. Input ports come from the **model's** routes, because `lfc 0.11.0` rejects
+many-to-one connections and so each sending instance needs its own port on the receiver — a
+per-class question cannot answer that. The price is an input port that nothing connects to
+whenever a class has more instances than senders, and that price is measured payable: an
+unconnected input port compiles and runs.
 -/
 
 /--
-Assemble one reactor from a class and its two already-compiled reaction groups.
+Assemble one reactor from a class, its routing, and its two already-compiled reaction groups.
 
 The constructor's typed parameters become the **reactor's** parameters, which is Fig. 5's
 `Reactor ::= reactor R (ParamList?)` production that stage C dropped — finding F22. Without
@@ -1150,18 +1593,23 @@ it, two instances of one class constructed with different arguments are indistin
 in the generated LF, so the paper's own class-to-reactor mapping loses information the
 source had.
 
-`inputPorts` and `outputPorts` are empty, and this is the single place stage D's boundary
-lives. `knownRebecs` is read by nothing: a known rebec becomes a port only when something
-sends on it, so a class that declares one and never uses it translates, which is what makes
-the committed fixtures with unused known rebecs pass rather than fail.
+`inputPorts` and `outputPorts` are the two routing projections, and this is the single place
+they enter the translated program. `knownRebecs` is still read by nothing *here*: a known rebec
+becomes a port only when something sends on it, and the deciding is done in
+`Relico/Translation/GeneralRouting.lean` by walking send sites rather than declarations. A
+class that declares a known rebec and never sends on it therefore still yields a reactor with
+no ports, which is what keeps the committed fixtures with unused known rebecs passing.
 
-One logical action per message server, in source order, and one reaction per message
-server, in the same order. The two lists are generated by two functions from one list, and
-§9.2 proves both orders are source order — the fixed starting point stage G's permutation
-needs.
+One logical action per message server, in source order. The reaction list is no longer one per
+message server — see §7.3 and the group above — so the two lists no longer have equal length,
+and `compileGeneralReactiveClass_reactionNames` was retired rather than adjusted for exactly
+that reason. `assembleGeneralReactor_logicalActions` still pins the action list to source
+order, which is the fixed starting point stage G's permutation needs.
 -/
 def assembleGeneralReactor
     (reactiveClass : DTR.GeneralReactiveClass)
+    (env : GeneralOutputPortEnv)
+    (routes : List GeneralRoute)
     (compiledStartupReaction : LF.GeneralReaction)
     (compiledMessageReactions : List LF.GeneralReaction) :
     LF.GeneralReactor where
@@ -1174,10 +1622,13 @@ def assembleGeneralReactor
       compileGeneralTypedParameter
 
   inputPorts :=
-    []
+    generalInputPortsOf
+      reactiveClass.name
+      routes
 
   outputPorts :=
-    []
+    generalOutputPortsOf
+      env
 
   stateVariables :=
     reactiveClass.stateVariables.map
@@ -1196,10 +1647,14 @@ def assembleGeneralReactor
 @[simp]
 theorem assembleGeneralReactor_name
     (reactiveClass : DTR.GeneralReactiveClass)
+    (env : GeneralOutputPortEnv)
+    (routes : List GeneralRoute)
     (compiledStartupReaction : LF.GeneralReaction)
     (compiledMessageReactions : List LF.GeneralReaction) :
     (assembleGeneralReactor
         reactiveClass
+        env
+        routes
         compiledStartupReaction
         compiledMessageReactions).name =
       reactorNameFor reactiveClass.name := by
@@ -1208,10 +1663,14 @@ theorem assembleGeneralReactor_name
 @[simp]
 theorem assembleGeneralReactor_parameters
     (reactiveClass : DTR.GeneralReactiveClass)
+    (env : GeneralOutputPortEnv)
+    (routes : List GeneralRoute)
     (compiledStartupReaction : LF.GeneralReaction)
     (compiledMessageReactions : List LF.GeneralReaction) :
     (assembleGeneralReactor
         reactiveClass
+        env
+        routes
         compiledStartupReaction
         compiledMessageReactions).parameters =
       reactiveClass.constructor.parameters.map
@@ -1221,34 +1680,49 @@ theorem assembleGeneralReactor_parameters
 @[simp]
 theorem assembleGeneralReactor_inputPorts
     (reactiveClass : DTR.GeneralReactiveClass)
+    (env : GeneralOutputPortEnv)
+    (routes : List GeneralRoute)
     (compiledStartupReaction : LF.GeneralReaction)
     (compiledMessageReactions : List LF.GeneralReaction) :
     (assembleGeneralReactor
         reactiveClass
+        env
+        routes
         compiledStartupReaction
         compiledMessageReactions).inputPorts =
-      [] := by
+      generalInputPortsOf
+        reactiveClass.name
+        routes := by
   rfl
 
 @[simp]
 theorem assembleGeneralReactor_outputPorts
     (reactiveClass : DTR.GeneralReactiveClass)
+    (env : GeneralOutputPortEnv)
+    (routes : List GeneralRoute)
     (compiledStartupReaction : LF.GeneralReaction)
     (compiledMessageReactions : List LF.GeneralReaction) :
     (assembleGeneralReactor
         reactiveClass
+        env
+        routes
         compiledStartupReaction
         compiledMessageReactions).outputPorts =
-      [] := by
+      generalOutputPortsOf
+        env := by
   rfl
 
 @[simp]
 theorem assembleGeneralReactor_stateVariables
     (reactiveClass : DTR.GeneralReactiveClass)
+    (env : GeneralOutputPortEnv)
+    (routes : List GeneralRoute)
     (compiledStartupReaction : LF.GeneralReaction)
     (compiledMessageReactions : List LF.GeneralReaction) :
     (assembleGeneralReactor
         reactiveClass
+        env
+        routes
         compiledStartupReaction
         compiledMessageReactions).stateVariables =
       reactiveClass.stateVariables.map
@@ -1258,10 +1732,14 @@ theorem assembleGeneralReactor_stateVariables
 @[simp]
 theorem assembleGeneralReactor_logicalActions
     (reactiveClass : DTR.GeneralReactiveClass)
+    (env : GeneralOutputPortEnv)
+    (routes : List GeneralRoute)
     (compiledStartupReaction : LF.GeneralReaction)
     (compiledMessageReactions : List LF.GeneralReaction) :
     (assembleGeneralReactor
         reactiveClass
+        env
+        routes
         compiledStartupReaction
         compiledMessageReactions).logicalActions =
       reactiveClass.messageServers.map
@@ -1271,10 +1749,14 @@ theorem assembleGeneralReactor_logicalActions
 @[simp]
 theorem assembleGeneralReactor_startupReaction
     (reactiveClass : DTR.GeneralReactiveClass)
+    (env : GeneralOutputPortEnv)
+    (routes : List GeneralRoute)
     (compiledStartupReaction : LF.GeneralReaction)
     (compiledMessageReactions : List LF.GeneralReaction) :
     (assembleGeneralReactor
         reactiveClass
+        env
+        routes
         compiledStartupReaction
         compiledMessageReactions).startupReaction =
       compiledStartupReaction := by
@@ -1283,10 +1765,14 @@ theorem assembleGeneralReactor_startupReaction
 @[simp]
 theorem assembleGeneralReactor_messageReactions
     (reactiveClass : DTR.GeneralReactiveClass)
+    (env : GeneralOutputPortEnv)
+    (routes : List GeneralRoute)
     (compiledStartupReaction : LF.GeneralReaction)
     (compiledMessageReactions : List LF.GeneralReaction) :
     (assembleGeneralReactor
         reactiveClass
+        env
+        routes
         compiledStartupReaction
         compiledMessageReactions).messageReactions =
       compiledMessageReactions := by
@@ -1295,88 +1781,208 @@ theorem assembleGeneralReactor_messageReactions
 /--
 Translate one reactive class into one reactor.
 
-The constructor is compiled before the message servers, so a class whose constructor and
-whose first message server both send externally reports the constructor's refusal. Source
-order again, and for the same reason as inside a body.
+Three failure sources now, in this order: resolving the class's output ports, the constructor,
+then the message servers. The environment is resolved **first and once**, which is §7.1's
+*"resolve once per class, then compile against the resolution"*, and the order of the other two
+is stage D's — a class whose constructor and whose first message server both fail reports the
+constructor's diagnostic, because source order is what a reader can act on.
+
+`classes` is the whole class list rather than this class, and it is not this function's business
+to know why: `outputPortEnvOf` needs the *receiving* class's message servers to type a payload,
+so the argument threads through. `routes` is the whole model's, for the reason
+`assembleGeneralReactor`'s docstring gives.
 -/
 def compileGeneralReactiveClass
+    (classes : List DTR.GeneralReactiveClass)
+    (routes : List GeneralRoute)
     (reactiveClass : DTR.GeneralReactiveClass) :
     Except String LF.GeneralReactor :=
-  match compileGeneralConstructor reactiveClass.constructor with
+  match
+      outputPortEnvOf
+        classes
+        reactiveClass with
 
   | .error message =>
       .error message
 
-  | .ok compiledStartupReaction =>
-      match compileGeneralMessageServerReactions reactiveClass.messageServers with
+  | .ok env =>
+      match
+          compileGeneralConstructor
+            env
+            reactiveClass.constructor with
 
       | .error message =>
           .error message
 
-      | .ok compiledMessageReactions =>
-          .ok
-            (assembleGeneralReactor
-              reactiveClass
-              compiledStartupReaction
-              compiledMessageReactions)
+      | .ok compiledStartupReaction =>
+          match
+              compileGeneralMessageServerReactions
+                env
+                routes
+                reactiveClass.name
+                reactiveClass.messageServers with
+
+          | .error message =>
+              .error message
+
+          | .ok compiledMessageReactions =>
+              .ok
+                (assembleGeneralReactor
+                  reactiveClass
+                  env
+                  routes
+                  compiledStartupReaction
+                  compiledMessageReactions)
 
 theorem compileGeneralReactiveClass_ok
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
     {reactiveClass : DTR.GeneralReactiveClass}
+    {env : GeneralOutputPortEnv}
     {compiledStartupReaction : LF.GeneralReaction}
     {compiledMessageReactions : List LF.GeneralReaction}
+    (hEnv :
+      outputPortEnvOf
+          classes
+          reactiveClass =
+        .ok env)
     (hConstructor :
-      compileGeneralConstructor reactiveClass.constructor =
+      compileGeneralConstructor
+          env
+          reactiveClass.constructor =
         .ok compiledStartupReaction)
     (hMessageServers :
-      compileGeneralMessageServerReactions reactiveClass.messageServers =
+      compileGeneralMessageServerReactions
+          env
+          routes
+          reactiveClass.name
+          reactiveClass.messageServers =
         .ok compiledMessageReactions) :
-    compileGeneralReactiveClass reactiveClass =
+    compileGeneralReactiveClass
+        classes
+        routes
+        reactiveClass =
       .ok
         (assembleGeneralReactor
           reactiveClass
+          env
+          routes
           compiledStartupReaction
           compiledMessageReactions) := by
   simp [
     compileGeneralReactiveClass,
+    hEnv,
     hConstructor,
     hMessageServers
   ]
 
-theorem compileGeneralReactiveClass_error_constructor
+/--
+The failure stage E adds to this function, and the only one that is not about a body.
+
+Stated separately from the other two rather than folded into a single error lemma, because the
+three failures have different causes and §10's inversion lemma has to be able to say which one
+it ruled out. `outputPortEnvOf` fails when a send names a known rebec the class never declared,
+when a known rebec's class has no message server of that name, or when a payload cannot be
+typed — the three diagnostics the two new `lean-reject` fixtures of #45 exercise.
+-/
+theorem compileGeneralReactiveClass_error_env
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
     {reactiveClass : DTR.GeneralReactiveClass}
     {message : String}
-    (hConstructor :
-      compileGeneralConstructor reactiveClass.constructor =
+    (hEnv :
+      outputPortEnvOf
+          classes
+          reactiveClass =
         .error message) :
-    compileGeneralReactiveClass reactiveClass =
+    compileGeneralReactiveClass
+        classes
+        routes
+        reactiveClass =
       .error message := by
   simp [
     compileGeneralReactiveClass,
+    hEnv
+  ]
+
+theorem compileGeneralReactiveClass_error_constructor
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {env : GeneralOutputPortEnv}
+    {message : String}
+    (hEnv :
+      outputPortEnvOf
+          classes
+          reactiveClass =
+        .ok env)
+    (hConstructor :
+      compileGeneralConstructor
+          env
+          reactiveClass.constructor =
+        .error message) :
+    compileGeneralReactiveClass
+        classes
+        routes
+        reactiveClass =
+      .error message := by
+  simp [
+    compileGeneralReactiveClass,
+    hEnv,
     hConstructor
   ]
 
 theorem compileGeneralReactiveClass_error_messageServers
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
     {reactiveClass : DTR.GeneralReactiveClass}
+    {env : GeneralOutputPortEnv}
     {compiledStartupReaction : LF.GeneralReaction}
     {message : String}
+    (hEnv :
+      outputPortEnvOf
+          classes
+          reactiveClass =
+        .ok env)
     (hConstructor :
-      compileGeneralConstructor reactiveClass.constructor =
+      compileGeneralConstructor
+          env
+          reactiveClass.constructor =
         .ok compiledStartupReaction)
     (hMessageServers :
-      compileGeneralMessageServerReactions reactiveClass.messageServers =
+      compileGeneralMessageServerReactions
+          env
+          routes
+          reactiveClass.name
+          reactiveClass.messageServers =
         .error message) :
-    compileGeneralReactiveClass reactiveClass =
+    compileGeneralReactiveClass
+        classes
+        routes
+        reactiveClass =
       .error message := by
   simp [
     compileGeneralReactiveClass,
+    hEnv,
     hConstructor,
     hMessageServers
   ]
 
 /--
 Translate every class into its reactor, in source order.
+
+`allClasses` is threaded unchanged past every recursive call and is **not** the list being
+walked. Two lists of the same type in one signature is a readability cost paid deliberately:
+`outputPortEnvOf` types a payload from the *receiving* class's message server, so compiling
+the last class in the list can need the first one, and a fold that consumed the list would
+have nothing left to look the receiver up in.
+
+`routes` is threaded for the same reason and is a model-level object throughout — see
+`assembleGeneralReactor`'s docstring for why a per-class routing table cannot exist.
 -/
-def compileGeneralReactiveClasses :
+def compileGeneralReactiveClasses
+    (allClasses : List DTR.GeneralReactiveClass)
+    (routes : List GeneralRoute) :
     List DTR.GeneralReactiveClass →
     Except String (List LF.GeneralReactor)
 
@@ -1384,13 +1990,21 @@ def compileGeneralReactiveClasses :
       .ok []
 
   | reactiveClass :: remaining =>
-      match compileGeneralReactiveClass reactiveClass with
+      match
+          compileGeneralReactiveClass
+            allClasses
+            routes
+            reactiveClass with
 
       | .error message =>
           .error message
 
       | .ok reactor =>
-          match compileGeneralReactiveClasses remaining with
+          match
+              compileGeneralReactiveClasses
+                allClasses
+                routes
+                remaining with
 
           | .error message =>
               .error message
@@ -1401,23 +2015,38 @@ def compileGeneralReactiveClasses :
                   compiledRemaining)
 
 @[simp]
-theorem compileGeneralReactiveClasses_nil :
-    compileGeneralReactiveClasses [] =
+theorem compileGeneralReactiveClasses_nil
+    (allClasses : List DTR.GeneralReactiveClass)
+    (routes : List GeneralRoute) :
+    compileGeneralReactiveClasses
+        allClasses
+        routes
+        [] =
       .ok [] := by
   rfl
 
 theorem compileGeneralReactiveClasses_cons_ok
+    {allClasses : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
     {reactiveClass : DTR.GeneralReactiveClass}
     {remaining : List DTR.GeneralReactiveClass}
     {reactor : LF.GeneralReactor}
     {compiledRemaining : List LF.GeneralReactor}
     (hClass :
-      compileGeneralReactiveClass reactiveClass =
+      compileGeneralReactiveClass
+          allClasses
+          routes
+          reactiveClass =
         .ok reactor)
     (hRemaining :
-      compileGeneralReactiveClasses remaining =
+      compileGeneralReactiveClasses
+          allClasses
+          routes
+          remaining =
         .ok compiledRemaining) :
     compileGeneralReactiveClasses
+        allClasses
+        routes
         (reactiveClass :: remaining) =
       .ok
         (reactor ::
@@ -1429,13 +2058,20 @@ theorem compileGeneralReactiveClasses_cons_ok
   ]
 
 theorem compileGeneralReactiveClasses_cons_error_head
+    {allClasses : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
     {reactiveClass : DTR.GeneralReactiveClass}
     {remaining : List DTR.GeneralReactiveClass}
     {message : String}
     (hClass :
-      compileGeneralReactiveClass reactiveClass =
+      compileGeneralReactiveClass
+          allClasses
+          routes
+          reactiveClass =
         .error message) :
     compileGeneralReactiveClasses
+        allClasses
+        routes
         (reactiveClass :: remaining) =
       .error message := by
   simp [
@@ -1444,17 +2080,27 @@ theorem compileGeneralReactiveClasses_cons_error_head
   ]
 
 theorem compileGeneralReactiveClasses_cons_error_tail
+    {allClasses : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
     {reactiveClass : DTR.GeneralReactiveClass}
     {remaining : List DTR.GeneralReactiveClass}
     {reactor : LF.GeneralReactor}
     {message : String}
     (hClass :
-      compileGeneralReactiveClass reactiveClass =
+      compileGeneralReactiveClass
+          allClasses
+          routes
+          reactiveClass =
         .ok reactor)
     (hRemaining :
-      compileGeneralReactiveClasses remaining =
+      compileGeneralReactiveClasses
+          allClasses
+          routes
+          remaining =
         .error message) :
     compileGeneralReactiveClasses
+        allClasses
+        routes
         (reactiveClass :: remaining) =
       .error message := by
   simp [
@@ -1464,15 +2110,21 @@ theorem compileGeneralReactiveClasses_cons_error_tail
   ]
 
 /--
-Assemble the program from a model and its already-compiled reactors.
+Assemble the program from a model, its routing, and its already-compiled reactors.
 
-`connections := []` is the boundary from the other side: no external sends means no
-connections, and stage C's connection layer sits unused and ready. The instances are total
-— nothing about an actor instance can fail in stage D — so the only `Except` in reach of
-this function is the one the reactors bring.
+`connections := generalConnectionsOf routes` is the third routing projection and the last
+piece of stage D's boundary to go. One connection per route, in the order `routesOf` produced
+them, which is main-block instance-declaration order — so the generated `main reactor` reads
+in the order the source's instances were declared, and `compileGeneralModel_connections` can
+still state the connection list exactly rather than up to permutation.
+
+The instances remain total: nothing about an actor instance can fail even now, because a
+binding that names an instance of the wrong class is caught in `routesOf` and never reaches
+here. So the only `Except` in reach of this function is still the one its callers bring.
 -/
 def assembleGeneralProgram
     (model : DTR.GeneralModel)
+    (routes : List GeneralRoute)
     (compiledReactors : List LF.GeneralReactor) :
     LF.GeneralProgram where
 
@@ -1484,14 +2136,17 @@ def assembleGeneralProgram
       compileGeneralActorInstance
 
   connections :=
-    []
+    generalConnectionsOf
+      routes
 
 @[simp]
 theorem assembleGeneralProgram_reactors
     (model : DTR.GeneralModel)
+    (routes : List GeneralRoute)
     (compiledReactors : List LF.GeneralReactor) :
     (assembleGeneralProgram
         model
+        routes
         compiledReactors).reactors =
       compiledReactors := by
   rfl
@@ -1499,9 +2154,11 @@ theorem assembleGeneralProgram_reactors
 @[simp]
 theorem assembleGeneralProgram_instances
     (model : DTR.GeneralModel)
+    (routes : List GeneralRoute)
     (compiledReactors : List LF.GeneralReactor) :
     (assembleGeneralProgram
         model
+        routes
         compiledReactors).instances =
       model.instances.map
         compileGeneralActorInstance := by
@@ -1510,58 +2167,355 @@ theorem assembleGeneralProgram_instances
 @[simp]
 theorem assembleGeneralProgram_connections
     (model : DTR.GeneralModel)
+    (routes : List GeneralRoute)
     (compiledReactors : List LF.GeneralReactor) :
     (assembleGeneralProgram
         model
+        routes
         compiledReactors).connections =
-      [] := by
+      generalConnectionsOf
+        routes := by
   rfl
+
+/-!
+## The output guard
+
+F32's third road, and the reason this section exists rather than a hypothesis on the
+preservation theorem. `docs/STAGE_E_DESIGN.md` §9: the translation decides
+`LF.GeneralProgram.wellFormed` **on its own output** and refuses when it is false. That makes
+preservation true with no extra hypothesis and — this is the part that decided it — with no
+DTR-side import, which matters because this module imports DTR *syntax* only and so cannot
+mention `DTR.GeneralModel.wellFormed` at all.
+
+The guard is the only place in this file where a refusal is not about a *source* construct.
+Its message therefore has to name a property of the generated program, and there is a real
+design tension in that: the nine clauses live in `Relico/LF/GeneralWellFormed.lean` and none
+of them carries prose fit for a diagnostic. The resolution below is a **mirror** — a list
+pairing each clause with a sentence — and the mirror is used for the refusal *text only*. The
+decision itself is made on `LF.GeneralProgram.wellFormed`, never on the mirror.
+
+That split is deliberate and was the second design considered, not the first. A guard that
+decided on an `Option String` diagnostic built from the mirror would need
+`diagnostic program = none ↔ program.wellFormed = true` as its anti-drift tripwire, and that
+biconditional unfolds into a five-hundred-and-twelve-leaf case split over nine independent
+booleans, on a module that has never elaborated. One unclosed leaf would surface as a gate
+failure with no way to tell a real defect from a proof-engineering gap. Deciding on the real
+predicate makes acceptance-implies-well-formedness a **two-case** proof, and pays for it with
+a mirror that can drift. Drift is then a *visible runtime symptom* rather than a soundness
+hole: the fallback string below names itself, so a program the guard rejects while every
+mirrored clause holds prints a sentence that says the mirror is out of date, in the gate log,
+where a reader is already looking.
+-/
+
+/--
+One sentence per conjunct of `LF.GeneralProgram.wellFormed`, in the same order.
+
+The order is not load-bearing for correctness — the refusal lists whatever is false — but it
+is kept identical to `wellFormed`'s so that a reader comparing the two files can do it by
+sight. Nine entries; if `Relico/LF/GeneralWellFormed.lean` gains a tenth conjunct, this list
+does not, and `generalProgramExplanation`'s fallback is what says so.
+
+Reaction names are **absent on purpose**, and the absence is the finding, not an omission.
+`Relico/LF/GeneralWellFormed.lean:37` records that reaction names need not be unique because
+LF reactions are anonymous in concrete syntax, and `portReactionNameFor`'s docstring records
+that stage E's port reactions can therefore collide with a message reaction's name without
+anything being wrong. There is nothing here for the guard to check.
+-/
+private def generalProgramClauses :
+    List (String × (LF.GeneralProgram → Bool)) :=
+  [
+    (
+      "no reactor is declared",
+      LF.GeneralProgram.reactorsNonEmpty
+    ),
+    (
+      "no instance is declared",
+      LF.GeneralProgram.instancesNonEmpty
+    ),
+    (
+      "some reactor is not well-formed, which for stage E most often means a generated name "
+        ++ "collided with another name in the same reactor, or a port was set that the "
+        ++ "reactor does not declare",
+      LF.GeneralProgram.reactorsWellFormed
+    ),
+    (
+      "two reactors share a name",
+      LF.GeneralProgram.reactorNamesUnique
+    ),
+    (
+      "two instances share a name",
+      LF.GeneralProgram.instanceNamesUnique
+    ),
+    (
+      "some instance has an empty name or instantiates a reactor that is not declared",
+      LF.GeneralProgram.instancesResolve
+    ),
+    (
+      "some instance passes the wrong number of arguments to its reactor",
+      LF.GeneralProgram.instanceArgumentsMatch
+    ),
+    (
+      "some connection names an endpoint that is not declared, or joins two ports whose "
+        ++ "payloads differ",
+      LF.GeneralProgram.connectionsWellFormed
+    ),
+    (
+      "two connections target the same input port of the same instance, which the LF "
+        ++ "compiler rejects as a many-to-one connection",
+      LF.GeneralProgram.targetEndpointsUnique
+    )
+  ]
+
+/--
+The sentences of the mirrored clauses that are false of this program.
+
+Explicit recursion with the varying list after the colon, which is the whole reason this is a
+separate definition rather than a `List.filterMap` inside `generalProgramExplanation`: the
+program does not vary and must stay before the colon.
+
+The discriminant is matched rather than tested with `if`, for the reason given at the top of
+this file: a `Bool` in a `match` needs no coercion and no `Decidable` instance, so nothing
+about this definition depends on how core spells propositional truth this month.
+-/
+private def generalFailingClauses
+    (program : LF.GeneralProgram) :
+    List (String × (LF.GeneralProgram → Bool)) →
+    List String
+
+  | [] =>
+      []
+
+  | (sentence, clause) :: remaining =>
+      match clause program with
+
+      | true =>
+          generalFailingClauses
+            program
+            remaining
+
+      | false =>
+          sentence ::
+            generalFailingClauses
+              program
+              remaining
+
+/--
+Why the guard refused this program.
+
+Total, like every other helper in the total layer, and it does not claim to be complete: the
+`[]` case is reachable exactly when the mirror has drifted out of step with
+`LF.GeneralProgram.wellFormed`, and it says so in the sentence it returns. Naming the two
+definitions that disagree is what turns a mystifying gate failure into a one-line fix.
+-/
+def generalProgramExplanation
+    (program : LF.GeneralProgram) :
+    String :=
+  match
+      generalFailingClauses
+        program
+        generalProgramClauses with
+
+  | [] =>
+      "every clause mirrored in `generalProgramClauses` holds, so that mirror has drifted " ++
+        "out of step with `LF.GeneralProgram.wellFormed` and is missing an entry for the " ++
+        "clause that failed"
+
+  | sentences =>
+      String.intercalate
+        "; "
+        sentences
+
+/--
+Accept the translated program if it is a well-formed LF program, and refuse it otherwise.
+
+The discriminant is `LF.GeneralProgram.wellFormed` itself, so `guardGeneralProgram_wellFormed`
+below is a two-case proof and every guarantee this guard offers rests on the same predicate
+`Relico/LF/GeneralCppPrinter.lean` and the target gate are written against.
+
+A refusal here is a **translator defect, not a document defect**, in every case the design
+anticipates: `Relico/Frontend/GeneralDecoder.lean` has already certified the model, so a
+model that reaches this point and is refused says the naming rules collided or a projection
+is wrong. That is why the message is phrased as a report about the generated program and not
+as advice to whoever wrote the model — and why the generated-name collision refusal of §8
+lands here rather than in `outputPortEnvOf`, where it would have to guess at names it has not
+finished generating.
+-/
+def guardGeneralProgram
+    (program : LF.GeneralProgram) :
+    Except String LF.GeneralProgram :=
+  match program.wellFormed with
+
+  | true =>
+      .ok program
+
+  | false =>
+      .error
+        ("the translated LF program is not well-formed: " ++
+          generalProgramExplanation program)
+
+/--
+The guard accepts a well-formed program unchanged.
+-/
+theorem guardGeneralProgram_of_wellFormed
+    {program : LF.GeneralProgram}
+    (hWellFormed :
+      program.wellFormed = true) :
+    guardGeneralProgram program =
+      .ok program := by
+  simp [
+    guardGeneralProgram,
+    hWellFormed
+  ]
+
+/--
+What the guard returns, it returns unchanged.
+
+Stated separately from the well-formedness half because the two are used in different places:
+the inversion lemmas need this one to rewrite `assembleGeneralProgram …` into the accepted
+program, and §9.1's boundary theorems need the other.
+-/
+theorem eq_of_guardGeneralProgram_ok
+    {program accepted : LF.GeneralProgram}
+    (hGuard :
+      guardGeneralProgram program =
+        .ok accepted) :
+    program = accepted := by
+  revert hGuard
+  unfold guardGeneralProgram
+  cases program.wellFormed <;>
+    simp
+
+/--
+Anything the guard accepts is a well-formed LF program.
+
+The two-case proof the design bought by deciding on the real predicate rather than on a
+mirror. Everything §9.1 says about the *translation's* output — and, through
+`compileGeneralModel_targetEndpointsUnique`, everything it says about many-to-one connections
+— goes through this theorem.
+-/
+theorem guardGeneralProgram_wellFormed
+    {program accepted : LF.GeneralProgram}
+    (hGuard :
+      guardGeneralProgram program =
+        .ok accepted) :
+    program.wellFormed = true := by
+  revert hGuard
+  unfold guardGeneralProgram
+  cases program.wellFormed <;>
+    simp
 
 /--
 Translate a model into a program.
 
-The entry point of stage D.
+The entry point of stage E, and three steps now rather than one. The routing table is built
+**first**, from the whole model, because both port lists and the connection list are
+projections of it and because a binding that cannot be resolved should be reported before any
+class is compiled. Then every class is compiled against that table. Then the guard.
+
+Ordering the routing first also fixes which diagnostic a doubly-broken model produces: a
+model with an unresolvable binding *and* a class whose constructor cannot be compiled reports
+the binding. That is a change from stage D — where no such choice existed — and it is the
+right way round, because an unresolved binding usually explains the body failure downstream
+of it.
 -/
 def compileGeneralModel
     (model : DTR.GeneralModel) :
     Except String LF.GeneralProgram :=
-  match compileGeneralReactiveClasses model.classes with
+  match routesOf model with
 
   | .error message =>
       .error message
 
-  | .ok compiledReactors =>
-      .ok
-        (assembleGeneralProgram
-          model
-          compiledReactors)
+  | .ok routes =>
+      match
+          compileGeneralReactiveClasses
+            model.classes
+            routes
+            model.classes with
 
+      | .error message =>
+          .error message
+
+      | .ok compiledReactors =>
+          guardGeneralProgram
+            (assembleGeneralProgram
+              model
+              routes
+              compiledReactors)
+
+/--
+What `compileGeneralModel` reduces to once routing and every class have succeeded.
+
+Note the shape: the right-hand side is the **guard applied to** the assembled program, not
+the assembled program. Stage D's version of this lemma ended in `.ok`, and every consumer of
+it that assumed the assembled program *is* the result has to be re-read — which is precisely
+what §9.1's boundary theorems do below, each one now going through
+`eq_of_guardGeneralProgram_ok` first.
+-/
 theorem compileGeneralModel_ok
     {model : DTR.GeneralModel}
+    {routes : List GeneralRoute}
     {compiledReactors : List LF.GeneralReactor}
+    (hRoutes :
+      routesOf model =
+        .ok routes)
     (hClasses :
-      compileGeneralReactiveClasses model.classes =
+      compileGeneralReactiveClasses
+          model.classes
+          routes
+          model.classes =
         .ok compiledReactors) :
     compileGeneralModel model =
-      .ok
+      guardGeneralProgram
         (assembleGeneralProgram
           model
+          routes
           compiledReactors) := by
   simp [
     compileGeneralModel,
+    hRoutes,
     hClasses
   ]
 
-theorem compileGeneralModel_error
+/--
+Routing failed, so the model does not translate.
+
+The failure stage E adds at model level. `routesOf` refuses a binding that names an instance
+the main block never declared, a binding that names an instance of a class that is not the
+declared known rebec's class, and a send whose payload cannot be typed — the three the two
+new `lean-reject` documents exercise.
+-/
+theorem compileGeneralModel_error_routes
     {model : DTR.GeneralModel}
     {message : String}
-    (hClasses :
-      compileGeneralReactiveClasses model.classes =
+    (hRoutes :
+      routesOf model =
         .error message) :
     compileGeneralModel model =
       .error message := by
   simp [
     compileGeneralModel,
+    hRoutes
+  ]
+
+theorem compileGeneralModel_error_classes
+    {model : DTR.GeneralModel}
+    {routes : List GeneralRoute}
+    {message : String}
+    (hRoutes :
+      routesOf model =
+        .ok routes)
+    (hClasses :
+      compileGeneralReactiveClasses
+          model.classes
+          routes
+          model.classes =
+        .error message) :
+    compileGeneralModel model =
+      .error message := by
+  simp [
+    compileGeneralModel,
+    hRoutes,
     hClasses
   ]
 
@@ -1600,24 +2554,42 @@ a later stage that needs one should extend this list deliberately rather than in
 -/
 
 private theorem exists_of_compileGeneralBody_cons_ok
+    {env : GeneralOutputPortEnv}
+    {bodyKey : GeneralBodyKey}
+    {index : Nat}
     {statement : DTR.GeneralStmt}
     {remaining : DTR.GeneralBody}
     {compiled : LF.GeneralBody}
     (hCompiled :
       compileGeneralBody
+          env
+          bodyKey
+          index
           (statement :: remaining) =
         .ok compiled) :
     ∃ compiledStatement compiledRemaining,
-      compileGeneralStmt statement =
+      compileGeneralStmt
+          env
+          bodyKey
+          index
+          statement =
           .ok compiledStatement ∧
-        compileGeneralBody remaining =
+        compileGeneralBody
+            env
+            bodyKey
+            (index + 1)
+            remaining =
             .ok compiledRemaining ∧
           compiled =
             compiledStatement ::
               compiledRemaining := by
 
   cases hStatement :
-      compileGeneralStmt statement with
+      compileGeneralStmt
+        env
+        bodyKey
+        index
+        statement with
 
   | error message =>
       rw [
@@ -1628,7 +2600,11 @@ private theorem exists_of_compileGeneralBody_cons_ok
 
   | ok compiledStatement =>
       cases hRemaining :
-          compileGeneralBody remaining with
+          compileGeneralBody
+            env
+            bodyKey
+            (index + 1)
+            remaining with
 
       | error message =>
           rw [
@@ -1654,33 +2630,62 @@ private theorem exists_of_compileGeneralBody_cons_ok
               hResult.symm
             ⟩
 
-private theorem exists_of_compileGeneralMessageServerReaction_ok
+/--
+Inverting the reaction **group**, which is where stage E's shape change reaches the inversion
+layer.
+
+The existential now produces a list rather than a reaction, and the equation it ends in names
+both halves of the group explicitly — the action reaction consed onto the port reactions —
+because that spelling is what §9.2's replacement order theorems consume. Nothing else about
+the idiom changes.
+-/
+private theorem exists_of_compileGeneralMessageServerReactionGroup_ok
+    {env : GeneralOutputPortEnv}
+    {routes : List GeneralRoute}
+    {className : ClassName}
     {server : DTR.GeneralMessageServer}
-    {reaction : LF.GeneralReaction}
+    {group : List LF.GeneralReaction}
     (hCompiled :
-      compileGeneralMessageServerReaction server =
-        .ok reaction) :
+      compileGeneralMessageServerReactionGroup
+          env
+          routes
+          className
+          server =
+        .ok group) :
     ∃ compiledBody,
-      compileGeneralBody server.body =
+      compileGeneralBody
+          env
+          (.messageServer server.name)
+          0
+          server.body =
           .ok compiledBody ∧
-        reaction =
+        group =
           assembleGeneralMessageReaction
-            server
-            compiledBody := by
+              server
+              compiledBody ::
+            assembleGeneralPortReactions
+              className
+              server
+              compiledBody
+              routes := by
 
   cases hBody :
-      compileGeneralBody server.body with
+      compileGeneralBody
+        env
+        (.messageServer server.name)
+        0
+        server.body with
 
   | error message =>
       rw [
-        compileGeneralMessageServerReaction_error
+        compileGeneralMessageServerReactionGroup_error
           hBody
       ] at hCompiled
       simp at hCompiled
 
   | ok compiledBody =>
       rw [
-        compileGeneralMessageServerReaction_ok
+        compileGeneralMessageServerReactionGroup_ok
           hBody
       ] at hCompiled
       injection hCompiled with hResult
@@ -1692,13 +2697,20 @@ private theorem exists_of_compileGeneralMessageServerReaction_ok
         ⟩
 
 private theorem exists_of_compileGeneralConstructor_ok
+    {env : GeneralOutputPortEnv}
     {classConstructor : DTR.GeneralConstructor}
     {reaction : LF.GeneralReaction}
     (hCompiled :
-      compileGeneralConstructor classConstructor =
+      compileGeneralConstructor
+          env
+          classConstructor =
         .ok reaction) :
     ∃ compiledBody,
-      compileGeneralBody classConstructor.body =
+      compileGeneralBody
+          env
+          .constructor
+          0
+          classConstructor.body =
           .ok compiledBody ∧
         reaction =
           assembleGeneralStartupReaction
@@ -1706,7 +2718,11 @@ private theorem exists_of_compileGeneralConstructor_ok
             compiledBody := by
 
   cases hBody :
-      compileGeneralBody classConstructor.body with
+      compileGeneralBody
+        env
+        .constructor
+        0
+        classConstructor.body with
 
   | error message =>
       rw [
@@ -1729,9 +2745,16 @@ private theorem exists_of_compileGeneralConstructor_ok
         ⟩
 
 private theorem eq_nil_of_compileGeneralMessageServerReactions_nil_ok
+    {env : GeneralOutputPortEnv}
+    {routes : List GeneralRoute}
+    {className : ClassName}
     {compiled : List LF.GeneralReaction}
     (hCompiled :
-      compileGeneralMessageServerReactions [] =
+      compileGeneralMessageServerReactions
+          env
+          routes
+          className
+          [] =
         .ok compiled) :
     compiled = [] := by
   rw [
@@ -1741,24 +2764,42 @@ private theorem eq_nil_of_compileGeneralMessageServerReactions_nil_ok
   exact hResult.symm
 
 private theorem exists_of_compileGeneralMessageServerReactions_cons_ok
+    {env : GeneralOutputPortEnv}
+    {routes : List GeneralRoute}
+    {className : ClassName}
     {server : DTR.GeneralMessageServer}
     {remaining : List DTR.GeneralMessageServer}
     {compiled : List LF.GeneralReaction}
     (hCompiled :
       compileGeneralMessageServerReactions
+          env
+          routes
+          className
           (server :: remaining) =
         .ok compiled) :
-    ∃ reaction compiledRemaining,
-      compileGeneralMessageServerReaction server =
-          .ok reaction ∧
-        compileGeneralMessageServerReactions remaining =
+    ∃ group compiledRemaining,
+      compileGeneralMessageServerReactionGroup
+          env
+          routes
+          className
+          server =
+          .ok group ∧
+        compileGeneralMessageServerReactions
+            env
+            routes
+            className
+            remaining =
             .ok compiledRemaining ∧
           compiled =
-            reaction ::
+            group ++
               compiledRemaining := by
 
   cases hServer :
-      compileGeneralMessageServerReaction server with
+      compileGeneralMessageServerReactionGroup
+        env
+        routes
+        className
+        server with
 
   | error message =>
       rw [
@@ -1767,9 +2808,13 @@ private theorem exists_of_compileGeneralMessageServerReactions_cons_ok
       ] at hCompiled
       simp at hCompiled
 
-  | ok reaction =>
+  | ok group =>
       cases hRemaining :
-          compileGeneralMessageServerReactions remaining with
+          compileGeneralMessageServerReactions
+            env
+            routes
+            className
+            remaining with
 
       | error message =>
           rw [
@@ -1788,72 +2833,134 @@ private theorem exists_of_compileGeneralMessageServerReactions_cons_ok
           injection hCompiled with hResult
           exact
             ⟨
-              reaction,
+              group,
               compiledRemaining,
               rfl,
               rfl,
               hResult.symm
             ⟩
 
+/--
+Inverting one class, which now has three sub-computations rather than two.
+
+The environment is existentially quantified along with the two reaction groups, and it has to
+be: `outputPortEnvOf` is a function of the class list and the class, so the env is *determined*
+here, but the consumers of this lemma — every port theorem in §9.1 — need a name for it to
+state what the reactor's `outputPorts` are.
+-/
 private theorem exists_of_compileGeneralReactiveClass_ok
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
     {reactiveClass : DTR.GeneralReactiveClass}
     {reactor : LF.GeneralReactor}
     (hCompiled :
-      compileGeneralReactiveClass reactiveClass =
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
         .ok reactor) :
-    ∃ compiledStartupReaction compiledMessageReactions,
-      compileGeneralConstructor reactiveClass.constructor =
-          .ok compiledStartupReaction ∧
-        compileGeneralMessageServerReactions reactiveClass.messageServers =
-            .ok compiledMessageReactions ∧
-          reactor =
-            assembleGeneralReactor
-              reactiveClass
-              compiledStartupReaction
-              compiledMessageReactions := by
+    ∃ env compiledStartupReaction compiledMessageReactions,
+      outputPortEnvOf
+          classes
+          reactiveClass =
+          .ok env ∧
+        compileGeneralConstructor
+            env
+            reactiveClass.constructor =
+            .ok compiledStartupReaction ∧
+          compileGeneralMessageServerReactions
+              env
+              routes
+              reactiveClass.name
+              reactiveClass.messageServers =
+              .ok compiledMessageReactions ∧
+            reactor =
+              assembleGeneralReactor
+                reactiveClass
+                env
+                routes
+                compiledStartupReaction
+                compiledMessageReactions := by
 
-  cases hConstructor :
-      compileGeneralConstructor reactiveClass.constructor with
+  cases hEnv :
+      outputPortEnvOf
+        classes
+        reactiveClass with
 
   | error message =>
       rw [
-        compileGeneralReactiveClass_error_constructor
-          hConstructor
+        compileGeneralReactiveClass_error_env
+          hEnv
       ] at hCompiled
       simp at hCompiled
 
-  | ok compiledStartupReaction =>
-      cases hMessageServers :
-          compileGeneralMessageServerReactions reactiveClass.messageServers with
+  | ok env =>
+      cases hConstructor :
+          compileGeneralConstructor
+            env
+            reactiveClass.constructor with
 
       | error message =>
           rw [
-            compileGeneralReactiveClass_error_messageServers
+            compileGeneralReactiveClass_error_constructor
+              hEnv
               hConstructor
-              hMessageServers
           ] at hCompiled
           simp at hCompiled
 
-      | ok compiledMessageReactions =>
-          rw [
-            compileGeneralReactiveClass_ok
-              hConstructor
-              hMessageServers
-          ] at hCompiled
-          injection hCompiled with hResult
-          exact
-            ⟨
-              compiledStartupReaction,
-              compiledMessageReactions,
-              rfl,
-              rfl,
-              hResult.symm
-            ⟩
+      | ok compiledStartupReaction =>
+          cases hMessageServers :
+              compileGeneralMessageServerReactions
+                env
+                routes
+                reactiveClass.name
+                reactiveClass.messageServers with
+
+          | error message =>
+              rw [
+                compileGeneralReactiveClass_error_messageServers
+                  hEnv
+                  hConstructor
+                  hMessageServers
+              ] at hCompiled
+              simp at hCompiled
+
+          | ok compiledMessageReactions =>
+              rw [
+                compileGeneralReactiveClass_ok
+                  hEnv
+                  hConstructor
+                  hMessageServers
+              ] at hCompiled
+              injection hCompiled with hResult
+
+              -- `rfl` closes the first conjunct and *only* the first, which is worth
+              -- recording because guessing uniformly either way fails here. `cases h : e`
+              -- rewrites `e` in the goal to the matched pattern, and
+              -- `outputPortEnvOf classes reactiveClass` is a closed term, so conjunct one
+              -- arrives already reduced to `.ok env = .ok env`. The next two are applied to
+              -- the existential's own bound variables, which no such rewrite can reach, so
+              -- they need the hypotheses the cases produced.
+              exact
+                ⟨
+                  env,
+                  compiledStartupReaction,
+                  compiledMessageReactions,
+                  rfl,
+                  hConstructor,
+                  hMessageServers,
+                  hResult.symm
+                ⟩
 
 private theorem eq_nil_of_compileGeneralReactiveClasses_nil_ok
+    {allClasses : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
     {compiled : List LF.GeneralReactor}
     (hCompiled :
-      compileGeneralReactiveClasses [] =
+      compileGeneralReactiveClasses
+          allClasses
+          routes
+          [] =
         .ok compiled) :
     compiled = [] := by
   rw [
@@ -1863,24 +2970,37 @@ private theorem eq_nil_of_compileGeneralReactiveClasses_nil_ok
   exact hResult.symm
 
 private theorem exists_of_compileGeneralReactiveClasses_cons_ok
+    {allClasses : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
     {reactiveClass : DTR.GeneralReactiveClass}
     {remaining : List DTR.GeneralReactiveClass}
     {compiled : List LF.GeneralReactor}
     (hCompiled :
       compileGeneralReactiveClasses
+          allClasses
+          routes
           (reactiveClass :: remaining) =
         .ok compiled) :
     ∃ reactor compiledRemaining,
-      compileGeneralReactiveClass reactiveClass =
+      compileGeneralReactiveClass
+          allClasses
+          routes
+          reactiveClass =
           .ok reactor ∧
-        compileGeneralReactiveClasses remaining =
+        compileGeneralReactiveClasses
+            allClasses
+            routes
+            remaining =
             .ok compiledRemaining ∧
           compiled =
             reactor ::
               compiledRemaining := by
 
   cases hClass :
-      compileGeneralReactiveClass reactiveClass with
+      compileGeneralReactiveClass
+        allClasses
+        routes
+        reactiveClass with
 
   | error message =>
       rw [
@@ -1891,7 +3011,10 @@ private theorem exists_of_compileGeneralReactiveClasses_cons_ok
 
   | ok reactor =>
       cases hRemaining :
-          compileGeneralReactiveClasses remaining with
+          compileGeneralReactiveClasses
+            allClasses
+            routes
+            remaining with
 
       | error message =>
           rw [
@@ -1917,66 +3040,132 @@ private theorem exists_of_compileGeneralReactiveClasses_cons_ok
               hResult.symm
             ⟩
 
+/--
+Inverting the model, and the one place in this section where the idiom's last step changes.
+
+Stage D's version finished with `injection`, because `compileGeneralModel` finished with `.ok`.
+Stage E's finishes with the guard, so the successful branch's equation is
+`guardGeneralProgram (assembleGeneralProgram …) = .ok program` — not a constructor application
+at all — and `injection` has nothing to take apart. `eq_of_guardGeneralProgram_ok` does that
+work instead, which is the reason that lemma is stated separately from the well-formedness
+half.
+
+The consequence is worth writing down because every §9.1 theorem inherits it: the guard is
+**transparent to shape**. What it accepts, it accepts unchanged, so every arithmetic fact about
+the assembled program is a fact about the returned program, and the port and connection
+theorems below need no new hypothesis to say so.
+-/
 private theorem exists_of_compileGeneralModel_ok
     {model : DTR.GeneralModel}
     {program : LF.GeneralProgram}
     (hCompiled :
       compileGeneralModel model =
         .ok program) :
-    ∃ compiledReactors,
-      compileGeneralReactiveClasses model.classes =
-          .ok compiledReactors ∧
-        program =
-          assembleGeneralProgram
-            model
-            compiledReactors := by
+    ∃ routes compiledReactors,
+      routesOf model =
+          .ok routes ∧
+        compileGeneralReactiveClasses
+            model.classes
+            routes
+            model.classes =
+            .ok compiledReactors ∧
+          program =
+            assembleGeneralProgram
+              model
+              routes
+              compiledReactors := by
 
-  cases hClasses :
-      compileGeneralReactiveClasses model.classes with
+  cases hRoutes :
+      routesOf model with
 
   | error message =>
       rw [
-        compileGeneralModel_error
-          hClasses
+        compileGeneralModel_error_routes
+          hRoutes
       ] at hCompiled
       simp at hCompiled
 
-  | ok compiledReactors =>
-      rw [
-        compileGeneralModel_ok
-          hClasses
-      ] at hCompiled
-      injection hCompiled with hResult
-      exact
-        ⟨
-          compiledReactors,
-          rfl,
-          hResult.symm
-        ⟩
+  | ok routes =>
+      cases hClasses :
+          compileGeneralReactiveClasses
+            model.classes
+            routes
+            model.classes with
+
+      | error message =>
+          rw [
+            compileGeneralModel_error_classes
+              hRoutes
+              hClasses
+          ] at hCompiled
+          simp at hCompiled
+
+      | ok compiledReactors =>
+          rw [
+            compileGeneralModel_ok
+              hRoutes
+              hClasses
+          ] at hCompiled
+          -- `rfl` for the first conjunct and the hypothesis for the second, for the reason
+          -- given at `exists_of_compileGeneralReactiveClass_ok`: `routesOf model` is closed
+          -- and was rewritten by the cases, `compileGeneralReactiveClasses model.classes
+          -- routes model.classes` mentions the bound `routes` and was not.
+          exact
+            ⟨
+              routes,
+              compiledReactors,
+              rfl,
+              hClasses,
+              (eq_of_guardGeneralProgram_ok
+                hCompiled).symm
+            ⟩
 
 /-!
 ## The boundary, as arithmetic
 
-Three facts about stage D's output that this document would otherwise only assert: reactors
-have no ports, programs have no connections, and the reactor list is the class list. When
-stage E arrives, the first two are the theorems that must *change*, which is the cheapest
-possible alarm that the boundary has moved — cheaper than a review, and it fires at build
-time.
+Stage D wrote three facts here — reactors have no ports, programs have no connections, the
+reactor list is the class list — and predicted that *"when stage E arrives, the first two are
+the theorems that must change, which is the cheapest possible alarm that the boundary has
+moved."* The prediction held exactly: both broke, at build time, and neither could be repaired
+by editing a proof. What follows is their replacement.
+
+The replacements are **not** weakenings. Each one states where the ports and the connections
+come from, which is strictly more than the old ones said, and each is still an equation
+between two lists rather than a claim about sets or lengths — so stage F can still name a
+port by position.
+
+Two shapes appear, and the difference between them is the port asymmetry showing up in the
+proofs. Input ports are a projection of the *model's* routes and the class's name, so the
+class-level theorem states them outright. Output ports are a projection of the class's
+*environment*, and the environment is a computation that can fail, so every theorem that
+mentions output ports has to produce the resolution alongside them. That is why
+`compileGeneralReactiveClass_outputPorts` is an existential and its input-port twin is not.
 -/
 
 /--
-A compiled reactor declares no ports.
+A compiled reactor's input ports are the routing projection for its class.
+
+Stage D's `compileGeneralReactiveClass_ports` in the half that survives without an
+existential. The right-hand side does not mention the class list, the environment, or anything
+this function computed: input ports are decided entirely by the model's routing table and the
+receiving class's name, which is the whole content of the design's *"input ports are declared
+on the receiving class as a union over every sending instance."*
 -/
-theorem compileGeneralReactiveClass_ports
+theorem compileGeneralReactiveClass_inputPorts
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
     {reactiveClass : DTR.GeneralReactiveClass}
     {reactor : LF.GeneralReactor}
     (hCompiled :
-      compileGeneralReactiveClass reactiveClass =
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
         .ok reactor) :
     reactor.inputPorts =
-        [] ∧
-      reactor.outputPorts =
-        [] := by
+      generalInputPortsOf
+        reactiveClass.name
+        routes := by
 
   rcases
       exists_of_compileGeneralReactiveClass_ok
@@ -1986,22 +3175,81 @@ theorem compileGeneralReactiveClass_ports
       _,
       _,
       _,
+      _,
+      _,
+      hReactor
+    ⟩
+
+  subst hReactor
+  simp
+
+/--
+A compiled reactor's output ports are the projection of the environment that was resolved for
+its class.
+
+The existential is not slack: `outputPortEnvOf` is a function, so the environment is
+determined by the two arguments, and this theorem's `∃` merely gives it a name. Stating it
+that way rather than with `outputPortEnvOf classes reactiveClass` inlined on the right keeps
+the conclusion an equation between two *port lists* — `generalOutputPortsOf` applied to an
+`Except` would not typecheck, and pushing the resolution into the statement with a hypothesis
+would force every caller to have resolved it first.
+-/
+theorem compileGeneralReactiveClass_outputPorts
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {reactor : LF.GeneralReactor}
+    (hCompiled :
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok reactor) :
+    ∃ env,
+      outputPortEnvOf
+          classes
+          reactiveClass =
+          .ok env ∧
+        reactor.outputPorts =
+          generalOutputPortsOf
+            env := by
+
+  rcases
+      exists_of_compileGeneralReactiveClass_ok
+        hCompiled with
+    ⟨
+      env,
+      _,
+      _,
+      hEnv,
+      _,
+      _,
       hReactor
     ⟩
 
   subst hReactor
 
-  constructor <;>
-    simp
+  exact
+    ⟨
+      env,
+      hEnv,
+      by
+        simp
+    ⟩
 
 /--
 A compiled reactor is named after its class.
 -/
 theorem compileGeneralReactiveClass_name
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
     {reactiveClass : DTR.GeneralReactiveClass}
     {reactor : LF.GeneralReactor}
     (hCompiled :
-      compileGeneralReactiveClass reactiveClass =
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
         .ok reactor) :
     reactor.name =
       reactorNameFor reactiveClass.name := by
@@ -2014,6 +3262,8 @@ theorem compileGeneralReactiveClass_name
       _,
       _,
       _,
+      _,
+      _,
       hReactor
     ⟩
 
@@ -2021,26 +3271,48 @@ theorem compileGeneralReactiveClass_name
   simp
 
 /--
-No reactor of a compiled program declares a port.
+Every reactor of a compiled class list has some class's ports, and both port lists are routing
+projections of that class.
 
-The class-level statement is what the design asks for; this is the one the design's §8
-argument actually uses, since the printer's refusals are justified by what a *program*
-looks like. Membership rather than a list equality, because the property has to hold of an
-arbitrary reactor a later proof picks out of the list.
+Stage D's membership-shaped theorem, with `[]` replaced by the two projections and the class
+they belong to produced as a witness. The witness is what makes this usable: at program level
+a reactor is picked out of a list, and nothing in the picking says which class it came from,
+so a theorem that could not name the class would say nothing an argument about the *printer's*
+output could consume.
+
+`allClasses` and `classes` are both quantified and are *not* required to be equal. The
+induction walks the second; the first is the lookup table, held fixed. `compileGeneralModel`
+instantiates both to `model.classes`, and no theorem here needs them related — which is worth
+noticing, because it means this induction stays valid if a later stage compiles a subset of
+the classes.
 -/
 theorem compileGeneralReactiveClasses_ports :
-    ∀ (classes : List DTR.GeneralReactiveClass)
+    ∀ (allClasses : List DTR.GeneralReactiveClass)
+      (routes : List GeneralRoute)
+      (classes : List DTR.GeneralReactiveClass)
       (compiled : List LF.GeneralReactor),
-      compileGeneralReactiveClasses classes =
+      compileGeneralReactiveClasses
+          allClasses
+          routes
+          classes =
           .ok compiled →
         ∀ (reactor : LF.GeneralReactor),
           reactor ∈ compiled →
-            reactor.inputPorts =
-                [] ∧
-              reactor.outputPorts =
-                [] := by
+            ∃ reactiveClass env,
+              reactiveClass ∈ classes ∧
+                outputPortEnvOf
+                    allClasses
+                    reactiveClass =
+                    .ok env ∧
+                  reactor.inputPorts =
+                      generalInputPortsOf
+                        reactiveClass.name
+                        routes ∧
+                    reactor.outputPorts =
+                      generalOutputPortsOf
+                        env := by
 
-  intro classes
+  intro allClasses routes classes
   induction classes with
 
   | nil =>
@@ -2074,25 +3346,66 @@ theorem compileGeneralReactiveClasses_ports :
       | inl hHead =>
           subst hHead
 
+          rcases
+              compileGeneralReactiveClass_outputPorts
+                hClass with
+            ⟨
+              env,
+              hEnv,
+              hOutputPorts
+            ⟩
+
           exact
-            compileGeneralReactiveClass_ports
-              hClass
+            ⟨
+              reactiveClass,
+              env,
+              List.mem_cons.mpr
+                (Or.inl rfl),
+              hEnv,
+              compileGeneralReactiveClass_inputPorts
+                hClass,
+              hOutputPorts
+            ⟩
 
       | inr hTail =>
+          rcases
+              inductionHypothesis
+                compiledRemaining
+                hRemaining
+                reactor
+                hTail with
+            ⟨
+              witnessClass,
+              env,
+              hWitnessMember,
+              hEnv,
+              hInputPorts,
+              hOutputPorts
+            ⟩
+
           exact
-            inductionHypothesis
-              compiledRemaining
-              hRemaining
-              reactor
-              hTail
+            ⟨
+              witnessClass,
+              env,
+              List.mem_cons.mpr
+                (Or.inr hWitnessMember),
+              hEnv,
+              hInputPorts,
+              hOutputPorts
+            ⟩
 
 /--
-A compiled program has no connections.
+A compiled program's connections are the routing projection of the model's routes.
 
-The theorem stage E has to break. It is `rfl` under the assembler, and that is the point of
-routing the program through a total assembler in the first place: the empty connection list
-is a property of a function with no failure case, so no branch of the partial layer can be
-the one that quietly adds a connection.
+The theorem stage E had to break, in its replacement form. It is still `rfl` under the
+assembler and the guard, and that remains the point of routing the program through a total
+assembler: the connection list is a property of a function with no failure case, so no branch
+of the partial layer can quietly add or drop a connection, and the guard — which is the only
+thing between the assembler and the caller — is transparent to shape.
+
+One connection per route, in `routesOf`'s order, which is main-block declaration order. That
+is a stronger statement than the empty list ever was, and it is what the target gate's *"three
+connections on one `Gateway`"* assertion checks from the outside.
 -/
 theorem compileGeneralModel_connections
     {model : DTR.GeneralModel}
@@ -2100,20 +3413,33 @@ theorem compileGeneralModel_connections
     (hCompiled :
       compileGeneralModel model =
         .ok program) :
-    program.connections =
-      [] := by
+    ∃ routes,
+      routesOf model =
+          .ok routes ∧
+        program.connections =
+          generalConnectionsOf
+            routes := by
 
   rcases
       exists_of_compileGeneralModel_ok
         hCompiled with
     ⟨
+      routes,
       _,
+      hRoutes,
       _,
       hProgram
     ⟩
 
   subst hProgram
-  simp
+
+  exact
+    ⟨
+      routes,
+      hRoutes,
+      by
+        simp
+    ⟩
 
 /--
 A compiled program instantiates exactly the model's actors, in source order.
@@ -2134,6 +3460,8 @@ theorem compileGeneralModel_instances
     ⟨
       _,
       _,
+      _,
+      _,
       hProgram
     ⟩
 
@@ -2141,7 +3469,15 @@ theorem compileGeneralModel_instances
   simp
 
 /--
-No reactor of a compiled program declares a port.
+Every reactor of a compiled program has some class's ports, and both port lists are routing
+projections of that class.
+
+The program-level form, and the one an argument about the printer's output uses. Stage D's
+version of this theorem was the load-bearing half of its §8 argument — the printer's refusals
+were justified by *"no reactor declares a port"* — and that justification is gone. What
+replaces it is not another blanket claim about the printer but the guard: a program whose
+generated port names collide, or whose connections name an endpoint no reactor declares, is
+refused by `guardGeneralProgram` before any caller can print it.
 -/
 theorem compileGeneralModel_ports
     {model : DTR.GeneralModel}
@@ -2149,23 +3485,44 @@ theorem compileGeneralModel_ports
     (hCompiled :
       compileGeneralModel model =
         .ok program) :
-    ∀ (reactor : LF.GeneralReactor),
-      reactor ∈ program.reactors →
-        reactor.inputPorts =
-            [] ∧
-          reactor.outputPorts =
-            [] := by
+    ∃ routes,
+      routesOf model =
+          .ok routes ∧
+        ∀ (reactor : LF.GeneralReactor),
+          reactor ∈ program.reactors →
+            ∃ reactiveClass env,
+              reactiveClass ∈ model.classes ∧
+                outputPortEnvOf
+                    model.classes
+                    reactiveClass =
+                    .ok env ∧
+                  reactor.inputPorts =
+                      generalInputPortsOf
+                        reactiveClass.name
+                        routes ∧
+                    reactor.outputPorts =
+                      generalOutputPortsOf
+                        env := by
 
   rcases
       exists_of_compileGeneralModel_ok
         hCompiled with
     ⟨
+      routes,
       compiledReactors,
+      hRoutes,
       hClasses,
       hProgram
     ⟩
 
   subst hProgram
+
+  refine
+    ⟨
+      routes,
+      hRoutes,
+      ?_
+    ⟩
 
   intro reactor hMember
 
@@ -2176,6 +3533,8 @@ theorem compileGeneralModel_ports
   exact
     compileGeneralReactiveClasses_ports
       model.classes
+      routes
+      model.classes
       compiledReactors
       hClasses
       reactor
@@ -2185,9 +3544,14 @@ theorem compileGeneralModel_ports
 The reactor names of a compiled class list are the class names, in source order.
 -/
 theorem compileGeneralReactiveClasses_reactorNames :
-    ∀ (classes : List DTR.GeneralReactiveClass)
+    ∀ (allClasses : List DTR.GeneralReactiveClass)
+      (routes : List GeneralRoute)
+      (classes : List DTR.GeneralReactiveClass)
       (compiled : List LF.GeneralReactor),
-      compileGeneralReactiveClasses classes =
+      compileGeneralReactiveClasses
+          allClasses
+          routes
+          classes =
           .ok compiled →
         compiled.map
             (fun reactor =>
@@ -2196,7 +3560,7 @@ theorem compileGeneralReactiveClasses_reactorNames :
             (fun reactiveClass =>
               reactorNameFor reactiveClass.name) := by
 
-  intro classes
+  intro allClasses routes classes
   induction classes with
 
   | nil =>
@@ -2237,6 +3601,10 @@ A compiled program declares one reactor per class, named after that class, in so
 Not merely the same *set* of names: the equality is between two `map`s over the same list,
 so it fixes the order too. Stage F's fan-in work has to name a reactor by position in
 several places at once, and this is what makes that reference stable.
+
+Untouched in substance by stage E, which is worth one line of comment: the reactor list is the
+only part of the program that routing does not reshape, because a route changes what a reactor
+*declares* and never how many reactors there are.
 -/
 theorem compileGeneralModel_reactorNames
     {model : DTR.GeneralModel}
@@ -2255,7 +3623,9 @@ theorem compileGeneralModel_reactorNames
       exists_of_compileGeneralModel_ok
         hCompiled with
     ⟨
+      routes,
       compiledReactors,
+      _,
       hClasses,
       hProgram
     ⟩
@@ -2268,6 +3638,8 @@ theorem compileGeneralModel_reactorNames
 
   exact
     compileGeneralReactiveClasses_reactorNames
+      model.classes
+      routes
       model.classes
       compiledReactors
       hClasses
@@ -2286,6 +3658,30 @@ Each is proved by induction with `change` and `congrArg`, the pattern of
 `Store.keys_mapValuesWithKey`, rather than by `simp [List.map_map]`. Both work; the
 induction does not depend on how the simp set normalizes a composition under a binder,
 and this file cannot be elaborated where it is written.
+
+**Stage E falsified two of these theorems outright, and they are replaced rather than
+weakened.** Stage D's `compileGeneralMessageServerReactions_names` and
+`compileGeneralReactiveClass_reactionNames` both said a class's reaction names are
+`messageServers.map messageReactionNameFor` — one reaction per message server. §7.3 makes that
+false: a message server reached by two external senders gets its action reaction *and* two port
+reactions, so the reaction list is longer than the server list and no substitution on the
+right-hand side can fix a length mismatch.
+
+The replacements are stated against a **specification function**, `generalReactionNamesOf`, and
+that deserves a defence because a specification that mirrors the implementation can be vacuous.
+This one is not, for a reason that is checkable by reading it: the specification is written
+entirely in terms of *names* — `messageReactionNameFor`, `portReactionNameFor`, and the route
+filter — while the implementation is written in terms of *reactions*, through
+`assembleGeneralMessageReaction` and `assembleGeneralPortReactions`. The theorem therefore
+pins three things a reordering would break: that the action reaction comes first in each group,
+that a group's port reactions follow the route order, and that groups appear in message-server
+source order. Those are exactly what stage G permutes and what stage F's fan-in ordering
+argument reads.
+
+`List.flatMap` was the obvious alternative spelling and is deliberately avoided: its core name
+has churned in the same family as `List.enum` and `String.capitalize`, and this development
+depends on no such function. An explicit recursive specification costs nine lines and cannot
+churn.
 -/
 
 /--
@@ -2398,32 +3794,150 @@ theorem compileGeneralStateVariableDecl_names :
           inductionHypothesis
 
 /--
-Compiled reactions carry the message-reaction names of their message servers, in source
-order.
+The reaction names one message server contributes, in the order they are declared.
+
+The specification the section note above defends. Total, and independent of both the
+translation and the `Except` layer — a reader can compare it against the design's §7.3 table
+without holding any of this file in their head.
+
+`routes` and `className` are before the colon because neither varies in the recursion; the
+server list is after it, which is the same discipline every recursive definition in this
+development follows.
+-/
+def generalReactionNamesOf
+    (routes : List GeneralRoute)
+    (className : ClassName) :
+    List DTR.GeneralMessageServer →
+    List ReactionName
+
+  | [] =>
+      []
+
+  | server :: remaining =>
+      (messageReactionNameFor server.name ::
+          (generalRoutesIntoMessageServer
+            className
+            server.name
+            routes).map
+            (fun route =>
+              portReactionNameFor
+                (generalInputPortOfRoute route))) ++
+        generalReactionNamesOf
+          routes
+          className
+          remaining
+
+/--
+One message server's reaction group carries its action reaction first, then one port reaction
+per route into it, in route order.
+
+The group-level half of the replacement, and the place the naming rule is pinned. Note what it
+says about a message server nothing sends to from outside: the filtered route list is empty, so
+the group is a one-element list and the reactor looks exactly as stage D left it. That is the
+precise sense in which stage E is conservative on the inherited fixtures — not an appeal to
+their contents, but a consequence of this equation.
+-/
+theorem compileGeneralMessageServerReactionGroup_names
+    {env : GeneralOutputPortEnv}
+    {routes : List GeneralRoute}
+    {className : ClassName}
+    {server : DTR.GeneralMessageServer}
+    {group : List LF.GeneralReaction}
+    (hCompiled :
+      compileGeneralMessageServerReactionGroup
+          env
+          routes
+          className
+          server =
+        .ok group) :
+    group.map
+        (fun reaction =>
+          reaction.name) =
+      messageReactionNameFor server.name ::
+        (generalRoutesIntoMessageServer
+          className
+          server.name
+          routes).map
+          (fun route =>
+            portReactionNameFor
+              (generalInputPortOfRoute route)) := by
+
+  rcases
+      exists_of_compileGeneralMessageServerReactionGroup_ok
+        hCompiled with
+    ⟨
+      compiledBody,
+      _,
+      hGroup
+    ⟩
+
+  subst hGroup
+
+  change
+    (assembleGeneralMessageReaction
+          server
+          compiledBody).name ::
+        (assembleGeneralPortReactions
+            className
+            server
+            compiledBody
+            routes).map
+            (fun reaction =>
+              reaction.name) =
+      messageReactionNameFor server.name ::
+        (generalRoutesIntoMessageServer
+          className
+          server.name
+          routes).map
+          (fun route =>
+            portReactionNameFor
+              (generalInputPortOfRoute route))
+
+  rw [
+    assembleGeneralMessageReaction_name,
+    assembleGeneralPortReactions_names
+  ]
+
+/--
+Compiled reactions carry the reaction names of their message servers, groups in source order.
 
 The `Except` counterpart of the three lemmas above: the reaction list is not a `map` of the
 server list, because compilation of a body can fail, so the induction has to invert a
 successful compilation at each step. That is what the private inversion lemmas are for.
+
+Stage D's version of this theorem is the one §7.3 falsified. This is its replacement, and the
+`++` in `generalReactionNamesOf` is where the shape change lives: groups are concatenated, not
+consed, so the reaction list is longer than the server list exactly when some server is reached
+from outside.
 -/
 theorem compileGeneralMessageServerReactions_names :
-    ∀ (servers : List DTR.GeneralMessageServer)
+    ∀ (env : GeneralOutputPortEnv)
+      (routes : List GeneralRoute)
+      (className : ClassName)
+      (servers : List DTR.GeneralMessageServer)
       (compiled : List LF.GeneralReaction),
-      compileGeneralMessageServerReactions servers =
+      compileGeneralMessageServerReactions
+          env
+          routes
+          className
+          servers =
           .ok compiled →
         compiled.map
             (fun reaction =>
               reaction.name) =
-          servers.map
-            (fun server =>
-              messageReactionNameFor server.name) := by
+          generalReactionNamesOf
+            routes
+            className
+            servers := by
 
-  intro servers
+  intro env routes className servers
   induction servers with
 
   | nil =>
       intro compiled hCompiled
 
       simp [
+        generalReactionNamesOf,
         eq_nil_of_compileGeneralMessageServerReactions_nil_ok
           hCompiled
       ]
@@ -2435,52 +3949,43 @@ theorem compileGeneralMessageServerReactions_names :
           exists_of_compileGeneralMessageServerReactions_cons_ok
             hCompiled with
         ⟨
-          reaction,
+          group,
           compiledRemaining,
           hServer,
           hRemaining,
           hCompiledEq
         ⟩
 
-      rcases
-          exists_of_compileGeneralMessageServerReaction_ok
-            hServer with
-        ⟨
-          compiledBody,
-          _,
-          hReaction
-        ⟩
-
       subst hCompiledEq
-      subst hReaction
 
-      change
-        messageReactionNameFor server.name ::
-            compiledRemaining.map
-              (fun candidate =>
-                candidate.name) =
-          messageReactionNameFor server.name ::
-            remaining.map
-              (fun candidate =>
-                messageReactionNameFor candidate.name)
-
-      exact
-        congrArg
-          (List.cons
-            (messageReactionNameFor server.name))
-          (inductionHypothesis
-            compiledRemaining
-            hRemaining)
+      simp [
+        generalReactionNamesOf,
+        compileGeneralMessageServerReactionGroup_names
+          hServer,
+        inductionHypothesis
+          compiledRemaining
+          hRemaining
+      ]
 
 /--
 A compiled reactor declares one logical action per message server, named after it, in
 source order.
+
+Unaffected by stage E, and the contrast with the reaction list is the finding worth keeping:
+one action per message server no matter how many senders reach it, because an action is the
+*self*-delivery mechanism and self-sends were never routed. A message server reached by two
+external senders has one action and three reactions.
 -/
 theorem compileGeneralReactiveClass_actionNames
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
     {reactiveClass : DTR.GeneralReactiveClass}
     {reactor : LF.GeneralReactor}
     (hCompiled :
-      compileGeneralReactiveClass reactiveClass =
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
         .ok reactor) :
     reactor.logicalActions.map
         (fun action =>
@@ -2493,6 +3998,8 @@ theorem compileGeneralReactiveClass_actionNames
       exists_of_compileGeneralReactiveClass_ok
         hCompiled with
     ⟨
+      _,
+      _,
       _,
       _,
       _,
@@ -2511,31 +4018,43 @@ theorem compileGeneralReactiveClass_actionNames
       reactiveClass.messageServers
 
 /--
-A compiled reactor declares one message reaction per message server, named after it, in
-source order.
+A compiled reactor's message reactions are its message servers' reaction groups, in source
+order.
 
-This is the theorem stage G permutes. Nothing here sorts, so the order on the right is the
-order the source was written in.
+This is the theorem stage G permutes, and the replacement for the version §7.3 falsified.
+Nothing here sorts, so the order on the right is the order the source was written in — now
+with each group's internal order fixed as well, which stage G has to respect: permuting whole
+groups is a reordering of message servers, permuting *within* a group reorders the delivery
+paths of one message server against each other, and those are different things with different
+observable effects.
 -/
 theorem compileGeneralReactiveClass_reactionNames
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
     {reactiveClass : DTR.GeneralReactiveClass}
     {reactor : LF.GeneralReactor}
     (hCompiled :
-      compileGeneralReactiveClass reactiveClass =
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
         .ok reactor) :
     reactor.messageReactions.map
         (fun reaction =>
           reaction.name) =
-      reactiveClass.messageServers.map
-        (fun server =>
-          messageReactionNameFor server.name) := by
+      generalReactionNamesOf
+        routes
+        reactiveClass.name
+        reactiveClass.messageServers := by
 
   rcases
       exists_of_compileGeneralReactiveClass_ok
         hCompiled with
     ⟨
+      env,
       _,
       compiledMessageReactions,
+      _,
       _,
       hMessageServers,
       hReactor
@@ -2549,6 +4068,9 @@ theorem compileGeneralReactiveClass_reactionNames
 
   exact
     compileGeneralMessageServerReactions_names
+      env
+      routes
+      reactiveClass.name
       reactiveClass.messageServers
       compiledMessageReactions
       hMessageServers
@@ -2561,10 +4083,15 @@ lemma that does that; separating them is what lets a later well-formedness proof
 about the reactor's *name scope* without dragging types through it.
 -/
 theorem compileGeneralReactiveClass_stateVariableNames
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
     {reactiveClass : DTR.GeneralReactiveClass}
     {reactor : LF.GeneralReactor}
     (hCompiled :
-      compileGeneralReactiveClass reactiveClass =
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
         .ok reactor) :
     reactor.stateVariables.map
         (fun declaration =>
@@ -2577,6 +4104,8 @@ theorem compileGeneralReactiveClass_stateVariableNames
       exists_of_compileGeneralReactiveClass_ok
         hCompiled with
     ⟨
+      _,
+      _,
       _,
       _,
       _,
@@ -2604,12 +4133,24 @@ measured — so `exprWellFormed`'s `.parameterVar` clause, which resolves agains
 reaction's own parameter list, succeeds precisely because these two lists agree. Stated as a
 theorem because it is otherwise a coincidence between two `map`s in one structure
 assembler.
+
+Stage E makes this theorem carry more weight than it did, and the reason is F32-shaped. A
+constructor that sends externally now emits a `setPort` inside the startup reaction, whose
+arguments are compiled expressions over exactly these parameters, so a mismatch here would
+produce a startup reaction that reads a name the reactor does not declare — and
+`reactorsWellFormed` would refuse the whole program with a diagnostic pointing at the port
+rather than at the parameter list.
 -/
 theorem compileGeneralReactiveClass_startupParameters
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
     {reactiveClass : DTR.GeneralReactiveClass}
     {reactor : LF.GeneralReactor}
     (hCompiled :
-      compileGeneralReactiveClass reactiveClass =
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
         .ok reactor) :
     reactor.startupReaction.parameters =
       reactor.parameters.map
@@ -2620,7 +4161,9 @@ theorem compileGeneralReactiveClass_startupParameters
       exists_of_compileGeneralReactiveClass_ok
         hCompiled with
     ⟨
+      _,
       compiledStartupReaction,
+      _,
       _,
       hConstructor,
       _,
@@ -2650,578 +4193,141 @@ theorem compileGeneralReactiveClass_startupParameters
       reactiveClass.constructor.parameters).symm
 
 /-!
-## The refusal surface, exactly
+## What acceptance guarantees
 
-`docs/STAGE_D_DESIGN.md` §9.3 asks for an iff: a model translates if and only if it contains
-no external send. Both directions are proved here in full, so the fallback the design allows
-— *"prove right-to-left in full and state left-to-right for the shapes the gate exercises"*
-— was not needed and is not taken.
+Stage D closed this file with an `iff`: a model translates exactly when every send in it
+targets `self`. That theorem is deleted, for the reason the note at §4 gives — its right-hand
+side stopped naming anything about this translation — and this section is what stands in its
+place.
 
-The right-hand side is the executable `Bool` predicate rather than `Except.isOk`, which
-appears nowhere in this development, and the left-hand side is `∃ program, … = .ok program`
-rather than a negation, so no proof below has to reason about the `false` side of `Bool`
-algebra. Each level gets a pair: `exists_of_…SelfSendOnly` builds a successful compilation
-out of the predicate, and `…SelfSendOnly_of_ok` reads the predicate back off a successful
-compilation. The second direction is the load-bearing one — it is what makes the refusal
-*complete*, i.e. rules out a construct this stage silently mistranslates instead of
-refusing.
+The replacement is not a weaker `iff`, and it is not the same claim with a wider fragment
+substituted in. It is a claim of a different shape, about a different object. Stage D's
+theorem characterised acceptance in terms of the *input*: read the model, decide the
+predicate, and you know the answer. This section states what acceptance tells you about the
+*output*: whatever comes back is a well-formed LF program. The two are not comparable, and
+the trade was deliberate. An input-side characterisation is the more informative theorem when
+the refusal surface is one syntactic construct; it becomes unwritable once the refusal surface
+is the conjunction of nine structural conditions on a translated artefact, because the
+predicate that characterises it would have to re-derive the whole translation.
 
-Why this is worth proving rather than reading off `compileGeneralStmt`: the claim is about
-the whole pipeline, and the six intermediate levels each have three outcome equations. A
-reader checking by eye has to confirm that no other arm anywhere returns `.error` *and* that
-no arm returns `.ok` on an external send. The induction does both at once, and stage E will
-find out from a build failure rather than a review when it moves the boundary.
+What is *lost* is worth naming precisely, because a later reader will otherwise assume it was
+overlooked. Nothing here says a model in the paper's DTR fragment is accepted. That is the
+converse direction — a sufficient syntactic condition — and it is deferred whole to the task
+this file's header records as the site-totality obligation. The reason for deferring is
+recorded there and is about diagnosis, not difficulty: the sufficient condition rests on an
+induction showing that every external send site of a class has an entry in that class's
+resolved environment, and an induction of that size written against a module that has never
+once elaborated turns a single gate failure into an undiagnosable one. The gate meanwhile
+answers the same question empirically for every committed fixture, and answers it more
+convincingly than a theorem would, since it runs the real `lfc`.
+
+So the honest summary of the fragment boundary after stage E is: acceptance is *sound* by
+proof, and *sufficiently wide* by measurement. Stage D had it the other way around.
 -/
 
 /--
-A statement outside the refusal surface compiles.
+Anything this translation accepts is a well-formed LF program.
+
+The soundness half of §9.2, and the theorem that makes the guard worth having rather than
+merely defensive. Every well-formedness clause the LF layer knows how to state — reactor names
+distinct, instance names distinct, every instance resolving to a declared reactor, argument
+counts agreeing, every connection's endpoints declared, no input port targeted twice — holds of
+the returned program, because the guard decided the real predicate and the guard is transparent
+to shape.
+
+Note what this does *not* require: no hypothesis about the model, no side condition, no
+appeal to a fixture. The reason it can be unconditional is that the guard is the last thing
+`compileGeneralModel` does, which is a fact about the definition and is why §9's guard was put
+at the boundary rather than inside `assembleGeneralProgram`.
 -/
-theorem exists_of_generalStmtSelfSendOnly
-    {statement : DTR.GeneralStmt}
-    (hSelfSendOnly :
-      generalStmtSelfSendOnly statement =
-        true) :
-    ∃ compiled,
-      compileGeneralStmt statement =
-        .ok compiled := by
-
-  cases statement with
-
-  | assign _ _ =>
-      exact ⟨_, rfl⟩
-
-  | send target _ _ _ =>
-
-      cases target with
-
-      | selfTarget =>
-          exact ⟨_, rfl⟩
-
-      | knownRebec _ =>
-          simp [
-            generalStmtSelfSendOnly
-          ] at hSelfSendOnly
-
-/--
-A statement that compiles is outside the refusal surface.
--/
-theorem generalStmtSelfSendOnly_of_ok
-    {statement : DTR.GeneralStmt}
-    {compiled : LF.GeneralStmt}
-    (hCompiled :
-      compileGeneralStmt statement =
-        .ok compiled) :
-    generalStmtSelfSendOnly statement =
-      true := by
-
-  cases statement with
-
-  | assign _ _ =>
-      rfl
-
-  | send target _ _ _ =>
-
-      cases target with
-
-      | selfTarget =>
-          rfl
-
-      | knownRebec _ =>
-          simp [
-            compileGeneralStmt
-          ] at hCompiled
-
-/--
-A body containing no external send compiles.
--/
-theorem exists_of_generalBodySelfSendOnly :
-    ∀ (body : DTR.GeneralBody),
-      generalBodySelfSendOnly body =
-        true →
-      ∃ compiled,
-        compileGeneralBody body =
-          .ok compiled := by
-
-  intro body
-  induction body with
-
-  | nil =>
-      intro _
-      exact ⟨[], rfl⟩
-
-  | cons statement remaining inductionHypothesis =>
-      intro hSelfSendOnly
-
-      simp only [
-        generalBodySelfSendOnly_cons,
-        Bool.and_eq_true
-      ] at hSelfSendOnly
-
-      rcases
-          exists_of_generalStmtSelfSendOnly
-            hSelfSendOnly.left with
-        ⟨
-          compiledStatement,
-          hStatement
-        ⟩
-
-      rcases
-          inductionHypothesis
-            hSelfSendOnly.right with
-        ⟨
-          compiledRemaining,
-          hRemaining
-        ⟩
-
-      exact
-        ⟨
-          compiledStatement ::
-            compiledRemaining,
-          compileGeneralBody_cons_ok
-            hStatement
-            hRemaining
-        ⟩
-
-/--
-A body that compiles contains no external send.
--/
-theorem generalBodySelfSendOnly_of_ok :
-    ∀ (body : DTR.GeneralBody)
-      (compiled : LF.GeneralBody),
-      compileGeneralBody body =
-        .ok compiled →
-      generalBodySelfSendOnly body =
-        true := by
-
-  intro body
-  induction body with
-
-  | nil =>
-      intro _ _
-      rfl
-
-  | cons statement remaining inductionHypothesis =>
-      intro _ hCompiled
-
-      rcases
-          exists_of_compileGeneralBody_cons_ok
-            hCompiled with
-        ⟨
-          compiledStatement,
-          compiledRemaining,
-          hStatement,
-          hRemaining,
-          _
-        ⟩
-
-      simp [
-        generalStmtSelfSendOnly_of_ok
-          hStatement,
-        inductionHypothesis
-          compiledRemaining
-          hRemaining
-      ]
-
-/--
-A message-server list containing no external send compiles.
--/
-theorem exists_of_generalMessageServersSelfSendOnly :
-    ∀ (servers : List DTR.GeneralMessageServer),
-      generalMessageServersSelfSendOnly servers =
-        true →
-      ∃ compiled,
-        compileGeneralMessageServerReactions servers =
-          .ok compiled := by
-
-  intro servers
-  induction servers with
-
-  | nil =>
-      intro _
-      exact ⟨[], rfl⟩
-
-  | cons server remaining inductionHypothesis =>
-      intro hSelfSendOnly
-
-      simp only [
-        generalMessageServersSelfSendOnly_cons,
-        Bool.and_eq_true
-      ] at hSelfSendOnly
-
-      rcases
-          exists_of_generalBodySelfSendOnly
-            server.body
-            hSelfSendOnly.left with
-        ⟨
-          compiledBody,
-          hBody
-        ⟩
-
-      rcases
-          inductionHypothesis
-            hSelfSendOnly.right with
-        ⟨
-          compiledRemaining,
-          hRemaining
-        ⟩
-
-      exact
-        ⟨
-          _,
-          compileGeneralMessageServerReactions_cons_ok
-            (compileGeneralMessageServerReaction_ok
-              hBody)
-            hRemaining
-        ⟩
-
-/--
-A message-server list that compiles contains no external send.
--/
-theorem generalMessageServersSelfSendOnly_of_ok :
-    ∀ (servers : List DTR.GeneralMessageServer)
-      (compiled : List LF.GeneralReaction),
-      compileGeneralMessageServerReactions servers =
-        .ok compiled →
-      generalMessageServersSelfSendOnly servers =
-        true := by
-
-  intro servers
-  induction servers with
-
-  | nil =>
-      intro _ _
-      rfl
-
-  | cons server remaining inductionHypothesis =>
-      intro _ hCompiled
-
-      rcases
-          exists_of_compileGeneralMessageServerReactions_cons_ok
-            hCompiled with
-        ⟨
-          reaction,
-          compiledRemaining,
-          hServer,
-          hRemaining,
-          _
-        ⟩
-
-      rcases
-          exists_of_compileGeneralMessageServerReaction_ok
-            hServer with
-        ⟨
-          compiledBody,
-          hBody,
-          _
-        ⟩
-
-      simp [
-        generalBodySelfSendOnly_of_ok
-          server.body
-          compiledBody
-          hBody,
-        inductionHypothesis
-          compiledRemaining
-          hRemaining
-      ]
-
-/--
-A class containing no external send compiles.
--/
-theorem exists_of_generalClassSelfSendOnly
-    {reactiveClass : DTR.GeneralReactiveClass}
-    (hSelfSendOnly :
-      generalClassSelfSendOnly reactiveClass =
-        true) :
-    ∃ reactor,
-      compileGeneralReactiveClass reactiveClass =
-        .ok reactor := by
-
-  simp only [
-    generalClassSelfSendOnly,
-    Bool.and_eq_true
-  ] at hSelfSendOnly
-
-  rcases
-      exists_of_generalBodySelfSendOnly
-        reactiveClass.constructor.body
-        hSelfSendOnly.left with
-    ⟨
-      compiledBody,
-      hBody
-    ⟩
-
-  rcases
-      exists_of_generalMessageServersSelfSendOnly
-        reactiveClass.messageServers
-        hSelfSendOnly.right with
-    ⟨
-      compiledMessageReactions,
-      hMessageServers
-    ⟩
-
-  exact
-    ⟨
-      _,
-      compileGeneralReactiveClass_ok
-        (compileGeneralConstructor_ok
-          hBody)
-        hMessageServers
-    ⟩
-
-/--
-A class that compiles contains no external send.
--/
-theorem generalClassSelfSendOnly_of_ok
-    {reactiveClass : DTR.GeneralReactiveClass}
-    {reactor : LF.GeneralReactor}
-    (hCompiled :
-      compileGeneralReactiveClass reactiveClass =
-        .ok reactor) :
-    generalClassSelfSendOnly reactiveClass =
-      true := by
-
-  rcases
-      exists_of_compileGeneralReactiveClass_ok
-        hCompiled with
-    ⟨
-      _,
-      compiledMessageReactions,
-      hConstructor,
-      hMessageServers,
-      _
-    ⟩
-
-  rcases
-      exists_of_compileGeneralConstructor_ok
-        hConstructor with
-    ⟨
-      compiledBody,
-      hBody,
-      _
-    ⟩
-
-  simp [
-    generalClassSelfSendOnly,
-    generalBodySelfSendOnly_of_ok
-      reactiveClass.constructor.body
-      compiledBody
-      hBody,
-    generalMessageServersSelfSendOnly_of_ok
-      reactiveClass.messageServers
-      compiledMessageReactions
-      hMessageServers
-  ]
-
-/--
-A class list containing no external send compiles.
--/
-theorem exists_of_generalClassesSelfSendOnly :
-    ∀ (classes : List DTR.GeneralReactiveClass),
-      generalClassesSelfSendOnly classes =
-        true →
-      ∃ compiled,
-        compileGeneralReactiveClasses classes =
-          .ok compiled := by
-
-  intro classes
-  induction classes with
-
-  | nil =>
-      intro _
-      exact ⟨[], rfl⟩
-
-  | cons reactiveClass remaining inductionHypothesis =>
-      intro hSelfSendOnly
-
-      simp only [
-        generalClassesSelfSendOnly_cons,
-        Bool.and_eq_true
-      ] at hSelfSendOnly
-
-      rcases
-          exists_of_generalClassSelfSendOnly
-            hSelfSendOnly.left with
-        ⟨
-          reactor,
-          hClass
-        ⟩
-
-      rcases
-          inductionHypothesis
-            hSelfSendOnly.right with
-        ⟨
-          compiledRemaining,
-          hRemaining
-        ⟩
-
-      exact
-        ⟨
-          reactor ::
-            compiledRemaining,
-          compileGeneralReactiveClasses_cons_ok
-            hClass
-            hRemaining
-        ⟩
-
-/--
-A class list that compiles contains no external send.
--/
-theorem generalClassesSelfSendOnly_of_ok :
-    ∀ (classes : List DTR.GeneralReactiveClass)
-      (compiled : List LF.GeneralReactor),
-      compileGeneralReactiveClasses classes =
-        .ok compiled →
-      generalClassesSelfSendOnly classes =
-        true := by
-
-  intro classes
-  induction classes with
-
-  | nil =>
-      intro _ _
-      rfl
-
-  | cons reactiveClass remaining inductionHypothesis =>
-      intro _ hCompiled
-
-      rcases
-          exists_of_compileGeneralReactiveClasses_cons_ok
-            hCompiled with
-        ⟨
-          reactor,
-          compiledRemaining,
-          hClass,
-          hRemaining,
-          _
-        ⟩
-
-      simp [
-        generalClassSelfSendOnly_of_ok
-          hClass,
-        inductionHypothesis
-          compiledRemaining
-          hRemaining
-      ]
-
-/--
-A model inside stage D's fragment compiles.
--/
-theorem exists_of_generalModelSelfSendOnly
-    {model : DTR.GeneralModel}
-    (hSelfSendOnly :
-      generalModelSelfSendOnly model =
-        true) :
-    ∃ program,
-      compileGeneralModel model =
-        .ok program := by
-
-  unfold generalModelSelfSendOnly at hSelfSendOnly
-
-  rcases
-      exists_of_generalClassesSelfSendOnly
-        model.classes
-        hSelfSendOnly with
-    ⟨
-      compiledReactors,
-      hClasses
-    ⟩
-
-  exact
-    ⟨
-      _,
-      compileGeneralModel_ok
-        hClasses
-    ⟩
-
-/--
-A model that compiles is inside stage D's fragment.
--/
-theorem generalModelSelfSendOnly_of_ok
+theorem compileGeneralModel_wellFormed
     {model : DTR.GeneralModel}
     {program : LF.GeneralProgram}
     (hCompiled :
       compileGeneralModel model =
         .ok program) :
-    generalModelSelfSendOnly model =
-      true := by
+    program.wellFormed = true := by
 
   rcases
       exists_of_compileGeneralModel_ok
         hCompiled with
     ⟨
+      routes,
       compiledReactors,
+      hRoutes,
       hClasses,
-      _
+      hProgram
     ⟩
 
-  unfold generalModelSelfSendOnly
+  rw [
+    compileGeneralModel_ok
+      hRoutes
+      hClasses
+  ] at hCompiled
+
+  rw [
+    hProgram
+  ]
 
   exact
-    generalClassesSelfSendOnly_of_ok
-      model.classes
-      compiledReactors
-      hClasses
+    guardGeneralProgram_wellFormed
+      hCompiled
 
 /--
-Stage D's fragment, characterized exactly: a model translates precisely when no body in it
-sends to a known rebec.
+Extract the last conjunct of well-formedness.
 
-The theorem `docs/STAGE_D_DESIGN.md` §9.3 asks for, and the one that makes *"stage D
-translates self-sends only"* a fact rather than a description of the code. Read left to
-right it says the refusal is complete — there is no external send this stage quietly
-mistranslates. Read right to left it says the refusal is minimal — nothing else is refused,
-so a class declaring unused known rebecs, an instance with any arguments, and any binding
-list all still translate.
+A local copy of a lemma `Relico/LF/GeneralWellFormed.lean` already proves, duplicated because
+that copy is `private` and this file is not the module it is private to. Duplicated rather than
+de-privatised on purpose: the LF module's copy exists to serve proofs *about* well-formedness,
+and making it public would invite translation-side proofs to reach past the `wellFormed`
+interface for the other eight conjuncts one at a time, which is the habit that turns a
+nine-clause predicate into nine independent obligations.
 
-Stage E will have to *delete* this theorem rather than generalize it, since external sends
-will then translate. That is the intended alarm: the fragment boundary is a proof
-obligation, not a comment.
+The proof is the house pattern — revert, unfold, split the conjunct — and it works for the last
+conjunct specifically because `&&` is strict on the right: the `false` branch makes the whole
+chain `false`, which contradicts the hypothesis, and the `true` branch leaves the goal
+trivially true.
 -/
-theorem compileGeneralModel_ok_iff_selfSendOnly
-    (model : DTR.GeneralModel) :
-    (∃ program,
-        compileGeneralModel model =
-          .ok program) ↔
-      generalModelSelfSendOnly model =
-        true :=
-  Iff.intro
-    (fun ⟨_, hCompiled⟩ =>
-      generalModelSelfSendOnly_of_ok
-        hCompiled)
-    (fun hSelfSendOnly =>
-      exists_of_generalModelSelfSendOnly
-        hSelfSendOnly)
+private theorem targetEndpointsUnique_of_wellFormed
+    {program : LF.GeneralProgram}
+    (hWellFormed :
+      program.wellFormed =
+        true) :
+    program.targetEndpointsUnique =
+      true := by
+
+  revert hWellFormed
+  unfold LF.GeneralProgram.wellFormed
+  cases program.targetEndpointsUnique <;>
+    simp
 
 /--
-A model outside the fragment gets a diagnostic.
+No input port of an accepted program is the target of two connections.
 
-The other half of totality, and the shape the gate's negative assertion mirrors: refusal is
-reported, never a partial program. Stated separately from the iff because a `¬ ∃` reading of
-that theorem would leave the `.error` case as an inference about `Except` having two
-constructors, which is exactly the kind of step this file makes explicit everywhere else.
+The corollary §9.2 singles out, and the one clause of well-formedness that stage E's routing
+could plausibly have violated. `lfc 0.11.0` rejects many-to-one connections — measured, and the
+reason input ports are keyed by *route* rather than by receiving class — so this is the clause
+that stands between a translated program and a target compiler error, and the only one whose
+failure the Lean layer would otherwise discover second-hand from the `lfc` gate.
+
+Stated as a consequence of the guard rather than proved by construction, which is the weaker of
+the two available statements and is deliberate at this point in the development. A construction
+proof would say the routing *cannot* produce a repeated target and would therefore let the
+guard's clause be retired as dead; that proof needs the same site-totality induction the
+sufficient condition needs, and is deferred with it. Until then a repeated target is a refusal
+with a diagnostic naming the clause, not a miscompilation, and this theorem is what says so.
 -/
-theorem exists_error_of_not_generalModelSelfSendOnly
+theorem compileGeneralModel_targetEndpointsUnique
     {model : DTR.GeneralModel}
-    (hSelfSendOnly :
-      generalModelSelfSendOnly model =
-        false) :
-    ∃ message,
+    {program : LF.GeneralProgram}
+    (hCompiled :
       compileGeneralModel model =
-        .error message := by
-
-  cases hCompiled :
-      compileGeneralModel model with
-
-  | error message =>
-      exact ⟨message, rfl⟩
-
-  | ok _ =>
-      rw [
-        generalModelSelfSendOnly_of_ok
-          hCompiled
-      ] at hSelfSendOnly
-      simp at hSelfSendOnly
+        .ok program) :
+    program.targetEndpointsUnique =
+      true :=
+  targetEndpointsUnique_of_wellFormed
+    (compileGeneralModel_wellFormed
+      hCompiled)
 
 end Translation
 end Relico

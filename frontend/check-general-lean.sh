@@ -180,13 +180,23 @@ echo "=== the general LF printer, well-formedness and translation assertions"
 # running: the completion marker alone cannot, since a `try` block that skipped
 # twenty assertions still reaches its final `IO.println`.
 #
-# 34 printing, 10 well-formedness, 12 translation, 4 for finding F32's counterexample.
+# 34 printing, 10 well-formedness, 11 translation, 5 for finding F32's counterexample,
+# 7 for the routed model.
 # Stage C ran 25, in two blocks; the third block is the one that mentions
 # `Relico.Translation`, so a translation that stopped being called would drop this
-# count by twelve rather than pass quietly. The fourth block asserts that the
+# count by eleven rather than pass quietly. The fourth block asserts that the
 # well-formedness preservation theorem is false; when the DTR-side clause lands it
-# must be rewritten, and this literal is what forces that to be deliberate.
-EXPECTED_PRINTER_ASSERTIONS=60
+# must be rewritten, and this literal is what forces that to be deliberate. The fifth
+# is the only block that routes, so a stage E regression drops this by seven and says so.
+#
+# Stage E moved this literal three times. First down from 60: `generalModelSelfSendOnly` and
+# its refusal text were asserted four times between them and the predicate no longer exists;
+# three assertions took their place. Then up to 66 for the routed model. Then up to 67, when
+# the F32 group moved off `compileGeneralModel` -- whose new guard refuses the counterexample
+# instead of returning it -- and gained an assertion pinning that refusal, which is finding
+# F43. A literal that is only ever raised is a literal being maintained by addition rather
+# than by reading.
+EXPECTED_PRINTER_ASSERTIONS=67
 
 set +e
 PRINTER_OUTPUT="$(

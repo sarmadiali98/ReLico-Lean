@@ -294,9 +294,21 @@ deriving Repr, DecidableEq, BEq, Inhabited
 /--
 A general reaction statement.
 
-`setPort` takes one expression while `schedule` takes a list, and that asymmetry
-is the paper's: `LFStmt ::= outPort([Expr])?.set(Expr);` admits exactly one value,
-while a typed logical action's payload arity follows the parameter list of the
+`setPort` and `schedule` both take a list of expressions, and stage E is what made
+them agree. Stage C and stage D gave `setPort` exactly one expression, following
+Fig. 5's `LFStmt ::= outPort([Expr])?.set(Expr);`, which admits one value and no
+more. That reading is faithful to the grammar and still wrong for this translation:
+an external send to `msgsrv report(int identifier, boolean urgent)` carries two
+values, the receiving reactor's input port must be able to hold them, and the
+measured target accepts exactly that — probe `struct_as_port_type` compiled a
+program-level `public preamble` struct used as a **port** type under real
+`lfc 0.11.0` and delivered its fields. So the arity restriction was the paper's
+grammar rather than the target's capability, and stage E lifts it on the port side
+the same way stage D lifted it on the action side, per
+`docs/STAGE_E_DESIGN.md` §5.1. The divergence from Fig. 5 is deliberate and filed
+as a finding rather than absorbed silently.
+
+A typed logical action's payload arity follows the parameter list of the
 message server it was derived from. `schedule`'s argument list is unbounded, and as of stage D that is genuinely
 supported rather than merely representable. This docstring used to say that a
 multi-value payload was refused in the C++ printer, and the printer said the same in
@@ -314,18 +326,25 @@ relates this argument list to the parameter list of the action it names. The
 well-formedness layer does — `stmtWellFormed` requires
 `declared.parameters.length == arguments.length` — so arity disagreement is caught for
 any program that passed the predicate, and a printer may rely on it only for such
-programs. What remains genuinely open after stage D is *type* agreement: an argument
+programs. The same now holds of `setPort` against its port's payload arity. What
+remains genuinely open after stage D is *type* agreement: an argument
 whose type differs from the declared parameter's is well-formed by that check, and
 checking it would require typing a reaction's parameters, which this family
 deliberately does not do. The corrected finding is F28.
 
 The delay on `schedule` is a `Delay` rather than an optional one, matching the DTR
 side: an absent `after` has already had the zero default applied by the time a
-statement exists.
+statement exists. `setPort` carries **no** delay, and that is not an omission: on the
+DTR side a send's `after` is a property of the statement, and on the LF side it is a
+property of the connection the value travels along. Stage E keys ports by send site
+precisely so that each statement's delay has its own connection to sit on, which is
+where the delay of a `setPort` is recorded — see `docs/STAGE_E_DESIGN.md` §6.
 
 There is no `if` and no `for`. Fig. 5's `LFStmt` has both. Control flow is a later
 stage on both sides at once, and adding the LF half alone would create a construct
-nothing can produce.
+nothing can produce. It is also what keeps stage E's central invariant true: with
+flat bodies one statement performs at most one `set()` per firing, so no reaction can
+set one port twice at one tag.
 -/
 inductive GeneralStmt where
   | assign :
@@ -341,7 +360,7 @@ inductive GeneralStmt where
 
   | setPort :
       PortName →
-      LF.GeneralExpr →
+      List LF.GeneralExpr →
       GeneralStmt
 
 deriving Repr, DecidableEq, BEq, Inhabited
@@ -357,11 +376,103 @@ abbrev GeneralBody :=
   List LF.GeneralStmt
 
 /--
+A typed parameter, used for both message-server payloads and reactor parameters.
+
+One structure for both because both are the same thing on the DTR side —
+`DTR.GeneralTypedParameter` serves a message server's formals and a constructor's
+formals alike — and mirroring that keeps `Translation.compileGeneralTypedParameter` a
+single identity-shaped map.
+
+It is declared here, ahead of the port declaration, because a port's payload is a
+parameter list whenever it carries more than one value. Stage D placed it after the
+port declaration, when no port could reference it.
+-/
+structure GeneralTypedParameter where
+  name :
+    VarName
+
+  declaredType :
+    LF.GeneralType
+
+deriving Repr, DecidableEq, BEq, Inhabited
+
+/--
+What a port carries.
+
+Stage C and stage D gave a port a `declaredType : LF.GeneralType`, and since
+`GeneralType` is `int | boolean` that field can name the type of exactly one value.
+It is the same erasure stage D removed from the action layer, surviving one layer
+further along: `msgsrv report(int identifier, boolean urgent)` reached by an external
+send needs a port carrying two values of two types, and a single `GeneralType` has
+nowhere to put the second. The finding is F36.
+
+The two constructors are not two mechanisms, they are one mechanism with a printed
+special case:
+
+* `scalar t` — the port carries one value of type `t`, printed as `input p: int`.
+* `struct reactor message parameters` — the port carries one value of a
+  program-level `public preamble` struct whose fields are `parameters`, printed as
+  `input p: <Reactor>_<message>_Args`. The struct's *name* is derived from the
+  **receiving** reactor and the message, by the same
+  `generalPayloadStructName` the action layer already uses, which is exactly what lets
+  one struct declaration serve a message server that is both self-sent and externally
+  received.
+
+Naming the struct from the receiving reactor rather than the sending one is what makes
+both ends of a connection agree without either end consulting the other. It is also a
+weakening worth stating plainly: stage D *derived* this name at one site, and stage E
+**stores** it at two and checks agreement, so a guarantee that used to hold by
+construction now holds by predicate. The finding is F37.
+
+There is no `void` constructor, so a port carrying nothing is unrepresentable and an
+arity-zero external send is refused by the translation rather than mistranslated. That
+refusal is provisional and says so: whether `lfc 0.11.0` accepts `input p: void` is
+**unmeasured**, the probe and its prediction are written down in
+`docs/STAGE_E_DESIGN.md` §11.2, and the day it runs this type gains a constructor or
+the refusal becomes permanent. The project does not guess about the target.
+-/
+inductive GeneralPortPayload where
+  | scalar :
+      LF.GeneralType →
+      GeneralPortPayload
+
+  | struct :
+      ReactorName →
+      ActionName →
+      List LF.GeneralTypedParameter →
+      GeneralPortPayload
+
+deriving Repr, DecidableEq, BEq, Inhabited
+
+namespace GeneralPortPayload
+
+/--
+How many values a port's payload carries.
+
+One for a scalar, and the length of the parameter list for a struct. This is the
+number a `setPort` statement's argument list is checked against, so it is defined here
+rather than open-coded at the two places that need it.
+
+A struct payload of length zero or one is *representable* and never *built*: the
+translation emits `scalar` at arity one and refuses arity zero. Well-formedness does
+not forbid it, because a predicate that ruled out a shape the translation cannot
+produce would be checking the translation rather than the program.
+-/
+def arity :
+    LF.GeneralPortPayload → Nat
+  | .scalar _ => 1
+  | .struct _ _ parameters => parameters.length
+
+end GeneralPortPayload
+
+/--
 A declared port of a reactor.
 
 Stage C carried ports as bare `PortName`s and let the printer supply `": int"`. That
 made the *type* of every port a fact about the printer rather than about the program,
-which is precisely the kind of claim a syntax tree exists to hold.
+which is precisely the kind of claim a syntax tree exists to hold. Stage D gave it a
+`GeneralType`; stage E replaces that with a `GeneralPortPayload`, for the reason that
+type records.
 
 There is still no width field. Fig. 5's `PortDecl` admits a multiport width
 `([intLiteral])?`, but `lfc 0.11.0` rejects `reaction(in[0])` and a whole-multiport
@@ -373,8 +484,8 @@ structure GeneralPortDecl where
   name :
     PortName
 
-  declaredType :
-    LF.GeneralType
+  payload :
+    LF.GeneralPortPayload
 
 deriving Repr, DecidableEq, BEq, Inhabited
 
@@ -397,23 +508,6 @@ in one place.
 `LF.StateVariableDecl` is left untouched for the earlier families that use it.
 -/
 structure GeneralStateVariableDecl where
-  name :
-    VarName
-
-  declaredType :
-    LF.GeneralType
-
-deriving Repr, DecidableEq, BEq, Inhabited
-
-/--
-A typed parameter, used for both message-server payloads and reactor parameters.
-
-One structure for both because both are the same thing on the DTR side —
-`DTR.GeneralTypedParameter` serves a message server's formals and a constructor's
-formals alike — and mirroring that keeps `Translation.compileGeneralTypedParameter` a
-single identity-shaped map.
--/
-structure GeneralTypedParameter where
   name :
     VarName
 
@@ -534,8 +628,8 @@ the union over those instances — which is the object §III-F's cost bound rang
 Specializing per instance would quietly change what that bound is about.
 
 Ports and state variables carry their declared types, and the reasons the port
-structure has no width field and no payload field are recorded on
-`GeneralPortDecl` itself.
+structure has no width field, and carries a payload rather than a bare type, are
+recorded on `GeneralPortDecl` and `GeneralPortPayload` themselves.
 
 Input ports, output ports, state variables and logical actions are four lists but
 **one** name scope. An LF reactor does not let `input v` and `state v` coexist, so
@@ -546,9 +640,15 @@ Stage D adds `parameters` as a fifth list in that same scope, on the same reason
 a parameter becomes a reactor member exactly as a state variable does — measured, in
 that a parameter is readable in a reaction body with no trigger and no local
 declaration — so `reactor R(x: int) { state x: int = 0 }` names one member twice.
-Whether `lfc` rejects that spelling is **unverified**, and the union check is the
-conservative side of the uncertainty: it refuses a program the compiler might have
-accepted, rather than emitting one it might reject.
+Stage D wrote here that whether `lfc` rejects that spelling is **unverified**, and that
+the union check was the conservative side of the uncertainty. It is measured as of
+2026-08-20, by probe `param_state_name_collision` in
+`tools/paper-measurements/lf_semantics_probe.sh`, and the answer is both halves at once:
+the validator **accepts** the collision, and the generated C++ then fails to compile,
+because the Cpp target emits a reactor parameter as a C++ *reference* member. So the
+union check is stricter than `lfc`'s validator and exactly as strict as the toolchain
+behind it. What that means for the predicate is recorded on
+`LF.GeneralReactor.declaredNames`, and deliberately not restated here.
 
 A declared port need not be connected, and that is load-bearing rather than a
 tolerated gap. Because one reactor is shared by every instance of its class, its

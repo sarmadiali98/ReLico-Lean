@@ -16,7 +16,7 @@ associates, while a projection chain into an anonymous conjunction reads a fixed
 nesting shape and, under the other associativity, proves a different clause while
 still compiling.
 
-Four things are deliberately not checked.
+Five things are deliberately not checked.
 
 A declared port need not be connected. Measured: a model with an unconnected input
 port compiles and runs, the reaction simply never fires. This is load-bearing
@@ -39,6 +39,19 @@ so uniqueness would constrain an identifier the target language never sees.
 
 Nothing here sorts anything. Declaration order is observable in the target, so a
 sort inserted in this pipeline would be a silent semantic change.
+
+A reaction may set the same output port twice. This is the fifth omission and the
+newest, and it is not an oversight: setting one port twice in one reaction body loses
+the first value, since a port holds one value per tag, so it is exactly the hazard
+stage E was rewritten to remove. It is absent here because it is proved of the
+*translation's output* rather than imposed on *arbitrary programs*
+(`docs/STAGE_E_DESIGN.md` §10.2). Two reasons in that order. A hand-built LF program
+setting one port twice is a faithful model of an LF program a person could write, and
+this predicate's job is to say what `lfc` and its toolchain will accept, which such a
+program is; and making it a conjunct here would let the translation discharge the
+invariant by *checking* it, when what the design earned is an invariant that holds
+because two sends in one body have two send sites and therefore two ports. A checked
+version of that theorem would be strictly weaker while looking stronger.
 -/
 
 namespace GeneralTrigger
@@ -78,8 +91,23 @@ checks, which would accept a program no LF compiler will.
 Parameters joined this union in stage D, on the measured ground that a reactor
 parameter is readable in a reaction body with no trigger and no local declaration —
 it is a member exactly as a state variable is, so `reactor R(x: int) { state x: int
-= 0 }` declares one name twice. Whether `lfc` rejects that spelling is unverified,
-and including parameters is the conservative side of that uncertainty.
+= 0 }` declares one name twice. Stage D wrote here that whether `lfc` rejects that
+spelling was unverified, and that including parameters was the conservative side of
+that uncertainty. **The uncertainty is gone.** Probe `param_state_name_collision`
+in `tools/paper-measurements/lf_semantics_probe.sh`, run on 2026-08-20, put that
+exact reactor through `lfc 0.11.0`: the validator **accepts** it, and the generated
+C++ then fails to compile with `reference member 'x' binds to a temporary object`,
+a diagnostic attributed to line 1 column 1 of the `.lf` file. So a reactor parameter
+is emitted as a C++ reference member, the collision is fatal one layer *later* than
+the validator, and this predicate is stricter than `lfc`'s validator and exactly as
+strict as the toolchain behind it.
+
+That is the sense in which `docs/STAGE_E_DESIGN.md` §9 calls this line conservative:
+not hedging against an unknown, but declining to delegate a rejection to a diagnostic
+that names neither the reactor nor the offending name and that no user could act on.
+F32 rests on it — the guard stage E installs on the translation's own output refuses
+such a program at this predicate rather than emitting LF that passes validation and
+then will not build.
 -/
 def declaredNames
     (reactor : LF.GeneralReactor) :
@@ -181,10 +209,20 @@ def exprWellFormed
         operand
 
 /--
-A statement resolves, and a scheduled action is given the arity it declares.
+A statement resolves, and a scheduled action or a set port is given the arity it
+declares.
 
 `setPort` requires an **output** port. A statement naming a real port in the wrong
 direction is one of the two mistakes this layer exists to catch.
+
+Stage E gave `setPort` a list of expressions (`GeneralSyntax.lean`, the `setPort`
+constructor), so the arity conjunct `.schedule` has carried since stage D now appears
+on both arms. The port arm reads the number its payload carries from
+`LF.GeneralPortPayload.arity` rather than open-coding the scalar case, which is why
+that helper lives beside the payload type instead of here. The two arms then differ in
+nothing but where the declared arity is stored, and that symmetry is the point: a port
+and a typed logical action are the same payload question asked in two places, and
+stage D answered it in only one of them.
 -/
 def stmtWellFormed
     (reactor : LF.GeneralReactor)
@@ -211,13 +249,16 @@ def stmtWellFormed
               parameters
               argument)
 
-  | .setPort port value =>
+  | .setPort port arguments =>
       reactor.outputPorts.any
           (fun declared =>
-            declared.name == port) &&
-        reactor.exprWellFormed
-          parameters
-          value
+            (declared.name == port) &&
+              (declared.payload.arity == arguments.length)) &&
+        arguments.all
+          (fun argument =>
+            reactor.exprWellFormed
+              parameters
+              argument)
 
 /--
 A reaction's trigger and body both resolve against its reactor, with its own
@@ -267,12 +308,28 @@ end GeneralReactor
 namespace GeneralProgram
 
 /--
-A connection resolves at both ends, in the right direction.
+A connection resolves at both ends, in the right direction, and the two ends agree on
+what they carry.
 
 Each endpoint goes through the instance list and then through the reactor list,
 because a connection names instances while ports are declared on reactors. The
 source port must be one of the source reactor's **outputs** and the target port one
 of the target reactor's **inputs**.
+
+Stage E adds the third condition, which `lfc` has always enforced and which this
+predicate previously had no way to express: connected ports must carry the same type.
+Ports now store a `LF.GeneralPortPayload`, so agreement is decidable equality — and
+both endpoints are found with `List.find?` rather than tested with `List.any`, because
+what the check needs is now the declaration itself and not merely its existence.
+
+Agreement is *checked* here rather than guaranteed by construction, and that is a real
+weakening worth naming rather than hiding, recorded as F37. Stage D derived a payload
+struct's name at the single site that used it, so two sites could not disagree; stage
+E stores that name at both ends of a connection. The translation builds both ends from
+one row of the routing table, so they cannot drift in practice — this conjunct is what
+makes that a checked fact instead of a trusted one, and it is the conjunct the
+acceptance-implies-well-formedness theorem of `docs/STAGE_E_DESIGN.md` §8 discharges
+by construction.
 -/
 def connectionWellFormed
     (program : LF.GeneralProgram)
@@ -290,12 +347,25 @@ def connectionWellFormed
           false
 
       | some targetReactor =>
-          sourceReactor.outputPorts.any
-              (fun declared =>
-                declared.name == connection.sourcePort) &&
-            targetReactor.inputPorts.any
-              (fun declared =>
-                declared.name == connection.targetPort)
+          match
+              sourceReactor.outputPorts.find?
+                (fun declared =>
+                  declared.name == connection.sourcePort)
+          with
+          | none =>
+              false
+
+          | some sourcePort =>
+              match
+                  targetReactor.inputPorts.find?
+                    (fun declared =>
+                      declared.name == connection.targetPort)
+              with
+              | none =>
+                  false
+
+              | some targetPort =>
+                  sourcePort.payload == targetPort.payload
 
 /--
 At least one reactor is declared.
@@ -433,7 +503,7 @@ def instanceArgumentsMatch
             reactor.parameters)
 
 /--
-Every connection resolves.
+Every connection resolves, and carries the same payload at both of its ends.
 -/
 def connectionsWellFormed
     (program : LF.GeneralProgram) :
