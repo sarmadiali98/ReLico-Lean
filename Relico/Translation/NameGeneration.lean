@@ -213,8 +213,16 @@ in the kernel, which means reducing `String.front` and `String.drop` through the
 and a parametric witness needs idempotence of `Char.toUpper`, which core does not supply. The
 right instrument for a concrete string witness is
 `frontend/lean-bridge/GeneralLfPrinterTestMain.lean`, which evaluates these functions at run
-time and compares the results — so the collision is asserted there, where it costs nothing,
-rather than argued here.
+time and compares the results, so the collisions are asserted there rather than argued here:
+`PORT_NAME_CASE_FOLDING_COLLIDES` for the case-folding channel,
+`PORT_NAME_SITE_SUFFIX_BOUNDARY_COLLIDES` for the unmarked boundary, and
+`PORT_NAME_UNESCAPED_SEPARATOR_COLLIDES` for F34's separator.
+
+**Those three labels are named here because the earlier version of this paragraph promised
+them and they did not exist**, in this docstring and two others, for a day — recorded as
+finding F44 in `docs/STAGE_E_FINDINGS.md`. A docstring that describes a test is a claim about
+the suite and has to be checkable by grepping for the label, which is why the labels appear
+here rather than a sentence saying the matter is covered.
 -/
 
 /--

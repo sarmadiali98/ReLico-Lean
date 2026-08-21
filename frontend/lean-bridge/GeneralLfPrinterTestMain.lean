@@ -3182,6 +3182,93 @@ private def translationAssertions :
           widenedInstanceWithWrongArity)
 
 /--
+Findings F34 and F42, asserted rather than argued: the port-naming rule is not injective,
+and these are the witnesses `Relico/Translation/NameGeneration.lean` says live here.
+
+Its own group, for the reason `collisionAssertions` is: the number that breaks should say
+which claim broke. These are also the only assertions in this file that call a naming
+function directly instead of reading a name off a translated program, so they fail for
+different causes than anything else here.
+
+**They exist because the docstring delegating to them was making a false statement.**
+`NameGeneration.lean` explains, correctly, why no Lean refutation is attempted — a concrete
+witness needs `String.front` and `String.drop` to reduce through the UTF-8 model, and a
+parametric one needs idempotence of `Char.toUpper`, which core does not supply — and then
+says the collision *"is asserted there"*, meaning here. It was not, for a day, while three
+code comments pointed at it. That is finding F44, and a documented test that does not exist
+is worse than an undocumented gap: it removes the signal that would have found the gap.
+
+Each assertion pins **both** names against the literal they collide on, rather than asserting
+only that the two are equal to each other. Equality alone would survive a change that moved
+both names together, which is precisely the change a reader of this group must be told about.
+
+Three channels, independent, which is the reason there are three:
+
+* the unescaped separator (F34) — closed by escaping it;
+* the unmarked boundary before the site suffix (F34, and the witness F42 shares) — closed by
+  marking it;
+* case folding in `capitalizeName` (F42) — closed by **neither**, since `hub` and `Hub` are
+  both legal Rebeca identifiers and collapse before any separator is consulted.
+
+None of this is a soundness defect, and the group is not evidence of one. Uniqueness is
+decided on the assembled program, by the `Nodup` guard on `LF.GeneralReactor.declaredNames`,
+which is strictly stronger than injectivity of these functions because it also covers
+state-variable, action and parameter names that no naming rule can constrain. What these
+assertions protect is the *claim* about the rule, which several docstrings now make.
+-/
+private def portNameCollisionAssertions :
+    IO Unit := do
+
+  -- F34, the unescaped separator: two different (message, known rebec) pairs, one name.
+  -- Every readable separator has this property, underscores included, so the finding is
+  -- about concatenation and not about this particular spelling.
+  expectString
+    "PORT_NAME_UNESCAPED_SEPARATOR_COLLIDES"
+    "reportToToHub = reportToToHub"
+    ((Translation.outputPortNameFor
+          ⟨"reportTo"⟩
+          ⟨"hub"⟩
+          "").value ++
+      " = " ++
+      (Translation.outputPortNameFor
+          ⟨"report"⟩
+          ⟨"toHub"⟩
+          "").value)
+
+  -- F34 again, and this is the witness F42 shares: nothing marks where the capitalized
+  -- rebec ends and the site ordinal begins. Site 2 of a class that sends twice to `hub`
+  -- is indistinguishable from the sole site of a class that sends once to `hub2`.
+  expectString
+    "PORT_NAME_SITE_SUFFIX_BOUNDARY_COLLIDES"
+    "reportToHub2 = reportToHub2"
+    ((Translation.outputPortNameFor
+          ⟨"report"⟩
+          ⟨"hub"⟩
+          "2").value ++
+      " = " ++
+      (Translation.outputPortNameFor
+          ⟨"report"⟩
+          ⟨"hub2"⟩
+          "").value)
+
+  -- F42's own channel, and the one that survives both fixes above. `capitalizeName` folds
+  -- the first character's case, so two distinct known rebecs give one infix. This is why
+  -- `docs/STAGE_E_DESIGN.md` §4.3's second one-sided injectivity lemma is false and why
+  -- `outputPortInfixFor_eq_of_outputPortNameFor_eq` is the strongest form that holds.
+  expectString
+    "PORT_NAME_CASE_FOLDING_COLLIDES"
+    "reportToHub = reportToHub"
+    ((Translation.outputPortNameFor
+          ⟨"report"⟩
+          ⟨"hub"⟩
+          "").value ++
+      " = " ++
+      (Translation.outputPortNameFor
+          ⟨"report"⟩
+          ⟨"Hub"⟩
+          "").value)
+
+/--
 The collision model's translated program, assembled but not guarded.
 
 This is `Translation.compileGeneralModel` with its last step left off, and it exists
@@ -3429,7 +3516,8 @@ private def routedAssertions :
 
 /--
 Run every assertion: 34 printing, then 10 well-formedness, then 11 translation, then
-5 for finding F32's counterexample, then 7 for the routed model, 67 in all.
+3 for the port-name collisions F34 and F42, then 5 for finding F32's counterexample,
+then 7 for the routed model, 70 in all.
 
 The count is stated here because `frontend/check-general-lean.sh` compares the
 number of `PASS_` lines against a literal. There are no fixtures to count, so a
@@ -3438,8 +3526,11 @@ which is the failure a marker check alone cannot see.
 
 Stage C ran 25 of these, in two blocks. The third block is the one that mentions
 `Relico.Translation`: everything above it would still pass if `compileGeneralModel` did
-not exist. The fifth is the one that mentions `Relico.Translation.GeneralRouting`, and
-everything above *it* would still pass if routing did not exist.
+not exist. The fourth is the only one that calls into
+`Relico.Translation.NameGeneration` directly, rather than reading names off a program
+something else built. The sixth is the one that mentions
+`Relico.Translation.GeneralRouting`, and everything above *it* would still pass if
+routing did not exist.
 
 Stage E moved this number in both directions, and the down direction is the one worth
 recording. It first went **60 to 59**: stage D asserted `generalModelSelfSendOnly`'s
@@ -3449,6 +3540,12 @@ are two refusals plus one statement about the collision program's connections. T
 routed model took it to 66, and the F32 group's move to the assembly layer added the
 refusal assertion F43 records, taking it to 67. A number that only ever rises is a number
 nobody is reading.
+
+Then **67 to 70**, and this rise is the one to read rather than wave through: the three
+assertions are not new coverage, they are coverage `Relico/Translation/NameGeneration.lean`
+had already claimed in prose while the assertions did not exist. That is finding F44. The
+count moving is the cheap part; what was actually repaired is a docstring that had been
+telling readers a gap was discharged.
 -/
 def runGeneralLfPrinterTests :
     IO UInt32 := do
@@ -3459,6 +3556,8 @@ def runGeneralLfPrinterTests :
     wellFormednessAssertions
 
     translationAssertions
+
+    portNameCollisionAssertions
 
     collisionAssertions
 

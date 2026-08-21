@@ -493,6 +493,23 @@ the case-folding channel — plus the docstring rewritten to name them. Because 
 `EXPECTED_PRINTER_ASSERTIONS` and the `runGeneralLfPrinterTests` docstring, it must travel with the other
 count moves rather than on its own; it is assigned below.
 
+> **Discharged the same day, in task #45.** The three assertions exist and run, under the labels
+> `PORT_NAME_UNESCAPED_SEPARATOR_COLLIDES`, `PORT_NAME_SITE_SUFFIX_BOUNDARY_COLLIDES` and
+> `PORT_NAME_CASE_FOLDING_COLLIDES`, in a `portNameCollisionAssertions` block between the translation
+> group and F32's counterexample group. `EXPECTED_PRINTER_ASSERTIONS` moved 67 → 70 and both docstrings
+> that state the breakdown moved with it. `NameGeneration.lean` now names the three labels instead of
+> promising them, so the claim is checkable by grepping for a label — which is the property the original
+> sentence lacked, and the reason it could be false for a day.
+>
+> Two details of the fix differ from the plan written above, and both are deliberate. First, each
+> assertion pins **both** generated names against one literal — `"reportToToHub = reportToToHub"` rather
+> than asserting only that the two calls agree. Asserting mutual equality alone would still pass if the
+> naming rule changed in a way that collided on a *different* string, which is exactly the regression a
+> collision witness is for. Second, the boundary witness is labelled for the boundary rather than for
+> F42, because the source assigns that witness to F34 at `NameGeneration.lean:110–115` and to F42 at
+> `:204–207`; the label names the mechanism, so it stays correct under either reading, and the
+> inconsistency itself is recorded under **F34** rather than resolved here.
+
 ---
 
 ## What is left open, and who owns it
@@ -526,6 +543,10 @@ a layer partition that three docstrings state deliberately. Whichever branch is 
 stage E fixtures, so `EXPECTED_PRINTER_ASSERTIONS` and the `runGeneralLfPrinterTests` docstring move once
 rather than twice. Until it lands, `NameGeneration.lean:214–217` is making a false statement about the
 test suite, which is the one kind of debt that hides itself.
+
+> **Closed** — see the addendum under F44. This item is kept rather than deleted because the closing
+> section is ordered by what blocks something later, and an item that vanishes leaves no record that the
+> ordering was ever load-bearing.
 
 **5. What the paper actually says about the send rule and where the delay goes.** This reading decides
 whether **F35** becomes a `P`-series correction in `docs/PAPER_CORRECTIONS.md` or stays a repository
