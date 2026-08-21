@@ -4375,5 +4375,696 @@ theorem compileGeneralModel_targetEndpointsUnique
     (compileGeneralModel_wellFormed
       hCompiled)
 
+/-!
+## Site totality
+
+The defensive arm at `compileGeneralStmt` — the one whose diagnostic says *"this is a defect in
+the translator and not in the model"* — is unreachable whenever the environment it is given came
+from `outputPortEnvOf`. This section proves that, and the proof buys more than the design asked
+for.
+
+`docs/STAGE_E_DESIGN.md` §8 asks for a sufficient condition for acceptance. What comes out is
+*totality*: **given a resolved environment, compiling a reactive class cannot fail at all.** The
+reason is a measurement rather than an argument. Every `.error` in this file below
+`compileGeneralStmt` is a *propagation* — a `match` arm that returns a refusal its callee
+produced — and the only place in the whole body-compilation path where a refusal is
+**originated** is that one defensive arm. So removing its reachability removes the last way any
+of `compileGeneralBody`, `compileGeneralConstructor`,
+`compileGeneralMessageServerReactionGroup`, `compileGeneralMessageServerReactions` or
+`compileGeneralReactiveClass` can refuse, once `outputPortEnvOf` has succeeded. Their `.error`
+arms remain, because they are what carries a *routing* refusal outward, and routing can still
+refuse for the four causes `compileGeneralReactiveClass_error_env` enumerates.
+
+The arm itself is also kept. A proof that a branch is unreachable is a proof about a fixed
+program, and stage F changes this program; deleting the arm would replace a refusal with a
+`sorry`-shaped hole in the next stage that adds a statement form. §6.3's `for` loop is the
+concrete case — it introduces statements whose sends this traversal does not yet index, and the
+requirement recorded there is that such a statement must break *loudly*. It breaks loudly here:
+`exists_compileGeneralBody` cases on the statement constructors exhaustively, so a new
+constructor is a build error in this file and not a silently unproved obligation.
+
+Nothing in this section is about port *names*. The naming rule is not injective (finding F34,
+and §4.3's would-be injectivity lemma is refuted as F42), so no fact about ports follows from
+site distinctness; §10.2's `Nodup` theorem needs the guard's `declaredNames.Nodup` and is proved
+separately.
+-/
+
+/--
+Compiling an assignment cannot fail.
+-/
+theorem compileGeneralStmt_assign
+    (env : GeneralOutputPortEnv)
+    (bodyKey : GeneralBodyKey)
+    (index : Nat)
+    (target : VarName)
+    (value : DTR.GeneralExpr) :
+    compileGeneralStmt
+        env
+        bodyKey
+        index
+        (
+          .assign
+            target
+            value
+        ) =
+      .ok
+        (.assign
+          target
+          (compileGeneralExpr
+            value)) := by
+  simp [
+    compileGeneralStmt
+  ]
+
+/--
+Compiling a self-send cannot fail: it needs no port, only the message's own action.
+-/
+theorem compileGeneralStmt_send_selfTarget
+    (env : GeneralOutputPortEnv)
+    (bodyKey : GeneralBodyKey)
+    (index : Nat)
+    (message : MsgName)
+    (arguments : List DTR.GeneralExpr)
+    (delay : Delay) :
+    compileGeneralStmt
+        env
+        bodyKey
+        index
+        (
+          .send
+            .selfTarget
+            message
+            arguments
+            delay
+        ) =
+      .ok
+        (.schedule
+          (actionNameFor
+            message)
+          (arguments.map
+            compileGeneralExpr)
+          delay) := by
+  simp [
+    compileGeneralStmt
+  ]
+
+/--
+Compiling an external send succeeds exactly when the environment has an entry at its address.
+
+The address is built here rather than taken as an argument, because it is the *statement's* own
+position and a caller free to pass a different one could satisfy this lemma while compiling the
+wrong send.
+-/
+theorem compileGeneralStmt_send_knownRebec_ok
+    (env : GeneralOutputPortEnv)
+    (bodyKey : GeneralBodyKey)
+    (index : Nat)
+    (rebec : KnownRebecName)
+    (message : MsgName)
+    (arguments : List DTR.GeneralExpr)
+    (delay : Delay)
+    {entry : GeneralOutputPortEntry}
+    (hLookup :
+      generalEntryAtSite?
+          env
+          {
+            body :=
+              bodyKey
+
+            index :=
+              index
+          } =
+        some entry) :
+    compileGeneralStmt
+        env
+        bodyKey
+        index
+        (
+          .send
+            (.knownRebec
+              rebec)
+            message
+            arguments
+            delay
+        ) =
+      .ok
+        (.setPort
+          entry.outputPort
+          (arguments.map
+            compileGeneralExpr)) := by
+  simp [
+    compileGeneralStmt,
+    hLookup
+  ]
+
+/--
+A body whose every external send has an entry compiles.
+
+The hypothesis is quantified over `externalSendsFromIndex bodyKey index body` — the sends of
+*this* body from *this* index — and not over the class's whole send list, which is what makes
+the induction go through: the tail's hypothesis is the head's hypothesis with one statement
+removed, and that is exactly what the three arm equations in `Relico/Translation/GeneralRouting.lean`
+say. The index advances in step with `externalSendsFromIndex` because both functions advance it
+once per statement, which is the alignment the note on `compileGeneralBody` flags as worth
+stating even though no earlier theorem needed it. This theorem needs it.
+-/
+theorem exists_compileGeneralBody
+    (env : GeneralOutputPortEnv)
+    (bodyKey : GeneralBodyKey)
+    (body : DTR.GeneralBody) :
+    ∀ index : Nat,
+      (∀ send ∈
+          externalSendsFromIndex
+            bodyKey
+            index
+            body,
+        ∃ entry,
+          generalEntryAtSite?
+              env
+              send.site =
+            some entry) →
+      ∃ compiled,
+        compileGeneralBody
+            env
+            bodyKey
+            index
+            body =
+          .ok compiled := by
+
+  induction body with
+
+  | nil =>
+      intro index _
+
+      exact
+        ⟨[],
+         compileGeneralBody_nil
+           env
+           bodyKey
+           index⟩
+
+  | cons statement remaining inductionHypothesis =>
+      intro index hSends
+
+      cases statement with
+
+      | assign target value =>
+
+          have hStatement :
+              compileGeneralStmt
+                  env
+                  bodyKey
+                  index
+                  (
+                    .assign
+                      target
+                      value
+                  ) =
+                .ok
+                  (.assign
+                    target
+                    (compileGeneralExpr
+                      value)) :=
+            compileGeneralStmt_assign
+              env
+              bodyKey
+              index
+              target
+              value
+
+          obtain ⟨compiledRemaining, hRemaining⟩ :=
+            inductionHypothesis
+              (index + 1)
+              (by
+                intro send hMember
+
+                exact
+                  hSends
+                    send
+                    (by
+                      rw [
+                        externalSendsFromIndex_assign
+                      ]
+
+                      exact hMember))
+
+          exact
+            ⟨_,
+             compileGeneralBody_cons_ok
+               hStatement
+               hRemaining⟩
+
+      | send target message arguments delay =>
+
+          cases target with
+
+          | selfTarget =>
+
+              have hStatement :
+                  compileGeneralStmt
+                      env
+                      bodyKey
+                      index
+                      (
+                        .send
+                          .selfTarget
+                          message
+                          arguments
+                          delay
+                      ) =
+                    .ok
+                      (.schedule
+                        (actionNameFor
+                          message)
+                        (arguments.map
+                          compileGeneralExpr)
+                        delay) :=
+                compileGeneralStmt_send_selfTarget
+                  env
+                  bodyKey
+                  index
+                  message
+                  arguments
+                  delay
+
+              obtain ⟨compiledRemaining, hRemaining⟩ :=
+                inductionHypothesis
+                  (index + 1)
+                  (by
+                    intro send hMember
+
+                    exact
+                      hSends
+                        send
+                        (by
+                          rw [
+                            externalSendsFromIndex_send_selfTarget
+                          ]
+
+                          exact hMember))
+
+              exact
+                ⟨_,
+                 compileGeneralBody_cons_ok
+                   hStatement
+                   hRemaining⟩
+
+          | knownRebec rebec =>
+
+              obtain ⟨entry, hEntry⟩ :=
+                hSends
+                  {
+                    site :=
+                      {
+                        body :=
+                          bodyKey
+
+                        index :=
+                          index
+                      }
+
+                    knownRebec :=
+                      rebec
+
+                    message :=
+                      message
+
+                    delay :=
+                      delay
+                  }
+                  (by
+                    rw [
+                      externalSendsFromIndex_send_knownRebec,
+                      List.mem_cons
+                    ]
+
+                    exact
+                      Or.inl
+                        rfl)
+
+              have hLookup :
+                  generalEntryAtSite?
+                      env
+                      {
+                        body :=
+                          bodyKey
+
+                        index :=
+                          index
+                      } =
+                    some entry :=
+                hEntry
+
+              have hStatement :
+                  compileGeneralStmt
+                      env
+                      bodyKey
+                      index
+                      (
+                        .send
+                          (.knownRebec
+                            rebec)
+                          message
+                          arguments
+                          delay
+                      ) =
+                    .ok
+                      (.setPort
+                        entry.outputPort
+                        (arguments.map
+                          compileGeneralExpr)) :=
+                compileGeneralStmt_send_knownRebec_ok
+                  env
+                  bodyKey
+                  index
+                  rebec
+                  message
+                  arguments
+                  delay
+                  hLookup
+
+              obtain ⟨compiledRemaining, hRemaining⟩ :=
+                inductionHypothesis
+                  (index + 1)
+                  (by
+                    intro send hMember
+
+                    exact
+                      hSends
+                        send
+                        (by
+                          rw [
+                            externalSendsFromIndex_send_knownRebec,
+                            List.mem_cons
+                          ]
+
+                          exact
+                            Or.inr
+                              hMember))
+
+              exact
+                ⟨_,
+                 compileGeneralBody_cons_ok
+                   hStatement
+                   hRemaining⟩
+
+/--
+A constructor whose every external send has an entry compiles.
+-/
+theorem exists_compileGeneralConstructor
+    (env : GeneralOutputPortEnv)
+    (classConstructor : DTR.GeneralConstructor)
+    (hSends :
+      ∀ send ∈
+          externalSendsOfBody
+            .constructor
+            classConstructor.body,
+        ∃ entry,
+          generalEntryAtSite?
+              env
+              send.site =
+            some entry) :
+    ∃ compiled,
+      compileGeneralConstructor
+          env
+          classConstructor =
+        .ok compiled := by
+
+  obtain ⟨compiledBody, hBody⟩ :=
+    exists_compileGeneralBody
+      env
+      .constructor
+      classConstructor.body
+      0
+      hSends
+
+  exact
+    ⟨_,
+     compileGeneralConstructor_ok
+       hBody⟩
+
+/--
+A message server whose every external send has an entry compiles, together with its arrivals.
+
+The arrival reactions are assembled, not compiled — `assembleGeneralPortReactions` is total —
+so the group's only failure is the body's, which is the sentence the note on
+`compileGeneralMessageServerReactionGroup` already claims and this theorem now supports.
+-/
+theorem exists_compileGeneralMessageServerReactionGroup
+    (env : GeneralOutputPortEnv)
+    (routes : List GeneralRoute)
+    (className : ClassName)
+    (server : DTR.GeneralMessageServer)
+    (hSends :
+      ∀ send ∈
+          externalSendsOfBody
+            (.messageServer
+              server.name)
+            server.body,
+        ∃ entry,
+          generalEntryAtSite?
+              env
+              send.site =
+            some entry) :
+    ∃ compiled,
+      compileGeneralMessageServerReactionGroup
+          env
+          routes
+          className
+          server =
+        .ok compiled := by
+
+  obtain ⟨compiledBody, hBody⟩ :=
+    exists_compileGeneralBody
+      env
+      (.messageServer
+        server.name)
+      server.body
+      0
+      hSends
+
+  exact
+    ⟨_,
+     compileGeneralMessageServerReactionGroup_ok
+       hBody⟩
+
+/--
+A list of message servers, each of whose sends has an entry, compiles.
+-/
+theorem exists_compileGeneralMessageServerReactions
+    (env : GeneralOutputPortEnv)
+    (routes : List GeneralRoute)
+    (className : ClassName)
+    (servers : List DTR.GeneralMessageServer) :
+    (∀ server ∈ servers,
+      ∀ send ∈
+          externalSendsOfBody
+            (.messageServer
+              server.name)
+            server.body,
+        ∃ entry,
+          generalEntryAtSite?
+              env
+              send.site =
+            some entry) →
+    ∃ compiled,
+      compileGeneralMessageServerReactions
+          env
+          routes
+          className
+          servers =
+        .ok compiled := by
+
+  induction servers with
+
+  | nil =>
+      intro _
+
+      exact
+        ⟨[],
+         compileGeneralMessageServerReactions_nil
+           env
+           routes
+           className⟩
+
+  | cons server remaining inductionHypothesis =>
+      intro hSends
+
+      obtain ⟨group, hGroup⟩ :=
+        exists_compileGeneralMessageServerReactionGroup
+          env
+          routes
+          className
+          server
+          (hSends
+            server
+            (by
+              simp))
+
+      obtain ⟨compiledRemaining, hRemaining⟩ :=
+        inductionHypothesis
+          (by
+            intro other hOther
+
+            exact
+              hSends
+                other
+                (by
+                  rw [
+                    List.mem_cons
+                  ]
+
+                  exact
+                    Or.inr
+                      hOther))
+
+      exact
+        ⟨_,
+         compileGeneralMessageServerReactions_cons_ok
+           hGroup
+           hRemaining⟩
+
+/--
+**A class with a resolved environment compiles. There is no other way for it to fail.**
+
+The theorem §8 asks for, in the strongest of the available forms. Its hypothesis is a success of
+`outputPortEnvOf` and nothing else: no well-formedness, no guard, no property of the class's
+statements. Everything about the class's *sends* is supplied by
+`exists_generalEntryAtSite?_of_mem_sends`, which is a fact about the environment the same call
+produced.
+
+Read together with `compileGeneralReactiveClass_error_env` this is a decision procedure: a class
+compiles if and only if its environment resolves, and its environment resolves unless one of the
+four causes that lemma enumerates fires. Three of those four are closed upstream by
+`DTR.GeneralModel.wellFormed`, measured conjunct by conjunct in that lemma's note; the fourth,
+an arity-zero external send, is the residue of finding F36 and is a real restriction rather than
+a defensive branch.
+-/
+theorem exists_compileGeneralReactiveClass
+    {classes : List DTR.GeneralReactiveClass}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {env : GeneralOutputPortEnv}
+    (routes : List GeneralRoute)
+    (hEnv :
+      outputPortEnvOf
+          classes
+          reactiveClass =
+        .ok env) :
+    ∃ reactor,
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok reactor := by
+
+  obtain ⟨compiledStartupReaction, hConstructor⟩ :=
+    exists_compileGeneralConstructor
+      env
+      reactiveClass.constructor
+      (by
+        intro send hMember
+
+        exact
+          exists_generalEntryAtSite?_of_mem_sends
+            hEnv
+            (mem_externalSendsOfClass_of_mem_constructor
+              hMember))
+
+  obtain ⟨compiledMessageReactions, hMessageServers⟩ :=
+    exists_compileGeneralMessageServerReactions
+      env
+      routes
+      reactiveClass.name
+      reactiveClass.messageServers
+      (by
+        intro server hServer send hMember
+
+        exact
+          exists_generalEntryAtSite?_of_mem_sends
+            hEnv
+            (mem_externalSendsOfClass_of_mem_messageServer
+              hServer
+              hMember))
+
+  exact
+    ⟨_,
+     compileGeneralReactiveClass_ok
+       hEnv
+       hConstructor
+       hMessageServers⟩
+
+/--
+Every class of a list whose environments all resolve compiles.
+
+The list is a separate parameter from the class *table*, as everywhere in this file, because
+`outputPortEnvOf` resolves against the table while the traversal walks the list. `compileGeneralModel`
+passes the same list twice; a theorem that assumed so would not survive the first caller that
+compiles a subset.
+-/
+theorem exists_compileGeneralReactiveClasses
+    (allClasses : List DTR.GeneralReactiveClass)
+    (routes : List GeneralRoute)
+    (classList : List DTR.GeneralReactiveClass) :
+    (∀ reactiveClass ∈ classList,
+      ∃ env,
+        outputPortEnvOf
+            allClasses
+            reactiveClass =
+          .ok env) →
+    ∃ compiled,
+      compileGeneralReactiveClasses
+          allClasses
+          routes
+          classList =
+        .ok compiled := by
+
+  induction classList with
+
+  | nil =>
+      intro _
+
+      exact
+        ⟨[],
+         compileGeneralReactiveClasses_nil
+           allClasses
+           routes⟩
+
+  | cons reactiveClass remaining inductionHypothesis =>
+      intro hEnvs
+
+      obtain ⟨env, hEnv⟩ :=
+        hEnvs
+          reactiveClass
+          (by
+            simp)
+
+      obtain ⟨reactor, hClass⟩ :=
+        exists_compileGeneralReactiveClass
+          routes
+          hEnv
+
+      obtain ⟨compiledRemaining, hRemaining⟩ :=
+        inductionHypothesis
+          (by
+            intro other hOther
+
+            exact
+              hEnvs
+                other
+                (by
+                  rw [
+                    List.mem_cons
+                  ]
+
+                  exact
+                    Or.inr
+                      hOther))
+
+      exact
+        ⟨_,
+         compileGeneralReactiveClasses_cons_ok
+           hClass
+           hRemaining⟩
+
 end Translation
 end Relico

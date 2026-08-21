@@ -1427,5 +1427,1226 @@ theorem generalEntryAtSite?_site
           inductionHypothesis
             hFound
 
+/-!
+## Site totality
+
+Task #47, and the reason `compileGeneralStmt`'s `none` arm carries a message addressed to a
+translator author rather than to a user: an external send whose site is missing from its own
+class's environment is a defect here, not something anybody can write. The arm was left
+reachable-in-principle when it landed because proving a two-hundred-line induction against a
+module that had never elaborated would have made a build failure undiagnosable.
+
+The chain has four links and each is separately usable. A successful lookup returns an
+element of the environment; an environment built from a numbered send list has exactly that
+list's sites; numbering preserves the sends; so every send of a class is looked up
+successfully in that class's environment. `Relico/Translation/GeneralBasic.lean` then walks a
+body once more and turns that into totality of the body compiler.
+
+The order matters for reading: everything here is about `outputPortEnvOf` and says nothing
+about *ports*. Two sites can share a port name — the naming rule is not injective, finding
+F34 — and no lemma in this section pretends otherwise. Port-name distinctness is a property
+of accepted *programs* and it is established where the guard is, not here.
+-/
+
+/--
+The `cons` equation when the head is the site asked for.
+
+Split into two directed equations rather than proved inline at each use, for the reason
+`compileGeneralBody`'s three `cons` lemmas give: a `match` written inside a theorem
+statement elaborates to a fresh matcher constant, and every proof that then rewrites with
+the equation depends on that constant agreeing definitionally with the one in the
+definition. Two `rw`-able equations carry the same content and depend on nothing.
+-/
+theorem generalEntryAtSite?_cons_self
+    (entry : GeneralOutputPortEntry)
+    (remaining : GeneralOutputPortEnv)
+    (site : SendSite)
+    (hMatch :
+      entry.site = site) :
+    generalEntryAtSite?
+        (entry :: remaining)
+        site =
+      some entry := by
+  simp [
+    generalEntryAtSite?,
+    hMatch
+  ]
+
+/--
+The `cons` equation when the head is some other site.
+-/
+theorem generalEntryAtSite?_cons_of_ne
+    (entry : GeneralOutputPortEntry)
+    (remaining : GeneralOutputPortEnv)
+    (site : SendSite)
+    (hMatch :
+      ¬ entry.site = site) :
+    generalEntryAtSite?
+        (entry :: remaining)
+        site =
+      generalEntryAtSite?
+        remaining
+        site := by
+  simp [
+    generalEntryAtSite?,
+    hMatch
+  ]
+
+/--
+A successful lookup returns an entry the environment actually holds.
+
+Together with `generalEntryAtSite?_site` this is everything a caller can want from the
+lookup: the entry is *in* the environment, so any property established for the whole
+environment holds of it, and its site is the site asked for, so the port name it carries
+belongs to the statement in hand. The pair is what lets a later theorem about port names
+quantify over the environment instead of over the lookup.
+-/
+theorem generalEntryAtSite?_mem
+    (env : GeneralOutputPortEnv)
+    (site : SendSite)
+    (entry : GeneralOutputPortEntry) :
+    generalEntryAtSite?
+          env
+          site =
+        some entry →
+      entry ∈ env := by
+
+  induction env with
+
+  | nil =>
+      intro hFound
+
+      simp [
+        generalEntryAtSite?
+      ] at hFound
+
+  | cons candidate remaining inductionHypothesis =>
+      intro hFound
+
+      by_cases hMatch :
+          candidate.site = site
+
+      · rw [
+          generalEntryAtSite?_cons_self
+            candidate
+            remaining
+            site
+            hMatch
+        ] at hFound
+
+        injection hFound with hEntry
+
+        subst hEntry
+
+        simp
+
+      · rw [
+          generalEntryAtSite?_cons_of_ne
+            candidate
+            remaining
+            site
+            hMatch
+        ] at hFound
+
+        rw [
+          List.mem_cons
+        ]
+
+        exact
+          Or.inr
+            (inductionHypothesis
+              hFound)
+
+/--
+A site the environment lists is a site the lookup finds.
+
+Stated as an existential rather than with `Option.isSome`, because every consumer wants the
+entry: the statement compiler needs its port name and the totality proof needs to hand it to
+`compileGeneralStmt`. `isSome` would force each of them to re-destruct an option that this
+proof has already destructed.
+
+The entry produced is not necessarily the one whose membership supplied the site — the lookup
+returns the *first* match. That is why the conclusion names no particular entry, and it is
+also why nothing here needs the environment's sites to be distinct.
+-/
+theorem exists_generalEntryAtSite?_of_mem_sites
+    (env : GeneralOutputPortEnv)
+    (site : SendSite) :
+    site ∈
+        env.map
+          (fun entry =>
+            entry.site) →
+      ∃ entry,
+        generalEntryAtSite?
+            env
+            site =
+          some entry := by
+
+  induction env with
+
+  | nil =>
+      intro hMember
+
+      simp at hMember
+
+  | cons candidate remaining inductionHypothesis =>
+      intro hMember
+
+      by_cases hMatch :
+          candidate.site = site
+
+      · exact
+          ⟨
+            candidate,
+            generalEntryAtSite?_cons_self
+              candidate
+              remaining
+              site
+              hMatch
+          ⟩
+
+      · rw [
+          generalEntryAtSite?_cons_of_ne
+            candidate
+            remaining
+            site
+            hMatch
+        ]
+
+        rw [
+          List.map_cons,
+          List.mem_cons
+        ] at hMember
+
+        cases hMember with
+
+        | inl hHead =>
+            exact
+              absurd
+                hHead.symm
+                hMatch
+
+        | inr hTail =>
+            exact
+              inductionHypothesis
+                hTail
+
+/-!
+### Inverting one entry
+
+`generalOutputPortEntryFor` is four nested matches deep and the site-map lemma below needs one
+fact out of it: a resolved entry sits at the site of the send it was resolved from. Getting
+that fact requires ruling out the four refusals, and the four are ruled out the way this
+repository rules out every other one — with a forward equation per outcome, rewritten into the
+hypothesis. `docs/STAGE_D_DESIGN.md` §9.1's argument applies unchanged: no `match` appears in
+any statement here, so no proof below depends on a matcher constant elaborated inside a
+theorem.
+
+The four refusals are stated as `¬ … = .ok entry` rather than as `∃ diagnostic, … = .error
+diagnostic`. Both are true; the negative form is what an inversion consumes, and it avoids
+writing four long diagnostic strings into four theorem statements where a later edit to a
+message would break a proof that has nothing to do with messages.
+-/
+
+/--
+A send naming a rebec its class does not declare resolves to no entry.
+-/
+private theorem generalOutputPortEntryFor_ne_ok_of_knownRebec_none
+    {classes : List DTR.GeneralReactiveClass}
+    {sendingClass : DTR.GeneralReactiveClass}
+    {allSends : List GeneralExternalSend}
+    {send : GeneralExternalSend}
+    {ordinal : Nat}
+    (hKnown :
+      sendingClass.knownRebec?
+          send.knownRebec =
+        none)
+    (entry : GeneralOutputPortEntry) :
+    ¬ generalOutputPortEntryFor
+          classes
+          sendingClass
+          allSends
+          send
+          ordinal =
+        .ok entry := by
+  simp [
+    generalOutputPortEntryFor,
+    hKnown
+  ]
+
+/--
+A known rebec whose declared class the model does not declare resolves to no entry.
+-/
+private theorem generalOutputPortEntryFor_ne_ok_of_class_none
+    {classes : List DTR.GeneralReactiveClass}
+    {sendingClass : DTR.GeneralReactiveClass}
+    {allSends : List GeneralExternalSend}
+    {send : GeneralExternalSend}
+    {ordinal : Nat}
+    {declaration : DTR.GeneralKnownRebecDecl}
+    (hKnown :
+      sendingClass.knownRebec?
+          send.knownRebec =
+        some declaration)
+    (hClass :
+      DTR.findClass?
+          classes
+          declaration.className =
+        none)
+    (entry : GeneralOutputPortEntry) :
+    ¬ generalOutputPortEntryFor
+          classes
+          sendingClass
+          allSends
+          send
+          ordinal =
+        .ok entry := by
+  simp [
+    generalOutputPortEntryFor,
+    hKnown,
+    hClass
+  ]
+
+/--
+A message the receiving class does not declare resolves to no entry.
+-/
+private theorem generalOutputPortEntryFor_ne_ok_of_messageServer_none
+    {classes : List DTR.GeneralReactiveClass}
+    {sendingClass : DTR.GeneralReactiveClass}
+    {allSends : List GeneralExternalSend}
+    {send : GeneralExternalSend}
+    {ordinal : Nat}
+    {declaration : DTR.GeneralKnownRebecDecl}
+    {receivingClass : DTR.GeneralReactiveClass}
+    (hKnown :
+      sendingClass.knownRebec?
+          send.knownRebec =
+        some declaration)
+    (hClass :
+      DTR.findClass?
+          classes
+          declaration.className =
+        some receivingClass)
+    (hServer :
+      receivingClass.messageServer?
+          send.message =
+        none)
+    (entry : GeneralOutputPortEntry) :
+    ¬ generalOutputPortEntryFor
+          classes
+          sendingClass
+          allSends
+          send
+          ordinal =
+        .ok entry := by
+  simp [
+    generalOutputPortEntryFor,
+    hKnown,
+    hClass,
+    hServer
+  ]
+
+/--
+A message server whose parameters admit no port payload resolves to no entry.
+
+This is the one of the four that is a *translation* limit rather than a document defect: an
+arity-zero external send has no measured port declaration to compile to, which is finding F36's
+open residue.
+-/
+private theorem generalOutputPortEntryFor_ne_ok_of_payload_error
+    {classes : List DTR.GeneralReactiveClass}
+    {sendingClass : DTR.GeneralReactiveClass}
+    {allSends : List GeneralExternalSend}
+    {send : GeneralExternalSend}
+    {ordinal : Nat}
+    {declaration : DTR.GeneralKnownRebecDecl}
+    {receivingClass : DTR.GeneralReactiveClass}
+    {receivingServer : DTR.GeneralMessageServer}
+    {diagnostic : String}
+    (hKnown :
+      sendingClass.knownRebec?
+          send.knownRebec =
+        some declaration)
+    (hClass :
+      DTR.findClass?
+          classes
+          declaration.className =
+        some receivingClass)
+    (hServer :
+      receivingClass.messageServer?
+          send.message =
+        some receivingServer)
+    (hPayload :
+      generalPortPayloadFor
+          receivingClass.name
+          send.message
+          receivingServer.parameters =
+        .error diagnostic)
+    (entry : GeneralOutputPortEntry) :
+    ¬ generalOutputPortEntryFor
+          classes
+          sendingClass
+          allSends
+          send
+          ordinal =
+        .ok entry := by
+  simp [
+    generalOutputPortEntryFor,
+    hKnown,
+    hClass,
+    hServer,
+    hPayload
+  ]
+
+/--
+The one success equation, with every field spelled out.
+
+Long, and deliberately so: the entry this function builds is the record that decides a
+generated identifier, and a forward equation that names all seven fields is what lets a later
+theorem about *any* of them be proved by rewriting rather than by unfolding four matches
+again. The site-map lemma below uses only the first field; §10.2's port-name theorem will use
+the fifth.
+-/
+private theorem generalOutputPortEntryFor_ok
+    {classes : List DTR.GeneralReactiveClass}
+    {sendingClass : DTR.GeneralReactiveClass}
+    {allSends : List GeneralExternalSend}
+    {send : GeneralExternalSend}
+    {ordinal : Nat}
+    {declaration : DTR.GeneralKnownRebecDecl}
+    {receivingClass : DTR.GeneralReactiveClass}
+    {receivingServer : DTR.GeneralMessageServer}
+    {portPayload : LF.GeneralPortPayload}
+    (hKnown :
+      sendingClass.knownRebec?
+          send.knownRebec =
+        some declaration)
+    (hClass :
+      DTR.findClass?
+          classes
+          declaration.className =
+        some receivingClass)
+    (hServer :
+      receivingClass.messageServer?
+          send.message =
+        some receivingServer)
+    (hPayload :
+      generalPortPayloadFor
+          receivingClass.name
+          send.message
+          receivingServer.parameters =
+        .ok portPayload) :
+    generalOutputPortEntryFor
+        classes
+        sendingClass
+        allSends
+        send
+        ordinal =
+      .ok
+        {
+          site :=
+            send.site
+
+          knownRebec :=
+            send.knownRebec
+
+          message :=
+            send.message
+
+          receiverClass :=
+            receivingClass.name
+
+          outputPort :=
+            outputPortNameFor
+              send.message
+              send.knownRebec
+              (generalSiteSuffixFor
+                allSends
+                send
+                ordinal)
+
+          payload :=
+            portPayload
+
+          delay :=
+            send.delay
+        } := by
+  simp [
+    generalOutputPortEntryFor,
+    hKnown,
+    hClass,
+    hServer,
+    hPayload
+  ]
+
+/--
+A resolved entry sits at the site of the send it was resolved from.
+
+The whole of the site-map lemma rests on this, and the reason it needs a proof rather than a
+glance is that `site` is the field the statement compiler matches on while `outputPort` is the
+field it uses. If the two could come from different sends, every port in the emitted program
+would still be a port the reactor declares and the messages would go to the wrong places.
+-/
+theorem generalOutputPortEntryFor_site
+    {classes : List DTR.GeneralReactiveClass}
+    {sendingClass : DTR.GeneralReactiveClass}
+    {allSends : List GeneralExternalSend}
+    {send : GeneralExternalSend}
+    {ordinal : Nat}
+    {entry : GeneralOutputPortEntry}
+    (hResolved :
+      generalOutputPortEntryFor
+          classes
+          sendingClass
+          allSends
+          send
+          ordinal =
+        .ok entry) :
+    entry.site = send.site := by
+
+  cases hKnown :
+      sendingClass.knownRebec?
+        send.knownRebec with
+
+  | none =>
+      exact
+        absurd
+          hResolved
+          (generalOutputPortEntryFor_ne_ok_of_knownRebec_none
+            hKnown
+            entry)
+
+  | some declaration =>
+
+      cases hClass :
+          DTR.findClass?
+            classes
+            declaration.className with
+
+      | none =>
+          exact
+            absurd
+              hResolved
+              (generalOutputPortEntryFor_ne_ok_of_class_none
+                hKnown
+                hClass
+                entry)
+
+      | some receivingClass =>
+
+          cases hServer :
+              receivingClass.messageServer?
+                send.message with
+
+          | none =>
+              exact
+                absurd
+                  hResolved
+                  (generalOutputPortEntryFor_ne_ok_of_messageServer_none
+                    hKnown
+                    hClass
+                    hServer
+                    entry)
+
+          | some receivingServer =>
+
+              cases hPayload :
+                  generalPortPayloadFor
+                    receivingClass.name
+                    send.message
+                    receivingServer.parameters with
+
+              | error diagnostic =>
+                  exact
+                    absurd
+                      hResolved
+                      (generalOutputPortEntryFor_ne_ok_of_payload_error
+                        hKnown
+                        hClass
+                        hServer
+                        hPayload
+                        entry)
+
+              | ok portPayload =>
+                  rw [
+                    generalOutputPortEntryFor_ok
+                      hKnown
+                      hClass
+                      hServer
+                      hPayload
+                  ] at hResolved
+
+                  injection hResolved with hEntry
+
+                  subst hEntry
+
+                  rfl
+
+/-!
+### Inverting the whole environment
+
+Three forward equations and one induction. The equations are the same shape
+`compileGeneralBody`'s are (`_cons_ok`, `_cons_error_head`, `_cons_error_tail`), which is not a
+coincidence: `generalOutputPortEntriesOf` was written as explicit recursion rather than as
+`mapM` precisely so that this shape would be available, and the note on the definition says so.
+
+The induction proves the fact the statement compiler needs: **a resolved environment has one
+entry per numbered send, at that send's site, in order.** Order is stated as an equality of the
+two site lists rather than as a length equality plus an index-wise claim, because the length
+equality alone would not rule out a permutation and a permutation would silently reassign every
+port name whose pair has more than one site.
+-/
+
+/-!
+The nil equation is **not** restated here. `generalOutputPortEntriesOf_nil` already exists above,
+as a public `@[simp]` lemma with exactly this statement and argument order, and re-declaring it
+privately here was a build error until it was removed. The induction below rewrites with that
+lemma directly.
+-/
+
+/--
+Both halves succeeding is the only way a cons succeeds, and this is that way.
+-/
+private theorem generalOutputPortEntriesOf_cons_ok
+    {classes : List DTR.GeneralReactiveClass}
+    {sendingClass : DTR.GeneralReactiveClass}
+    {allSends : List GeneralExternalSend}
+    {send : GeneralExternalSend}
+    {ordinal : Nat}
+    {remaining : List (GeneralExternalSend × Nat)}
+    {entry : GeneralOutputPortEntry}
+    {entries : GeneralOutputPortEnv}
+    (hEntry :
+      generalOutputPortEntryFor
+          classes
+          sendingClass
+          allSends
+          send
+          ordinal =
+        .ok entry)
+    (hRemaining :
+      generalOutputPortEntriesOf
+          classes
+          sendingClass
+          allSends
+          remaining =
+        .ok entries) :
+    generalOutputPortEntriesOf
+        classes
+        sendingClass
+        allSends
+        (
+          (
+            send,
+            ordinal
+          ) ::
+            remaining
+        ) =
+      .ok
+        (entry ::
+          entries) := by
+  simp [
+    generalOutputPortEntriesOf,
+    hEntry,
+    hRemaining
+  ]
+
+/--
+A refusal on the head is a refusal for the whole list.
+-/
+private theorem generalOutputPortEntriesOf_cons_ne_ok_of_head_error
+    {classes : List DTR.GeneralReactiveClass}
+    {sendingClass : DTR.GeneralReactiveClass}
+    {allSends : List GeneralExternalSend}
+    {send : GeneralExternalSend}
+    {ordinal : Nat}
+    {remaining : List (GeneralExternalSend × Nat)}
+    {diagnostic : String}
+    (hEntry :
+      generalOutputPortEntryFor
+          classes
+          sendingClass
+          allSends
+          send
+          ordinal =
+        .error diagnostic)
+    (env : GeneralOutputPortEnv) :
+    ¬ generalOutputPortEntriesOf
+          classes
+          sendingClass
+          allSends
+          (
+            (
+              send,
+              ordinal
+            ) ::
+              remaining
+          ) =
+        .ok env := by
+  simp [
+    generalOutputPortEntriesOf,
+    hEntry
+  ]
+
+/--
+A refusal anywhere in the tail is a refusal for the whole list.
+-/
+private theorem generalOutputPortEntriesOf_cons_ne_ok_of_tail_error
+    {classes : List DTR.GeneralReactiveClass}
+    {sendingClass : DTR.GeneralReactiveClass}
+    {allSends : List GeneralExternalSend}
+    {send : GeneralExternalSend}
+    {ordinal : Nat}
+    {remaining : List (GeneralExternalSend × Nat)}
+    {entry : GeneralOutputPortEntry}
+    {diagnostic : String}
+    (hEntry :
+      generalOutputPortEntryFor
+          classes
+          sendingClass
+          allSends
+          send
+          ordinal =
+        .ok entry)
+    (hRemaining :
+      generalOutputPortEntriesOf
+          classes
+          sendingClass
+          allSends
+          remaining =
+        .error diagnostic)
+    (env : GeneralOutputPortEnv) :
+    ¬ generalOutputPortEntriesOf
+          classes
+          sendingClass
+          allSends
+          (
+            (
+              send,
+              ordinal
+            ) ::
+              remaining
+          ) =
+        .ok env := by
+  simp [
+    generalOutputPortEntriesOf,
+    hEntry,
+    hRemaining
+  ]
+
+/--
+A resolved environment carries exactly the sites of the sends it was resolved from, in order.
+-/
+theorem generalOutputPortEntriesOf_sites
+    (classes : List DTR.GeneralReactiveClass)
+    (sendingClass : DTR.GeneralReactiveClass)
+    (allSends : List GeneralExternalSend)
+    (numbered : List (GeneralExternalSend × Nat)) :
+    ∀ env : GeneralOutputPortEnv,
+      generalOutputPortEntriesOf
+          classes
+          sendingClass
+          allSends
+          numbered =
+        .ok env →
+      env.map
+          (fun entry =>
+            entry.site) =
+        numbered.map
+          (fun pair =>
+            pair.1.site) := by
+
+  induction numbered with
+
+  | nil =>
+      intro env hResolved
+
+      rw [
+        generalOutputPortEntriesOf_nil
+      ] at hResolved
+
+      injection hResolved with hEnv
+
+      subst hEnv
+
+      simp
+
+  | cons pair remaining inductionHypothesis =>
+      intro env hResolved
+
+      cases pair with
+      | mk send ordinal =>
+
+          cases hEntry :
+              generalOutputPortEntryFor
+                classes
+                sendingClass
+                allSends
+                send
+                ordinal with
+
+          | error diagnostic =>
+              exact
+                absurd
+                  hResolved
+                  (generalOutputPortEntriesOf_cons_ne_ok_of_head_error
+                    hEntry
+                    env)
+
+          | ok entry =>
+
+              cases hRemaining :
+                  generalOutputPortEntriesOf
+                    classes
+                    sendingClass
+                    allSends
+                    remaining with
+
+              | error diagnostic =>
+                  exact
+                    absurd
+                      hResolved
+                      (generalOutputPortEntriesOf_cons_ne_ok_of_tail_error
+                        hEntry
+                        hRemaining
+                        env)
+
+              | ok entries =>
+                  rw [
+                    generalOutputPortEntriesOf_cons_ok
+                      hEntry
+                      hRemaining
+                  ] at hResolved
+
+                  injection hResolved with hEnv
+
+                  subst hEnv
+
+                  have hHead :
+                      entry.site =
+                        send.site :=
+                    generalOutputPortEntryFor_site
+                      hEntry
+
+                  have hTail :
+                      entries.map
+                          (fun entry =>
+                            entry.site) =
+                        remaining.map
+                          (fun pair =>
+                            pair.1.site) :=
+                    inductionHypothesis
+                      entries
+                      hRemaining
+
+                  simp [
+                    hHead,
+                    hTail
+                  ]
+
+/-!
+### From a class's sends to its environment
+
+Three links remain between "this statement is an external send" and "the environment has an
+entry for it": numbering has to preserve the send list, `outputPortEnvOf` has to be the
+numbered list resolved, and a body's sends have to be among its class's sends.
+
+The numbering lemma is proved by its own four-line induction rather than by composing an
+order-preservation lemma with `List.map_map`. The composition is one line shorter and it makes
+the proof depend on the *shape* of a library lemma stated with `∘`, which is the kind of
+dependency the note on `externalSendsFromIndex` already refused once for `List.enum`.
+-/
+
+/--
+Numbering preserves the send list.
+
+Stated even though nothing below consumes it: it is the fact that makes the ordinal a property
+*of a send in a list* rather than of a traversal, and §10.2's port-name theorem needs the sends
+themselves, not their sites.
+-/
+theorem numberExternalSends_sends
+    (sends : List GeneralExternalSend) :
+    ∀ numbered : List GeneralExternalSend,
+      (numberExternalSends
+            numbered
+            sends).map
+          (fun pair =>
+            pair.1) =
+        sends := by
+
+  induction sends with
+
+  | nil =>
+      intro numbered
+
+      simp [
+        numberExternalSends
+      ]
+
+  | cons send remaining inductionHypothesis =>
+      intro numbered
+
+      simp [
+        numberExternalSends,
+        inductionHypothesis
+      ]
+
+/--
+Numbering preserves the site list.
+-/
+theorem numberExternalSends_sites
+    (sends : List GeneralExternalSend) :
+    ∀ numbered : List GeneralExternalSend,
+      (numberExternalSends
+            numbered
+            sends).map
+          (fun pair =>
+            pair.1.site) =
+        sends.map
+          (fun send =>
+            send.site) := by
+
+  induction sends with
+
+  | nil =>
+      intro numbered
+
+      simp [
+        numberExternalSends
+      ]
+
+  | cons send remaining inductionHypothesis =>
+      intro numbered
+
+      simp [
+        numberExternalSends,
+        inductionHypothesis
+      ]
+
+/--
+A class's resolved environment carries exactly the sites of that class's sends, in order.
+-/
+theorem outputPortEnvOf_sites
+    {classes : List DTR.GeneralReactiveClass}
+    {sendingClass : DTR.GeneralReactiveClass}
+    {env : GeneralOutputPortEnv}
+    (hResolved :
+      outputPortEnvOf
+          classes
+          sendingClass =
+        .ok env) :
+    env.map
+        (fun entry =>
+          entry.site) =
+      (externalSendsOfClass
+          sendingClass).map
+        (fun send =>
+          send.site) := by
+
+  unfold outputPortEnvOf at hResolved
+
+  rw [
+    generalOutputPortEntriesOf_sites
+      classes
+      sendingClass
+      (externalSendsOfClass
+        sendingClass)
+      (numberedExternalSendsOfClass
+        sendingClass)
+      env
+      hResolved
+  ]
+
+  unfold numberedExternalSendsOfClass
+
+  exact
+    numberExternalSends_sites
+      (externalSendsOfClass
+        sendingClass)
+      []
+
+/--
+Every send of a class has an entry in that class's resolved environment.
+
+This is the root of the site-totality chain and the only theorem in this section a reader has
+to hold in mind: **if `outputPortEnvOf` succeeded, the lookup `compileGeneralStmt` performs
+cannot fail.** Everything above it is inversion and everything below it, in
+`Relico/Translation/GeneralBasic.lean`, is the induction that carries this from one statement to
+a whole class.
+-/
+theorem exists_generalEntryAtSite?_of_mem_sends
+    {classes : List DTR.GeneralReactiveClass}
+    {sendingClass : DTR.GeneralReactiveClass}
+    {env : GeneralOutputPortEnv}
+    {send : GeneralExternalSend}
+    (hResolved :
+      outputPortEnvOf
+          classes
+          sendingClass =
+        .ok env)
+    (hMember :
+      send ∈
+        externalSendsOfClass
+          sendingClass) :
+    ∃ entry,
+      generalEntryAtSite?
+          env
+          send.site =
+        some entry := by
+
+  apply
+    exists_generalEntryAtSite?_of_mem_sites
+
+  rw [
+    outputPortEnvOf_sites
+      hResolved
+  ]
+
+  exact
+    List.mem_map.mpr
+      ⟨send,
+       hMember,
+       rfl⟩
+
+/-!
+### A body's sends are its class's sends
+
+The last link, and the one that is pure list bookkeeping. It is stated in the direction the
+induction consumes — from a body to the class — rather than as a characterisation of
+`externalSendsOfClass`, because a characterisation would have to say something about the
+*order* of the append and nothing needs that.
+-/
+
+/--
+The empty body sends nothing.
+-/
+theorem externalSendsFromIndex_nil
+    (bodyKey : GeneralBodyKey)
+    (index : Nat) :
+    externalSendsFromIndex
+        bodyKey
+        index
+        [] =
+      [] := by
+  simp [
+    externalSendsFromIndex
+  ]
+
+/--
+An assignment contributes nothing and advances the index.
+-/
+theorem externalSendsFromIndex_assign
+    (bodyKey : GeneralBodyKey)
+    (index : Nat)
+    (variableName : VarName)
+    (expression : DTR.GeneralExpr)
+    (remaining : DTR.GeneralBody) :
+    externalSendsFromIndex
+        bodyKey
+        index
+        (
+          .assign
+              variableName
+              expression ::
+            remaining
+        ) =
+      externalSendsFromIndex
+        bodyKey
+        (index + 1)
+        remaining := by
+  simp [
+    externalSendsFromIndex
+  ]
+
+/--
+A self-send contributes nothing and advances the index.
+-/
+theorem externalSendsFromIndex_send_selfTarget
+    (bodyKey : GeneralBodyKey)
+    (index : Nat)
+    (message : MsgName)
+    (arguments : List DTR.GeneralExpr)
+    (delay : Delay)
+    (remaining : DTR.GeneralBody) :
+    externalSendsFromIndex
+        bodyKey
+        index
+        (
+          .send
+              .selfTarget
+              message
+              arguments
+              delay ::
+            remaining
+        ) =
+      externalSendsFromIndex
+        bodyKey
+        (index + 1)
+        remaining := by
+  simp [
+    externalSendsFromIndex
+  ]
+
+/--
+An external send contributes one send, at this statement's address.
+-/
+theorem externalSendsFromIndex_send_knownRebec
+    (bodyKey : GeneralBodyKey)
+    (index : Nat)
+    (knownRebec : KnownRebecName)
+    (message : MsgName)
+    (arguments : List DTR.GeneralExpr)
+    (delay : Delay)
+    (remaining : DTR.GeneralBody) :
+    externalSendsFromIndex
+        bodyKey
+        index
+        (
+          .send
+              (.knownRebec
+                knownRebec)
+              message
+              arguments
+              delay ::
+            remaining
+        ) =
+      {
+        site :=
+          {
+            body :=
+              bodyKey
+
+            index :=
+              index
+          }
+
+        knownRebec :=
+          knownRebec
+
+        message :=
+          message
+
+        delay :=
+          delay
+      } ::
+        externalSendsFromIndex
+          bodyKey
+          (index + 1)
+          remaining := by
+  simp [
+    externalSendsFromIndex
+  ]
+
+/--
+A constructor's sends are among its class's sends.
+-/
+theorem mem_externalSendsOfClass_of_mem_constructor
+    {sendingClass : DTR.GeneralReactiveClass}
+    {send : GeneralExternalSend}
+    (hMember :
+      send ∈
+        externalSendsOfBody
+          .constructor
+          sendingClass.constructor.body) :
+    send ∈
+      externalSendsOfClass
+        sendingClass := by
+
+  unfold externalSendsOfClass
+
+  rw [
+    List.mem_append
+  ]
+
+  exact
+    Or.inl
+      hMember
+
+/--
+One message server's sends are among the whole list's sends.
+-/
+theorem mem_externalSendsOfMessageServers_of_mem
+    (servers : List DTR.GeneralMessageServer)
+    {server : DTR.GeneralMessageServer}
+    {send : GeneralExternalSend} :
+    server ∈ servers →
+    send ∈
+      externalSendsOfBody
+        (.messageServer
+          server.name)
+        server.body →
+    send ∈
+      externalSendsOfMessageServers
+        servers := by
+
+  induction servers with
+
+  | nil =>
+      intro hServer _
+
+      simp at hServer
+
+  | cons candidate remaining inductionHypothesis =>
+      intro hServer hSend
+
+      unfold externalSendsOfMessageServers
+
+      rw [
+        List.mem_append
+      ]
+
+      rw [
+        List.mem_cons
+      ] at hServer
+
+      cases hServer with
+
+      | inl hHead =>
+          subst hHead
+
+          exact
+            Or.inl
+              hSend
+
+      | inr hTail =>
+          exact
+            Or.inr
+              (inductionHypothesis
+                hTail
+                hSend)
+
+/--
+A message server's sends are among its class's sends.
+-/
+theorem mem_externalSendsOfClass_of_mem_messageServer
+    {sendingClass : DTR.GeneralReactiveClass}
+    {server : DTR.GeneralMessageServer}
+    {send : GeneralExternalSend}
+    (hServer :
+      server ∈
+        sendingClass.messageServers)
+    (hMember :
+      send ∈
+        externalSendsOfBody
+          (.messageServer
+            server.name)
+          server.body) :
+    send ∈
+      externalSendsOfClass
+        sendingClass := by
+
+  unfold externalSendsOfClass
+
+  rw [
+    List.mem_append
+  ]
+
+  exact
+    Or.inr
+      (mem_externalSendsOfMessageServers_of_mem
+        sendingClass.messageServers
+        hServer
+        hMember)
+
 end Translation
 end Relico
