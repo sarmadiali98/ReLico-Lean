@@ -17,9 +17,23 @@
 # fan-in port shape (named ports vs multiports). It writes only under
 # /tmp/relico_lf_probe and reads only $LFC.
 #
-# Run:  bash /Users/ali/Desktop/ReLico-Lean/tmp/lf_semantics_probe.sh 2>&1 | tee /tmp/relico_lf_probe.log
+# Run:  bash tools/paper-measurements/lf_semantics_probe.sh 2>&1 | tee /tmp/relico_lf_probe.log
+#
+# That is the TRACKED copy. This line used to name `tmp/lf_semantics_probe.sh`,
+# which is gitignored, so a fresh clone following the instruction found no file.
+#
+# Every probe runs by default. To re-measure one section without paying for all
+# of them -- each probe is a full lfc compile AND a C++ build -- set PROBE_FILTER
+# to a substring of the probe names:
+#
+#     PROBE_FILTER=action bash tools/paper-measurements/lf_semantics_probe.sh
+#
+# Skipped probes announce themselves in the log, so a filtered run cannot be
+# mistaken for a full one when the log is read later.
 # ============================================================================
 set -u
+
+PROBE_FILTER=${PROBE_FILTER:-}
 
 LFC=/Users/ali/.local/share/lingua-franca/cli/bin/lfc
 ROOT=/tmp/relico_lf_probe
@@ -39,6 +53,18 @@ printf '  (harness pins exactly "lfc 0.11.0" -- relico_bench_stage.py:473)\n'
 # with --timeout 5 msec --fast  (relico_bench_stage.py:457, :462, :494).
 probe() {
   NAME=$1; EXPECT=$2
+
+  # With PROBE_FILTER unset the pattern is `**`, which matches every name, so the
+  # default remains a full run and no existing invocation changes behaviour.
+  case "$NAME" in
+    *$PROBE_FILTER*) ;;
+    *)
+      printf '\n========== %s ==========\n' "$NAME"
+      printf '  SKIPPED by PROBE_FILTER=%s -- this log is NOT a full run\n' "$PROBE_FILTER"
+      cat > /dev/null
+      return ;;
+  esac
+
   W=$ROOT/$NAME
   mkdir -p "$W/src"
   cat > "$W/src/V0Controller.lf"
@@ -714,6 +740,135 @@ main reactor {
 }
 LF
 
+# ============================================================================
+# Section 12 -- two schedules of one action at one tag (task #39).
+#
+# This section measures the design alternative stage E REJECTED, which is the
+# only reason it is worth running. STAGE_E_DESIGN.md SS6 keys an output port on
+# the SEND SITE rather than on the (message, target) pair, and the stated
+# reason is that one Rebeca message server may send the same message twice to
+# the same target at the same tag. If a logical action can carry both of those
+# sends, the per-send-site key is a convenience. If it cannot, the key is
+# FORCED, and that is a much stronger claim -- one the paper should make in
+# those words rather than presenting per-send-site ports as a preference.
+#
+# No probe in this file has ever used `action` or `schedule`, so the API itself
+# is unmeasured here. That is why there are two probes and not one: the second
+# is a CONTROL that schedules at two DISTINCT tags. Without it a single output
+# line is ambiguous between "the two schedules collided" and "the schedule call
+# was written wrong", and reading the first as the second would be a false
+# negative in the direction of believing a collision.
+#
+#   experiment prints ONE line  + control prints TWO  -> collision is real, the
+#                                                        send-site key is forced
+#   experiment prints TWO lines + control prints TWO  -> one action carries both
+#                                                        sends; SS6 needs revisiting
+#   BOTH fail to compile                              -> the API call is wrong and
+#                                                        neither probe means anything
+# ============================================================================
+
+probe action_two_schedules_same_tag 'ONE line or TWO? schedules 1 then 2 at the SAME tag -- read only together with the control below' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Queue {
+    logical action slot: int
+    reaction(startup) -> slot {=
+        slot.schedule(1, 0ms);
+        slot.schedule(2, 0ms);
+        std::printf("RELICO_SCHEDULED_TWICE\n");
+        std::fflush(stdout);
+    =}
+    reaction(slot) {=
+        std::printf("RELICO_ACTION %d\n", *slot.get());
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    q = new Queue()
+}
+LF
+
+probe action_two_schedules_distinct_tags 'CONTROL -- same code, delays 0ms and 1ms, so two DISTINCT tags. Expect RELICO_ACTION 1 then RELICO_ACTION 2' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Queue {
+    logical action slot: int
+    reaction(startup) -> slot {=
+        slot.schedule(1, 0ms);
+        slot.schedule(2, 1ms);
+        std::printf("RELICO_SCHEDULED_TWICE\n");
+        std::fflush(stdout);
+    =}
+    reaction(slot) {=
+        std::printf("RELICO_ACTION %d\n", *slot.get());
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    q = new Queue()
+}
+LF
+
+# ============================================================================
+# Section 13 -- can `policy: defer` recover the dropped send? (task #39, part 2)
+#
+# Section 12 established that two schedules at one tag keep only the last value.
+# STAGE_E_DESIGN.md SS11.2 item 7 asked for this second probe in the same breath,
+# and it is the one with a repair attached: LF actions take (min_delay,
+# min_spacing, policy), and `defer` is documented to push a schedule that would
+# violate min_spacing to the next permitted tag instead of discarding it.
+#
+# The rule stated before the run, kept because the prediction is evidence: if defer
+# fires the reaction TWICE, a faithful encoding of Rebeca's queue exists and the
+# repair to stage D's self-send path is a declaration change; if it fires ONCE, the
+# loss is not a policy choice and the repair has to be structural -- distinct
+# actions per send site, mirroring what SS6.2 already does for ports.
+#
+# MEASURED 2026-08-22, lfc 0.11.0: neither. The declaration is REJECTED, because
+# reactor-cpp implements no spacing policy for logical actions at all, so there was
+# a third branch the rule did not enumerate and it is the structural one -- see the
+# "Seventh" paragraph in HOW TO READ THIS for the diagnostic and what follows.
+#
+# min_spacing is 1ms against a 5 msec timeout, so a deferred second event has room
+# to arrive well inside the run.
+# ============================================================================
+
+probe action_defer_policy_same_tag 'TWICE, ONCE, or REJECTED? two schedules at one tag with min_spacing 1ms and policy defer -- only TWICE means a declaration-level repair exists' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Queue {
+    logical action slot(0ms, 1ms, "defer"): int
+    reaction(startup) -> slot {=
+        slot.schedule(1, 0ms);
+        slot.schedule(2, 0ms);
+        std::printf("RELICO_SCHEDULED_TWICE\n");
+        std::fflush(stdout);
+    =}
+    reaction(slot) {=
+        std::printf("RELICO_ACTION %d\n", *slot.get());
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    q = new Queue()
+}
+LF
+
 printf '\n\n========== HOW TO READ THIS ==========\n'
 cat <<'NOTE'
   The single most important line in this log is whether
@@ -751,6 +906,60 @@ cat <<'NOTE'
   than its target and must say so in those words -- see F32.
   parameter_defaults_named_args simply repays a debt: that form was measured ad
   hoc in stage D with no committed script, and a fresh clone can now re-run it.
+
+  Sixth, sections 12 and 13 are the only ones here that measure a road NOT taken,
+  and the only ones whose result moved a claim from "chosen" to "forced". Measured
+  2026-08-22 against lfc 0.11.0, section 12's two probes compiling and running
+  cleanly:
+
+    action_two_schedules_same_tag       lfc 0, run 0 -> ONE line,  RELICO_ACTION 2
+    action_two_schedules_distinct_tags  lfc 0, run 0 -> TWO lines, 1 then 2
+
+  Read them together, which is why the control exists. The control printed both
+  values, so the two-argument `schedule(value, delay)` call and the `0ms` literal
+  are right, and the single line in the experiment is therefore a real collision
+  rather than a mistyped API call. Two schedules of one logical action at one tag
+  keep only the LAST value; the first is dropped with exit 0 and no diagnostic of
+  any kind.
+
+  That silence is the whole result. A rejection would have been a restriction to
+  write down. A SILENT drop means an action-based encoding of a Rebeca send is not
+  merely wrong but undetectably wrong -- the program compiles, runs, exits 0, and
+  loses a message. SS6's per-send-site port key is therefore FORCED, and both the
+  design document and the paper should say forced rather than presenting it as a
+  preference among workable options.
+
+  Seventh, section 13 asked whether that loss is a policy choice, and the answer
+  is that in this target the policy cannot be expressed at all. Measured the same
+  day, same lfc:
+
+    action_defer_policy_same_tag        lfc 1 -> DID NOT COMPILE
+
+  and the diagnostic is worth keeping verbatim, typo included, because it names
+  its own scope:
+
+    lfc: error: minSpacing and spacing violation policies are not yet supported
+         for logical actions in reactor-ccp!
+      --> src/V0Controller.lf:8:5
+       8 |     logical action slot(0ms, 1ms, "defer"): int
+
+  So `defer` neither fires the reaction twice nor once: the declaration is
+  rejected before code generation, by the C++ runtime rather than by the language.
+  The consequence is the one that costs more work. There is no declaration-level
+  repair available in the target this translator emits, so a faithful encoding of
+  Rebeca's queue must be STRUCTURAL -- a distinct action per send site, exactly
+  what SS6.2 already does for ports. That makes the port decision and the
+  self-send decision the same decision, reached twice.
+
+  Read section 12 and section 13 together and there is a sharper observation than
+  either alone. The target refuses to *discuss* spacing -- naming a policy is a
+  hard error -- while silently *implementing* the worst available spacing
+  behaviour when you say nothing. The safe-looking declaration is the lossy one
+  and the explicit one is unavailable, which is close to the opposite of
+  fail-closed. Both facts are version-scoped: the error says "not yet", so a later
+  reactor-cpp may support the policy, and a re-run of section 13 is the cheapest
+  way to find out. Do not carry either result forward across an lfc upgrade
+  without re-measuring.
 
   Nothing in the repo was read or written. Scratch tree: /tmp/relico_lf_probe
 NOTE

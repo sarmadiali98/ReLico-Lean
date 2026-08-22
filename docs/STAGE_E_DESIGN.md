@@ -504,7 +504,10 @@ consequences follow, and every one of them simplifies the design:
 1. **Per-statement delays are representable.** Each site's own connection carries that site's own
    `after`, which is DTR's placement exactly. So the delay conflict of the original §6 does not exist,
    the sender-side logical-action workaround it recorded as the alternative is **not needed**, and no
-   extra action, reaction or microstep is spent.
+   extra action, reaction or microstep is spent. Measured 2026-08-22 and recorded in §6.3 as F56, that
+   alternative is worse than unneeded: two schedules of one action at one tag silently keep only the last
+   value, and the spacing policy that would have repaired it does not compile in reactor-cpp. So this key
+   is **forced rather than preferred**, and forced is the word this design and the paper should use.
 2. **Nothing legal is refused on delay grounds.** The refusal count drops from three to two (§8).
 3. **F35 dissolves.** What looked like an unrepresentable mismatch between a statement-level and a
    connection-level delay was an artifact of choosing the wrong key. The finding survives only in
@@ -532,12 +535,27 @@ buys, the mechanism §6.1's rewrite made unnecessary here but which stage H may 
 §10.2 must be stated so that adding loop constructors **breaks its proof loudly** rather than silently
 weakening its meaning, in the same style as stage D's deliberate tripwires (§10.1).
 
-One measurement stays owed, and it is now about **stage D's landed self-send path** rather than about
-stage E. `self.tick(); self.tick();` in one body emits two `tick_action.schedule(0ms)` calls at one tag.
-Two invocations of one action at one tag are understood to be acceptable in LF, which is why this is not
-being treated as a defect — but it is **unmeasured**, no committed fixture exercises it (`priorities`
-self-sends twice from its constructor, to two *different* message servers, so nothing collides), and
-stage E's external-send path deliberately does not rely on it. §11.2 carries the probe.
+One measurement is no longer owed, and making it **refuted** the claim this paragraph used to carry. It
+concerns **stage D's landed self-send path** rather than stage E. `self.tick(); self.tick();` in one body
+emits two `tick_action.schedule(0ms)` calls at one tag, and this paragraph previously recorded that two
+invocations of one action at one tag "are understood to be acceptable in LF", which was the stated reason
+for not treating it as a defect. Measured 2026-08-22 against `lfc` 0.11.0: **only the last value
+survives.** The first schedule is discarded, `lfc` exits 0, the compiled program runs and exits 0, and no
+diagnostic is produced at any stage. A control differing only in the second delay (`1ms`, so two distinct
+tags) printed both values, which is what establishes that the single line is a real collision rather than a
+mistyped API call. The documented repair — a spacing policy on the declaration, `logical action slot(0ms,
+1ms, "defer")` — does not compile: reactor-cpp implements no spacing policy for logical actions, so `lfc`
+exits 1 before code generation with *"minSpacing and spacing violation policies are not yet supported for
+logical actions in reactor-ccp"*.
+
+So this **is** a defect, it is in landed stage D code, and it is silent. Nothing in
+`Relico/DTR/GeneralWellFormed.lean` constrains repeated send statements in a body — every `Nodup` there is
+on *names* — so such a model is accepted and then mistranslated. It is recorded as **F56**, and the repair
+is forced rather than chosen: with no declaration-level mechanism available in the target, a faithful
+encoding needs a distinct action per self-send **site**, which is the same decision §6.2 reaches for ports,
+arrived at a second time by a different road. §11.2 item 7 carries the refuted prediction and the two
+probes that settled it, now sections 12 and 13 of `tools/paper-measurements/lf_semantics_probe.sh`. Stage
+E's external-send path never relied on the false claim, so the consequence lands entirely on stage D.
 
 
 ## 7. The translation, function by function
@@ -1225,6 +1243,19 @@ Each is stated with its prediction now, so the prediction cannot be adjusted aft
    > program before any LF is emitted — and the difference matters, because a check that runs can be
    > retired or weakened whereas a construction cannot. If `declaredNames.Nodup` ever stops being
    > enforced, this measurement becomes owed again.
+
+   > **Prediction refuted, and this item discharged, 2026-08-22 — finding F56.** Both halves were wrong.
+   > The default policy does **not** fire the reaction twice at successive microsteps: it fires **once**,
+   > keeping only the last value, with `lfc` exit 0, run exit 0 and no diagnostic of any kind. That
+   > behaviour *was* among the three candidates enumerated above, so the enumeration was adequate and only
+   > the guess was wrong. Nor does `defer` change the spacing but not the count — the declaration `logical
+   > action slot(0ms, 1ms, "defer")` is **rejected** before code generation, because reactor-cpp implements
+   > no spacing policy for logical actions at all, which is a fourth outcome the enumeration did not
+   > anticipate: not a behaviour but the absence of a vocabulary. Sections 12 and 13 of
+   > `tools/paper-measurements/lf_semantics_probe.sh` carry both probes plus the control that distinguishes
+   > a real collision from a mistyped call. What survives is the scoping — this is stage D's and not stage
+   > E's. What changes is the weight: a silently lost message in landed code is a defect rather than a debt,
+   > it has no declaration-level repair, and §6.3 now records the structural one.
 
 ### 11.3 Decisions this design cannot make for you — all four answered on 2026-08-20
 

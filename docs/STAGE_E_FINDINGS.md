@@ -1,9 +1,10 @@
-# Stage E findings — F34 through F55
+# Stage E findings — F34 through F56
 
 **Why this file exists.**
 Stage E added external sends, ports and connections to the general translator, and in doing so it
-produced twenty-two findings about *this repository* — its own code, its own design document, and its
-own test harness. They are numbered F34 through F55, continuing the single `F` series that
+produced twenty-three findings about *this repository* — its own code, its own design document, and its
+own test harness — and, in **F56**, about what the code this translator emits actually does when it is
+compiled and run. They are numbered F34 through F56, continuing the single `F` series that
 `docs/STAGE_B_FINDINGS.md` opened at F1–F20 and `docs/STAGE_D_FINDINGS.md` carried to F21–F33.
 
 The `F` series and the `P` series answer different questions, and keeping them apart is the whole
@@ -55,7 +56,7 @@ F34 through F40 were first written in `docs/STAGE_E_DESIGN.md` §11.1, under an 
 they were *"provisional until the findings file lands"* and *"do not cite these elsewhere yet"*. That
 warning was earned: stage D's design had numbered its own findings D1 through D9, they became F21
 through F29 when the stage D findings file landed, and the D-numbers became uncitable. **This file is
-what makes F34–F55 citable.** Nothing below is provisional any more. (This range is one of the places that
+what makes F34–F56 citable.** Nothing below is provisional any more. (This range is one of the places that
 move whenever an entry is added, and it is the one that went stale when F50 landed. How many places there
 are depends on how finely they are counted, which is not a quibble: this file answers it three times and
 three ways. **F51** lists four, **F54** lists a different four, and the paragraph below at *"The three
@@ -103,6 +104,15 @@ commit `c6ce367` — `frontend/java-bridge/check-general.sh` and `frontend/test_
 commit before this entry existed. F43's paragraph above predicted the recurrence and named the cause, and
 the cause was the same one: the commit carrying the code was green, and the entry was documentation that
 could follow.
+
+F56, added in task #69, is the first entry in this file whose subject is not this repository but the
+behaviour of the target code the translator emits — measured by compiling and running it. It was written
+despite a decision taken one commit earlier to stop adding entries here, and that decision is not being
+quietly abandoned: it was a decision to stop writing findings about *this file's own bookkeeping*, three of
+which had landed in a row. The test it set was whether an entry records a defect in something that runs,
+and F56 is the first since then to pass it. Its commit moves all six places, F55's closing paragraph among
+them, and repairs `docs/STAGE_E_DESIGN.md` §6.3 and §11.2 item 7 in the same edit, because both carried
+claims the measurement refuted.
 
 **One trap.** The number F34 was considered once before, in stage D, for a different thing entirely,
 and rejected — `docs/STAGE_D_FINDINGS.md:289` records that it would have duplicated an obligation F32
@@ -2084,8 +2094,9 @@ landed separately in `c6ce367`, together with the tenth positive and the twelfth
 commit is documentation only and owes no `lake build` — no gate script reads `docs/`.
 
 **Deliberately not done.** The stranded *What is left open, and who owns it* section is still not moved to
-the end; it now has three entries below it instead of two, so the case for a commit with no other business
-is stronger by exactly one entry. The working conventions this file keeps citing — the rules about addresses,
+the end; F55 left three entries below it where there had been two, and F56 below makes four, so the case for
+a commit with no other business is stronger by exactly one entry each time. The working conventions this
+file keeps citing — the rules about addresses,
 instruments and quoted words that F54 reached for when it wrote `§4d` — are still held outside the
 repository, so item 7 repairs three cites without removing the reason they were written. Graduating those
 conventions into a numbered document in `docs/` is what would make such a cite resolvable, and it is a
@@ -2093,3 +2104,88 @@ document to write rather than an edit to this one, which is why it is filed here
 gate gains no check for the class of defect F55 is: the first rule above is a rule for a reader, not an
 assertion, and making it executable would require a run that deliberately deletes a committed document in
 order to prove it can be recreated.
+
+---
+
+## F56 — two identical self-sends in one body compile to one message execution, silently
+
+**Provenance: measured.** `lfc` 0.11.0, 2026-08-22, target `Cpp`, sections 12 and 13 of
+`tools/paper-measurements/lf_semantics_probe.sh`. Three probes: two compiled and ran, one did not compile,
+and the one that did not compile is half the finding.
+
+**The claim this replaces.** `docs/STAGE_E_DESIGN.md` §6.3 recorded that `self.tick(); self.tick();` in one
+body emits two `tick_action.schedule(0ms)` calls at one tag, and that *"two invocations of one action at one
+tag are understood to be acceptable in LF, which is why this is not being treated as a defect"*. The grade of
+*understood* was **inferred**, and §11.2 item 7 said as much in the same document: the behaviour was
+**unmeasured**, and the item recorded a prediction that the reaction would fire twice at successive
+microsteps. This is precisely the shape the provenance rule at the head of this file exists to catch — an
+inferred claim doing the work of deciding that something is not a defect.
+
+**What the run showed.**
+
+    action_two_schedules_same_tag       lfc 0, run 0 -> ONE line,  RELICO_ACTION 2
+    action_two_schedules_distinct_tags  lfc 0, run 0 -> TWO lines, 1 then 2
+    action_defer_policy_same_tag        lfc 1        -> DID NOT COMPILE
+
+Two schedules of one logical action at one tag keep only the **last** value; the first is discarded. `lfc`
+exits 0, the generated C++ builds, the program runs, it exits 0, and nothing at any stage reports a lost
+event. The second probe is the control, differing only in the second delay — `1ms` rather than `0ms`, so two
+distinct tags — and it printed both values. That is what rules out a mistyped API call and establishes the
+single line in the experiment as a real collision rather than a broken probe.
+
+**The repair that does not exist.** LF actions take `(min_delay, min_spacing, policy)`, and `defer` is
+documented to push a schedule that would violate `min_spacing` to the next permitted tag instead of
+discarding it — exactly the mechanism that would reproduce Rebeca's queue. It cannot be used here:
+
+    lfc: error: minSpacing and spacing violation policies are not yet supported
+         for logical actions in reactor-ccp!
+
+The `ccp` is `lfc`'s own. So both halves of §11.2 item 7's prediction were wrong, and the second was wrong in
+a way that item's enumeration of candidate behaviours could not have covered: the outcome is not a behaviour
+but the absence of a vocabulary in which to ask for one. Note the shape of the pair — the target refuses to
+*discuss* spacing, while silently *implementing* the lossiest spacing behaviour when nothing is said. The
+safe-looking declaration is the lossy one and the explicit one is unavailable, which is the opposite of
+failing closed.
+
+**Why it is reachable.** Nothing refuses such a model. Every `Nodup` in `Relico/DTR/GeneralWellFormed.lean`
+constrains a set of *names* — class names `:332`, declaration names `:342`, message-server names `:346`,
+message-server priorities `:460`, actor priorities `:490` — and none of them constrains repeated send
+statements within a body. Repeating a send is legal Rebeca: the upstream compiler has no objection and
+neither does the exporter. So a DTR well-formed model reaches the printer and is translated into a program
+that performs one of its two sends. This was checked in the F32→F43 direction **first and deliberately**,
+because the last time a defect of this shape was suspected it turned out to be a guard refusing the program.
+Here there is no guard.
+
+**Why no fixture caught it, and which fixture is the trap.** No committed positive puts two schedules of one
+action in one body, and the near-miss is not the one the replaced §6.3 named. The version quoted above
+pointed at `priorities`, which self-sends twice from its constructor (`:7`, `:8`) but to two *different*
+message servers, so two different actions; the repair to §6.3 drops that remark rather than carrying it
+forward, so it is preserved here and nowhere else. The closer near-miss is `keep-alive`, which repeats the
+**identical** send `self.keepAlive()
+after(1)` — same message, same target, same delay — at `:7` and `:11`, and is safe only because those two
+occurrences sit in *different bodies*: the constructor schedules once, and each firing of `keepAlive`
+schedules once more. So the property that decides safety is not whether a model repeats a send but whether
+**one body** repeats it, and a fixture written by copying `keep-alive` would reproduce its safety rather than
+the defect. Whoever writes the witness for task #69 needs two sends in a single body.
+
+**Why no gate caught it either.** The divergence sits past the last artifact any gate inspects.
+`check-general-lean.sh` compares emitted LF text against expected LF text, and the target gate checks that
+`lfc` accepts what was emitted. Both pass on the defective output, because the output is well-formed LF that
+compiles cleanly — it simply means something other than the source model does. Catching this class requires
+**running** the produced binary and comparing observed message executions against the Rebeca semantics, and
+no gate in this repository does that for any model, in any family.
+
+**What follows, and it is forced rather than chosen.** With no declaration-level mechanism available in the
+target, a faithful encoding needs a distinct action per self-send **site**. That is the same decision §6.2
+reached for ports, arrived at a second time down an unrelated road, and it is the argument for restating
+§6.2's key as forced rather than preferred — which its item 1 now does, and which the paper should follow.
+
+**Open, and owned by task #69.** Whether to implement the structural repair or instead to refuse repeated
+identical self-sends in the well-formedness predicate. Refusing is far cheaper and fails closed, but it
+narrows the accepted fragment against legal Rebeca, so the choice is being recorded rather than assumed. Also
+open: whether this earns a `P` number. It appears not to — the paper's SOS rules do not commit to an
+action-based encoding of self-sends, so the mistranslation looks like this development's rather than the
+paper's — but that reading has not been checked against the paper, which makes it **inferred**, and under
+this file's own rule an inferred claim names the check instead of concluding it. The check is to read the
+paper's send rule for the self-send case and confirm it constrains only the resulting queue, not the
+mechanism.
