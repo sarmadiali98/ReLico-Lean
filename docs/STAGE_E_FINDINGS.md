@@ -1,9 +1,9 @@
-# Stage E findings — F34 through F52
+# Stage E findings — F34 through F53
 
 **Why this file exists.**
 Stage E added external sends, ports and connections to the general translator, and in doing so it
-produced nineteen findings about *this repository* — its own code, its own design document, and its own
-test harness. They are numbered F34 through F52, continuing the single `F` series that
+produced twenty findings about *this repository* — its own code, its own design document, and its own
+test harness. They are numbered F34 through F53, continuing the single `F` series that
 `docs/STAGE_B_FINDINGS.md` opened at F1–F20 and `docs/STAGE_D_FINDINGS.md` carried to F21–F33.
 
 The `F` series and the `P` series answer different questions, and keeping them apart is the whole
@@ -55,7 +55,7 @@ F34 through F40 were first written in `docs/STAGE_E_DESIGN.md` §11.1, under an 
 they were *"provisional until the findings file lands"* and *"do not cite these elsewhere yet"*. That
 warning was earned: stage D's design had numbered its own findings D1 through D9, they became F21
 through F29 when the stage D findings file landed, and the D-numbers became uncitable. **This file is
-what makes F34–F52 citable.** Nothing below is provisional any more. (This range is one of the four
+what makes F34–F53 citable.** Nothing below is provisional any more. (This range is one of the four
 literals that move whenever an entry is added, and it is the one that went stale when F50 landed —
 see **F51**, which records that and lists all four.)
 
@@ -1460,6 +1460,17 @@ than a rewrite of its history — the same convention F40 relies on.
 > effect of a proof commit — **not** because it is cosmetic. Recording the distinction matters: this item is
 > named "documentation hygiene", and if it silently accumulates refuted arguments alongside stale counts,
 > its position last in a list ordered by what blocks something later stops being right.
+>
+> **All four corrections landed 2026-08-22, in the commit that added F53 — the touch this item was waiting
+> for.** §11.1's F36 bullet and its *provisional* warning each carry a dated blockquote; §7.2's *"carried by
+> construction"* sentence and §10.2's *"from route-key distinctness (§7.2)"* clause each carry one naming
+> `assembleGeneralProgram_targetEndpointsUnique` and the guard's name check as what actually discharges
+> them. Two notes on the citations above. `:633` was still accurate; **`:891` was not** — the clause it names
+> sits in §10.2's owed-theorem paragraph, and the design's line numbers had moved under it. It is left as
+> written, per the same pointer-not-rewrite convention, and F53's closing paragraphs are the pointer. The
+> reason it went unnoticed is worth carrying forward: the quoted phrase *"route-key distinctness"* **wraps**
+> in the design, so grepping it to re-find the line returns nothing at all, and a check that returns nothing
+> looks like a check that passed.
 
 **14. F47's six unasserted refusal causes.** Two of the eight causes in F47's table have their message text
 asserted; six do not. The closing instrument is not an argument, it is six `expectString` assertions in
@@ -1525,3 +1536,173 @@ nothing; worth doing because it converts a nine-clause predicate's redundancy fr
 > contradiction (assume the negation, and the `&&` chain collapses to `false`), which depends on neither the
 > clause's position in the chain nor how the chain associates, so it survives edits to `wellFormed` that a
 > positional projection would not.
+
+---
+
+## F53 — three "by construction" claims outlived the findings that refuted them, and the load-bearing one licensed dropping a refusal
+
+**Grade: read, over a refutation that was already measured and already in the repository.** F48, F49 and
+F50 each established that a guarantee stage E claims by construction is in fact bought by a check on
+generated names. Each repaired the passage it was about — a docstring in
+`Relico/Translation/GeneralBasic.lean`, an entry in this file — and none of the three swept the design
+document for the same claim stated somewhere else. At `be50578`, `grep -n "by construction"
+docs/STAGE_E_DESIGN.md` returned three hits and every one of them was either false or true for a reason
+the design does not give. That command is the core of this finding, and it is the command that none of
+the three closing commits ran. (The count is **not** a live invariant and must not be maintained as one.
+It also did not move: re-measured with the corrections below in the working tree, `grep -c` still returns
+three, and the reason it does is worth a paragraph of its own at the end of this entry. What is invariant
+is that every hit is now dated and answered.)
+
+**Hit one — §7.2 at `:633–639`.** *"`targetEndpointsUnique` then follows from the routes being distinct
+in `(senderInstance, site)` … That is the point of the site key — under the old (rebec, message) key two
+sites collapsed to one port and uniqueness had to be bought with a deduplication step and a delay
+refusal; now it is carried by construction."* **False.** F48 exhibits a model
+`DTR.GeneralModel.wellFormed` accepts whose routes are distinct in `(senderInstance, site)` and whose
+connections still land twice on `hubActor.reportToToHubFromProbe`, because `outputPortNameFor` does not
+escape its separator. F49 then measured the clause to be *independent* of the other eight, so nothing
+in the construction implies it and no implication between clauses can supply it either. The strongest
+true statement is `assembleGeneralProgram_targetEndpointsUnique`
+(`Relico/Translation/GeneralBasic.lean:4560`), which derives the ninth clause from the third on programs
+whose ports and connections come from one routing table — one guard clause from another, not from the
+construction.
+
+**Hit two — §11.2, in the *not owed* note.** *"Note also what is **not** owed: the corresponding
+question for ports, what a second `set()` on one port at one tag does, is now unreachable by construction
+(§10.2), so it stays unmeasured on purpose."* **The conclusion survives and the reason does not.** F50's
+witness is one
+emitted `reaction(startup)` that sets `reportToToHub` twice, so a second `set()` on one port at one tag
+is reachable — from a DTR-well-formed model, through routing, through class compilation, into an
+assembled program. It stays unmeasured because the guard refuses that program before any LF is emitted,
+which is a different fact with a different failure mode: it depends on a clause continuing to run,
+whereas *unreachable by construction* would not. This is the F45/F46 shape once more, a true sentence
+resting on a false reason, and it is the reason that a later reader would rely on.
+
+**Hit three — §11.3, decision 3, and this one is load-bearing.** *"…and with that the
+'refuse when they coincide' half needs no refusal at all: coincidence on one port is structurally
+unreachable (§6.2, §10.2). Both halves of the answer are therefore honoured, one by translation and one
+by construction."* **Coincidence on one port is reachable, and it is what the assertion measures.**
+`ALIASED_SETPORT_TWICE_IN_ONE_REACTION` pins the set-port list of that startup reaction as
+`"reportToToHub | reportToToHub"`; both sends sit in `aliasedProbeClass`'s constructor, both carry delay
+`⟨0⟩`, and `outputPortNameFor` maps their two distinct sites to one name because `reportTo` with `hub`
+and `report` with `toHub` spell the same string (F34). That is exactly the configuration §6.1 calls
+broken: two `set()` calls on one port inside one reaction at one tag, where the receiver's reaction
+fires once and a message is lost or the runtime errors, *"and both are wrong."*
+
+**What is and is not being claimed about the user's answer.** The instruction was *implement it when the
+delays differ, refuse when they coincide*, and the coinciding case **is** refused — the program never
+reaches `lfc`. So the answer is honoured. What is wrong is the design's account of the mechanism: the
+refusal comes from `declaredNames.Nodup` in `LF.GeneralReactor.wellFormed`, carrying a diagnostic about
+colliding *names*, and site keying closed only the route the section was thinking about. Keying on the
+send site removes pair collapse; it does not make two sites unable to share a port name, because the
+sites are arguments to a non-injective function. So the sentence should read *one by translation and one
+by a check on generated names* — which is the same guard-relative shape as F37, and the shape every
+stage E port-level guarantee has turned out to have.
+
+**Why the third hit matters beyond its wording.** F48 records that this very clause was once proposed for
+retirement: an earlier docstring on `compileGeneralModel_targetEndpointsUnique` said a construction proof
+*"would … therefore let the guard's clause be retired as dead."* Hit three is a sentence in the design
+document that would have supported exactly that reading — it says the hazard is structurally unreachable,
+and a hazard that is structurally unreachable needs no clause. Retiring it would have replaced a refusal
+with emitted LF in which a message is silently dropped. The two documents were one step from agreeing on
+a change that loses messages, and the only thing standing in the way was a measurement neither of them
+cited.
+
+**Why all three survived.** Each of F48, F49 and F50 was closed by a commit that edited the declaration
+the finding named and this file. The design document was treated as the *source* of each claim rather
+than as a place claims are also *repeated*, and §8's precedent shows the convention existed: its first
+owed statement carries a `> **Discharged 2026-08-21.**` blockquote and its second a
+`> **Refuted 2026-08-22 — finding F52.**` one. Both were added by the task whose section that was.
+Neither task looked one section over. (Those two were cited by line number in the draft of this entry,
+and the citations were correct against `be50578` and wrong by eleven lines by the time this entry landed,
+because the §7.2 blockquote below sits above them. The design's line numbers move under exactly the edits
+these findings make — the next commit shifts §11 again — so its citable unit is the **section**, and the
+line numbers kept below are only the ones no pending edit sits above.)
+
+**A fourth site, and the same omission in its plainest form.** §10.2 is where the design *asks* for the
+theorem F50 refuted. F50 recorded the refutation in this file and on the guard-relative theorem that
+landed in its place, and left the request itself unmarked — so the document still asks, in its own list of
+owed theorems, for a sentence its own repository has a counterexample to. That is not a *by construction*
+claim and so it is not one of the three hits, but it is the same movement: the finding repaired what it
+was looking at.
+
+**What was done.** Seven dated blockquotes in `docs/STAGE_E_DESIGN.md`, following §8's two precedents — the
+original text kept, so the record of what was believed stays legible. Three answer the three hits: §7.2,
+§11.2's *not owed* note, and §11.3's decision 3. One marks §10.2's `setPort` paragraph refuted, which is
+the fourth site described above. Three more discharge corrections this file had already filed and deferred
+to "the next time that document is touched" — §10.2's owed-theorem clause, §11.1's *provisional* warning
+and §11.1's **F36** bullet — and the last two paragraphs of this entry explain how they surfaced. No new
+assertion is
+added, and that is deliberate: the witness this finding rests on already runs on every gate as
+`ALIASED_SETPORT_TWICE_IN_ONE_REACTION` and `ALIASED_SETPORT_REACTION_STILL_WELLFORMED`, so F53 is
+checked rather than merely described. Adding a second assertion for the same reaction would inflate the
+count invariant of `frontend/check-general-lean.sh` for no new coverage.
+
+**The rule this finding leaves behind.** When a finding refutes a claim, grep the *claim's wording*
+across every tracked document before closing the task — not only the passage the finding cites. The
+phrase is usually short and usually repeated, and one `grep` costs nothing next to the cost of a
+document that argues against a check the code depends on. The three phrasings here differ in every
+respect except the words *by construction*, which is what made them findable at all and what makes the
+sweep cheap enough to be unconditional. The instrument is less reliable than that argument makes it
+sound, though, and the last paragraph of this entry is about how it fails.
+
+**The sweep was run, not just prescribed.** Over every tracked `.md`, `.lean`, `.sh` and `.py`, the same
+phrase turns up in many more places and all of them are sound. Three are the repaired sites and say the
+opposite of the design's claim in as many words — `Relico/Translation/NameGeneration.lean:292` (*"It does
+not say the sender side of `targetEndpointsUnique` holds by construction"*),
+`Relico/Translation/GeneralRouting.lean:1318` and `:2889`. The rest concern other properties, and one is a
+fixture note about a collision being guaranteed by reusing an identifier rather than by two spellings
+agreeing, which is the phrase used correctly. One unrelated item surfaced and is filed rather than
+addressed here: `docs/STAGE_D_FINDINGS.md:185` names a measurement stage E must take before the printer's
+payload refusal can be called unreachable by construction, and that measurement has not been taken.
+
+**The instrument this entry prescribes has a hole, and the hole hid a site that was owed to this very
+commit.** `grep` is line-oriented and prose wraps, so a two-word claim whose wrap falls between the two
+words is invisible to every search for it. Re-running the sweep with a wrap-tolerant matcher —
+`by\s+construction` against whole file contents rather than line by line — turned up two occurrences that
+no line-oriented grep in this project has ever seen. One is sound: `Relico/LF/GeneralSyntax.lean`, in the
+`GeneralPortPayload` docstring, says that a guarantee which *used to* hold by construction now holds by
+predicate, which is **F37** stated correctly and in the past tense. The other is `:1444` of this file —
+item 13 of the closing *What is left open* section — and it was owed to whoever next touched the design
+document. There is a
+third level to the same trap, and it is why the design's phrase count did not move across this commit:
+when the wrap falls inside a blockquote or a list item, Markdown puts `>` or indentation at the head of
+the continuation line, so even `by\s+construction` does not span it, and the §11.2 blockquote this commit
+adds is exactly that shape. The wrap-proof instrument is to match the rarer **single** word and read the
+hits, or
+to strip continuation prefixes and join lines before matching; the single-word search finds strictly more
+sites than the phrase search in both of these files, and the difference is exactly the wrapped occurrences
+plus the unrelated uses of the word. No count is given here on purpose — the numbers move with every
+reflow, and a number in this paragraph would be the very defect F46 records. Two of this commit's own
+blockquotes wrap the phrase, which is why the design still answers *three* to a phrase grep after seven
+corrections were added to it.
+
+**What item 13 asked for, and the rule it leaves behind.** It asked that §11.1's description of **F36** as
+an open gap and its *"provisional until the findings file lands"* warning both be corrected "the next time
+that document is touched", by pointer rather than rewrite. This commit is that touch, so both corrections
+are in it — and F36 is closed for a reason worth stating precisely, because the two halves of it are not
+equally strong: `LF.GeneralPortDecl` no longer has the `declaredType : LF.GeneralType` field the bullet
+names, its `payload : LF.GeneralPortPayload` carries a `struct` constructor over
+`List LF.GeneralTypedParameter` so the parameter types survive the crossing, and there is no `void`
+constructor, so an arity-zero external send is *unrepresentable* rather than mistyped. That last one is
+closure by construction in the strong sense the rest of this entry says the design does not earn. What
+remains guard-relative in that layer is the struct's *name*, stored at both ends and checked — and that is
+F37, not F36. The rule: a correction deferred to "the next time X is touched" fires on the toucher, not on
+its author, and nothing in this repository enforces such a trigger. It fired here only because a
+wrap-tolerant sweep re-read the file that defers it. Deferred corrections of that shape must therefore be
+recorded *at* X, which is what putting these two in §11.1 rather than only citing them here achieves: the
+next reader of §11.1 finds the correction in place instead of needing to be lucky.
+
+**One list item, two deferrals, and a broken pointer inside the second.** Item 13 holds a nested blockquote
+added by task #58, asking that §7.2's sentence and §10.2's owed-theorem clause both be repointed away from
+the refuted argument. Both are in this commit as well, which is how a single list item came to account for
+four of the seven blockquotes — and it is why the count in *What was done* is seven and not three. The
+nested deferral also carried a defect of its own. It cites the §10.2 clause as `:891`. With this commit
+applied the clause sits at `:929–930`, and the only insertion this commit makes above it is eleven lines,
+so at `be50578` it was `:918`; either way, not `:891`. The pointer had gone stale before it was read, and
+the reason no one noticed is the trap above one more time: the phrase it quotes, *"route-key
+distinctness"*, **wraps** in the design, so the obvious way to re-find the line — grep the quoted words —
+returns nothing, and nothing reads like agreement rather than like a miss. The stale number is left as
+written, per the same pointer-not-rewrite convention, and this paragraph is its pointer. The rule here is
+narrower than the one above and cheaper to apply: **a line number quoted from another document is a claim,
+and re-measuring it costs one command.** This one was repeated in three places — F49's entry, F50's entry
+and the closing section — and not one of them re-measured it.

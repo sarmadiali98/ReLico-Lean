@@ -638,6 +638,17 @@ ordinals. That is the point of the site key — under the old (rebec, message) k
 one port and uniqueness had to be bought with a deduplication step and a delay refusal; now it is
 carried by construction.
 
+> **Refuted 2026-08-22 — finding F53, over F48 and F49.** The last clause is false. Routes distinct in
+> `(senderInstance, site)` do not give distinct endpoints, because `outputPortNameFor` concatenates
+> without escaping its separator: F48's model is DTR well-formed, has distinct sites, and lands two
+> connections on `hubActor.reportToToHubFromProbe`. F49 then measured this clause to be *independent* of
+> the other eight, so no implication between clauses supplies it either. The strongest true statement is
+> `assembleGeneralProgram_targetEndpointsUnique` (`Relico/Translation/GeneralBasic.lean:4560`), which
+> derives the ninth clause from the third on a program whose ports and connections come from one routing
+> table — one guard clause from another, never from the construction. The sentence above is kept because
+> it is what the site key was believed to buy, and that belief is why the guard clause must not be
+> retired.
+
 ### 7.3 The receiver's reactions, and the order they are declared in
 
 Each message server `m` on class `C` produces, in this order:
@@ -921,6 +932,18 @@ receiver's port reactions for one message server appear in main-block instance-d
 paired with a docstring saying in as many words that this is *not* a priority result and that stage F
 owns that claim.
 
+> **The `targetEndpointsUnique` item: statement discharged, stated reason refuted — 2026-08-22, finding
+> F53 over F48 and F49.** The theorem landed twice, as `compileGeneralModel_targetEndpointsUnique`
+> (`Relico/Translation/GeneralBasic.lean:4416`) and `assembleGeneralProgram_targetEndpointsUnique`
+> (`:4560`), so this list no longer owes the statement. It never held *"from route-key distinctness"*,
+> though: distinct route keys are distinct *arguments* to `outputPortNameFor`, which is not injective
+> (F34, F42), so the step from distinct keys to distinct names does not exist. What discharges the clause
+> is the guard's check on the generated names, which is why the ninth well-formedness clause is
+> independent of the other eight (F49) and must not be retired. This correction was deferred by task
+> #58's annotation in `docs/STAGE_E_FINDINGS.md` to "the next time that document is touched", and this is
+> that touch. The **reaction declaration order** statement in the same sentence is still owed — task #65,
+> which will add its own note here rather than borrow this one.
+
 And one more, which is the theorem the whole of §6 exists to make provable: **no reaction of an emitted
 reactor sets one output port twice.** Stated over the compiled body of a single reaction — for any
 class `C` accepted by the translation and any reaction of the emitted `reactor C`, the list of port names
@@ -931,6 +954,20 @@ under the pair-keyed design could not be stated at all, and it is worth writing 
 leaving implicit precisely because it is the guarantee that a message cannot be silently dropped. It
 also has a reachability obligation of the same kind as §9's guard: a fixture whose class sends the same
 message twice to the same rebec must exist, or the theorem is about a case nothing exercises (§10.3).
+
+> **Refuted 2026-08-22 — finding F50; recorded here by F53.** The unconditional sentence is false and the
+> argument for it skips a step. Sites do differ; what fails is *"so `outputPortEnvOf` gave them different
+> port names"*, because distinct sites are distinct *arguments* to a function that is not injective on
+> them (F34). `ALIASED_SETPORT_TWICE_IN_ONE_REACTION` pins one emitted `reaction(startup)` whose set-port
+> list is `"reportToToHub | reportToToHub"`, and `ALIASED_SETPORT_REACTION_STILL_WELLFORMED` records that
+> no clause inspecting a reaction notices. The `or refused` hedge does not rescue it either: the refusal
+> is a check on the assembled program, and that model reaches assembly.
+>
+> What landed instead is the guard-relative form, `compileGeneralBody_setPortNames_nodup`
+> (`Relico/Translation/GeneralBasic.lean:5737`): **if** the routing table gives distinct sites of one body
+> distinct port names, **then** no compiled body sets one port twice. The hypothesis is exactly the step
+> the argument above skipped, and it is the form a caller holding a per-class guard can supply. The
+> reachability obligation in the last sentence is unaffected and still owed — task #51.
 
 ### 10.3 Fixtures, counts and the documents that must move together
 
@@ -989,6 +1026,14 @@ Numbers continue the single repo `F` series after F33 and are **provisional unti
 lands** — stage D's design taught this the hard way, when its own D1–D9 had to be renumbered to F21–F29
 and the D-numbers became uncitable. Do not cite these elsewhere yet.
 
+> **Discharged 2026-08-22 — finding F53, over the correction owed by `docs/STAGE_E_FINDINGS.md:1444`.**
+> The findings file has landed, and its own citability paragraph names the range it makes citable; the
+> numbers below may now be cited from anywhere in the repository, and the renumbering this warning was
+> written to prevent did not recur. The sentence is kept rather than deleted because it is the record of
+> when the numbers stopped being provisional, and because "do not cite these yet" was true when written.
+> Cite the findings file for the wording of any finding — the entries there are the ones that were
+> reviewed, and several of the bullets below were weakened or refuted on the way.
+
 - **F34 — the readable port-naming rule is not injective.** `"reportTo"` with rebec `"hub"` and
   `"report"` with rebec `"toHub"` both produce `reportToToHub`, and every readable separator has this
   property, underscores included. Any implementation that claims unique port names from a
@@ -1008,6 +1053,20 @@ and the D-numbers became uncitable. Do not cite these elsewhere yet.
   `LF.GeneralPortDecl.declaredType : LF.GeneralType` with `GeneralType = int | boolean` cannot type a
   port that carries two values, which is the same shape of gap as `initialValue : Int` and
   `msgsrv logic(boolean, boolean)`, surviving one layer further along.
+
+  > **Closed 2026-08-22 — finding F53, over the correction owed by `docs/STAGE_E_FINDINGS.md:1444`.**
+  > The field this bullet names no longer exists. `LF.GeneralPortDecl` carries
+  > `payload : LF.GeneralPortPayload`, and that structure's own docstring records the move — *"Stage D
+  > gave it a `GeneralType`; stage E replaces that with a `GeneralPortPayload`"*. A port carrying two
+  > values is representable as `struct` over a receiving `ReactorName`, an `ActionName` and a
+  > `List LF.GeneralTypedParameter`, so the parameter types survive the crossing and the erasure is gone.
+  > Two qualifications keep this from being a larger claim than it is. There is no `void` constructor, so
+  > an arity-zero external send is *unrepresentable* and refused rather than mistyped — closure by
+  > construction in the strong sense, and one of the few places in this document that phrase is earned.
+  > But the struct's *name* is stored at both ends of a connection and checked for agreement rather than
+  > derived, which is weaker than stage D's "cannot disagree"; that weakening is **F37**, recorded
+  > separately and still standing. F36 is closed. The layer it was found in is not thereby free of
+  > guarantees that rest on a check.
 - **F37 — a derived name becomes a stored one.** The payload struct's name is derived at exactly one
   site today; §5.2 stores it at both ends of a connection and *checks* agreement. Stage D's "cannot
   disagree" becomes stage E's "is checked", which is weaker, and the printer's own stated principle
@@ -1090,6 +1149,14 @@ Each is stated with its prediction now, so the prediction cannot be adjusted aft
    ports, what a second `set()` on one port at one tag does, is now unreachable by construction (§10.2),
    so it stays unmeasured on purpose.
 
+   > **Reason refuted 2026-08-22 — finding F53, over F50. The conclusion stands.** *Unreachable by
+   > construction* is false: `ALIASED_SETPORT_TWICE_IN_ONE_REACTION` is one emitted reaction that sets one
+   > port twice, reached from a DTR well-formed model through routing and class compilation into an
+   > assembled program. The question stays unmeasured for a different reason — the guard refuses that
+   > program before any LF is emitted — and the difference matters, because a check that runs can be
+   > retired or weakened whereas a construction cannot. If `declaredNames.Nodup` ever stops being
+   > enforced, this measurement becomes owed again.
+
 ### 11.3 Decisions this design cannot make for you — all four answered on 2026-08-20
 
 The port-name **spelling** was never on this list: it was delegated with the criterion *readable and
@@ -1117,6 +1184,22 @@ from an assumption:
    coincide" half needs no refusal at all: coincidence on one port is structurally unreachable (§6.2,
    §10.2). Both halves of the answer are therefore honoured, one by translation and one by construction,
    and F40 records what was wrong.
+
+   > **Refuted 2026-08-22 — finding F53, over F50. The answer is still honoured; this account of why is
+   > not.** Coincidence on one port is reachable. `ALIASED_SETPORT_TWICE_IN_ONE_REACTION` pins the set-port
+   > list of one emitted `reaction(startup)` as `"reportToToHub | reportToToHub"`: both sends sit in
+   > `aliasedProbeClass`'s constructor, both carry delay `⟨0⟩`, and `outputPortNameFor` maps their two
+   > distinct sites to one name because `reportTo` with `hub` and `report` with `toHub` spell the same
+   > string (F34). That is precisely the configuration §6.1 calls broken.
+   >
+   > The coinciding case **is** refused, so the instruction is satisfied — but by `declaredNames.Nodup` in
+   > `LF.GeneralReactor.wellFormed`, with a diagnostic about colliding names rather than about delays.
+   > Keying on the send site removes pair collapse; it does not make two sites unable to share a port name,
+   > because the sites are arguments to a function that is not injective on them. So the last sentence
+   > should read *one by translation and one by a check on generated names* — the guard-relative shape of
+   > F37, which every port-level guarantee in this stage has turned out to have. This matters beyond
+   > wording: F48 records that a docstring once proposed retiring that very clause as dead, and the
+   > sentence above is what such a retirement would have cited.
 4. **Non-conservativity — ANSWERED: keep the refusal.** §9's guard refuses rather than warns, so stage E
    refuses inputs stage D accepted (F39). The alternative would have kept every stage D input working and
    let ill-formed LF reach `lfc`. As designed.
