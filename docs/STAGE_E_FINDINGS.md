@@ -1,9 +1,9 @@
-# Stage E findings — F34 through F54
+# Stage E findings — F34 through F55
 
 **Why this file exists.**
 Stage E added external sends, ports and connections to the general translator, and in doing so it
-produced twenty-one findings about *this repository* — its own code, its own design document, and its
-own test harness. They are numbered F34 through F54, continuing the single `F` series that
+produced twenty-two findings about *this repository* — its own code, its own design document, and its
+own test harness. They are numbered F34 through F55, continuing the single `F` series that
 `docs/STAGE_B_FINDINGS.md` opened at F1–F20 and `docs/STAGE_D_FINDINGS.md` carried to F21–F33.
 
 The `F` series and the `P` series answer different questions, and keeping them apart is the whole
@@ -55,9 +55,12 @@ F34 through F40 were first written in `docs/STAGE_E_DESIGN.md` §11.1, under an 
 they were *"provisional until the findings file lands"* and *"do not cite these elsewhere yet"*. That
 warning was earned: stage D's design had numbered its own findings D1 through D9, they became F21
 through F29 when the stage D findings file landed, and the D-numbers became uncitable. **This file is
-what makes F34–F54 citable.** Nothing below is provisional any more. (This range is one of the four
-literals that move whenever an entry is added, and it is the one that went stale when F50 landed —
-see **F51**, which records that and lists all four.)
+what makes F34–F55 citable.** Nothing below is provisional any more. (This range is one of the places that
+move whenever an entry is added, and it is the one that went stale when F50 landed. How many places there
+are depends on how finely they are counted, which is not a quibble: this file answers it three times and
+three ways. **F51** lists four, **F54** lists a different four, and the paragraph below at *"The three
+places that have to move together"* lists three. **F55** item 5 reconciles all three and gives the total as
+six counted finely, five at F54's granularity.)
 
 F41 and F42 were never in the design document, and **until this file landed** they were recorded only
 on the declarations they concern — F41 across `Relico/Translation/GeneralRouting.lean:47`, `:1127` and
@@ -86,6 +89,20 @@ wherever the choice exists.
 F49 was added in task #59, and its commit moved all four places in the same edit rather than leaving them
 owed — the first time in this file's history that a finding arrived without dragging a stale count behind
 it. Recorded because a convention that has held once is not yet a convention: the next finding is the test.
+
+F50 missed one of the four when it landed at `f9f241e`, and **F51** records which and repairs it. F54's
+commit moved all four and said so. F55, added in task #67, moves a place no earlier entry had to: F54's own
+closing paragraph counts the entries sitting below the stranded *What is left open* section, so appending an
+entry falsifies it. F55 also measured something the three tallies above hide — this file states the
+move-together rule three times, at *"The three places that have to move together"* below, in **F51** and in
+**F54**, and no two of the three name the same set. Item 5 of that entry reconciles them, which is why the
+parenthetical above now gives the total at two granularities instead of asserting one number.
+
+One further echo of F43, at the shortest possible interval. Two tracked files cited **F55** by number in
+commit `c6ce367` — `frontend/java-bridge/check-general.sh` and `frontend/test_validate_general_v1.py` — one
+commit before this entry existed. F43's paragraph above predicted the recurrence and named the cause, and
+the cause was the same one: the commit carrying the code was green, and the entry was documentation that
+could follow.
 
 **One trap.** The number F34 was considered once before, in stage D, for a different thing entirely,
 and rejected — `docs/STAGE_D_FINDINGS.md:289` records that it would have duplicated an obligation F32
@@ -1755,8 +1772,10 @@ machine that has the toolchain; and this file's F42 heading is quoted by title e
 heading breaks quotations of it. The correction instead goes where a reader meets the ask: §4.3's third
 bullet now carries a dated blockquote that **quotes the failing clause** instead of counting to it. That is
 the cheaper fix and also the better one, which is the general point — an ordinal reference into another
-document is an *address*, exactly as a line number is, and it moves for the same reason. §4d's rule extends
-to it unchanged: cite by quoted words.
+document is an *address*, exactly as a line number is, and it moves for the same reason. The discipline this
+file already applies to line numbers extends to it unchanged: cite by quoted words. (That rule was stated
+here as a bare section reference into a document this repository does not carry, which **F55** item 7
+records and repairs.)
 
 **3. The instrument that missed the duplicate had been measured to answer a different question.** The
 F-heading map carried into this task listed F48 through F53 and was produced to establish which number was
@@ -1807,7 +1826,7 @@ blockquote that sits inside a bullet, because a nested quote carries an indent b
 disagreed with a count that had been recorded from an indent-tolerant pattern. Second: *an ordinal reference into another document is an
 address, exactly as a line number is.* "§4.3's second lemma" moves when a clause is inserted or reordered,
 and it moved here — four places call the refuted lemma the second while §4.3 lists it first. Cite by
-quoted words, as §4d already required for line numbers. Third: *no arithmetic over line numbers detects a
+quoted words, as this file's own practice already required for line numbers. Third: *no arithmetic over line numbers detects a
 stale cite into a Lean file.* This commit tried both kinds available and both failed — range-suspicion
 raised a false alarm, and cross-document disagreement raised one and got as far as an edit before
 measurement reverted it. A declaration with a long docstring has as many defensible addresses as its
@@ -1829,15 +1848,248 @@ not done: the four ordinal sites are not renumbered, three of them being Lean in
 commit, and F49's record of a search is not rewritten.
 
 Those two insertions shifted §5 onward by twenty-one lines and §10.3 onward by twelve more, so the sweep
-§4d asks for was run in both directions afterwards. It found exactly three qualified cites into the design
+that discipline calls for — re-resolving every qualified cite into the shifted document — was run in both
+directions afterwards. It found exactly three qualified cites into the design
 anywhere in the repository: one names a commit and is immune, one sits above the first insertion, and one
 is the search record above. No live cite needed repair — which is the first time that sweep has come back
 empty, and it came back empty because the two cites that would have broken had already been converted to
 section cites by earlier findings.
 
 One thing is filed rather than fixed. The closing *What is left open, and who owns it* section is no
-longer closing: F53 sits below it and F54 now sits below F53, for the reason F53 gave — appending is the
-only edit to this file that shifts nothing. Moving that section to the end would displace several hundred
-lines and invalidate the cites this commit has just verified, so it belongs to a commit with no other
-business. Until then, a reader who stops at the closing section stops two entries early, and this
+longer closing: F53 sits below it, F54 below F53, and F55 below F54, for the reason F53 gave — appending
+is the only edit to this file that shifts nothing. Moving that section to the end would displace several
+hundred lines and invalidate the cites this commit has just verified, so it belongs to a commit with no
+other business. Until then, a reader who stops at the closing section stops three entries early, and this
 paragraph is the pointer that says so.
+
+---
+
+## F55 — a recording run could not record, because the preflight forbade the state its own message asked for
+
+**Grade: measured**, with the provenance of each part kept separate. The failing run is recorded in the code
+it caused, `frontend/test_validate_general_v1.py:754-767`, written when it happened. The repaired run
+printed `RECORDED — review before commit` for `send-sites` and then `General frontend check passed.` The
+Lean gate afterwards ended `GENERAL_LEAN_GATE_OK`, reporting 24 frontend assertions and 88 printer
+assertions. No part of this entry needs a run that has not happened.
+
+**The defect.** Adding a positive to `frontend/fixtures/general` is a two-file change and only one of the
+two files can be written by hand. `<name>.rebeca` is authored; `<name>.parser.json` has to be **recorded**
+from a real exporter run, because every node in `general-v1` carries a `line`, those line numbers come from
+the Rebeca compiler's own AST, and no other exporter in this repository reads them at all — the argument
+`frontend/fixtures/general/README.md` makes at length under *"Why six are recorded rather than predicted"*.
+The run that records is `check-general.sh --record`.
+
+That run could not record. `check-general.sh` runs its own two checker suites at `:110-111`, before the
+positives loop at `:128` that writes missing expected documents. One assertion in the first suite —
+`PositiveFixturesAreAccountedFor.test_every_positive_has_an_expected_document`, at
+`frontend/test_validate_general_v1.py:750` — requires every `.rebeca` under `fixtures/general` to have a
+committed `.parser.json`. So on the one run whose entire purpose was to create the missing document, the
+demand for that document was evaluated first and the creation never happened. **And the failing
+assertion's own message named `--record` as the remedy** — the run that had just failed. A reader
+following the diagnostic exactly is sent in a circle.
+
+**Why it stayed latent for a whole positive.** The assertion was tightened once, deliberately, and
+`:754-758` records the tightening: before the first gate run it asked something weaker, that a fixture
+either be an anchor or be named in the README as not yet recorded, and once recording had happened the
+invariant tightened to the strong form. The strong form is the right invariant — a positive with no
+expected document asserts only that the exporter does not crash. What went unnoticed is that tightening it
+put the suite in conflict with the recording run, and **that conflict is unreachable until the next new
+positive arrives**, because in the interval every positive already has its document. It took a second new
+positive to fire it. That is the general shape, and it is worth more than this instance: an invariant
+tightened immediately after a one-off event is a trap armed for the second occurrence of that event.
+
+**The fix, and why it is narrow rather than a relaxation.** `check-general.sh:106-108` exports
+`RELICO_GENERAL_RECORDING=1` when and only when `MODE` is `--record`, and
+`test_validate_general_v1.py:76` is its only reader in the tracked tree. The exemption at `:772` is
+`if RECORDING and not document.is_file()`, and it **skips rather than passes**, so a recording run still
+says out loud which positive it has yet to account for. Nothing about the content of a document that does
+exist is affected, and for every ordinary run — the run whose green result is the gate — the invariant is
+exactly as tight as it was. The narrowness is the whole design: the alternative on the table was to weaken
+the assertion back to its pre-tightening form, which would have paid for one bad run with a permanently
+weaker gate.
+
+Seven things travelled with this repair, and a recurrence besides. Five are about counts, one is about
+instruments, and one is about a cite that resolves to nothing. Only the first was known when the task
+opened; the rest were found by verifying this entry's own claims before it landed, which is the argument for
+doing that.
+
+**1. A stale count was repaired by deleting it.** `check-general.sh` carried a comment saying the shared
+Maven build saves "twenty-seven fixtures" a build each, while the corpus held twenty-eight. It is **not**
+corrected to twenty-eight. The comment now states why: *"Deliberately not written as a count … a number
+here has to be maintained by whoever adds a fixture anywhere, which is exactly the maintenance that keeps
+failing."* Nothing executable reads that number. This gives F46's rule a corollary worth stating on its
+own: **where a count is load-bearing for nothing, deleting it is strictly better than maintaining it**,
+because a number that does not exist cannot go stale.
+
+**2. The numeral sweep took three passes, and the third found the case the first two could not.** The
+first pass swept for English number words and missed "twenty-seven", because that word was not in the list
+the sweep was built from — an instrument answering exactly the question it was pointed at, which is F54's
+first rule recurring within two commits. The second pass, with the word added, found it. The third found
+something neither could: `fixtures/general/README.md` stated the size of `reject/` as a **numeral inside
+Markdown table syntax**, `| | reject/ (11) | upstream-reject/ (8) |`, while the corpus held twelve. That is
+a third way a count hides from a text search, and the least obvious: not by being wrong in a sentence, but
+by sitting where no sweep for sentences looks. A count written as a numeral inside markup is invisible to a
+sweep for number words, and invisible again to a sweep for prose, because its neighbouring bytes are table
+delimiters rather than words. The sizes were then taken by counting the directories
+instead of reading the prose: 12 `reject/`, 8 `upstream-reject/`, 10 positives, 14 `lean-reject/`.
+
+**3. A neighbouring "eleven" was repaired by making it a record rather than by correcting it.**
+`fixtures/general/lean-reject/README.md` said the exporter's parameter-shadowing branch was unexercised and
+that *"`reject/` holds eleven sources"*. That number is **not** changed to twelve. One word is inserted —
+*"`reject/` **then** held eleven sources"* — and the paragraph continues that the gap is closed as of
+2026-08-22 by the new fixture, *"the companion this paragraph asked for"*. Two counts reading eleven, in
+one commit, handled oppositely on purpose: the first is a live claim about the present corpus and had to be
+corrected, the second describes the state at the time it was written and had to be preserved. This is F54's
+fourth rule applied deliberately, rather than discovered in breach.
+
+**4. Six sentences were left saying "nine", and the first count of them said three.**
+`docs/STAGE_B_DESIGN.md` speaks of the nine positives six times — among them *"All nine positives elaborate
+except"*, *"Eight of nine elaborate"* and *"All nine stage-A positives elaborate except"* — while a seventh
+"nine" in that file counts inductive constructors and is unrelated. All six are stage-B-era measurements of
+a corpus that held nine positives when they were taken, so all six are records, and none is touched. The
+count in this item is the part worth reporting: it read *three* until a grep was run, having been written
+from recollection inside an item about counts that nobody measured. That is F46's pattern — an off-by-one
+written into prose at the moment of the edit describing off-by-ones — and it is one more count in this task
+that a measurement moved after it had already been written down.
+
+**5. The rule about counts that go stale is stated three times in this file, and no two statements name the
+same places.** This is the item worth the most, because the defect is in the rule rather than in an
+application of it. Measured, in file order:
+
+- The numbering-history section, in the passage written when F48's commit repaired three stale numbers:
+  *"The three places that have to move together are line 1, the "Why this file exists" paragraph, and the
+  numbering-history line above."*
+- **F51**: *"This file states its own range or count in four places: the title, the "eighteen findings"
+  sentence, the "numbered F34 through …" sentence, and the sentence "this file is what makes F34–…
+  citable"."*
+- **F54**: it *"moved all four numbering literals … line 1, the* Why this file exists *paragraph, the
+  citability sentence, and the numbering-history line."*
+
+The first two describe the **same three places at two granularities** — F51 splits the *Why this file
+exists* paragraph into the two sentences it contains, and so counts four where the earlier passage counts
+three. F54 merges those back into one and adds a place neither earlier statement has, the running
+numbering-history paragraph recording what each finding did about its numbers. So "four" is reached twice,
+by two different routes, over two different sets, and each of the three tallies is internally correct.
+Counted at F51's granularity the places are six, F54's closing paragraph included; counted at F54's they are
+five. This entry moves all of them and the parenthetical near the top now gives both numbers, because
+picking one silently is what produced three answers.
+
+That sixth place is the one no rule anticipated, and it is a live count rather than a range: F54's closing
+paragraph says a reader who stops at the stranded *What is left open* section *"stops two entries early"*,
+which appending F55 falsifies. It is repaired in the paragraph immediately above this entry's heading, which
+is where F54 ends.
+
+Two things follow. First, **a count is not made safe by being carefully derived — three careful passes
+derived three different numbers from one file**, because each fixed a granularity implicitly and none said
+which. Where a rule counts things, the rule owes a statement of what it counts as one thing. Second, the
+reason no pass saw the others is F54's first rule recurring a third time: each was written while repairing
+one specific stale number, so each enumerated the places *that* number lives in and stopped. Nothing was
+ever pointed at *how many such places exist*, so nothing answered it.
+
+**6. Three instruments failed inside this one task, by three different mechanisms.** Complying with the
+move-together rule meant reading it, and a `grep` for the phrase *four literals* in this file returns **no
+matches**: the phrase wraps, "four" ending one line and "literals" beginning the next. That is the rule
+about how counts hide, hidden by the mechanism it describes. The second was the number-word sweep with no
+"twenty-seven" in its list, item 2 above. The third is the one worth recording, because unlike the others it
+reached a conclusion that was then acted on: a `grep` for every `§` cite in this file was piped through
+`head -40`, and the file then held **91** such marks, so the forty that came back were read as evidence
+about all ninety-one. The conclusion drawn was that no `§4d` cite existed here — three did, all of them in
+F54, as item 7 records — and it was reversed two commands later by a grep aimed at the letter suffix
+instead. Truncated output is not a smaller answer to the same question, it is a complete answer to a
+different one, and `head` over a match set whose size has not been measured substitutes the second for the
+first, silently and in the direction of believing an absence.
+
+The rule for the first: **a phrase grep over prose is not a search for a phrase, it is a search for an
+unwrapped phrase.** The rule covering all three is F54's first, now recurring for the second, third and
+fourth time — each instrument answered exactly the question it was pointed at. Both greps here were
+recovered by reading the section, which is the case for citing by quoted words and *reading* by section
+rather than by match.
+
+**7. Three cites in F54 resolved to no document this repository carries.** F54 stated two of its four rules
+by reference rather than in full. It said *"§4d's rule extends to it unchanged: cite by quoted words"*, and
+*"Cite by quoted words, as §4d already required for line numbers"*, and it called a sweep the one *"§4d asks
+for"*. Those are quoted in the past tense because this commit repairs all three, and no line numbers are
+given for them, both for the reason this item is about. Measured, and the measurement is the point: **no
+letter-suffixed section cite exists anywhere in this repository outside this file** — not in
+`CONTRIBUTING.md`, whose six sections are unnumbered, not in `README.md`, not in any of the other 92
+markdown documents under `docs/`, not in any Lean source — and not in the untracked working design under
+`tmp/` either, whose §4 is *"Where the translator should live"* and carries no lettered subsections. That
+numbering belongs to a set of working conventions held outside the repository altogether.
+
+What made it read as legitimate is the company it keeps. This repository carries **308** dotted section
+cites of the form `§4.1`, `§7.2`, `§10.2`, and they resolve — overwhelmingly into `docs/STAGE_E_DESIGN.md`,
+which really does have those subsections, including the §4.3 that F54's own ordinal finding is about. A
+`§4d` sitting among 308 working cites inherits their credibility while resolving to nothing, which is a
+better explanation of how it passed review three times than inattention is. For a reader who has only the
+repository it is a rule asserted by reference to nothing, and the sweep it names is a claim about a
+procedure that reader cannot look up.
+
+**And the ordinal itself is real, which is the part worth keeping.** `4d` *is* a live address in this
+repository: `docs/actor-priority/phase4d/` exists and holds a document, alongside fifteen sibling
+directories numbered by exactly this convention — `phase2b`, `phase3a`, `phase3b`, `phase3c`, `phase4a`,
+`phase4b`, `phase4c`, and `phase4d1` through `phase4d7`, forty markdown files between them. So `§4d` is not
+invented notation. It is a real ordinal from the *phase* namespace wearing the `§` sigil, which claims the
+*section* namespace, and the sigil is the only part that is wrong. That is a narrower and more useful
+diagnosis than "the cite resolves to nothing", because it names the mechanism: a collision between two live
+numbering schemes, one of which resolves. It also sharpens F54's own rule. That entry established that
+ordinals are addresses; this adds that **an ordinal is an address only together with its namespace**, and a
+sigil is the whole of what carries the namespace.
+
+This is F54's own ordinal finding one level up — an address into a document, cited where it should have been
+quoted — and it was landed by the entry that states the rule against it. It is repaired the way that entry
+prescribed: all three now state the rule in words and cite no section number. What is deliberately **not**
+done is graduating those conventions into the repository as a real document with a real numbering, which is
+what would make such a cite resolvable. That is a document to be written, not a repair to this one.
+
+**A recurrence worth naming.** `frontend/java-bridge/check-general.sh`, in the comment above its `--record`
+branch, says *"That is finding F55"*, and `frontend/test_validate_general_v1.py`, above its `RECORDING`
+definition, says *"See finding F55 for why this flag has to exist"* — and both landed in
+commit `c6ce367` while this entry did not exist. That is exactly the F43 situation the numbering history
+above records, and that paragraph predicted it in as many words: *"It is recorded rather than tidied away,
+because the pressure that caused it (a green gate is a strong incentive to land) will recur."* It recurred
+one finding later and for the identical reason — the fixture commit was green, and the entry was docs-only
+work that could follow. The interval is one commit rather than F43's several, which is the only respect in
+which this is better.
+
+**The rules this leaves behind.** First, and it is the one with teeth: **a diagnostic that names a remedy
+is a claim that the remedy is reachable, and a gate must be able to reach the state its own failure message
+asks for.** Nothing checks this class of defect and no ordinary run can, because the state that triggers it
+exists only in the window between adding a fixture and recording it. Second: **an invariant tightened
+immediately after a one-off event is armed for the second occurrence of that event**, so the question when
+tightening is not "does this hold now" but "what is the next run that has not happened yet". Third: **a
+provenance note naming a unique event goes stale the first time a second event of that kind happens** —
+the `RECORDED` tuple's comment said "the first `--record` run" and now says "a real run", because five of
+its six entries were recorded by one run and `send-sites` by another. Fourth: **where a count is
+load-bearing for nothing, delete it rather than maintain it.** Fifth: **a rule that counts things owes a
+statement of what it counts as one thing** — three careful passes over this file derived three different
+totals from very nearly the same set of places, each having fixed a granularity without saying so. Sixth:
+**truncated output is a complete answer to a different question**, so a `head` over a match set whose size
+has not been measured is not evidence about that set, and the failure is silent in the direction of
+believing an absence. Seventh, refining F54 rather than adding to it: **an ordinal is an address only
+together with its namespace.** `4d` resolves in this repository and `§4d` does not, and the entire
+difference is a sigil asserting a namespace the ordinal was not drawn from. Where two numbering schemes are
+live at once — audit phases and design sections, here — a bare ordinal is ambiguous, and a sigilled one can
+be confidently wrong while looking more precise than the bare one.
+
+**What this commit did.** It added this entry and moved every place in this file that states its own range or
+count — six counted at F51's granularity, five at F54's: line 1, the two sentences of the *Why this file
+exists* paragraph, the citability sentence, the running numbering-history paragraph, and F54's closing
+paragraph, which no earlier finding had cause to touch. It rewrote the numbering-history paragraph that
+records what each finding did about its numbers, so that it points at the reconciliation rather than
+asserting a fourth total, and recorded there that F55's number was already cited in two tracked files by
+commit `c6ce367`, one commit before this entry existed. It repaired three cites in F54 that addressed a
+section of a document
+this repository does not carry, restating each rule in words instead. The code and fixture side of F55
+landed separately in `c6ce367`, together with the tenth positive and the twelfth exporter reject, so this
+commit is documentation only and owes no `lake build` — no gate script reads `docs/`.
+
+**Deliberately not done.** The stranded *What is left open, and who owns it* section is still not moved to
+the end; it now has three entries below it instead of two, so the case for a commit with no other business
+is stronger by exactly one entry. The working conventions this file keeps citing — the rules about addresses,
+instruments and quoted words that F54 reached for when it wrote `§4d` — are still held outside the
+repository, so item 7 repairs three cites without removing the reason they were written. Graduating those
+conventions into a numbered document in `docs/` is what would make such a cite resolvable, and it is a
+document to write rather than an edit to this one, which is why it is filed here and not attempted. And the
+gate gains no check for the class of defect F55 is: the first rule above is a rule for a reader, not an
+assertion, and making it executable would require a run that deliberately deletes a committed document in
+order to prove it can be recreated.
