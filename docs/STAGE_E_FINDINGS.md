@@ -273,8 +273,8 @@ should travel together in one Maven round trip.
 
 ## F39 — stage E is not conservative over stage D
 
-**Grade: decided.** The alternative was considered and rejected; `docs/STAGE_E_DESIGN.md:1081` records
-the rejection.
+**Grade: decided.** The alternative was considered and rejected; §11.1 of `docs/STAGE_E_DESIGN.md`
+records the rejection in its *"F39 — stage E is not conservative over stage D"* bullet.
 
 `Translation.compileGeneralModel` now ends in `guardGeneralProgram`, which refuses any program that
 fails `LF.GeneralProgram.wellFormed`. Some models that stage D translated successfully are therefore

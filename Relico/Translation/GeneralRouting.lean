@@ -3133,5 +3133,517 @@ theorem generalConnectionsOf_targetEndpoints_nodup
       hReceiverClass
       hInputPortNames
 
+/-!
+## Instance-declaration order
+
+`docs/STAGE_E_DESIGN.md` §10.2's fourth owed item: an explicit statement that a receiver's port
+reactions for one message server appear in main-block instance-declaration order. The *docstring*
+half of that item already sits on `generalRoutesIntoMessageServer` above, and says in as many words
+that route order is instance-declaration order and that reaction order realizing priority is stage
+F's claim rather than this stage's. What follows is the statement half. The composite lives in
+`Relico/Translation/GeneralBasic.lean`, because that is where the reaction assembly is and this
+module deliberately does not import it.
+
+Everything here is phrased with `++` over an arbitrary split of the instance list, rather than with
+a list-order predicate. `List.Sublist` is used by no statement and no proof in this development —
+the identifier occurs only in prose like this paragraph — and introducing a core order API to say
+"in order" would put one more trusted name between the claim and its proof for no gain. The split
+says the same thing, and says it at every cut point rather than only at the head: if the instances
+are `earlier ++ later`, every route owed to an instance declared in `earlier` precedes every route
+owed to one declared in `later`.
+
+Appended at file end deliberately, so that no line number cited from `docs/STAGE_E_FINDINGS.md` or
+from another module moves.
+-/
+
+/--
+The `cons` equation of the instance recursion, in the direction that builds a table.
+
+Four hypotheses because the definition has four gates, and each is a real refusal rather than a
+defensive one: an instance of a class the model does not declare, an output-port environment that
+does not resolve, a send site the environment cannot place, and a failure further down the instance
+list. The conclusion is the `++` that makes instance order observable — the head instance's routes
+are a *prefix* of the table, never interleaved with a later instance's.
+-/
+theorem routesOfInstances_cons_ok
+    (model : DTR.GeneralModel)
+    (actor : DTR.GeneralActorInstance)
+    (remaining : List DTR.GeneralActorInstance)
+    (sendingClass : DTR.GeneralReactiveClass)
+    (env : GeneralOutputPortEnv)
+    (headRoutes tailRoutes : List GeneralRoute)
+    (hClass :
+      model.class? actor.className =
+        some sendingClass)
+    (hEnv :
+      outputPortEnvOf
+          model.classes
+          sendingClass =
+        .ok env)
+    (hHead :
+      routesOfEntries
+          model
+          actor
+          env =
+        .ok headRoutes)
+    (hTail :
+      routesOfInstances
+          model
+          remaining =
+        .ok tailRoutes) :
+    routesOfInstances
+        model
+        (actor :: remaining) =
+      .ok
+        (headRoutes ++
+          tailRoutes) := by
+
+  simp [
+    routesOfInstances,
+    hClass,
+    hEnv,
+    hHead,
+    hTail
+  ]
+
+/--
+The same equation read backwards: a successful table on a `cons` exhibits its four successes.
+
+Stated as one existential rather than as four projections because the four are produced together by
+a single unfolding, and a caller that needs one needs the rest. `routesOfInstances_append` below is
+that caller: its induction step holds a successful table for `actor :: remaining` and has to rebuild
+one for `actor :: (remaining ++ later)`, which needs the head's routes, the tail's table **and** the
+two lookups, since `routesOfInstances_cons_ok` takes all four.
+
+Each error branch is closed by the hypothesis becoming `.error … = .ok …`, which is the only way an
+unfolding of this definition can contradict a success.
+-/
+theorem routesOfInstances_cons_inv
+    (model : DTR.GeneralModel)
+    (actor : DTR.GeneralActorInstance)
+    (remaining : List DTR.GeneralActorInstance)
+    (routes : List GeneralRoute)
+    (hRoutes :
+      routesOfInstances
+          model
+          (actor :: remaining) =
+        .ok routes) :
+    ∃ (sendingClass : DTR.GeneralReactiveClass)
+      (env : GeneralOutputPortEnv)
+      (headRoutes tailRoutes : List GeneralRoute),
+      model.class? actor.className =
+          some sendingClass ∧
+        outputPortEnvOf
+            model.classes
+            sendingClass =
+          .ok env ∧
+        routesOfEntries
+            model
+            actor
+            env =
+          .ok headRoutes ∧
+        routesOfInstances
+            model
+            remaining =
+          .ok tailRoutes ∧
+        routes =
+          headRoutes ++
+            tailRoutes := by
+
+  cases hClass :
+      model.class? actor.className with
+
+  | none =>
+      simp [
+        routesOfInstances,
+        hClass
+      ] at hRoutes
+
+  | some sendingClass =>
+      cases hEnv :
+          outputPortEnvOf
+            model.classes
+            sendingClass with
+
+      | error diagnostic =>
+          simp [
+            routesOfInstances,
+            hClass,
+            hEnv
+          ] at hRoutes
+
+      | ok env =>
+          cases hHead :
+              routesOfEntries
+                model
+                actor
+                env with
+
+          | error diagnostic =>
+              simp [
+                routesOfInstances,
+                hClass,
+                hEnv,
+                hHead
+              ] at hRoutes
+
+          | ok headRoutes =>
+              cases hTail :
+                  routesOfInstances
+                    model
+                    remaining with
+
+              | error diagnostic =>
+                  simp [
+                    routesOfInstances,
+                    hClass,
+                    hEnv,
+                    hHead,
+                    hTail
+                  ] at hRoutes
+
+              | ok tailRoutes =>
+                  refine
+                    ⟨sendingClass,
+                      env,
+                      headRoutes,
+                      tailRoutes,
+                      ?_,
+                      ?_,
+                      ?_,
+                      ?_,
+                      ?_⟩
+
+                  · simp [hClass]
+
+                  · simp [hEnv]
+
+                  · simp [hHead]
+
+                  · simp [hTail]
+
+                  · simpa [
+                      routesOfInstances,
+                      hClass,
+                      hEnv,
+                      hHead,
+                      hTail
+                    ] using hRoutes.symm
+
+/--
+The instance list splits, and so does the table it produces.
+
+Stated with the two quantifiers *inside* the conclusion rather than as hypotheses of the theorem,
+which is the shape `exists_compileGeneralReactiveClasses` uses and for the same reason: the
+induction is on `earlier`, `earlierRoutes` has to vary with it, and putting both under a `∀` in the
+goal avoids `induction … generalizing` and leaves the induction hypothesis in an unambiguous shape.
+`later` and `laterRoutes` are fixed throughout and stay as parameters.
+-/
+private theorem routesOfInstances_append_aux
+    (model : DTR.GeneralModel)
+    (later : List DTR.GeneralActorInstance)
+    (laterRoutes : List GeneralRoute)
+    (hLater :
+      routesOfInstances
+          model
+          later =
+        .ok laterRoutes) :
+    ∀ (earlier : List DTR.GeneralActorInstance)
+      (earlierRoutes : List GeneralRoute),
+      routesOfInstances
+            model
+            earlier =
+          .ok earlierRoutes →
+        routesOfInstances
+            model
+            (earlier ++ later) =
+          .ok
+            (earlierRoutes ++
+              laterRoutes) := by
+
+  intro earlier
+
+  induction earlier with
+
+  | nil =>
+      intro earlierRoutes hEarlier
+
+      have hEmpty :
+          earlierRoutes = [] := by
+        simpa [
+          routesOfInstances
+        ] using hEarlier.symm
+
+      subst hEmpty
+
+      simpa using hLater
+
+  | cons actor remaining inductionHypothesis =>
+      intro earlierRoutes hEarlier
+
+      obtain
+          ⟨sendingClass,
+            env,
+            headRoutes,
+            tailRoutes,
+            hClass,
+            hEnv,
+            hHead,
+            hTail,
+            hSplit⟩ :=
+        routesOfInstances_cons_inv
+          model
+          actor
+          remaining
+          earlierRoutes
+          hEarlier
+
+      subst hSplit
+
+      rw [
+        List.cons_append,
+        List.append_assoc
+      ]
+
+      exact
+        routesOfInstances_cons_ok
+          model
+          actor
+          (remaining ++ later)
+          sendingClass
+          env
+          headRoutes
+          (tailRoutes ++ laterRoutes)
+          hClass
+          hEnv
+          hHead
+          (inductionHypothesis
+            tailRoutes
+            hTail)
+
+/--
+The table of a split instance list is the concatenation of the two tables, in order.
+
+This is the order claim at the level of the routing table: no interleaving, no sorting, and the cut
+point is arbitrary, so it holds between *any* earlier instance and *any* later one rather than only
+at the head of the list.
+-/
+theorem routesOfInstances_append
+    (model : DTR.GeneralModel)
+    (earlier later : List DTR.GeneralActorInstance)
+    (earlierRoutes laterRoutes : List GeneralRoute)
+    (hEarlier :
+      routesOfInstances
+          model
+          earlier =
+        .ok earlierRoutes)
+    (hLater :
+      routesOfInstances
+          model
+          later =
+        .ok laterRoutes) :
+    routesOfInstances
+        model
+        (earlier ++ later) =
+      .ok
+        (earlierRoutes ++
+          laterRoutes) :=
+  routesOfInstances_append_aux
+    model
+    later
+    laterRoutes
+    hLater
+    earlier
+    earlierRoutes
+    hEarlier
+
+/--
+The same statement about the model's own table, split at a cut in the main block.
+
+`routesOf` is `routesOfInstances` at `model.instances`, and `model.instances` *is* main-block
+declaration order — `DTR.GeneralElaborator` preserves it and nothing between here and there sorts.
+So a hypothesis that the declared instances split as `earlier ++ later` is exactly a hypothesis
+about where the cut falls in the main block, which is what §10.2's item asks the statement to be
+about.
+-/
+theorem routesOf_split
+    (model : DTR.GeneralModel)
+    (earlier later : List DTR.GeneralActorInstance)
+    (earlierRoutes laterRoutes : List GeneralRoute)
+    (hInstances :
+      model.instances =
+        earlier ++ later)
+    (hEarlier :
+      routesOfInstances
+          model
+          earlier =
+        .ok earlierRoutes)
+    (hLater :
+      routesOfInstances
+          model
+          later =
+        .ok laterRoutes) :
+    routesOf model =
+      .ok
+        (earlierRoutes ++
+          laterRoutes) := by
+
+  show
+    routesOfInstances
+        model
+        model.instances =
+      .ok
+        (earlierRoutes ++
+          laterRoutes)
+
+  rw [hInstances]
+
+  exact
+    routesOfInstances_append
+      model
+      earlier
+      later
+      earlierRoutes
+      laterRoutes
+      hEarlier
+      hLater
+
+/--
+The `cons` equation of the message-server filter when the head lands on the server asked for.
+
+Mirrors `generalRoutesIntoClass_cons_self` above, and exists for the reason given there: two
+directed equations rather than a `match` inside a statement. The hypothesis is the `Prod` equality
+the definition actually tests, rather than its two components, so that nothing has to decompose a
+pair in the middle of a rewrite — and because `by_cases` at the one call site below produces exactly
+this shape.
+-/
+theorem generalRoutesIntoMessageServer_cons_self
+    (className : ClassName)
+    (message : MsgName)
+    (route : GeneralRoute)
+    (remaining : List GeneralRoute)
+    (hMatch :
+      (route.receiverClass,
+        route.message) =
+        (className, message)) :
+    generalRoutesIntoMessageServer
+        className
+        message
+        (route :: remaining) =
+      route ::
+        generalRoutesIntoMessageServer
+          className
+          message
+          remaining := by
+
+  simp [
+    generalRoutesIntoMessageServer,
+    hMatch
+  ]
+
+/--
+The `cons` equation when the head lands on some other class, or on the same class but a different
+message server.
+
+Both misses go through one equation because the definition tests one pair, which is also why §7.3's
+grouping is by the pair rather than by class followed by a second filter.
+-/
+theorem generalRoutesIntoMessageServer_cons_of_ne
+    (className : ClassName)
+    (message : MsgName)
+    (route : GeneralRoute)
+    (remaining : List GeneralRoute)
+    (hMatch :
+      ¬ ((route.receiverClass,
+        route.message) =
+        (className, message))) :
+    generalRoutesIntoMessageServer
+        className
+        message
+        (route :: remaining) =
+      generalRoutesIntoMessageServer
+        className
+        message
+        remaining := by
+
+  simp [
+    generalRoutesIntoMessageServer,
+    hMatch
+  ]
+
+/--
+The filter distributes over concatenation.
+
+The bridge from the routing table's split to the reaction group's split: `routesOf_split` says the
+table is `earlierRoutes ++ laterRoutes`, this says the group of routes landing on one message server
+splits at the same point, and `assembleGeneralPortReactions` is a `map`, so the reactions do too.
+Proved by induction on the left list with a case split on the head, because the filter is not
+structurally a `List.filter` — it is its own recursion, for the reason its docstring gives.
+-/
+theorem generalRoutesIntoMessageServer_append
+    (className : ClassName)
+    (message : MsgName)
+    (earlier later : List GeneralRoute) :
+    generalRoutesIntoMessageServer
+        className
+        message
+        (earlier ++ later) =
+      generalRoutesIntoMessageServer
+          className
+          message
+          earlier ++
+        generalRoutesIntoMessageServer
+          className
+          message
+          later := by
+
+  induction earlier with
+
+  | nil =>
+      simp [
+        generalRoutesIntoMessageServer
+      ]
+
+  | cons route remaining inductionHypothesis =>
+      by_cases hMatch :
+          (route.receiverClass,
+            route.message) =
+            (className, message)
+
+      · rw [
+          List.cons_append,
+          generalRoutesIntoMessageServer_cons_self
+            className
+            message
+            route
+            (remaining ++ later)
+            hMatch,
+          generalRoutesIntoMessageServer_cons_self
+            className
+            message
+            route
+            remaining
+            hMatch,
+          inductionHypothesis,
+          List.cons_append
+        ]
+
+      · rw [
+          List.cons_append,
+          generalRoutesIntoMessageServer_cons_of_ne
+            className
+            message
+            route
+            (remaining ++ later)
+            hMatch,
+          generalRoutesIntoMessageServer_cons_of_ne
+            className
+            message
+            route
+            remaining
+            hMatch,
+          inductionHypothesis
+        ]
+
 end Translation
 end Relico

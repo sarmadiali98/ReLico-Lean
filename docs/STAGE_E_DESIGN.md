@@ -944,6 +944,42 @@ owns that claim.
 > that touch. The **reaction declaration order** statement in the same sentence is still owed — task #65,
 > which will add its own note here rather than borrow this one.
 
+> **The reaction declaration order item: discharged — 2026-08-22, task #65.** It landed as
+> `assembleGeneralPortReactions_instanceDeclarationOrder`
+> (`Relico/Translation/GeneralBasic.lean:6227`), and the statement is stronger than the one asked for
+> here. Rather than a receiver's port reactions appearing in instance-declaration order for some
+> distinguished first instance, the order *splits*: for **any** `earlier` and `later` with
+> `model.instances = earlier ++ later`, the compiled port reactions of one message server are the
+> `earlier` ones followed by the `later` ones, at every cut point. That shape needs no order relation
+> on instances and no `List.Sublist` — `++` at an arbitrary cut carries the whole claim — which is
+> worth having because no statement and no proof in this development uses `List.Sublist`; the
+> identifier occurs only in prose. Three lemmas do the work: `routesOf_split`
+> (`Relico/Translation/GeneralRouting.lean:3469`) splits routing along the instance list,
+> `generalRoutesIntoMessageServer_append` (`:3583`) shows the per-server filter distributes over `++`,
+> and `assembleGeneralPortReactions_append` (`GeneralBasic.lean:6162`) shows the reaction map does too.
+>
+> The docstring this list asks for is there, but **not** in the words used here, and the difference is
+> load-bearing. Written flatly — *"this is not a priority result"* — it would read as denying
+> `priorityServerNamePrecedesOrEqual_compileMessageReactions` in
+> `Relico/Correctness/PriorityOrder.lean`, which proves a two-way correspondence between source
+> priority order and reaction declaration order. That theorem is about *message-server* priority
+> inside one actor in the restricted `DTR.MessageServer` family, which sorts by
+> `priorityOrderedMessageServers`. The general pipeline sorts nothing, emits source order, and drops
+> `DTR.GeneralMessageServer.priority` outright, with `assembleGeneralMessageReaction_priority`
+> recording the drop as a theorem. So the docstring scopes the disclaimer to the general pipeline
+> rather than asserting it universally, and it records the boundary `docs/PAPER_CORRECTIONS.md` P1
+> draws: declaration order totally orders same-tag reactions **within one reactor**, while across
+> reactors the order comes from the connection-induced dependency graph. This statement stays inside
+> the single receiving reactor, so it is on the right side of that line.
+>
+> Two things it deliberately does not say: nothing about where the action reaction sits relative to
+> the port reactions, and nothing about port *names*, which stay guard-relative under F34, F37 and
+> F42 — order is carried by the construction, names are checked. Item two of the sentence above is
+> also untouched. Only one of §4.3's *two* one-sided injectivity lemmas exists in the asked-for form;
+> the other landed as the weaker `outputPortInfixFor_eq_of_outputPortNameFor_eq`
+> (`Relico/Translation/NameGeneration.lean:261`) because §4.3's own site-suffix witness refutes it.
+> Task #66 owns that correction and will annotate §4.3 and this sentence.
+
 And one more, which is the theorem the whole of §6 exists to make provable: **no reaction of an emitted
 reactor sets one output port twice.** Stated over the compiled body of a single reaction — for any
 class `C` accepted by the translation and any reaction of the emitted `reactor C`, the list of port names

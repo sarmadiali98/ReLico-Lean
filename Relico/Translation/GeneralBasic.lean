@@ -6141,5 +6141,143 @@ theorem compileGeneralModel_ok_iff
           compiledReactors
           hClasses)
 
+/-!
+## Instance-declaration order
+
+`docs/STAGE_E_DESIGN.md` §10.2's fourth owed item, composite half. The routing half is
+`routesOf_split` in `Relico/Translation/GeneralRouting.lean`; what this section adds is the step
+from a split routing table to a split group of reactions, and the statement that puts the two
+together.
+-/
+
+/--
+One message server's port reactions split wherever the route list splits.
+
+Immediate from `generalRoutesIntoMessageServer_append` and `List.map_append`, because
+`assembleGeneralPortReactions` is a `map` over the filter and nothing else. Stated for an arbitrary
+class, server and compiled body: if no route in either half lands on this server the two sides are
+both empty and the equation is the empty split, which is the honest content in that case rather than
+a degenerate one to be excluded by hypothesis.
+-/
+theorem assembleGeneralPortReactions_append
+    (className : ClassName)
+    (server : DTR.GeneralMessageServer)
+    (compiledBody : LF.GeneralBody)
+    (earlierRoutes laterRoutes : List GeneralRoute) :
+    assembleGeneralPortReactions
+        className
+        server
+        compiledBody
+        (earlierRoutes ++ laterRoutes) =
+      assembleGeneralPortReactions
+          className
+          server
+          compiledBody
+          earlierRoutes ++
+        assembleGeneralPortReactions
+          className
+          server
+          compiledBody
+          laterRoutes := by
+
+  simp [
+    assembleGeneralPortReactions,
+    generalRoutesIntoMessageServer_append
+  ]
+
+/--
+A receiver's port reactions for one message server appear in main-block instance-declaration order.
+
+`docs/STAGE_E_DESIGN.md` §10.2 owes this statement explicitly, and this is it. Read the hypothesis
+`model.instances = earlier ++ later` as a cut anywhere in the main block: the first conjunct says the
+routing table splits at that cut, the second says the group of port reactions for any one message
+server splits at the same point. Together they say that every reaction owed to an instance declared
+earlier precedes every reaction owed to one declared later, for every cut, which is what "in
+declaration order" means without a list-order API. Nothing sorts anywhere along the path, and
+`routesOf`'s docstring records why that is a decision rather than an omission.
+
+**This is not a priority result, and stage F owns that claim.** The distinction is worth stating
+precisely rather than modestly, because the two halves of it point in opposite directions. Reaction
+declaration order is genuinely observable in the target: within *one* reactor it totally orders the
+reactions enabled at the same tag, measured rather than assumed, and every port reaction this
+statement is about belongs to the single receiving reactor. `docs/PAPER_CORRECTIONS.md` P1 is the
+boundary that makes the qualifier load-bearing — *across* reactors the order comes from the
+dependency graph the connections induce and not from declaration order at all, so a statement of
+this shape would be unsound if it reached across reactors. This one does not.
+
+What is *not* a theorem is that instance-declaration order coincides with Rebeca's priority order.
+For a fixture whose instances happen to be declared in priority order the two coincide, and that
+coincidence is a property of the fixture rather than of the translation. The contrast with the
+restricted family is the thing to keep in view: `Relico/Translation/MultiStoreBasic.lean` compiles
+message servers in `priorityOrderedMessageServers` order, and
+`priorityServerNamePrecedesOrEqual_compileMessageReactions` in
+`Relico/Correctness/PriorityOrder.lean` proves the declaration order that results is exactly source
+priority order — for *message-server* priority inside one actor, in the family that sorts. This
+stage sorts nothing, emits source order, and drops `DTR.GeneralMessageServer.priority` outright,
+with `assembleGeneralMessageReaction_priority` recording the drop as a theorem. The silence here is
+therefore a deliberate difference from that family and not an omission, and any claim that the
+emitted order *realizes* priority in the general pipeline needs semantics this stage does not have.
+
+Two further things this statement deliberately does not say. It says nothing about the order of the
+action reaction relative to the port reactions — that is `compileGeneralMessageServerReactions`'s
+concern and §7.3's order, covered separately. And it says nothing about port *names*: names are
+guard-relative in this stage (F34, F37, F42), whereas order is carried by the construction here, and
+conflating the two is the defect finding F53 records three instances of.
+-/
+theorem assembleGeneralPortReactions_instanceDeclarationOrder
+    (model : DTR.GeneralModel)
+    (earlier later : List DTR.GeneralActorInstance)
+    (earlierRoutes laterRoutes : List GeneralRoute)
+    (className : ClassName)
+    (server : DTR.GeneralMessageServer)
+    (compiledBody : LF.GeneralBody)
+    (hInstances :
+      model.instances =
+        earlier ++ later)
+    (hEarlier :
+      routesOfInstances
+          model
+          earlier =
+        .ok earlierRoutes)
+    (hLater :
+      routesOfInstances
+          model
+          later =
+        .ok laterRoutes) :
+    routesOf model =
+        .ok
+          (earlierRoutes ++
+            laterRoutes) ∧
+      assembleGeneralPortReactions
+          className
+          server
+          compiledBody
+          (earlierRoutes ++ laterRoutes) =
+        assembleGeneralPortReactions
+            className
+            server
+            compiledBody
+            earlierRoutes ++
+          assembleGeneralPortReactions
+            className
+            server
+            compiledBody
+            laterRoutes :=
+  ⟨routesOf_split
+      model
+      earlier
+      later
+      earlierRoutes
+      laterRoutes
+      hInstances
+      hEarlier
+      hLater,
+    assembleGeneralPortReactions_append
+      className
+      server
+      compiledBody
+      earlierRoutes
+      laterRoutes⟩
+
 end Translation
 end Relico
