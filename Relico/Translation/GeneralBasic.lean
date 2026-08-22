@@ -5889,5 +5889,257 @@ theorem compileGeneralBody_setPortNames_nodup
                 compiledRemaining
                 hRemaining
 
+/-!
+## §8 revisited: where each refusal lives
+
+`docs/STAGE_E_DESIGN.md` §8 asks, as its second owed statement, for a decidable predicate over DTR
+models that implies acceptance. That statement is **false as worded**, and the empty model refutes
+it, which is finding **F52**: `⟨[], []⟩` satisfies all three conjuncts §8 names and is still
+refused, because the guard requires a reactor and an instance.
+
+What the section's own *title* asks for is available, and this is where it is proved. Acceptance
+factors into exactly three conditions — routing resolves, every class's port environment resolves,
+and the guard passes — and **nothing between them can fail**. That last clause is what the site
+totality of the preceding section buys: it is why the middle stage appears in the statement below
+only as a way to name the reactors, and never as something a caller has to show succeeds.
+
+This replaces stage D's `compileGeneralModel_ok_iff_selfSendOnly`, which stage E deleted when
+self-sends stopped being the only translatable shape. It is stronger than the sufficient condition
+§8 asked for, being a biconditional, and it is honest about the guard rather than silent on it: the
+third condition is stated on the assembled program, so the F37 weakening is visible in the statement
+instead of hidden behind it.
+-/
+
+/--
+Inversion for one class: if a class compiled, its port environment resolved.
+
+The converse of `compileGeneralReactiveClass_ok`, and it holds for a structural reason rather than a
+semantic one. `compileGeneralReactiveClass` matches on `outputPortEnvOf` first and propagates its
+refusal unchanged — which is what `compileGeneralReactiveClass_error_env` records — so an `.ok`
+result cannot have been reached through a failing environment.
+-/
+theorem compileGeneralReactiveClass_ok_env
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {compiled : LF.GeneralReactor}
+    (hCompiled :
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok compiled) :
+    ∃ env,
+      outputPortEnvOf
+          classes
+          reactiveClass =
+        .ok env := by
+  cases hEnv :
+      outputPortEnvOf
+        classes
+        reactiveClass with
+  | error message =>
+      rw [
+        compileGeneralReactiveClass_error_env
+          hEnv
+      ] at hCompiled
+      simp at hCompiled
+  | ok env =>
+      exact ⟨env, rfl⟩
+
+/--
+Inversion for a list of classes: if the list compiled, every class in it resolved.
+
+The mirror of `exists_compileGeneralReactiveClasses`, and stated the same way — hypothesis as an
+arrow, class table a separate parameter from the traversed list — so that the two compose into a
+biconditional without either being reshaped at the use site. The induction needs only the two
+propagation lemmas: a head refusal and a tail refusal each refuse the whole list, so an `.ok` list
+rules both out.
+-/
+theorem compileGeneralReactiveClasses_ok_env
+    (allClasses : List DTR.GeneralReactiveClass)
+    (routes : List GeneralRoute)
+    (classList : List DTR.GeneralReactiveClass) :
+    (∃ compiled,
+        compileGeneralReactiveClasses
+            allClasses
+            routes
+            classList =
+          .ok compiled) →
+    ∀ reactiveClass ∈ classList,
+      ∃ env,
+        outputPortEnvOf
+            allClasses
+            reactiveClass =
+          .ok env := by
+  induction classList with
+  | nil =>
+      intro _ reactiveClass hMember
+      simp at hMember
+  | cons head remaining inductionHypothesis =>
+      intro hCompiled reactiveClass hMember
+      obtain ⟨compiled, hCompiled⟩ := hCompiled
+      cases hHead :
+          compileGeneralReactiveClass
+            allClasses
+            routes
+            head with
+      | error message =>
+          rw [
+            compileGeneralReactiveClasses_cons_error_head
+              hHead
+          ] at hCompiled
+          simp at hCompiled
+      | ok compiledHead =>
+          cases hRemaining :
+              compileGeneralReactiveClasses
+                allClasses
+                routes
+                remaining with
+          | error message =>
+              rw [
+                compileGeneralReactiveClasses_cons_error_tail
+                  hHead
+                  hRemaining
+              ] at hCompiled
+              simp at hCompiled
+          | ok compiledRemaining =>
+              rcases List.mem_cons.mp hMember with
+                hHeadCase | hTailCase
+              · subst hHeadCase
+                exact
+                  compileGeneralReactiveClass_ok_env
+                    hHead
+              · exact
+                  inductionHypothesis
+                    ⟨compiledRemaining, hRemaining⟩
+                    reactiveClass
+                    hTailCase
+
+/--
+Acceptance, factored: routing, resolution, guard — and nothing in between.
+
+The theorem `docs/STAGE_E_DESIGN.md` §8 should have asked for, in place of the predicate finding F52
+refutes. Read left to right it localises every refusal `compileGeneralModel` can produce to one of
+two sites: either `routesOf` refused, or some class's `outputPortEnvOf` refused, or the assembled
+program failed the guard. Read right to left it says those three are jointly sufficient.
+
+The middle stage is absent from the right-hand side as an obligation and present only as a binder,
+and that asymmetry is the content. `exists_compileGeneralReactiveClasses` says a resolved
+environment is all class compilation ever needs, so no caller has to show it succeeds, while
+`compileGeneralReactiveClasses_ok_env` says nothing else could have made it succeed. Everything
+between resolution and the guard is total, which is what the site-totality induction was for.
+
+What this does **not** say is that a model in the paper's DTR fragment is accepted. The third
+condition is a hypothesis about the translation's own output rather than a property of the source,
+and F32/F43 exhibit a legal DTR model whose assembled program fails the guard. Nor can that
+condition be decided from the source by inspection, because collision of generated names is not a
+syntactic property of a model (F34, F42). The gap is named here rather than papered over: no
+sufficient condition for acceptance can omit the guard.
+-/
+theorem compileGeneralModel_ok_iff
+    (model : DTR.GeneralModel) :
+    (∃ program,
+        compileGeneralModel model =
+          .ok program) ↔
+      ∃ routes,
+        routesOf model =
+            .ok routes ∧
+          (∀ reactiveClass ∈ model.classes,
+              ∃ env,
+                outputPortEnvOf
+                    model.classes
+                    reactiveClass =
+                  .ok env) ∧
+            ∀ compiledReactors,
+              compileGeneralReactiveClasses
+                    model.classes
+                    routes
+                    model.classes =
+                  .ok compiledReactors →
+                (assembleGeneralProgram
+                    model
+                    routes
+                    compiledReactors).wellFormed =
+                  true := by
+  constructor
+
+  · intro hAccepted
+    obtain ⟨program, hProgram⟩ := hAccepted
+    cases hRoutes :
+        routesOf model with
+    | error message =>
+        rw [
+          compileGeneralModel_error_routes
+            hRoutes
+        ] at hProgram
+        simp at hProgram
+    | ok routes =>
+        refine
+          ⟨routes,
+           rfl,
+           ?_,
+           ?_⟩
+
+        · cases hClasses :
+              compileGeneralReactiveClasses
+                model.classes
+                routes
+                model.classes with
+          | error message =>
+              rw [
+                compileGeneralModel_error_classes
+                  hRoutes
+                  hClasses
+              ] at hProgram
+              simp at hProgram
+          | ok compiledReactors =>
+              exact
+                compileGeneralReactiveClasses_ok_env
+                  model.classes
+                  routes
+                  model.classes
+                  ⟨compiledReactors, hClasses⟩
+
+        · intro compiledReactors hClasses
+          rw [
+            compileGeneralModel_ok
+              hRoutes
+              hClasses
+          ] at hProgram
+          exact
+            guardGeneralProgram_wellFormed
+              hProgram
+
+  · intro hFactored
+    obtain
+        ⟨routes,
+         hRoutes,
+         hEnvironments,
+         hGuard⟩ :=
+      hFactored
+    obtain ⟨compiledReactors, hClasses⟩ :=
+      exists_compileGeneralReactiveClasses
+        model.classes
+        routes
+        model.classes
+        hEnvironments
+    refine
+      ⟨assembleGeneralProgram
+         model
+         routes
+         compiledReactors,
+       ?_⟩
+    rw [
+      compileGeneralModel_ok
+        hRoutes
+        hClasses
+    ]
+    exact
+      guardGeneralProgram_of_wellFormed
+        (hGuard
+          compiledReactors
+          hClasses)
+
 end Translation
 end Relico
