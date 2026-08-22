@@ -4402,11 +4402,128 @@ private def sharedTargetAssertions :
     (Translation.guardGeneralProgram
       sharedTargetProgram)
 
+/-!
+## Finding F50's witness: one reaction, one output port, set twice
+
+F48's model is reused rather than a new one built, and that is deliberate. The collision that
+makes two routes share a target endpoint is the *same* collision that makes one reaction set
+one output port twice; a second model would let a future change fix one and leave the other,
+and would hide that both are consequences of one unescaped separator.
+
+What is new is where the assertions look. F48 read the sending class's output port
+*environment* and the emitted *connection* list, both program-level objects. `docs/STAGE_E_DESIGN.md`
+§10.2's sentence — *"no reaction of an emitted reactor sets one output port twice"* — is not a
+claim about either: it is a claim about the statement list inside one compiled reaction body,
+and this is the only block in the file that opens one.
+
+Which reaction it is carries the finding, and `LF.GeneralReactor` names it for us: the structure
+has no flat `reactions` list at all, but a `startupReaction` field beside a `messageReactions`
+list, so the doubling reaction is projected rather than searched for. The colliding sends sit in
+`aliasedProbeClass`'s *constructor*, which is exactly what compiles to `startupReaction`; any
+restatement of §10.2 scoped to message-server reactions would be true and would miss this
+entirely.
+-/
+
+/--
+The emitted `startup` reaction of the aliasing sender, with its reactor, or the step that
+refused.
+
+The reactor comes back alongside the reaction because `LF.GeneralReactor.reactionWellFormed`
+resolves a body against its reactor's declarations, so the second assertion below cannot ask
+its question with the reaction alone.
+-/
+private def aliasedEndpointStartup :
+    Except String (LF.GeneralReactor × LF.GeneralReaction) :=
+  match assembledAliasedEndpointProgram with
+
+  | .error diagnostic =>
+      .error
+        ("the aliased-endpoint model did not assemble: " ++
+          diagnostic)
+
+  | .ok program =>
+      match
+          LF.findReactor?
+            program.reactors
+            (Translation.reactorNameFor
+              aliasedProbeClassName) with
+
+      | none =>
+          .error
+            "the aliasing sender emitted no reactor"
+
+      | some reactor =>
+          .ok
+            (reactor, reactor.startupReaction)
+
+/--
+The output ports the sender's startup reaction sets, in order, repeats included.
+-/
+private def aliasedEndpointStartupSetPorts :
+    String :=
+  match aliasedEndpointStartup with
+
+  | .error diagnostic =>
+      diagnostic
+
+  | .ok (_, reaction) =>
+      String.intercalate
+        " | "
+        ((LF.setPortNamesOfBody
+          reaction.body).map
+          (fun port =>
+            port.value))
+
+/--
+Whether that same reaction satisfies `LF.GeneralReactor.reactionWellFormed`.
+-/
+private def aliasedEndpointStartupReactionWellFormed :
+    Bool :=
+  match aliasedEndpointStartup with
+
+  | .error _ =>
+      false
+
+  | .ok (reactor, reaction) =>
+      reactor.reactionWellFormed
+        reaction
+
+/--
+Finding F50, asserted rather than argued: §10.2's owed theorem is false unqualified, and the
+counterexample is one reaction of one emitted reactor.
+
+Two assertions, and the second is what keeps the attribution narrow — the same move
+`ALIASED_ENDPOINT_CONNECTIONS_WELLFORMED` makes for F48. `reactionWellFormed` is expected to
+**accept** this reaction: its `.setPort` arm asks that the port be *declared* on the reactor
+with a matching payload arity, and `reportToToHub` is declared, twice over. So the repetition
+is invisible to every clause that inspects a reaction, and the refusal F48 already asserts
+comes from `declaredNames` and from the connection list — never from the body that does the
+doubling.
+
+If that second assertion ever reports `false`, it is not a regression to paper over: it would
+mean some clause of `LF.GeneralWellFormed` had started catching the repetition, which is news,
+and the honest response is to find which clause and rewrite F50 rather than adjust the
+expected value.
+-/
+private def perReactionSetPortAssertions :
+    IO Unit := do
+
+  expectString
+    "ALIASED_SETPORT_TWICE_IN_ONE_REACTION"
+    "reportToToHub | reportToToHub"
+    aliasedEndpointStartupSetPorts
+
+  expectBool
+    "ALIASED_SETPORT_REACTION_STILL_WELLFORMED"
+    true
+    aliasedEndpointStartupReactionWellFormed
+
 /--
 Run every assertion: 34 printing, then 10 well-formedness, then 11 translation, then
 3 for the port-name collisions F34 and F42, then 5 for finding F32's counterexample,
 then 7 for the routed model, then 6 for the refusals routing reaches, then 6 for finding
-F48's aliased endpoints, then 4 for finding F49's shared target endpoint, 86 in all.
+F48's aliased endpoints, then 4 for finding F49's shared target endpoint, then 2 for
+finding F50's doubled set port, 88 in all.
 
 The count is stated here because `frontend/check-general-lean.sh` compares the
 number of `PASS_` lines against a literal. There are no fixtures to count, so a
@@ -4465,6 +4582,17 @@ the other eight, so it must **stay** in `wellFormed`, and independence is a stro
 keep it than the absence of a construction proof was. The ninth block is also the only one whose
 program is built by hand *for a clause*, rather than to be printed or to be refused — the eighth
 block's model has to go through the translation to be a witness, and this one has to not.
+
+Then **86 to 88**, and this pair is the first in stage E to be added because a theorem the
+*design document* owed was refuted, rather than one a docstring claimed. `docs/STAGE_E_DESIGN.md`
+§10.2 owes *"no reaction of an emitted reactor sets one output port twice"* and derives it from
+sites being addresses; distinct sites do not give distinct names, so the sentence is false and
+`ALIASED_SETPORT_TWICE_IN_ONE_REACTION` is one emitted reaction that breaks it. That is finding
+F50. The tenth block is the only one that reads inside a compiled *reaction body* — every block
+above it stops at the program, the reactor, or a diagnostic's text, and none of them can see a
+statement list at all. It is also the second block to reuse an earlier block's model on purpose:
+F48's collision and F50's are one collision seen at two depths, and splitting the model would
+let a repair fix one and silently leave the other.
 -/
 def runGeneralLfPrinterTests :
     IO UInt32 := do
@@ -4487,6 +4615,8 @@ def runGeneralLfPrinterTests :
     aliasedEndpointAssertions
 
     sharedTargetAssertions
+
+    perReactionSetPortAssertions
 
     IO.println
       "GENERAL_LF_PRINTER_TESTS_OK"

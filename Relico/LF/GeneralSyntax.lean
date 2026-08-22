@@ -889,5 +889,48 @@ def reactorOfInstance?
 
 end GeneralProgram
 
+/--
+The output ports one reaction body sets, in source order, **with repeats preserved**.
+
+The repeats are the entire reason this function exists, so it is not a `filterMap` composed
+with a dedup and it must never become one. `docs/STAGE_E_DESIGN.md` §10.2 owes a theorem
+saying *"no reaction of an emitted reactor sets one output port twice"*; that sentence is a
+claim about `Nodup` of exactly this list, and it cannot be stated without a list that would
+show the repeat if there were one.
+
+Explicit recursion over all three `LF.GeneralStmt` constructors rather than
+`List.filterMap` with a pattern-matching function, for the two reasons
+`Translation.compileGeneralBody` gives for its own shape: every equation below then holds by
+`rfl`, so the induction in `Translation.compileGeneralBody_setPortNames_nodup` rewrites with
+`rfl` lemmas instead of unfolding a combinator; and this development depends on no library
+function whose name has churned across Lean releases, which `List.filterMap`'s neighbours
+`flatMap` and `flatten` both have. Writing the `.assign` and `.schedule` arms out instead of
+using a catch-all is deliberate too: a fourth statement constructor should break this
+function loudly rather than be silently classified as setting nothing.
+
+**No clause of `LF.GeneralWellFormed` looks at this list, and that is the finding rather than
+an oversight.** `LF.GeneralReactor.stmtWellFormed`'s `.setPort` arm asks that the port be
+*declared* on the reactor with a matching payload arity — not that it be set once — which is
+the same shape as `connectionsWellFormed` asking that an endpoint be declared rather than
+declared once (F48). So `Nodup` of this list is a property the stage E guard does not check,
+and finding F50 records that it is also not true in general.
+-/
+def setPortNamesOfBody :
+    LF.GeneralBody →
+    List PortName
+
+  | [] =>
+      []
+
+  | .assign _ _ :: remaining =>
+      setPortNamesOfBody remaining
+
+  | .schedule _ _ _ :: remaining =>
+      setPortNamesOfBody remaining
+
+  | .setPort port _ :: remaining =>
+      port ::
+        setPortNamesOfBody remaining
+
 end LF
 end Relico

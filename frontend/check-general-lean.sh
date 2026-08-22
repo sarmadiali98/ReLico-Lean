@@ -183,8 +183,8 @@ echo "=== the general LF printer, well-formedness and translation assertions"
 # 34 printing, 10 well-formedness, 11 translation, 3 for the port-name collisions F34
 # and F42, 5 for finding F32's counterexample, 7 for the routed model, 6 for the
 # refusals routing reaches, 6 for finding F48's aliased endpoints, 4 for finding F49's
-# shared target endpoint. Nine blocks, 86, the same breakdown the runner's own
-# docstring gives.
+# shared target endpoint, 2 for finding F50's doubled set port. Ten blocks, 88, the same
+# breakdown the runner's own docstring gives.
 #
 # That enumeration was itself stale until 2026-08-22, when it listed six blocks summing
 # to 70 under a literal reading 82: F47's six and F48's six had been added to the
@@ -195,7 +195,9 @@ echo "=== the general LF printer, well-formedness and translation assertions"
 # against the literal finds a drift; do that whenever the literal moves. F49's four are
 # the first block added after that repair, and the list, the paragraph below, the runner
 # docstring and the literal all moved in the one edit -- which is the convention holding
-# once, not yet a convention.
+# once, not yet a convention. F50's two are the second block added after the repair and moved
+# the same four places in one edit, so the convention has now held twice. What would falsify
+# it is a count moving without this list moving with it, which is what to look for first.
 #
 # Stage C ran 25, in two blocks; the third block is the one that mentions
 # `Relico.Translation`, so a translation that stopped being called would drop this
@@ -228,8 +230,14 @@ echo "=== the general LF printer, well-formedness and translation assertions"
 # block is the only one whose program is built by hand *for a clause* rather than to be printed
 # or translated, and the only place the guard's diagnostic is pinned with exactly one clause
 # failing -- the eighth pins it with two, and between them they say the explanation enumerates
-# the failing clauses rather than the first of them.
-EXPECTED_PRINTER_ASSERTIONS=86
+# the failing clauses rather than the first of them. Then up to 88 for finding F50's two: the
+# same aliased model as the eighth block, read one level deeper, where a single emitted startup
+# reaction sets `reportToToHub` twice and refutes the theorem `docs/STAGE_E_DESIGN.md` §10.2
+# owed unqualified. This tenth block is the only one that opens a compiled reaction *body*, so
+# it is the only place a per-reaction property can be checked at all, and its second assertion
+# deliberately expects `reactionWellFormed` to still accept that body -- a drop there would mean
+# some clause had begun catching the repetition, which would be news rather than a regression.
+EXPECTED_PRINTER_ASSERTIONS=88
 
 set +e
 PRINTER_OUTPUT="$(

@@ -1,9 +1,9 @@
-# Stage E findings — F34 through F49
+# Stage E findings — F34 through F50
 
 **Why this file exists.**
 Stage E added external sends, ports and connections to the general translator, and in doing so it
-produced sixteen findings about *this repository* — its own code, its own design document, and its own
-test harness. They are numbered F34 through F49, continuing the single `F` series that
+produced seventeen findings about *this repository* — its own code, its own design document, and its own
+test harness. They are numbered F34 through F50, continuing the single `F` series that
 `docs/STAGE_B_FINDINGS.md` opened at F1–F20 and `docs/STAGE_D_FINDINGS.md` carried to F21–F33.
 
 The `F` series and the `P` series answer different questions, and keeping them apart is the whole
@@ -1035,6 +1035,81 @@ measured for the multiple case and, until this run, merely assumed for the singl
 > **Fixed in task #58**, which is also what makes the fix checkable: the paragraph now states F49's
 > independence result and points at `assembleGeneralProgram_targetEndpointsUnique`, a theorem in the build
 > closure, so the docstring's claim is now falsifiable by the compiler rather than by a reader.
+
+---
+
+## F50 — the design document owes a theorem that is false, and the counterexample was already in the test suite
+
+**The claim.** `docs/STAGE_E_DESIGN.md` §10.2 lists among stage E's owed theorems that **"no reaction of
+an emitted reactor sets one output port twice."** Its stated argument is short enough to quote whole: *"It
+follows from the site being an address (§7.1): two `setPort`s in one compiled body come from two statements
+at two indices of one body, so their sites differ, so `outputPortEnvOf` gave them different port names **or
+refused**."*
+
+**The premise is true and the conclusion does not follow.** Sites do differ — that part of §7.1 holds, and
+it is worth saying because the first refutation drafted here attacked the wrong step. What fails is
+*"so `outputPortEnvOf` gave them different port names"*. Distinct sites are distinct *arguments*, and
+`outputPortNameFor` is not injective on its arguments: it concatenates message, `To`, capitalized known
+rebec and site suffix without escaping the separator, so `reportTo` with `hub` and `report` with `toHub`
+both spell `reportToToHub` (F34), and the suffix is empty for a once-sent pair so neither send carries an
+ordinal. Two distinct sites therefore receive two distinct arguments and are handed **one** port name.
+
+**The `or refused` hedge does not rescue it.** The refusal is a check on the assembled program, and the
+model below *reaches assembly* — it has to route and compile to be a witness at all. What the guard
+refuses is the whole program, after the reaction bodies have already been built with the repetition in
+them; a refused program is not a program in which no reaction sets a port twice.
+
+**The counterexample needed no new model.** It is F48's, at
+`frontend/lean-bridge/GeneralLfPrinterTestMain.lean`'s `aliasedProbeClass`, whose *constructor* body holds
+both colliding sends. A constructor that sends externally is compiled into `reaction(startup)`, so one
+emitted startup reaction sets `reportToToHub` twice, and
+`ALIASED_SETPORT_TWICE_IN_ONE_REACTION` pins that reaction's set-port list as
+`"reportToToHub | reportToToHub"`. This is F48's collision seen one level deeper: the same unescaped
+separator produces the shared *target endpoint* F48 measured and the doubled *set port* measured here, and
+the tenth assertion block reuses F48's model rather than building a second so that a future repair cannot
+fix one and silently leave the other.
+
+**Which reaction it is carries the finding.** The colliding sends are in the constructor, not in a message
+server, so the reaction that doubles is `startup`. Any restatement of §10.2 scoped to message-server
+reactions would be true of this model and would miss the counterexample entirely — which is why the
+assertion looks the reaction up by name instead of taking the reactor's first.
+
+**Nothing in `LF.GeneralWellFormed` catches the repetition, and that is the structural half.**
+`LF.GeneralReactor.stmtWellFormed`'s `.setPort` arm asks that the port be *declared* on the reactor with a
+matching payload arity — not that it be set once. So the doubled body is accepted by every clause that
+inspects a reaction, and `ALIASED_SETPORT_REACTION_STILL_WELLFORMED` asserts exactly that, expecting
+`true`. This is the same shape as F48's `ALIASED_ENDPOINT_CONNECTIONS_WELLFORMED`: `connectionsWellFormed`
+asks that an endpoint be declared, not declared once. Both are the neighbouring clause that still holds,
+and both exist to keep the attribution narrow — F48's model is refused, but it is refused by
+`declaredNames` and by the connection list, never by the body that does the doubling.
+
+**What replaces the owed theorem.** `Translation.compileGeneralBody_setPortNames_nodup` in
+`Relico/Translation/GeneralBasic.lean` proves the guard-relative version: **if** the routing table gives
+distinct sites of one body distinct output port names, **then** the compiled body's set-port list is
+`Nodup`. The hypothesis is stated over sites of one `bodyKey` rather than as `Nodup` of the whole
+environment, because that is all the induction consumes and it is the form a caller holding a per-class
+guard can supply. `LF.setPortNamesOfBody` is the list the statement is about, and it preserves repeats on
+purpose — a `filterMap` composed with a dedup could not express the property at all.
+
+So this property joins `targetEndpointsUnique` in the category F48 and F49 established: **earned by a
+check on generated names, never by the naming rule.** That is now three of stage E's port-level guarantees
+with the same provenance, and the pattern is worth stating as a design fact rather than rediscovering it a
+fourth time.
+
+**Why this instance is not F44's or F47's root cause.** Those were docstrings claiming that coverage
+existed. F48 was a docstring claiming a *theorem* was deferred when it was false. This one is a **design
+document** listing an obligation that cannot be discharged — and the difference matters operationally,
+because a docstring is read by whoever edits the function while a design document's owed-theorem list is
+read by whoever plans the next commit. An impossible entry on that list does not merely mislead; it
+schedules work that will fail, and it did: §10.2 is where task #60 came from.
+
+**Disposition, and what is deliberately not done.** The guard is *not* strengthened and the port-naming
+rule of P20 is *not* reopened; P20 is settled and `lfc`-accepted, and the collision is refused rather than
+prevented by design. §10.2's own text still carries the false argument, and is corrected when that document
+is next opened rather than as a side effect of a proof commit — the same convention closing item 13 records
+for `STAGE_E_DESIGN.md:633` and `:891`, and this entry is the pointer that convention relies on. §10.2's
+reachability obligation for a class that sends one message twice to one rebec is unaffected by any of this
+and remains task #51's.
 
 ---
 

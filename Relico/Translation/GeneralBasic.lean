@@ -5334,5 +5334,540 @@ theorem exists_compileGeneralReactiveClasses
            hClass
            hRemaining⟩
 
+/--
+The `cons` case of `compileGeneralBody`, read backwards.
+
+The three equations near `compileGeneralBody` go from the parts to the whole. Every induction
+that reasons about a body the translator *already* compiled needs the other direction, because
+what such a proof holds is the hypothesis that the whole call succeeded.
+
+Derived from those three equations by case analysis rather than by unfolding
+`compileGeneralBody`, and the difference matters: unfolding exposes the shape of the match the
+equation compiler generated, which is not part of this function's interface and has changed
+under us before. The equations are the interface, and this lemma keeps them the only one.
+-/
+theorem compileGeneralBody_cons_ok_inversion
+    {env : GeneralOutputPortEnv}
+    {bodyKey : GeneralBodyKey}
+    {index : Nat}
+    {statement : DTR.GeneralStmt}
+    {remaining : DTR.GeneralBody}
+    {compiled : LF.GeneralBody}
+    (hCompiled :
+      compileGeneralBody
+          env
+          bodyKey
+          index
+          (statement :: remaining) =
+        .ok compiled) :
+    ∃ (compiledStatement : LF.GeneralStmt)
+      (compiledRemaining : LF.GeneralBody),
+      compileGeneralStmt
+          env
+          bodyKey
+          index
+          statement =
+        .ok compiledStatement ∧
+      compileGeneralBody
+          env
+          bodyKey
+          (index + 1)
+          remaining =
+        .ok compiledRemaining ∧
+      compiled =
+        compiledStatement ::
+          compiledRemaining := by
+
+  cases hStatement :
+      compileGeneralStmt
+        env
+        bodyKey
+        index
+        statement with
+
+  | error message =>
+      rw [
+        compileGeneralBody_cons_error_head
+          hStatement
+      ] at hCompiled
+
+      simp at hCompiled
+
+  | ok compiledStatement =>
+
+      cases hRemaining :
+          compileGeneralBody
+            env
+            bodyKey
+            (index + 1)
+            remaining with
+
+      | error message =>
+          rw [
+            compileGeneralBody_cons_error_tail
+              hStatement
+              hRemaining
+          ] at hCompiled
+
+          simp at hCompiled
+
+      | ok compiledRemaining =>
+          rw [
+            compileGeneralBody_cons_ok
+              hStatement
+              hRemaining
+          ] at hCompiled
+
+          injection hCompiled with hEqual
+
+          -- `rfl`, not `hStatement` and `hRemaining`, and the reason is worth stating
+          -- because it cost a build: `cases h : e` generalizes `e` in the *goal* as well
+          -- as recording the equation. Both compilation components of the existential
+          -- mention the two scrutinees, so by here they have already been rewritten to
+          -- `Except.ok _ = Except.ok _` and close by reflexivity. The two hypotheses are
+          -- still needed -- they are what the `rw`s above consume -- but passing them
+          -- here is an application type mismatch, since they still speak about the
+          -- un-generalized calls.
+          exact
+            ⟨compiledStatement,
+             compiledRemaining,
+             rfl,
+             rfl,
+             hEqual.symm⟩
+
+/--
+A compiled `.setPort` came from an external send at *this* site, and it carries the port name
+the routing table put there.
+
+The only arm of `compileGeneralStmt` that emits `.setPort` is the external send, and that arm
+takes its port name from `generalEntryAtSite?` at the index it was handed. That is the whole
+content of this lemma, and it is what lets an induction over a *compiled* body talk about
+sites at all: a `setPort` in the output is a witness that the environment has an entry at that
+index, so the compiled body and the routing table can be compared without re-deriving either.
+
+Both the environment and the body key are fixed, because both are fixed along
+`compileGeneralBody`'s recursion and only the index moves.
+-/
+private theorem compileGeneralStmt_setPort_inversion
+    {env : GeneralOutputPortEnv}
+    {bodyKey : GeneralBodyKey}
+    {index : Nat}
+    {statement : DTR.GeneralStmt}
+    {port : PortName}
+    {arguments : List LF.GeneralExpr}
+    (hStatement :
+      compileGeneralStmt
+          env
+          bodyKey
+          index
+          statement =
+        .ok
+          (.setPort
+            port
+            arguments)) :
+    ∃ (entry : GeneralOutputPortEntry),
+      generalEntryAtSite?
+          env
+          {
+            body :=
+              bodyKey
+
+            index :=
+              index
+          } =
+        some entry ∧
+      entry.outputPort = port := by
+
+  cases statement with
+
+  | assign target value =>
+      simp [
+        compileGeneralStmt
+      ] at hStatement
+
+  | send target message sendArguments delay =>
+
+      cases target with
+
+      | selfTarget =>
+          simp [
+            compileGeneralStmt
+          ] at hStatement
+
+      | knownRebec rebec =>
+
+          cases hEntry :
+              generalEntryAtSite?
+                env
+                {
+                  body :=
+                    bodyKey
+
+                  index :=
+                    index
+                } with
+
+          | none =>
+              simp [
+                compileGeneralStmt,
+                hEntry
+              ] at hStatement
+
+          | some entry =>
+              simp only [
+                compileGeneralStmt,
+                hEntry,
+                Except.ok.injEq,
+                LF.GeneralStmt.setPort.injEq
+              ] at hStatement
+
+              -- `rfl` rather than `hEntry`, for the reason given at the end of
+              -- `compileGeneralBody_cons_ok_inversion` above: the goal's lookup was
+              -- generalized by the `cases hEntry :` that produced this branch.
+              exact
+                ⟨entry,
+                 rfl,
+                 hStatement.left⟩
+
+/--
+Every port a compiled body sets was put there by a routing entry at some site of this body,
+at or after the index the compilation started from.
+
+The `index ≤ site` half is what makes this usable for a `Nodup` argument and it is the reason
+the lemma is phrased over a *suffix* rather than a whole body. Walking `compileGeneralBody`'s
+recursion, the head statement is at `index` and everything the tail contributes comes from
+`index + 1` or later; so a port set by the head cannot also be set by the tail unless two
+distinct sites carry one port name. That is exactly the hypothesis the theorem below takes,
+and exactly what F48's model denies.
+-/
+private theorem compileGeneralBody_setPortNames_provenance
+    (env : GeneralOutputPortEnv)
+    (bodyKey : GeneralBodyKey) :
+    ∀ (statements : DTR.GeneralBody)
+      (index : Nat)
+      (compiled : LF.GeneralBody),
+      compileGeneralBody
+          env
+          bodyKey
+          index
+          statements =
+        .ok compiled →
+      ∀ (port : PortName),
+        port ∈
+          LF.setPortNamesOfBody
+            compiled →
+        ∃ (site : Nat)
+          (entry : GeneralOutputPortEntry),
+          index ≤ site ∧
+          generalEntryAtSite?
+              env
+              {
+                body :=
+                  bodyKey
+
+                index :=
+                  site
+              } =
+            some entry ∧
+          entry.outputPort = port := by
+
+  intro statements
+  induction statements with
+
+  | nil =>
+      intro index compiled hCompiled port hPort
+
+      rw [
+        compileGeneralBody_nil
+      ] at hCompiled
+
+      injection hCompiled with hEqual
+
+      subst hEqual
+
+      simp [
+        LF.setPortNamesOfBody
+      ] at hPort
+
+  | cons statement remaining inductionHypothesis =>
+      intro index compiled hCompiled port hPort
+
+      obtain
+          ⟨compiledStatement,
+           compiledRemaining,
+           hStatement,
+           hRemaining,
+           hShape⟩ :=
+        compileGeneralBody_cons_ok_inversion
+          hCompiled
+
+      subst hShape
+
+      cases compiledStatement with
+
+      | assign _ _ =>
+
+          simp only [
+            LF.setPortNamesOfBody
+          ] at hPort
+
+          obtain ⟨site, entry, hSite, hEntry, hPortName⟩ :=
+            inductionHypothesis
+              (index + 1)
+              compiledRemaining
+              hRemaining
+              port
+              hPort
+
+          exact
+            ⟨site,
+             entry,
+             by omega,
+             hEntry,
+             hPortName⟩
+
+      | schedule _ _ _ =>
+
+          simp only [
+            LF.setPortNamesOfBody
+          ] at hPort
+
+          obtain ⟨site, entry, hSite, hEntry, hPortName⟩ :=
+            inductionHypothesis
+              (index + 1)
+              compiledRemaining
+              hRemaining
+              port
+              hPort
+
+          exact
+            ⟨site,
+             entry,
+             by omega,
+             hEntry,
+             hPortName⟩
+
+      | setPort statementPort _ =>
+
+          simp only [
+            LF.setPortNamesOfBody,
+            List.mem_cons
+          ] at hPort
+
+          cases hPort with
+
+          | inl hHere =>
+
+              obtain ⟨entry, hEntry, hPortName⟩ :=
+                compileGeneralStmt_setPort_inversion
+                  hStatement
+
+              exact
+                ⟨index,
+                 entry,
+                 by omega,
+                 hEntry,
+                 hPortName.trans
+                   hHere.symm⟩
+
+          | inr hThere =>
+
+              obtain ⟨site, entry, hSite, hEntry, hPortName⟩ :=
+                inductionHypothesis
+                  (index + 1)
+                  compiledRemaining
+                  hRemaining
+                  port
+                  hThere
+
+              exact
+                ⟨site,
+                 entry,
+                 by omega,
+                 hEntry,
+                 hPortName⟩
+
+/--
+§10.2's theorem, in the strongest form that is true: **if** the routing table gives distinct
+sites of one body distinct output port names, **then** no compiled reaction body sets one
+output port twice.
+
+`docs/STAGE_E_DESIGN.md` §10.2 asks for the unconditional sentence — *"no reaction of an
+emitted reactor sets one output port twice"* — and argues it *"follows from the site being an
+address (§7.1): two `setPort`s in one compiled body come from two statements at two indices of
+one body, so their sites differ, so `outputPortEnvOf` gave them different port names **or
+refused**."*
+
+**The inference does not go through, and the hypothesis below is exactly the step it skips.**
+Sites differing is the premise, not the conclusion: `outputPortNameFor` concatenates message,
+`To`, capitalized known rebec and site suffix without escaping the separator, so two distinct
+sites can be handed distinct arguments and still produce one name (F34). The `or refused`
+hedge does not rescue the argument either, because the refusal is a check on the *assembled
+program*, and F48's model reaches assembly — it routes and compiles, which is what makes it a
+witness at all. Finding F50 records the refutation and
+`ALIASED_SETPORT_TWICE_IN_ONE_REACTION` in `frontend/lean-bridge/GeneralLfPrinterTestMain.lean`
+is the witness that a single emitted reaction really does set one port twice.
+
+So the property is *guard-relative*, in the same way and for the same reason as
+`assembleGeneralProgram_targetEndpointsUnique`: what earns it is a check on generated names,
+never the naming rule. The hypothesis is stated over sites of one `bodyKey` rather than as
+`Nodup` of the whole environment's port names, because that is all the induction consumes and
+it is the form a caller holding a per-class guard can actually supply.
+-/
+theorem compileGeneralBody_setPortNames_nodup
+    (env : GeneralOutputPortEnv)
+    (bodyKey : GeneralBodyKey)
+    (hDistinctSites :
+      ∀ (siteLeft siteRight : Nat)
+        (entryLeft entryRight : GeneralOutputPortEntry),
+        generalEntryAtSite?
+            env
+            {
+              body :=
+                bodyKey
+
+              index :=
+                siteLeft
+            } =
+          some entryLeft →
+        generalEntryAtSite?
+            env
+            {
+              body :=
+                bodyKey
+
+              index :=
+                siteRight
+            } =
+          some entryRight →
+        entryLeft.outputPort = entryRight.outputPort →
+          siteLeft = siteRight) :
+    ∀ (statements : DTR.GeneralBody)
+      (index : Nat)
+      (compiled : LF.GeneralBody),
+      compileGeneralBody
+          env
+          bodyKey
+          index
+          statements =
+        .ok compiled →
+      (LF.setPortNamesOfBody
+        compiled).Nodup := by
+
+  intro statements
+  induction statements with
+
+  | nil =>
+      intro index compiled hCompiled
+
+      rw [
+        compileGeneralBody_nil
+      ] at hCompiled
+
+      injection hCompiled with hEqual
+
+      subst hEqual
+
+      simp [
+        LF.setPortNamesOfBody
+      ]
+
+  | cons statement remaining inductionHypothesis =>
+      intro index compiled hCompiled
+
+      obtain
+          ⟨compiledStatement,
+           compiledRemaining,
+           hStatement,
+           hRemaining,
+           hShape⟩ :=
+        compileGeneralBody_cons_ok_inversion
+          hCompiled
+
+      subst hShape
+
+      cases compiledStatement with
+
+      | assign _ _ =>
+          simp only [
+            LF.setPortNamesOfBody
+          ]
+
+          exact
+            inductionHypothesis
+              (index + 1)
+              compiledRemaining
+              hRemaining
+
+      | schedule _ _ _ =>
+          simp only [
+            LF.setPortNamesOfBody
+          ]
+
+          exact
+            inductionHypothesis
+              (index + 1)
+              compiledRemaining
+              hRemaining
+
+      | setPort statementPort _ =>
+          simp only [
+            LF.setPortNamesOfBody
+          ]
+
+          constructor
+
+          · intro other hOther hEqual
+
+            have hMember :
+                statementPort ∈
+                  LF.setPortNamesOfBody
+                    compiledRemaining := by
+              rw [hEqual]
+              exact hOther
+
+            obtain
+                ⟨site,
+                 entry,
+                 hSite,
+                 hEntry,
+                 hPortName⟩ :=
+              compileGeneralBody_setPortNames_provenance
+                env
+                bodyKey
+                remaining
+                (index + 1)
+                compiledRemaining
+                hRemaining
+                statementPort
+                hMember
+
+            obtain
+                ⟨headEntry,
+                 hHeadEntry,
+                 hHeadPortName⟩ :=
+              compileGeneralStmt_setPort_inversion
+                hStatement
+
+            have hSame :
+                site = index :=
+              hDistinctSites
+                site
+                index
+                entry
+                headEntry
+                hEntry
+                hHeadEntry
+                (hPortName.trans
+                  hHeadPortName.symm)
+
+            omega
+
+          · exact
+              inductionHypothesis
+                (index + 1)
+                compiledRemaining
+                hRemaining
+
 end Translation
 end Relico
