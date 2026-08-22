@@ -237,7 +237,12 @@ echo "=== the general LF printer, well-formedness and translation assertions"
 # it is the only place a per-reaction property can be checked at all, and its second assertion
 # deliberately expects `reactionWellFormed` to still accept that body -- a drop there would mean
 # some clause had begun catching the repetition, which would be news rather than a regression.
-EXPECTED_PRINTER_ASSERTIONS=88
+# Then up to 92 for finding F56's four: the repeated-self-send model, whose one message server
+# owns two logical actions because its two sends share a tag. This eleventh block is the only
+# one added because the *target* mishandled a construct rather than because this repository
+# claimed something false, so it is the only one that no earlier assertion could have been
+# failing on before it existed.
+EXPECTED_PRINTER_ASSERTIONS=92
 
 set +e
 PRINTER_OUTPUT="$(

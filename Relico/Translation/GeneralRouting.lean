@@ -467,6 +467,386 @@ def generalSiteSuffixFor
     toString ordinal
 
 /-!
+## The same numbering, for self-sends
+
+Everything above numbers *external* send sites so that two sends to one (known rebec,
+message) pair get two ports. This section does the same for *self*-sends, so that two sends
+to one message server get two logical actions, and it exists because of a measurement rather
+than for symmetry.
+
+Probe sections 12 to 14 of `tools/paper-measurements/lf_semantics_probe.sh`, against `lfc`
+0.11.0: two `schedule` calls on one logical action at one tag keep only the **last** value,
+with `lfc` exit 0, a clean C++ build, run exit 0 and no diagnostic anywhere (section 12); the
+spacing policy that would repair it, `logical action slot(0ms, 1ms, "defer")`, is rejected
+before code generation because reactor-cpp implements no spacing policy for logical actions
+(section 13); and one reaction triggered by *two* actions both scheduled at one tag fires
+**once**, because a reaction's trigger list is a disjunction rather than a queue (section
+14a). So neither one action for k sends nor one reaction for k actions is faithful, and the
+only shape left standing is one action **and** one reaction per site (section 14b). Recorded
+as finding F56 in `docs/STAGE_E_FINDINGS.md` and in §6.3 of the design.
+
+Two consequences are worth stating where the code is rather than only in the design. The
+first is that this is not a tidiness argument: `self.tick(); self.tick();` in one body
+compiled, ran, exited 0 and executed `tick` once, so the defect this repairs was silent. The
+second is that `selfSendsOfClass` fixes the site ordinals, and section 14b measured that
+reaction *declaration* order decides same-tag firing order for action-triggered reactions as
+it already did for port-triggered ones — so the order of this list is a correctness property
+of the generated program and not a presentation choice.
+-/
+
+/--
+One self-send, addressed.
+
+The same shape as `GeneralExternalSend` with the known rebec dropped, because a self-send
+names no other actor. The delay is kept and, unlike the external case, it stays *in* the
+reaction body: a self-send's `after` becomes the delay argument of the `schedule` call, which
+is the asymmetry §6.3 turns on.
+-/
+structure GeneralSelfSend where
+  site :
+    SendSite
+
+  message :
+    MsgName
+
+  delay :
+    Delay
+
+deriving Repr, DecidableEq, BEq, Inhabited
+
+/--
+The self-sends of one body, from a given starting index.
+
+The mirror of `externalSendsFromIndex`, and the indices agree with it by construction because
+both advance on **every** statement rather than only on the ones they collect. That is what
+lets one site identify one statement whichever list it was drawn from, and it is why the
+`.assign` arm is not a wildcard here either: a stage that adds a statement form gets a build
+error rather than a site numbering that has silently shifted.
+-/
+def selfSendsFromIndex
+    (bodyKey : GeneralBodyKey) :
+    Nat →
+    DTR.GeneralBody →
+    List GeneralSelfSend
+
+  | _, [] =>
+      []
+
+  | index, .assign _ _ :: remaining =>
+      selfSendsFromIndex
+        bodyKey
+        (index + 1)
+        remaining
+
+  | index, .send (.knownRebec _) _ _ _ :: remaining =>
+      selfSendsFromIndex
+        bodyKey
+        (index + 1)
+        remaining
+
+  | index, .send .selfTarget message _ delay :: remaining =>
+      {
+        site :=
+          {
+            body :=
+              bodyKey
+
+            index :=
+              index
+          }
+
+        message :=
+          message
+
+        delay :=
+          delay
+      } ::
+        selfSendsFromIndex
+          bodyKey
+          (index + 1)
+          remaining
+
+/--
+The self-sends of one body.
+-/
+def selfSendsOfBody
+    (bodyKey : GeneralBodyKey)
+    (body : DTR.GeneralBody) :
+    List GeneralSelfSend :=
+  selfSendsFromIndex
+    bodyKey
+    0
+    body
+
+/--
+The self-sends of a list of message servers, in declaration order.
+-/
+def selfSendsOfMessageServers :
+    List DTR.GeneralMessageServer →
+    List GeneralSelfSend
+
+  | [] =>
+      []
+
+  | server :: remaining =>
+      selfSendsOfBody
+          (.messageServer server.name)
+          server.body ++
+        selfSendsOfMessageServers
+          remaining
+
+/--
+Every self-send of one class, in canonical order.
+
+Constructor first, then message servers in declaration order — the same canonical order
+`externalSendsOfClass` fixes, for the same reason it fixes it, and now with a second reason
+that the external case did not have. Ordinals drawn from this list decide action *names*, as
+they decide port names there; but they also decide the order the site reactions are declared
+in, and probe section 14b measured that declaration order is what orders two action-triggered
+reactions firing at one tag. Reordering this list would therefore change the observable
+behaviour of the emitted program, not merely its identifiers.
+-/
+def selfSendsOfClass
+    (reactiveClass : DTR.GeneralReactiveClass) :
+    List GeneralSelfSend :=
+  selfSendsOfBody
+      .constructor
+      reactiveClass.constructor.body ++
+    selfSendsOfMessageServers
+      reactiveClass.messageServers
+
+/--
+How many of these self-sends name the same message.
+
+One field rather than the pair `countSendsTo` tests, so this is a plain `DecidableEq` test
+and needs no `Prod.mk.injEq` to split. The reason its sibling uses a pair — that `DecidableEq`
+and `BEq` are derived independently and nothing bridges them — applies here too and is the
+reason this is `=` rather than `==`.
+-/
+def countSelfSendsTo
+    (message : MsgName) :
+    List GeneralSelfSend →
+    Nat
+
+  | [] =>
+      0
+
+  | send :: remaining =>
+      if
+        send.message =
+          message
+      then
+        1 +
+          countSelfSendsTo
+            message
+            remaining
+      else
+        countSelfSendsTo
+          message
+          remaining
+
+/--
+The 1-based ordinal of one self-send site among its class's sends of the same message.
+
+Counts the sends of `message` lying before `site` and adds one, rather than searching a
+pre-numbered list, and the difference is the whole reason this is written as a count: a count
+is **total**. A site drawn from outside `allSelfSends` counts every matching send and lands one
+past the last real ordinal, so the fallback cannot collide with a site that is really there.
+The alternative — a lookup returning `Option` — would add a refusal cause to a function that
+cannot fail, and would owe a totality induction like the one task #47 needed for ports.
+
+That fallback is unreachable from frontend output anyway, and for a reason already proved
+elsewhere: `DTR.GeneralModel.sendsResolveToMessageServers` sends `.selfTarget` to
+`receivingClass? = some` on the sending class itself, so every self-send's message names a
+message server of its own class and every site in a compiled body is a site this list contains.
+
+`allSelfSends` is the **class's** list, not the body's, so this depends on
+`selfSendsOfClass`'s traversal order: the constructor first, then the message servers in
+declaration order, ascending index within a body. That order is therefore a correctness
+property of the translation rather than a formatting choice, and it is the same order the
+per-site reactions are emitted in — which, measured against `lfc` 0.11.0, is what decides
+which of two same-tag firings runs first.
+-/
+def selfSendOrdinalAt
+    (site : SendSite)
+    (message : MsgName) :
+    List GeneralSelfSend →
+    Nat
+
+  | [] =>
+      1
+
+  | send :: remaining =>
+      if
+        send.site =
+          site
+      then
+        1
+      else
+        if
+          send.message =
+            message
+        then
+          1 +
+            selfSendOrdinalAt
+              site
+              message
+              remaining
+        else
+          selfSendOrdinalAt
+            site
+            message
+            remaining
+
+/--
+The self-send sites of one class that target one message, in the class's traversal order.
+
+Selection, not lookup: the result is a **list**, so nothing here can fail, no `Option` is
+introduced and no refusal cause is added. A well-formed model declares one message server per
+name, so applied to a message server's own name this yields that server's sites and nothing
+else — the guard is what makes that true, and it is stated where it is used rather than assumed
+here.
+
+The order is `selfSendsOfClass`'s: constructor first, then message servers in declaration
+order, ascending statement index within a body. That order is a **correctness property** and
+not a formatting one, because F56 section 14b measured that two reactions triggered at one tag
+fire in reaction *declaration* order. The reactions this list drives are emitted in its order,
+so a body's two sends to one message are delivered in the order the body wrote them.
+
+Recursive rather than `List.filter` for the reason `NameGeneration.lean` gives for avoiding
+`String.capitalize`: this development depends on no library function whose name has churned
+across Lean releases, and it also gets usable `nil`/`cons` equations for free.
+-/
+def generalSelfSendSitesOf
+    (message : MsgName) :
+    List GeneralSelfSend →
+    List GeneralSelfSend
+
+  | [] =>
+      []
+
+  | send :: remaining =>
+      if
+        send.message =
+          message
+      then
+        send ::
+          generalSelfSendSitesOf
+            message
+            remaining
+      else
+        generalSelfSendSitesOf
+          message
+          remaining
+
+/--
+The suffix that distinguishes one self-send site's action from its message's other sites.
+
+Empty when the class sends to this message **at most** once, and the site's 1-based ordinal
+otherwise — the same rule `generalSiteSuffixFor` applies to ports.
+
+**Why `at most` and not `exactly`.** A message server nothing self-sends has zero sites, and
+the zero case has to land in the empty-suffix branch: it keeps `actionNameFor`'s spelling, so
+the action list stays at minimum one action per message server, and every fixture whose
+message servers are reached only from outside is byte-identical after this repair. An `= 1`
+test sends the zero case to `toString ordinal` instead, numbering a site that does not exist.
+
+**MEASURED 2026-08-23, correcting what this docstring claimed yesterday.** It said that
+"every committed positive fixture sends to each of its message servers at most once per class,
+so ... this repair changes no expected LF text that was already green". The second half is
+false. Ten committed positive fixtures, five self-send at all, and of those `fan-in`,
+`send-sites`, `two-classes`, `two-instances` and `priorities` all send *distinct* messages once
+each, so they are unchanged. `keep-alive.rebeca` is not: it sends `self.keepAlive()` at its
+constructor's line 7 and again at line 11 inside `msgsrv keepAlive`, which is two sites on one
+message, so its single `keepAlive_action` becomes two suffixed actions with two reactions and
+its expected LF does change. That fixture is the near-miss F56 was found through — both
+schedules are `after(1)` from bodies that run at different times, so they never share a tag and
+no message is actually lost — and this is the second time a claim about it has been written
+from memory instead of from the file.
+
+Takes the message rather than the send it belongs to, because the *declaration* side and the
+*schedule* side reach this function from different data — a message server and a statement —
+and only the message is common to both.
+-/
+def generalActionSiteSuffixFor
+    (allSelfSends : List GeneralSelfSend)
+    (message : MsgName)
+    (ordinal : Nat) :
+    String :=
+  if
+    countSelfSendsTo
+        message
+        allSelfSends ≤
+      1
+  then
+    ""
+  else
+    toString ordinal
+
+/--
+The name of the logical action that carries one self-send site's message.
+
+**The single place a site's action name is computed.** Both the `schedule` statement that
+sends the message and the action declaration that receives it call this, on the same site, so
+they agree by construction. Numbering the sites once and deriving the two names separately —
+the first shape this took — would have left two computations to keep in step, and F56 is a
+finding about exactly that class of silent divergence.
+-/
+def generalActionNameAtSite
+    (allSelfSends : List GeneralSelfSend)
+    (site : SendSite)
+    (message : MsgName) :
+    ActionName :=
+  generalActionNameFor
+    message
+    (generalActionSiteSuffixFor
+      allSelfSends
+      message
+      (selfSendOrdinalAt
+        site
+        message
+        allSelfSends))
+
+/--
+The data a statement is compiled against, beyond the statement itself.
+
+Two facts about *where* a statement sits, carried as one record so that `compileGeneralStmt`
+and `compileGeneralBody` keep a fixed arity. That is not only economy: adding a field costs
+nothing at the three dozen call sites that merely pass this argument along, and stage H will
+need to add one, because a loop body is a body whose statement index is no longer a position
+in a flat list.
+
+* `bodyKey` is the body the statement occurs in. With the statement's index it makes the
+  `SendSite` that both the output-port environment and the action names are keyed by.
+* `selfSends` is every self-send of the **enclosing class**, not of this body, because the
+  action-name suffix is the site's ordinal among that class's sends of the same message.
+  Per-body numbering would be a weaker repair that looks like this one: two bodies of one
+  class each sending `m` once would both take the empty suffix and share a single action,
+  which loses a message whenever those two bodies run at the **same tag**.
+
+  `keep-alive.rebeca` has the sharing shape but *not* the tag collision — its two schedules
+  are `after(1)` from bodies that run at different times — so even per-body numbering would
+  lose nothing there. An action shared between two bodies is not sufficient for F56's loss; a
+  shared tag is the other half of it. So that fixture is a near-miss rather than the witness
+  this repair is tested with, which is a weaker reason than the one this paragraph gave until
+  2026-08-23, when it claimed the fixture would "reproduce exactly the loss F56 records".
+
+  That claim was false, and it is the third about this fixture in this repository written from
+  memory instead of from the file — the second being the one the paragraph above
+  `generalActionSiteSuffixFor` records, sixty lines above this one and in the same task. Which
+  is the point worth keeping: writing that correction did not stop the next false claim about
+  the same fixture from being written immediately below it.
+-/
+structure GeneralBodyContext where
+  bodyKey :
+    GeneralBodyKey
+
+  selfSends :
+    List GeneralSelfSend
+
+deriving Repr, DecidableEq, BEq, Inhabited
+
+/-!
 ## What a port carries
 -/
 

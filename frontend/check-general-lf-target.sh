@@ -32,7 +32,7 @@ set -euo pipefail
 # same program the assertions pin, and nothing else -- so this gate cannot pass
 # against a hand-transcribed variant that drifted from what the printer does.
 #
-# THREE programs are emitted, compiled and run. `emit-program` prints a hand-built
+# FOUR programs are emitted, compiled and run. `emit-program` prints a hand-built
 # LF program and so asks only whether this printer's output is legal LF.
 # `emit-widened` prints the translation of a single-actor Timed Rebeca model --
 # `compileGeneralModel` then the printer -- and so asks the question stage D exists
@@ -66,6 +66,20 @@ set -euo pipefail
 # and the class it then sends to sends nothing. That is a requirement of this gate
 # rather than a property of the models -- a model that kept scheduling would hang
 # here instead of failing.
+#
+# `emit-repeated` is the F56 witness, and it is the first program here in which one
+# message server owns more than one logical action. Its class self-sends `tick` twice
+# from a single constructor body, with the same `after(1)` on both, which is the exact
+# configuration lfc 0.11.0 mishandles when both sends share one action: it keeps only
+# the last payload, silently, exiting 0. The three programs above would all still
+# compile and run if the per-site repair were reverted, so this one is the only place
+# in this gate where the repair is on trial. What lfc decides here is narrow but not
+# nothing -- whether two logical actions on one reactor, two reactions distinguished
+# only by their triggers, and one startup reaction declaring both actions as effects,
+# are together legal LF.
+#
+# It terminates for the reason the two models above do: `tick` assigns to a state
+# variable and sends nothing, so the queue empties once both deliveries have run.
 
 REPO="$(
   cd "$(dirname "$0")/.." &&
@@ -83,12 +97,13 @@ PRINTER_TEST_MAIN="$REPO/frontend/lean-bridge/GeneralLfPrinterTestMain.lean"
 # anonymous -- `main reactor {`, with no name of its own. So each name below also
 # names the binary that gets run.
 #
-# Three names, and each program gets its own work directory. Sharing one would let a
+# Four names, and each program gets its own work directory. Sharing one would let a
 # binary left by an earlier run satisfy a later one even if its own compile step had
 # quietly produced nothing.
 BASE_PROGRAM_NAME="GeneralPrinterProgram"
 WIDENED_PROGRAM_NAME="GeneralTranslatedProgram"
 ROUTED_PROGRAM_NAME="GeneralRoutedProgram"
+REPEATED_PROGRAM_NAME="GeneralRepeatedSelfSendProgram"
 
 WORK="${TMPDIR:-/tmp}/relico_general_lf_target"
 
@@ -235,6 +250,15 @@ check_program \
   emit-widened \
   "$WIDENED_PROGRAM_NAME" \
   "the translated program from the widened Rebeca model"
+
+# Third rather than last, by the same cost-of-reading rule: one reactor, one instance,
+# no ports and no connections, so the only thing an lfc complaint here can be about is
+# the construct this program exists to exercise -- two logical actions on one reactor,
+# with two reactions that differ only in which one triggers them.
+check_program \
+  emit-repeated \
+  "$REPEATED_PROGRAM_NAME" \
+  "the translated program from the repeated-self-send Rebeca model"
 
 # Last, because it is the most expensive failure to read: two reactors, three
 # instances and three connections, so an lfc complaint here has the most places to

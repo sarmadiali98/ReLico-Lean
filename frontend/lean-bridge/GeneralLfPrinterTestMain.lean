@@ -2724,6 +2724,8 @@ private def routedSpecifiedReactionOrder :
           String.intercalate
             ","
             ((Translation.generalReactionNamesOf
+              (Translation.selfSendsOfClass
+                reactiveClass)
               routes
               reactiveClass.name
               reactiveClass.messageServers).map
@@ -2870,6 +2872,255 @@ private def routedProgramText :
 
   LF.CppPrinter.renderGeneralProgram
     program
+
+/-!
+### The F56 witness: two sends to one message server, from one body, at one tag
+
+Every other model in this file self-sends a given message **at most once**, and that is
+precisely why none of them can detect whether the per-site repair is right. Under the
+`≤ 1` suffix rule a one-site message keeps the name it had before send sites existed, so
+`baseProgram`, `widenedModel` and `routedModel` render byte-identically before and after
+the repair. They are regression witnesses, not repair witnesses.
+
+This model is the repair witness. `Pulse`'s constructor sends `tick` twice, with different
+payloads and the **same** delay, so both messages land at one tag. That combination is what
+finding F56 measured as a silent loss against `lfc` 0.11.0: two `schedule` calls on one
+logical action at one tag keep only the last value, and every exit code stays 0. Before the
+repair this model emits one action and one reaction and drops the payload `1`; after it,
+one action and one reaction **per site**.
+
+`keep-alive.rebeca` is deliberately not the witness even though it has two sends of one
+message. Its sends sit in two different bodies — the constructor and `keepAlive` itself —
+which run at different times, so it is a near miss rather than a live loss. Reusing it
+would have produced a test that passes either way.
+
+The payloads differ (`1` and `2`) rather than being two copies of one value, so that the
+two emitted `schedule` calls are distinguishable in the expected text. Two identical
+schedules would render as two identical lines, and an assertion over those cannot tell one
+action from two.
+-/
+
+private def pulseClassName :
+    ClassName :=
+  ⟨"Pulse"⟩
+
+private def countStateName :
+    VarName :=
+  ⟨"count"⟩
+
+private def tickMessageName :
+    MsgName :=
+  ⟨"tick"⟩
+
+private def amountParameter :
+    VarName :=
+  ⟨"amount"⟩
+
+private def pulseInstanceName :
+    ActorName :=
+  ⟨"pulse"⟩
+
+/--
+The body that carries both sites.
+
+The two sends are the last two statements rather than being separated by an assignment,
+because site order is a correctness property of the repair and adjacent sends are the
+arrangement in which a reversal is visible as a payload swap rather than as a reordering
+of unrelated statements.
+-/
+private def pulseConstructor :
+    DTR.GeneralConstructor where
+
+  parameters :=
+    []
+
+  body :=
+    [
+      .assign
+        countStateName
+        (.intLiteral 0),
+
+      .send
+        .selfTarget
+        tickMessageName
+        [.intLiteral 1]
+        ⟨1⟩,
+
+      .send
+        .selfTarget
+        tickMessageName
+        [.intLiteral 2]
+        ⟨1⟩
+    ]
+
+/--
+The message server both sites reach.
+
+It accumulates rather than overwriting, so that the two deliveries are not
+observationally equivalent: with both payloads delivered `count` ends at 3, and with one
+lost it ends at whichever payload survived. Nothing in this file asserts the runtime
+value, but the target gate runs the compiled binary, so a model whose two deliveries
+cancelled out would be a weaker program to hand `lfc`.
+-/
+private def tickMessageServer :
+    DTR.GeneralMessageServer where
+
+  name :=
+    tickMessageName
+
+  parameters :=
+    [
+      {
+        name :=
+          amountParameter
+
+        declaredType :=
+          .int
+      }
+    ]
+
+  body :=
+    [
+      .assign
+        countStateName
+        (.binary
+          .add
+          (.stateVar countStateName)
+          (.parameterVar amountParameter))
+    ]
+
+private def pulseClass :
+    DTR.GeneralReactiveClass where
+
+  name :=
+    pulseClassName
+
+  knownRebecs :=
+    []
+
+  stateVariables :=
+    [
+      {
+        name :=
+          countStateName
+
+        declaredType :=
+          .int
+      }
+    ]
+
+  constructor :=
+    pulseConstructor
+
+  messageServers :=
+    [tickMessageServer]
+
+private def pulseActor :
+    DTR.GeneralActorInstance where
+
+  name :=
+    pulseInstanceName
+
+  className :=
+    pulseClassName
+
+  bindings :=
+    []
+
+  arguments :=
+    []
+
+/--
+One class, one instance, no known rebecs and no routing.
+
+Kept minimal on purpose: this model exists to vary exactly one thing against the rest of
+the file, and a known rebec or a second instance would let a failure here have a cause
+that has nothing to do with send sites.
+-/
+private def repeatedSelfSendModel :
+    DTR.GeneralModel where
+
+  classes :=
+    [pulseClass]
+
+  instances :=
+    [pulseActor]
+
+/--
+Translate the repeated-self-send model and print it, in one `Except`.
+
+Shared between the emitter and the assertion, for the reason `widenedProgramText` and
+`routedProgramText` are: the bytes `lfc` compiles have to be the bytes an assertion
+pinned.
+-/
+private def repeatedSelfSendProgramText :
+    Except String String := do
+
+  let program ←
+    Translation.compileGeneralModel
+      repeatedSelfSendModel
+
+  LF.CppPrinter.renderGeneralProgram
+    program
+
+/--
+The exact text the repaired translation produces for `repeatedSelfSendModel`.
+
+**Transcribed from a measured emission, not composed by hand.** Two earlier descriptions of a
+two-send model in this project were written from memory and both were wrong, so this block was
+produced by running `emit-repeated` and copying the bytes.
+
+Three lines carry the whole point of finding F56. Lines four and five declare **two** logical
+actions with distinct names, where the pre-repair translation declared one. The two
+`schedule` calls then land on *different* actions at the *same* tag — both `1ms`, from one
+constructor body — which is exactly the configuration that silently discarded a payload when
+both calls targeted one action. And the two `reaction(tick_action…)` blocks are
+distinguished by their triggers alone.
+
+The two message reactions share the name `tick_reaction` in the AST and the printer drops it,
+which is why nothing in this text says `tick_reaction` anywhere. That asymmetry against the
+action names is deliberate and is asserted structurally below rather than being left to this
+text, precisely because the text cannot show it.
+
+`state count: int = 0` on the second line of the reactor is the printer's default initializer
+for an `int` state variable, and `count = 0;` inside the startup reaction is the constructor
+body. The redundancy predates send sites and is shared with every other fixture; it is not
+part of this witness.
+-/
+private def expectedRepeatedSelfSendProgramText :
+    String :=
+  String.intercalate
+    "\n"
+    [
+      "target Cpp",
+      "",
+      "reactor Pulse {",
+      "  state count: int = 0",
+      "  logical action tick_action1: int",
+      "  logical action tick_action2: int",
+      "",
+      "  reaction(startup) -> tick_action1, tick_action2 {=",
+      "    count = 0;",
+      "    tick_action1.schedule(1, 1ms);",
+      "    tick_action2.schedule(2, 1ms);",
+      "  =}",
+      "",
+      "  reaction(tick_action1) {=",
+      "    auto amount = *tick_action1.get();",
+      "    count = (count + amount);",
+      "  =}",
+      "",
+      "  reaction(tick_action2) {=",
+      "    auto amount = *tick_action2.get();",
+      "    count = (count + amount);",
+      "  =}",
+      "}",
+      "",
+      "main reactor {",
+      "  pulse = new Pulse()",
+      "}"
+    ] ++
+    "\n"
 
 /-!
 ## Assertions
@@ -3355,7 +3606,12 @@ private def translationAssertions :
     unresolvedSendSiteDiagnostic
     (Translation.compileGeneralStmt
       []
-      (.messageServer settleMessageName)
+      {
+        bodyKey :=
+          .messageServer settleMessageName,
+        selfSends :=
+          []
+      }
       0
       (.send
         (.knownRebec peerKnownRebecName)
@@ -4519,11 +4775,80 @@ private def perReactionSetPortAssertions :
     aliasedEndpointStartupReactionWellFormed
 
 /--
+The F56 witness, as four assertions.
+
+The text assertion is load-bearing and would fail on its own if the repair regressed. The
+three structural assertions exist to **localise**: a failure in the text alone says the bytes
+moved, a failure in the action names says the site suffix stopped being applied, and a
+failure in the reaction names says the sibling-naming rule changed. Reading which one broke
+is cheaper than diffing a twenty-seven line program.
+-/
+private def repeatedSelfSendAssertions :
+    IO Unit := do
+
+  expectRendered
+    "REPEATED_SELF_SEND_PROGRAM"
+    expectedRepeatedSelfSendProgramText
+    repeatedSelfSendProgramText
+
+  match Translation.compileGeneralModel
+    repeatedSelfSendModel
+  with
+
+  | .error diagnostic =>
+      testFailure
+        ("the repeated-self-send model must translate, but it was refused: " ++
+          diagnostic)
+
+  | .ok program => do
+
+      -- The clause that matters here is `declaredNames` being `Nodup`. Two sites of one
+      -- message declare two actions on one reactor, so dropping the site suffix would
+      -- collide them against each other, and this is the check that would catch it rather
+      -- than the text assertion, which would merely differ.
+      expectWellFormed
+        "ACCEPT_REPEATED_SELF_SEND_PROGRAM"
+        program
+
+      -- Distinct, because action names are printed identifiers under the `Nodup` guard.
+      expectString
+        "REPEATED_SELF_SEND_ACTION_NAMES"
+        "tick_action1,tick_action2"
+        (String.intercalate
+          "|"
+          (program.reactors.map
+            (fun reactor =>
+              String.intercalate
+                ","
+                (reactor.logicalActions.map
+                  (fun action =>
+                    action.name.value)))))
+
+      -- Shared, and that is the asymmetry against the line above.
+      -- `renderGeneralReaction` prints `reaction(<trigger>)` and drops the name, reaction
+      -- names are absent from `declaredNames`, and `Relico/LF/GeneralWellFormed.lean:37`
+      -- records that requiring them to be unique would constrain an identifier the target
+      -- language never sees. What separates these two reactions in the emitted text is
+      -- their triggers, which the text assertion above pins.
+      expectString
+        "REPEATED_SELF_SEND_REACTION_NAMES_SHARED"
+        "tick_reaction,tick_reaction"
+        (String.intercalate
+          "|"
+          (program.reactors.map
+            (fun reactor =>
+              String.intercalate
+                ","
+                (reactor.messageReactions.map
+                  (fun reaction =>
+                    reaction.name.value)))))
+
+/--
 Run every assertion: 34 printing, then 10 well-formedness, then 11 translation, then
 3 for the port-name collisions F34 and F42, then 5 for finding F32's counterexample,
 then 7 for the routed model, then 6 for the refusals routing reaches, then 6 for finding
 F48's aliased endpoints, then 4 for finding F49's shared target endpoint, then 2 for
-finding F50's doubled set port, 88 in all.
+finding F50's doubled set port, then 4 for finding F56's repeated self-send, 92 in all.
 
 The count is stated here because `frontend/check-general-lean.sh` compares the
 number of `PASS_` lines against a literal. There are no fixtures to count, so a
@@ -4593,6 +4918,18 @@ above it stops at the program, the reactor, or a diagnostic's text, and none of 
 statement list at all. It is also the second block to reuse an earlier block's model on purpose:
 F48's collision and F50's are one collision seen at two depths, and splitting the model would
 let a repair fix one and silently leave the other.
+
+Then **88 to 92**, and this rise is the first in stage E that came from measuring the *target
+language* rather than from refuting something written in this repository. F45 through F50 were
+all cases where a docstring, a design section or a theorem said something false about code that
+was already here; F56 is a case where `lfc 0.11.0` accepts two `schedule` calls on one logical
+action at one tag, keeps only the last value, and exits 0 — so no assertion in this file could
+have failed, and none of the three programs the target gate already compiled could have caught
+it. The eleventh block is also the only one whose model exists to be emitted *twice*: it is
+asserted here as text, and it is also one of the four programs
+`frontend/check-general-lf-target.sh` compiles and runs against a real `lfc`. It is the only
+one of those four in which a message server owns more than one logical action, so it is the
+only one whose acceptance says anything about whether the repair produces legal LF.
 -/
 def runGeneralLfPrinterTests :
     IO UInt32 := do
@@ -4617,6 +4954,8 @@ def runGeneralLfPrinterTests :
     sharedTargetAssertions
 
     perReactionSetPortAssertions
+
+    repeatedSelfSendAssertions
 
     IO.println
       "GENERAL_LF_PRINTER_TESTS_OK"
@@ -4725,6 +5064,30 @@ def emitRoutedProgram :
 
       pure 1
 
+/--
+Print the repeated-self-send program, for the target gate to hand to `lfc`.
+
+This is the only emitted program in which one message server owns two logical actions and
+two reactions, so it is the only one whose acceptance says anything about whether the
+per-site repair produces legal LF. The other three would compile unchanged if the repair
+were reverted.
+-/
+def emitRepeatedSelfSendProgram :
+    IO UInt32 :=
+  match repeatedSelfSendProgramText with
+
+  | .ok programText => do
+      IO.print programText
+
+      pure 0
+
+  | .error reason => do
+      IO.eprintln
+        ("the translation or the printer refused the repeated-self-send model: " ++
+          reason)
+
+      pure 1
+
 end GeneralLfPrinterTests
 end Relico
 
@@ -4751,8 +5114,11 @@ def main
   | ["emit-routed"] =>
       Relico.GeneralLfPrinterTests.emitRoutedProgram
 
+  | ["emit-repeated"] =>
+      Relico.GeneralLfPrinterTests.emitRepeatedSelfSendProgram
+
   | _ => do
       IO.eprintln
-        "usage: GeneralLfPrinterTestMain [emit-program|emit-widened|emit-routed]"
+        "usage: GeneralLfPrinterTestMain [emit-program|emit-widened|emit-routed|emit-repeated]"
 
       pure 2

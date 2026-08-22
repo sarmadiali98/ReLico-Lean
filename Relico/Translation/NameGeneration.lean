@@ -16,6 +16,66 @@ def actionNameFor
     ActionName :=
   ⟨messageName.value ++ "_action"⟩
 
+/--
+Everything that follows the message name in a general translator's action name.
+
+Split out for the reason `outputPortInfixFor` is: it puts the varying component at one end of
+a **single** `++` against one opaque string, which is what keeps
+`generalActionNameFor_message_injective` a suffix cancellation instead of a reassociation
+argument about three appends.
+-/
+def generalActionInfixFor
+    (siteSuffix : String) :
+    String :=
+  "_action" ++
+    siteSuffix
+
+/--
+The name of the logical action that carries one self-send **site's** message.
+
+`<message>_action<siteSuffix>`, declared on the sending class, which is also the receiving
+class because the send is a self-send.
+
+**Why this exists rather than a second parameter on `actionNameFor`.** `actionNameFor` is
+shared with the six pre-general translation families, and `actionNameFor_injective` is used in
+roughly twenty proofs under `Relico/Correctness/`. Giving it a site parameter would edit all of
+them without changing anything any of them claims. The general translator therefore carries its
+own action-name rule, exactly as it carries its own syntax, well-formedness, printer and
+assembly; the older families keep a name function whose one action per message server is
+correct *for them*, because none of them admits two sends to one message server in one body.
+
+**Why sites at all.** Measured against `lfc` 0.11.0 and recorded as finding F56: two
+`schedule` calls on one logical action at one tag keep only the last value, silently, with
+every exit code 0; the spacing policy that would repair it does not compile in reactor-cpp;
+and one reaction triggered by two actions at one tag fires once, because a trigger list is a
+disjunction. One action and one reaction per site is the only shape left standing. See
+`Translation.generalActionSiteSuffixFor` in `Relico/Translation/GeneralRouting.lean` for the
+suffix, which is empty when the class sends to a message **at most** once — so every fixture
+that predates send sites keeps the action name it already had.
+
+**The zero case is the reason that reads "at most" rather than "exactly", and it was a
+correction to what this docstring first said.** A message server nothing self-sends has no
+sites at all, and under an "exactly once" rule it fell to the numeric branch and was handed a
+suffix for a site that does not exist — renaming the actions of every message server in the
+corpus that is only ever reached from outside. That is most of them, so the rule as first
+written would have churned ten fixtures to repair a defect that shows up in one.
+
+**No injectivity in both components is claimed, and none is proved.** The separator `_action`
+is not escaped, so this function is in the same category as `outputPortNameFor`: uniqueness of
+generated identifiers is decided on the assembled program, by requiring
+`LF.GeneralReactor.declaredNames` to be `Nodup` and refusing with a diagnostic otherwise, which
+is strictly stronger than injectivity here because it also covers collisions against state
+variable, reaction and parameter names. What *is* proved below is the one direction that
+carries weight: with the site suffix fixed, the name determines the message.
+-/
+def generalActionNameFor
+    (messageName : MsgName)
+    (siteSuffix : String) :
+    ActionName :=
+  ⟨messageName.value ++
+    generalActionInfixFor
+      siteSuffix⟩
+
 def startupReactionName :
     ReactionName :=
   ⟨"startup"⟩
@@ -174,6 +234,38 @@ theorem actionNameFor_injective :
 
   simpa [
     actionNameFor
+  ] using
+    hEqual
+
+/--
+With the site suffix fixed, a general action's name determines the message.
+
+Suffix cancellation, the same one-line proof as `actionNameFor_injective` and the same shape as
+`outputPortNameFor_message_injective`, which is the whole reason `generalActionInfixFor` was
+factored out instead of the suffix being appended inline.
+
+The converse direction is not stated, and the omission is deliberate rather than pending: with
+the message fixed, the name determines `generalActionInfixFor siteSuffix`, and since that
+function is `"_action" ++ siteSuffix` the suffix *is* recoverable — but nothing in this
+development needs it, and a lemma that exists only to be complete is a lemma a later reader has
+to check the relevance of. If a stage needs it, prefix cancellation gives it in the same three
+lines `outputPortInfixFor_eq_of_outputPortNameFor_eq` uses.
+-/
+theorem generalActionNameFor_message_injective
+    (siteSuffix : String) :
+    Function.Injective
+      (fun message =>
+        generalActionNameFor
+          message
+          siteSuffix) := by
+
+  intro left right hEqual
+
+  cases left
+  cases right
+
+  simpa [
+    generalActionNameFor
   ] using
     hEqual
 

@@ -1,10 +1,10 @@
-# Stage E findings — F34 through F56
+# Stage E findings — F34 through F57
 
 **Why this file exists.**
 Stage E added external sends, ports and connections to the general translator, and in doing so it
-produced twenty-three findings about *this repository* — its own code, its own design document, and its
+produced twenty-four findings about *this repository* — its own code, its own design document, and its
 own test harness — and, in **F56**, about what the code this translator emits actually does when it is
-compiled and run. They are numbered F34 through F56, continuing the single `F` series that
+compiled and run. They are numbered F34 through F57, continuing the single `F` series that
 `docs/STAGE_B_FINDINGS.md` opened at F1–F20 and `docs/STAGE_D_FINDINGS.md` carried to F21–F33.
 
 The `F` series and the `P` series answer different questions, and keeping them apart is the whole
@@ -56,7 +56,7 @@ F34 through F40 were first written in `docs/STAGE_E_DESIGN.md` §11.1, under an 
 they were *"provisional until the findings file lands"* and *"do not cite these elsewhere yet"*. That
 warning was earned: stage D's design had numbered its own findings D1 through D9, they became F21
 through F29 when the stage D findings file landed, and the D-numbers became uncitable. **This file is
-what makes F34–F56 citable.** Nothing below is provisional any more. (This range is one of the places that
+what makes F34–F57 citable.** Nothing below is provisional any more. (This range is one of the places that
 move whenever an entry is added, and it is the one that went stale when F50 landed. How many places there
 are depends on how finely they are counted, which is not a quibble: this file answers it three times and
 three ways. **F51** lists four, **F54** lists a different four, and the paragraph below at *"The three
@@ -113,6 +113,18 @@ which had landed in a row. The test it set was whether an entry records a defect
 and F56 is the first since then to pass it. Its commit moves all six places, F55's closing paragraph among
 them, and repairs `docs/STAGE_E_DESIGN.md` §6.3 and §11.2 item 7 in the same edit, because both carried
 claims the measurement refuted.
+
+F57, added in the same task as F56 (#69), exists because two docstrings *that task itself wrote* cited it
+before it existed. It is the first entry here whose occasion is a citation rather than a defect: the ordering
+behaviour it describes was already known and deliberately left, and the only thing wrong was that two tracked
+files said it had been recorded when nothing had been. So it is a fourth instance of F44's family and a third
+echo of F43's pattern — tracked code citing a finding number ahead of the finding — with the interval
+compressed to zero, since the citing docstrings and this entry belong to one task. F43's paragraph above
+predicted recurrence and named the cause as the pressure of a green gate; this recurrence had a different
+cause, which is worth separating: the citation was written while the finding still felt like something
+already decided, and a thing that has been decided feels as though it has been written down. Its commit moves
+all six places, and the one F56's commit missed is repaired in the same edit and named in F54's closing
+paragraph rather than given an entry of its own.
 
 **One trap.** The number F34 was considered once before, in stage D, for a different thing entirely,
 and rejected — `docs/STAGE_D_FINDINGS.md:289` records that it would have duplicated an obligation F32
@@ -1866,11 +1878,18 @@ empty, and it came back empty because the two cites that would have broken had a
 section cites by earlier findings.
 
 One thing is filed rather than fixed. The closing *What is left open, and who owns it* section is no
-longer closing: F53 sits below it, F54 below F53, and F55 below F54, for the reason F53 gave — appending
-is the only edit to this file that shifts nothing. Moving that section to the end would displace several
-hundred lines and invalidate the cites this commit has just verified, so it belongs to a commit with no
-other business. Until then, a reader who stops at the closing section stops three entries early, and this
-paragraph is the pointer that says so.
+longer closing: F53 sits below it, F54 below F53, F55 below F54, F56 below F55 and F57 below F56, for the
+reason F53 gave — appending is the only edit to this file that shifts nothing. Moving that section to the
+end would displace several hundred lines and invalidate the cites this commit has just verified, so it
+belongs to a commit with no other business. Until then, a reader who stops at the closing section stops
+five entries early, and this paragraph is the pointer that says so.
+
+This paragraph is also the place F56's commit missed. Its numbering-history entry above claims that commit
+"moves all six places"; it moved five, leaving this one reading *three* entries with F56 sitting unmentioned
+below it. That is F51's observation about F50 recurring at a larger count, and the larger count is the
+reason to expect it: six places is more than a writer holds in mind while finishing a measurement. It is
+repaired here rather than made a finding of its own, because the decision recorded above was to stop opening
+entries about this file's own bookkeeping and a stale sentence is exactly that.
 
 ---
 
@@ -2094,8 +2113,8 @@ landed separately in `c6ce367`, together with the tenth positive and the twelfth
 commit is documentation only and owes no `lake build` — no gate script reads `docs/`.
 
 **Deliberately not done.** The stranded *What is left open, and who owns it* section is still not moved to
-the end; F55 left three entries below it where there had been two, and F56 below makes four, so the case for
-a commit with no other business is stronger by exactly one entry each time. The working conventions this
+the end; F55 left three entries below it where there had been two, F56 below makes four and F57 five, so the
+case for a commit with no other business is stronger by exactly one entry each time. The working conventions this
 file keeps citing — the rules about addresses,
 instruments and quoted words that F54 reached for when it wrote `§4d` — are still held outside the
 repository, so item 7 repairs three cites without removing the reason they were written. Graduating those
@@ -2200,9 +2219,128 @@ this whole stage sequence exists to do; and the same trade was already resolved 
 refuted item was recorded rather than converted into a stronger guard. The cheapness of refusing is real and
 is the reason to record the choice here instead of letting it look inevitable.
 
+**Repair landed — task #69, and its shape was forced by §14 rather than chosen.** One logical action **and**
+one reaction per self-send **site**. `Relico/Translation/GeneralRouting.lean` gained the site machinery,
+`generalActionNameAtSite` and `generalActionSiteSuffixFor`; `Relico/Translation/GeneralBasic.lean` gained
+per-site action declarations, schedules and reactions. `lake build` reports 508 jobs, unchanged, so nothing
+was added as a module or orphaned as one.
+
+**The suffix rule is `≤ 1`, not `= 1`, and the difference is the whole cost of the repair.** A message server
+nothing self-sends has **zero** sites, and under an `= 1` test the zero case falls to the numeric branch and
+is handed a suffix for a site that does not exist — which would rename the actions of every
+externally-reached message server in the corpus. With `≤ 1` the zero and one cases share the empty-suffix
+branch, and because `name ++ "_action" ++ ""` renders as `name_action`, a one-site server emits
+byte-identical text to what it emitted before. Churn across the committed positives collapses from ten
+fixtures to one: only `keep-alive`, which has two sites on one message, gains a sibling. The cheapest
+evidence that this held is that the printer assertion count did **not** move when the per-site branch landed
+— it stayed at 88 through task #72, and an expected block that had shifted would have had to add or drop an
+assertion to stay green.
+
+**Actions and reactions are named asymmetrically, and that is principled rather than sloppy.** Sibling
+reactions of one message server deliberately **share** a name; sibling actions must not. Action names are
+declared identifiers inside `LF.GeneralReactor.declaredNames`, which the well-formedness predicate requires
+to be `Nodup`, so a shared action name is refused. Reaction names are dropped entirely by
+`renderGeneralReaction`, which prints `reaction(<trigger>)`, and are constrained by no uniqueness check at
+all — `Relico/LF/GeneralWellFormed.lean:37` records that constraining them would bind an identifier the
+target never sees. What distinguishes sibling reactions in emitted text is their **triggers**.
+
+**The emission-order obligation this entry stated is now discharged, and it needed a theorem in triggers.**
+The paragraph above requires the generator to emit site reactions in body order and calls that a correctness
+property. A correctness property with nothing stating it is the shape F44, F45 and F47 each recorded, so
+task #69 added `generalMessageReactionTriggersOf` and `assembleGeneralMessageReactions_triggers` to
+`Relico/Translation/GeneralBasic.lean`. It had to be stated in triggers rather than names, and that is
+forced: `generalMessageReactionNamesOf` returns k copies of one identical `ReactionName`, so **no** statement
+in names can say which sibling listens to which action — a names-level theorem is not weaker here, it is
+blind to the property. The pair now fixes the group completely, names giving length and triggers giving
+which action each position listens to, and neither implies the other.
+
+**The witness, and why it is inline rather than a fixture.** No `.rebeca` fixture pins emitted LF text
+anywhere in this repository; only the inline models in `frontend/lean-bridge/GeneralLfPrinterTestMain.lean`
+do. So the witness is inline: a class `Pulse` whose constructor self-sends `tick` twice at the same
+`after(1)` — F56's exact silent-loss configuration — with **different** payloads, `1` and `2`, on purpose.
+Identical payloads would have made the loss invisible even in a correct expected block, because the
+surviving value would equal the discarded one. Four assertions were added, taking the printer count from 88
+to **92**: the full emitted text, an `expectWellFormed` aimed at the `declaredNames` `Nodup` clause a dropped
+suffix would break, and two name assertions encoding the asymmetry above — actions distinct, reactions
+shared — which until then existed only in prose.
+
+**What `lfc` 0.11.0 then decided, measured 2026-08-23.** It accepted the emitted program and the binary ran
+and exited 0. So two logical actions on one reactor, two reactions distinguished *only* by their triggers,
+and one startup reaction declaring **both** actions as effects are together legal, compilable, executable
+LF. Pre-repair both sends targeted one action and the run kept only payload `2`.
+
+**What this does not buy, stated because it would be easy to overclaim.** The paragraph above — that catching
+this *class* of defect requires running the produced binary and comparing observed message executions
+against the Rebeca semantics, which no gate in this repository does for any model in any family — remains
+true and is not softened by anything above. Pinning the *repaired* text catches a **regression** of the
+repair, which is strictly weaker than detecting the original defect: the pre-repair output was well-formed
+LF that compiled and ran cleanly, so no text this repository had committed at the time would have differed.
+The fourth `check_program` call added to `frontend/check-general-lf-target.sh` is the only one of the four in
+which a message server owns more than one logical action, and therefore the only one whose `lfc` verdict
+bears on the repair at all — but its verdict is an exit code, not a comparison of executions.
+
 **Still open.** Whether this earns a `P` number. It appears not to — the paper's SOS rules do not commit to an
 action-based encoding of self-sends, so the mistranslation looks like this development's rather than the
 paper's — but that reading has not been checked against the paper, which makes it **inferred**, and under
 this file's own rule an inferred claim names the check instead of concluding it. The check is to read the
 paper's send rule for the self-send case and confirm it constrains only the resulting queue, not the
 mechanism.
+
+---
+
+## F57 — the cross-server reaction order, and the finding two docstrings cited before it existed
+
+**Provenance: mixed, and the parts are graded separately rather than averaged.** That the record was missing
+is **measured** — the string `cross-server` occurs zero times anywhere under `docs/`. The ordering mechanism
+is **read from the code**, at `Relico/Translation/GeneralBasic.lean`, where reaction assembly is
+message-server-major. That LF fires same-tag reactions in declaration order is **measured**, F56 §14b for
+action-triggered reactions and earlier for port-triggered ones. That the resulting order is a **divergence**
+from Rebeca is **inferred**, and under this file's own rule an inferred claim names its check instead of
+concluding — which is most of the point of this entry.
+
+**What was claimed, and by what.** Two docstrings written in task #72 delegate this case to a record that did
+not exist. `Relico/Translation/GeneralBasic.lean:369` says the cross-server case "is a separate divergence,
+recorded rather than repaired"; `:1041` says it "is recorded as a separate finding and deliberately left".
+Nothing was recorded. This is the fourth instance of the family F44, F45 and F47 are about — a docstring
+crediting a document that was never written — and the first authored by the same task that then had to find
+it. It was found by reading the two docstrings while writing something else, not by any gate, and no gate
+could have found it: the cited thing is prose, and the citation is prose.
+
+**The mechanism, and why it is not the same case F56 repaired.** A body that sends to two *different* message
+servers gets their reactions in the order the **class declares those servers**, not the order the body wrote
+the sends, because `assembleGeneralMessageReactions` is called per server and the groups are concatenated in
+server order. F56's case is the same message sent twice, which lives entirely inside one server's group and
+is ordered by site — correctly, and now provably, via
+`assembleGeneralMessageReactions_triggers`. The two cases look alike and are not: one is intra-group and
+repaired, the other is inter-group and untouched.
+
+**Why it may be no divergence at all, which is the part worth reading twice.** For this to be a defect,
+Rebeca would have to specify that two messages arriving at one instance at the same tag execute in the order
+their sends were written. It does not obviously do so. The canonical paper's SOS tables were read earlier in
+this project and found to carry **no tie rule** for messages of equal arrival time — the same silence that
+`docs/PAPER_CORRECTIONS.md` records for priority. If the order is genuinely unspecified for equal tags, then
+emitting in server-declaration order is a permitted *choice* and this entry records a design decision rather
+than a bug. The honest position is that this has not been checked at the level of the specific question, and
+so it is not asserted either way here.
+
+**And the question is stage F's, not a loose end of stage E.** Whatever resolves same-tag ordering in Rebeca
+will resolve it by **message-server priority**, which is exactly what stage F owns: the claim that reaction
+declaration order realizes priority. If stage F establishes that, then server-major assembly is correct
+precisely when a class declares its message servers in priority order — and body order is irrelevant rather
+than lost. So the cross-server case is not an independent divergence to be repaired but an instance of the
+obligation stage F already carries, and routing it there is more useful than repairing it here.
+
+**Why it is recorded and left, rather than repaired.** Repairing it means site-major assembly: emitting
+reactions in the order the body's sends appear, across servers. That would perturb the
+reaction-declaration-order theorem landed for `docs/STAGE_E_DESIGN.md` §10.2 in task #65, which states a
+property of the current server-major order, and F56 supplies no measurement that would justify paying that.
+Refusing such a model is not available either: two sends to two servers in one body is ordinary Rebeca that
+the paper's fragment contains, and narrowing the accepted fragment is what this whole stage sequence exists
+to avoid.
+
+**Still open, and stated as a check rather than a conclusion.** Read the paper's SOS rules for two messages
+delivered to one rebec at equal arrival time and establish whether an execution order is specified. If it
+is, and it is body order, this becomes a real divergence and stage F inherits a second obligation. If it is
+unspecified, this entry should be demoted to a recorded decision and the two docstrings above rewritten to
+say *choice* rather than *divergence*. Either way the answer belongs to stage F, and it is the one place a
+`P` number might yet come out of this entry.

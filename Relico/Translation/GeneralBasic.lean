@@ -325,6 +325,102 @@ def compileGeneralMessageServerAction
       compileGeneralTypedParameter
 
 /--
+The logical action that carries one self-send **site's** message.
+
+The parameters are the message server's, because the payload a site schedules is that message
+server's parameter list; only the name distinguishes one site's action from another's, and
+`generalActionNameAtSite` is the single place that name is computed, so the schedule emitted in
+a body and the declaration emitted here agree by construction rather than by two functions
+happening to spell the same thing.
+-/
+def compileGeneralMessageServerActionAtSite
+    (allSelfSends : List GeneralSelfSend)
+    (site : SendSite)
+    (server : DTR.GeneralMessageServer) :
+    LF.GeneralAction where
+
+  name :=
+    generalActionNameAtSite
+      allSelfSends
+      site
+      server.name
+
+  parameters :=
+    server.parameters.map
+      compileGeneralTypedParameter
+
+/--
+Every logical action one message server contributes: one per self-send site that targets it,
+and exactly one when nothing self-sends it at all.
+
+**The empty branch is what keeps this repair local, not a special case bolted on.** A message
+server reached only from outside has no site to name an action after. `lfc` accepts a reaction
+on an action nothing ever schedules — `expressions.rebeca` ships three such actions through the
+real compiler today, which is measured rather than assumed — so emitting the unsuffixed action
+there keeps the action list at minimum one per message server, keeps
+`compileGeneralMessageServerAction` and its two equations true, and holds nine of the ten
+committed positive fixtures byte-identical. Only `keep-alive`, whose two sends share one
+message, gains a sibling.
+
+**Order within a message server is site order. Order across them is not body order.** A body
+that sends to two *different* message servers gets their reactions in the order the class
+declares those servers, not the order the body wrote the sends, because reaction assembly is
+message-server-major. F56 measured only the same-message case, which lives entirely inside one
+server's group and is therefore ordered correctly here — provably so, since
+`assembleGeneralMessageReactions_triggers` states which action each position in that group listens
+to. The cross-server case is **F57**, recorded rather than repaired: making reaction assembly
+site-major would perturb the reaction-declaration-order theorem already landed for §10.2, and F56
+supplies no measurement that would justify that.
+
+F57 also records why it may be no divergence at all, which is why this paragraph now says *case*
+where it once said *divergence*: same-tag ordering across message servers will be settled by
+message-server priority, and that is stage F's obligation rather than a loose end of stage E.
+-/
+def compileGeneralMessageServerActions
+    (allSelfSends : List GeneralSelfSend)
+    (server : DTR.GeneralMessageServer) :
+    List LF.GeneralAction :=
+  match
+      generalSelfSendSitesOf
+        server.name
+        allSelfSends with
+
+  | [] =>
+      [compileGeneralMessageServerAction
+        server]
+
+  | sites =>
+      sites.map
+        (fun send =>
+          compileGeneralMessageServerActionAtSite
+            allSelfSends
+            send.site
+            server)
+
+/--
+The logical actions of a whole class, message server by message server.
+
+Hand-rolled rather than a `flatMap` over `messageServers`, for `generalSelfSendSitesOf`'s
+reason: no dependence on a library name that has churned across releases, and `nil`/`cons`
+equations the `logicalActions` theorems can rewrite with directly.
+-/
+def compileGeneralMessageServerActionsOf
+    (allSelfSends : List GeneralSelfSend) :
+    List DTR.GeneralMessageServer →
+    List LF.GeneralAction
+
+  | [] =>
+      []
+
+  | server :: remaining =>
+      compileGeneralMessageServerActions
+          allSelfSends
+          server ++
+        compileGeneralMessageServerActionsOf
+          allSelfSends
+          remaining
+
+/--
 Translate an actor instance.
 
 `bindings` is read by nothing here. A known-rebec binding becomes a connection only when
@@ -545,7 +641,7 @@ send would have had to work out that they were about one send.
 -/
 def compileGeneralStmt
     (env : GeneralOutputPortEnv)
-    (bodyKey : GeneralBodyKey)
+    (context : GeneralBodyContext)
     (index : Nat) :
     DTR.GeneralStmt →
     Except String LF.GeneralStmt
@@ -559,7 +655,16 @@ def compileGeneralStmt
   | .send .selfTarget message arguments delay =>
       .ok
         (.schedule
-          (actionNameFor message)
+          (generalActionNameAtSite
+            context.selfSends
+            {
+              body :=
+                context.bodyKey
+
+              index :=
+                index
+            }
+            message)
           (arguments.map
             compileGeneralExpr)
           delay)
@@ -570,7 +675,7 @@ def compileGeneralStmt
             env
             {
               body :=
-                bodyKey
+                context.bodyKey
 
               index :=
                 index
@@ -593,7 +698,7 @@ def compileGeneralStmt
               renderGeneralSendSite
                 {
                   body :=
-                    bodyKey
+                    context.bodyKey
 
                   index :=
                     index
@@ -624,7 +729,7 @@ message a user sees is about the first construct they wrote that this stage cann
 -/
 def compileGeneralBody
     (env : GeneralOutputPortEnv)
-    (bodyKey : GeneralBodyKey) :
+    (context : GeneralBodyContext) :
     Nat →
     DTR.GeneralBody →
     Except String LF.GeneralBody
@@ -636,7 +741,7 @@ def compileGeneralBody
       match
           compileGeneralStmt
             env
-            bodyKey
+            context
             index
             statement with
 
@@ -647,7 +752,7 @@ def compileGeneralBody
           match
               compileGeneralBody
                 env
-                bodyKey
+                context
                 (index + 1)
                 remaining with
 
@@ -662,11 +767,11 @@ def compileGeneralBody
 @[simp]
 theorem compileGeneralBody_nil
     (env : GeneralOutputPortEnv)
-    (bodyKey : GeneralBodyKey)
+    (context : GeneralBodyContext)
     (index : Nat) :
     compileGeneralBody
         env
-        bodyKey
+        context
         index
         [] =
       .ok [] := by
@@ -690,7 +795,7 @@ through a body appears in these three statements and nowhere else in the file.
 
 theorem compileGeneralBody_cons_ok
     {env : GeneralOutputPortEnv}
-    {bodyKey : GeneralBodyKey}
+    {context : GeneralBodyContext}
     {index : Nat}
     {statement : DTR.GeneralStmt}
     {remaining : DTR.GeneralBody}
@@ -699,20 +804,20 @@ theorem compileGeneralBody_cons_ok
     (hStatement :
       compileGeneralStmt
           env
-          bodyKey
+          context
           index
           statement =
         .ok compiledStatement)
     (hRemaining :
       compileGeneralBody
           env
-          bodyKey
+          context
           (index + 1)
           remaining =
         .ok compiledRemaining) :
     compileGeneralBody
         env
-        bodyKey
+        context
         index
         (statement :: remaining) =
       .ok
@@ -726,7 +831,7 @@ theorem compileGeneralBody_cons_ok
 
 theorem compileGeneralBody_cons_error_head
     {env : GeneralOutputPortEnv}
-    {bodyKey : GeneralBodyKey}
+    {context : GeneralBodyContext}
     {index : Nat}
     {statement : DTR.GeneralStmt}
     {remaining : DTR.GeneralBody}
@@ -734,13 +839,13 @@ theorem compileGeneralBody_cons_error_head
     (hStatement :
       compileGeneralStmt
           env
-          bodyKey
+          context
           index
           statement =
         .error message) :
     compileGeneralBody
         env
-        bodyKey
+        context
         index
         (statement :: remaining) =
       .error message := by
@@ -751,7 +856,7 @@ theorem compileGeneralBody_cons_error_head
 
 theorem compileGeneralBody_cons_error_tail
     {env : GeneralOutputPortEnv}
-    {bodyKey : GeneralBodyKey}
+    {context : GeneralBodyContext}
     {index : Nat}
     {statement : DTR.GeneralStmt}
     {remaining : DTR.GeneralBody}
@@ -760,20 +865,20 @@ theorem compileGeneralBody_cons_error_tail
     (hStatement :
       compileGeneralStmt
           env
-          bodyKey
+          context
           index
           statement =
         .ok compiledStatement)
     (hRemaining :
       compileGeneralBody
           env
-          bodyKey
+          context
           (index + 1)
           remaining =
         .error message) :
     compileGeneralBody
         env
-        bodyKey
+        context
         index
         (statement :: remaining) =
       .error message := by
@@ -861,6 +966,115 @@ def assembleGeneralMessageReaction
   priority :=
     none
 
+/--
+The reaction that runs one message server's body when **one self-send site's** action fires.
+
+Identical to `assembleGeneralMessageReaction` except in the trigger, which names this site's
+action rather than the one action the message server used to have. That single difference is
+the whole of finding F56's repair on the reaction side.
+
+**Why a reaction per site and not one reaction listing every site's action.** Measured against
+`lfc` 0.11.0, recorded as F56 §14a: a reaction's trigger list is a **disjunction**, so a
+reaction triggered by two actions that are both present at one tag fires **once**, and one of
+the two payloads is never observed. §14b measured the working shape — one reaction per action
+fires both, in reaction *declaration* order. So the sibling count here is forced by the
+target's semantics, not chosen for symmetry with the action side.
+
+**The name is deliberately shared with every sibling, and that costs nothing.** Reaction names
+are checked for uniqueness nowhere, and must not be: `Relico/LF/GeneralWellFormed.lean:37`
+records that LF reactions are anonymous in concrete syntax, and `renderGeneralReaction` bears
+that out by printing `reaction(<trigger>)` and dropping the name entirely. What distinguishes
+these siblings in the emitted text is their *triggers*, which are distinct because
+`generalActionNameAtSite` gives each site its own action. Reaction names are also therefore
+absent from `LF.GeneralReactor.declaredNames`, so k siblings add nothing the §9 `Nodup` guard
+has to accommodate.
+
+**`priority := none` is preserved on purpose**, for the reason spelled out on
+`assembleGeneralMessageReaction` above: stage G owns wiring `DTR.GeneralMessageServer.priority`
+to a declaration order, and a sibling that quietly wrote `some n` here would make that stage
+look finished while proving nothing.
+-/
+def assembleGeneralMessageReactionAtSite
+    (allSelfSends : List GeneralSelfSend)
+    (site : SendSite)
+    (server : DTR.GeneralMessageServer)
+    (compiledBody : LF.GeneralBody) :
+    LF.GeneralReaction where
+
+  name :=
+    messageReactionNameFor server.name
+
+  trigger :=
+    .logicalAction
+      (generalActionNameAtSite
+        allSelfSends
+        site
+        server.name)
+
+  parameters :=
+    server.parameters.map
+      (fun parameter =>
+        parameter.name)
+
+  body :=
+    compiledBody
+
+  priority :=
+    none
+
+/--
+Every action reaction one message server contributes: one per self-send site that targets it,
+or the single unsuffixed reaction when nothing self-sends to it.
+
+**The empty branch delegates to `assembleGeneralMessageReaction` rather than reconstructing
+it**, which keeps that definition live and keeps all five of its `@[simp]` equations true
+statements about this function's output. It also keeps the trigger in that branch spelled with
+`actionNameFor`, matching what `compileGeneralMessageServerAction` puts on the action side for
+the same server — the two sides have to agree per branch or the emitted reaction triggers on an
+action the reactor never declares.
+
+**Order within the server is site order, and that is a correctness property rather than a
+cosmetic one.** F56 §14b measured that two reactions whose actions are both present at one tag
+fire in reaction *declaration* order, so the order this list is built in is the order the
+target executes the two bodies in — and site order is the order the sends appear in the Rebeca
+body. `generalSelfSendSitesOf` preserves `selfSendsOfClass`'s order for exactly this reason.
+
+**Order *across* message servers is not body order, and that is a known divergence rather than
+a thing this function gets wrong.** Reaction assembly is message-server-major — this function
+is called once per server, from a caller that walks the server list — so `self.b(); self.a();`
+in one body emits `a`'s reaction first whenever `a`'s message server is declared first. F56's
+same-message case is entirely inside one server's group and is repaired here; the cross-server
+case is recorded as **F57** and deliberately left, because repairing it means site-major
+assembly, which would perturb the reaction-declaration-order theorem already landed for §10.2.
+
+This sentence and its counterpart on the action side both cited that record before it existed,
+which turned out to be F57's own occasion: the case had been decided and left, and a case that
+has been decided reads as though it has been written down.
+-/
+def assembleGeneralMessageReactions
+    (allSelfSends : List GeneralSelfSend)
+    (server : DTR.GeneralMessageServer)
+    (compiledBody : LF.GeneralBody) :
+    List LF.GeneralReaction :=
+  match
+      generalSelfSendSitesOf
+        server.name
+        allSelfSends with
+
+  | [] =>
+      [assembleGeneralMessageReaction
+        server
+        compiledBody]
+
+  | sites =>
+      sites.map
+        (fun send =>
+          assembleGeneralMessageReactionAtSite
+            allSelfSends
+            send.site
+            server
+            compiledBody)
+
 @[simp]
 theorem assembleGeneralMessageReaction_name
     (server : DTR.GeneralMessageServer)
@@ -880,6 +1094,38 @@ theorem assembleGeneralMessageReaction_trigger
         compiledBody).trigger =
       .logicalAction
         (actionNameFor server.name) := by
+  rfl
+
+/--
+The reaction built for one self-send site triggers on *that site's* action.
+
+The site-branch counterpart of `assembleGeneralMessageReaction_trigger` directly above, and the
+fact that carries F56's repair down at the level of a single reaction.
+
+It has to be stated in **triggers** rather than in names, and that is forced rather than
+stylistic. Sibling reactions of one message server deliberately share a name — see the note on
+`assembleGeneralMessageReactionAtSite` — so `generalMessageReactionNamesOf` returns k copies of
+one identical `ReactionName`, and *no* statement in names can say which sibling listens to
+which action. A names-level theorem is not merely weaker here; it is blind to the property.
+That is why this is a separate theorem instead of another conjunct of
+`assembleGeneralMessageReactions_names`.
+-/
+@[simp]
+theorem assembleGeneralMessageReactionAtSite_trigger
+    (allSelfSends : List GeneralSelfSend)
+    (site : SendSite)
+    (server : DTR.GeneralMessageServer)
+    (compiledBody : LF.GeneralBody) :
+    (assembleGeneralMessageReactionAtSite
+        allSelfSends
+        site
+        server
+        compiledBody).trigger =
+      .logicalAction
+        (generalActionNameAtSite
+          allSelfSends
+          site
+          server.name) := by
   rfl
 
 @[simp]
@@ -1146,7 +1392,8 @@ theorem assembleGeneralPortReactions_names
 /--
 Translate one message server into its group of reactions.
 
-The action reaction first, then one port reaction per incoming route, which is §7.3's order and
+The action reactions first — one per self-send site, in site order — then one port reaction
+per incoming route, which is §7.3's order and
 also the only order that keeps a self-send's delivery ahead of an external one at the same tag
 for a message server that has both. That last point is an observation and not a claim: nothing
 in this stage proves anything about it, and stage F is where it becomes a statement.
@@ -1160,6 +1407,7 @@ No new failure: the only thing that can go wrong is a refusal inside the body.
 -/
 def compileGeneralMessageServerReactionGroup
     (env : GeneralOutputPortEnv)
+    (selfSends : List GeneralSelfSend)
     (routes : List GeneralRoute)
     (className : ClassName)
     (server : DTR.GeneralMessageServer) :
@@ -1167,7 +1415,7 @@ def compileGeneralMessageServerReactionGroup
   match
       compileGeneralBody
         env
-        (.messageServer server.name)
+        { bodyKey := .messageServer server.name, selfSends := selfSends }
         0
         server.body with
 
@@ -1176,9 +1424,10 @@ def compileGeneralMessageServerReactionGroup
 
   | .ok compiledBody =>
       .ok
-        (assembleGeneralMessageReaction
+        (assembleGeneralMessageReactions
+            selfSends
             server
-            compiledBody ::
+            compiledBody ++
           assembleGeneralPortReactions
             className
             server
@@ -1187,6 +1436,7 @@ def compileGeneralMessageServerReactionGroup
 
 theorem compileGeneralMessageServerReactionGroup_ok
     {env : GeneralOutputPortEnv}
+    {selfSends : List GeneralSelfSend}
     {routes : List GeneralRoute}
     {className : ClassName}
     {server : DTR.GeneralMessageServer}
@@ -1194,19 +1444,21 @@ theorem compileGeneralMessageServerReactionGroup_ok
     (hBody :
       compileGeneralBody
           env
-          (.messageServer server.name)
+          { bodyKey := .messageServer server.name, selfSends := selfSends }
           0
           server.body =
         .ok compiledBody) :
     compileGeneralMessageServerReactionGroup
         env
+        selfSends
         routes
         className
         server =
       .ok
-        (assembleGeneralMessageReaction
+        (assembleGeneralMessageReactions
+            selfSends
             server
-            compiledBody ::
+            compiledBody ++
           assembleGeneralPortReactions
             className
             server
@@ -1219,6 +1471,7 @@ theorem compileGeneralMessageServerReactionGroup_ok
 
 theorem compileGeneralMessageServerReactionGroup_error
     {env : GeneralOutputPortEnv}
+    {selfSends : List GeneralSelfSend}
     {routes : List GeneralRoute}
     {className : ClassName}
     {server : DTR.GeneralMessageServer}
@@ -1226,12 +1479,13 @@ theorem compileGeneralMessageServerReactionGroup_error
     (hBody :
       compileGeneralBody
           env
-          (.messageServer server.name)
+          { bodyKey := .messageServer server.name, selfSends := selfSends }
           0
           server.body =
         .error message) :
     compileGeneralMessageServerReactionGroup
         env
+        selfSends
         routes
         className
         server =
@@ -1346,12 +1600,13 @@ nothing beyond deciding to write one.
 -/
 def compileGeneralConstructor
     (env : GeneralOutputPortEnv)
+    (selfSends : List GeneralSelfSend)
     (classConstructor : DTR.GeneralConstructor) :
     Except String LF.GeneralReaction :=
   match
       compileGeneralBody
         env
-        .constructor
+        { bodyKey := .constructor, selfSends := selfSends }
         0
         classConstructor.body with
 
@@ -1366,17 +1621,19 @@ def compileGeneralConstructor
 
 theorem compileGeneralConstructor_ok
     {env : GeneralOutputPortEnv}
+    {selfSends : List GeneralSelfSend}
     {classConstructor : DTR.GeneralConstructor}
     {compiledBody : LF.GeneralBody}
     (hBody :
       compileGeneralBody
           env
-          .constructor
+          { bodyKey := .constructor, selfSends := selfSends }
           0
           classConstructor.body =
         .ok compiledBody) :
     compileGeneralConstructor
         env
+        selfSends
         classConstructor =
       .ok
         (assembleGeneralStartupReaction
@@ -1389,17 +1646,19 @@ theorem compileGeneralConstructor_ok
 
 theorem compileGeneralConstructor_error
     {env : GeneralOutputPortEnv}
+    {selfSends : List GeneralSelfSend}
     {classConstructor : DTR.GeneralConstructor}
     {message : String}
     (hBody :
       compileGeneralBody
           env
-          .constructor
+          { bodyKey := .constructor, selfSends := selfSends }
           0
           classConstructor.body =
         .error message) :
     compileGeneralConstructor
         env
+        selfSends
         classConstructor =
       .error message := by
   simp [
@@ -1422,6 +1681,7 @@ says exactly that in one `++`.
 -/
 def compileGeneralMessageServerReactions
     (env : GeneralOutputPortEnv)
+    (selfSends : List GeneralSelfSend)
     (routes : List GeneralRoute)
     (className : ClassName) :
     List DTR.GeneralMessageServer →
@@ -1434,6 +1694,7 @@ def compileGeneralMessageServerReactions
       match
           compileGeneralMessageServerReactionGroup
             env
+            selfSends
             routes
             className
             server with
@@ -1445,6 +1706,7 @@ def compileGeneralMessageServerReactions
           match
               compileGeneralMessageServerReactions
                 env
+                selfSends
                 routes
                 className
                 remaining with
@@ -1460,10 +1722,12 @@ def compileGeneralMessageServerReactions
 @[simp]
 theorem compileGeneralMessageServerReactions_nil
     (env : GeneralOutputPortEnv)
+    (selfSends : List GeneralSelfSend)
     (routes : List GeneralRoute)
     (className : ClassName) :
     compileGeneralMessageServerReactions
         env
+        selfSends
         routes
         className
         [] =
@@ -1472,6 +1736,7 @@ theorem compileGeneralMessageServerReactions_nil
 
 theorem compileGeneralMessageServerReactions_cons_ok
     {env : GeneralOutputPortEnv}
+    {selfSends : List GeneralSelfSend}
     {routes : List GeneralRoute}
     {className : ClassName}
     {server : DTR.GeneralMessageServer}
@@ -1481,6 +1746,7 @@ theorem compileGeneralMessageServerReactions_cons_ok
     (hServer :
       compileGeneralMessageServerReactionGroup
           env
+          selfSends
           routes
           className
           server =
@@ -1488,12 +1754,14 @@ theorem compileGeneralMessageServerReactions_cons_ok
     (hRemaining :
       compileGeneralMessageServerReactions
           env
+          selfSends
           routes
           className
           remaining =
         .ok compiledRemaining) :
     compileGeneralMessageServerReactions
         env
+        selfSends
         routes
         className
         (server :: remaining) =
@@ -1508,6 +1776,7 @@ theorem compileGeneralMessageServerReactions_cons_ok
 
 theorem compileGeneralMessageServerReactions_cons_error_head
     {env : GeneralOutputPortEnv}
+    {selfSends : List GeneralSelfSend}
     {routes : List GeneralRoute}
     {className : ClassName}
     {server : DTR.GeneralMessageServer}
@@ -1516,12 +1785,14 @@ theorem compileGeneralMessageServerReactions_cons_error_head
     (hServer :
       compileGeneralMessageServerReactionGroup
           env
+          selfSends
           routes
           className
           server =
         .error message) :
     compileGeneralMessageServerReactions
         env
+        selfSends
         routes
         className
         (server :: remaining) =
@@ -1533,6 +1804,7 @@ theorem compileGeneralMessageServerReactions_cons_error_head
 
 theorem compileGeneralMessageServerReactions_cons_error_tail
     {env : GeneralOutputPortEnv}
+    {selfSends : List GeneralSelfSend}
     {routes : List GeneralRoute}
     {className : ClassName}
     {server : DTR.GeneralMessageServer}
@@ -1542,6 +1814,7 @@ theorem compileGeneralMessageServerReactions_cons_error_tail
     (hServer :
       compileGeneralMessageServerReactionGroup
           env
+          selfSends
           routes
           className
           server =
@@ -1549,12 +1822,14 @@ theorem compileGeneralMessageServerReactions_cons_error_tail
     (hRemaining :
       compileGeneralMessageServerReactions
           env
+          selfSends
           routes
           className
           remaining =
         .error message) :
     compileGeneralMessageServerReactions
         env
+        selfSends
         routes
         className
         (server :: remaining) =
@@ -1635,8 +1910,10 @@ def assembleGeneralReactor
       compileGeneralStateVariableDecl
 
   logicalActions :=
-    reactiveClass.messageServers.map
-      compileGeneralMessageServerAction
+    compileGeneralMessageServerActionsOf
+      (selfSendsOfClass
+        reactiveClass)
+      reactiveClass.messageServers
 
   startupReaction :=
     compiledStartupReaction
@@ -1729,6 +2006,18 @@ theorem assembleGeneralReactor_stateVariables
         compileGeneralStateVariableDecl := by
   rfl
 
+/--
+The reactor's logical actions are the per-site action lists of its message servers, concatenated
+in message-server order.
+
+**The previous form of this theorem said `reactiveClass.messageServers.map
+compileGeneralMessageServerAction`, and that statement is now false rather than merely
+unproven.** A message server with two self-send sites contributes two actions, so the lists
+differ in *length* as soon as any class self-sends the same message twice — `keep-alive.rebeca`
+is the committed fixture that witnesses it. The `map` form survives exactly on the classes where
+every message server has at most one site, which is nine of the ten positive fixtures, and that
+is why the old statement went green for as long as it did.
+-/
 @[simp]
 theorem assembleGeneralReactor_logicalActions
     (reactiveClass : DTR.GeneralReactiveClass)
@@ -1742,8 +2031,10 @@ theorem assembleGeneralReactor_logicalActions
         routes
         compiledStartupReaction
         compiledMessageReactions).logicalActions =
-      reactiveClass.messageServers.map
-        compileGeneralMessageServerAction := by
+      compileGeneralMessageServerActionsOf
+        (selfSendsOfClass
+          reactiveClass)
+        reactiveClass.messageServers := by
   rfl
 
 @[simp]
@@ -1809,6 +2100,7 @@ def compileGeneralReactiveClass
       match
           compileGeneralConstructor
             env
+            (selfSendsOfClass reactiveClass)
             reactiveClass.constructor with
 
       | .error message =>
@@ -1818,6 +2110,7 @@ def compileGeneralReactiveClass
           match
               compileGeneralMessageServerReactions
                 env
+                (selfSendsOfClass reactiveClass)
                 routes
                 reactiveClass.name
                 reactiveClass.messageServers with
@@ -1849,11 +2142,13 @@ theorem compileGeneralReactiveClass_ok
     (hConstructor :
       compileGeneralConstructor
           env
+          (selfSendsOfClass reactiveClass)
           reactiveClass.constructor =
         .ok compiledStartupReaction)
     (hMessageServers :
       compileGeneralMessageServerReactions
           env
+          (selfSendsOfClass reactiveClass)
           routes
           reactiveClass.name
           reactiveClass.messageServers =
@@ -1942,6 +2237,7 @@ theorem compileGeneralReactiveClass_error_constructor
     (hConstructor :
       compileGeneralConstructor
           env
+          (selfSendsOfClass reactiveClass)
           reactiveClass.constructor =
         .error message) :
     compileGeneralReactiveClass
@@ -1970,11 +2266,13 @@ theorem compileGeneralReactiveClass_error_messageServers
     (hConstructor :
       compileGeneralConstructor
           env
+          (selfSendsOfClass reactiveClass)
           reactiveClass.constructor =
         .ok compiledStartupReaction)
     (hMessageServers :
       compileGeneralMessageServerReactions
           env
+          (selfSendsOfClass reactiveClass)
           routes
           reactiveClass.name
           reactiveClass.messageServers =
@@ -2601,7 +2899,7 @@ a later stage that needs one should extend this list deliberately rather than in
 
 private theorem exists_of_compileGeneralBody_cons_ok
     {env : GeneralOutputPortEnv}
-    {bodyKey : GeneralBodyKey}
+    {context : GeneralBodyContext}
     {index : Nat}
     {statement : DTR.GeneralStmt}
     {remaining : DTR.GeneralBody}
@@ -2609,20 +2907,20 @@ private theorem exists_of_compileGeneralBody_cons_ok
     (hCompiled :
       compileGeneralBody
           env
-          bodyKey
+          context
           index
           (statement :: remaining) =
         .ok compiled) :
     ∃ compiledStatement compiledRemaining,
       compileGeneralStmt
           env
-          bodyKey
+          context
           index
           statement =
           .ok compiledStatement ∧
         compileGeneralBody
             env
-            bodyKey
+            context
             (index + 1)
             remaining =
             .ok compiledRemaining ∧
@@ -2633,7 +2931,7 @@ private theorem exists_of_compileGeneralBody_cons_ok
   cases hStatement :
       compileGeneralStmt
         env
-        bodyKey
+        context
         index
         statement with
 
@@ -2648,7 +2946,7 @@ private theorem exists_of_compileGeneralBody_cons_ok
       cases hRemaining :
           compileGeneralBody
             env
-            bodyKey
+            context
             (index + 1)
             remaining with
 
@@ -2687,6 +2985,7 @@ the idiom changes.
 -/
 private theorem exists_of_compileGeneralMessageServerReactionGroup_ok
     {env : GeneralOutputPortEnv}
+    {selfSends : List GeneralSelfSend}
     {routes : List GeneralRoute}
     {className : ClassName}
     {server : DTR.GeneralMessageServer}
@@ -2694,6 +2993,7 @@ private theorem exists_of_compileGeneralMessageServerReactionGroup_ok
     (hCompiled :
       compileGeneralMessageServerReactionGroup
           env
+          selfSends
           routes
           className
           server =
@@ -2701,14 +3001,15 @@ private theorem exists_of_compileGeneralMessageServerReactionGroup_ok
     ∃ compiledBody,
       compileGeneralBody
           env
-          (.messageServer server.name)
+          { bodyKey := .messageServer server.name, selfSends := selfSends }
           0
           server.body =
           .ok compiledBody ∧
         group =
-          assembleGeneralMessageReaction
+          assembleGeneralMessageReactions
+              selfSends
               server
-              compiledBody ::
+              compiledBody ++
             assembleGeneralPortReactions
               className
               server
@@ -2718,7 +3019,7 @@ private theorem exists_of_compileGeneralMessageServerReactionGroup_ok
   cases hBody :
       compileGeneralBody
         env
-        (.messageServer server.name)
+        { bodyKey := .messageServer server.name, selfSends := selfSends }
         0
         server.body with
 
@@ -2744,17 +3045,19 @@ private theorem exists_of_compileGeneralMessageServerReactionGroup_ok
 
 private theorem exists_of_compileGeneralConstructor_ok
     {env : GeneralOutputPortEnv}
+    {selfSends : List GeneralSelfSend}
     {classConstructor : DTR.GeneralConstructor}
     {reaction : LF.GeneralReaction}
     (hCompiled :
       compileGeneralConstructor
           env
+          selfSends
           classConstructor =
         .ok reaction) :
     ∃ compiledBody,
       compileGeneralBody
           env
-          .constructor
+          { bodyKey := .constructor, selfSends := selfSends }
           0
           classConstructor.body =
           .ok compiledBody ∧
@@ -2766,7 +3069,7 @@ private theorem exists_of_compileGeneralConstructor_ok
   cases hBody :
       compileGeneralBody
         env
-        .constructor
+        { bodyKey := .constructor, selfSends := selfSends }
         0
         classConstructor.body with
 
@@ -2792,12 +3095,14 @@ private theorem exists_of_compileGeneralConstructor_ok
 
 private theorem eq_nil_of_compileGeneralMessageServerReactions_nil_ok
     {env : GeneralOutputPortEnv}
+    {selfSends : List GeneralSelfSend}
     {routes : List GeneralRoute}
     {className : ClassName}
     {compiled : List LF.GeneralReaction}
     (hCompiled :
       compileGeneralMessageServerReactions
           env
+          selfSends
           routes
           className
           [] =
@@ -2811,6 +3116,7 @@ private theorem eq_nil_of_compileGeneralMessageServerReactions_nil_ok
 
 private theorem exists_of_compileGeneralMessageServerReactions_cons_ok
     {env : GeneralOutputPortEnv}
+    {selfSends : List GeneralSelfSend}
     {routes : List GeneralRoute}
     {className : ClassName}
     {server : DTR.GeneralMessageServer}
@@ -2819,6 +3125,7 @@ private theorem exists_of_compileGeneralMessageServerReactions_cons_ok
     (hCompiled :
       compileGeneralMessageServerReactions
           env
+          selfSends
           routes
           className
           (server :: remaining) =
@@ -2826,12 +3133,14 @@ private theorem exists_of_compileGeneralMessageServerReactions_cons_ok
     ∃ group compiledRemaining,
       compileGeneralMessageServerReactionGroup
           env
+          selfSends
           routes
           className
           server =
           .ok group ∧
         compileGeneralMessageServerReactions
             env
+            selfSends
             routes
             className
             remaining =
@@ -2843,6 +3152,7 @@ private theorem exists_of_compileGeneralMessageServerReactions_cons_ok
   cases hServer :
       compileGeneralMessageServerReactionGroup
         env
+        selfSends
         routes
         className
         server with
@@ -2858,6 +3168,7 @@ private theorem exists_of_compileGeneralMessageServerReactions_cons_ok
       cases hRemaining :
           compileGeneralMessageServerReactions
             env
+            selfSends
             routes
             className
             remaining with
@@ -2912,10 +3223,12 @@ private theorem exists_of_compileGeneralReactiveClass_ok
           .ok env ∧
         compileGeneralConstructor
             env
+            (selfSendsOfClass reactiveClass)
             reactiveClass.constructor =
             .ok compiledStartupReaction ∧
           compileGeneralMessageServerReactions
               env
+              (selfSendsOfClass reactiveClass)
               routes
               reactiveClass.name
               reactiveClass.messageServers =
@@ -2944,6 +3257,7 @@ private theorem exists_of_compileGeneralReactiveClass_ok
       cases hConstructor :
           compileGeneralConstructor
             env
+            (selfSendsOfClass reactiveClass)
             reactiveClass.constructor with
 
       | error message =>
@@ -2958,6 +3272,7 @@ private theorem exists_of_compileGeneralReactiveClass_ok
           cases hMessageServers :
               compileGeneralMessageServerReactions
                 env
+                (selfSendsOfClass reactiveClass)
                 routes
                 reactiveClass.name
                 reactiveClass.messageServers with
@@ -3731,41 +4046,135 @@ churn.
 -/
 
 /--
-Deriving the actions of a message-server list preserves names and order.
+The action names one message server contributes, in declaration order.
+
+The action-side counterpart of `generalMessageReactionNamesOf`, and the one place the two sides
+visibly differ: reaction siblings all share a name, while action siblings must **not**, because
+action names are declared identifiers and `LF.GeneralReactor.declaredNames` has to stay `Nodup`.
+That asymmetry is not a style choice — it follows from `renderGeneralReaction` dropping reaction
+names and the printer emitting action names.
+
+The zero-site branch spells the name with `actionNameFor` rather than `generalActionNameAtSite`,
+matching what `compileGeneralMessageServerActions` emits in the same branch. The two agree
+per branch or the reaction triggers on an action the reactor never declares.
 -/
-theorem compileGeneralMessageServerAction_names :
-    ∀ (servers : List DTR.GeneralMessageServer),
-      (servers.map
-          compileGeneralMessageServerAction).map
+def generalMessageActionNamesOf
+    (allSelfSends : List GeneralSelfSend)
+    (message : MsgName) :
+    List ActionName :=
+  match
+      generalSelfSendSitesOf
+        message
+        allSelfSends with
+
+  | [] =>
+      [actionNameFor message]
+
+  | sites =>
+      sites.map
+        (fun send =>
+          generalActionNameAtSite
+            allSelfSends
+            send.site
+            message)
+
+/--
+Deriving one message server's actions produces exactly the names the specification predicts.
+-/
+@[simp]
+theorem compileGeneralMessageServerActions_names
+    (allSelfSends : List GeneralSelfSend)
+    (server : DTR.GeneralMessageServer) :
+    (compileGeneralMessageServerActions
+          allSelfSends
+          server).map
+        (fun action =>
+          action.name) =
+      generalMessageActionNamesOf
+        allSelfSends
+        server.name := by
+
+  cases hSites :
+      generalSelfSendSitesOf
+        server.name
+        allSelfSends with
+
+  | nil =>
+      simp [
+        compileGeneralMessageServerActions,
+        generalMessageActionNamesOf,
+        compileGeneralMessageServerAction,
+        hSites
+      ]
+
+  | cons firstSite remainingSites =>
+      simp [
+        compileGeneralMessageServerActions,
+        generalMessageActionNamesOf,
+        compileGeneralMessageServerActionAtSite,
+        hSites
+      ]
+
+/--
+The action names one class contributes, in declaration order.
+
+Concatenation rather than `::` for the same reason `generalReactionNamesOf` concatenates: a
+message server contributes a *list*, whose length is its self-send site count, so no
+cons-shaped specification can state this.
+-/
+def generalActionNamesOf
+    (allSelfSends : List GeneralSelfSend) :
+    List DTR.GeneralMessageServer →
+    List ActionName
+
+  | [] =>
+      []
+
+  | server :: remaining =>
+      generalMessageActionNamesOf
+          allSelfSends
+          server.name ++
+        generalActionNamesOf
+          allSelfSends
+          remaining
+
+/--
+Deriving the actions of a message-server list preserves names and order.
+
+**This replaced a theorem stating `servers.map compileGeneralMessageServerAction`, whose
+right-hand side was `servers.map (fun server => actionNameFor server.name)`.** That statement was
+true of the function it named and stopped being true of the reactor, because
+`assembleGeneralReactor` no longer builds its action list with `map`. The length mismatch is
+the same one §7.3 forced on the reaction side one stage earlier, arriving from a different
+direction: there it was external senders multiplying reactions, here it is self-send sites
+multiplying actions.
+-/
+theorem compileGeneralMessageServerActionsOf_names :
+    ∀ (allSelfSends : List GeneralSelfSend)
+      (servers : List DTR.GeneralMessageServer),
+      (compileGeneralMessageServerActionsOf
+            allSelfSends
+            servers).map
           (fun action =>
             action.name) =
-        servers.map
-          (fun server =>
-            actionNameFor server.name) := by
+        generalActionNamesOf
+          allSelfSends
+          servers := by
 
-  intro servers
+  intro allSelfSends servers
   induction servers with
 
   | nil =>
       rfl
 
   | cons server remaining inductionHypothesis =>
-      change
-        actionNameFor server.name ::
-            (remaining.map
-                compileGeneralMessageServerAction).map
-                (fun action =>
-                  action.name) =
-          actionNameFor server.name ::
-            remaining.map
-              (fun candidate =>
-                actionNameFor candidate.name)
-
-      exact
-        congrArg
-          (List.cons
-            (actionNameFor server.name))
-          inductionHypothesis
+      simp [
+        compileGeneralMessageServerActionsOf,
+        generalActionNamesOf,
+        List.map_append,
+        compileGeneralMessageServerActions_names,
+        inductionHypothesis
+      ]
 
 /--
 Translating typed parameters preserves names and order.
@@ -3840,17 +4249,177 @@ theorem compileGeneralStateVariableDecl_names :
           inductionHypothesis
 
 /--
-The reaction names one message server contributes, in the order they are declared.
+The reaction names one message server contributes through its **own** actions, in declaration
+order.
+
+One name per self-send site, or the single name when nothing self-sends to this server. Every
+entry is the same string, and that is the point rather than a shortcut: siblings differ in their
+*triggers*, not their names, because reaction names are dropped by `renderGeneralReaction` and
+checked for uniqueness nowhere. So what this specification pins is the **count** and the
+**position** of the action reactions within the group, which is exactly what F56 got wrong — the
+old shape had one where the target needs k.
+-/
+def generalMessageReactionNamesOf
+    (allSelfSends : List GeneralSelfSend)
+    (message : MsgName) :
+    List ReactionName :=
+  match
+      generalSelfSendSitesOf
+        message
+        allSelfSends with
+
+  | [] =>
+      [messageReactionNameFor message]
+
+  | sites =>
+      sites.map
+        (fun _ =>
+          messageReactionNameFor message)
+
+/--
+Assembling a message server's action reactions produces exactly the names the specification
+predicts.
+
+The bridge between the two vocabularies the section note above defends: the left-hand side is
+built from *reactions*, the right from *names*.
+-/
+@[simp]
+theorem assembleGeneralMessageReactions_names
+    (allSelfSends : List GeneralSelfSend)
+    (server : DTR.GeneralMessageServer)
+    (compiledBody : LF.GeneralBody) :
+    (assembleGeneralMessageReactions
+          allSelfSends
+          server
+          compiledBody).map
+        (fun reaction =>
+          reaction.name) =
+      generalMessageReactionNamesOf
+        allSelfSends
+        server.name := by
+
+  cases hSites :
+      generalSelfSendSitesOf
+        server.name
+        allSelfSends with
+
+  | nil =>
+      simp [
+        assembleGeneralMessageReactions,
+        generalMessageReactionNamesOf,
+        assembleGeneralMessageReaction,
+        hSites
+      ]
+
+  | cons firstSite remainingSites =>
+      simp [
+        assembleGeneralMessageReactions,
+        generalMessageReactionNamesOf,
+        assembleGeneralMessageReactionAtSite,
+        hSites
+      ]
+
+/--
+The triggers one message server's action reactions carry, in declaration order.
+
+The specification `generalMessageReactionNamesOf` cannot express, for the reason recorded on
+`assembleGeneralMessageReactionAtSite_trigger`: sibling reaction names are identical by design,
+so which sibling listens to which action is invisible in names and visible only here.
+
+This is what makes F56's closing obligation checkable rather than merely asserted. That finding
+records that once one action per site is required, *"the generator must emit site reactions in
+the order their sends appear in the body, which makes emission order a correctness property
+rather than a formatting choice"*. A correctness property with nothing stating it is the shape
+F44, F45 and F47 each recorded, so it is stated here instead of left to inspection of the
+definition: the i-th reaction of the group triggers on the i-th site's action, with
+`generalSelfSendSitesOf` fixing what i-th means.
+
+The `[]` branch keeps `actionNameFor`'s spelling for the reason every zero-site branch in this
+file does: the declaration side and the trigger side have to agree *per branch*, or a reaction
+triggers on an action its own reactor never declares.
+-/
+def generalMessageReactionTriggersOf
+    (allSelfSends : List GeneralSelfSend)
+    (message : MsgName) :
+    List LF.GeneralTrigger :=
+  match
+      generalSelfSendSitesOf
+        message
+        allSelfSends with
+
+  | [] =>
+      [.logicalAction
+        (actionNameFor message)]
+
+  | sites =>
+      sites.map
+        (fun send =>
+          .logicalAction
+            (generalActionNameAtSite
+              allSelfSends
+              send.site
+              message))
+
+/--
+Assembling a message server's action reactions produces exactly the triggers the specification
+predicts, in the order it predicts them.
+
+Together with `assembleGeneralMessageReactions_names` this pins the group completely, and the
+division of labour is exact: that theorem fixes the names and therefore the length, this one
+fixes which action each position listens to. Neither implies the other — identical names carry
+no order information, and identical triggers would carry no naming information — so the pair is
+what a reader checking §7.3 needs, not either alone.
+-/
+@[simp]
+theorem assembleGeneralMessageReactions_triggers
+    (allSelfSends : List GeneralSelfSend)
+    (server : DTR.GeneralMessageServer)
+    (compiledBody : LF.GeneralBody) :
+    (assembleGeneralMessageReactions
+          allSelfSends
+          server
+          compiledBody).map
+        (fun reaction =>
+          reaction.trigger) =
+      generalMessageReactionTriggersOf
+        allSelfSends
+        server.name := by
+
+  cases hSites :
+      generalSelfSendSitesOf
+        server.name
+        allSelfSends with
+
+  | nil =>
+      simp [
+        assembleGeneralMessageReactions,
+        generalMessageReactionTriggersOf,
+        assembleGeneralMessageReaction,
+        hSites
+      ]
+
+  | cons firstSite remainingSites =>
+      simp [
+        assembleGeneralMessageReactions,
+        generalMessageReactionTriggersOf,
+        assembleGeneralMessageReactionAtSite,
+        hSites
+      ]
+
+/--
+The reaction names one class contributes, in the order they are declared.
 
 The specification the section note above defends. Total, and independent of both the
 translation and the `Except` layer — a reader can compare it against the design's §7.3 table
-without holding any of this file in their head.
+without holding any of this file in their head, with the one amendment F56 forced: the leading
+entry of each group became a list of k entries, one per self-send site.
 
-`routes` and `className` are before the colon because neither varies in the recursion; the
-server list is after it, which is the same discipline every recursive definition in this
-development follows.
+`selfSends` joins `routes` and `className` before the colon: none of the three varies in the
+recursion, and the self-send list is the sending *class's*, so it is fixed for the whole server
+list.
 -/
 def generalReactionNamesOf
+    (selfSends : List GeneralSelfSend)
     (routes : List GeneralRoute)
     (className : ClassName) :
     List DTR.GeneralMessageServer →
@@ -3860,7 +4429,9 @@ def generalReactionNamesOf
       []
 
   | server :: remaining =>
-      (messageReactionNameFor server.name ::
+      (generalMessageReactionNamesOf
+            selfSends
+            server.name ++
           (generalRoutesIntoMessageServer
             className
             server.name
@@ -3869,22 +4440,30 @@ def generalReactionNamesOf
               portReactionNameFor
                 (generalInputPortOfRoute route))) ++
         generalReactionNamesOf
+          selfSends
           routes
           className
           remaining
 
 /--
-One message server's reaction group carries its action reaction first, then one port reaction
-per route into it, in route order.
+One message server's reaction group carries its action reactions first — one per self-send
+site — then one port reaction per route into it, in route order.
 
 The group-level half of the replacement, and the place the naming rule is pinned. Note what it
-says about a message server nothing sends to from outside: the filtered route list is empty, so
-the group is a one-element list and the reactor looks exactly as stage D left it. That is the
-precise sense in which stage E is conservative on the inherited fixtures — not an appeal to
-their contents, but a consequence of this equation.
+says about a message server nothing sends to from outside **and nothing self-sends to twice**:
+the filtered route list is empty and the site list has at most one entry, so the group is a
+one-element list and the reactor looks exactly as stage D left it. That is the precise sense in
+which stage E is conservative on the inherited fixtures — not an appeal to their contents, but a
+consequence of this equation.
+
+**The second condition is new and was absent from this paragraph until F56.** The earlier text
+named only the routing condition, which was sufficient while every message server had exactly
+one action; it is not sufficient now, and `keep-alive.rebeca` is the committed fixture where the
+route list is empty and the group is still two reactions long.
 -/
 theorem compileGeneralMessageServerReactionGroup_names
     {env : GeneralOutputPortEnv}
+    {selfSends : List GeneralSelfSend}
     {routes : List GeneralRoute}
     {className : ClassName}
     {server : DTR.GeneralMessageServer}
@@ -3892,6 +4471,7 @@ theorem compileGeneralMessageServerReactionGroup_names
     (hCompiled :
       compileGeneralMessageServerReactionGroup
           env
+          selfSends
           routes
           className
           server =
@@ -3899,7 +4479,9 @@ theorem compileGeneralMessageServerReactionGroup_names
     group.map
         (fun reaction =>
           reaction.name) =
-      messageReactionNameFor server.name ::
+      generalMessageReactionNamesOf
+          selfSends
+          server.name ++
         (generalRoutesIntoMessageServer
           className
           server.name
@@ -3919,28 +4501,9 @@ theorem compileGeneralMessageServerReactionGroup_names
 
   subst hGroup
 
-  change
-    (assembleGeneralMessageReaction
-          server
-          compiledBody).name ::
-        (assembleGeneralPortReactions
-            className
-            server
-            compiledBody
-            routes).map
-            (fun reaction =>
-              reaction.name) =
-      messageReactionNameFor server.name ::
-        (generalRoutesIntoMessageServer
-          className
-          server.name
-          routes).map
-          (fun route =>
-            portReactionNameFor
-              (generalInputPortOfRoute route))
-
-  rw [
-    assembleGeneralMessageReaction_name,
+  simp [
+    List.map_append,
+    assembleGeneralMessageReactions_names,
     assembleGeneralPortReactions_names
   ]
 
@@ -3958,12 +4521,14 @@ from outside.
 -/
 theorem compileGeneralMessageServerReactions_names :
     ∀ (env : GeneralOutputPortEnv)
+      (selfSends : List GeneralSelfSend)
       (routes : List GeneralRoute)
       (className : ClassName)
       (servers : List DTR.GeneralMessageServer)
       (compiled : List LF.GeneralReaction),
       compileGeneralMessageServerReactions
           env
+          selfSends
           routes
           className
           servers =
@@ -3972,11 +4537,12 @@ theorem compileGeneralMessageServerReactions_names :
             (fun reaction =>
               reaction.name) =
           generalReactionNamesOf
+            selfSends
             routes
             className
             servers := by
 
-  intro env routes className servers
+  intro env selfSends routes className servers
   induction servers with
 
   | nil =>
@@ -4014,13 +4580,21 @@ theorem compileGeneralMessageServerReactions_names :
       ]
 
 /--
-A compiled reactor declares one logical action per message server, named after it, in
-source order.
+A compiled reactor declares one logical action per self-send **site**, plus one for every
+message server nothing self-sends to, in source order.
 
-Unaffected by stage E, and the contrast with the reaction list is the finding worth keeping:
-one action per message server no matter how many senders reach it, because an action is the
-*self*-delivery mechanism and self-sends were never routed. A message server reached by two
-external senders has one action and three reactions.
+**The previous version of this docstring opened with "Unaffected by stage E" and "one logical
+action per message server", and both were false by the time F56 was measured.** What the
+sentence after them said is still true, and is why the error survived review: one action per
+message server *no matter how many senders reach it*, because an action is the *self*-delivery
+mechanism and self-sends were never routed. That correctly rules out the **routing** channel of
+multiplication — a message server reached by two external senders still has one action and three
+reactions — and it was read as ruling out every channel. Self-send sites multiply actions along
+an axis routing never touches, so a claim that was sound about senders was wrong about actions.
+
+The contrast with the reaction list is still the thing worth keeping, and it is now sharper: the
+reaction list grows in *two* independent dimensions, senders and sites, while the action list
+grows only in sites.
 -/
 theorem compileGeneralReactiveClass_actionNames
     {classes : List DTR.GeneralReactiveClass}
@@ -4036,9 +4610,10 @@ theorem compileGeneralReactiveClass_actionNames
     reactor.logicalActions.map
         (fun action =>
           action.name) =
-      reactiveClass.messageServers.map
-        (fun server =>
-          actionNameFor server.name) := by
+      generalActionNamesOf
+        (selfSendsOfClass
+          reactiveClass)
+        reactiveClass.messageServers := by
 
   rcases
       exists_of_compileGeneralReactiveClass_ok
@@ -4060,7 +4635,9 @@ theorem compileGeneralReactiveClass_actionNames
   ]
 
   exact
-    compileGeneralMessageServerAction_names
+    compileGeneralMessageServerActionsOf_names
+      (selfSendsOfClass
+        reactiveClass)
       reactiveClass.messageServers
 
 /--
@@ -4089,6 +4666,8 @@ theorem compileGeneralReactiveClass_reactionNames
         (fun reaction =>
           reaction.name) =
       generalReactionNamesOf
+        (selfSendsOfClass
+          reactiveClass)
         routes
         reactiveClass.name
         reactiveClass.messageServers := by
@@ -4115,6 +4694,7 @@ theorem compileGeneralReactiveClass_reactionNames
   exact
     compileGeneralMessageServerReactions_names
       env
+      (selfSendsOfClass reactiveClass)
       routes
       reactiveClass.name
       reactiveClass.messageServers
@@ -4702,13 +5282,13 @@ Compiling an assignment cannot fail.
 -/
 theorem compileGeneralStmt_assign
     (env : GeneralOutputPortEnv)
-    (bodyKey : GeneralBodyKey)
+    (context : GeneralBodyContext)
     (index : Nat)
     (target : VarName)
     (value : DTR.GeneralExpr) :
     compileGeneralStmt
         env
-        bodyKey
+        context
         index
         (
           .assign
@@ -4729,14 +5309,14 @@ Compiling a self-send cannot fail: it needs no port, only the message's own acti
 -/
 theorem compileGeneralStmt_send_selfTarget
     (env : GeneralOutputPortEnv)
-    (bodyKey : GeneralBodyKey)
+    (context : GeneralBodyContext)
     (index : Nat)
     (message : MsgName)
     (arguments : List DTR.GeneralExpr)
     (delay : Delay) :
     compileGeneralStmt
         env
-        bodyKey
+        context
         index
         (
           .send
@@ -4747,7 +5327,15 @@ theorem compileGeneralStmt_send_selfTarget
         ) =
       .ok
         (.schedule
-          (actionNameFor
+          (generalActionNameAtSite
+            context.selfSends
+            {
+              body :=
+                context.bodyKey
+
+              index :=
+                index
+            }
             message)
           (arguments.map
             compileGeneralExpr)
@@ -4765,7 +5353,7 @@ wrong send.
 -/
 theorem compileGeneralStmt_send_knownRebec_ok
     (env : GeneralOutputPortEnv)
-    (bodyKey : GeneralBodyKey)
+    (context : GeneralBodyContext)
     (index : Nat)
     (rebec : KnownRebecName)
     (message : MsgName)
@@ -4777,7 +5365,7 @@ theorem compileGeneralStmt_send_knownRebec_ok
           env
           {
             body :=
-              bodyKey
+              context.bodyKey
 
             index :=
               index
@@ -4785,7 +5373,7 @@ theorem compileGeneralStmt_send_knownRebec_ok
         some entry) :
     compileGeneralStmt
         env
-        bodyKey
+        context
         index
         (
           .send
@@ -4818,12 +5406,12 @@ stating even though no earlier theorem needed it. This theorem needs it.
 -/
 theorem exists_compileGeneralBody
     (env : GeneralOutputPortEnv)
-    (bodyKey : GeneralBodyKey)
+    (context : GeneralBodyContext)
     (body : DTR.GeneralBody) :
     ∀ index : Nat,
       (∀ send ∈
           externalSendsFromIndex
-            bodyKey
+            context.bodyKey
             index
             body,
         ∃ entry,
@@ -4834,7 +5422,7 @@ theorem exists_compileGeneralBody
       ∃ compiled,
         compileGeneralBody
             env
-            bodyKey
+            context
             index
             body =
           .ok compiled := by
@@ -4848,7 +5436,7 @@ theorem exists_compileGeneralBody
         ⟨[],
          compileGeneralBody_nil
            env
-           bodyKey
+           context
            index⟩
 
   | cons statement remaining inductionHypothesis =>
@@ -4861,7 +5449,7 @@ theorem exists_compileGeneralBody
           have hStatement :
               compileGeneralStmt
                   env
-                  bodyKey
+                  context
                   index
                   (
                     .assign
@@ -4875,7 +5463,7 @@ theorem exists_compileGeneralBody
                       value)) :=
             compileGeneralStmt_assign
               env
-              bodyKey
+              context
               index
               target
               value
@@ -4911,7 +5499,7 @@ theorem exists_compileGeneralBody
               have hStatement :
                   compileGeneralStmt
                       env
-                      bodyKey
+                      context
                       index
                       (
                         .send
@@ -4922,14 +5510,16 @@ theorem exists_compileGeneralBody
                       ) =
                     .ok
                       (.schedule
-                        (actionNameFor
+                        (generalActionNameAtSite
+                          context.selfSends
+                          { body := context.bodyKey, index := index }
                           message)
                         (arguments.map
                           compileGeneralExpr)
                         delay) :=
                 compileGeneralStmt_send_selfTarget
                   env
-                  bodyKey
+                  context
                   index
                   message
                   arguments
@@ -4965,7 +5555,7 @@ theorem exists_compileGeneralBody
                     site :=
                       {
                         body :=
-                          bodyKey
+                          context.bodyKey
 
                         index :=
                           index
@@ -4995,7 +5585,7 @@ theorem exists_compileGeneralBody
                       env
                       {
                         body :=
-                          bodyKey
+                          context.bodyKey
 
                         index :=
                           index
@@ -5006,7 +5596,7 @@ theorem exists_compileGeneralBody
               have hStatement :
                   compileGeneralStmt
                       env
-                      bodyKey
+                      context
                       index
                       (
                         .send
@@ -5023,7 +5613,7 @@ theorem exists_compileGeneralBody
                           compileGeneralExpr)) :=
                 compileGeneralStmt_send_knownRebec_ok
                   env
-                  bodyKey
+                  context
                   index
                   rebec
                   message
@@ -5061,6 +5651,7 @@ A constructor whose every external send has an entry compiles.
 -/
 theorem exists_compileGeneralConstructor
     (env : GeneralOutputPortEnv)
+    (selfSends : List GeneralSelfSend)
     (classConstructor : DTR.GeneralConstructor)
     (hSends :
       ∀ send ∈
@@ -5075,13 +5666,14 @@ theorem exists_compileGeneralConstructor
     ∃ compiled,
       compileGeneralConstructor
           env
+          selfSends
           classConstructor =
         .ok compiled := by
 
   obtain ⟨compiledBody, hBody⟩ :=
     exists_compileGeneralBody
       env
-      .constructor
+      { bodyKey := .constructor, selfSends := selfSends }
       classConstructor.body
       0
       hSends
@@ -5100,6 +5692,7 @@ so the group's only failure is the body's, which is the sentence the note on
 -/
 theorem exists_compileGeneralMessageServerReactionGroup
     (env : GeneralOutputPortEnv)
+    (selfSends : List GeneralSelfSend)
     (routes : List GeneralRoute)
     (className : ClassName)
     (server : DTR.GeneralMessageServer)
@@ -5117,6 +5710,7 @@ theorem exists_compileGeneralMessageServerReactionGroup
     ∃ compiled,
       compileGeneralMessageServerReactionGroup
           env
+          selfSends
           routes
           className
           server =
@@ -5125,8 +5719,7 @@ theorem exists_compileGeneralMessageServerReactionGroup
   obtain ⟨compiledBody, hBody⟩ :=
     exists_compileGeneralBody
       env
-      (.messageServer
-        server.name)
+      { bodyKey := .messageServer server.name, selfSends := selfSends }
       server.body
       0
       hSends
@@ -5141,6 +5734,7 @@ A list of message servers, each of whose sends has an entry, compiles.
 -/
 theorem exists_compileGeneralMessageServerReactions
     (env : GeneralOutputPortEnv)
+    (selfSends : List GeneralSelfSend)
     (routes : List GeneralRoute)
     (className : ClassName)
     (servers : List DTR.GeneralMessageServer) :
@@ -5158,6 +5752,7 @@ theorem exists_compileGeneralMessageServerReactions
     ∃ compiled,
       compileGeneralMessageServerReactions
           env
+          selfSends
           routes
           className
           servers =
@@ -5172,6 +5767,7 @@ theorem exists_compileGeneralMessageServerReactions
         ⟨[],
          compileGeneralMessageServerReactions_nil
            env
+           selfSends
            routes
            className⟩
 
@@ -5181,6 +5777,7 @@ theorem exists_compileGeneralMessageServerReactions
       obtain ⟨group, hGroup⟩ :=
         exists_compileGeneralMessageServerReactionGroup
           env
+          selfSends
           routes
           className
           server
@@ -5248,6 +5845,7 @@ theorem exists_compileGeneralReactiveClass
   obtain ⟨compiledStartupReaction, hConstructor⟩ :=
     exists_compileGeneralConstructor
       env
+      (selfSendsOfClass reactiveClass)
       reactiveClass.constructor
       (by
         intro send hMember
@@ -5261,6 +5859,7 @@ theorem exists_compileGeneralReactiveClass
   obtain ⟨compiledMessageReactions, hMessageServers⟩ :=
     exists_compileGeneralMessageServerReactions
       env
+      (selfSendsOfClass reactiveClass)
       routes
       reactiveClass.name
       reactiveClass.messageServers
@@ -5368,7 +5967,7 @@ under us before. The equations are the interface, and this lemma keeps them the 
 -/
 theorem compileGeneralBody_cons_ok_inversion
     {env : GeneralOutputPortEnv}
-    {bodyKey : GeneralBodyKey}
+    {context : GeneralBodyContext}
     {index : Nat}
     {statement : DTR.GeneralStmt}
     {remaining : DTR.GeneralBody}
@@ -5376,7 +5975,7 @@ theorem compileGeneralBody_cons_ok_inversion
     (hCompiled :
       compileGeneralBody
           env
-          bodyKey
+          context
           index
           (statement :: remaining) =
         .ok compiled) :
@@ -5384,13 +5983,13 @@ theorem compileGeneralBody_cons_ok_inversion
       (compiledRemaining : LF.GeneralBody),
       compileGeneralStmt
           env
-          bodyKey
+          context
           index
           statement =
         .ok compiledStatement ∧
       compileGeneralBody
           env
-          bodyKey
+          context
           (index + 1)
           remaining =
         .ok compiledRemaining ∧
@@ -5401,7 +6000,7 @@ theorem compileGeneralBody_cons_ok_inversion
   cases hStatement :
       compileGeneralStmt
         env
-        bodyKey
+        context
         index
         statement with
 
@@ -5418,7 +6017,7 @@ theorem compileGeneralBody_cons_ok_inversion
       cases hRemaining :
           compileGeneralBody
             env
-            bodyKey
+            context
             (index + 1)
             remaining with
 
@@ -5470,7 +6069,7 @@ Both the environment and the body key are fixed, because both are fixed along
 -/
 private theorem compileGeneralStmt_setPort_inversion
     {env : GeneralOutputPortEnv}
-    {bodyKey : GeneralBodyKey}
+    {context : GeneralBodyContext}
     {index : Nat}
     {statement : DTR.GeneralStmt}
     {port : PortName}
@@ -5478,7 +6077,7 @@ private theorem compileGeneralStmt_setPort_inversion
     (hStatement :
       compileGeneralStmt
           env
-          bodyKey
+          context
           index
           statement =
         .ok
@@ -5490,7 +6089,7 @@ private theorem compileGeneralStmt_setPort_inversion
           env
           {
             body :=
-              bodyKey
+              context.bodyKey
 
             index :=
               index
@@ -5521,7 +6120,7 @@ private theorem compileGeneralStmt_setPort_inversion
                 env
                 {
                   body :=
-                    bodyKey
+                    context.bodyKey
 
                   index :=
                     index
@@ -5562,13 +6161,13 @@ and exactly what F48's model denies.
 -/
 private theorem compileGeneralBody_setPortNames_provenance
     (env : GeneralOutputPortEnv)
-    (bodyKey : GeneralBodyKey) :
+    (context : GeneralBodyContext) :
     ∀ (statements : DTR.GeneralBody)
       (index : Nat)
       (compiled : LF.GeneralBody),
       compileGeneralBody
           env
-          bodyKey
+          context
           index
           statements =
         .ok compiled →
@@ -5583,7 +6182,7 @@ private theorem compileGeneralBody_setPortNames_provenance
               env
               {
                 body :=
-                  bodyKey
+                  context.bodyKey
 
                 index :=
                   site
@@ -5736,7 +6335,7 @@ it is the form a caller holding a per-class guard can actually supply.
 -/
 theorem compileGeneralBody_setPortNames_nodup
     (env : GeneralOutputPortEnv)
-    (bodyKey : GeneralBodyKey)
+    (context : GeneralBodyContext)
     (hDistinctSites :
       ∀ (siteLeft siteRight : Nat)
         (entryLeft entryRight : GeneralOutputPortEntry),
@@ -5744,7 +6343,7 @@ theorem compileGeneralBody_setPortNames_nodup
             env
             {
               body :=
-                bodyKey
+                context.bodyKey
 
               index :=
                 siteLeft
@@ -5754,7 +6353,7 @@ theorem compileGeneralBody_setPortNames_nodup
             env
             {
               body :=
-                bodyKey
+                context.bodyKey
 
               index :=
                 siteRight
@@ -5767,7 +6366,7 @@ theorem compileGeneralBody_setPortNames_nodup
       (compiled : LF.GeneralBody),
       compileGeneralBody
           env
-          bodyKey
+          context
           index
           statements =
         .ok compiled →
@@ -5854,7 +6453,7 @@ theorem compileGeneralBody_setPortNames_nodup
                  hPortName⟩ :=
               compileGeneralBody_setPortNames_provenance
                 env
-                bodyKey
+                context
                 remaining
                 (index + 1)
                 compiledRemaining
