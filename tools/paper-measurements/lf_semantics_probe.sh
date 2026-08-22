@@ -869,6 +869,88 @@ main reactor {
 }
 LF
 
+# ============================================================================
+# SECTION 14 (2026-08-23) -- WHICH SHAPE the forced repair takes
+#
+# Section 12 measured that one action cannot carry two sends at one tag, and
+# section 13 that no declaration-level policy repairs it in this target. So the
+# repair is structural: one action per send SITE, mirroring what SS6.2 does for
+# ports. That leaves one open question, and it decides the shape of the generated
+# reactor. With k actions all feeding ONE message server, does that server get one
+# reaction with k triggers, or k reactions?
+#
+# 14a asks whether a multi-trigger reaction fires ONCE or TWICE when both of its
+# triggers are present at one tag. Its body prints a fixed marker and reads no
+# payload at all, deliberately: counting markers answers the question with no
+# dependence on an is_present() API this harness has never exercised, so the probe
+# cannot fail for a reason unrelated to what it asks.
+#
+# If 14a fires ONCE, shape (A) is lossy for section 12's reason and the only rescue
+# is branching over presence inside the body -- which is the multiport fallback this
+# project already rejected, because it moves the ordering guarantee into generated
+# C++ statement order, where the Lean development cannot see it.
+#
+# 14b is the shape the repair uses if (A) falls: k actions, k reactions. Two
+# reactions in one reactor firing at one tag in declaration order is already
+# measured (section 1); what is NOT measured is whether that holds when the
+# triggers are ACTIONS rather than ports. This probe checks that, and is not a
+# re-measurement of the ordering result.
+# ============================================================================
+
+probe action_two_actions_one_reaction 'ONCE or TWICE? two actions scheduled at one tag, ONE reaction triggered by both -- count the RELICO_MULTI_FIRED lines' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Queue {
+    logical action slotA: int
+    logical action slotB: int
+    reaction(startup) -> slotA, slotB {=
+        slotA.schedule(1, 0ms);
+        slotB.schedule(2, 0ms);
+    =}
+    reaction(slotA, slotB) {=
+        std::printf("RELICO_MULTI_FIRED\n");
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    q = new Queue()
+}
+LF
+
+probe action_two_actions_two_reactions 'TWO lines, A then B? two actions at one tag with ONE REACTION EACH -- the shape the repair takes if the probe above fires once' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Queue {
+    logical action slotA: int
+    logical action slotB: int
+    reaction(startup) -> slotA, slotB {=
+        slotA.schedule(1, 0ms);
+        slotB.schedule(2, 0ms);
+    =}
+    reaction(slotA) {=
+        std::printf("RELICO_TWO A %d\n", *slotA.get());
+        std::fflush(stdout);
+    =}
+    reaction(slotB) {=
+        std::printf("RELICO_TWO B %d\n", *slotB.get());
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    q = new Queue()
+}
+LF
+
 printf '\n\n========== HOW TO READ THIS ==========\n'
 cat <<'NOTE'
   The single most important line in this log is whether
@@ -907,10 +989,12 @@ cat <<'NOTE'
   parameter_defaults_named_args simply repays a debt: that form was measured ad
   hoc in stage D with no committed script, and a fresh clone can now re-run it.
 
-  Sixth, sections 12 and 13 are the only ones here that measure a road NOT taken,
-  and the only ones whose result moved a claim from "chosen" to "forced". Measured
-  2026-08-22 against lfc 0.11.0, section 12's two probes compiling and running
-  cleanly:
+  Sixth, sections 12, 13 and 14a are the only ones here that measure a road NOT
+  taken, and the only ones whose result moved a claim from "chosen" to "forced".
+  14b is the exception within its own section: it measures the road that IS taken,
+  which is why section 14 is split across this sentence and the Eighth paragraph
+  below. Measured 2026-08-22 against lfc 0.11.0, section 12's two probes compiling
+  and running cleanly:
 
     action_two_schedules_same_tag       lfc 0, run 0 -> ONE line,  RELICO_ACTION 2
     action_two_schedules_distinct_tags  lfc 0, run 0 -> TWO lines, 1 then 2
@@ -960,6 +1044,42 @@ cat <<'NOTE'
   reactor-cpp may support the policy, and a re-run of section 13 is the cheapest
   way to find out. Do not carry either result forward across an lfc upgrade
   without re-measuring.
+
+  Eighth, section 14 asked which SHAPE the forced structural repair takes. Given k
+  actions all feeding one message server, does that server get one reaction with k
+  triggers, or k reactions? Measured 2026-08-23, same lfc:
+
+    action_two_actions_one_reaction     lfc 0, run 0 -> ONE  RELICO_MULTI_FIRED
+    action_two_actions_two_reactions    lfc 0, run 0 -> TWO  lines, A 1 then B 2
+
+  The one-reaction shape fires ONCE. A reaction's trigger list is a disjunction,
+  not a queue: the reaction is enabled if ANY trigger is present, so two triggers
+  present at one tag is one firing and k-1 message executions are lost. Note this
+  is a DIFFERENT loss from section 12 -- there the payload was overwritten on a
+  single action, here the firings themselves are merged across two distinct
+  actions -- so it is independent confirmation rather than a restatement, and the
+  two results close the space from opposite directions. The only rescue for the
+  multi-trigger shape would be branching over presence inside the reaction body,
+  which relocates the ordering guarantee into generated C++ statement order where
+  the Lean development cannot see it; that is the multiport fallback this project
+  has already rejected once, and the reason has not changed.
+
+  The k-reactions shape works, and it also settles something that had never been
+  measured: section 1 established that two reactions in one reactor both fire at
+  one tag in DECLARATION order, but only for reactions triggered by ports. Section
+  14b shows the same holds when the triggers are logical ACTIONS. That is a load
+  on the printer, not a free gift -- if declaration order is what orders the
+  firings, the generated reactor must emit one reaction per send site in the order
+  the sends appear in the body, and that emission order becomes semantically
+  significant rather than cosmetic.
+
+  So the repair is one action AND one reaction per self-send SITE, and the "reached
+  twice" above becomes reached three times. The value of three roads is that every
+  alternative to site-keying is now measured dead rather than merely disfavoured:
+  one action for k sends drops values (12), no policy can restore them (13), and
+  one reaction for k actions drops firings (14a). The design document and the paper
+  should make that claim in exactly that form, because it is stronger than an
+  argument from preference and it is the form the evidence actually supports.
 
   Nothing in the repo was read or written. Scratch tree: /tmp/relico_lf_probe
 NOTE

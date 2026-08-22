@@ -2180,10 +2180,27 @@ target, a faithful encoding needs a distinct action per self-send **site**. That
 reached for ports, arrived at a second time down an unrelated road, and it is the argument for restating
 §6.2's key as forced rather than preferred — which its item 1 now does, and which the paper should follow.
 
-**Open, and owned by task #69.** Whether to implement the structural repair or instead to refuse repeated
-identical self-sends in the well-formedness predicate. Refusing is far cheaper and fails closed, but it
-narrows the accepted fragment against legal Rebeca, so the choice is being recorded rather than assumed. Also
-open: whether this earns a `P` number. It appears not to — the paper's SOS rules do not commit to an
+**Necessary but not sufficient — measured 2026-08-23, probe section 14.** One action per site still leaves the
+question of how many *reactions* those k actions feed, and the cheaper answer does not work. Two actions
+scheduled at one tag with a single reaction triggered by both fire it **once** (`lfc` 0, run 0), since a
+reaction's trigger list is a disjunction and is enabled if any trigger is present, so k−1 executions are lost
+again — by a different mechanism than above, where the payload was overwritten on one action rather than the
+firings merged across two. One reaction per action prints both values, in reaction declaration order. So the
+repair is **an action and a reaction per site**, the alternatives are measured dead rather than disfavoured,
+and §6.2's key and this one are one decision reached three times. It also puts an obligation on the printer:
+declaration-order firing was previously measured only for *port*-triggered reactions, and now that it is known
+to hold for *action*-triggered ones, the generator must emit site reactions in the order their sends appear in
+the body, which makes emission order a correctness property rather than a formatting choice.
+
+**Decided, not asked — the repair is implemented, not refused.** Whether to build the structural repair or
+instead refuse repeated identical self-sends in the well-formedness predicate was left open above. It is
+settled in favour of implementing. Refusing is far cheaper and fails closed, but it would narrow the accepted
+fragment against Rebeca that is legal and that the paper's fragment contains, which is the opposite of what
+this whole stage sequence exists to do; and the same trade was already resolved the same way when §10.2's
+refuted item was recorded rather than converted into a stronger guard. The cheapness of refusing is real and
+is the reason to record the choice here instead of letting it look inevitable.
+
+**Still open.** Whether this earns a `P` number. It appears not to — the paper's SOS rules do not commit to an
 action-based encoding of self-sends, so the mistranslation looks like this development's rather than the
 paper's — but that reading has not been checked against the paper, which makes it **inferred**, and under
 this file's own rule an inferred claim names the check instead of concluding it. The check is to read the

@@ -557,6 +557,28 @@ arrived at a second time by a different road. §11.2 item 7 carries the refuted 
 probes that settled it, now sections 12 and 13 of `tools/paper-measurements/lf_semantics_probe.sh`. Stage
 E's external-send path never relied on the false claim, so the consequence lands entirely on stage D.
 
+"A distinct action per self-send **site**" is necessary but, measured a day later, **not sufficient**, and the
+paragraph above is completed rather than corrected by what follows. Given k actions all feeding one message
+server, the cheaper generated shape is one reaction with k triggers; probe section 14 asked whether it works
+and it does not. Two actions scheduled at one tag with a single reaction triggered by both fire that reaction
+**once** (`lfc` 0, run 0), because a reaction's trigger list is a disjunction — enabled if *any* trigger is
+present — so k−1 message executions are lost. That is a *different* loss from the one above: there the payload
+was overwritten on one action, here the firings are merged across two distinct actions. The escape is the same
+one already rejected for multiports — branch over presence inside the body — and it fails for the same reason,
+that it relocates the ordering guarantee into generated C++ statement order where nothing in the Lean
+development can see or state it. The shape that works is **k actions and k reactions**: the same probe, with
+one reaction per action, printed both values in reaction **declaration** order.
+
+Two consequences follow for the repair, and both belong in the paper. First, the argument for keying by send
+site is now an argument from exhausted alternatives rather than from preference: one action for k sends drops
+values, no declaration-level policy can restore them, and one reaction for k actions drops firings — three
+independent measurements, so §6.2's port key and this self-send key are one decision reached by three roads,
+not two. Second, **emission order becomes semantically load-bearing.** Section 1 of the same probe had
+established declaration-order firing only for reactions triggered by *ports*; section 14 extends it to
+reactions triggered by logical *actions*, which means the printer must emit one reaction per send site in the
+order the sends appear in the body, and that ordering is now a correctness obligation on the generator rather
+than a cosmetic property of its output.
+
 
 ## 7. The translation, function by function
 
