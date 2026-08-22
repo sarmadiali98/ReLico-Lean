@@ -771,6 +771,33 @@ are together more useful and separately provable:
   into a stage that had not happened yet. Note that delay agreement is **not** a conjunct: it was one
   until §6 was rewritten, and per-site ports removed it.
 
+> **Refuted 2026-08-22 — finding F52.** The second statement is **false as worded**, and the empty
+> model refutes it. `⟨[], []⟩` satisfies all three conjuncts — DTR well-formedness is five conjuncts
+> over lists that are now empty, and a model with no classes has no send to be arity-zero or to
+> generate a name that could collide — while `compileGeneralModel` refuses it, because
+> `LF.GeneralProgram.wellFormed`'s first two clauses are `reactorsNonEmpty` and `instancesNonEmpty`.
+> Measured rather than argued, and routing succeeds (`routes=0`), so the refusal is the guard's. The
+> bullet is kept as written because the paragraph above supplies the standard that makes the
+> counterexample legitimate rather than pedantic: the translation is total on the *type*, so a
+> predicate over `DTR.GeneralModel` has to meet the empty model.
+>
+> Non-emptiness is the missing conjunct, but adding it does not rescue the wording. *"No colliding
+> generated names"* cannot be read off a DTR model — `outputPortNameFor` is not injective (F34, F42),
+> so collision is decidable only by running the generator, which is the pipeline reference this
+> section forbids two sentences earlier. The fear is right about **duplication**, which can drift from
+> what it duplicates; it over-generalises to **reference**, which cannot, there being one
+> implementation.
+>
+> So what is actually owed here is this section's own **title** rather than its body. Acceptance
+> factors into exactly three conditions — the model is non-empty, name resolution succeeds for every
+> class, and the guard passes — and **nothing between them can fail**, which is where the
+> site-totality induction earns its keep. As a biconditional that *replaces* stage D's deleted
+> `compileGeneralModel_ok_iff_selfSendOnly` with a stronger statement, and it localises the refusal
+> surface to two sites, which is what a fragment boundary is for. **No sufficient condition can omit
+> the guard**: F32/F43 make the guard refuse legal DTR models, and F34/F42 make that refusal
+> unpredictable from the source. That is F52's positive content, and the owed theorem is stated
+> against it.
+
 ## 9. How F32 is discharged, and why the answer is neither of the two options offered
 
 F32 records that nothing proves `compileGeneralModel`'s output is well formed, and that the obvious

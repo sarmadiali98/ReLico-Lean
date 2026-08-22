@@ -4258,14 +4258,26 @@ predicate that characterises it would have to re-derive the whole translation.
 
 What is *lost* is worth naming precisely, because a later reader will otherwise assume it was
 overlooked. Nothing here says a model in the paper's DTR fragment is accepted. That is the
-converse direction — a sufficient syntactic condition — and it is deferred whole to the task
-this file's header records as the site-totality obligation. The reason for deferring is
-recorded there and is about diagnosis, not difficulty: the sufficient condition rests on an
-induction showing that every external send site of a class has an entry in that class's
-resolved environment, and an induction of that size written against a module that has never
-once elaborated turns a single gate failure into an undiagnosable one. The gate meanwhile
-answers the same question empirically for every committed fixture, and answers it more
-convincingly than a theorem would, since it runs the real `lfc`.
+converse direction, and it is **not** merely deferred: as §8 words it — a decidable predicate over
+DTR models, requiring no arity-zero send, no colliding generated names and DTR well-formedness — it
+is **false**, refuted by the empty model, which satisfies all three conjuncts and is refused because
+an LF program must declare at least one reactor and at least one instance. That is finding **F52**.
+
+An earlier version of this passage deferred the condition to the site-totality obligation and gave as
+its reason that the condition rests on the induction showing every external send site has an entry in
+its class's resolved environment. That reason was wrong, and its own staleness proves it: the
+induction landed, and the condition is still not provable as worded. What the condition actually
+rests on is the **guard** — `declaredNames.Nodup` and `targetEndpointsUnique`, which F48 and F49
+measure as failing on source the DTR layer accepts — and site totality is not about port names at
+all, as the site-totality section says itself.
+
+What is owed instead is a biconditional: acceptance holds exactly when the model is non-empty, name
+resolution succeeds for every class, and the guard passes, with nothing between those able to fail.
+That localises the refusal surface to two sites and replaces stage D's deleted biconditional with a
+stronger statement rather than a weaker one. It cannot omit the guard, because a guard refusal is not
+predictable from the source model without generating names, which are not injective (F34, F42). The
+gate meanwhile answers the width question empirically for every committed fixture, and answers it
+more convincingly than a theorem would, since it runs the real `lfc`.
 
 So the honest summary of the fragment boundary after stage E is: acceptance is *sound* by
 proof, and *sufficiently wide* by measurement. Stage D had it the other way around.
@@ -4648,12 +4660,20 @@ theorem assembleGeneralProgram_targetEndpointsUnique
 
 The defensive arm at `compileGeneralStmt` — the one whose diagnostic says *"this is a defect in
 the translator and not in the model"* — is unreachable whenever the environment it is given came
-from `outputPortEnvOf`. This section proves that, and the proof buys more than the design asked
-for.
+from `outputPortEnvOf`. This section proves that.
 
-`docs/STAGE_E_DESIGN.md` §8 asks for a sufficient condition for acceptance. What comes out is
-*totality*: **given a resolved environment, compiling a reactive class cannot fail at all.** The
-reason is a measurement rather than an argument. Every `.error` in this file below
+`docs/STAGE_E_DESIGN.md` §8 asks for a sufficient condition for acceptance, and this section does
+**not** deliver it. What it delivers is *totality*: **given a resolved environment, compiling a
+reactive class cannot fail at all.** The two are incomparable rather than ordered, and an earlier
+version of this docstring claimed the second bought more than §8 asked for, which is false in both
+directions. This result *assumes* the resolution stage succeeded — part of what §8's conjuncts were
+meant to deliver — and it concludes about the middle stage only, so it says nothing about routing and
+nothing about the guard, which is where refusal on legal models actually lives (F32, F43, F48, F49).
+§8's ask is separately refuted as worded, by the empty model, as finding **F52**; the theorem owed in
+its place is a biconditional localising the refusal surface to resolution and the guard, and this
+section is its load-bearing half — it is what discharges the middle stage.
+
+The reason is a measurement rather than an argument. Every `.error` in this file below
 `compileGeneralStmt` is a *propagation* — a `match` arm that returns a refusal its callee
 produced — and the only place in the whole body-compilation path where a refusal is
 **originated** is that one defensive arm. So removing its reachability removes the last way any

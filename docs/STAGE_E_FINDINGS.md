@@ -1,9 +1,9 @@
-# Stage E findings — F34 through F51
+# Stage E findings — F34 through F52
 
 **Why this file exists.**
 Stage E added external sends, ports and connections to the general translator, and in doing so it
-produced eighteen findings about *this repository* — its own code, its own design document, and its own
-test harness. They are numbered F34 through F51, continuing the single `F` series that
+produced nineteen findings about *this repository* — its own code, its own design document, and its own
+test harness. They are numbered F34 through F52, continuing the single `F` series that
 `docs/STAGE_B_FINDINGS.md` opened at F1–F20 and `docs/STAGE_D_FINDINGS.md` carried to F21–F33.
 
 The `F` series and the `P` series answer different questions, and keeping them apart is the whole
@@ -55,7 +55,7 @@ F34 through F40 were first written in `docs/STAGE_E_DESIGN.md` §11.1, under an 
 they were *"provisional until the findings file lands"* and *"do not cite these elsewhere yet"*. That
 warning was earned: stage D's design had numbered its own findings D1 through D9, they became F21
 through F29 when the stage D findings file landed, and the D-numbers became uncitable. **This file is
-what makes F34–F51 citable.** Nothing below is provisional any more. (This range is one of the four
+what makes F34–F52 citable.** Nothing below is provisional any more. (This range is one of the four
 literals that move whenever an entry is added, and it is the one that went stale when F50 landed —
 see **F51**, which records that and lists all four.)
 
@@ -1253,7 +1253,126 @@ above, since an entry that shifts its own citations is the failure mode this ent
 
 ---
 
+## F52 — the design document asks for a checklist that cannot exist, and the file answering it claims to have over-delivered
+
+**Grade: measured by evaluation.** The refutation below is an `#eval` against the built package, not
+an argument. The two docstring readings are quotations with line numbers.
+
+**The claim.** `docs/STAGE_E_DESIGN.md` §8 (`:767-772`) owes *"a sufficient condition for
+acceptance. A decidable predicate over DTR models — no arity-zero external send, no colliding
+generated names, and DTR well-formedness — that implies `.ok`."* It is careful to say the condition
+is deliberately sufficient and not necessary, and that saying so in the theorem's docstring *"is the
+difference between an honest lemma and stage D's biconditional overreaching."*
+
+**The claim is false as worded, and the cheapest possible model refutes it.** `DTR.GeneralModel`
+(`Relico/DTR/GeneralSyntax.lean:436`) has exactly two fields, `classes` and `instances`. Take both
+empty. All three conjuncts hold: `DTR.GeneralModel.wellFormed` is exactly five conjuncts
+(`Relico/DTR/GeneralWellFormed.lean`), every one of them a statement over a list that is now empty,
+and the other two conjuncts hold vacuously because a model with no classes has no external send to be
+arity-zero or to generate a name that could collide. But `LF.GeneralProgram.wellFormed`
+(`Relico/LF/GeneralWellFormed.lean:538`) is **nine** clauses, and its first two are
+`reactorsNonEmpty` (`:376`) and `instancesNonEmpty` (`:387`). The guard refuses. Predicate true,
+acceptance false.
+
+**What ran.** The block below is the output of a scratch witness kept deliberately *outside* the
+repository, so that no untracked Lean landed in the tree, elaborated against the built package with
+`lake env lean` and exiting 0. Its `F52_` labels therefore exist nowhere in the code, which is what
+the method predicts and not evidence of anything — the reason that sentence is here at all is **F51**,
+which records what happens when a block like this one is introduced as a verbatim transcript instead.
+
+```
+F52_MODEL_WELLFORMED true
+F52_CONJUNCTS bindings=true arguments=true sendTargets=true sendsResolve=true names=true
+F52_ROUTES OK routes=0
+F52_COMPILE ERROR the translated LF program is not well-formed: no reactor is declared; no instance is declared
+```
+
+Three things this pins that an argument could not. `F52_ROUTES OK` locates the refusal: routing
+**succeeded**, so the refusal is the guard's and not an earlier stage's. The refusal text names
+**both** failing clauses rather than the first, independently reproducing the measurement F48 made
+about `generalProgramExplanation`. And the five conjuncts are reported separately, so "DTR
+well-formedness holds" is not being inferred from a single `true`.
+
+**The counterexample is legitimate by §8's own standard**, which is what raises it above pedantry.
+§8 (`:707-710`) justifies keeping the translation's defensive `.error` arms on the ground that *"the
+translation is a total function on the *type* and not only on frontend output."* A predicate over
+`DTR.GeneralModel` is therefore a predicate over the type, and the empty model inhabits it. §8 sets
+the standard by which its own claim fails. Nor is the degenerate model the only witness: one class
+with zero instances fails `instancesNonEmpty` identically, so the missing conjunct is non-emptiness
+and not an artefact of the empty list.
+
+**Adding non-emptiness does not rescue the wording, and this is the part that matters.** The conjunct
+*"no colliding generated names"* is not a property of a DTR model that can be read off the model.
+Port names are manufactured by `outputPortNameFor`, which concatenates message name, `To`, the
+capitalized known rebec and a site suffix, and which **is not injective** — F34 records the unescaped
+separator and F42 records `capitalizeName` folding case, two independent collision channels. So
+whether a model's generated names collide can only be decided by *running the generator*. The
+predicate §8 asks for must therefore reference the resolution pipeline, and §8 forbids exactly that
+one sentence earlier, on the ground that *"a faithful characterising predicate would be a mirror of
+the resolution pipeline, and a mirror is the shape of defect this development keeps finding."*
+
+§8 thus demands a source-side predicate **and** forbids pipeline reference, and F34/F42 make those two
+demands jointly unsatisfiable for this conjunct. The demands are not equally wrong, though, and the
+distinction is worth keeping: what §8 was right to fear is **duplication**, because a re-implementation
+of the pipeline's logic can drift from the pipeline. Naming the pipeline's own stages by **reference**
+cannot drift, because there is only one implementation. That distinction is what leaves a real theorem
+available, and it is recorded here because the section's wording collapses the two.
+
+**Two docstrings in one file disagree about whether the ask was discharged.** This is F48's shape
+again, and the second of them is mine.
+
+- `Relico/Translation/GeneralBasic.lean:4259-4262` says the sufficient condition *"is deferred whole
+  to the task this file's header records as the site-totality obligation"*, and gives as its reason
+  that the condition *"rests on an induction showing that every external send site of a class has an
+  entry in that class's resolved environment."*
+- `Relico/Translation/GeneralBasic.lean:4654-4655` says *"§8 asks for a sufficient condition for
+  acceptance. What comes out is *totality*"*, and that the proof *"buys more than the design asked
+  for."*
+
+**`:4654` is the wrong one.** `exists_compileGeneralReactiveClasses` (`:5272`) has hypothesis
+`∀ reactiveClass ∈ classList, ∃ env, outputPortEnvOf allClasses reactiveClass = .ok env` and
+conclusion `compileGeneralReactiveClasses … = .ok`. So it **assumes** that the resolution stage
+already succeeded — which is part of what §8's conjuncts were meant to *deliver* — and it concludes
+about the middle pipeline stage only. `compileGeneralModel` (`:2444-2467`) is `routesOf`, then
+`compileGeneralReactiveClasses`, then `guardGeneralProgram` applied to the assembled program, so the
+totality result stops one stage short of the guard and says nothing about it. Totality and §8's ask
+are **incomparable**, not ordered, and the same file makes precisely that incomparability argument
+correctly about the *other* owed statement at `:4249-4253` (*"The two are not comparable, and the
+trade was deliberate"*) four hundred lines earlier.
+
+`:4261`'s stated *reason* for deferring is wrong as well, and it is now stale in a way that proves it:
+that induction **landed** at `efef73a`, so if the condition really rested on it the condition would
+now be provable. It is not. What it actually rests on is the guard — `declaredNames.Nodup` and
+`targetEndpointsUnique`, which F48 and F49 measured as failing on source the DTR layer accepts — and
+site totality is not about names at all, as `:4674-4677` states in its own words: *"Nothing in this
+section is about port *names*."* A deferral that names the wrong instrument is the same defect F48
+recorded, one layer up.
+
+**What the right theorem is.** §8's own title — *"Totality, and where each refusal lives"* — is a
+better description of the available result than the checklist its body asks for. Acceptance factors
+into exactly three conditions: the model is non-empty, name resolution succeeds for every class, and
+the guard passes; and **nothing between them can fail**, which is where the site-totality induction
+earns its keep. Stated as a biconditional this replaces stage D's deleted
+`compileGeneralModel_ok_iff_selfSendOnly` with a stronger statement rather than a weaker one, and it
+localises the refusal surface to two sites, which is what a reader wants from a fragment boundary.
+
+The guard hypothesis is not an apology in that statement — it is this finding's positive content.
+**No sufficient condition for acceptance can omit the guard**, because F32 and F43 established that
+the guard genuinely refuses legal DTR models, and F34 and F42 established that its refusal is not
+predictable from the source model without generating names.
+
+**What was done.** This entry, §8's wording, and both docstrings. The theorem is deliberately *not*
+part of the same change: the record is straightened first, so that the false docstrings do not sit in
+the tree while a proof is written, which is how F48 and the theorem that replaced it were sequenced.
+
+**What is deliberately not done.** `DTR.GeneralModel.wellFormed` is **not** strengthened to require
+non-emptiness. It is the frontend's contract, an empty model is not malformed, and widening a
+well-formedness predicate to make a downstream theorem convenient is the inversion of the discipline
+this file exists to enforce. The refusal stays where it is, in the guard, which is the layer that
+knows LF's requirements.
+
 ## What is left open, and who owns it
+
 
 Ordered by what blocks something later, not by finding number. Each item names the experiment or reading
 that would close it, so that no entry here can be closed by argument alone.
