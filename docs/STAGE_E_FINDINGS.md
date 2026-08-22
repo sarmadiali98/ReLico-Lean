@@ -1,9 +1,9 @@
-# Stage E findings — F34 through F53
+# Stage E findings — F34 through F54
 
 **Why this file exists.**
 Stage E added external sends, ports and connections to the general translator, and in doing so it
-produced twenty findings about *this repository* — its own code, its own design document, and its own
-test harness. They are numbered F34 through F53, continuing the single `F` series that
+produced twenty-one findings about *this repository* — its own code, its own design document, and its
+own test harness. They are numbered F34 through F54, continuing the single `F` series that
 `docs/STAGE_B_FINDINGS.md` opened at F1–F20 and `docs/STAGE_D_FINDINGS.md` carried to F21–F33.
 
 The `F` series and the `P` series answer different questions, and keeping them apart is the whole
@@ -55,14 +55,14 @@ F34 through F40 were first written in `docs/STAGE_E_DESIGN.md` §11.1, under an 
 they were *"provisional until the findings file lands"* and *"do not cite these elsewhere yet"*. That
 warning was earned: stage D's design had numbered its own findings D1 through D9, they became F21
 through F29 when the stage D findings file landed, and the D-numbers became uncitable. **This file is
-what makes F34–F53 citable.** Nothing below is provisional any more. (This range is one of the four
+what makes F34–F54 citable.** Nothing below is provisional any more. (This range is one of the four
 literals that move whenever an entry is added, and it is the one that went stale when F50 landed —
 see **F51**, which records that and lists all four.)
 
-F41 and F42 were never in the design document. They were found during implementation and recorded
-only on the declarations they concern — F41 across `Relico/Translation/GeneralRouting.lean:47`,
-`:1127` and `Relico/LF/GeneralCppPrinter.lean:1526`, F42 across
-`Relico/Translation/NameGeneration.lean:114`, `:208` and `Relico/Translation/GeneralRouting.lean:68`.
+F41 and F42 were never in the design document, and **until this file landed** they were recorded only
+on the declarations they concern — F41 across `Relico/Translation/GeneralRouting.lean:47`, `:1127` and
+`Relico/LF/GeneralCppPrinter.lean:1526`, F42 across `Relico/Translation/NameGeneration.lean:114`,
+`:208` and `Relico/Translation/GeneralRouting.lean:68`. **Both have full entries below.**
 
 F43 was claimed on 2026-08-21 in **committed** code — `frontend/lean-bridge/GeneralLfPrinterTestMain.lean:3235`,
 `:3269`, `:3450` and `frontend/check-general-lean.sh:197` — while this file did not yet exist. That
@@ -300,8 +300,8 @@ and the gate that runs `lfc` is not the only consumer. The cost of the choice is
 **Grade: read, then decided.** Recorded against §6 of `docs/STAGE_E_DESIGN.md` **as committed at
 `6298284`** — revision 1 — not against the paper. A design that was reviewed and landed is exactly the
 kind of artifact whose errors are worth keeping visible, so revision 1's text was not quietly
-overwritten: `docs/STAGE_E_DESIGN.md:19–20` and `:443` point at this finding from the document that
-replaced it.
+overwritten: `docs/STAGE_E_DESIGN.md:19–20` and §6's opening paragraph point at this finding from the
+document that replaced it.
 
 Three parts, each independently reusable.
 
@@ -1174,9 +1174,9 @@ schedules work that will fail, and it did: §10.2 is where task #60 came from.
 
 **Disposition, and what is deliberately not done.** The guard is *not* strengthened and the port-naming
 rule of P20 is *not* reopened; P20 is settled and `lfc`-accepted, and the collision is refused rather than
-prevented by design. §10.2's own text still carries the false argument, and is corrected when that document
-is next opened rather than as a side effect of a proof commit — the same convention closing item 13 records
-for `STAGE_E_DESIGN.md:633` and `:891`, and this entry is the pointer that convention relies on. §10.2's
+prevented by design. §10.2's own text carried the false argument when this entry was written; it and §7.2
+were both corrected in the commit that added F53, which closing item 13 records as the touch it was waiting
+for. This entry is the pointer that convention relied on, and the convention paid out. §10.2's
 reachability obligation for a class that sends one message twice to one rebec is unaffected by any of this
 and remains task #51's.
 
@@ -1706,3 +1706,138 @@ written, per the same pointer-not-rewrite convention, and this paragraph is its 
 narrower than the one above and cheaper to apply: **a line number quoted from another document is a claim,
 and re-measuring it costs one command.** This one was repeated in three places — F49's entry, F50's entry
 and the closing section — and not one of them re-measured it.
+
+---
+
+## F54 — an entry that exists is indexed as absent, and every pointer to it counts §4.3's lemmas in the wrong order
+
+**Grade: read, then decided.** Method: the `## F` heading list of this file read in full rather than from
+F48 down; the numbering-history paragraph near the top; §4.3 and §10.2 of `docs/STAGE_E_DESIGN.md`; the four
+tracked sites that name the refuted lemma; and one declaration line re-measured in
+`Relico/Translation/GeneralBasic.lean`. No run, and nothing here needs one.
+
+**What happened.** Task #66 was opened to file a finding that `docs/STAGE_E_DESIGN.md` §4.3 asks for **two**
+one-sided injectivity lemmas about `outputPortNameFor` while its own site-suffix witness refutes one of them.
+That finding is **F42**, in this file, filed in task #52 alongside F34–F44. The task was a duplicate of work
+already complete, and it was opened by the task immediately before it — which had written the number F42 into
+the design document, in prose, one commit earlier. Five things lined up to allow that, and each is recorded
+because four of them are still live for the next reader.
+
+**1. The numbering-history paragraph indexed two entries as having none.** It read *"F41 and F42 were never
+in the design document. They were found during implementation and recorded **only** on the declarations they
+concern"*, followed by six `path:line` cites and nothing else. Read as provenance the sentence is true: until
+this file landed, the declarations were their only home. But every sibling sentence in that paragraph marks
+its relationship to this file explicitly — F34–F40 *"were first written in `docs/STAGE_E_DESIGN.md` §11.1"*,
+F43 was claimed in committed code *"while this file did not yet exist"*, F44 *"is stated here first and
+nowhere else yet"* — and this one's unqualified *"only"* does not. So it reads as present tense, and a reader
+who wants F42 goes to `Relico/Translation/NameGeneration.lean`, finds the whole matter documented there, and
+never learns that a full entry sits three hundred lines below the sentence that sent them away. That is what
+happened, and it is this file pointing the wrong way about its own contents — the same shape as **F45**,
+where it denied a test that existed. Corrected in this commit to *"until this file landed"* plus *"Both have
+full entries below"*, in the same four lines, so no cite into this file moved.
+
+**2. Four sites call the refuted lemma §4.3's *second*, and §4.3 lists it first.** §4.3's ask is one
+sentence: *"with the message fixed the name determines the rebec, and with the rebec fixed the name
+determines the message."* The clause listed **first** is the one that fails — with the message fixed, prefix
+cancellation yields the *infix* and the infix does not determine the rebec, which is F42's subject. The
+clause listed **second** is the one that holds and is proved, `outputPortNameFor_message_injective`, by
+suffix cancellation. Yet all four tracked sites attribute the ordinal to §4.3 and all four invert it: this
+file's own F42 heading (*"the design's second one-sided injectivity lemma is false"*),
+`Relico/Translation/GeneralRouting.lean:68` (*"§4.3's second injectivity lemma is false and is not stated"*),
+`Relico/Translation/NameGeneration.lean:257` (*"the honest form of the second lemma §4.3 asks for"*, and its
+own preceding words are *"Prefix cancellation"*, which names the failing direction), and
+`frontend/lean-bridge/GeneralLfPrinterTestMain.lean:3517`. A reader following any of them into §4.3 and
+counting clauses lands on the lemma that is already proved, and would set out to strengthen it.
+
+The four sites are **not** renumbered, and the reason is worth stating rather than assuming. Three of them
+are Lean files, so touching them would turn a documentation commit into one owing a full `lake build` on the
+machine that has the toolchain; and this file's F42 heading is quoted by title elsewhere, so rewriting the
+heading breaks quotations of it. The correction instead goes where a reader meets the ask: §4.3's third
+bullet now carries a dated blockquote that **quotes the failing clause** instead of counting to it. That is
+the cheaper fix and also the better one, which is the general point — an ordinal reference into another
+document is an *address*, exactly as a line number is, and it moves for the same reason. §4d's rule extends
+to it unchanged: cite by quoted words.
+
+**3. The instrument that missed the duplicate had been measured to answer a different question.** The
+F-heading map carried into this task listed F48 through F53 and was produced to establish which number was
+free next. It was then reused, silently, as though it were evidence that the finding did not already exist.
+Whether a pattern or a line range limited it is no longer recoverable; what is recorded is that its lowest
+entry was F48, so F42 was never in the window. The aggravating detail is that the number was not merely
+findable but already written: the design blockquote committed one task earlier says port names *"stay
+guard-relative under F34, F37 and F42"*. Having the number in hand and not asking whether it had an entry is
+the whole of the defect.
+
+**4. Two documents cited one declaration fifty lines apart, and neither of them was wrong.** F48's entry
+above cites `compileGeneralModel_targetEndpointsUnique` at `Relico/Translation/GeneralBasic.lean:4366`; the
+F53 blockquote in §10.2 of the design cites the same declaration at `:4416`. That looked decidable — two
+numbers for one named target, so one must be stale — and this entry said exactly that in its first draft,
+and changed the findings side to `:4416` on the strength of it. Measuring the Lean file killed the
+conclusion: `/--` opens at `:4363`, `-/` closes at `:4415`, and `theorem
+compileGeneralModel_targetEndpointsUnique` is on `:4416`. Both cites land in the same block. F48's names the
+docstring paragraph its next line quotes, which is what that sentence is about; the design's names the
+declaration. The edit was reverted, and it had done real damage in the meantime: five other mentions in this
+file address that same docstring as `:4366`, so changing one of six left the file disagreeing with itself,
+which is the defect this entry exists to describe, committed by the entry describing it.
+
+So the rule this defect leaves behind is the reverse of the one first written here. Cross-document
+disagreement is **not** a decidable stale-cite detector, and it fails for the same reason range-suspicion
+fails: a declaration carrying a fifty-line docstring has fifty-three defensible addresses, and two documents
+can choose different ones indefinitely without either going stale. The decidable object is the **name**.
+Resolve both cites to the declaration they name before concluding anything; if they name the same one, there
+is nothing to repair. This is the third false alarm from one family in three commits — the first two
+compared docstring cites against a declaration-line map, this one compared a docstring cite against a
+declaration cite — and it is the only one of the three that reached an edit, because a disagreement between
+two documents feels like evidence in a way that a suspicious range does not.
+
+**5. A debt was discharged at one of the two places that asserted it.** Closing item 13 records that all four
+of its corrections *"landed 2026-08-22, in the commit that added F53 — the touch this item was waiting for"*.
+F50's entry asserts the same debt independently, and still read *"§10.2's own text **still** carries the false
+argument, and is corrected when that document is next opened"* — a future-tense obligation that had already
+been met. Corrected here in the same three lines. The mechanism is the one F53 named and did not escape:
+when a claim is asserted in two entries, discharging it at one leaves the other arguing for work that is
+done, and nothing in the file's structure connects them.
+
+**The rules this leaves behind.** Four of them, and the first is the cheap one that would have prevented
+the whole task. *Before opening a task for a defect in a document, grep every `^## F` heading in this
+file* — all of them, not the tail. The instrument that failed here was not missing, it was aimed
+elsewhere: the heading map had been measured to find the next free number, and its output was then read as
+evidence that the finding was new. An instrument answers exactly the question it was pointed at, and the
+same mistake appeared twice more in this commit alone — a `^> \*\*` sweep of the design missed every
+blockquote that sits inside a bullet, because a nested quote carries an indent before its `>`, and so
+disagreed with a count that had been recorded from an indent-tolerant pattern. Second: *an ordinal reference into another document is an
+address, exactly as a line number is.* "§4.3's second lemma" moves when a clause is inserted or reordered,
+and it moved here — four places call the refuted lemma the second while §4.3 lists it first. Cite by
+quoted words, as §4d already required for line numbers. Third: *no arithmetic over line numbers detects a
+stale cite into a Lean file.* This commit tried both kinds available and both failed — range-suspicion
+raised a false alarm, and cross-document disagreement raised one and got as far as an edit before
+measurement reverted it. A declaration with a long docstring has as many defensible addresses as its
+docstring has lines, so the one decidable question is whether two cites resolve to the same **name**;
+resolve the name first, and stop there if it is the same. Fourth: *a record of what a search returned
+must not be rewritten, and a live claim about a document's present state must be correct.* One sentence
+can be either, and which it is decides whether a stale number in it is a defect or the evidence.
+
+**What this commit did.** It moved all four numbering literals from F53 to F54 — line 1, the *Why this
+file exists* paragraph, the citability sentence, and the numbering-history line — which is the test the
+four-literals rule set for itself one finding ago, and it passed. It rewrote the numbering-history
+sentence so F41 and F42 are indexed as entries that exist. It replaced a line cite into the
+design with a section cite. It rewrote three lines of F50's entry that still asserted a debt discharged at
+closing item 13. It changed F48's cite to `compileGeneralModel_targetEndpointsUnique` and then changed it
+back, the fourth defect above being the record of why. And it added two dated blockquotes to `docs/STAGE_E_DESIGN.md`: one under §4.3's third
+bullet quoting the clause that is false, and one in §10.2 discharging the promise task #65 committed there
+in as many words — *"Task #66 owns that correction and will annotate §4.3 and this sentence."* Deliberately
+not done: the four ordinal sites are not renumbered, three of them being Lean in an otherwise docs-only
+commit, and F49's record of a search is not rewritten.
+
+Those two insertions shifted §5 onward by twenty-one lines and §10.3 onward by twelve more, so the sweep
+§4d asks for was run in both directions afterwards. It found exactly three qualified cites into the design
+anywhere in the repository: one names a commit and is immune, one sits above the first insertion, and one
+is the search record above. No live cite needed repair — which is the first time that sweep has come back
+empty, and it came back empty because the two cites that would have broken had already been converted to
+section cites by earlier findings.
+
+One thing is filed rather than fixed. The closing *What is left open, and who owns it* section is no
+longer closing: F53 sits below it and F54 now sits below F53, for the reason F53 gave — appending is the
+only edit to this file that shifts nothing. Moving that section to the end would displace several hundred
+lines and invalidate the cites this commit has just verified, so it belongs to a commit with no other
+business. Until then, a reader who stops at the closing section stops two entries early, and this
+paragraph is the pointer that says so.

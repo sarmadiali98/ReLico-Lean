@@ -311,6 +311,27 @@ logicalActions` and must be `Nodup`. So stage E's obligation takes this shape:
   a reader expects: with the message fixed the name determines the rebec, and with the rebec fixed the
   name determines the message. Both reduce to suffix or prefix cancellation.
 
+> **The third bullet asks for one lemma that cannot exist — 2026-08-22, finding F42, annotated in task #66.**
+> Of the two, the one that holds is *"with the rebec fixed the name determines the message"*: suffix
+> cancellation, landed as `outputPortNameFor_message_injective`
+> (`Relico/Translation/NameGeneration.lean:234`). The other — *"with the message fixed the name determines
+> the rebec"* — is **false**, and the witness is already in this section, above the bullet list:
+> `report`/`hub` at site 2 and `report`/`hub2` at its class's only site both give `reportToHub2`. Prefix
+> cancellation yields the **infix** and stops there, because the boundary between the capitalized rebec and
+> the site suffix is unmarked, and `capitalizeName` folds case besides. What landed is therefore the
+> strongest form that holds, `outputPortInfixFor_eq_of_outputPortNameFor_eq` (`:261`) — so *"Both reduce to
+> suffix or prefix cancellation"* is the clause that is wrong: only one of the two reduces.
+>
+> One caution for anyone arriving here by pointer. F42's heading in `docs/STAGE_E_FINDINGS.md`,
+> `Relico/Translation/GeneralRouting.lean:68`, `Relico/Translation/NameGeneration.lean:257` and
+> `frontend/lean-bridge/GeneralLfPrinterTestMain.lean:3517` all call the refuted lemma §4.3's *second*,
+> while the sentence above lists it **first**. Those four are deliberately not renumbered — three are Lean,
+> and F42's heading is quoted by title elsewhere — so the failing clause is quoted here instead, and F54
+> records the general rule: an ordinal reference into another document is an address, exactly as a line
+> number is. The naming rule itself is untouched. P20 stays settled and `lfc`-accepted, the escaped-separator
+> alternative recorded above stays declined, and uniqueness stays a checked property of whole programs,
+> guard-relative under F34 and F37.
+
 That the readable rule is not injective is a finding, not an embarrassment, and it gets an F-number in
 §11: the paper's Fig. 2b idiom cannot be made injective by inspection, and any implementation that
 claims unique port names from a concatenation rule without either escaping or checking is wrong.
@@ -979,6 +1000,18 @@ owns that claim.
 > the other landed as the weaker `outputPortInfixFor_eq_of_outputPortNameFor_eq`
 > (`Relico/Translation/NameGeneration.lean:261`) because §4.3's own site-suffix witness refutes it.
 > Task #66 owns that correction and will annotate §4.3 and this sentence.
+
+> **The port-name injectivity item: one lemma proved as asked, one refuted — 2026-08-22, finding F42, in
+> task #66, discharging the promise in the blockquote above.** The sentence at the head of this section
+> owes *two* one-sided lemmas beside `actionNameFor_injective`. Only the rebec-fixed direction exists in
+> that form, as `outputPortNameFor_message_injective` (`Relico/Translation/NameGeneration.lean:234`). The
+> message-fixed direction is **false** — refuted by a witness §4.3 states itself — and what landed instead
+> is the strictly weaker `outputPortInfixFor_eq_of_outputPortNameFor_eq` (`:261`), which cancels only down
+> to the infix. §4.3 now carries the annotation this item promised, quoting the failing clause rather than
+> counting to it. The item is therefore closed, as one lemma proved and one refuted, and nothing further is
+> owed on it. F42 has held that refutation since the commit that created `docs/STAGE_E_FINDINGS.md` in task
+> #66's own series — task #52, fourteen tasks before this one — and it was invisible from here the whole
+> time. That is F54's subject, and the reason this annotation exists at all.
 
 And one more, which is the theorem the whole of §6 exists to make provable: **no reaction of an emitted
 reactor sets one output port twice.** Stated over the compiled body of a single reaction — for any
