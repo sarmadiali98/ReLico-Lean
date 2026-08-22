@@ -983,6 +983,59 @@ fails, and F48's pins it for the case where two do. Together they establish that
 `generalProgramExplanation` enumerates exactly the failing clauses, at both ends of its range — which was
 measured for the multiple case and, until this run, merely assumed for the singleton.
 
+> **A fifth site, and it is in the first site's own docstring — found in task #58 by landing the theorem.**
+> The count above is five mentions, four of them wrong. The new one is the closing paragraph of the very
+> comment block whose earlier paragraph F48 repaired: about twenty lines below `:4366` it said *"what
+> remains achievable is a strictly weaker relative statement — `reactorsWellFormed` together with
+> `instancesResolve` implies this clause"*, which is precisely what F49 then refuted, and it named item 15
+> of the list below as its owner. So after F48's fix that one docstring asserted a construction proof was
+> deferred in one paragraph and offered a false substitute in another, and after F49's fix it still offered
+> the false substitute.
+>
+> **Two lessons, both narrower and more useful than the count.** First, F48's repair was scoped to the
+> paragraph it was reading rather than to the block it was inside; a docstring is the unit that has to be
+> re-read after an edit, because a comment cannot be internally inconsistent in the way two comments in
+> different modules can. Second, F49's remote verification grepped for `holds by construction rather than
+> by check` — the phrasing of the fourth site — and this paragraph makes the same claim in entirely
+> different words, so the search was structurally incapable of finding it. **A verification grep anchored
+> on one phrasing measures that phrasing, not the claim.** Where the claim cannot be reduced to a label,
+> the check is reading the whole block, and that has to be planned for rather than hoped for.
+>
+> **The lesson paid inside the hour: two more sites, in the design document, found by the search it
+> recommends.** Listing every mention of `targetEndpointsUnique` in the repository instead of grepping a
+> sentence turned up `docs/STAGE_E_DESIGN.md:633`, which says the clause *"then follows from the routes
+> being distinct in `(senderInstance, site)`"*, and `:891`, which owes §10.2 that clause *"from route-key
+> distinctness (§7.2)"*. This is a **third** phrasing, and it is the load-bearing one, because route keys
+> are precisely what stage E's per-send-site naming makes distinct — while distinct keys do not give
+> distinct port *names*, which is what `F48_OUTPUT_PORTS reportToToHub | reportToToHub` measures. So the
+> family reaches five mentions in code and two in the design document. Per closing item 13 these two are
+> corrected the next time that document is touched rather than rewritten as a side effect of a proof commit;
+> the addendum under item 13 names them so the ownership is explicit.
+>
+> **A sixth site, in a fifth file, and this one is a true theorem with a false gloss.** The same
+> whole-repository listing also reached `Relico/Translation/NameGeneration.lean:289`, whose docstring for
+> `inputPortNameFor_outputPort_injective` closed by calling that lemma *"the sender-side half of
+> `targetEndpointsUnique` being a property of the construction rather than of a check"*. The lemma is true
+> and proved on the next line; only the gloss is wrong, and it is wrong in F48's own way. Injectivity is in
+> the **output port name**, and F48 measured that uniqueness is already lost one step earlier: `report` with
+> `toHub` and `reportTo` with `hub` both spell `reportToToHub`, so two distinct send sites reach this
+> function as the *same* argument and injectivity excludes nothing. The composite a construction argument
+> would need, `(message, known rebec, site)` to input port name, is the non-injective one. Repaired in task
+> #58 by scoping the gloss and pointing at the theorem that does earn the clause — a repair the previous
+> five did not need, because there was no true statement in them to keep.
+>
+> **This is the count's fourth revision, and the revisions are the finding.** Four mentions at F49, five
+> when the fifth turned up in an already-repaired block, seven with the design document, eight now. Each
+> correction was produced by widening the instrument, never by a check: sentence grep found one phrasing,
+> claim-level grep found a second and third, and only listing **every** occurrence of the identifier found
+> the sixth — which no phrase-based search could have reached, since it shares no phrase with any other
+> site. The durable rule is therefore stronger than F49 stated it: for a claim that can be paraphrased,
+> enumerate the identifier and read every hit. A phrase search measures the phrase.
+>
+> **Fixed in task #58**, which is also what makes the fix checkable: the paragraph now states F49's
+> independence result and points at `assembleGeneralProgram_targetEndpointsUnique`, a theorem in the build
+> closure, so the docstring's claim is now falsifiable by the compiler rather than by a reader.
+
 ---
 
 ## What is left open, and who owns it
@@ -1060,6 +1113,20 @@ construction, and still carries the *"provisional until the findings file lands"
 discharges. Both should be corrected the next time that document is touched, with a pointer here rather
 than a rewrite of its history — the same convention F40 relies on.
 
+> **Two further corrections for that document, added in task #58, and they are not the same kind of debt as
+> the two above.** `:633` states that `targetEndpointsUnique` *"follows from the routes being distinct in
+> `(senderInstance, site)`"*, and `:891` owes §10.2 that clause *"from route-key distinctness (§7.2)"*. Both
+> rest on the step F48's witness refutes, so this is a refuted **argument** presented as the design's
+> reason, not bookkeeping that fell behind. When that document is next touched, the justification should be
+> replaced by a pointer to `Translation.assembleGeneralProgram_targetEndpointsUnique` and to the fifth-site
+> addendum under F49, and the hypotheses should be stated as they actually are: one shared `routes`, routes
+> agreeing on an instance's class, and reactor input ports built from those same routes.
+>
+> It is filed here rather than fixed because the convention forbids rewriting that document as a side
+> effect of a proof commit — **not** because it is cosmetic. Recording the distinction matters: this item is
+> named "documentation hygiene", and if it silently accumulates refuted arguments alongside stale counts,
+> its position last in a list ordered by what blocks something later stops being right.
+
 **14. F47's six unasserted refusal causes.** Two of the eight causes in F47's table have their message text
 asserted; six do not. The closing instrument is not an argument, it is six `expectString` assertions in
 `frontend/lean-bridge/GeneralLfPrinterTestMain.lean` against hand-built models — the same shape as the two
@@ -1094,3 +1161,33 @@ task. **This is strictly weaker than what `:4366` promised and that is the point
 clause from another rather than from the construction, so it does *not* license retiring the clause, and any
 future attempt to strengthen it to a construction proof is refuted by F48's witness before it starts. Blocks
 nothing; worth doing because it converts a nine-clause predicate's redundancy from a belief into a theorem.
+
+> **Closed in task #58** — the theorem is `Translation.assembleGeneralProgram_targetEndpointsUnique`, with
+> the route-level induction `generalRouteEndpoints_nodup` behind it. Kept, not deleted, for the same reason
+> as items 4 and 14. **Three corrections to the item as written, and the first is that its statement is
+> false.**
+>
+> `reactorsWellFormed` together with `instancesResolve` does **not** imply the clause: F49's own witness
+> satisfies both, and all six other clauses, and fails this one. The counting argument the item gives is
+> sound; what it got wrong is what indexes it. `instancesResolve` cannot close the gap because a target
+> endpoint pairs an *instance* with a port name while input ports are declared on a *class* — resolution
+> says the class exists, not that two routes into one instance were filtered into one reactor. The landed
+> hypotheses are that both sides are built from the **same** `routes`, that those routes agree about which
+> class an instance has, and that each receiver class has a reactor whose `inputPorts` are
+> `generalInputPortsOf` of those routes. The first is what `assembleGeneralProgram` cannot know, since
+> nothing in its body relates its `compiledReactors` to its `routes`; the last two are discharged by
+> `routesOf` and `compileGeneralReactiveClasses` respectively, and are named in the theorem's docstring as
+> residue rather than left silent.
+>
+> **The predicted obstacle was the wrong one.** `eq_of_nodup_map` being `private` never arose — no step of
+> the proof needs it. The gap Lean core actually leaves is that `Nodup` of an append does not restrict to
+> either side, so `nodup_of_append_left` and `nodup_of_append_right` are hand-rolled here for exactly the
+> reason `eq_of_nodup_map` is hand-rolled there. They are needed because `declaredNames` is five appended
+> lists and the input port names are the second of the five.
+>
+> **Therefore the reason this item gave for bundling §10.2's per-reaction `setPort` `Nodup` into one task —
+> "the same obstacle" — is void**, and §10.2 is now its own task with its own prediction recorded before
+> any proof attempt. One further method note worth keeping: the `wellFormed` clause is projected out by
+> contradiction (assume the negation, and the `&&` chain collapses to `false`), which depends on neither the
+> clause's position in the chain nor how the chain associates, so it survives edits to `wellFormed` that a
+> positional projection would not.

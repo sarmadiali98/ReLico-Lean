@@ -2681,5 +2681,457 @@ theorem mem_externalSendsOfClass_of_mem_messageServer
         hServer
         hMember)
 
+/-!
+## Endpoint uniqueness, indexed by the routing table
+
+Finding F49 measured that `LF.GeneralProgram.targetEndpointsUnique` is **independent** of the
+other eight clauses of `LF.GeneralProgram.wellFormed`: a hand-built program satisfies all eight
+and fails the ninth. No theorem can therefore derive that clause from them, and the guard cannot
+retire it.
+
+What this section proves is the statement that survives F49. It is relative to the routing
+table: for connections built by `generalConnectionsOf routes` and input ports built by
+`generalInputPortsOf className routes` out of the **same** `routes`, a repeated target endpoint
+forces a repeated input port name on the receiving reactor — which
+`LF.GeneralReactor.declaredNames` already refuses. Scope is exactly what F49 corrected. The
+earlier statement quantified over an arbitrary `LF.GeneralProgram`, where it is false, because
+*two connections sharing a target endpoint come from two distinct routes* is a fact about
+programs this translation assembles and not a fact about programs.
+
+Everything here is about routes and names, so it stays in this module. `GeneralRouting.lean`
+imports LF *syntax* and not `Relico.LF.GeneralWellFormed`, and widening an import to place a
+theorem would be the wrong trade; the bridge from `reactorsWellFormed` and `declaredNames` to
+the hypothesis these lemmas take lives in `Relico/Translation/GeneralBasic.lean`, which already
+imports both sides.
+-/
+
+/--
+The `cons` equation of the class filter when the head lands on the class asked for.
+
+Two directed equations rather than a `match` inside a statement, for the reason
+`generalEntryAtSite?_cons_self` gives: a `match` written in a theorem statement elaborates to a
+fresh matcher constant, and every rewrite then depends on that constant agreeing definitionally
+with the one in the definition.
+-/
+theorem generalRoutesIntoClass_cons_self
+    (className : ClassName)
+    (route : GeneralRoute)
+    (remaining : List GeneralRoute)
+    (hClass :
+      route.receiverClass = className) :
+    generalRoutesIntoClass
+        className
+        (route :: remaining) =
+      route ::
+        generalRoutesIntoClass
+          className
+          remaining := by
+  simp [
+    generalRoutesIntoClass,
+    hClass
+  ]
+
+/--
+The `cons` equation when the head lands on some other class.
+-/
+theorem generalRoutesIntoClass_cons_of_ne
+    (className : ClassName)
+    (route : GeneralRoute)
+    (remaining : List GeneralRoute)
+    (hClass :
+      ¬ route.receiverClass = className) :
+    generalRoutesIntoClass
+        className
+        (route :: remaining) =
+      generalRoutesIntoClass
+        className
+        remaining := by
+  simp [
+    generalRoutesIntoClass,
+    hClass
+  ]
+
+/--
+A route whose receiver class is the one asked for survives the filter.
+
+The direction that matters for endpoint uniqueness: the induction below has a route in the tail
+and needs it among the input ports the receiving reactor declares, which is this statement
+composed with the fact that `generalInputPortsOf` maps over exactly this filter.
+-/
+theorem mem_generalRoutesIntoClass
+    (className : ClassName)
+    (route : GeneralRoute) :
+    ∀ (routes : List GeneralRoute),
+      route ∈ routes →
+      route.receiverClass = className →
+        route ∈
+          generalRoutesIntoClass
+            className
+            routes := by
+
+  intro routes
+  induction routes with
+
+  | nil =>
+      intro hMember _
+      cases hMember
+
+  | cons head remaining inductionHypothesis =>
+      intro hMember hClass
+
+      by_cases hHead :
+          head.receiverClass = className
+
+      · rw [
+          generalRoutesIntoClass_cons_self
+            className
+            head
+            remaining
+            hHead,
+          List.mem_cons
+        ]
+
+        cases List.mem_cons.mp hMember with
+
+        | inl hEqual =>
+            exact Or.inl hEqual
+
+        | inr hTail =>
+            exact
+              Or.inr
+                (inductionHypothesis
+                  hTail
+                  hClass)
+
+      · rw [
+          generalRoutesIntoClass_cons_of_ne
+            className
+            head
+            remaining
+            hHead
+        ]
+
+        cases List.mem_cons.mp hMember with
+
+        | inl hEqual =>
+            rw [hEqual] at hClass
+            exact absurd hClass hHead
+
+        | inr hTail =>
+            exact
+              inductionHypothesis
+                hTail
+                hClass
+
+/--
+The target endpoints of the emitted connections, read off the routes instead.
+
+`LF.GeneralProgram.targetEndpointsUnique` asks for `Nodup` of the list on the left. This
+equation is what lets the induction below work on the list on the right, where a route's
+receiver class is available and the filter of the previous lemmas applies. One connection per
+route and both projections are fields of `generalConnectionOf`, so the content is a `map`
+composition and nothing else.
+-/
+theorem generalConnectionsOf_targetEndpoints :
+    ∀ (routes : List GeneralRoute),
+      (generalConnectionsOf
+          routes).map
+          (fun connection =>
+            (
+              connection.targetInstance,
+              connection.targetPort
+            )) =
+        routes.map
+          (fun route =>
+            (
+              route.receiverInstance,
+              generalInputPortOfRoute route
+            )) := by
+
+  intro routes
+  induction routes with
+
+  | nil =>
+      simp [
+        generalConnectionsOf
+      ]
+
+  | cons route remaining inductionHypothesis =>
+      simp only [
+        generalConnectionsOf
+      ] at inductionHypothesis ⊢
+
+      simp [
+        generalConnectionOf,
+        inductionHypothesis
+      ]
+
+/--
+Distinct input port names give distinct target endpoints — the theorem F49 left standing.
+
+Two hypotheses, and naming what each one does is most of the content.
+
+`hReceiverClass` says the routes agree about what class an instance has. It is not decoration:
+a target endpoint is an instance and a port name, while input ports are declared on a *class*,
+so without it two routes could share a receiver instance and be filtered into two different
+reactors, where neither reactor's `declaredNames` can see the collision. Routing built by
+`routesOf` satisfies it because a route's receiver class comes from resolving its receiver
+instance, and this is where that fact has to be supplied rather than assumed.
+
+`hInputPortNames` is the guard clause, one class at a time: the input port names the receiving
+reactor declares are distinct. `LF.GeneralReactor.declaredNames` is what supplies it, which is
+why the bridge lives in the other module.
+
+Given both, the emitted endpoints are distinct. The induction is on the routes, and the head
+step is the whole argument: a later route with the head's endpoint has the head's receiver
+instance, so by `hReceiverClass` it has the head's receiver class, so it survives the same
+filter, so `generalInputPortsOf` declares its name too — and the two names are equal, which
+`hInputPortNames` forbids. Nothing here holds by construction; the conclusion is inherited from
+a decided property of the receiver, exactly as F49 says it must be.
+-/
+theorem generalRouteEndpoints_nodup :
+    ∀ (routes : List GeneralRoute),
+      (∀ (first : GeneralRoute),
+        first ∈ routes →
+        ∀ (second : GeneralRoute),
+          second ∈ routes →
+          first.receiverInstance = second.receiverInstance →
+            first.receiverClass = second.receiverClass) →
+      (∀ (route : GeneralRoute),
+        route ∈ routes →
+          ((generalInputPortsOf
+            route.receiverClass
+            routes).map
+            (fun port =>
+              port.name.value)).Nodup) →
+        (routes.map
+          (fun route =>
+            (
+              route.receiverInstance,
+              generalInputPortOfRoute route
+            ))).Nodup := by
+
+  intro routes
+  induction routes with
+
+  | nil =>
+      intro _ _
+      simp
+
+  | cons head remaining inductionHypothesis =>
+      intro hReceiverClass hInputPortNames
+
+      have hHeadMember :
+          head ∈ head :: remaining := by
+        rw [List.mem_cons]
+        exact Or.inl rfl
+
+      have hTailMember :
+          ∀ (route : GeneralRoute),
+            route ∈ remaining →
+              route ∈ head :: remaining := by
+        intro route hMember
+        rw [List.mem_cons]
+        exact Or.inr hMember
+
+      have hConsistentTail :
+          ∀ (first : GeneralRoute),
+            first ∈ remaining →
+            ∀ (second : GeneralRoute),
+              second ∈ remaining →
+              first.receiverInstance = second.receiverInstance →
+                first.receiverClass = second.receiverClass := by
+        intro first hFirst second hSecond hInstance
+        exact
+          hReceiverClass
+            first
+            (hTailMember first hFirst)
+            second
+            (hTailMember second hSecond)
+            hInstance
+
+      have hNamesTail :
+          ∀ (route : GeneralRoute),
+            route ∈ remaining →
+              ((generalInputPortsOf
+                route.receiverClass
+                remaining).map
+                (fun port =>
+                  port.name.value)).Nodup := by
+
+        intro route hRoute
+
+        have hFull :=
+          hInputPortNames
+            route
+            (hTailMember route hRoute)
+
+        unfold generalInputPortsOf at hFull ⊢
+
+        by_cases hClass :
+            head.receiverClass = route.receiverClass
+
+        · rw [
+            generalRoutesIntoClass_cons_self
+              route.receiverClass
+              head
+              remaining
+              hClass,
+            List.map_cons,
+            List.map_cons
+          ] at hFull
+
+          cases hFull with
+
+          | cons _ hTail =>
+              exact hTail
+
+        · rw [
+            generalRoutesIntoClass_cons_of_ne
+              route.receiverClass
+              head
+              remaining
+              hClass
+          ] at hFull
+
+          exact hFull
+
+      have hHeadNames :=
+        hInputPortNames
+          head
+          hHeadMember
+
+      unfold generalInputPortsOf at hHeadNames
+
+      rw [
+        generalRoutesIntoClass_cons_self
+          head.receiverClass
+          head
+          remaining
+          rfl,
+        List.map_cons,
+        List.map_cons
+      ] at hHeadNames
+
+      cases hHeadNames with
+
+      | cons hHeadFresh _ =>
+
+          constructor
+
+          · intro mapped hMapped hEqual
+
+            rcases
+                List.mem_map.mp
+                  hMapped
+              with
+                ⟨route,
+                 hRoute,
+                 hMappedRoute⟩
+
+            have hPair :
+                (
+                  head.receiverInstance,
+                  generalInputPortOfRoute head
+                ) =
+                  (
+                    route.receiverInstance,
+                    generalInputPortOfRoute route
+                  ) :=
+              hEqual.trans
+                hMappedRoute.symm
+
+            simp only [
+              Prod.mk.injEq
+            ] at hPair
+
+            have hClass :
+                head.receiverClass =
+                  route.receiverClass :=
+              hReceiverClass
+                head
+                hHeadMember
+                route
+                (hTailMember route hRoute)
+                hPair.left
+
+            have hFiltered :
+                route ∈
+                  generalRoutesIntoClass
+                    head.receiverClass
+                    remaining :=
+              mem_generalRoutesIntoClass
+                head.receiverClass
+                route
+                remaining
+                hRoute
+                hClass.symm
+
+            exact
+              hHeadFresh
+                ((generalInputPortDeclOf route).name.value)
+                (List.mem_map.mpr
+                  ⟨generalInputPortDeclOf route,
+                   List.mem_map.mpr
+                     ⟨route,
+                      hFiltered,
+                      rfl⟩,
+                   rfl⟩)
+                (by
+                  simp only [
+                    generalInputPortDeclOf,
+                    hPair.right
+                  ])
+
+          · exact
+              inductionHypothesis
+                hConsistentTail
+                hNamesTail
+
+/--
+`generalRouteEndpoints_nodup` restated on the connection list the assembler actually emits.
+
+The two hypotheses are unchanged and unweakened; only the shape of the conclusion moves, through
+`generalConnectionsOf_targetEndpoints`. This is the form `LF.GeneralProgram.targetEndpointsUnique`
+wants once `assembleGeneralProgram_connections` has fired, so it is the last route-level step before
+the statement becomes a claim about a well-formedness clause — and that step needs
+`LF.GeneralWellFormed`, which this module does not import.
+-/
+theorem generalConnectionsOf_targetEndpoints_nodup
+    (routes : List GeneralRoute)
+    (hReceiverClass :
+      ∀ (first : GeneralRoute),
+        first ∈ routes →
+        ∀ (second : GeneralRoute),
+          second ∈ routes →
+          first.receiverInstance = second.receiverInstance →
+            first.receiverClass = second.receiverClass)
+    (hInputPortNames :
+      ∀ (route : GeneralRoute),
+        route ∈ routes →
+          ((generalInputPortsOf
+            route.receiverClass
+            routes).map
+            (fun port =>
+              port.name.value)).Nodup) :
+    ((generalConnectionsOf
+        routes).map
+        (fun connection =>
+          (
+            connection.targetInstance,
+            connection.targetPort
+          ))).Nodup := by
+
+  rw [
+    generalConnectionsOf_targetEndpoints
+      routes
+  ]
+
+  exact
+    generalRouteEndpoints_nodup
+      routes
+      hReceiverClass
+      hInputPortNames
+
 end Translation
 end Relico

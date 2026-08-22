@@ -4384,11 +4384,22 @@ So a repeated target is a refusal with a diagnostic naming the clause, permanent
 design, and this theorem is what says so. That refusal is asserted under
 `PASS_ALIASED_ENDPOINT_COLLISION_REFUSED` in
 `frontend/lean-bridge/GeneralLfPrinterTestMain.lean`, so F48's witness is checked on every gate
-run instead of being described here. What remains achievable is a strictly weaker *relative*
-statement — `reactorsWellFormed` together with `instancesResolve` implies this clause, since
-`generalInputPortsOf` maps over exactly the routes `generalConnectionsOf` does — carried as item
-15 of that findings file's open list. It would derive one guard clause from another rather than
-from the construction, so it licenses retiring nothing either.
+run instead of being described here.
+
+This docstring used to close by offering a *relative* statement — `reactorsWellFormed` together
+with `instancesResolve` implies this clause — as what remained achievable. **F49 measured that as
+false**: a hand-built program satisfies all eight other clauses, including both of those, and
+fails this one, so the ninth clause is independent and no implication of that shape exists.
+`instancesResolve` cannot supply the missing link, because a target endpoint pairs an *instance*
+with a port name while input ports are declared on a *class*; resolution says the class exists,
+not that two routes to one instance were filtered into one reactor.
+
+The implication that does hold is indexed by the routing table rather than stated about
+`LF.GeneralProgram`, and it is proved below as `assembleGeneralProgram_targetEndpointsUnique`: for
+a program whose connections and whose reactor input ports are built from the *same* routes, and
+whose routes agree about which class an instance has, `reactorsWellFormed` implies this clause.
+That is the nine-clauses-to-eight reduction §8's acceptance condition wants. It still derives one
+guard clause from another rather than from the construction, so it licenses retiring nothing.
 -/
 theorem compileGeneralModel_targetEndpointsUnique
     {model : DTR.GeneralModel}
@@ -4401,6 +4412,236 @@ theorem compileGeneralModel_targetEndpointsUnique
   targetEndpointsUnique_of_wellFormed
     (compileGeneralModel_wellFormed
       hCompiled)
+
+/--
+`Nodup` of an append restricts to either side.
+
+Hand-rolled for the same reason `LF.GeneralWellFormed`'s `eq_of_nodup_map` is: this development
+depends on Lean core alone, and core exposes no `Nodup.of_append_left`. Both are needed because
+`LF.GeneralReactor.declaredNames` is five appended lists and the input port names are the second
+of the five, so reaching them costs three left steps and one right step.
+-/
+private theorem nodup_of_append_left
+    {α : Type} :
+    ∀ (left right : List α),
+      (left ++ right).Nodup →
+        left.Nodup := by
+
+  intro left right
+  induction left with
+
+  | nil =>
+      intro _
+      simp
+
+  | cons head remaining inductionHypothesis =>
+      intro hNodup
+
+      rw [List.cons_append] at hNodup
+
+      cases hNodup with
+
+      | cons hHead hTail =>
+          constructor
+
+          · intro value hMember
+            exact
+              hHead
+                value
+                (List.mem_append.mpr
+                  (Or.inl hMember))
+
+          · exact
+              inductionHypothesis
+                hTail
+
+/--
+The right-hand companion of `nodup_of_append_left`.
+-/
+private theorem nodup_of_append_right
+    {α : Type} :
+    ∀ (left right : List α),
+      (left ++ right).Nodup →
+        right.Nodup := by
+
+  intro left right
+  induction left with
+
+  | nil =>
+      intro hNodup
+      rw [List.nil_append] at hNodup
+      exact hNodup
+
+  | cons head remaining inductionHypothesis =>
+      intro hNodup
+
+      rw [List.cons_append] at hNodup
+
+      cases hNodup with
+
+      | cons _ hTail =>
+          exact
+            inductionHypothesis
+              hTail
+
+/--
+A well-formed reactor declares distinct input port names.
+
+This is the projection that turns the guard's decided `declaredNames.Nodup` into the hypothesis
+`Translation.generalRouteEndpoints_nodup` asks for. The clause is extracted by contradiction
+rather than positionally: assume the negation, and the `&&` chain collapses to `false`, so the
+proof does not depend on where in `wellFormed` the clause sits or on how the chain associates.
+-/
+private theorem inputPortNames_nodup_of_wellFormed
+    {reactor : LF.GeneralReactor}
+    (hWellFormed :
+      reactor.wellFormed = true) :
+    (reactor.inputPorts.map
+      (fun port =>
+        port.name.value)).Nodup := by
+
+  have hNodup :
+      reactor.declaredNames.Nodup := by
+    by_cases hCandidate :
+        reactor.declaredNames.Nodup
+
+    · exact hCandidate
+
+    · revert hWellFormed
+      unfold LF.GeneralReactor.wellFormed
+      simp [hCandidate]
+
+  unfold LF.GeneralReactor.declaredNames at hNodup
+
+  exact
+    nodup_of_append_right _ _
+      (nodup_of_append_left _ _
+        (nodup_of_append_left _ _
+          (nodup_of_append_left _ _
+            hNodup)))
+
+/--
+The ninth well-formedness clause, derived from the third — on assembled programs, not in general.
+
+F49 measured `targetEndpointsUnique` to be independent of the other eight clauses, so this is the
+strongest statement of its kind available: it is indexed by the routing table the assembler was
+given, and `reactorsWellFormed` is what discharges it.
+
+Two hypotheses beyond that clause, and both are real content rather than bookkeeping.
+
+`hReceiverClass` says the routes agree about which class an instance has. `assembleGeneralProgram`
+does not know this — nothing in its body relates its `compiledReactors` to its `routes` — and
+without it two routes could target one instance through two different classes, where no single
+reactor's `declaredNames` can see the collision.
+
+`hReactorOf` is the link the opaque `compiledReactors` argument otherwise lacks: every route's
+receiver class has a reactor among them whose input ports are the ones `generalInputPortsOf`
+builds from these same routes.
+
+**Scope, stated plainly.** This is content-equivalent to a `compileGeneralModel`-level statement
+modulo two facts about the functions that produce these arguments — that `routesOf` resolves a
+route's receiver class from its receiver instance, and that `compileGeneralReactiveClasses` emits
+one reactor per class with `generalInputPortsOf` for its input ports. Those two are the named
+residue, not a silent gap; `compileGeneralModel_targetEndpointsUnique` above continues to get the
+same conclusion from the guard, so nothing downstream waits on them.
+-/
+theorem assembleGeneralProgram_targetEndpointsUnique
+    {model : DTR.GeneralModel}
+    {routes : List GeneralRoute}
+    {compiledReactors : List LF.GeneralReactor}
+    (hReceiverClass :
+      ∀ (first : GeneralRoute),
+        first ∈ routes →
+        ∀ (second : GeneralRoute),
+          second ∈ routes →
+          first.receiverInstance = second.receiverInstance →
+            first.receiverClass = second.receiverClass)
+    (hReactorOf :
+      ∀ (route : GeneralRoute),
+        route ∈ routes →
+          ∃ (reactor : LF.GeneralReactor),
+            reactor ∈ compiledReactors ∧
+              reactor.inputPorts =
+                generalInputPortsOf
+                  route.receiverClass
+                  routes)
+    (hReactorsWellFormed :
+      (assembleGeneralProgram
+        model
+        routes
+        compiledReactors).reactorsWellFormed =
+          true) :
+    (assembleGeneralProgram
+      model
+      routes
+      compiledReactors).targetEndpointsUnique =
+        true := by
+
+  have hAll :
+      ∀ (reactor : LF.GeneralReactor),
+        reactor ∈ compiledReactors →
+          reactor.wellFormed = true := by
+
+    have hReactors := hReactorsWellFormed
+
+    unfold LF.GeneralProgram.reactorsWellFormed at hReactors
+
+    rw [
+      assembleGeneralProgram_reactors
+    ] at hReactors
+
+    simp only [
+      List.all_eq_true
+    ] at hReactors
+
+    intro reactor hMember
+
+    exact
+      hReactors
+        reactor
+        hMember
+
+  have hInputPortNames :
+      ∀ (route : GeneralRoute),
+        route ∈ routes →
+          ((generalInputPortsOf
+            route.receiverClass
+            routes).map
+            (fun port =>
+              port.name.value)).Nodup := by
+
+    intro route hRoute
+
+    rcases
+        hReactorOf
+          route
+          hRoute
+      with
+        ⟨reactor,
+         hMember,
+         hPorts⟩
+
+    rw [← hPorts]
+
+    exact
+      inputPortNames_nodup_of_wellFormed
+        (hAll reactor hMember)
+
+  unfold LF.GeneralProgram.targetEndpointsUnique
+
+  rw [
+    assembleGeneralProgram_connections
+  ]
+
+  simp only [
+    decide_eq_true_eq
+  ]
+
+  exact
+    generalConnectionsOf_targetEndpoints_nodup
+      routes
+      hReceiverClass
+      hInputPortNames
 
 /-!
 ## Site totality

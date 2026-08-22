@@ -287,9 +287,22 @@ theorem outputPortInfixFor_eq_of_outputPortNameFor_eq
 With the sender instance fixed, an input port's name determines the sender's output port.
 
 Suffix cancellation again, and this is the direction that carries weight: it says an input
-port name cannot be produced by two different output ports of one sender, which is the
-sender-side half of `targetEndpointsUnique` being a property of the *construction* rather
-than of a check.
+port name cannot be produced by two different output ports of one sender.
+
+**It does not say the sender side of `targetEndpointsUnique` holds by construction, and an
+earlier version of this paragraph did say that.** The claim is injectivity in the *output port
+name*, and finding F48 measured that the step before this one is where uniqueness is actually
+lost: `outputPortNameFor` concatenates message, `To`, capitalized known rebec and site suffix
+without escaping the separator, so `report` with `toHub` and `reportTo` with `hub` both spell
+`reportToToHub`. Two distinct send sites therefore arrive at this function as the *same*
+argument, and injectivity is satisfied without excluding anything. The composite a
+construction argument would need — `(message, known rebec, site)` to input port name — is the
+non-injective one.
+
+So the clause is earned by a check, not by naming. See F48 and F49 in
+`docs/STAGE_E_FINDINGS.md`, and `Translation.assembleGeneralProgram_targetEndpointsUnique` in
+`Relico/Translation/GeneralBasic.lean` for the theorem that does establish it, whose
+hypotheses include the well-formedness guard precisely because this lemma cannot replace it.
 -/
 theorem inputPortNameFor_outputPort_injective
     (senderInstance : ActorName) :
