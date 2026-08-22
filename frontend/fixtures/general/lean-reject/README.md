@@ -179,11 +179,20 @@ first is why the fixture is interesting at all — the pipeline narrows a constr
 the source language allows, and the narrowing is the exporter's and this layer's,
 not Rebeca's.
 
-Note that the exporter's own parameter-shadowing branch is, as of this fixture,
-**unexercised**: `reject/` holds eleven sources and none of them shadows a state
-variable with a formal. `local-declaration.rebeca` reaches `Scope.declare` by the
-`declare`-statement path only. A `reject/` source for the formal path would close
-that on the Java side, and it is the natural companion to this file.
+Note that the exporter's own parameter-shadowing branch was, when this fixture
+was written, **unexercised**: `reject/` then held eleven sources and none of them
+shadowed a state variable with a formal, `local-declaration.rebeca` reaching
+`Scope.declare` by the `declare`-statement path only. That gap is closed as of
+2026-08-22 by `reject/parameter-shadows-state.rebeca`, the companion this
+paragraph asked for. It declares `msgsrv add(int total)` against
+`statevars { int total; }` and expects `a local name shadowing state variable
+total`, which is the exporter throwing at `:417–421` above rather than the
+compiler objecting — the point of the two bullets.
+
+The two fixtures are deliberately named alike and are still two claims. The Java
+one says the exporter refuses to **emit** such a document; this one says the
+decoder refuses to **accept** one, which is a claim no exporter fixture can make
+precisely because the exporter will not emit the input it needs.
 
 Note that `PASS_REJECT_PARAMETER_SHADOWS_STATE_VARIABLE` here and stage D's
 `PASS_REJECT_PARAMETER_STATE_COLLISION` in the printer runner are different

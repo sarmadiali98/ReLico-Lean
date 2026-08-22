@@ -231,6 +231,17 @@ def runGeneralFrontendTests
       1
       1
 
+    -- The only positive whose class sends one message to one known rebec from
+    -- two distinct sites, with two different `after` values and a payload of
+    -- arity two. It is what makes `docs/STAGE_E_DESIGN.md` §6's per-send-site
+    -- ports reachable from a real exporter document rather than only from a
+    -- hand-built `DTR.GeneralModel`, which §10.2 asked for.
+    expectAccept
+      "SEND_SITES"
+      (fixtureDirectory ++ "/send-sites.parser.json")
+      2
+      2
+
     -- A document the exporter emits and this layer refuses. The only negative
     -- of that kind, and the reason the expectations here cannot be derived from
     -- which directory a fixture sits in.

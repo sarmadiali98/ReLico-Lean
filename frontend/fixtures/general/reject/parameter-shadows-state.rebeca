@@ -1,0 +1,13 @@
+reactiveclass Ledger(2) {
+    statevars {
+        int total;
+        int touched;
+    }
+    msgsrv add(int total) {
+        touched = total;
+    }
+}
+
+main {
+    Ledger ledger0():();
+}

@@ -24,6 +24,7 @@ from __future__ import annotations
 import copy
 import importlib.util
 import json
+import os
 import pathlib
 import re
 import sys
@@ -43,15 +44,20 @@ ANCHORS = (
     "constructor-arguments",
 )
 
-# Recorded from the first real exporter run and then reviewed, rather than
-# predicted. Kept as a named list because the provenance of an expected
-# document is worth knowing even after the distinction stops mattering: these
-# four anchors are evidence that the exporter is right, and these five are not.
+# Recorded from a real exporter run and then reviewed, rather than predicted.
+# Kept as a named list because the provenance of an expected document is worth
+# knowing even after the distinction stops mattering: these four anchors are
+# evidence that the exporter is right, and these six are not. Five of the six
+# were recorded by the first `--record` run; `send-sites` was recorded by the
+# later run that added it, which is why this comment says "a real run" rather
+# than "the first" — a provenance note that names one event goes stale the first
+# time a second event of the same kind happens.
 RECORDED = (
     "expressions",
     "fan-in",
     "minimal-class",
     "priorities",
+    "send-sites",
     "two-instances",
 )
 
@@ -59,6 +65,15 @@ RECORDED = (
 # in the wrong directory is a test that passes for the wrong reason, so the
 # split is checked here as well as at the gate.
 REJECT_DIRECTORIES = ("reject", "upstream-reject")
+
+# Set by `check-general.sh --record`, the one run whose purpose is to create
+# expected documents that do not exist yet. Exactly one assertion below relaxes
+# under it, and only in the direction of a file not existing yet; nothing about
+# the content of a document that does exist is affected. See finding F55 for why
+# this flag has to exist: without it the gate could not record a new positive,
+# because its preflight failed on the absence the recording loop was about to
+# fix.
+RECORDING = os.environ.get("RELICO_GENERAL_RECORDING") == "1"
 
 # Reserved words of the Core and Timed Rebeca lexers that a fixture could
 # plausibly reach for as an identifier. `record` is the reason this list exists:
@@ -741,10 +756,27 @@ class PositiveFixturesAreAccountedFor(unittest.TestCase):
         # Recording has happened, so the invariant tightens. A positive with no
         # expected document would now be a fixture that asserts only that the
         # exporter does not crash.
+        #
+        # The tightening had a cost that took a second new positive to notice.
+        # The failure message below says to run the gate with --record, and that
+        # gate runs this suite before the loop that records, so on the very run
+        # the message asks for, this assertion fired first and the recording never
+        # happened. Finding F55. The exemption is therefore narrow on purpose: it
+        # applies only under RECORDING, only to a document that does not exist,
+        # and it skips rather than passes, so a recording run still says out loud
+        # which positive it has yet to account for.
         for model in sorted(FIXTURES.glob("*.rebeca")):
             with self.subTest(fixture=model.stem):
+                document = model.with_suffix(".parser.json")
+
+                if RECORDING and not document.is_file():
+                    self.skipTest(
+                        model.stem + " has no expected document yet; this run"
+                        " is the one recording it"
+                    )
+
                 self.assertTrue(
-                    model.with_suffix(".parser.json").is_file(),
+                    document.is_file(),
                     model.stem + " has no expected document; run the gate with"
                     " --record, then review what it wrote",
                 )

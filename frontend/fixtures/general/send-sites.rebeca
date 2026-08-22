@@ -1,0 +1,36 @@
+reactiveclass Probe(4) {
+    knownrebecs {
+        Archive hub;
+    }
+    statevars {
+        int sequence;
+    }
+    Probe(int start) {
+        sequence = start;
+        self.emit() after(1);
+    }
+    msgsrv emit() {
+        hub.capture(sequence, 1) after(2);
+        hub.capture(sequence, 2) after(5);
+    }
+}
+
+reactiveclass Archive(6) {
+    statevars {
+        int entries;
+        int lastTag;
+    }
+    Archive() {
+        entries = 0;
+        lastTag = 0;
+    }
+    msgsrv capture(int value, int tag) {
+        entries = entries + 1;
+        lastTag = tag;
+    }
+}
+
+main {
+    Probe probe0(archive0):(7);
+    Archive archive0():();
+}

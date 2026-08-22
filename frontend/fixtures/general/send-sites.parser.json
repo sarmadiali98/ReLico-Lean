@@ -1,0 +1,247 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 9,
+            "target": "sequence",
+            "value": {
+              "kind": "variable",
+              "line": 9,
+              "name": "start"
+            }
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 1
+            },
+            "arguments": [],
+            "kind": "send",
+            "line": 10,
+            "messageServer": "emit",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Probe"
+          }
+        ],
+        "line": 8,
+        "parameters": [
+          {
+            "line": 8,
+            "name": "start",
+            "type": "int"
+          }
+        ]
+      },
+      "knownRebecs": [
+        {
+          "className": "Archive",
+          "line": 3,
+          "name": "hub"
+        }
+      ],
+      "line": 1,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 2
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 13,
+                  "name": "sequence"
+                },
+                {
+                  "kind": "intLiteral",
+                  "line": 13,
+                  "value": 1
+                }
+              ],
+              "kind": "send",
+              "line": 13,
+              "messageServer": "capture",
+              "target": {
+                "kind": "knownRebec",
+                "name": "hub"
+              },
+              "targetClassName": "Archive"
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 5
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 14,
+                  "name": "sequence"
+                },
+                {
+                  "kind": "intLiteral",
+                  "line": 14,
+                  "value": 2
+                }
+              ],
+              "kind": "send",
+              "line": 14,
+              "messageServer": "capture",
+              "target": {
+                "kind": "knownRebec",
+                "name": "hub"
+              },
+              "targetClassName": "Archive"
+            }
+          ],
+          "line": 12,
+          "name": "emit",
+          "parameters": [],
+          "priority": null
+        }
+      ],
+      "name": "Probe",
+      "queueBound": 4,
+      "stateVariables": [
+        {
+          "line": 6,
+          "name": "sequence",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 24,
+            "target": "entries",
+            "value": {
+              "kind": "intLiteral",
+              "line": 24,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 25,
+            "target": "lastTag",
+            "value": {
+              "kind": "intLiteral",
+              "line": 25,
+              "value": 0
+            }
+          }
+        ],
+        "line": 23,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 18,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 28,
+              "target": "entries",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 28,
+                  "name": "entries"
+                },
+                "line": 28,
+                "operator": "+",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 28,
+                  "value": 1
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 29,
+              "target": "lastTag",
+              "value": {
+                "kind": "variable",
+                "line": 29,
+                "name": "tag"
+              }
+            }
+          ],
+          "line": 27,
+          "name": "capture",
+          "parameters": [
+            {
+              "line": 27,
+              "name": "value",
+              "type": "int"
+            },
+            {
+              "line": 27,
+              "name": "tag",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Archive",
+      "queueBound": 6,
+      "stateVariables": [
+        {
+          "line": 20,
+          "name": "entries",
+          "type": "int"
+        },
+        {
+          "line": 21,
+          "name": "lastTag",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 7
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Archive",
+          "instance": "archive0",
+          "knownRebec": "hub"
+        }
+      ],
+      "className": "Probe",
+      "line": 34,
+      "name": "probe0",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Archive",
+      "line": 35,
+      "name": "archive0",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

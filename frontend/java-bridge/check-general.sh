@@ -84,14 +84,28 @@ mkdir -p "$GENERATED_DIRECTORY/logs"
 
 # One Maven build for the whole run. Each fixture still gets its own invocation
 # of the runner, so its exit code and stderr stay separately observable; only
-# the unpack-and-compile step is shared. Without this the twenty-seven fixtures
-# would pay for twenty-seven builds of the upstream compiler.
+# the unpack-and-compile step is shared. Without this every fixture in all three
+# loops would pay for its own build of the upstream compiler. Deliberately not
+# written as a count: this comment said "twenty-seven fixtures" while the corpus
+# held twenty-eight, and a number here has to be maintained by whoever adds a
+# fixture anywhere, which is exactly the maintenance that keeps failing.
 BUILD_DIRECTORY="$GENERATED_DIRECTORY/build"
 mkdir -p "$BUILD_DIRECTORY"
 
 export RELICO_GENERAL_BUILD_DIR="$BUILD_DIRECTORY"
 
 echo "=== the checkers' own tests, before trusting anything they say"
+
+# A recording run is the one run whose purpose is to create expected documents
+# that do not exist yet, so the suite below must not demand them first. Without
+# this the gate could not record a new positive at all: the preflight failed on
+# the missing document, and the loop that would have written it never ran — while
+# the failing test's own message said to "run the gate with --record". That is
+# finding F55. The tight invariant is unchanged for every ordinary run, which is
+# the run whose green result is the gate.
+if [ "$MODE" = "--record" ]; then
+  export RELICO_GENERAL_RECORDING=1
+fi
 
 python3 "$REPOSITORY_ROOT/frontend/test_validate_general_v1.py"
 python3 "$REPOSITORY_ROOT/frontend/test_compare_general_v1.py"

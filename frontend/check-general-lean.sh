@@ -14,7 +14,7 @@ set -euo pipefail
 # step, `lake build`, and neither can run against stale oleans.
 #
 # Deliberately does NOT run the Java exporter. frontend/java-bridge/check-general.sh
-# already owns the Rebeca-to-JSON boundary -- it regenerates all nine positives
+# already owns the Rebeca-to-JSON boundary -- it regenerates all ten positives
 # from source and compares them against the committed documents, and runs the two
 # negative corpora. Re-running it here would pay for a Maven build of the
 # upstream compiler to re-establish a fact another gate already establishes.

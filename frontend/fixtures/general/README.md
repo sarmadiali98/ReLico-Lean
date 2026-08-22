@@ -1,9 +1,9 @@
 # `general-v1` frontend fixtures
 
 These models are the acceptance surface of the general family's two frontend
-layers. Between them the nine positives exercise every production
-`frontend/java-bridge/RebecaGeneralJsonExporter.java` admits, and the thirty-three
-negatives pin one rejection each — nineteen against the exporter and the Rebeca
+layers. Between them the ten positives exercise every production
+`frontend/java-bridge/RebecaGeneralJsonExporter.java` admits, and the thirty-four
+negatives pin one rejection each — twenty against the exporter and the Rebeca
 compiler upstream of it, fourteen against the Lean decoder.
 
 Two gates read this directory, and they read different parts of it.
@@ -15,7 +15,7 @@ produce. The documents in this directory are the contract between the two, which
 is why neither gate regenerates what the other one checks.
 
 The negatives are split across three directories by *which layer* rejects them:
-eleven in `reject/` that this exporter refuses, eight in `upstream-reject/`
+twelve in `reject/` that this exporter refuses, eight in `upstream-reject/`
 that the Rebeca parser and typechecker refuse before the exporter is handed an
 AST, and fourteen in `lean-reject/` that the Lean decoder refuses. That split was
 measured, not guessed, and the reason it is worth recording
@@ -65,11 +65,11 @@ whole corpus every other kind the schema defines — `assign`, `send`, `if`, `fo
 `declare`, `intLiteral`, `boolLiteral`, `variable`, `binary`, and both send
 targets — appears in at least one anchor.
 
-Five are not hand-authored: `expressions`, `fan-in`, `minimal-class`,
-`priorities`, `two-instances`. Their expected documents were **recorded from the
-first real exporter run and then reviewed**, for a specific reason.
+Six are not hand-authored: `expressions`, `fan-in`, `minimal-class`,
+`priorities`, `send-sites`, `two-instances`. Their expected documents were
+**recorded from a real exporter run and then reviewed**, for a specific reason.
 
-## Why five are recorded rather than predicted, and what stops that from being circular
+## Why six are recorded rather than predicted, and what stops that from being circular
 
 Every node in this schema carries a `line`, and line numbers are parser trivia:
 they come from the Rebeca compiler's own AST, and **no other exporter in this
@@ -95,7 +95,7 @@ that here:
    (`--accept-lines`, which rewrites `line` fields and nothing else). A
    structural mismatch can never be rubber-stamped by re-recording.
 
-Once recorded and reviewed, those five files are committed and are as binding
+Once recorded and reviewed, those six files are committed and are as binding
 as the anchors. The distinction is historical, not permanent.
 
 ### What the first run actually showed
@@ -166,7 +166,7 @@ The two layers are distinguishable in the log, which is what lets the gate hold
 each corpus to its own claim rather than merely checking that *something*
 rejected the model:
 
-| | `reject/` (11) | `upstream-reject/` (8) |
+| | `reject/` (12) | `upstream-reject/` (8) |
 |---|---|---|
 | `unsupported by the ReLico general parser bridge` | required | forbidden |
 | `Timed Rebeca parsing or semantic checking failed` | forbidden | required |
@@ -233,6 +233,45 @@ reserved. `read-message-arrival` pins that behaviour so the fail-closed part is
 guaranteed rather than incidental, and so improving the message later is a
 visible change instead of a silent one.
 
+## The two fixtures added on 2026-08-22
+
+`send-sites` is the tenth positive, and it exists for a shape the other nine do
+not have. Measured across the corpus, every other positive that sends to a known
+rebec sends **once**: `two-classes` has `sink.accept(sent)`, `two-instances` has
+`hub.report(identifier)`, `fan-in` has `gateway.collect(reading)`. `fan-in` earns
+its name from several sender *instances* reaching one receiver, which gives many
+ordered instance pairs one send site each. `send-sites` is the other axis: one
+pair with **two** sites, `hub.capture(sequence, 1) after(2)` and
+`hub.capture(sequence, 2) after(5)` — same message, same target, different delays.
+That is the case `docs/STAGE_E_DESIGN.md` §6 keys a port on, and before this
+fixture it was reachable only from a model hand-built in the printer runner, which
+is the reachability §10.2 records as still owed from a real document.
+
+The same measurement corrected a second claim, so it is worth stating precisely.
+`send-sites` is *not* the first positive with a two-parameter message server —
+`constructor-arguments` and `expressions` declare four between them — but it is
+the first in which such a server is ever the **target of a send**. Those four are
+declared and never sent to, so no committed positive had produced a two-element
+send payload until this one, and a struct payload now has a source-level witness
+rather than only a constructed one.
+
+Its message server is called `capture` rather than the obvious `record`, because
+`record` is a reserved token — the trap that cost `read-clock` its first life, one
+section above. The reserved-word check in `test_validate_general_v1.py` was added
+because of that incident, and it is what caught this one, before the fixture had
+been anywhere near a JDK. A guard firing a second time, on an unrelated fixture,
+is the evidence that it earned its place.
+
+`reject/parameter-shadows-state.rebeca` is the twelfth source under `reject/`, and
+it closes a gap `lean-reject/README.md` named and asked for a companion to: the
+exporter's parameter-shadowing branch had no source fixture reaching it by the
+*formal* path, only `local-declaration.rebeca` reaching `Scope.declare` by the
+`declare`-statement path. Shadowing is legal Rebeca — the upstream compiler has no
+hiding check of any kind — so the restriction is the exporter's own, which is why
+this fixture belongs in `reject/` rather than `upstream-reject/`, and why the
+diagnostic it expects is the exporter's `a local name shadowing state variable
+total` rather than anything the compiler says.
+
 ## Running the checks
 
 ```
@@ -257,7 +296,7 @@ takes those same committed documents as given and checks what Lean makes of them
 Neither re-does the other's work, and the documents in this directory are the
 contract between them.
 
-Note that the glob on the first line matches only the nine positives. The fourteen
+Note that the glob on the first line matches only the ten positives. The fourteen
 documents in `lean-reject/` are deliberately invalid against `general-v1` — one of
 them is not even JSON — so validating them would fail by design. They are named
 `invalid-*.json` rather than `*.parser.json` partly for that reason.
