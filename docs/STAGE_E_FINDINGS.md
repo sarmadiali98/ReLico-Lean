@@ -1,9 +1,9 @@
-# Stage E findings — F34 through F50
+# Stage E findings — F34 through F51
 
 **Why this file exists.**
 Stage E added external sends, ports and connections to the general translator, and in doing so it
-produced seventeen findings about *this repository* — its own code, its own design document, and its own
-test harness. They are numbered F34 through F50, continuing the single `F` series that
+produced eighteen findings about *this repository* — its own code, its own design document, and its own
+test harness. They are numbered F34 through F51, continuing the single `F` series that
 `docs/STAGE_B_FINDINGS.md` opened at F1–F20 and `docs/STAGE_D_FINDINGS.md` carried to F21–F33.
 
 The `F` series and the `P` series answer different questions, and keeping them apart is the whole
@@ -55,7 +55,9 @@ F34 through F40 were first written in `docs/STAGE_E_DESIGN.md` §11.1, under an 
 they were *"provisional until the findings file lands"* and *"do not cite these elsewhere yet"*. That
 warning was earned: stage D's design had numbered its own findings D1 through D9, they became F21
 through F29 when the stage D findings file landed, and the D-numbers became uncitable. **This file is
-what makes F34–F49 citable.** Nothing below is provisional any more.
+what makes F34–F51 citable.** Nothing below is provisional any more. (This range is one of the four
+literals that move whenever an entry is added, and it is the one that went stale when F50 landed —
+see **F51**, which records that and lists all four.)
 
 F41 and F42 were never in the design document. They were found during implementation and recorded
 only on the declarations they concern — F41 across `Relico/Translation/GeneralRouting.lean:47`,
@@ -743,7 +745,30 @@ names and that each bound actor exists with the declared class, so **aliasing tw
 is well-formed source**. Both message servers take one parameter because an arity-zero external send is a
 refusal cause in its own right (**F36**) and would have masked the effect.
 
-**What ran**, verbatim from the `#eval` output:
+**What ran.** The block below is a **superseded scratch run**, not current output. The witness was a
+self-contained file elaborated against the built package with `lake env lean`, kept deliberately *outside*
+the repository so that no untracked Lean landed in the tree, and its `F48_*` labels were renamed when the
+assertions were carried into the suite. Grepping `F48_` therefore returns nothing anywhere in the code,
+which is why the mapping is spelled out here instead of left implicit: this block once introduced itself as
+*"verbatim from the `#eval` output"*, and that provenance claim is finding **F51**.
+
+Four of its lines have landed instruments in `frontend/lean-bridge/GeneralLfPrinterTestMain.lean`, whose
+expected literals match the values below character for character: `F48_SOURCE_WELLFORMED` is now
+`ALIASED_ENDPOINT_SOURCE_WELLFORMED` (`:4142`), `F48_OUTPUT_PORTS` is
+`ALIASED_ENDPOINT_OUTPUT_PORTS_COLLIDE` (`:4147`), `F48_TARGET_ENDPOINTS` is
+`ALIASED_ENDPOINT_TARGETS_COLLIDE` (`:4152`), and `F48_TRANSLATION_REFUSED` is
+`ALIASED_ENDPOINT_COLLISION_REFUSED` (`:4160`). Two of the nine values the scratch run reported inside
+`F48_PROGRAM_CLAUSES` are now pinned individually rather than as a string:
+`targetEndpointsUnique=false` by `ALIASED_ENDPOINT_TARGET_UNIQUENESS_FALSE` (`:4180`) and
+`connectionsWellFormed=true` by `ALIASED_ENDPOINT_CONNECTIONS_WELLFORMED` (`:4185`).
+
+Three lines were **not** carried into the suite and survive only here, so they are the reason this block is
+kept rather than replaced: `F48_SOURCE_CONJUNCTS`, the other seven clauses of `F48_PROGRAM_CLAUSES`, and
+`F48_DECLARED_NAMES`. Of those, the five conjunct names are corroborated independently by the comment at
+`:4139-4140`, which states that all five conjuncts of `DTR.GeneralModel.wellFormed` hold, aliasing
+included; `reactorsWellFormed=false` is corroborated by the landed refusal text, which names a reactor
+cause; and `F48_DECLARED_NAMES` is corroborated by nothing and should be treated as the weakest line in
+this entry.
 
 ```
 F48_SOURCE_WELLFORMED true
@@ -761,7 +786,25 @@ F48_TRANSLATION_REFUSED the translated LF program is not well-formed: some react
   same instance, which the LF compiler rejects as a many-to-one connection
 ```
 
-**Three things the run measured that were predicted wrongly or not at all**, recorded because each one would
+**What the gate pins today**, verbatim from a green `frontend/check-general-lean.sh`:
+
+```
+PASS_ALIASED_ENDPOINT_SOURCE_WELLFORMED
+PASS_ALIASED_ENDPOINT_OUTPUT_PORTS_COLLIDE
+PASS_ALIASED_ENDPOINT_TARGETS_COLLIDE
+PASS_ALIASED_ENDPOINT_COLLISION_REFUSED
+PASS_ALIASED_ENDPOINT_TARGET_UNIQUENESS_FALSE
+PASS_ALIASED_ENDPOINT_CONNECTIONS_WELLFORMED
+```
+
+Those six lines are the whole of what the suite prints for this finding: the runner emits one bare label per
+assertion and no values at all. So the two blocks are not redundant and neither replaces the other — the
+`PASS_` lines prove the assertions exist and passed, while the values they compared against are auditable
+only by reading the `expectString` and `expectBool` literals at the lines cited above. Anything the scratch
+run scored clause by clause is not asserted anywhere, which is a coverage gap this entry states rather than
+hides.
+
+**Three things the scratch run measured that were predicted wrongly or not at all**, recorded because each one would
 have become a false sentence in this entry had it been written from the argument instead of the run.
 
 * **The collision is over-determined across both reactors.** It was predicted on the receiver only. In fact
@@ -852,8 +895,6 @@ short enough that reading them is not optional.**
 
 ## F49 — the ninth clause is independent of the other eight, and two more docstrings argue it away
 
-<!-- F49_BODY_MARKER -->
-
 **Grade: measured.** Method: the same shape as F48 — a self-contained witness elaborated against the built
 package with `lake env lean`, from a file deliberately *outside* the repository so no untracked Lean lands in
 the tree. Exit 0. Seven `#eval`s: the nine clauses of `LF.GeneralProgram.wellFormed` in two groups of five and
@@ -887,6 +928,31 @@ F49_RECEIVER_DECLARED_NAMES incoming  nodup=true
 F49_TARGET_ENDPOINTS receiverActor.incoming | receiverActor.incoming
 F49_GUARD_REFUSED the translated LF program is not well-formed: two connections target the same
   input port of the same instance, which the LF compiler rejects as a many-to-one connection
+```
+
+Those labels are the scratch run's own and not the suite's. As with F48 the witness lived outside the
+repository and the labels were renamed when four of these seven measurements were carried in, so grepping
+`F49_` returns nothing in the code; unlike F48 the paragraph above never called the block verbatim, which is
+the difference between a stale label and the provenance defect recorded as **F51**. The mapping, all in
+`frontend/lean-bridge/GeneralLfPrinterTestMain.lean`: the eight clauses that hold — `F49_CLAUSES_ONE`
+together with the first three values of `F49_CLAUSES_TWO` — are pinned as one string by
+`SHARED_TARGET_EIGHT_CLAUSES_HOLD` (`:4376`); the ninth, `targetEndpointsUnique=false`, by
+`SHARED_TARGET_UNIQUENESS_FALSE` (`:4391`); the `nodup=true` verdict inside `F49_RECEIVER_DECLARED_NAMES` by
+`SHARED_TARGET_RECEIVER_NAMES_NODUP` (`:4385`); and `F49_GUARD_REFUSED` by
+`SHARED_TARGET_ISOLATED_REFUSAL` (`:4398`).
+
+Three lines did not land and survive only here: `F49_PROGRAM_WELLFORMED`, `F49_REACTORS`, and
+`F49_TARGET_ENDPOINTS`. The last is the asymmetry worth naming, because F48's endpoint list *is* asserted
+(`ALIASED_ENDPOINT_TARGETS_COLLIDE`) while this one is not, so the doubled endpoint that gives this finding
+its name is visible in the suite only through the clause that fails on it.
+
+**What the gate pins today**, verbatim from a green `frontend/check-general-lean.sh`:
+
+```
+PASS_SHARED_TARGET_EIGHT_CLAUSES_HOLD
+PASS_SHARED_TARGET_RECEIVER_NAMES_NODUP
+PASS_SHARED_TARGET_UNIQUENESS_FALSE
+PASS_SHARED_TARGET_ISOLATED_REFUSAL
 ```
 
 **What that establishes, in order of usefulness.**
@@ -924,9 +990,10 @@ translator produced — which is exactly what F48's witness showed, where it fai
 `Relico/Translation/GeneralRouting.lean:1253` argues that `generalInputPortsOf` needs no deduplication, and
 writes the argument out deliberately, *"as an argument rather than leaving as a silence"*. It has two premises
 and F48's measurement refutes both. The first — *"a sender instance's output port names are distinct within its
-class by step 4 of the environment"* — is what `F48_OUTPUT_PORTS reportToToHub | reportToToHub` disproved, two
-entries with one name in a single class's port environment. The second — *"one instance binds one known rebec to
-one instance, so one (sender instance, output port) pair contributes exactly one arrow"* — is true of a single
+class by step 4 of the environment"* — is what `ALIASED_ENDPOINT_OUTPUT_PORTS_COLLIDE`
+(`reportToToHub | reportToToHub`) disproved: two entries with one name in a single class's port
+environment. The second — *"one instance binds one known rebec to one instance, so one (sender
+instance, output port) pair contributes exactly one arrow"* — is true of a single
 binding and false of the pair, because `bindingsMatchClass` permits two *different* known rebecs to bind to the
 same actor, which is exactly the aliasing F48 used. So the conclusion *"two rows with equal input port names on
 one class would therefore have to be one row"* does not follow.
@@ -951,9 +1018,10 @@ contradicted by a measurement of what it constructed.
 The cited theorem is true, and the interesting part is how it fails to help. It says one sender's two
 *different* output **ports** cannot produce one input port name — injectivity with the sender instance fixed.
 The gap is that two routes can share one output port **name**, which is what non-injectivity of
-`outputPortNameFor` permits and what `F48_OUTPUT_PORTS reportToToHub | reportToToHub` is. So both wrong sites
-in this module rest on the same unstated premise, that a (sender instance, output port name) pair identifies at
-most one route, and both were written as though a theorem about names supplied it. **Fixed here too**, on the
+`outputPortNameFor` permits and what `ALIASED_ENDPOINT_OUTPUT_PORTS_COLLIDE`
+(`reportToToHub | reportToToHub`) is. So both wrong sites in this module rest on the same unstated premise,
+that a (sender instance, output port name) pair identifies at most one route, and both were written as
+though a theorem about names supplied it. **Fixed here too**, on the
 same terms: the false claim is replaced by the refutation, the relative statement is written out with its
 hypothesis, and the docstring says which module owns it.
 
@@ -1007,10 +1075,11 @@ measured for the multiple case and, until this run, merely assumed for the singl
 > being distinct in `(senderInstance, site)`"*, and `:891`, which owes §10.2 that clause *"from route-key
 > distinctness (§7.2)"*. This is a **third** phrasing, and it is the load-bearing one, because route keys
 > are precisely what stage E's per-send-site naming makes distinct — while distinct keys do not give
-> distinct port *names*, which is what `F48_OUTPUT_PORTS reportToToHub | reportToToHub` measures. So the
-> family reaches five mentions in code and two in the design document. Per closing item 13 these two are
-> corrected the next time that document is touched rather than rewritten as a side effect of a proof commit;
-> the addendum under item 13 names them so the ownership is explicit.
+> distinct port *names*, which is what `ALIASED_ENDPOINT_OUTPUT_PORTS_COLLIDE`
+> (`reportToToHub | reportToToHub`) measures. So the family reaches five mentions in code and two in the
+> design document as of this addendum — a sixth code site is recorded immediately below. Per closing item 13
+> these two are corrected the next time that document is touched rather than rewritten as a side effect of
+> a proof commit; the addendum under item 13 names them so the ownership is explicit.
 >
 > **A sixth site, in a fifth file, and this one is a true theorem with a false gloss.** The same
 > whole-repository listing also reached `Relico/Translation/NameGeneration.lean:289`, whose docstring for
@@ -1110,6 +1179,77 @@ is next opened rather than as a side effect of a proof commit — the same conve
 for `STAGE_E_DESIGN.md:633` and `:891`, and this entry is the pointer that convention relies on. §10.2's
 reachability obligation for a class that sends one message twice to one rebec is unaffected by any of this
 and remains task #51's.
+
+---
+
+## F51 — a findings file called a transcript verbatim after its labels were renamed, and three citations then treated them as instruments
+
+**Grade: measured**, by enumeration rather than by a run: every `F<number>_<LABEL>` string in `docs/` was
+listed and read against the code, and every value in the two evidence blocks was compared against the
+expected literal it corresponds to in `frontend/lean-bridge/GeneralLfPrinterTestMain.lean`.
+
+**The defect.** F48's entry introduced its evidence block as *"**What ran**, verbatim from the `#eval`
+output"*. The block is real output, but not of anything that still exists: the witness was a scratch file
+kept outside the repository, and its seven `F48_*` labels were renamed to `ALIASED_ENDPOINT_*` when four of
+the measurements were carried into the suite. So *verbatim* asserted a provenance the block did not have, in
+the one file whose worth depends on provenance being checkable.
+
+**What the defect is not, recorded because the first diagnosis was wrong.** Task #61 initially concluded the
+block was fabricated — that three of its lines were invented and that it claimed more assertions than exist.
+That was a mis-diagnosis, and the reasoning behind it is worth writing down because it is this file's own
+error running in the opposite direction. The argument was *"no `F48_` label exists in any `.lean`, `.sh` or
+`.py`, therefore the labels are invented"*. But both entries state that their witness lived **outside** the
+repository precisely so no untracked Lean would land in the tree, so absence from the repository is exactly
+what the stated method predicts. Absence is evidence of fabrication only where the method claims presence.
+
+The values are corroborated line by line. `reportToToHub | reportToToHub` is the expected literal at
+`GeneralLfPrinterTestMain.lean:4148`; the doubled target endpoint is the literal at `:4153`; the two-clause
+refusal text is the literal at `:4161-4165`; `targetEndpointsUnique=false` is asserted at `:4179-4182` and
+`connectionsWellFormed=true` at `:4184-4187`. The five conjunct names in `F48_SOURCE_CONJUNCTS`, which land
+nowhere, are corroborated by the comment at `:4139-4140` stating that all five conjuncts of
+`DTR.GeneralModel.wellFormed` hold, aliasing included. F49's block corroborates itself internally: its prose
+promises seven `#eval`s and enumerates them, and the block carries exactly seven labels matching that
+enumeration one to one. **So the measurements stand and the findings resting on them are safe; what was false
+was the sentence introducing them.**
+
+**How it propagated, which is the part that cost a reader something.** Three passages in F49's entry cite
+`F48_OUTPUT_PORTS` in the present tense — *"is what … disproved"*, *"what … is"*, *"which is what …
+measures"* — so each reads as a live instrument. A reader following F47's own rule, grep the named term, gets
+zero hits and correctly concludes the instrument does not exist. One of the three was written during task
+#58's repair of the fifth site of the F49 family, which is to say while explicitly fixing this class of
+defect.
+
+**The fourth stale range literal, found by the same census.** This file states its own range or count in four
+places: the title, the *"eighteen findings"* sentence, the *"numbered F34 through …"* sentence, and the
+sentence *"this file is what makes F34–… citable"*. F50 landed in commit `f9f241e` having updated the first
+three and not the fourth, which read `F34–F49` while F50's own entry sat in the file. That is a fourth
+occurrence of the family F45 and F46 record; it happened in the commit that made it stale; and it happened
+despite the general rule stated at the end of F46. The rule was honoured for the literal a check reads and
+forgotten for the three that no check reads.
+
+**What was done.** Both blocks are relabelled as superseded scratch runs, and each is followed by a mapping
+from scratch label to landed label giving the source line of every landed assertion, so every surviving line
+is either greppable or explicitly marked as surviving only here. Each block gains a second block of the
+`PASS_` lines the gate actually prints. The two are not redundant and neither replaces the other: the `PASS_`
+lines prove the assertions exist and passed, while the values they compare against are auditable only by
+reading the `expectString` and `expectBool` literals, because the runner emits one bare label per assertion
+and no values. The three citations now name `ALIASED_ENDPOINT_OUTPUT_PORTS_COLLIDE`. The fourth range
+literal is corrected and now carries a pointer here. A dead `<!-- F49_BODY_MARKER -->` anchor, referenced by
+nothing in the repository, is removed. Six lines across the two blocks are marked as landing nowhere; the
+weakest is `F48_DECLARED_NAMES`, which no landed assertion and no comment corroborates.
+
+**The rule this adds**, beside F46's rule about numbers stated in more than one place: **a transcript is
+evidence about what produced it, so the sentence introducing one is itself a claim, and it has to be true of
+the artifact that still exists.** Renaming a label while landing an experiment is ordinary; leaving prose
+that says the old labels are what ran is not. And the corollary the mis-diagnosis earned: **where a claim's
+own stated method predicts a string will be absent, absence does not test the claim** — corroborate the
+values instead, which is cheap here because the suite keeps its expected literals in the source.
+
+**What is deliberately not done.** No assertion is added to cover the six lines that survive only in prose.
+The clause-by-clause scoring and the `declaredNames` lists were exploratory, and asserting them now would pin
+implementation detail no finding rests on; they are marked unasserted instead, the same disposition F47 item
+14 took for refusal causes no fixture reaches. Line numbers into *this* file are also deliberately avoided
+above, since an entry that shifts its own citations is the failure mode this entry is about.
 
 ---
 
