@@ -1,4 +1,5 @@
 import Relico.DTR.GeneralSyntax
+import Relico.DTR.GeneralPriority
 import Relico.LF.GeneralSyntax
 import Relico.LF.GeneralWellFormed
 import Relico.Translation.GeneralRouting
@@ -52,19 +53,30 @@ inversion lemma has exactly one right-hand side to name. Stage E gains from this
 over: the fields that used to be `rfl`-empty are now `rfl`-equal to a routing projection,
 and no inversion lemma changed shape to say so.
 
-Nothing in *this file* sorts anything, but as of stage F the route list it consumes is
-sorted: `routesOf` walks `priorityOrderedInstances`, so a receiver's port reactions come
-out in sending-actor priority order with ties resolved by main-block declaration order.
-That closes level 1 of §III-D. What is still dropped is `DTR.GeneralMessageServer.priority`,
-so the per-server reaction *groups* are still emitted in source order — the difference worth
-stating against `Relico/Translation/MultiStoreBasic.lean`, which compiles message servers in
-`priorityOrderedMessageServers` order. Reaction declaration order is observable in the
-target — measured, not assumed — so that remaining sort is a semantic act and belongs with
-the proof of what it achieves.
-`assembleGeneralMessageReaction_priority` records the dropped field as a theorem, so no later
-stage can wire `LF.GeneralReaction.priority` without breaking a proof — which is the intended
-outcome, because the printer never reads that field and list order is the only mechanism the
-target actually offers.
+As of stage F both levels of §III-D are closed, and this file is where the second one enters.
+The route list it consumes is already sorted: `routesOf` walks `priorityOrderedInstances`, so a
+receiver's port reactions come out in sending-actor priority order with ties resolved by
+main-block declaration order, and that is level 1 — nothing here has to know it happened.
+Level 2 is the reaction *groups*, ordered by the priority of the receiving message server, and
+it enters at exactly one place: `generalPriorityOrderedMessageServers`, applied once at
+`compileGeneralReactiveClass`'s single call to `compileGeneralMessageServerReactions`. The walk
+itself still does not sort, and must not — it recurses on the server list, so a sort inside it
+would re-sort at every step.
+
+One entry point per level is deliberate, and finding **F60** is why. Level 1's sort sits inside
+`routesOf`, which every consumer calls, so an assertion comparing two values that both read
+routes cannot fail on ordering. Level 2's sits on the constructor side only, while
+`generalReactionNamesOf` still receives `reactiveClass.messageServers` unsorted — so the
+specification function and the constructor can now disagree, which is what makes the
+disagreement worth asserting.
+
+`assembleGeneralMessageReaction_priority` records `DTR.GeneralMessageServer.priority` as a field
+the emitted reaction never carries, so no later stage can wire `LF.GeneralReaction.priority`
+without breaking a proof — which is the intended outcome, and more load-bearing now than before.
+The printer never reads that field, so **list order is the only mechanism the target offers**, and
+it is the mechanism both levels use. Reaction declaration order is observable in the target —
+measured under `lfc` 0.11.0, not assumed — which is what makes ordering this list a semantic act
+rather than a cosmetic one, and why it ships with the theorems that say what it achieves.
 
 ## What stage E changed, and why each choice was forced
 
@@ -1688,17 +1700,101 @@ theorem compileGeneralConstructor_error
   ]
 
 /--
-Translate every message server into its group of reactions, in source order.
+One class's message servers, in the order the translation walks them: **message-server priority
+order, ties broken by class declaration order**.
 
-Explicit recursion and no sort. `Relico/Translation/MultiStoreBasic.lean` compiles this
-list in `priorityOrderedMessageServers` order; this family deliberately does not, because
-declaration order is observable in the target and the sort that realizes priority is stage
-G's, together with the theorem that says what it achieves.
+This is stage F's level-2 mechanism and the only place it enters reaction construction.
+`docs/STAGE_F_DESIGN.md` §1.1 owes Lemma 2 of the paper an ordering of one actor's reaction
+*blocks* by the priority of the message server each block serves. A block is one message server's
+reaction group — its action reactions, then one port reaction per route into it — and
+`compileGeneralMessageServerReactions` emits those groups in the order of the list it is handed.
+So ordering the list here orders the blocks, and nothing downstream has to know that priority
+exists. §5 states the premise that scopes the result: this is Lemma 2's **same-actor** case, every
+statement staying inside one reactor.
+
+Ties are resolved by source declaration order because `DTR.GeneralMessageServerPriority.normalize`
+is a stable sort — the convention decision `0041` fixed for equal LF microsteps, and the one level
+1 already uses. An unannotated server is a priority class of its own, ordered after every explicit
+one; that convention is the AST's, stated at `Relico/DTR/GeneralSyntax.lean:335-337`, not this
+function's.
+
+Carries the `general` prefix because `Translation.priorityOrderedMessageServers` is already taken,
+at `Relico/Translation/MultiStoreBasic.lean:18`, by the multi-store family's sort at its own AST
+type — and both live in `Relico.Translation`, so the collision would be a redeclaration rather than
+an overload. Level 1's `priorityOrderedInstances` needs no prefix because no other family sorts
+instances. The rule this family follows is prefix-to-disambiguate, which is also why
+`selfSendsOfClass` and `outputPortEnvOf` are bare.
+-/
+def generalPriorityOrderedMessageServers
+    (reactiveClass : DTR.GeneralReactiveClass) :
+    List DTR.GeneralMessageServer :=
+  DTR.GeneralMessageServerPriority.normalize
+    reactiveClass.messageServers
+
+/--
+The sort changes order and nothing else, so membership transfers both ways.
+
+This is the lemma that keeps level 2 cheap. Every side condition in this file that quantifies over
+a class's message servers — "every server's sends have an entry", and the like — was proved against
+`reactiveClass.messageServers`, and each one is now asked about the sorted list instead. A
+permutation lemma lets those proofs go through by rewriting the membership hypothesis rather than
+by re-doing the argument, which is why re-keying eight sites needed no new induction.
+
+`@[simp]`, matching `priorityOrderedMessageServers_mem_iff` at
+`Relico/Translation/MultiStoreBasic.lean:26`, so the two families discharge this obligation the
+same way.
+-/
+@[simp]
+theorem generalPriorityOrderedMessageServers_mem_iff
+    (messageServer : DTR.GeneralMessageServer)
+    (reactiveClass : DTR.GeneralReactiveClass) :
+    messageServer ∈
+        generalPriorityOrderedMessageServers
+          reactiveClass ↔
+      messageServer ∈
+        reactiveClass.messageServers :=
+  DTR.GeneralMessageServerPriority.mem_normalize_iff
+    messageServer
+    reactiveClass.messageServers
+
+/--
+The sort drops nothing and duplicates nothing, so the block count is the server count.
+
+Stated because a reader checking that stage F changed *order only* should be able to see the
+length claim without unfolding `normalize`, and because a sort that lost a server would emit a
+reactor with a missing reaction block — a failure that reads as an ordering bug and is not one.
+-/
+@[simp]
+theorem generalPriorityOrderedMessageServers_length
+    (reactiveClass : DTR.GeneralReactiveClass) :
+    (generalPriorityOrderedMessageServers
+      reactiveClass).length =
+      reactiveClass.messageServers.length :=
+  DTR.GeneralMessageServerPriority.length_normalize
+    reactiveClass.messageServers
+
+/--
+Translate every message server into its group of reactions, in the order of the list it is given.
+
+Explicit recursion and **no sort, deliberately**. That is not the same claim it was before stage
+F: level 2's message-server priority sort is real and applied, but it is applied by the caller —
+`compileGeneralReactiveClass` passes `generalPriorityOrderedMessageServers reactiveClass` rather
+than `reactiveClass.messageServers`. A sort *inside* this function would be wrong, not merely
+redundant: it recurses on the server list, so it would re-sort at every step, and the tail's
+order would be decided as many times as the list is long.
+
+So this function is order-**preserving** rather than order-**deciding**, and every theorem about
+it is stated over an arbitrary server list. That is what lets the sort be re-keyed at one call
+site without re-proving anything here. `Relico/Translation/MultiStoreBasic.lean` reaches the same
+place by the same route, through its own `priorityOrderedMessageServers`; the two families now
+agree on message-server order and differ only in that the general family also sorts *instances*,
+which is level 1 and lives in `Relico/Translation/GeneralRouting.lean`.
 
 Groups are **appended**, not consed, which is the one structural change stage E makes to this
-function. A class's reaction list is therefore its message servers in declaration order with
+function. A class's reaction list is therefore its message servers in the given order with
 each server's arrivals contiguous behind it, and `compileGeneralMessageServerReactions_cons_ok`
-says exactly that in one `++`.
+says exactly that in one `++`. `compileGeneralMessageServerReactions_append` generalizes it from
+a head-and-tail split to an arbitrary one, which is the form level 2's ordering theorem consumes.
 -/
 def compileGeneralMessageServerReactions
     (env : GeneralOutputPortEnv)
@@ -2134,7 +2230,8 @@ def compileGeneralReactiveClass
                 (selfSendsOfClass reactiveClass)
                 routes
                 reactiveClass.name
-                reactiveClass.messageServers with
+                (generalPriorityOrderedMessageServers
+                  reactiveClass) with
 
           | .error message =>
               .error message
@@ -2172,7 +2269,8 @@ theorem compileGeneralReactiveClass_ok
           (selfSendsOfClass reactiveClass)
           routes
           reactiveClass.name
-          reactiveClass.messageServers =
+          (generalPriorityOrderedMessageServers
+            reactiveClass) =
         .ok compiledMessageReactions) :
     compileGeneralReactiveClass
         classes
@@ -2296,7 +2394,8 @@ theorem compileGeneralReactiveClass_error_messageServers
           (selfSendsOfClass reactiveClass)
           routes
           reactiveClass.name
-          reactiveClass.messageServers =
+          (generalPriorityOrderedMessageServers
+            reactiveClass) =
         .error message) :
     compileGeneralReactiveClass
         classes
@@ -3219,6 +3318,165 @@ private theorem exists_of_compileGeneralMessageServerReactions_cons_ok
             ⟩
 
 /--
+Compiling a split server list concatenates the two compiled reaction lists.
+
+Stated with the two *varying* quantifiers inside the conclusion rather than as hypotheses of the
+theorem, which is the shape `routesOfInstances_append_aux` in
+`Relico/Translation/GeneralRouting.lean` uses and for the same reason: the induction is on
+`earlier`, `compiledEarlier` has to vary with it, and putting both under a `∀` in the goal avoids
+`induction … generalizing` and leaves the induction hypothesis in an unambiguous shape. `later`
+and `compiledLater` are fixed throughout and stay as parameters.
+
+The two inversion lemmas above are why this needs no unfolding of its own: the nil case reads the
+compiled list off `eq_nil_of_compileGeneralMessageServerReactions_nil_ok` and the cons case off
+`exists_of_compileGeneralMessageServerReactions_cons_ok`, so the recursion is inverted in exactly
+one place in this file and this proof consumes that inversion rather than repeating it. That is
+also why this declaration sits here, below both inverters, rather than beside the `_cons_ok`
+lemma it generalizes.
+-/
+private theorem compileGeneralMessageServerReactions_append_aux
+    (env : GeneralOutputPortEnv)
+    (selfSends : List GeneralSelfSend)
+    (routes : List GeneralRoute)
+    (className : ClassName)
+    (later : List DTR.GeneralMessageServer)
+    (compiledLater : List LF.GeneralReaction)
+    (hLater :
+      compileGeneralMessageServerReactions
+          env
+          selfSends
+          routes
+          className
+          later =
+        .ok compiledLater) :
+    ∀ (earlier : List DTR.GeneralMessageServer)
+      (compiledEarlier : List LF.GeneralReaction),
+      compileGeneralMessageServerReactions
+            env
+            selfSends
+            routes
+            className
+            earlier =
+          .ok compiledEarlier →
+        compileGeneralMessageServerReactions
+            env
+            selfSends
+            routes
+            className
+            (earlier ++ later) =
+          .ok
+            (compiledEarlier ++
+              compiledLater) := by
+
+  intro earlier
+
+  induction earlier with
+
+  | nil =>
+      intro compiledEarlier hEarlier
+
+      have hEmpty :
+          compiledEarlier = [] :=
+        eq_nil_of_compileGeneralMessageServerReactions_nil_ok
+          hEarlier
+
+      subst hEmpty
+
+      simpa using hLater
+
+  | cons server remaining inductionHypothesis =>
+      intro compiledEarlier hEarlier
+
+      obtain
+          ⟨group,
+            compiledRemaining,
+            hServer,
+            hRemaining,
+            hSplit⟩ :=
+        exists_of_compileGeneralMessageServerReactions_cons_ok
+          hEarlier
+
+      subst hSplit
+
+      rw [
+        List.cons_append,
+        List.append_assoc
+      ]
+
+      exact
+        compileGeneralMessageServerReactions_cons_ok
+          hServer
+          (inductionHypothesis
+            compiledRemaining
+            hRemaining)
+
+/--
+A class's reaction list splits where its server list splits, in order.
+
+This is the order claim at the level of one class's reactions: no interleaving, no re-sorting, and
+the cut point is **arbitrary**, so it holds between any earlier server and any later one rather
+than only at the head of the list. `compileGeneralMessageServerReactions_cons_ok` is this statement
+at a head-and-tail split; level 2's ordering theorem needs the arbitrary one, because it speaks
+about a cut in message-server *priority* order and nothing distinguishes the first element of a
+sorted list.
+
+"No re-sorting" is a statement about this recursion, which walks whatever list it is handed. The
+sort lives one level up, in `compileGeneralReactiveClass`, which hands it
+`generalPriorityOrderedMessageServers reactiveClass` rather than `reactiveClass.messageServers` —
+so a cut this theorem takes a hypothesis about is a cut in priority order whenever the list it is
+given came from there. `routesOfInstances_append` in `Relico/Translation/GeneralRouting.lean` is
+the level-1 counterpart, proved the same way for the same reason.
+
+Binders are implicit here where the level-1 counterpart's are explicit. Every one of them is
+determined by the two hypotheses, and this theorem is the generalization of
+`compileGeneralMessageServerReactions_cons_ok`, whose binders are implicit; matching its immediate
+neighbour matters more than matching the other family.
+-/
+theorem compileGeneralMessageServerReactions_append
+    {env : GeneralOutputPortEnv}
+    {selfSends : List GeneralSelfSend}
+    {routes : List GeneralRoute}
+    {className : ClassName}
+    {earlier later : List DTR.GeneralMessageServer}
+    {compiledEarlier compiledLater : List LF.GeneralReaction}
+    (hEarlier :
+      compileGeneralMessageServerReactions
+          env
+          selfSends
+          routes
+          className
+          earlier =
+        .ok compiledEarlier)
+    (hLater :
+      compileGeneralMessageServerReactions
+          env
+          selfSends
+          routes
+          className
+          later =
+        .ok compiledLater) :
+    compileGeneralMessageServerReactions
+        env
+        selfSends
+        routes
+        className
+        (earlier ++ later) =
+      .ok
+        (compiledEarlier ++
+          compiledLater) :=
+  compileGeneralMessageServerReactions_append_aux
+    env
+    selfSends
+    routes
+    className
+    later
+    compiledLater
+    hLater
+    earlier
+    compiledEarlier
+    hEarlier
+
+/--
 Inverting one class, which now has three sub-computations rather than two.
 
 The environment is existentially quantified along with the two reaction groups, and it has to
@@ -3252,7 +3510,8 @@ private theorem exists_of_compileGeneralReactiveClass_ok
               (selfSendsOfClass reactiveClass)
               routes
               reactiveClass.name
-              reactiveClass.messageServers =
+              (generalPriorityOrderedMessageServers
+                reactiveClass) =
               .ok compiledMessageReactions ∧
             reactor =
               assembleGeneralReactor
@@ -3296,7 +3555,8 @@ private theorem exists_of_compileGeneralReactiveClass_ok
                 (selfSendsOfClass reactiveClass)
                 routes
                 reactiveClass.name
-                reactiveClass.messageServers with
+                (generalPriorityOrderedMessageServers
+                  reactiveClass) with
 
           | error message =>
               rw [
@@ -4664,15 +4924,22 @@ theorem compileGeneralReactiveClass_actionNames
       reactiveClass.messageServers
 
 /--
-A compiled reactor's message reactions are its message servers' reaction groups, in source
-order.
+A compiled reactor's message reactions are its message servers' reaction groups, in
+**message-server priority order**.
 
-This is the theorem stage G permutes, and the replacement for the version §7.3 falsified.
-Nothing here sorts, so the order on the right is the order the source was written in — now
-with each group's internal order fixed as well, which stage G has to respect: permuting whole
-groups is a reordering of message servers, permuting *within* a group reorders the delivery
-paths of one message server against each other, and those are different things with different
-observable effects.
+This is the statement §7.3 replaced, now carrying stage F's level-2 sort in its own right-hand
+side. It used to say "in source order", and to name stage G as the stage that would permute it;
+stage F did that instead, and the permutation is visible here rather than hidden — the right-hand
+side reads `generalPriorityOrderedMessageServers reactiveClass`, not `reactiveClass.messageServers`.
+Making the sort appear in the theorem statement is the point. A version that pushed `normalize`
+down inside `generalReactionNamesOf` would prove the same equation while saying nothing about
+order, which is exactly the shape finding **F60** caught elsewhere.
+
+The two granularities stay distinct and both are now decided. Permuting whole groups is a
+reordering of *message servers* and is level 2, applied here. Permuting *within* a group reorders
+the delivery paths of one message server against each other and is level 1, applied upstream in
+`routesOf`. They have different observable effects and different theorems, and neither subsumes
+the other.
 -/
 theorem compileGeneralReactiveClass_reactionNames
     {classes : List DTR.GeneralReactiveClass}
@@ -4693,7 +4960,8 @@ theorem compileGeneralReactiveClass_reactionNames
           reactiveClass)
         routes
         reactiveClass.name
-        reactiveClass.messageServers := by
+        (generalPriorityOrderedMessageServers
+          reactiveClass) := by
 
   rcases
       exists_of_compileGeneralReactiveClass_ok
@@ -4720,7 +4988,8 @@ theorem compileGeneralReactiveClass_reactionNames
       (selfSendsOfClass reactiveClass)
       routes
       reactiveClass.name
-      reactiveClass.messageServers
+      (generalPriorityOrderedMessageServers
+        reactiveClass)
       compiledMessageReactions
       hMessageServers
 
@@ -5885,7 +6154,8 @@ theorem exists_compileGeneralReactiveClass
       (selfSendsOfClass reactiveClass)
       routes
       reactiveClass.name
-      reactiveClass.messageServers
+      (generalPriorityOrderedMessageServers
+        reactiveClass)
       (by
         intro server hServer send hMember
 
@@ -5893,7 +6163,10 @@ theorem exists_compileGeneralReactiveClass
           exists_generalEntryAtSite?_of_mem_sends
             hEnv
             (mem_externalSendsOfClass_of_mem_messageServer
-              hServer
+              ((generalPriorityOrderedMessageServers_mem_iff
+                server
+                reactiveClass).mp
+                hServer)
               hMember))
 
   exact

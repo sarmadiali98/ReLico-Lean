@@ -266,10 +266,11 @@ echo "=== the general LF printer, well-formedness and translation assertions"
 # its priority order, so its expected text fails under declaration order and under any single
 # transposition of it. Both order assertions are compared against one shared literal rather
 # than against each other, which is finding F60's defect and the reason this block is four
-# assertions and not two. Its last token, drain_reaction, sits where *declaration* order puts
-# it because level 2 is not written yet; task #87 must move it to the front, so this is the
-# one block in the list whose literal is expected to change on a schedule, and a drop of four
-# here before then means the ordering evidence has left the repository entirely.
+# assertions and not two. Its first receiver token, drain_reaction, now sits where *priority*
+# order puts it: task #87 moved it there from the end of the literal, which is the one
+# scheduled literal change this list ever carried, and it is discharged. A drop of four here
+# still means the ordering evidence has left the repository entirely, because no other block
+# in the file carries a priority annotation at all.
 EXPECTED_PRINTER_ASSERTIONS=96
 
 set +e

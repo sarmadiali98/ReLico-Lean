@@ -281,3 +281,164 @@ running it means annotating a model whose purpose is to be the unannotated drift
 block gets the annotations instead, and its `PRIORITY_FAN_IN_EMITTED_REACTION_ORDER` is the same
 observation made against a literal, where it can fail.
 
+---
+
+## F61 — a documented fail-fast policy silently voided a diagnostic promise made elsewhere, at the exact assertion pair built to carry stage F's evidence
+
+**Grade: measured** for the run and its three counts, which are repeatable by the command named
+below; **read** for the mechanism, at four cited `path:line`s.
+
+**Method.** `frontend/check-general-lean.sh` was run on a working tree with level 2 wired (task
+**#94**) and the expected literal **deliberately left unedited**, so that the first exercise of the
+new sort would be a prediction test rather than a confirmation of text already fitted to it. The log
+was then searched for `^PASS_` and for every occurrence of the string `SPECIFIED`. `testFailure`,
+`expectString`, `expectRendered` and `runGeneralLfPrinterTests` were read afterwards, to explain
+what the search found.
+
+### The run
+
+`EXIT=1`, and **118** `PASS_` lines where green is 120 — 24 frontend plus 96 printer — so **94 of
+the 96 printer assertions**. Exactly one diagnostic, reproduced here in full:
+
+```
+PRIORITY_FAN_IN_EMITTED_REACTION_ORDER: expected
+sample_reaction|ping_reaction,pingToHubFromBeta_reaction,pingToHubFromGamma_reaction,pingToHubFromAlpha_reaction,drain_reaction
+but got
+sample_reaction|drain_reaction,ping_reaction,pingToHubFromBeta_reaction,pingToHubFromGamma_reaction,pingToHubFromAlpha_reaction
+```
+
+`grep -n SPECIFIED` over all **4380** log lines returns **nothing**.
+`PRIORITY_FAN_IN_SPECIFIED_REACTION_ORDER` printed neither a `PASS_` line nor a failure of its own.
+Two assertions are missing from the count and the diagnostic accounts for only one of them.
+
+The `but got` string above is also the finding this run was for, and it is recorded here because the
+two arrived together: it is the repository's first gate-visible evidence of level 2 ordering, it
+matches the permutation predicted in `frontend/lean-bridge/GeneralLfPrinterTestMain.lean` before the
+behaviour existed, and level 1's within-group 3-cycle `Beta, Gamma, Alpha` is visibly untouched
+beside it. **The instrument produced its intended measurement and a defect in itself on the same
+run, at the first moment it was used.**
+
+### The mechanism, read
+
+`testFailure` (`:237-243`) is `throw (IO.userError message)`. `expectString` (`:253-265`) calls it
+on mismatch, and `expectRendered` (`:294-310`) delegates to `expectString`. `runGeneralLfPrinterTests`
+(`:5490`) is a **single** `try` over all twelve assertion blocks with a **single** `catch` (`:5523`)
+that prints the exception and returns 1. So the first throw anywhere in the suite abandons every
+assertion after it — not merely the rest of its own block.
+
+The fan-in block is the twelfth and last, and its four calls are sequenced
+`SOURCE_WELLFORMED`, `ACTOR_PRIORITIES_DISTINCT`, `EMITTED_REACTION_ORDER`,
+`SPECIFIED_REACTION_ORDER`. The first two passed — they are the last two `PASS_` lines in the log —
+the third threw, and the fourth never ran. 96 − 2 = 94, which is the measured count exactly.
+
+### The promise this refutes
+
+**The quotation below refers to commit `6ebcd11`**, the last commit in which the defective sentence
+was live. The commit that records this finding rewrites that docstring in the same landing, so the
+quoted text does not appear in the working file and is not meant to. It was transcribed from the
+working tree at `:5247-5250` immediately before the edit that replaced it, and re-checked against
+`git show 6ebcd11:frontend/lean-bridge/GeneralLfPrinterTestMain.lean` piped through
+`tr '\n' ' ' | tr -s ' '`, which returns the sentence — the flattening is necessary because it wraps
+across a line break, which is the trap **F51** recorded. The cites in the section above are to the
+**working** file, where the mechanism they describe is unchanged by this landing.
+
+`priorityFanInSpecifiedReactionOrder`'s docstring, written under task #86 in anticipation of #87,
+read:
+
+> *"level 2's sort enters at the reaction-group walk on the *constructor* side, while this function
+> still receives `reactiveClass.messageServers` unsorted, so if #87 moves only one of them these two
+> assertions will disagree and say which one moved."*
+
+The two **values** really would have disagreed in that run — that half of the sentence is right, and
+the experiment named below says exactly how. What cannot happen is the *reporting*. The pair cannot
+both be observed in one run, so the run cannot "say which one moved", and the promise holds in
+exactly **one** of its two directions. The asymmetry is fixed by the order of the two calls:
+
+* A move in the **specification function** alone is fully diagnosed. `EMITTED` is asserted first and
+  passes, `SPECIFIED` then runs and fails, and the pair reads as one `PASS_` line and one failure —
+  which is the two-sided reading the docstring promises.
+* A move in the **constructor** alone is only half diagnosed. `EMITTED` throws, and its label does
+  name the side that moved, so the run is not silent. But `SPECIFIED` never executes, so the log
+  cannot distinguish *the constructor alone moved* from *both sides moved*: those two situations
+  produce byte-identical output. The pair collapses to one bit, and the bit that goes missing is
+  exactly the one that says whether the specification function still needs changing too.
+
+The second is the direction task #87 moves in, and it is the direction the docstring was written
+for. The ambiguity was not hypothetical. Mid-task, with `EMITTED` failing and `SPECIFIED` absent,
+the gate could not answer the one question the pair exists to answer — whether
+`priorityFanInSpecifiedReactionOrder` had to be re-pointed at the sorted list as well. That question
+was settled by reading the code, which is the instrument the pair was built to replace.
+
+### The reporting policy is not the defect, and this is the part worth keeping
+
+`testFailure`'s own docstring at `:231-235` states the policy deliberately and gives its reason:
+
+> *"The runner catches this once and returns a nonzero status, so the first failing assertion is the
+> one reported. A later assertion cannot mask an earlier one."*
+
+That is a defensible trade and it is honestly documented at the site that implements it. Converting
+eight assertion helpers and 96 call sites to fail-slow, so that one diagnostic becomes available in
+one direction it currently is not, would spend a global architecture change on a local convenience —
+and it would give up the property the docstring names, which is the property that makes a single
+reported failure trustworthy. **So the repair is to the claim, not to the runner.** The docstring
+that over-promised now states the asymmetry, and no code changed on account of this finding.
+
+This distinguishes F61 from its three siblings. F47, F59 and F60 each found an instrument that
+**could not observe** what it was credited with observing, and each was repaired by changing the
+instrument. F61 found an instrument that observes correctly and a *second document* that described
+its reporting behaviour wrongly. The defect is entirely in the description, which is why it is the
+cheapest of the four to fix and the easiest of the four to have missed: nothing was broken, and a
+green run would never have revealed it. **It took a failing run at a predicted failure to expose a
+false sentence about what failing runs report.**
+
+### The trap in reading the log, which cost a wrong first reading
+
+In the log the diagnostic sits at line 4281, *ahead of* all 94 `PASS_` lines, which invites the
+reading that the block reports failures before successes. It does not, and the ordering is not a
+stdio buffering accident either — it is forced by the gate script.
+`frontend/check-general-lean.sh:277-281` captures the printer run's **stdout** into
+`PRINTER_OUTPUT="$( … )"` and re-prints it afterwards at `:285`, while **stderr** is never
+redirected and so reaches the log the instant it is written. `IO.println` writes the `PASS_` lines
+to stdout; the `catch` at `:5523` uses `IO.eprintln`. **A printer failure diagnostic therefore
+always precedes every `PASS_` line in a gate log, by construction.** Line order in that log is not
+execution order across the two streams, and any finding that reasons from it must say which stream
+each line came from.
+
+### Why it is load-bearing rather than cosmetic
+
+F60 prescribed the shape of stage F's ordering instrument: two assertions against one literal, so
+that they "can fail alone rather than only together". F61 measures the limit of what that shape
+delivers under this suite's reporting policy — each can fail alone, but only one failure per run is
+ever *seen*, and which one is decided by call order rather than by which side is wrong. A reader who
+takes the pair as a two-bit diagnostic will over-read a single reported failure as a statement about
+both sides. That is the same mistake F59 recorded against the ninety-two unchanged assertions,
+committed against a failing run instead of a passing one.
+
+### What the repair run added, and the one question that stays open
+
+The landing that records this finding was re-gated: `EXIT=0`, **120** `PASS_` lines, and
+`grep -n SPECIFIED` over the log now returns exactly one line,
+`PASS_PRIORITY_FAN_IN_SPECIFIED_REACTION_ORDER`. Both order assertions run, and both agree with the
+drain-first literal. That is an addition rather than bookkeeping: it measures that
+`generalReactionNamesOf` applied to `generalPriorityOrderedMessageServers reactiveClass` yields the
+same five names in the same order that `compileGeneralModel` emits, which is the agreement the
+re-keyed `compileGeneralReactiveClass_reactionNames` asserts — now checked on a concrete model
+rather than only proved.
+
+What neither run establishes is what `SPECIFIED` would have *reported* in the failing run, while it
+still walked the **unsorted** list. It is not in the log, and it is not recoverable by re-running,
+because the same landing that moves the literal also points the specification value at the sorted
+list; after that the assertion passes, and the question becomes unobservable for a second and
+different reason. To answer it: revert only the expected literal to declaration order, revert only
+the argument back to `reactiveClass.messageServers`, and comment out the `EMITTED` call so that
+`SPECIFIED` runs first.
+
+**The prediction is that it passes**, and the reason is worth stating because it is the sharpest form
+of the whole finding. An unsorted server walk reproduces *declaration* order at the group level,
+while the port reactions inside `ping`'s group still come from `routes` and so are already level-1
+sorted — which is precisely the old literal, token for token. So in the failing run the two values
+did disagree, the disagreement was exactly the one #86 anticipated, and the pair still could not
+report it: the side that would have passed was the side that never ran. A two-bit diagnostic whose
+bits are read in a fixed order can only ever return the first bit.
+
+

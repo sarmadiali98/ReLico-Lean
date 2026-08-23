@@ -4890,13 +4890,18 @@ against the same literal precisely so that they cannot be satisfied by agreeing 
 other.
 
 The receiver's two message servers carry distinct priorities in disagreeing declaration
-order as well, and that is a **negative control**, not a second claim. Level 2 is not
-written: `DTR.GeneralMessageServerPriority` has zero references under
-`Relico/Translation/` and `Relico/Correctness/`, so message-server priority is inert today
-and `drain_reaction` is emitted last, where its *declaration* puts it. Task #87 must move
-it to the front, and the literal below must then change in exactly that one way — which is
-one predicted permutation of text written before the behaviour existed, rather than text
-written to match behaviour after the fact.
+order as well. When this block was written that was a **negative control** rather than a
+second claim: level 2 did not exist, `DTR.GeneralMessageServerPriority` had zero references
+under `Relico/Translation/` and `Relico/Correctness/`, message-server priority was inert,
+and `drain_reaction` was emitted last where its *declaration* puts it. Task #87 then moved
+it to the front, and the literal below changed in exactly that one way — one predicted
+permutation of text written before the behaviour existed, rather than text written to match
+behaviour after the fact.
+
+The prediction was checked in that order rather than merely claimed in it. The gate was run
+with the old literal still in place, and the diagnostic reported the new order character for
+character *before* any text was edited. So this is a claim now rather than a control, and
+the control it used to be is what makes the claim worth anything.
 -/
 
 private def fanInSenderClassName :
@@ -5005,9 +5010,10 @@ private def fanInPingMessageServer :
 The server no route lands on: declared **second**, priority **first**.
 
 Nothing sends `drain`, so its group is one action reaction and nothing else — which is the
-whole reason it is shaped this way. Level 2 moving it is then a single token moving from
+whole reason it is shaped this way. Level 2 moving it was then a single token moving from
 the end of the expected literal to the front, and a one-token difference is the cheapest
-predicted permutation task #87 can be held to.
+predicted permutation task #87 could be held to. It was held to exactly that: the token
+moved, and nothing else in the literal did.
 -/
 private def fanInDrainMessageServer :
     DTR.GeneralMessageServer where
@@ -5240,14 +5246,30 @@ private def priorityFanInEmittedReactionOrder :
 /--
 The specified reaction order: what `generalReactionNamesOf` predicts.
 
-The same shape as `routedSpecifiedReactionOrder` above and asserted very differently. There
-the two sides were compared to *each other*, which finding **F60** records as an assertion
-no permutation the sort can produce could fail. Here it is compared to a literal, and so is
-the constructor's own answer, so the two assertions are independent and each can fail
-alone. That matters for task #87 in particular: level 2's sort enters at the reaction-group
-walk on the *constructor* side, while this function still receives
-`reactiveClass.messageServers` unsorted, so if #87 moves only one of them these two
-assertions will disagree and say which one moved.
+The same shape as `routedSpecifiedReactionOrder` above, and asserted very differently. There the
+two sides are compared to *each other*, which finding **F60** records as an assertion no
+permutation the sort can produce could fail. Here this value and the constructor's own answer are
+each compared against the same **literal**, which is what lets either of them fail without the
+other.
+
+This walks `generalPriorityOrderedMessageServers reactiveClass` rather than
+`reactiveClass.messageServers`, and that changed with task #87. The reason is that this function is
+the executable counterpart of `compileGeneralReactiveClass_reactionNames`, whose right-hand side
+became `generalReactionNamesOf … (generalPriorityOrderedMessageServers reactiveClass)` when level 2
+was wired. The alternative considered was to leave the argument unsorted and give this assertion a
+declaration-order literal of its own, asserting the specification function's parametricity in
+whatever list it is handed. That was rejected because it would pin a value **no theorem mentions**:
+a change to the sort would become invisible here, and the single purpose of this value is to be the
+runnable form of a statement that is proved.
+
+What the pair can and cannot report is finding **F61**. Either side can fail alone, but at most one
+failure per run is ever *observed*: `testFailure` throws, `runGeneralLfPrinterTests` catches once,
+and the emitted assertion is sequenced ahead of this one. So a fault in `generalReactionNamesOf`
+alone is reported here with the emitted assertion passing, and a fault in the constructor's group
+walk alone is reported there — but a fault that moves **both** reports only the constructor and
+says nothing whatever about this value. That asymmetry is why the sentence this docstring replaces
+was wrong to promise that the two "will disagree and say which one moved": in the one direction
+task #87 actually moved, this assertion never runs.
 -/
 private def priorityFanInSpecifiedReactionOrder :
     Except String String := do
@@ -5266,7 +5288,8 @@ private def priorityFanInSpecifiedReactionOrder :
               (Translation.selfSendsOfClass reactiveClass)
               routes
               reactiveClass.name
-              reactiveClass.messageServers).map
+              (Translation.generalPriorityOrderedMessageServers
+                reactiveClass)).map
               (fun reactionName => reactionName.value)))))
 
 /--
@@ -5292,19 +5315,32 @@ Route order is priority order, because `routesOf` walks
 preserves order. Priorities `beta = 1`, `gamma = 2`, `alpha = 3` therefore give
 `Beta, Gamma, Alpha` — a 3-cycle away from the declared `alpha, beta, gamma`.
 
-`drain_reaction` closes the list, in **declaration** order rather than its priority order,
-and that is the negative control: it is where level 2 is not yet implemented becomes
-visible.
+`drain_reaction` **opens** `Collector`'s group rather than closing it, and its position is the
+whole of level 2's observation. The two servers are declared `ping, drain` and prioritized
+`drain = 1, ping = 2`, so declaration order and priority order disagree at this class, and
+`compileGeneralReactiveClass` walks `generalPriorityOrderedMessageServers reactiveClass` rather
+than `reactiveClass.messageServers`. Level 1's 3-cycle inside `ping`'s group survives that move
+untouched, because the two sorts act on different lists — one on instances, one on servers — and
+this literal is the one place in the repository where both are visible at once.
+
+This token's position is also where level 2 *not* being implemented used to be visible. It sat
+last, in declaration order, from task #86 until task #87, and the commitment at `:4896-4899` was
+that #87 would move it to the front and change this literal in exactly that one way. It did, and
+the order of events is the part worth keeping: the run that first exercised level 2 reported
+`drain_reaction` leading with the rest of the list unchanged, character for character, **before**
+this literal was touched. Editing the literal first would have left a green gate equally
+consistent with the sort working and with the text having been fitted to whatever the sort
+happened to produce, which is the defect F51 and F53 record.
 -/
 private def expectedPriorityFanInReactionOrder :
     String :=
   "sample_reaction" ++
     "|" ++
+    "drain_reaction," ++
     "ping_reaction," ++
     "pingToHubFromBeta_reaction," ++
     "pingToHubFromGamma_reaction," ++
-    "pingToHubFromAlpha_reaction," ++
-    "drain_reaction"
+    "pingToHubFromAlpha_reaction"
 
 /--
 Stage F's ordering evidence: four assertions on one model whose declaration order and
@@ -5445,9 +5481,11 @@ identity on all of them, and the ninety-two assertions could not have moved for 
 sort. They witness stability, which the sortedness theorems cannot pin, and they do not
 witness ordering. The twelfth block is the first model in this file with a priority
 annotation of any kind, and the first whose expected text a permutation of the emitted order
-would break. It is also the only block whose literal is written to be **changed** on a
-schedule: its last token is in declaration order because level 2 does not exist yet, and
-task #87 must move it to the front.
+would break. It is also the only block whose literal was written to be **changed** on a schedule: its last token
+sat in declaration order because level 2 did not exist yet, and task #87 moved it to the front. That
+schedule is now discharged, and the literal is an ordinary pin again — with the one difference that
+the permutation it records was written down before it could be observed, and then observed to be
+right.
 -/
 def runGeneralLfPrinterTests :
     IO UInt32 := do
