@@ -522,6 +522,18 @@ order and records the dropped priority as an explicit, tested divergence rather 
 whose meaning is not yet decided. A stage D that wrote `priority := some n` would look finished and be
 unproved.
 
+> **Corrected 2026-08-23.** The mechanism this paragraph names was right and was vindicated: local
+> message-server priority *is* realized by reaction declaration order, and choosing that order *is* a
+> sort over the message-server list. The **attribution is wrong**. Stage F did both sorts, not stage G —
+> the actor-priority sort inside `routesOf` (level 1, §III-D) and the message-server sort at
+> `compileGeneralReactiveClass`'s call to `compileGeneralMessageServerReactions` (level 2, Lemma 2's
+> same-actor case). What stage G retains from this paragraph is narrower than it reads: the *field*
+> `LF.GeneralReaction.priority` is still `none` and still stage G's to justify or reverse (F27), and
+> `docs/STAGE_F_DESIGN.md` §7.4 argues that justifying the drop is the right disposition, because wiring
+> `priority := some n` yields byte-identical emitted text and so would prove nothing observable. The
+> paragraph is left as written because it is the record of a correct prediction filed under the wrong
+> stage.
+
 `compileConstructor ctor` produces the `startupReaction`:
 `⟨startupReactionName, .startup, ctor.parameters.map (·.name), body, none⟩`. The constructor's parameters
 become the **reactor's** parameters (§5.5), so the reaction's parameter list here names identifiers that
@@ -644,6 +656,14 @@ so stage G's priority work will be a permutation of `messageReactions`. Proving 
 source order gives stage G a fixed starting point to permute away from, and makes any accidental reordering
 in between a failing proof rather than a silent behavioural change.
 
+> **Corrected 2026-08-23, same verdict as §5's `priority := none` paragraph.** The argument is right and
+> the attribution is wrong: the permutation happened in **stage F**, at both levels. This sentence has a
+> twin in `Relico/Translation/GeneralBasic.lean`'s free-standing `## Order preservation` section block,
+> which said almost the same words and was repaired in `d91a1be`; the two were written together and are
+> corrected together. The prediction it makes is worth keeping precisely because it held: stage D's
+> source-order theorems did give stage F a fixed starting point to permute away from, and re-keying them
+> to the sorted list is how level 2's payoff theorem is stated.
+
 Two more, cheap and worth having: `compileActorInstance` preserves argument count and order, and
 `(compileGeneralValue v).typeOf = compileGeneralType v.typeOf` — the type-preservation lemma mirroring DTR's
 existing `@[simp] typeOf_initialValue`. The second requires an LF-side `GeneralValue.typeOf`, which §5's
@@ -708,8 +728,9 @@ and it then lived under a gitignored `tmp/` path — which meant the project's m
 one thing a fresh clone did not get. **That is resolved since, 2026-08-23:** the paper series is tracked at
 `docs/PAPER_CORRECTIONS.md` and runs through **P23**, and the findings series continued past stage B into
 `docs/STAGE_E_FINDINGS.md`, which holds **F34–F58**. A fresh clone gets both. The `F` series now has
-four homes and this is the list: `docs/STAGE_B_FINDINGS.md` **F1–F20**, `docs/STAGE_D_FINDINGS.md`
-**F21–F33**, `docs/STAGE_E_FINDINGS.md` **F34–F58**, `docs/STAGE_F_FINDINGS.md` **F59 onward**. Stage
+**five** homes and this is the list: `docs/STAGE_B_FINDINGS.md` **F1–F20**, `docs/STAGE_D_FINDINGS.md`
+**F21–F33**, `docs/STAGE_E_FINDINGS.md` **F34–F58**, `docs/STAGE_F_FINDINGS.md` **F59–F62** (a closed
+range, stage F having landed), `docs/STAGE_G_FINDINGS.md` **F63 onward**. Stage
 D's nine were first written *here*, numbered **F21–F29**, and they graduated into their own file
 along with F30–F33; the ledger no longer lives in a gitignored path at all.
 
@@ -784,6 +805,13 @@ Findings about **the paper**:
    never compiled by a real compiler, which is the situation the `lfc` gate was created to end (§9.4).
 3. **Approve dropping local message-server priority to stage G** (`priority := none`), on the grounds that
    realizing it means choosing a reaction declaration order and the paper supplies no tie rule (F27).
+
+   > **Disposition, 2026-08-23.** Approved as asked, and left verbatim because it records what was put to
+   > the user and granted — rewriting it would falsify the record rather than correct a claim. Only the
+   > destination moved: stage F chose the reaction declaration order, so what stage G inherits from this
+   > item is the **field**, not the order. The premise still holds; #79 confirmed the paper's SOS take
+   > rule carries no priority term, which is why stage F keyed its ordering to the correctness
+   > development's `prty_l` and Lemma 2 rather than to a tie rule that does not exist.
 4. **Confirm P20 stays deferred.** Stage D emits no ports, so the port-naming disagreement between Fig. 1b
    (`receiveReading`) and Fig. 2b (`readingFromTemp`) does not block it. It blocks E and F, and it is a paper
    decision that only you can make.

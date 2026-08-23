@@ -12,7 +12,10 @@ This file exists rather than an eleventh section of [`STAGE_E_FINDINGS.md`](STAG
 because **F54** was the cost of an entry that existed but was invisible from where a reader looks. A
 stage F finding filed under a heading that says "Stage E" is that defect by construction. The counts in
 the stage E file say **F34–F58** and they stay true; nothing here renumbers them, and
-[`STAGE_D_DESIGN.md`](STAGE_D_DESIGN.md) §10.1 carries the list of all four homes of the `F` series.
+[`STAGE_D_DESIGN.md`](STAGE_D_DESIGN.md) §10.1 carries the list of all five homes of the `F` series. For
+the same reason this file was split off, stage F's own range closed at **F62** when stage F landed:
+**F63 onward is in [`STAGE_G_FINDINGS.md`](STAGE_G_FINDINGS.md)**, and the first entry there is a defect
+that accumulated across stages B–F rather than belonging to any one of them.
 
 **The provenance rule, unchanged from stage D.** Every entry carries one of four grades, and where a
 single entry mixes them the sub-claims are graded separately rather than the whole taking the

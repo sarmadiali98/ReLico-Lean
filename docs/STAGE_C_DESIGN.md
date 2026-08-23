@@ -791,8 +791,11 @@ stage E's to implement; stage C only makes its output expressible. The measured 
 that justifies the split is that all four existing exporters reject `r.m(...)`
 outright, so there is no source-side input to translate yet.
 
-**No control flow.** `if` and `for` are stage H. `GeneralStmt` has three constructors
-and gains no `ite`, matching `MultiStorePayloadStmt`'s two.
+**No control flow.** `if` and `for` are stage H. `LF.GeneralStmt` has three constructors
+(`assign`, `schedule`, `setPort`) and gains no `ite`, matching `MultiStorePayloadStmt`'s two.
+The namespace is load-bearing here and was originally left off: `DTR.GeneralStmt` has **two**
+constructors, `assign` and `send`, so an unqualified "`GeneralStmt` has three" reads as false
+against the DTR side and true against the LF side that this stage builds.
 
 **No semantics and no evaluator.** `MultiStorePayloadSyntax.lean` puts `evaluate`
 beside its expression type; stage C's `GeneralExpr` gets none, because there is no

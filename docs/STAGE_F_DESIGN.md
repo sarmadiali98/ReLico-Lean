@@ -637,6 +637,15 @@ cosmetic without re-reading the paragraphs they sit in, and two of those paragra
 claims that the same change falsified. An enumeration is not a reading, and only the reading finds the
 false claim next to the harmless one.
 
+**The mirror case, and it cost nothing only because the reading happened.** Grading the same change's
+mentions outside `Relico/` a day later, `docs/STAGE_C_DESIGN.md:794` — *"`GeneralStmt` has three
+constructors"* — read as a flat contradiction of §2.4's *"exactly two constructors"* above, and the repair
+was drafted before the referent was measured: `DTR.GeneralStmt` has two and `LF.GeneralStmt` has three, so
+both sentences were true and only the namespace was missing. The failure mode here is the inverse of this
+section's — a *true* claim graded against the wrong referent rather than a false one graded as cosmetic —
+and the same discipline catches both. Recorded with the repair as **F63** in
+[`STAGE_G_FINDINGS.md`](STAGE_G_FINDINGS.md).
+
 ## 8. The fixture stage F needs, and why the existing one cannot serve
 
 ### 8.1 `fan-in.rebeca` proves nothing about priority, by construction

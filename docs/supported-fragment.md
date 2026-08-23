@@ -4,6 +4,33 @@ This document defines the first vertical slice of ReLico-Lean.
 
 The initial fragment is intentionally small. We will complete an executable translator and an end-to-end correctness theorem for this fragment before adding more language features.
 
+> **SCOPE MARKER, added 2026-08-23. Read this before quoting anything below.**
+>
+> This document declares **vertical slice v0**, the project's first proof milestone. It is retained as
+> the historical record of that declaration, **not** as a description of what the translator now
+> accepts, and the two are far apart. On 2026-08-17 the project turned to generalizing the translator
+> over the paper's DTR fragment, and stages A through F have since delivered **half of the *Initially
+> excluded* list below**: multiple classes, multiple actor instances, known rebecs, external sends,
+> ports and inter-reactor connections, message parameters and payloads, actor priorities, and
+> message-server priorities. Every clause of v0 below is still true *of v0*; none of it bounds the
+> general family.
+>
+> This matters because three sites quantify the project's claim over "the supported fragment" and this
+> is the only document that declares one — `README.md:3`, and `docs/trusted-boundary.md` at `:28`
+> ("For every well-formed source model in the supported fragment, the project aims to prove that:")
+> and at `:62` ("formally verified for the declared supported fragment"). Resolving those pointers to
+> v0 both understates what the tool accepts and misdescribes what is verified; in particular
+> `trusted-boundary.md`'s aim 7, *"designer-specified priorities are preserved"*, is claimed for a
+> fragment whose own exclusion list names actor priorities and message-server priorities. Recorded as
+> **F63** in [`STAGE_G_FINDINGS.md`](STAGE_G_FINDINGS.md).
+>
+> The repair — a tracked declaration of the general family's accepted fragment, together with the
+> theorem-eligibility boundary inside it — is specified in `docs/STAGE_G_DESIGN.md` and is not yet
+> written. Until it exists, the accepted fragment is documented only by the stage design documents
+> (`STAGE_B_DESIGN.md` through `STAGE_F_DESIGN.md`), and the authority over all of that prose is the
+> executable predicate: `GeneralModel.wellFormed` and the two priority-distinctness predicates in
+> `Relico/DTR/GeneralWellFormed.lean`.
+
 ## Vertical slice v0
 
 A source model contains:
@@ -77,24 +104,27 @@ A source model in vertical slice v0 is well formed when:
 
 ## Initially excluded
 
-The following are not included in vertical slice v0:
+The following are not included in vertical slice v0. **Delivery status appended 2026-08-23** — the item
+text is unchanged, and "delivered" always means delivered for the **general** family, never for v0,
+which is closed as declared. Stage attributions are given only where a single stage owns the item:
 
-- multiple classes;
-- multiple actor instances;
-- known rebecs;
-- external sends;
-- ports and inter-reactor connections;
-- message parameters and payloads;
-- conditionals;
-- loops;
-- arrays;
-- inheritance;
-- physical actions;
-- environmental inputs;
-- actor priorities;
-- message-server priorities;
-- broadcast;
-- arbitrary LF programs.
+- multiple classes — **delivered**, stage B;
+- multiple actor instances — **delivered**, stage B;
+- known rebecs — **delivered**, stages C–E;
+- external sends — **delivered**, stages C–E;
+- ports and inter-reactor connections — **delivered**, stages C–E;
+- message parameters and payloads — **delivered**, stages D and E;
+- conditionals — still excluded; stage H;
+- loops — still excluded; stage H;
+- arrays — still excluded;
+- inheritance — still excluded;
+- physical actions — still excluded;
+- environmental inputs — still excluded;
+- actor priorities — **delivered**, stage F level 1;
+- message-server priorities — **delivered**, stage F level 2;
+- broadcast — still excluded;
+- arbitrary LF programs — still excluded, and by design rather than by schedule: the LF subset is
+  generated and never parsed, so this one is not a milestone exclusion at all.
 
 These are temporary exclusions for the first proof milestone, not necessarily exclusions from the final translator.
 
