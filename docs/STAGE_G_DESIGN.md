@@ -132,6 +132,28 @@ is being assumed.
 question from what a step *does*, and proving the first as a standalone `iff` over compilation is what
 makes the second tractable. Stage G keeps that separation.
 
+**The precedent reaches further than selection, and this section first understated it (F65).** The same
+family also carries a finite-execution development, and `trusted-boundary.md` aims 8 and 9 are **already
+proved** there — twice, once without priorities and once with:
+
+| Role | Multi-store module | Anchor declaration |
+|---|---|---|
+| Source finite executions | `Relico/DTR/GlobalMultiStorePayloadFiniteExecution.lean` | `Steps` |
+| Target finite executions | `Relico/LF/GlobalMultiStorePayloadFiniteExecution.lean` | `Steps` |
+| Execution correspondence | `Relico/Correctness/GlobalMultiStorePayloadFiniteExecutionCorrespondence.lean` | `ForwardStepsCompatible`, `BackwardStepsCompatible`, `finite_forward`, `finite_backward` |
+| Priority-aware traces | `Relico/Correctness/GlobalMultiStorePayloadActorFiniteExecution.lean` | `SourceActorPriorityDispatchSteps`, `sourceActorPriorityDispatchSteps_forward`, `actorDispatchEventTraceCorresponds_length_eq` |
+
+**That shape is strict lock-step — a stronger statement than the paper's, at a coarser granularity.**
+`sourceActorPriorityDispatchSteps_forward` produces a target execution over the *same* `frames` list the
+source execution was indexed by, and `actorDispatchEventTraceCorresponds_length_eq` proves
+`sourceEvents.length = targetEvents.length`: one target event per source event, no internal steps, no τ.
+Stage G does not extend it, and neither reason is that it is wrong. First, every frame carries the `ready`
+snapshot that §3's defect is about, and `ActorDispatchFrame`'s docstring concedes the point in advance:
+*"The ready-actor snapshot is local to this transition. It is deliberately not fixed globally across an
+arbitrary execution."* Second, the theorem this project is measured against is the paper's `Theorem 1`,
+which is weak bisimilarity. Where the general family's τ sets turn out empty, stage G's result and this
+one coincide.
+
 The one deviation is §3's: no cohort parameter. Concretely, where the multi-store relation reads
 `ActorPriorityDispatchStep request ready sourceModel actorName before after …`, the general source
 transition reads `GeneralDtrStep sourceModel config action configAfter` and obtains the cohort internally
@@ -219,13 +241,31 @@ them as a cohort's only credential.
 
 ## 7. G2 — weak bisimulation: the paper's Theorem 1, for the general family
 
-**This section was rewritten on 2026-08-23 after reading the paper, and the first version would have
-diverged from it.** The original plan was a strong step-by-step correspondence with the lift to whole
-executions stated as owed. That is *not* the paper's architecture and, worse, the strong version is
-**false** of our generated programs: the emitted reactor contains a `drain_reaction` whose firings have no
-source counterpart, so a step correspondence admitting no internal steps has counterexamples in the
-repository already. The paper avoids this by construction and stage G follows it. The near-miss is
-recorded here rather than deleted because the refuted plan is the one a reader would expect.
+**This section was rewritten on 2026-08-23 after reading the paper, and then corrected the same day after
+measuring the repository.** The original plan was a strong step-by-step correspondence with the lift to
+whole executions stated as owed; that is *not* the paper's architecture, so it was replaced. The
+replacement then carried an error of its own, recorded as **F64**. It claimed the strong version is
+*false* of our generated programs because "the emitted reactor contains a `drain_reaction` whose firings
+have no source counterpart". **The premise is real; the conclusion is false.** `drain_reaction` *is*
+emitted — it is the message reaction generated from the DTR message server `drain` of
+`fanInReceiverClass`, a `DTR.GeneralReactiveClass` in
+`frontend/lean-bridge/GeneralLfPrinterTestMain.lean` that is fed through the real translation — and that
+is precisely why it has a source counterpart: the server it is named after. It also never fires in that
+model, because nothing sends `drain`, so it contributes no firings to correspond to anything. A
+never-firing reaction is not an unmatched one. What the translator actually emits is measured next, and it
+admits no internal reaction at all. Both the refuted plan and the withdrawn justification are recorded
+here rather than deleted, because each is a conclusion a reader would otherwise expect to find.
+
+**What the translator actually emits, measured 2026-08-23.**
+`compileGeneralMessageServerReactionGroup` compiles a message server's body **once** and passes the same
+`compiledBody` to both `assembleGeneralMessageReactions` and `assembleGeneralPortReactions`. A port
+reaction therefore *runs the server's own body* rather than forwarding to the server's logical action.
+Every reaction the general translator emits has a source counterpart — message reactions to self-send
+sites, port reactions to routed send sites, the startup reaction to the constructor — so **no emitted
+reaction is internal**. Weak bisimulation is consequently adopted on the paper's authority, `Theorem 1`
+being the theorem this project claims to implement, and *not* because our output refutes lock-step. If the
+granularity G2a picks leaves both τ sets empty, weak bisimilarity specialises to lock-step: a
+*strengthening* of the stated result rather than a contradiction of it.
 
 **What the paper proves.** `Definition 1` is weak bisimilarity w.r.t. a bijection `ϕ` on actions, with
 the two standard transfer conditions and `⇒` expanded as `τ* γ τ*` for `γ ≠ τ`. `Theorem 1` states
@@ -246,10 +286,13 @@ translation's reactor naming rather than an abstract `map_A`.
 **What is τ, and why this is the crux.** The paper makes assignments τ on both sides — a DTR assignment
 updates the local environment as `si →τ si[x ↦ …]` and the LF `ASSIGN` rule matches it — and it abstracts
 scheduler stuttering steps in the same breath (`:1258`). Stage G's τ set is therefore: assignments on both
-sides, and on the LF side the scheduler's own steps **including `drain_reaction` firings**. Observable
-actions are message takes on the DTR side and the corresponding message-or-port reaction firings on the
-LF side, related by `ϕ`. Getting this classification right *is* G2's design content; everything else is
-bookkeeping over it.
+sides, and on the LF side the scheduler's own steps, which are the **only** τ candidates on that side now
+that no emitted reaction is internal. Observable actions are message takes on the DTR side and the
+corresponding message-or-port reaction firings on the LF side, related by `ϕ`. Getting this classification
+right *is* G2's design content; everything else is bookkeeping over it. Note what it now rests on: the τ
+sets are non-empty only if the LTSs are finer-grained than one-step-per-dispatch, so **G2a's granularity
+choice decides whether any τ exists at all**, and that choice must be made explicitly rather than
+inherited.
 
 **Deliverables.**
 
@@ -283,8 +326,10 @@ precedent, for §3's reason.
    actor, and the witness for the existential cannot be constructed.
 6. `weakBisimulation_traceAgreement` — **generic, model-independent**: from a weak bisimulation, the two
    systems agree on finite observable traces. This is what discharges `trusted-boundary.md` aims 8 and 9
-   outright instead of owing them, and it is proved once over an abstract LTS, so it costs nothing per
-   family and can be reused by the multi-store family later.
+   for the general family outright instead of owing them, and it is proved once over an abstract LTS, so
+   it costs nothing per family. It is **not** what first gives this repository a finite-execution result:
+   the multi-store family already has two, in a strict lock-step shape — see §4, and **F65** for the
+   correction this sentence replaces.
 
 **Scope limit, stated rather than discovered.** Aims 8 and 9 are discharged for **finite** executions.
 Infinite runs would need a coinductive treatment, which the paper does not give either, and which no
@@ -520,13 +565,24 @@ Stated as falsifiable predictions, so that a failure is informative rather than 
 2. **If `lfc` accepts a reaction priority attribute**, G3 inverts from justification to reversal (§8),
    and the "byte-identical" argument in `docs/STAGE_F_DESIGN.md` §7.4 becomes a statement about our
    printer rather than about the target.
-3. **If a `drain_reaction` firing turns out to be observable**, the τ classification of §7 collapses and
+3. ~~**If a `drain_reaction` firing turns out to be observable**, the τ classification of §7 collapses and
    with it the whole architecture. The check is concrete: a τ step must not change any state that `R`
    constrains — no state variable in `ex ≡ ηr`, no pending trigger in `bx ≡ qr`. `drain_reaction`
    *consumes* triggers, so this is the assumption most likely to be wrong, and it is wrong in a specific
    way if it is: draining would have to be modelled as part of the observable take rather than as a step
    preceding it. **This is the single prediction whose failure would cost the most**, and it is checkable
-   before the transfer conditions are attempted, at the point `R` is defined.
+   before the transfer conditions are attempted, at the point `R` is defined.~~
+   **Void, 2026-08-23, and the defect is F64.** There is no such firing to observe. `drain_reaction` is
+   the message reaction generated from a DTR message server named `drain`, so it has a source counterpart
+   by construction, and nothing in that model sends `drain`, so it never fires at all. More generally the
+   translator emits no internal reaction anywhere (§7's measurement). The test that mattered survives,
+   stated positively —
+   **a τ step must not change any state that `R` constrains** — but the risk it was guarding has moved to
+   **G2a's granularity choice**. If the LTSs are one step per dispatch, both τ sets are empty and §7's
+   `τ* γ τ*` machinery is dead weight threaded through five modules; if they are statement-granular, τ is
+   non-empty on both sides and the transfer conditions must genuinely use it. That is decidable at the
+   moment `GeneralLTS.lean` is written, before any correspondence is attempted, and it is now the
+   prediction whose failure would cost the most.
 4. **If the target LTS cannot be keyed on triggers alone** — because two reactions in one reactor share a
    trigger — then reaction identity needs the site keys from the F56 repair as an explicit index. F56's
    repair emits one action *and* one reaction per send **site**, so this is expected to be fine; it is
@@ -555,11 +611,13 @@ All five are settled; this section is the record, not a request. Four were put t
 4. **G2's scope — how much of the correctness claim does stage G owe? → The paper's Theorem 1.** Delegated
    to my judgment with the instruction to read the paper first and to keep any divergence minimal and
    precisely documented. The paper read changed the answer: what I had drafted as a step correspondence
-   with an owed lift is not the paper's architecture, and the strong form is refuted by our own
-   `drain_reaction`. Stage G therefore proves weak bisimilarity (Definition 1) with `drain_reaction` and
-   assignments as τ — a classification the paper itself licenses — and derives finite-trace agreement from
-   it, so aims 8 and 9 are discharged rather than owed. Three divergences are documented in §7; two were
-   already forced by earlier findings and the third is scope. §7.
+   with an owed lift is not the paper's architecture. A second reason offered the same day — that the
+   strong form is refuted by our own `drain_reaction` — was **wrong, and is withdrawn as F64**; the
+   decision rests on the paper alone. Stage G therefore proves weak bisimilarity (Definition 1) with
+   assignments and scheduler stuttering as τ — a classification the paper itself licenses — and derives
+   finite-trace agreement from it, so aims 8 and 9 are discharged for the general family rather than
+   owed. Three divergences are documented in §7; two were already forced by earlier findings and the
+   third is scope. §7.
 5. **Commit order — may G6's documents land last? → Yes, and it is now the ninth commit.** F63 is filed
    and `docs/supported-fragment.md` carries a scope marker pointing at it, so the interval is documented
    rather than silent. §11, §13.

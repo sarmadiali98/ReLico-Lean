@@ -112,7 +112,7 @@ exists in tracked form. The repair is one document, so the finding is one entry.
 
 Repaired here: a dated scope marker at the head of `docs/supported-fragment.md` recording that it
 declares v0 and is retained as the historical declaration; a per-item delivery status on the
-*Initially excluded* list separating the eight delivered from the nine still excluded; and the
+*Initially excluded* list separating the eight delivered from the eight still excluded; and the
 namespace qualification at `docs/STAGE_C_DESIGN.md:794` (see below).
 
 Deliberately **not** repaired here, and filed as stage G design work instead: writing the tracked
@@ -140,3 +140,160 @@ namespace from the surrounding stage rather than from the name. Two types share 
 `GeneralStmt` across `DTR` and `LF`, and the same is true of `GeneralSyntax.lean`, `GeneralExpr`,
 `GeneralBody` and `GeneralWellFormed`. In tracked prose the namespace is not optional, and `:794` now
 carries it along with both constructor lists.
+
+---
+
+## F64 — a reaction that never fires was recorded as a reaction with no source counterpart, and that was the stated reason for choosing the stage's central theorem
+
+*Read.* The conclusion it was supporting is *decided*, and it survives on other grounds.
+
+`docs/STAGE_G_DESIGN.md` §7, as landed in `dee5951`, rejected a strong step-by-step correspondence in
+favour of the paper's weak bisimulation and gave two reasons. The first is correct: a step correspondence
+with the whole-execution lift stated as owed is not the paper's architecture, and proves something
+strictly weaker than `Theorem 1`. The second was this:
+
+> *"the strong version is **false** of our generated programs: the emitted reactor contains a
+> `drain_reaction` whose firings have no source counterpart, so a step correspondence admitting no
+> internal steps has counterexamples in the repository already."*
+
+**That is false — and the first attempt to say why was also false, which is the more useful half of this
+entry.**
+
+### The wrong refutation, recorded because it is the trap
+
+`grep -rc "drain" Relico/ frontend/` returns matches in exactly four files, **all** under `frontend/`:
+`check-general-lean.sh` (1), `fixtures/general/lean-reject/README.md` (1),
+`fixtures/general/lean-reject/invalid-send-target-undeclared.json` (1), and
+`lean-bridge/GeneralLfPrinterTestMain.lean` (10). **Zero occurrences anywhere under `Relico/`** — not in
+`Relico/Translation/GeneralBasic.lean`, not in `Relico/LF/GeneralCppPrinter.lean`, not in the LF AST. The
+conclusion drawn from that was *"`drain_reaction` is not translator output at all; it lives only in a
+hand-built printer fixture"*, and it was written into this file before it was checked.
+
+It is wrong. `fanInReceiverClass` in that test main is a **`DTR.GeneralReactiveClass`** — the file builds a
+*source* model and feeds it through the real translation — and `drain` is one of its two message servers:
+*"Its two servers are declared in the order `ping, drain` and prioritized in the order `drain, ping`"*. So
+`drain_reaction` is emitted by `assembleGeneralMessageReactions` exactly like any other message reaction.
+The string is absent from `Relico/` because the **name is data-derived**: it comes from the model, not from
+a literal in the translator. String absence in an implementation is not artefact absence.
+
+That is **F51**'s lesson pointed the other way. F51 recorded that absence of a string is not *invention*
+when the method puts the witness outside the repository. Here absence of a string was read as absence of
+the *emission*, while the witness was inside the repository the whole time, spelled by its input. A grep
+bounded to `Relico/` answers "does the translator mention this name", which is a different question from
+"does the translator emit this artefact", and for anything named after source data the two answers come
+apart.
+
+### The actual refutation
+
+Two facts. The second is the general one and it is what the design now rests on.
+
+`drain_reaction` **has a source counterpart**: the message server `drain` it is generated from. The
+original claim's own words — *"whose firings have no source counterpart"* — are refuted by the declaration
+that produces it. And in that model it never fires, because nothing sends `drain`; the same file records
+*"Nothing sends `drain`, so its group is one action reaction and nothing else"*. **A never-firing reaction
+is not an unmatched reaction**, and collapsing the two is the substance of the error: "no firings" was read
+as "firings with nothing to match".
+
+The general fact settles every model rather than one fixture.
+`compileGeneralMessageServerReactionGroup` (`Relico/Translation/GeneralBasic.lean:1446` at this commit;
+cited by name because line arithmetic does not detect a stale Lean cite, per the **F54** lesson) compiles a
+message server's body **once** and passes the same `compiledBody` to *both*
+`assembleGeneralMessageReactions` and `assembleGeneralPortReactions`. A port reaction therefore runs the
+server's own body; it is not a forwarding stub that schedules the server's logical action. Together with
+`assembleGeneralStartupReaction` for the constructor, **every reaction the general translator emits has a
+source counterpart**, and the repository contains no counterexample to a lock-step correspondence at all.
+
+**What this cost, and what it did not.** The conclusion — prove the paper's `Theorem 1`, weak
+bisimilarity — is unchanged, because its first reason is sufficient on its own and is the reason the
+decision-maker's instruction pointed at (*"read the paper first so we don't end up designing something
+that would contradict that"*). What changes is a claim about **our own artefact** that a paper drafted
+from these documents would have repeated, and three downstream statements that leaned on it: §7's τ
+paragraph named `drain_reaction` firings as a τ member; §14 item 3 made an observable `drain_reaction`
+firing *"the single prediction whose failure would cost the most"*, a prediction that cannot now fail
+because the event does not exist; and §15 item 4 recorded the withdrawn reason as part of a settled
+decision. All three are repaired in the commit that files this entry, and the real risk §14 item 3 was
+groping at is restated there: **whether either τ set is non-empty is decided by the LTS granularity G2a
+picks**, not by anything the translator emits.
+
+**The mechanism.** `drain_reaction` was not invented, and neither was its emission — what was invented was
+its *role*. Task **#97** moved it to the front of a reactor and ran the gate on the result, so it was
+recent and familiar as *"the reaction whose position is interesting"*, and the reason its position is
+interesting is that nothing sends it. "Nothing sends it" was then recalled as "nothing corresponds to it".
+Those two properties sit one unmeasured inference apart, and that inference is the whole defect.
+
+The check that separates them is asked of the **source** side, not the target: *does some source
+declaration generate this reaction?* For every reaction family in `GeneralBasic.lean` the answer is yes —
+message servers, send sites, the constructor — which is why the general measurement above is the durable
+one and any fixture-level argument was never going to matter in either direction.
+
+Correcting the wrong refutation adds a second and sharper rule, since it cost a second draft of this
+entry: **for an artefact named after source data, a grep of the implementation cannot establish absence.**
+`drain_reaction`'s name never appears in the translator that emits it, and never will. Whether something
+is emitted is settled by reading the emitting function against its inputs, or by inspecting output — never
+by searching the emitter for the output's name.
+
+**Age.** Written and landed on 2026-08-23 and refuted the same day, before any Lean rested on it — the
+one respect in which this is unlike **F53**, where three "by construction" claims outlived the findings
+that refuted them. Both the original claim *and* this entry's first refutation were caught before being
+committed, because §7's justification was re-checked before the first line of stage G's Lean was written,
+on the standing rule that `docs/` is the paper's drafting source. The second catch came from a small habit
+worth naming: *"servers"* is DTR vocabulary, and noticing that one word in a docstring is what exposed a
+`DTR.` type where a hand-built LF program had been assumed.
+
+---
+
+## F65 — the design understated the project's own proof coverage: aims 8 and 9 are already proved for the multi-store family, twice
+
+*Read.* Found in the same pass as **F64**, while gathering the exact API `selectedActor` must be built
+against, and filed separately because the mechanism is the opposite one: F64 credited the repository with
+an artefact it does not contain, and this credits it with **less proof than it has**.
+
+`docs/trusted-boundary.md:28-38`'s aims 8 and 9 — *"every permitted source execution has a corresponding
+target execution"* and *"every target execution corresponds to a permitted source execution"* — are
+already discharged for the multi-store payload family, in two separate developments:
+
+| Role | Module | Anchor declarations |
+|---|---|---|
+| Source finite executions | `Relico/DTR/GlobalMultiStorePayloadFiniteExecution.lean` | `Steps` |
+| Target finite executions | `Relico/LF/GlobalMultiStorePayloadFiniteExecution.lean` | `Steps` |
+| Execution correspondence | `Relico/Correctness/GlobalMultiStorePayloadFiniteExecutionCorrespondence.lean` | `ForwardStepsCompatible`, `BackwardStepsCompatible`, `finite_forward`, `finite_backward` |
+| Priority-aware traces | `Relico/Correctness/GlobalMultiStorePayloadActorFiniteExecution.lean` (556 lines) | `SourceActorPriorityDispatchSteps`, `sourceActorPriorityDispatchSteps_forward`, `ActorDispatchEventTraceCorresponds`, `actorDispatchEventTraceCorresponds_length_eq` |
+
+Two statements in `docs/STAGE_G_DESIGN.md` as landed in `dee5951` are wrong against that.
+
+**§4 claimed the precedent is four modules.** *"The multi-store payload family already carries a full
+actor-selection development. It is **four modules**, not one file"* — true of the *selection* development
+and false as a description of the precedent, which the section is titled "The shape to mirror" and is
+offering as exactly that. The four modules above are additional, and they are the ones bearing on §7's
+subject rather than §6's.
+
+**§7 item 6 implied the multi-store family has no finite-execution result.** It described the generic
+`weakBisimulation_traceAgreement` as *"proved once over an abstract LTS, so it costs nothing per family
+and can be reused by the multi-store family later"*. "Later" presupposes an absence. The family has two
+such results already, and neither needs the generic theorem.
+
+**Why the omission is not merely tidiness: it changes the argument.** With F64's justification withdrawn,
+the live question was whether a lock-step correspondence is available to the general family, and these
+modules answer it — *the existing shape is strict lock-step*.
+`sourceActorPriorityDispatchSteps_forward` produces a target execution indexed by the **same `frames`
+list** the source execution was indexed by, and `actorDispatchEventTraceCorresponds_length_eq` proves
+`sourceEvents.length = targetEvents.length`: one target event per source event, no internal steps, no τ.
+So lock-step is not refuted anywhere in this repository — it is *implemented*, and at its own granularity
+it is a stronger statement than weak bisimilarity. Stage G still states the paper's weaker theorem, and
+the honest reasons are now recorded in §4: `Theorem 1` is the claim this project is measured against, and
+every `ActorDispatchFrame` carries the `ready` snapshot that is precisely §3's defect — a point that
+structure's own docstring concedes in advance (*"The ready-actor snapshot is local to this transition. It
+is deliberately not fixed globally across an arbitrary execution."*). Where the general family's τ sets
+turn out empty, the two results coincide.
+
+**Why this matters for the paper specifically.** F63's Part 1 found the project's headline claim
+*understated* for what the tool accepts. This is the same direction one layer down: a contributions or
+related-work section drafted from §7 item 6 would present whole-execution correspondence as new work for
+stage G, when a narrower family already has it — either failing to cite the project's own result or
+claiming novelty against it. Both readings are avoidable by naming the four modules, which §4 now does.
+
+**The transferable check.** The claim "no such theorem exists yet" is an absence claim, and this file's
+own provenance rule already says absence must be *"established by a described search"*. Neither §4's count
+nor §7 item 6's "later" was; both were written from recollection of which modules stage G would touch,
+which is a different set from which modules exist. Before a design document says a family lacks a result,
+the search that would find it belongs in the entry.
