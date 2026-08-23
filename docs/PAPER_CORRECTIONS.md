@@ -676,11 +676,15 @@ broadcast to every receiver. Injectivity then follows from DTR instance names be
 are. Then redraw Fig. 1b so its single-sender case is that same function's output instead of a second
 scheme, since a reader will reasonably read the simpler figure as the general rule.
 
-**What the tool does:** nothing yet, deliberately. Stage C prints only port names it is handed and invents
-none (`docs/STAGE_C_DESIGN.md` §7), because a naming scheme chosen inside the printer would be
-unreviewable — it belongs to the translation, where it can be stated once and proved injective. This entry
-is the reason stage E and stage F are blocked on a paper decision and not only on code, and it is the
-cleanest example in this file of a gap that a prose proof can leave open and an implementation cannot.
+**What the tool does — SETTLED as of stage E, 2026-08-23.** Stage C deliberately did nothing here: it
+printed only port names it was handed and invented none (`docs/STAGE_C_DESIGN.md` §7), because a naming
+scheme chosen inside the printer would be unreviewable — it belongs to the translation, where it can be
+stated once and proved injective. Stage E did that. The landed scheme keys each name to the **send site**
+rather than to the sender instance, so `reportToHub1` becomes `reportToHub1FromProbe`; injectivity is
+proved rather than asserted, and the emitted programs are accepted and run by real `lfc 0.11.0` under
+`GENERAL_LF_TARGET_OK`. What is left is the suggested edit above, not a decision the implementation is
+waiting on. Stage F is unaffected: its paper-side questions are P1, P4, P5 and P23, which concern
+priority, not port naming.
 
 ---
 
@@ -754,5 +758,59 @@ between the two: more than Fig. 5 can derive, less than a general payload. Stage
 the same layer rather than widening it (`docs/STAGE_C_DESIGN.md` §6.6), so the limit stays in one place and
 stays visible.
 
+---
 
+## P23 — Lemma 2's `prty_l` and `map_M` are total functions on `MName`, which Fig. 4 and Fig. 2a both refute
 
+**Claim in the paper:** the execution-order preservation argument (p. 9) writes *"Let `map_A : AID → RID`
+denote a mapping from actors to reactors and `map_M : MName → RName` denote a mapping from each message
+server within an actor `x` to a reaction within `map_A(x)`. Local priority is defined by
+`prty_l : MName → ℕ`, and global priority by `prty_g : AID → ℕ`."* Lemma 2's same-actor case then argues
+that if `prty_l(ms_i) < prty_l(ms_j)` then `map_M(ms_i)` is declared before `map_M(ms_j)` in the reactor's
+reaction list, and concludes from LF's within-reactor declaration order that `r_i` executes before `r_j`.
+
+**Why it is wrong — two defects in one signature.**
+
+*Totality.* Fig. 4 derives `MsgSrv ::= Priority? msgsrv msgsrvName <Type v>* { Stmt* }`, so a message
+server need carry no `@priority`. `prty_l : MName → ℕ` is total and has no value for such a server. The
+paper's own Fig. 2a exercises exactly that: line 31 is `msgsrv receiveReading(int w)` with no annotation,
+so `prty_l(receiveReading)` is undefined in the very example the ordering argument is stated over. This is
+P5's defect one level down, and strictly harder to repair — P5's fix is a side condition on `InstanceDecl`,
+and no side condition repairs a function whose codomain is `ℕ` rather than `ℕ` extended with an absent
+value. Fig. 1a compounds it by annotating the *same* message server: line 17 there reads
+`@priority(1) msgsrv receiveReading()`. So the two figures disagree about whether `receiveReading` has a
+local priority at all.
+
+*Domain.* Both `map_M` and `prty_l` take `MName`, while the gloss says "each message server **within an
+actor `x`**" — the index `x` is in the prose and not in the type. Fig. 2a declares
+`msgsrv sendReading(int w)` twice, once in `reactiveclass TempSensor` (line 9) and once in
+`reactiveclass SmokeSensor` (line 24), and Fig. 2b duly gives each of those two reactors its own
+`sendReading` logical action and its own reaction triggered by it. Under `map_M : MName → RName` those two
+distinct reactions carry one name, and Lemma 2's "before `map_M(ms_j)` in **the** reactor's reaction list"
+cannot say which of the two lists it means. Under `prty_l : MName → ℕ` the two servers share one priority
+value. In Fig. 2a they happen to share `@priority(1)`, which is precisely why the defect is invisible in
+the figure: the example accidentally satisfies the signature that it refutes.
+
+**Evidence:** grade (c) throughout. Fig. 4's `MsgSrv` production and the `map_M` / `prty_l` / `prty_g`
+definitions read directly from the PDF; Fig. 1a line 17, Fig. 2a lines 9, 24 and 31, and Fig. 2b's
+per-reactor `sendReading` action and reaction transcribed and compared name by name. No corpus or `lfc`
+measurement is involved — the counterexamples are the paper's own figures.
+
+**Suggested edit:** index both functions by the actor and make the local one partial in the same move -
+`map_M : AID × MName → RName` and `prty_l : AID × MName → ℕ` extended with an absent value, or
+per-class families. Lemma 2's same-actor case then restates over one class's own priority function, which
+also makes "the reactor's reaction list" denote. The absent case needs a rule, and the natural one is the
+paper's own §III-G intent: an unannotated server is ordered after every annotated one, with ties among
+unannotated servers being unresolved observable choices and therefore outside the fragment. That is not a
+new restriction — it is P4's missing tie rule, stated at the point where the type forces the question.
+
+**What the tool does:** it already carries the indexed, partial form. The `priority : Option Nat` field
+(`Relico/DTR/GeneralSyntax.lean:349`) makes absence representable, and the convention this entry asks the
+paper to state is already recorded beside it: an absent priority is *"a priority class in its own right and
+is ordered after every explicit one"* (`:336`) and *"two absences are a tie"* (`:386`). Priorities are
+per message server per reactive class and are never keyed on a bare name, so the Fig. 2a collision cannot
+arise. What the tool does **not** yet do is order anything by them: the general family emits source order
+and drops the field, and `Relico/Translation/GeneralBasic.lean:1161` records that drop as a theorem so the
+wiring cannot land unnoticed. Stage F is where the sort and its ordering theorem land — against the repo's
+convention rather than the paper's signature, per the 2026-08-16 rule that the repo is definitive where the
+two conflict.
