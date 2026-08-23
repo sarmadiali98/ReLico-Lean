@@ -7,6 +7,10 @@ and line a reviewer can check, projections that could turn out false are stated 
 §11 so that the design can be scored against what happens, and the boundary with the neighbouring
 stages is stated at the top because all three of the previous stages had theirs misread at least once.
 
+**Stage F's findings live in [`STAGE_F_FINDINGS.md`](STAGE_F_FINDINGS.md), starting at F59.** This
+document owns what stage F *does* and why; that one owns what stage F *found wrong*, including two
+corrections to this document made after its own commit-1 gate run.
+
 ## 1. What stage F is, and exactly where its boundary falls
 
 Stage F makes the **order** of a receiver's reactions realize Rebeca's **priorities**. Stage E built
@@ -671,17 +675,44 @@ declared **first** rather than last. One fixture can carry both disagreements, a
 single fixture that exercises both levels also witnesses §1.1's composition claim — that the two sorts
 act on disjoint pairs and do not interfere.
 
-Everything that travels with a new general fixture travels with this one. The list has been paid for
-twice already (#37 and #51), and `relico-doc-count-invariants` records why it is easy to get wrong:
-the fixture file, its `.parser.json`, the exporter run, the printer test main's expected LF text, the
-bridge assertions, both gate scripts' counts, and the **spelled-out English counts** in
-`frontend/fixtures/general/README.md` — which is read by a Python test, so a missed count fails a gate
+**Task #86 is therefore two artefacts, not one, and F59 is why.** They carry different claims and
+either can land without the other:
+
+**(A) The hand-built model in the printer test main — the only artefact that witnesses the sort.** A
+fourteenth `DTR.GeneralModel` literal in `frontend/lean-bridge/GeneralLfPrinterTestMain.lean`, carrying
+the derangement above, asserting the emitted reaction order as text through `compileGeneralModel`
+(precedent at `:1857`) or `routesOf` (`:2716`), and bumping `EXPECTED_PRINTER_ASSERTIONS` at
+`frontend/check-general-lean.sh:245` with a twelfth entry added to the block-by-block provenance
+comment above it. This needs no Java, no `artifact.zip` and no exporter run — Lean and a `lake build`.
+It is also the first priority annotation of any kind in that file.
+
+**(B) The `.rebeca` plus `.parser.json` pair — strictly weaker, and about the frontend.** It pins that
+the exporter and the Lean decoder carry disagreeing priority annotations across the bridge intact. It
+does **not** move any emitted text, because nothing translates it. Everything that travels with a new
+general fixture travels with it: the list has been paid for twice already (#37 and #51), and
+`relico-doc-count-invariants` records why it is easy to get wrong — the fixture file, its
+`.parser.json`, the exporter run, the bridge assertions, `POSITIVE_COUNT` 10 → 11 and so the frontend
+assertion total 24 → 25, and the **spelled-out English counts** in
+`frontend/fixtures/general/README.md`, which is read by a Python test, so a missed count fails a gate
 rather than merely reading wrong.
+
+(A) is a hand transcription of (B) and nothing checks the transcription; see §8.3.
 
 ### 8.3 What the gates can and cannot show
 
-`frontend/check-general-lean.sh` carries the structural evidence: the emitted reaction order for the
-new fixture, asserted as text. That is the real gate for this stage.
+`frontend/check-general-lean.sh` carries the structural evidence: the emitted reaction order, asserted
+as text. **But it asserts it for a hand-built Lean model, never for a fixture** — and the difference is
+finding **F59**, which had to be written because this section originally claimed the latter. The
+printer runner is invoked at `:248-252` with **no arguments**; its models are thirteen hand-built
+`DTR.GeneralModel` literals inside `frontend/lean-bridge/GeneralLfPrinterTestMain.lean`. No committed
+`.parser.json` is ever translated by any gate, and the general family has no expected LF text at all
+(every `expected/lf-source` in the tree belongs to `tests/benchmarks/`).
+
+So the model that witnesses the ordering is a **hand transcription** of the fixture, and *nothing
+checks that the transcription is faithful*. That is a real gap and it is stated rather than closed: the
+alternative would be a runner that decodes a `.parser.json` and prints it, which is a harness change
+stage F does not need and should not smuggle in. What stage F must not do is describe the fixture as
+the thing being asserted.
 
 `frontend/check-general-lf-target.sh` can only show that the emitted program still **compiles and runs
 under `lfc` 0.11.0**, because a generated program has no observable output (§2.4). It cannot witness the
@@ -693,7 +724,9 @@ that no one of them suffices: §2.1's measurement that declaration order decides
 §8.2's assertion that the emitted declarations are in priority order, and §5's premise connecting DTR's
 selection to LF's. The measurement is of hand-written LF, which is the correct instrument for a
 target-language property, and the F58 lesson is that the instrument must be able to separate the causes
-it is credited with separating.
+it is credited with separating. **F59 is that same lesson landing on this section eight lines later**:
+the instrument named here could not have separated a priority-ordering sort from the identity, because
+it contains no priority annotation anywhere.
 
 ## 9. Level 2 in detail: the blueprint ports, but not the way it is written
 
@@ -836,15 +869,25 @@ Stage E's §11 recorded projections and seven were later falsified, which made i
 in that document. The same is attempted here. Each of these is stated so that a specific observation
 refutes it.
 
-**Outcomes as of the commit-1 gate run, 2026-08-23.** Seven of the nine below now have measured results
-and all seven held: F-1 (the generic sort's lemmas went through with the same `by_cases`/`simp` shape, so
+**Outcomes as of the commit-1 gate run, 2026-08-23.** **Six** of the nine below have measured results
+and all six held: F-1 (the generic sort's lemmas went through with the same `by_cases`/`simp` shape, so
 §4.3's monomorphic fallback was never taken), F-2 (shipped with the routing-succeeded hypothesis as
 projected), F-3 (`assembleGeneralPortReactions_instanceDeclarationOrder` needed no restatement — re-keying
 its walk dated its docstring and nothing more), F-4 (no `.priority` obligation appeared, all three
-`_priority` theorems green with no edit), F-5, F-7 (`wellFormed` still five clauses; the distinctness
-premise stayed a hypothesis) and F-9. F-6 is unresolved because level 2 has not been written, and F-8 is
-untestable until it is. Nothing here was adjusted after the fact — the figures below are as written before
-the run.
+`_priority` theorems green with no edit), F-5, and F-7 (`wellFormed` still five clauses; the distinctness
+premise stayed a hypothesis). F-6 is unresolved because level 2 has not been written, and F-8 is
+untestable until it is.
+
+**F-9 is the ninth and it is scored separately, because the run could not bear on it.** Its claim is
+true and was pre-checked by inspection, but it was written naming an artefact that does not exist — "the
+fixture whose expected LF text changes" — and no gate translates a fixture at all. Finding **F59**
+measured that, quotes the original wording so the score stays auditable, and explains why the green
+92 printer assertions are a witness for *stability* rather than for ordering. **The headline and
+refutation condition of F-9 below were rewritten after the run, and that is the only projection text in
+this document ever altered post-hoc.** It is recorded here rather than done quietly because the rule is
+that projections are never adjusted to fit results: what changed is a category error in what F-9 named
+as its instrument, not the claim it makes or whether the claim held. No figure was touched — the
+numbers below are as written before the run.
 
 **F-1. The generic sort costs less than two monomorphic copies.** Refuted if `GeneralPriority.lean`'s
 lemmas do not go through with the same `by_cases`/`simp` shape as
@@ -885,27 +928,44 @@ would also shrink the accepted fragment and owe a fragment-restriction note.
 **F-8. Level 2 is a re-derivation, not a rename.** Refuted — happily — if `PriorityOrder.lean` ports by
 substitution after all, which would mean §9.1's three obstacles are avoidable.
 
-**F-9. The new fixture is the only fixture whose expected LF text changes.** **Pre-checked by
-inspection on 2026-08-23, and it held**, which is why it is stated as a projection rather than left to
-gate time. Every positive general fixture carrying priority annotations was read: `fan-in.rebeca`'s
-instances are declared `1, 2, 3` then unannotated (§8.1); `priorities.rebeca`'s message servers are
-declared `1, 2, none` and its instances `3, none`; `two-classes.rebeca` annotates one server of two.
-All are already in priority order under the absence-last convention, so both sorts are no-ops on the
-entire existing corpus. Refuted if any existing positive fixture's emitted order nevertheless moves —
-the residual risk is that reading a `.rebeca` file is not the same as reading what the exporter produced
-into its `.parser.json`, and the two have disagreed before.
+**F-9. No existing positive fixture's declared order disagrees with its priority order, at either
+level.** **Pre-checked by inspection on 2026-08-23, and it held**, which is why it is stated as a
+projection rather than left to gate time. Every positive general fixture carrying priority annotations
+was read: `fan-in.rebeca`'s instances are declared `1, 2, 3` then unannotated (§8.1);
+`priorities.rebeca`'s message servers are declared `1, 2, none` and its instances `3, none`;
+`two-classes.rebeca` annotates one server of two. All are already in priority order under the
+absence-last convention, so both sorts are no-ops on the entire existing corpus.
 
-**MEASURED at gate time, 2026-08-23: it held, and the residual risk did not materialise.** With `routesOf`
-walking `priorityOrderedInstances`, all **92** printer assertions — which pin exact emitted text — passed
-unchanged, the **24** frontend assertions passed, and `GENERAL_LF_TARGET_OK` held with real `lfc` 0.11.0
-accepting the routed two-class program and running it to a clean exit.
+**Refuted by reading a fixture whose annotations disagree** — not by a gate. Finding **F59** measured
+why: no gate carries a `.parser.json` through translation, so no fixture *has* an emitted order for a
+run to move. The residual risk noted when this projection was written — that reading a `.rebeca` file
+is not the same as reading what the exporter produced into its `.parser.json` — is therefore **still
+open**, and no gate result can close it. What would close it is reading the priority fields of the
+committed `.parser.json` documents directly.
 
-**Consequence, and it is the reason task #86 is not optional.** Both gates passing *unchanged* is the same
-observation read from the other side: the level-1 sort is observationally **inert** on every fixture the
-repository has. Nothing in the corpus distinguishes it from the identity function. The only artefacts that
-do are the seven `rfl` pins in `Relico/Tests/GeneralPriority.lean` and the sortedness theorems of §4.5 —
-and the pins are `theorem`s closed by `rfl`, so they are discharged at elaboration and never appear in the
-24 or 92 counts at all. It follows that **the 92 printer assertions must not be described anywhere as
-covering stage F**, and that until #86 lands the corpus-level evidence for level 1 is exactly zero. This is
-§4.5's measurement restated at corpus scale, and it is the same shape as the earlier finding that
-`normalize := id` would break one regression test and no theorems.
+**MEASURED at gate time, 2026-08-23, and what the run does and does not show.** With `routesOf`
+walking `priorityOrderedInstances`, all **92** printer assertions passed unchanged, the **24**
+frontend assertions passed, and `GENERAL_LF_TARGET_OK` held with real `lfc` 0.11.0 accepting the
+routed two-class program and running it to a clean exit. **This is not confirmation of an ordering
+claim, and F59 is the entry that establishes why.** `grep -c priority` over the 5124 lines of
+`frontend/lean-bridge/GeneralLfPrinterTestMain.lean` returns **zero**: every hand-built instance takes
+the default `priority := none`, every pair is tied under the reflexive `PriorityPrecedesOrEqual`, and
+`normalize` is the identity on all-tied input for *any* stable sort. The 92 assertions could not have
+moved. The 24 frontend assertions decode fixtures and never translate them, so they carry no ordering
+information either.
+
+**What the run does establish is worth stating positively:** all-tied input is exactly the case §4.5
+argues sortedness cannot see, so 92 unchanged assertions are an independent witness that `normalize`
+is **stable**. That is the property the theorems structurally cannot pin, and it is a real result —
+just not the one the projection was about.
+
+**Consequence, and it is the reason task #86 is not optional but had to be re-scoped.** The level-1
+sort is observationally **inert** on every fixture the repository has, established by the inspection
+above rather than by the run. Nothing in the corpus distinguishes it from the identity function. The
+only artefacts that do are the seven `rfl` pins in `Relico/Tests/GeneralPriority.lean` and the
+sortedness theorems of §4.5 — and the pins are `theorem`s closed by `rfl`, so they are discharged at
+elaboration and never appear in the 24 or 92 counts at all. It follows that **the 92 printer
+assertions must not be described anywhere as covering stage F's ordering claim**, and that the
+corpus-level evidence for level 1 is currently zero. This is §4.5's measurement restated at corpus
+scale, and it is the same shape as the earlier finding that `normalize := id` would break one
+regression test and no theorems.

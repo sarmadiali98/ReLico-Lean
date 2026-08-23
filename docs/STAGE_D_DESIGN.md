@@ -707,8 +707,11 @@ The corrections ledger ran P1–P22 for the paper plus F1–F20 from stage B whe
 and it then lived under a gitignored `tmp/` path — which meant the project's most reusable artefact was the
 one thing a fresh clone did not get. **That is resolved since, 2026-08-23:** the paper series is tracked at
 `docs/PAPER_CORRECTIONS.md` and runs through **P23**, and the findings series continued past stage B into
-`docs/STAGE_E_FINDINGS.md`, which holds **F34–F58**. A fresh clone gets both. Stage D's findings are written here in the meantime, numbered **F21–F29**, and graduating the
-ledger into the repository is a task in its own right rather than something to keep postponing.
+`docs/STAGE_E_FINDINGS.md`, which holds **F34–F58**. A fresh clone gets both. The `F` series now has
+four homes and this is the list: `docs/STAGE_B_FINDINGS.md` **F1–F20**, `docs/STAGE_D_FINDINGS.md`
+**F21–F33**, `docs/STAGE_E_FINDINGS.md` **F34–F58**, `docs/STAGE_F_FINDINGS.md` **F59 onward**. Stage
+D's nine were first written *here*, numbered **F21–F29**, and they graduated into their own file
+along with F30–F33; the ledger no longer lives in a gitignored path at all.
 
 **These findings were numbered D1–D9 when this document was first committed, and that was a collision.**
 `docs/dtr-fragment/PAPER_FRAGMENT_RESTRICTIONS.md` already defines a `D1–D9` series meaning *divergences
