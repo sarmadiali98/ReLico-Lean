@@ -242,12 +242,24 @@ apart**. That is a real obligation, and the comment that replaces the sentence q
 in those terms instead: an agreement claim, named as one, with a pointer to where the ordering claim
 is actually made.
 
-It is also not permanently blind to priority. Level 2's sort will enter on the constructor side only,
-inside `compileGeneralReactiveClass`, while `generalReactionNamesOf` still receives
-`reactiveClass.messageServers` unsorted — so after task **#87** a model with message-server
-priorities *would* make the two sides disagree. `routedModel` carries no priority annotation of any
-kind, so that sensitivity is unreachable there, and the model is deliberately left unannotated: its
-job is the drift check, and the fan-in block below it is the ordering instrument.
+It is also not permanently blind to priority. Level 2's sort entered on the constructor side only,
+inside `compileGeneralReactiveClass`, and this assertion still hands `generalReactionNamesOf`
+`reactiveClass.messageServers` unsorted (`frontend/lean-bridge/GeneralLfPrinterTestMain.lean:2737`)
+— so a model with message-server priorities put through *this* assertion would make the two sides
+disagree. `routedModel` carries no priority annotation of any kind, so that sensitivity is
+unreachable there, and the model is deliberately left unannotated: its job is the drift check, and
+the fan-in block below it is the ordering instrument.
+
+One consequence of task **#87** that this paragraph did not anticipate, recorded here because it
+weakens the sentence above rather than confirming it: re-keying
+`compileGeneralReactiveClass_reactionNames` moved the *theorem's* right-hand side onto
+`generalPriorityOrderedMessageServers reactiveClass`, so this assertion is no longer the runnable
+form of it. The fan-in assertion below was updated to match and this one was not, which means the
+drift check now pins a value **no theorem mentions** — precisely the option
+`priorityFanInSpecifiedReactionOrder`'s docstring records as considered and rejected. It is harmless
+at `routedModel`, because with no annotations the sort is the identity and both arguments are the
+same list. But the reason it is harmless is the same reason this finding was filed, so the promised
+sensitivity now costs an annotation *and* a decision about which value the assertion should mirror.
 
 ### Why it is load-bearing rather than cosmetic
 

@@ -704,12 +704,19 @@ and it is asserted **twice** — once against `compileGeneralModel`'s emitted re
 literal makes them independent, so either can fail alone and say which side moved. Four assertions in
 all, the other two being source well-formedness and `ActorPrioritiesDistinct`, which §8.2 above
 requires so that the guard-relative theorem is exercised and not only the unconditional one. The
-receiver's two servers do carry the level-2 disagreement §8.2 asks for, but that is a **negative
-control** rather than a second claim: `DTR.GeneralMessageServerPriority` has zero references under
-`Relico/Translation/` and `Relico/Correctness/`, so level 2 is inert and `drain_reaction` is emitted
-last, where its *declaration* puts it. Task #87 must move it to the front, which makes the literal
-above a **prediction written before the behaviour exists** rather than text fitted to behaviour
-afterwards.
+receiver's two servers do carry the level-2 disagreement §8.2 asks for, and when this section was
+written that was a **negative control** rather than a second claim:
+`DTR.GeneralMessageServerPriority` then had zero references under `Relico/Translation/` and
+`Relico/Correctness/`, so level 2 was inert and `drain_reaction` was emitted last, where its
+*declaration* puts it.
+
+That is no longer the state of the repository, and the paragraph above is left standing rather than
+rewritten because its value is that it was written first. Task #87 moved `drain_reaction` to the
+front: the sort entered at `compileGeneralReactiveClass` in commit `1da1d78`, and the ordering
+theorems followed in the commit after it. So the literal is now satisfied by behaviour that did not
+exist when the literal was chosen — a **prediction written before the behaviour exists**, since
+discharged, rather than text fitted to behaviour afterwards. The negative control became the
+positive claim, which is the outcome §8.2 was asking for and not a change of plan.
 
 Why the sketch's `Sensor`/`Gateway` names were not used: `ping` carries an `int` payload because a
 port must carry one — `generalPortPayloadFor` (`Relico/Translation/GeneralRouting.lean:871`) refuses
@@ -879,8 +886,10 @@ deliberately and for a measured reason. Also the six stage-G attribution lines �
 the one lemma that bridges `GeneralWellFormed`'s named guard to the sort's raw `Nodup` premise, and the
 composition of the guard-relative form with
 `assembleGeneralPortReactions_instanceDeclarationOrder` that states the emitted-reaction claim §III-D
-actually asks for. Level 2's two forms are added to the same file in commit 2, deliberately not written
-in commit 1 so that a build failure is localizable to one level.
+actually asks for. Level 2's two forms are added to the same file, deliberately not written in commit 1
+so that a build failure is localizable to one level. Level 2 then took **two** commits rather than the one
+projected here: the walk re-keying and its append lemma first, the ordering forms and their guard bridge
+second, split for the same localization reason one level down.
 
 **New file, commit 1.** `Relico/Tests/GeneralPriority.lean` — §4.5's value pins, at both element types:
 the four-element normalization regression mirroring
@@ -915,8 +924,27 @@ and all six held: F-1 (the generic sort's lemmas went through with the same `by_
 projected), F-3 (`assembleGeneralPortReactions_instanceDeclarationOrder` needed no restatement — re-keying
 its walk dated its docstring and nothing more), F-4 (no `.priority` obligation appeared, all three
 `_priority` theorems green with no edit), F-5, and F-7 (`wellFormed` still five clauses; the distinctness
-premise stayed a hypothesis). F-6 is unresolved because level 2 has not been written, and F-8 is
-untestable until it is.
+premise stayed a hypothesis).
+
+**F-6 and F-8 were scored when level 2's ordering theorems landed, taking the count to eight of nine.**
+F-6 **held**: level 2 surfaced no paper claim outside P1, P4, P5 and P23. It implements Lemma 2's
+same-actor case, and P1 already carries the different-actor exclusion, so no new `P` number is owed.
+
+F-8 is the one projection whose stated refutation condition and whose budget disagree, so it is scored on
+both. Its condition — that `PriorityOrder.lean` ports by substitution after all — **did not occur**, and
+in that narrow sense it held: the blueprint was not ported and §9.1's three obstacles stand. Its
+**budget was wrong, and by a wide margin**. "Budget level 2 as a re-derivation of a 215-line file"
+measured level 2 against the blueprint, when the file level 2 actually mirrors is **level 1's own**,
+written in commit 1 and structurally identical at a different element type. `GeneralPriority.lean`'s two
+new instantiations are the actor ones with the element type changed;
+`GeneralPriorityOrder.lean`'s four new theorems are level 1's four with one extra argument, because the
+message-server guard is per class where the actor guard is model-wide. All six elaborated on the first
+build.
+
+The transferable lesson is that a projection can name the right comparison for the **wrong stage**: once
+level 1 pays a re-derivation, level 2 is a mirror of it, and the budget should have been set against the
+file that would exist by the time level 2 was written rather than against the one that existed when the
+projection was made.
 
 **F-9 is the ninth and it is scored separately, because the run could not bear on it.** Its claim is
 true and was pre-checked by inspection, but it was written naming an artefact that does not exist — "the

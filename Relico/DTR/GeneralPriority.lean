@@ -1244,7 +1244,8 @@ theorem length_normalize
 /--
 Message-server priority normalization produces a sorted server list.
 
-Level 2's append-split consumers arrive with task #87; sortedness is stated here so that both
+Level 2's append-split consumers are the two theorems below, and they arrived with task #87 as this
+docstring previously said they would. Sortedness is still stated separately from them, so that both
 instantiations expose the same guarantee and neither level can drift into relying on an unproved sort.
 -/
 theorem normalize_sorted
@@ -1257,6 +1258,70 @@ theorem normalize_sorted
   GeneralPriority.normalize_sorted
     priorityOf
     messageServers
+
+/--
+The unconditional level-2 ordering result, in the append-split shape
+`compileGeneralMessageServerReactions_append` already consumes.
+
+Ties are possible and are resolved by source declaration order, which is `normalize`'s stability and
+what decision `0041` requires. At this element type a tie is the ordinary case rather than the corner
+one: an unannotated message server is permitted, so any class with two unannotated servers ties them,
+and `docs/STAGE_F_DESIGN.md` §6 records that this is exactly why the guard below cannot be a
+`wellFormed` clause.
+-/
+theorem normalize_append_precedes
+    {messageServers earlier later :
+      List DTR.GeneralMessageServer}
+    (hSplit :
+      normalize
+          messageServers =
+        earlier ++ later) :
+    ∀ earlierServer,
+      earlierServer ∈ earlier →
+      ∀ laterServer,
+        laterServer ∈ later →
+        GeneralPriority.PrecedesOrEqual
+          priorityOf
+          earlierServer
+          laterServer :=
+  GeneralPriority.normalize_append_precedes
+    priorityOf
+    hSplit
+
+/--
+The guard-relative level-2 ordering result, with message-server priorities distinct.
+
+The `Nodup` premise is the unfolded form of `GeneralMessageServers.PrioritiesDistinct`, and that
+predicate is **per class** where level 1's is model-wide: `GeneralModel.MessageServerPrioritiesDistinct`
+quantifies over `model.classes`, because two classes may both annotate a server `1` without conflict.
+So the bridge in `Relico/Correctness/GeneralPriorityOrder.lean` has to apply class membership before it
+can apply this theorem, which is the one step level 1's bridge does not need and the only structural
+difference between the two instantiations.
+-/
+theorem normalize_append_strict
+    {messageServers earlier later :
+      List DTR.GeneralMessageServer}
+    (hSplit :
+      normalize
+          messageServers =
+        earlier ++ later)
+    (hNodup :
+      (messageServers.map
+        priorityOf).Nodup) :
+    ∀ earlierServer,
+      earlierServer ∈ earlier →
+      ∀ laterServer,
+        laterServer ∈ later →
+        GeneralPriority.PrecedesOrEqual
+            priorityOf
+            earlierServer
+            laterServer ∧
+          priorityOf earlierServer ≠
+            priorityOf laterServer :=
+  GeneralPriority.normalize_append_strict
+    priorityOf
+    hSplit
+    hNodup
 
 end GeneralMessageServerPriority
 
