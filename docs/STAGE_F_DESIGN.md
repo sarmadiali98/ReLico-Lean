@@ -616,6 +616,27 @@ in `compileGeneralReactiveClass_reactionNames`'s docstring, and three in the fre
 all. §1.1 claims that work for stage F's level 2 instead. The two docstring homes are declarations level
 2 has to re-key anyway, so the correction travels with commit 2.
 
+**What actually happened, and the sentence above that was wrong.** Only the two lines in
+`compileGeneralReactiveClass_reactionNames`'s docstring travelled with commit 2; that declaration was
+re-keyed and its docstring rewritten in the same edit. `assembleGeneralReactor` was not re-keyed, so
+its line and the `## Order preservation` block's three did not travel, leaving **four** outstanding
+rather than the three a later task note recorded. More consequentially, the grading in the first
+sentence — *"a stage attribution rather than a false claim"* — held for two of the four and failed for
+the other two. `assembleGeneralReactor`'s docstring also asserted that
+`compileGeneralReactiveClass_reactionNames` *"was retired rather than adjusted"*, while a theorem of
+that name is live with a different statement, so a reader who greps the name finds the docstring
+contradicted. And the `## Order preservation` block's third clause said the class-level theorem pins
+*"groups appear in message-server source order"*, which level 2 made false: it pins priority order now.
+Both were repaired with the attribution.
+
+The transferable point is narrower than F46's and worth separating from it. F46's lesson is to search
+for the proposition rather than the word, and §7.4 did that — grepping for the *claim* is how it found
+`assembleGeneralPortReactions` and `compileGeneralModel_connections` two paragraphs above. What failed
+here was not the search but the **triage**: having found six lines, this section graded them as
+cosmetic without re-reading the paragraphs they sit in, and two of those paragraphs made load-bearing
+claims that the same change falsified. An enumeration is not a reading, and only the reading finds the
+false claim next to the harmless one.
+
 ## 8. The fixture stage F needs, and why the existing one cannot serve
 
 ### 8.1 `fan-in.rebeca` proves nothing about priority, by construction

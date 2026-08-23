@@ -453,4 +453,41 @@ did disagree, the disagreement was exactly the one #86 anticipated, and the pair
 report it: the side that would have passed was the side that never ran. A two-bit diagnostic whose
 bits are read in a fixed order can only ever return the first bit.
 
+## F62 — an enumeration graded all six of its docstring lines cosmetic, and two of them were false
+
+Provenance: **measured** — the grading was checked against the current source before the repair,
+2026-08-23.
+
+`docs/STAGE_F_DESIGN.md` §7.4 enumerated six docstring lines, written during stage D, that attribute
+the `messageReactions` permutation to stage G. It opened by grading them: *"a stage attribution rather
+than a false claim."* With level 2 landed, that grading holds for four of the six and fails for two.
+
+The two it missed are both in paragraphs the enumeration had already located, sitting beside a line it
+graded correctly:
+
+- `assembleGeneralReactor`'s docstring said `compileGeneralReactiveClass_reactionNames` *"was retired
+  rather than adjusted"*. A theorem of that name is live with a different statement, and the module
+  header thirty lines above says *"replaced"* of the same event. So the file contradicted itself, and
+  the version a reader reaches by grepping the name is the one that says "retired".
+- the `## Order preservation` block said the class-level theorem pins *"groups appear in message-server
+  source order"*. Level 2 re-keyed its right-hand side to
+  `generalPriorityOrderedMessageServers reactiveClass`, so it pins **priority** order. The sentence
+  survived the re-keying because the re-keying edited the theorem's own docstring and not the section
+  block that introduces it — the free-standing block belongs to no declaration, which is the same
+  reason §7.4 gave for enumerating by claim rather than by declaration.
+
+This is not F46 again, and the difference is the useful part. F46's lesson is to search for the
+proposition rather than the word, and §7.4 followed it — grepping for the claim is exactly how it found
+two extra lines that a declaration-based enumeration had missed. What failed was the **triage** after
+the search: six lines were graded from the lines themselves, without re-reading the paragraphs holding
+them, and two of those paragraphs made load-bearing claims the same change falsified. F53 records
+claims that outlived their refutations; this records a claim that outlived an inspection which had
+already found its address and moved on.
+
+The check that would have caught it is cheap and is now the recommended one: when a change re-keys a
+theorem, re-read every paragraph that *names* that theorem, not only the paragraphs that state the
+proposition being changed. The name is the index into the text that goes stale, and `grep` for the
+name costs one command — it is what turned up both of these.
+
+
 

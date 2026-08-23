@@ -65,10 +65,15 @@ would re-sort at every step.
 
 One entry point per level is deliberate, and finding **F60** is why. Level 1's sort sits inside
 `routesOf`, which every consumer calls, so an assertion comparing two values that both read
-routes cannot fail on ordering. Level 2's sits on the constructor side only, while
-`generalReactionNamesOf` still receives `reactiveClass.messageServers` unsorted — so the
-specification function and the constructor can now disagree, which is what makes the
-disagreement worth asserting.
+routes cannot fail on ordering. Level 2's sits on the constructor side only, at
+`compileGeneralReactiveClass`, and `generalReactionNamesOf` takes its server list as a
+*parameter* — it has no order of its own, so what it reports is decided by whoever calls it.
+`compileGeneralReactiveClass_reactionNames` and the fan-in ordering assertion both hand it
+`generalPriorityOrderedMessageServers reactiveClass`, which is what puts the sort into the
+theorem statement rather than hiding it inside the specification. The routed-model drift check
+still hands it `reactiveClass.messageServers`, which is harmless there because that model
+carries no priority annotation and the sort is the identity on it — and finding **F60** records
+why that makes it a drift check rather than a second ordering claim.
 
 `assembleGeneralMessageReaction_priority` records `DTR.GeneralMessageServer.priority` as a field
 the emitted reaction never carries, so no later stage can wire `LF.GeneralReaction.priority`
@@ -1994,9 +1999,19 @@ no ports, which is what keeps the committed fixtures with unused known rebecs pa
 
 One logical action per message server, in source order. The reaction list is no longer one per
 message server — see §7.3 and the group above — so the two lists no longer have equal length,
-and `compileGeneralReactiveClass_reactionNames` was retired rather than adjusted for exactly
-that reason. `assembleGeneralReactor_logicalActions` still pins the action list to source
-order, which is the fixed starting point stage G's permutation needs.
+and stage D's `compileGeneralReactiveClass_reactionNames` was replaced rather than adjusted for
+exactly that reason. A theorem of that name is live again further down this file with a
+different statement, so the name resolving to something is not evidence that the stage D
+version survived; the paragraph in the module header above says the same thing in the word
+"replaced".
+
+`assembleGeneralReactor_logicalActions` still pins the *action* list to source order, and the
+two lists have since parted company. Reaction order is decided, by stage F's level 2. The action
+list is sorted by neither level and nothing permutes it, because level 2's sort is applied to the
+server list handed to `compileGeneralMessageServerReactions` and this field is built from
+`reactiveClass.messageServers` directly. Whether action declaration order is observable in the
+target has not been measured — reaction declaration order has been, under `lfc` 0.11.0 — so this
+theorem pins source order as a fact about the translation and claims nothing about its effect.
 -/
 def assembleGeneralReactor
     (reactiveClass : DTR.GeneralReactiveClass)
@@ -4293,10 +4308,13 @@ theorem compileGeneralModel_reactorNames
 
 These look like bookkeeping and are not. Reaction *declaration order* is the only
 deterministic ordering hook the target gives us — measured: swapping two reaction
-declarations swaps their same-tag execution order — so stage G's priority work will be a
-permutation of `messageReactions`. Proving now that stage D's order **is** source order
-gives stage G a fixed starting point to permute away from, and turns any accidental
-reordering in between into a failing proof rather than a silent behavioural change.
+declarations swaps their same-tag execution order — so the priority work is a permutation
+of `messageReactions`. This block was written during stage D and attributed that permutation
+to stage G. Stage F did it instead, at both levels, and the attribution is corrected here
+rather than deleted because the *argument* was right and is what the sort was eventually
+re-keyed against: proving that the order **is** source order gave the permutation a fixed
+starting point to move away from, and turned any accidental reordering in between into a
+failing proof rather than a silent behavioural change.
 
 Each is proved by induction with `change` and `congrArg`, the pattern of
 `Store.keys_mapValuesWithKey`, rather than by `simp [List.map_map]`. Both work; the
@@ -4318,9 +4336,13 @@ entirely in terms of *names* — `messageReactionNameFor`, `portReactionNameFor`
 filter — while the implementation is written in terms of *reactions*, through
 `assembleGeneralMessageReaction` and `assembleGeneralPortReactions`. The theorem therefore
 pins three things a reordering would break: that the action reaction comes first in each group,
-that a group's port reactions follow the route order, and that groups appear in message-server
-source order. Those are exactly what stage G permutes and what stage F's fan-in ordering
-argument reads.
+that a group's port reactions follow the route order, and that groups appear in the order of
+whatever server list the theorem names. That third clause is where stage F entered, and it is
+why the wording here is no longer "source order": the list the class-level theorem names is now
+`generalPriorityOrderedMessageServers reactiveClass`, so it pins message-server **priority**
+order. Level 1 decides the second clause, by sorting instances inside `routesOf` so that route
+order is sending-actor priority order; level 2 decides the third. The fan-in ordering assertion
+is the runnable form of both, and neither clause subsumes the other.
 
 `List.flatMap` was the obvious alternative spelling and is deliberately avoided: its core name
 has churned in the same family as `List.enum` and `String.capitalize`, and this development
