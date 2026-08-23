@@ -1,10 +1,10 @@
-# Stage E findings — F34 through F57
+# Stage E findings — F34 through F58
 
 **Why this file exists.**
 Stage E added external sends, ports and connections to the general translator, and in doing so it
-produced twenty-four findings about *this repository* — its own code, its own design document, and its
+produced twenty-five findings about *this repository* — its own code, its own design document, and its
 own test harness — and, in **F56**, about what the code this translator emits actually does when it is
-compiled and run. They are numbered F34 through F57, continuing the single `F` series that
+compiled and run. They are numbered F34 through F58, continuing the single `F` series that
 `docs/STAGE_B_FINDINGS.md` opened at F1–F20 and `docs/STAGE_D_FINDINGS.md` carried to F21–F33.
 
 The `F` series and the `P` series answer different questions, and keeping them apart is the whole
@@ -56,7 +56,7 @@ F34 through F40 were first written in `docs/STAGE_E_DESIGN.md` §11.1, under an 
 they were *"provisional until the findings file lands"* and *"do not cite these elsewhere yet"*. That
 warning was earned: stage D's design had numbered its own findings D1 through D9, they became F21
 through F29 when the stage D findings file landed, and the D-numbers became uncitable. **This file is
-what makes F34–F57 citable.** Nothing below is provisional any more. (This range is one of the places that
+what makes F34–F58 citable.** Nothing below is provisional any more. (This range is one of the places that
 move whenever an entry is added, and it is the one that went stale when F50 landed. How many places there
 are depends on how finely they are counted, which is not a quibble: this file answers it three times and
 three ways. **F51** lists four, **F54** lists a different four, and the paragraph below at *"The three
@@ -1420,9 +1420,35 @@ that would close it, so that no entry here can be closed by argument alone.
 three-reactor generated program, and `Gateway`'s five reactions are declared in an order that the
 2026-08-17 probe showed to be observable — but its two port reactions fire at 0 msec and 3 msec, which are
 *different tags*, so time order decides and declaration order is never consulted. The gate therefore
-proves the generated declaration order **compiles**; it does not exercise a race. The paper's §III-D
-ordering claim over *generated* text is still unmeasured, and what would settle it is a fan-in fixture
-whose sends share a tag. Stage F cannot claim its ordering result until this runs.
+proves the generated declaration order **compiles**; it does not exercise a race.
+
+> **Closed 2026-08-23 (task #80) — and the experiment this item asked for was mis-specified, which is
+> worth more than the result.** The item ended *"what would settle it is a fan-in fixture whose sends
+> share a tag. Stage F cannot claim its ordering result until this runs."* Both sentences are wrong, for
+> one reason: **a generated program has no observable output at all.** `DTR.GeneralStmt` has exactly two
+> constructors, `assign` and `send`; the DTR fragment has no print statement; `GeneralCppPrinter.lean`
+> emits no `cout` or `printf`; and `LF.GeneralReactor` has no preamble field to inject one. The only
+> observable of a generated program is its **exit code**. So no fixture, however its tags are arranged,
+> can report which of two reactions ran first. The experiment cannot be performed — it is not merely
+> outstanding.
+>
+> Two consequences. First, `frontend/check-general-lf-target.sh` checking only exit codes is **forced,
+> not lazy**; do not "improve" it by diffing `run.log` content. Second, the ordering claim is a property
+> of the **target language**, so the correct instrument is hand-written LF, and the correct shape of the
+> argument is a measurement composed with a theorem rather than a fixture that tries to be both.
+>
+> **What discharges it.** Probe **section 15** (`PROBE_FILTER=stageF`, six probes, three pairs) measured
+> against `lfc` 0.11.0 that **declaration order decides** in all three same-tag shapes a generated
+> receiver produces — two action-triggered reactions, two port-triggered reactions from one sender, and
+> one of each mixed. Every pair swapped when only its declarations were swapped. That closes the
+> *measurement* half. The remaining half is structural — that the **generated** declaration order is the
+> priority order — and it is a Lean theorem over emitted text, tracked as task #83, not a measurement.
+> Stage F is therefore unblocked, and needed no fragment restriction: the contingency that a level tie
+> might degrade to insertion order (which would have made a priority sort of the declarations achieve
+> nothing) is refuted.
+>
+> Section 15 also found that §14b, cited in four Lean docstrings and one entry of this file for the
+> action-triggered case, could not separate declaration order from schedule order — recorded as **F58**.
 
 **2. Two `schedule()` calls on one logical action at one tag** — pending task #39, and owed by stage D's
 *landed* self-send path rather than by stage E. `self.tick(); self.tick();` already emits two
@@ -2293,8 +2319,10 @@ mechanism.
 **Provenance: mixed, and the parts are graded separately rather than averaged.** That the record was missing
 is **measured** — the string `cross-server` occurs zero times anywhere under `docs/`. The ordering mechanism
 is **read from the code**, at `Relico/Translation/GeneralBasic.lean`, where reaction assembly is
-message-server-major. That LF fires same-tag reactions in declaration order is **measured**, F56 §14b for
-action-triggered reactions and earlier for port-triggered ones. That the resulting order is a **divergence**
+message-server-major. That LF fires same-tag reactions in declaration order is **measured** — probe
+section 15 for action-triggered reactions (this entry cited F56 §14b, which **F58** found cannot
+separate declaration order from schedule order) and section 1 for port-triggered ones.
+That the resulting order is a **divergence**
 from Rebeca is **inferred**, and under this file's own rule an inferred claim names its check instead of
 concluding — which is most of the point of this entry.
 
@@ -2344,3 +2372,82 @@ is, and it is body order, this becomes a real divergence and stage F inherits a 
 unspecified, this entry should be demoted to a recorded decision and the two docstrings above rewritten to
 say *choice* rather than *divergence*. Either way the answer belongs to stage F, and it is the one place a
 `P` number might yet come out of this entry.
+
+> **Closed 2026-08-23 (task #79, discharged by #85) — DEMOTED to a recorded decision. Not a
+> divergence, and no `P` number.** The check this entry named was run: the paper's DTR SOS take rule
+> selects on **minimum arrival time alone**. The rule and its LF counterpart both read
+> `ar_min = min {arm | …}` with **no priority term**, and §II-A states the consequence in prose —
+> *"in the case of having messages with the same earliest arrival time, the order of the execution of
+> their corresponding message servers is **non-deterministically chosen** to faithfully model the
+> distributed concurrent system."*
+>
+> So the source specifies **no** execution order for two messages at equal arrival time. Emitting one
+> order rather than another therefore cannot diverge from a source order that does not exist, and the
+> two docstrings say *choice* rather than *divergence* or *case*. This is the strongest available
+> outcome: the entry was written as a suspected divergence and the reading dissolved it.
+>
+> **What survives, and it is the more useful half.** The same section adds that *"full Timed Rebeca
+> models with unresolved observable choices require priorities before translation."* So a model
+> reaching the translator is in one of two states: priority-annotated, in which case **message-server
+> priority decides** and the order is stage F's to realize; or carrying an unresolved observable
+> choice, in which case it is **outside the accepted fragment** and the guard should say so. That
+> turns this entry's open question into a well-formedness decision, which is where
+> `docs/STAGE_F_DESIGN.md` takes it up. Note the two distinctness predicates it would need already
+> exist, unused: `MessageServerPrioritiesDistinct` and `ActorPrioritiesDistinct` in
+> `Relico/DTR/GeneralWellFormed.lean`, both with `Decidable` instances, neither conjoined into
+> `wellFormed`.
+
+## F58 — four docstrings and one entry of this file credit a measurement to a probe that could not make it
+
+**The claim.** That reaction **declaration** order decides same-tag firing order for
+**action-triggered** reactions. **The instrument cited.** Probe section 14b
+(`action_two_actions_two_reactions`, `tools/paper-measurements/lf_semantics_probe.sh`).
+
+**Why 14b cannot support it.** That probe schedules `slotA` first **and** declares `reaction(slotA)`
+first. Its observed "A then B" is exactly what **schedule** order would also produce. The two
+candidate causes are not separable from it — not weakly supported, but formally indistinguishable.
+No reading of that probe's output can tell them apart, so no amount of care in citing it would have
+helped.
+
+**Where it propagated.** Five sites, all repaired in task #80:
+
+- `Relico/Translation/GeneralBasic.lean`, the "order within the server is site order" docstring
+- `Relico/Translation/GeneralRouting.lean`, three docstrings — the `self.tick(); self.tick();`
+  consequence note, `selfSendsOfClass`, and the site-ordering paragraph
+- this file, F57's provenance paragraph, which graded the claim **measured**
+
+and the origin is the probe script's own trailer, which asserted *"14b shows the same holds when the
+triggers are logical ACTIONS."* Two further citations of 14b were **left alone** on inspection,
+because they credit it with the **shape** result (one action and one reaction per site) which 14b
+genuinely did measure: `GeneralBasic.lean`'s multi-trigger paragraph and `GeneralRouting.lean`'s
+"only shape left standing". The distinction is the whole finding — the same probe is a valid
+instrument for one claim and an invalid one for another.
+
+**Provenance, graded rather than averaged: the claim is TRUE and the evidence was borrowed.** Probe
+**section 15** (added in #80: six probes, three pairs, `PROBE_FILTER=stageF`) measured the claim
+properly against `lfc` 0.11.0 by holding the schedules fixed and swapping only the declarations. The
+output swapped. So nothing generated is wrong, and no emitted code changes — this is an **evidence**
+defect, not a correctness defect. That is also why it is worth a number: an evidence defect leaves
+every dependent claim looking supported.
+
+**Blast radius, bounded by measurement rather than by argument.** F56's repair is unaffected: it
+emits one action **and** one reaction per send site in body order, so schedule order and declaration
+order **coincide by construction** in the shape it generates, and either cause yields the behaviour
+the repair relies on. The mis-attribution could not have produced a wrong program. It could have
+produced a wrong **proof obligation**, because **stage F is the first place the two orders diverge** —
+a priority sort reorders reaction *declarations* while the `schedule()` calls stay in the sender
+body's order. Had stage F been designed on 14b's authority and schedule order turned out to decide,
+the sort would have achieved nothing observable and the ordering theorem would have been true of the
+emitted text while false of the execution.
+
+**Why it went unnoticed for four citations.** All of them were written by the tasks that added the
+repair (#69, #72, #75), so no independent reader ever compared the claim against the probe body. And
+the claim sits *inside a measurement artifact*, which is the most persuasive possible place for an
+unearned one: the trailer's register is confident and specific, and the surrounding paragraphs are
+genuinely measured.
+
+**The transferable rule, now recorded in section 15's header.** A probe that varies two things at
+once measures neither. A pair must hold everything fixed except the single variable named in its
+expectation string, and a pair whose members differ in more than one respect is not a pair. Section
+15's header states this and the six probe bodies are byte-identical within each pair apart from the
+two swapped declarations.

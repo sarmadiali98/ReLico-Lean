@@ -52,14 +52,19 @@ inversion lemma has exactly one right-hand side to name. Stage E gains from this
 over: the fields that used to be `rfl`-empty are now `rfl`-equal to a routing projection,
 and no inversion lemma changed shape to say so.
 
-Nothing here sorts anything, which is the difference worth stating against
-`Relico/Translation/MultiStoreBasic.lean`: that family compiles message servers in
+Nothing in *this file* sorts anything, but as of stage F the route list it consumes is
+sorted: `routesOf` walks `priorityOrderedInstances`, so a receiver's port reactions come
+out in sending-actor priority order with ties resolved by main-block declaration order.
+That closes level 1 of §III-D. What is still dropped is `DTR.GeneralMessageServer.priority`,
+so the per-server reaction *groups* are still emitted in source order — the difference worth
+stating against `Relico/Translation/MultiStoreBasic.lean`, which compiles message servers in
 `priorityOrderedMessageServers` order. Reaction declaration order is observable in the
-target — measured, not assumed — so the sort that would realize local message-server
-priority is a semantic act, and it belongs to the stage that also proves what it
-achieves. Source order is emitted and `DTR.GeneralMessageServer.priority` is dropped.
-`assembleGeneralMessageReaction_priority` records that drop as a theorem, so stage G
-cannot wire the field without breaking a proof.
+target — measured, not assumed — so that remaining sort is a semantic act and belongs with
+the proof of what it achieves.
+`assembleGeneralMessageReaction_priority` records the dropped field as a theorem, so no later
+stage can wire `LF.GeneralReaction.priority` without breaking a proof — which is the intended
+outcome, because the printer never reads that field and list order is the only mechanism the
+target actually offers.
 
 ## What stage E changed, and why each choice was forced
 
@@ -372,9 +377,13 @@ to. The cross-server case is **F57**, recorded rather than repaired: making reac
 site-major would perturb the reaction-declaration-order theorem already landed for §10.2, and F56
 supplies no measurement that would justify that.
 
-F57 also records why it may be no divergence at all, which is why this paragraph now says *case*
-where it once said *divergence*: same-tag ordering across message servers will be settled by
-message-server priority, and that is stage F's obligation rather than a loose end of stage E.
+F57 is now **demoted to a recorded choice**, and it is no divergence at all — settled 2026-08-23 by
+reading the paper's DTR SOS take rule, which selects on minimum arrival time **alone** and says in
+prose that the order among messages of equal earliest arrival time is non-deterministically chosen.
+The source specifies no order here, so emitting one cannot diverge from an order that does not exist.
+That is why this paragraph says *choice* where it once said *divergence* and then *case*: same-tag
+ordering across message servers is settled by message-server priority, and that is stage F's
+obligation rather than a loose end of stage E.
 -/
 def compileGeneralMessageServerActions
     (allSelfSends : List GeneralSelfSend)
@@ -936,12 +945,15 @@ Their types are not repeated here and that is not an omission: a payload's types
 by the action that triggers the reaction, so recording them a second time would create two
 places for one fact to live.
 
-`priority := none` **deliberately**, even though `DTR.GeneralMessageServer.priority` may be
-`some n` and this field exists to receive it. Local message-server priority is realized in
-LF by reaction *declaration order* — the one ordering hook the target actually provides,
-measured rather than assumed — and choosing that order is a sort over the message-server
-list that stage G owns together with the actor-priority observable. A stage D that wrote
-`priority := some n` would look finished and be unproved.
+`priority := none` **deliberately, and permanently**. `DTR.GeneralMessageServer.priority` may
+be `some n`, and this field looks like the place to put it, but `Relico/LF/GeneralCppPrinter.lean`
+never reads `LF.GeneralReaction.priority` — nothing in the emitted Lingua Franca corresponds to
+it, because the target has no reaction-priority attribute. Local message-server priority is
+realized in LF by reaction *declaration order* instead, the one ordering hook the target
+actually provides, measured rather than assumed. Choosing that order is a sort over the
+message-server list, and it is stage F's level-2 obligation (`docs/STAGE_F_DESIGN.md` §9), not a
+matter of populating this field. A stage that wrote `priority := some n` here would look
+finished, prove nothing, and change no emitted character.
 -/
 def assembleGeneralMessageReaction
     (server : DTR.GeneralMessageServer)
@@ -990,9 +1002,10 @@ absent from `LF.GeneralReactor.declaredNames`, so k siblings add nothing the §9
 has to accommodate.
 
 **`priority := none` is preserved on purpose**, for the reason spelled out on
-`assembleGeneralMessageReaction` above: stage G owns wiring `DTR.GeneralMessageServer.priority`
-to a declaration order, and a sibling that quietly wrote `some n` here would make that stage
-look finished while proving nothing.
+`assembleGeneralMessageReaction` above: message-server priority is realized by reaction declaration
+order, which is stage F's level-2 obligation, and the field itself is never read by the printer. A
+sibling that quietly wrote `some n` here would make that obligation look discharged while changing
+nothing observable.
 -/
 def assembleGeneralMessageReactionAtSite
     (allSelfSends : List GeneralSelfSend)
@@ -1034,18 +1047,25 @@ the same server — the two sides have to agree per branch or the emitted reacti
 action the reactor never declares.
 
 **Order within the server is site order, and that is a correctness property rather than a
-cosmetic one.** F56 §14b measured that two reactions whose actions are both present at one tag
-fire in reaction *declaration* order, so the order this list is built in is the order the
+cosmetic one.** Probe **section 15** measured that two reactions whose actions are both present at
+one tag fire in reaction *declaration* order, so the order this list is built in is the order the
 target executes the two bodies in — and site order is the order the sends appear in the Rebeca
 body. `generalSelfSendSitesOf` preserves `selfSendsOfClass`'s order for exactly this reason.
+(This cited F56 §14b until **F58**: §14b schedules and declares in the same order, so it cannot
+separate declaration order from schedule order. Section 15 swaps only the declarations.)
 
-**Order *across* message servers is not body order, and that is a known divergence rather than
+**Order *across* message servers is not body order, and that is an unforced *choice* rather than
 a thing this function gets wrong.** Reaction assembly is message-server-major — this function
 is called once per server, from a caller that walks the server list — so `self.b(); self.a();`
 in one body emits `a`'s reaction first whenever `a`'s message server is declared first. F56's
 same-message case is entirely inside one server's group and is repaired here; the cross-server
 case is recorded as **F57** and deliberately left, because repairing it means site-major
 assembly, which would perturb the reaction-declaration-order theorem already landed for §10.2.
+
+It read *divergence* here until 2026-08-23, when the paper's SOS take rule was found to select on
+minimum arrival time **alone**: the source specifies no order for two messages arriving at the same
+time, so there is no source order to diverge from. F57 is demoted accordingly, and message-server
+priority — stage F's obligation — is what settles the order.
 
 This sentence and its counterpart on the action side both cited that record before it existed,
 which turned out to be F57's own occasion: the case had been decided and left, and a case that
@@ -1280,10 +1300,11 @@ filter makes that agreement structural instead of a coincidence between two cond
 also means the theorem below is an ordinary statement about `List.map` rather than an induction
 over a bespoke recursion.
 
-Route order is the order `routesOf` walked the main block in. Nothing sorts, and in particular
-nothing sorts by the sender's actor priority, which is what stage G would need — recorded here
-because a reader who knows §III-D will expect a sort and its absence should be a decision they
-can find rather than an omission they discover.
+Route order is the order `routesOf` walked the main block in, which since stage F is **sending-actor
+priority order, ties broken by main-block declaration order** — the level-1 sort §III-D asks for,
+introduced at `priorityOrderedInstances` in `Relico/Translation/GeneralRouting.lean` rather than here,
+so that this function stays a pure `map` and its order-preservation lemma stays free of priority. A
+reader who knows §III-D will expect a sort; it exists, one function upstream.
 -/
 def assembleGeneralPortReactions
     (className : ClassName)
@@ -3764,9 +3785,11 @@ assembler: the connection list is a property of a function with no failure case,
 of the partial layer can quietly add or drop a connection, and the guard — which is the only
 thing between the assembler and the caller — is transparent to shape.
 
-One connection per route, in `routesOf`'s order, which is main-block declaration order. That
-is a stronger statement than the empty list ever was, and it is what the target gate's *"three
-connections on one `Gateway`"* assertion checks from the outside.
+One connection per route, in `routesOf`'s order, which since stage F is sending-actor priority order
+with ties broken by main-block declaration order. That is a stronger statement than the empty list ever
+was, and it is what the target gate's *"three connections on one `Gateway`"* assertion checks from the
+outside. Connection order in the emitted text therefore moves when a priority annotation moves, which is
+intended: it is the observable trace of the level-1 sort.
 -/
 theorem compileGeneralModel_connections
     {model : DTR.GeneralModel}
@@ -6785,37 +6808,49 @@ theorem assembleGeneralPortReactions_append
   ]
 
 /--
-A receiver's port reactions for one message server appear in main-block instance-declaration order.
+A receiver's port reactions for one message server appear in the order the translation walks the main
+block, which since stage F is **actor-priority order, ties broken by main-block declaration order**.
 
 `docs/STAGE_E_DESIGN.md` §10.2 owes this statement explicitly, and this is it. Read the hypothesis
-`model.instances = earlier ++ later` as a cut anywhere in the main block: the first conjunct says the
-routing table splits at that cut, the second says the group of port reactions for any one message
-server splits at the same point. Together they say that every reaction owed to an instance declared
-earlier precedes every reaction owed to one declared later, for every cut, which is what "in
-declaration order" means without a list-order API. Nothing sorts anywhere along the path, and
-`routesOf`'s docstring records why that is a decision rather than an omission.
+`priorityOrderedInstances model = earlier ++ later` as a cut anywhere in the walked instance list: the
+first conjunct says the routing table splits at that cut, the second says the group of port reactions
+for any one message server splits at the same point. Together they say that every reaction owed to an
+instance walked earlier precedes every reaction owed to one walked later, for every cut, which is what
+"in this order" means without a list-order API.
 
-**This is not a priority result, and stage F owns that claim.** The distinction is worth stating
-precisely rather than modestly, because the two halves of it point in opposite directions. Reaction
-declaration order is genuinely observable in the target: within *one* reactor it totally orders the
-reactions enabled at the same tag, measured rather than assumed, and every port reaction this
-statement is about belongs to the single receiving reactor. `docs/PAPER_CORRECTIONS.md` P1 is the
-boundary that makes the qualifier load-bearing — *across* reactors the order comes from the
-dependency graph the connections induce and not from declaration order at all, so a statement of
-this shape would be unsound if it reached across reactors. This one does not.
+**The hypothesis was re-keyed when stage F landed, and the two conjuncts had different fates.** It
+previously read `model.instances = earlier ++ later`, which was the same list while nothing sorted.
+`routesOf` now routes `priorityOrderedInstances model`, so a split of the *declared* list no longer
+implies a split of the table — a sort does not distribute over an arbitrary append — while a split of
+the walked list does. Conjunct 2 never mentioned a model and was unaffected: it says only that port
+reaction assembly distributes over append, i.e. that it is order-preserving, and it is what makes this
+theorem composable with the sort at all. `docs/STAGE_F_DESIGN.md` §7.1 and §7.2 record the reasoning
+and the count of declarations that alternative choices would have cost.
 
-What is *not* a theorem is that instance-declaration order coincides with Rebeca's priority order.
-For a fixture whose instances happen to be declared in priority order the two coincide, and that
-coincidence is a property of the fixture rather than of the translation. The contrast with the
-restricted family is the thing to keep in view: `Relico/Translation/MultiStoreBasic.lean` compiles
-message servers in `priorityOrderedMessageServers` order, and
-`priorityServerNamePrecedesOrEqual_compileMessageReactions` in
-`Relico/Correctness/PriorityOrder.lean` proves the declaration order that results is exactly source
-priority order — for *message-server* priority inside one actor, in the family that sorts. This
-stage sorts nothing, emits source order, and drops `DTR.GeneralMessageServer.priority` outright,
-with `assembleGeneralMessageReaction_priority` recording the drop as a theorem. The silence here is
-therefore a deliberate difference from that family and not an omission, and any claim that the
-emitted order *realizes* priority in the general pipeline needs semantics this stage does not have.
+**This statement carries the structural half of the priority claim, not the claim itself.** The
+distinction is worth stating precisely rather than modestly, because the two halves of it point in
+opposite directions. Reaction declaration order is genuinely observable in the target: within *one*
+reactor it totally orders the reactions enabled at the same tag, measured rather than assumed, and
+every port reaction this statement is about belongs to the single receiving reactor.
+`docs/PAPER_CORRECTIONS.md` P1 is the boundary that makes the qualifier load-bearing — *across* reactors
+the order comes from the dependency graph the connections induce and not from declaration order at all,
+so a statement of this shape would be unsound if it reached across reactors. This one does not.
+
+What is *not* here is the step from "splits at every cut of the walked list" to "realizes the sending
+actors' priority order". That step needs the sort's own ordering property and lives in
+`Relico/Correctness/GeneralPriorityOrder.lean`, exactly as
+`priorityServerNamePrecedesOrEqual_compileMessageReactions` in `Relico/Correctness/PriorityOrder.lean`
+composes the restricted family's order-preservation lemma with `MessageServerPriority.normalize`. The
+contrast with that family is now one of scope rather than of kind: it sorts message servers inside one
+actor, this stage sorts sending actors across the main block.
+
+**One half of the paper's ask is still open at this commit.** Level 1 (§III-D, ordering a server's port
+reactions by the sending actor's priority) is what `priorityOrderedInstances` delivers.
+`DTR.GeneralMessageServer.priority` is still dropped, so the per-server *groups* are still emitted in
+source order; that is level 2, and it is owed at the walk inside `compileGeneralReactiveClass`.
+`assembleGeneralMessageReaction_priority` continues to record that `LF.GeneralReaction.priority` is left
+unset, which stays true at both levels because the printer never reads that field — list order is the
+only mechanism the target offers.
 
 Two further things this statement deliberately does not say. It says nothing about the order of the
 action reaction relative to the port reactions — that is `compileGeneralMessageServerReactions`'s
@@ -6831,7 +6866,8 @@ theorem assembleGeneralPortReactions_instanceDeclarationOrder
     (server : DTR.GeneralMessageServer)
     (compiledBody : LF.GeneralBody)
     (hInstances :
-      model.instances =
+      priorityOrderedInstances
+          model =
         earlier ++ later)
     (hEarlier :
       routesOfInstances

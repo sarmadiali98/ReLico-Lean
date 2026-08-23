@@ -707,7 +707,7 @@ The corrections ledger ran P1–P22 for the paper plus F1–F20 from stage B whe
 and it then lived under a gitignored `tmp/` path — which meant the project's most reusable artefact was the
 one thing a fresh clone did not get. **That is resolved since, 2026-08-23:** the paper series is tracked at
 `docs/PAPER_CORRECTIONS.md` and runs through **P23**, and the findings series continued past stage B into
-`docs/STAGE_E_FINDINGS.md`, which holds **F34–F57**. A fresh clone gets both. Stage D's findings are written here in the meantime, numbered **F21–F29**, and graduating the
+`docs/STAGE_E_FINDINGS.md`, which holds **F34–F58**. A fresh clone gets both. Stage D's findings are written here in the meantime, numbered **F21–F29**, and graduating the
 ledger into the repository is a task in its own right rather than something to keep postponing.
 
 **These findings were numbered D1–D9 when this document was first committed, and that was a collision.**

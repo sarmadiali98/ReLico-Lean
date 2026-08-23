@@ -1,4 +1,5 @@
 import Relico.DTR.GeneralSyntax
+import Relico.DTR.GeneralPriority
 import Relico.LF.GeneralSyntax
 import Relico.Translation.NameGeneration
 
@@ -488,10 +489,11 @@ as finding F56 in `docs/STAGE_E_FINDINGS.md` and in §6.3 of the design.
 Two consequences are worth stating where the code is rather than only in the design. The
 first is that this is not a tidiness argument: `self.tick(); self.tick();` in one body
 compiled, ran, exited 0 and executed `tick` once, so the defect this repairs was silent. The
-second is that `selfSendsOfClass` fixes the site ordinals, and section 14b measured that
+second is that `selfSendsOfClass` fixes the site ordinals, and probe **section 15** measured that
 reaction *declaration* order decides same-tag firing order for action-triggered reactions as
-it already did for port-triggered ones — so the order of this list is a correctness property
-of the generated program and not a presentation choice.
+section 1 already did for port-triggered ones — so the order of this list is a correctness property
+of the generated program and not a presentation choice. (Cited §14b before **F58**, which found
+that §14b cannot separate declaration order from schedule order.)
 -/
 
 /--
@@ -602,9 +604,9 @@ Constructor first, then message servers in declaration order — the same canoni
 `externalSendsOfClass` fixes, for the same reason it fixes it, and now with a second reason
 that the external case did not have. Ordinals drawn from this list decide action *names*, as
 they decide port names there; but they also decide the order the site reactions are declared
-in, and probe section 14b measured that declaration order is what orders two action-triggered
+in, and probe **section 15** measured that declaration order is what orders two action-triggered
 reactions firing at one tag. Reordering this list would therefore change the observable
-behaviour of the emitted program, not merely its identifiers.
+behaviour of the emitted program, not merely its identifiers. (Cited §14b before **F58**.)
 -/
 def selfSendsOfClass
     (reactiveClass : DTR.GeneralReactiveClass) :
@@ -709,9 +711,10 @@ here.
 
 The order is `selfSendsOfClass`'s: constructor first, then message servers in declaration
 order, ascending statement index within a body. That order is a **correctness property** and
-not a formatting one, because F56 section 14b measured that two reactions triggered at one tag
+not a formatting one, because probe **section 15** measured that two reactions triggered at one tag
 fire in reaction *declaration* order. The reactions this list drives are emitted in its order,
 so a body's two sends to one message are delivered in the order the body wrote them.
+(Cited F56 §14b before **F58**, which found §14b could not separate the two candidate causes.)
 
 Recursive rather than `List.filter` for the reason `NameGeneration.lean` gives for avoiding
 `String.capitalize`: this development depends on no library function whose name has churned
@@ -1476,12 +1479,101 @@ def routesOfInstances
                           remainingRoutes)
 
 /--
-The model's routing table, in main-block declaration order.
+The main block's instances, in the order the translation walks them: **actor-priority order, ties
+broken by main-block declaration order**.
 
-Instance order is the order of `model.instances`, which is main-block declaration order,
-and within one instance the order is canonical site order. Nothing sorts, here or anywhere
-below: connection order is observable in the emitted program, so a translation that sorted
-would be making a semantic choice in a projection.
+This is stage F's level-1 mechanism and the only place it enters routing. `docs/STAGE_F_DESIGN.md`
+§1.1 owes §III-D of the paper an ordering of one message server's port reactions by the *sending*
+actor's priority. Port reactions for a server are the routes into that server, filtered out of this
+table in table order, and filtering preserves order — so ordering the instance list here orders those
+reactions, and nothing downstream has to know that priority exists.
+
+Ties are resolved by source declaration order because `DTR.GeneralActorPriority.normalize` is a stable
+sort, which is the same convention decision `0041` fixed for equal LF microsteps. An unannotated
+instance is a priority class of its own, ordered after every explicit one; that convention is the
+AST's, at `Relico/DTR/GeneralSyntax.lean:335-337`, not this function's.
+-/
+def priorityOrderedInstances
+    (model : DTR.GeneralModel) :
+    List DTR.GeneralActorInstance :=
+  DTR.GeneralActorPriority.normalize
+    model.instances
+
+/--
+The walked order is a permutation of the declared order.
+
+Everything that depends on the route *set* rather than its order transfers through this one lemma
+instead of being re-proved — `docs/STAGE_F_DESIGN.md` §7.3 lists which: endpoint uniqueness, site
+totality, port-name distinctness and the guard-relative setPort `Nodup`.
+-/
+theorem priorityOrderedInstances_perm
+    (model : DTR.GeneralModel) :
+    List.Perm
+      (priorityOrderedInstances
+        model)
+      model.instances :=
+  DTR.GeneralActorPriority.normalize_perm
+    model.instances
+
+@[simp]
+theorem mem_priorityOrderedInstances_iff
+    (model : DTR.GeneralModel)
+    (actor : DTR.GeneralActorInstance) :
+    actor ∈
+        priorityOrderedInstances
+          model ↔
+      actor ∈ model.instances :=
+  DTR.GeneralActorPriority.mem_normalize_iff
+    actor
+    model.instances
+
+@[simp]
+theorem length_priorityOrderedInstances
+    (model : DTR.GeneralModel) :
+    (priorityOrderedInstances
+      model).length =
+      model.instances.length :=
+  DTR.GeneralActorPriority.length_normalize
+    model.instances
+
+/--
+Instance *names* are permuted, not changed.
+
+This is the form the name-keyed results consume: a `Nodup` over declared instance names transfers to
+the walked order without knowing anything about priorities.
+-/
+theorem priorityOrderedInstances_names_perm
+    (model : DTR.GeneralModel) :
+    List.Perm
+      ((priorityOrderedInstances
+        model).map
+          (fun actor =>
+            actor.name))
+      (model.instances.map
+        (fun actor =>
+          actor.name)) :=
+  DTR.GeneralActorPriority.names_perm
+    model.instances
+
+/--
+The model's routing table, in actor-priority order.
+
+Instance order is the order of `priorityOrderedInstances model` — actor priority, ties broken by
+main-block declaration order — and within one instance the order is canonical site order.
+
+**This sorts, and that is stage F's whole point.** Earlier revisions of this docstring said *"Nothing
+sorts, here or anywhere below: connection order is observable in the emitted program, so a translation
+that sorted would be making a semantic choice in a projection."* The premise was right and the
+conclusion was backwards: the emitted order *is* a semantic choice, which is exactly why it cannot be
+left to declaration order once the source language annotates priorities. `docs/STAGE_F_DESIGN.md` §2.1
+measured that reaction declaration order is the only mechanism the target offers, since
+`LF.GeneralReaction.priority` is never read by the printer.
+
+Two consequences worth stating here, because both are easy to misread as oversights. Connection
+declaration order in the emitted program changes with priority, and that is intended — it is the
+observable trace of the sort. The emitted *instance* declarations do not, because
+`Relico/Translation/GeneralBasic.lean:2467` builds them from `model.instances` directly and instance
+declaration order has no semantic role in the target.
 
 `Store.lookup actor.bindings` is the resolution used, and `DTR.GeneralModel`'s own
 `resolve_topology_of_actor` proves it agrees with resolution through the derived topology —
@@ -1492,7 +1584,8 @@ def routesOf
     Except String (List GeneralRoute) :=
   routesOfInstances
     model
-    model.instances
+    (priorityOrderedInstances
+      model)
 
 /-!
 ## The three projections
@@ -3806,7 +3899,9 @@ The table of a split instance list is the concatenation of the two tables, in or
 
 This is the order claim at the level of the routing table: no interleaving, no sorting, and the cut
 point is arbitrary, so it holds between *any* earlier instance and *any* later one rather than only
-at the head of the list.
+at the head of the list. "No sorting" is a statement about this recursion, which walks whatever list
+it is handed; stage F's sort lives one level up, in `routesOf`, which hands it
+`priorityOrderedInstances model` rather than `model.instances`.
 -/
 theorem routesOfInstances_append
     (model : DTR.GeneralModel)
@@ -3838,20 +3933,26 @@ theorem routesOfInstances_append
     hEarlier
 
 /--
-The same statement about the model's own table, split at a cut in the main block.
+The same statement about the model's own table, split at a cut in the walked instance order.
 
-`routesOf` is `routesOfInstances` at `model.instances`, and `model.instances` *is* main-block
-declaration order — `DTR.GeneralElaborator` preserves it and nothing between here and there sorts.
-So a hypothesis that the declared instances split as `earlier ++ later` is exactly a hypothesis
-about where the cut falls in the main block, which is what §10.2's item asks the statement to be
-about.
+`routesOf` is `routesOfInstances` at `priorityOrderedInstances model`, so the cut this theorem takes a
+hypothesis about is a cut in **actor-priority order**, not in main-block declaration order. Before
+stage F the two lists were the same and the hypothesis was keyed to `model.instances`; re-keying it was
+one of the three edits `docs/STAGE_F_DESIGN.md` §7.2 budgets, and it makes the statement stronger
+rather than weaker, because a split of the walked list is a split of the list the translator really
+consumes. The two coincide exactly when the sort is the identity, which is the case for every fixture
+in the corpus that predates stage F.
+
+`docs/STAGE_E_DESIGN.md` §10.2's item asked for a statement about where a cut falls; that is still what
+this is, with the order it cuts now named explicitly.
 -/
 theorem routesOf_split
     (model : DTR.GeneralModel)
     (earlier later : List DTR.GeneralActorInstance)
     (earlierRoutes laterRoutes : List GeneralRoute)
     (hInstances :
-      model.instances =
+      priorityOrderedInstances
+          model =
         earlier ++ later)
     (hEarlier :
       routesOfInstances
@@ -3871,7 +3972,8 @@ theorem routesOf_split
   show
     routesOfInstances
         model
-        model.instances =
+        (priorityOrderedInstances
+          model) =
       .ok
         (earlierRoutes ++
           laterRoutes)

@@ -951,6 +951,276 @@ main reactor {
 }
 LF
 
+# ---------------------------------------------------------------------------
+# SECTION 15 (2026-08-23) -- WHICH ORDER decides at one tag, DECLARATION or
+# SCHEDULE, in the two trigger shapes a generated receiver actually produces.
+# Six probes, three pairs, one filter: PROBE_FILTER=stageF
+#
+# Every pair differs ONLY in the order two reactions are DECLARED.  Everything
+# else -- schedules, set() calls, connections, payloads, bodies -- is byte
+# identical between the members of a pair.  A pair must be read together; a
+# single member proves nothing.
+#
+# Why these are needed even though order_decl_AB/BA already measured that
+# declaration order is observable: generated receivers produce two trigger
+# shapes that order_decl_* does not, and the action pair below isolates a
+# variable that `action_two_actions_two_reactions` (above) leaves confounded.
+#
+# MEASURED 2026-08-23 against lfc 0.11.0, all six compiled and ran clean:
+#
+#   stageF_action_declsame_AB     RELICO_DECL A 1 ; RELICO_DECL B 2
+#   stageF_action_declswap_BA     RELICO_DECL B 2 ; RELICO_DECL A 1
+#   stageF_onesender_twoports_AB  RELICO_PORT A 1 ; RELICO_PORT B 2
+#   stageF_onesender_twoports_BA  RELICO_PORT B 2 ; RELICO_PORT A 1
+#   stageF_action_port_mixed_AB   RELICO_MIX ACT 1 ; RELICO_MIX PORT 2
+#   stageF_action_port_mixed_BA   RELICO_MIX PORT 2 ; RELICO_MIX ACT 1
+#
+# DECLARATION ORDER DECIDES, in all three shapes.  Every pair swapped, so no
+# member's result is explicable by anything the pair holds fixed.  Cite THIS
+# section, not 14b, for the action-triggered ordering claim -- see F58.
+#
+# Pair 3 also proves a fact no pair was designed to test: `act.schedule(1, 0ms)`
+# and a connection's `after 0 msec` deliver at the SAME microstep.  Had they
+# differed, complete-tag order would have fixed the outcome and swapping the
+# declarations could not have moved it.  It moved.
+# ---------------------------------------------------------------------------
+
+# --- PAIR 1.  THE LOAD-BEARING ONE: declaration order vs SCHEDULE order.
+# `action_two_actions_two_reactions` schedules slotA first AND declares it
+# first, so its observed "A then B" is consistent with either cause.  Stage F
+# is the first place the two diverge: a priority sort reorders reaction
+# DECLARATIONS while the schedule() calls stay in the sender body's order.
+# Here the schedules are A-then-B in BOTH members and only the declarations
+# move.  BA printing "B A" means declaration order decides and Lemma 2's
+# same-actor case is implementable for self-sends.  BA printing "A B" means
+# schedule order decides and stage F's design must change.
+# The payload identifies the action independently of the label: slotA always
+# carries 1, slotB always carries 2.
+
+probe stageF_action_declsame_AB 'CONTROL -- schedules A,B and declarations A,B: expect RELICO_DECL A 1 then RELICO_DECL B 2' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Queue {
+    logical action slotA: int
+    logical action slotB: int
+    reaction(startup) -> slotA, slotB {=
+        slotA.schedule(1, 0ms);
+        slotB.schedule(2, 0ms);
+    =}
+    reaction(slotA) {=
+        std::printf("RELICO_DECL A %d\n", *slotA.get());
+        std::fflush(stdout);
+    =}
+    reaction(slotB) {=
+        std::printf("RELICO_DECL B %d\n", *slotB.get());
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    q = new Queue()
+}
+LF
+
+probe stageF_action_declswap_BA 'schedules STILL A,B but declarations B,A: "B 2" then "A 1" means DECLARATION order wins; "A 1" then "B 2" means SCHEDULE order wins' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Queue {
+    logical action slotA: int
+    logical action slotB: int
+    reaction(startup) -> slotA, slotB {=
+        slotA.schedule(1, 0ms);
+        slotB.schedule(2, 0ms);
+    =}
+    reaction(slotB) {=
+        std::printf("RELICO_DECL B %d\n", *slotB.get());
+        std::fflush(stdout);
+    =}
+    reaction(slotA) {=
+        std::printf("RELICO_DECL A %d\n", *slotA.get());
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    q = new Queue()
+}
+LF
+
+# --- PAIR 2.  ONE sender, TWO output ports, one tag.
+# order_decl_AB/BA use TWO senders, so their two edges enter the receiver from
+# two different upstream reactions.  The routed model the tool actually emits
+# has ONE sender writing two ports in ONE reaction body (Probe sets
+# reportToHub1 and reportToHub2 in a single reaction), which is a different
+# precedence-graph shape.  Both connections carry `after 0 msec`, so both
+# inputs are present at the same tag.  Payloads identify the port: inA=1, inB=2.
+
+probe stageF_onesender_twoports_AB 'one sender, two ports, declarations A,B: expect RELICO_PORT A 1 then RELICO_PORT B 2' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Src {
+    output outA: int
+    output outB: int
+    reaction(startup) -> outA, outB {=
+        outA.set(1);
+        outB.set(2);
+    =}
+}
+
+reactor Sink {
+    input inA: int
+    input inB: int
+    reaction(inA) {=
+        std::printf("RELICO_PORT A %d\n", *inA.get());
+        std::fflush(stdout);
+    =}
+    reaction(inB) {=
+        std::printf("RELICO_PORT B %d\n", *inB.get());
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    s = new Src()
+    k = new Sink()
+    s.outA -> k.inA after 0 msec
+    s.outB -> k.inB after 0 msec
+}
+LF
+
+probe stageF_onesender_twoports_BA 'identical model, ONLY the two Sink reactions swapped: expect RELICO_PORT B 2 then RELICO_PORT A 1' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Src {
+    output outA: int
+    output outB: int
+    reaction(startup) -> outA, outB {=
+        outA.set(1);
+        outB.set(2);
+    =}
+}
+
+reactor Sink {
+    input inA: int
+    input inB: int
+    reaction(inB) {=
+        std::printf("RELICO_PORT B %d\n", *inB.get());
+        std::fflush(stdout);
+    =}
+    reaction(inA) {=
+        std::printf("RELICO_PORT A %d\n", *inA.get());
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    s = new Src()
+    k = new Sink()
+    s.outA -> k.inA after 0 msec
+    s.outB -> k.inB after 0 msec
+}
+LF
+
+# --- PAIR 3.  An ACTION-triggered and a PORT-triggered reaction at one tag.
+# A generated receiver's reaction list interleaves both kinds: Gateway emits
+# reaction(report_action), then one reaction per incoming send site, then the
+# next message server's block.  A priority sort reorders whole blocks, so it
+# reorders across the action/port boundary -- and no probe has ever put an
+# action and a port at the same tag in one reactor.
+# act.schedule(1, 0ms) from a reaction at (0,0) lands at (0,1); the connection's
+# `after 0 msec` also lands at (0,1).  The startup reaction stays FIRST in both
+# members so that only the two reactions under test move.
+
+probe stageF_action_port_mixed_AB 'action and port at ONE tag, declarations ACT,PORT: expect RELICO_MIX ACT 1 then RELICO_MIX PORT 2' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Src {
+    output out: int
+    reaction(startup) -> out {=
+        out.set(2);
+    =}
+}
+
+reactor Mix {
+    input inp: int
+    logical action act: int
+    reaction(startup) -> act {=
+        act.schedule(1, 0ms);
+    =}
+    reaction(act) {=
+        std::printf("RELICO_MIX ACT %d\n", *act.get());
+        std::fflush(stdout);
+    =}
+    reaction(inp) {=
+        std::printf("RELICO_MIX PORT %d\n", *inp.get());
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    s = new Src()
+    m = new Mix()
+    s.out -> m.inp after 0 msec
+}
+LF
+
+probe stageF_action_port_mixed_BA 'identical model, ONLY act and inp reactions swapped: expect RELICO_MIX PORT 2 then RELICO_MIX ACT 1' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Src {
+    output out: int
+    reaction(startup) -> out {=
+        out.set(2);
+    =}
+}
+
+reactor Mix {
+    input inp: int
+    logical action act: int
+    reaction(startup) -> act {=
+        act.schedule(1, 0ms);
+    =}
+    reaction(inp) {=
+        std::printf("RELICO_MIX PORT %d\n", *inp.get());
+        std::fflush(stdout);
+    =}
+    reaction(act) {=
+        std::printf("RELICO_MIX ACT %d\n", *act.get());
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    s = new Src()
+    m = new Mix()
+    s.out -> m.inp after 0 msec
+}
+LF
+
 printf '\n\n========== HOW TO READ THIS ==========\n'
 cat <<'NOTE'
   The single most important line in this log is whether
@@ -1066,8 +1336,16 @@ cat <<'NOTE'
 
   The k-reactions shape works, and it also settles something that had never been
   measured: section 1 established that two reactions in one reactor both fire at
-  one tag in DECLARATION order, but only for reactions triggered by ports. Section
-  14b shows the same holds when the triggers are logical ACTIONS. That is a load
+  one tag in DECLARATION order, but only for reactions triggered by ports.
+
+  CORRECTED 2026-08-23 (finding F58). This paragraph used to read "Section 14b
+  shows the same holds when the triggers are logical ACTIONS." The claim is TRUE,
+  but 14b does not show it and never could: 14b schedules slotA first AND declares
+  reaction(slotA) first, so its observed "A then B" is exactly what SCHEDULE order
+  would also produce. The two candidate causes are not separable from that probe.
+  SECTION 15 separates them -- same schedules in both members, only the two
+  declarations swapped, and the output swaps -- so the action-triggered ordering
+  claim is now earned. Cite section 15 for it. That is a load
   on the printer, not a free gift -- if declaration order is what orders the
   firings, the generated reactor must emit one reaction per send site in the order
   the sends appear in the body, and that emission order becomes semantically

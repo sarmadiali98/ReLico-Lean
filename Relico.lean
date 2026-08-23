@@ -622,6 +622,7 @@ import Relico.Tests.ActorPriorityErasureImpossibility
 
 import Relico.DTR.GeneralSyntax
 import Relico.DTR.GeneralWellFormed
+import Relico.DTR.GeneralPriority
 import Relico.DTR.GeneralState
 import Relico.Frontend.GeneralSchema
 import Relico.Frontend.GeneralDiagnostic
@@ -635,3 +636,7 @@ import Relico.LF.GeneralCppPrinter
 
 import Relico.Translation.GeneralRouting
 import Relico.Translation.GeneralBasic
+
+import Relico.Correctness.GeneralPriorityOrder
+
+import Relico.Tests.GeneralPriority
