@@ -69,6 +69,12 @@ hand-built model is unannotated.**
 
 ### The two defects
 
+**Every `docs/STAGE_F_DESIGN.md` line number below refers to commit `f5d108a`**, the commit in which the
+defective text was live. The commit that records this finding corrected that text in the same landing, so
+these numbers do not resolve in the working file and were never meant to. Each quotation was checked
+character-for-character against `git show f5d108a:docs/STAGE_F_DESIGN.md` — necessary because two of them
+wrap across a line break and so cannot be located by grepping the quoted phrase.
+
 **Defect one — attribution to an instrument that cannot reach the code.** `docs/STAGE_F_DESIGN.md`
 §8.3 at `:683-684` reads:
 
@@ -109,8 +115,9 @@ which read every positive `.rebeca` by inspection and found `fan-in` declaring `
 unannotated, `priorities` declaring `1, 2, none` and `3, none`, and `two-classes` annotating one
 server of two, all already sorted under the absence-last convention. Inspection is the instrument
 that supports the claim; the gate run is not. Crediting it to the run is precisely the **F58**
-defect, and §8.3 at `:695` states the F58 lesson — *"the instrument must be able to separate the
-causes it is credited with separating"* — eight lines above committing it.
+defect, and the section that commits it is the section that states the lesson: §8.3 at `:695-696`
+reads *"the instrument must be able to separate the causes it is credited with separating"*, eleven
+lines below the defective sentence quoted above.
 
 ### What the green run does establish, which is worth keeping rather than deleting
 

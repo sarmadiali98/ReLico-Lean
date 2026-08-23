@@ -724,9 +724,10 @@ that no one of them suffices: §2.1's measurement that declaration order decides
 §8.2's assertion that the emitted declarations are in priority order, and §5's premise connecting DTR's
 selection to LF's. The measurement is of hand-written LF, which is the correct instrument for a
 target-language property, and the F58 lesson is that the instrument must be able to separate the causes
-it is credited with separating. **F59 is that same lesson landing on this section eight lines later**:
-the instrument named here could not have separated a priority-ordering sort from the identity, because
-it contains no priority annotation anywhere.
+it is credited with separating. **F59 is that same lesson landing on this very section**: the instrument
+named here could not have separated a priority-ordering sort from the identity, because it contains no
+priority annotation anywhere. So the second of the three is **owed, not delivered** — it is task #86,
+and until that lands the ordering claim rests on two legs rather than three.
 
 ## 9. Level 2 in detail: the blueprint ports, but not the way it is written
 
