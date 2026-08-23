@@ -624,6 +624,7 @@ import Relico.DTR.GeneralSyntax
 import Relico.DTR.GeneralWellFormed
 import Relico.DTR.GeneralPriority
 import Relico.DTR.GeneralState
+import Relico.DTR.GeneralActorSelection
 import Relico.Frontend.GeneralSchema
 import Relico.Frontend.GeneralDiagnostic
 import Relico.Frontend.GeneralElaborator
@@ -640,3 +641,4 @@ import Relico.Translation.GeneralBasic
 import Relico.Correctness.GeneralPriorityOrder
 
 import Relico.Tests.GeneralPriority
+import Relico.Tests.GeneralActorSelection
