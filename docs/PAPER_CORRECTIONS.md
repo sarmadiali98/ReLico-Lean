@@ -814,3 +814,96 @@ and drops the field, and `Relico/Translation/GeneralBasic.lean:1161` records tha
 wiring cannot land unnoticed. Stage F is where the sort and its ordering theorem land — against the repo's
 convention rather than the paper's signature, per the 2026-08-16 rule that the repo is definitive where the
 two conflict.
+
+## P24 — Theorem 1's transfer conditions both fail for a zero-delay send, because LF's microstep advance is an observable `t` transition that DTR cannot match
+
+**Claim in the paper:** Theorem 1 states that `TS_dtr` is weakly bisimilar to `TS_lf` with respect to the
+bijection `ϕ`, where `ϕ` maps `ms ↦ rct`, `t ↦ t` and `τ ↦ τ`. Definition 1 requires that each
+`α`-transition on one side be matched by a weak transition `⇒` on the other, with
+`⇒ = τ* γ τ*` when `γ ≠ τ`. The proof discharges the surplus LF behaviour in one sentence: *"Since
+scheduler steps are internal to LF and have no corresponding observable transition in DTR, they are
+subsumed by the weak transition relation `⇒`. Consequently, only the resulting observable transition must
+be matched in the bisimulation proof."*
+
+**Why it is wrong.** Take the commonest idiom in the language: a send with no `after`, i.e. delay `0`. The
+paper's own §III note confirms this is the default case and how it is compiled — *"An external send in DTR
+with no explicit `after` is treated as delay 0. Our tool translates it to an LF connection with
+`after 0ms`, scheduling at the next microstep within the same logical tag."*
+
+*On the DTR side*, Table I's SEND rule inserts `(x, y, ms, v⃗, e_y(now) + d)` into the receiver's bag. With
+`d = 0` the arrival is `e_y(now)`, i.e. the current logical time `t`. The message is therefore due
+immediately, TAKE fires, and the observable action is `ms`. Table I's TIME PROGRESS **cannot** fire, because
+its premise is `s ̸−ms→` and a take is available. DTR's sequence is exactly `ms`.
+
+*On the LF side*, `upd((t, m), d)` is defined as `(t + d, 0)` when `d > 0` and **`(t, m + 1)` when `d = 0`**.
+So the corresponding trigger is stamped `(t, m + 1)`, which is not the current tag. Table II's TAKE requires
+the trigger to be due, and its continuation premise `ε` is already satisfied because the sending body has
+finished — so no τ rule applies either. The only enabled rule is Table II's TIME PROGRESS, which sets
+`TT := ar_min = (t, m + 1)` and which the paper labels **`t`**. Only then can TAKE fire. LF's sequence is
+`t · rct`.
+
+*Both transfer conditions fail on that pair.* Forward: DTR's `ms` must be matched by
+`τ* ϕ(ms) τ* = τ* rct τ*`, and LF's `t` step is not in `τ*`. Backward: LF's `t` step must be matched by
+`τ* ϕ⁻¹(t) τ* = τ* t τ*`, and DTR cannot produce a `t` step at all here, for the reason just given — TAKE
+preempts TIME PROGRESS. The counterexample is not exotic; it is every zero-delay send, which is the default
+form of every send in the fragment.
+
+A second oddity falls out of the same rule and is worth recording beside it. `Act_lf` defines the time
+action as *"a numerical value `t ∈ ℕ`"*, and a microstep-only advance leaves the logical-time component
+unchanged. So the surplus transition is an **observable action reporting the logical time the system is
+already at** — observationally empty, yet not `τ`.
+
+**Why Lemma 1 does not rescue it.** Lemma 1 is correct, and it is about a different quantity. Its induction
+maintains that the DTR logical time `t` equals the logical-time component `t′` of the current LF tag
+`(t′, m)`, and microstep advance preserves exactly that. Its time-progress case says LF *"advances execution
+to this tag"* — which is precisely the `t`-labelled Table II rule at issue. Lemma 1 establishes that the
+tags line up; it says nothing about the label the step carries, and the label is the whole defect.
+
+**Why the proof's own sentence is the tell, and why it does not close the gap.** The sentence quoted above
+is reaching for this absorption, but it misnames the steps. **Table II contains no scheduler rule.** Its
+rules are ASSIGN, INTERNAL SEND, EXTERNAL SEND, TAKE, CONDITIONAL-T, CONDITIONAL-F and TIME PROGRESS, and
+nothing else. Nor is there a surplus of τ steps needing absorption: every τ-labelled LF rule has a DTR τ
+counterpart — ASSIGN with ASSIGN, both send forms with SEND, and the conditionals with the conditionals — so
+the τ steps stand in bijection and `τ*` has nothing to do. The one LF step with no DTR counterpart is the
+microstep-only TIME PROGRESS, and it is the one step the paper labels observably.
+
+**A dependency this entry declares rather than hides.** The DTR half of the argument needs a message whose
+arrival equals `now` to be takeable, and takeability is `enabled_m`, the predicate **P16** records the paper
+as never defining. That reading is forced rather than chosen: TIME PROGRESS sets `now := ar_min` where
+`ar_min` is the minimum arrival in any bag, so if arrival `= now` did not enable a take, TIME PROGRESS would
+be enabled with `ar_min = now` and would fire as a `now := now` self-loop, indefinitely. Any definition of
+`enabled_m` that avoids that divergence makes arrival `= now` takeable. The same argument fixes `enabled_tr`
+on the LF side.
+
+**Evidence:** grade (c) throughout, from the PDF. Table I's SEND, TAKE and TIME PROGRESS rules with their
+arrow labels and premises; Table II's seven rules with their arrow labels and premises; the definition of
+`upd(TT, d)`; the definitions of `Act_dtr` and `Act_lf`; Definition 1's `⇒ = τ* γ τ*`; the statement of `ϕ`;
+Lemma 1 and its proof by cases; Theorem 1's proof and its scheduler-step sentence; and the §III translation
+note on `after 0ms`. No `lfc` or corpus measurement is involved — the counterexample is derived from the
+paper's own two tables, and the idiom it uses is the one the paper's own tool note describes.
+
+**Suggested edit:** split Table II's TIME PROGRESS by whether logical time advances. Label it `τ` when
+`ar_min` has the same logical-time component as the current tag and only the microstep differs, and `t` when
+the logical-time component increases. This is the minimal repair and it has four things to recommend it: it
+makes the proof's own scheduler-step sentence true, since the absorbed steps really are internal; it leaves
+`ϕ`'s `t ↦ t` a bijection on the observable time actions; it leaves Lemma 1 untouched, because Lemma 1 never
+mentions labels; and it is semantically right, because superdense microsteps exist only to order events at
+one logical time, which is exactly the target-side structure a *weak* bisimulation is supposed to hide. The
+alternative repairs are worse: relabelling all of TIME PROGRESS `τ` would erase the genuine time
+correspondence that Lemma 1 exists to establish, and dropping `t ↦ t` from `ϕ` would abandon timing
+preservation altogether.
+
+**What the tool does:** stage G adopts the split as a documented divergence rather than transcribing the
+paper's single rule, because transcribing it would mean formalizing a theorem that is false of the tool's
+own output — every zero-delay send in the general fragment reaches it. The split lands in the LF step
+relation, and the zero-delay case is pinned as a value-level regression test so that a later collapse back
+to one time rule fails a test instead of silently reintroducing the defect. Recorded as a stage G finding in
+[`docs/STAGE_G_FINDINGS.md`](STAGE_G_FINDINGS.md) F66 part 4, which also corrects this project's own earlier
+misreading — the stage G design had attributed the absorbed steps to "LF scheduler steps", inheriting the
+paper's misnomer instead of checking Table II.
+
+**What this entry is not.** It is not P16, which is about `enabled_m` and `enabled_tr` being undefined; P24
+depends on P16 and says so above. It is not P17, which is about TIME PROGRESS writing its message tuple with
+sender and receiver transposed — a defect in the rule's *conclusion*, whereas this is a defect in its
+*label*. Both neighbours were checked before this number was opened, along with
+`docs/STAGE_F_DESIGN.md`'s record that P24 and P25 were considered and deliberately not issued.

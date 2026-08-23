@@ -850,9 +850,9 @@ the printer's expected strings can be written once. Case 4 closes the question �
 open. Case 5 is the one worth more than its cost: it builds a genuine causality loop —
 `reaction(in)` writing `out`, connected back to `in` — that only the `after` delay makes
 schedulable, and it printed `RELICO_SELF_CYCLIC 1`, `2`, `3` at increasing microsteps.
-That confirms §III-E's sentence about `after` breaking cycles at grade (a). The ledger is
-otherwise twenty-two corrections; a measured confirmation belongs on the record next to
-them.
+That confirms §III-E's sentence about `after` breaking cycles at grade (a). The ledger held
+twenty-two corrections when this section was written; a measured confirmation belongs on the
+record next to them.
 
 ### 8.2 Then the Lean, written blind
 

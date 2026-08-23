@@ -151,8 +151,17 @@ Stage G does not extend it, and neither reason is that it is wrong. First, every
 snapshot that §3's defect is about, and `ActorDispatchFrame`'s docstring concedes the point in advance:
 *"The ready-actor snapshot is local to this transition. It is deliberately not fixed globally across an
 arbitrary execution."* Second, the theorem this project is measured against is the paper's `Theorem 1`,
-which is weak bisimilarity. Where the general family's τ sets turn out empty, stage G's result and this
-one coincide.
+which is weak bisimilarity.
+
+**What this section must not be read as licensing, corrected 2026-08-24 (F66 part 5).** It said, until that
+date, that *"where the general family's τ sets turn out empty, stage G's result and this one coincide"*.
+They do not coincide, because the τ sets are not empty: §7 settles G2a at **statement** granularity, where
+τ is assignments and sends on both sides. The two results are over LTSs of different granularity and
+neither subsumes the other — this one is lock-step over dispatches, stage G's is weak bisimilarity over
+statements. **The part of this precedent stage G copies is the module split and the `_forward` /
+`_backward` shape, not its granularity.** That distinction was implicit here and §7 read it as inherited
+permission to work one-step-per-dispatch, which would have made the paper's `πx ≡ µr` vacuous. A precedent
+cited for its *structure* has to say which of its properties travel.
 
 The one deviation is §3's: no cohort parameter. Concretely, where the multi-store relation reads
 `ActorPriorityDispatchStep request ready sourceModel actorName before after …`, the general source
@@ -263,9 +272,12 @@ reaction therefore *runs the server's own body* rather than forwarding to the se
 Every reaction the general translator emits has a source counterpart — message reactions to self-send
 sites, port reactions to routed send sites, the startup reaction to the constructor — so **no emitted
 reaction is internal**. Weak bisimulation is consequently adopted on the paper's authority, `Theorem 1`
-being the theorem this project claims to implement, and *not* because our output refutes lock-step. If the
+being the theorem this project claims to implement, and *not* because our output refutes lock-step. ~~If the
 granularity G2a picks leaves both τ sets empty, weak bisimilarity specialises to lock-step: a
-*strengthening* of the stated result rather than a contradiction of it.
+*strengthening* of the stated result rather than a contradiction of it.~~ **That escape hatch is closed as of
+2026-08-24**: granularity is settled at statement level below, both τ sets are non-empty, and weak
+bisimilarity does not specialise to lock-step here. The adoption still rests on the paper's authority, which
+is what it should have rested on alone.
 
 **What the paper proves.** `Definition 1` is weak bisimilarity w.r.t. a bijection `ϕ` on actions, with
 the two standard transfer conditions and `⇒` expanded as `τ* γ τ*` for `γ ≠ τ`. `Theorem 1` states
@@ -283,31 +295,114 @@ pending DTR messages and LF triggers, corresponding pairs sharing an arrival tim
 `GeneralStateCorrespondence` with exactly these three components, per actor, keyed through the existing
 translation's reactor naming rather than an abstract `map_A`.
 
-**What is τ, and why this is the crux.** The paper makes assignments τ on both sides — a DTR assignment
-updates the local environment as `si →τ si[x ↦ …]` and the LF `ASSIGN` rule matches it — and it abstracts
-scheduler stuttering steps in the same breath (`:1258`). Stage G's τ set is therefore: assignments on both
-sides, and on the LF side the scheduler's own steps, which are the **only** τ candidates on that side now
-that no emitted reaction is internal. Observable actions are message takes on the DTR side and the
-corresponding message-or-port reaction firings on the LF side, related by `ϕ`. Getting this classification
-right *is* G2's design content; everything else is bookkeeping over it. Note what it now rests on: the τ
-sets are non-empty only if the LTSs are finer-grained than one-step-per-dispatch, so **G2a's granularity
-choice decides whether any τ exists at all**, and that choice must be made explicitly rather than
-inherited.
+**What is τ — corrected 2026-08-24 by reading the two SOS tables, and recorded as F66 part 4.** This
+paragraph previously said τ was *"assignments on both sides, and on the LF side the scheduler's own
+steps"*. **Table II has no scheduler rule.** Its rules are `ASSIGN`, `INTERNAL SEND`, `EXTERNAL SEND`,
+`TAKE`, `CONDITIONAL-T`, `CONDITIONAL-F` and `TIME PROGRESS`; Table I's are `ASSIGN`, `SEND`, the two
+conditionals, `TAKE` and `TIME PROGRESS`. Read off the tables, the τ set is:
 
-**Deliverables.**
+| | τ | observable |
+|---|---|---|
+| DTR | `ASSIGN`, `SEND`, `CONDITIONAL-T/F` | `TAKE` → `ms`, `TIME PROGRESS` → `t` |
+| LF | `ASSIGN`, `INTERNAL SEND`, `EXTERNAL SEND`, `CONDITIONAL-T/F` | `TAKE` → `rct`, `TIME PROGRESS` → `t` |
+
+`ϕ` maps `ms ↦ rct`, `t ↦ t`, `τ ↦ τ`. So the τ steps stand in **bijection** across the two tables:
+`ASSIGN` matches `ASSIGN`, DTR's single `SEND` matches whichever of LF's two send forms the translation
+chose for that site, and the conditionals match pairwise. Nothing on either side is unmatched, and `τ*`
+in Definition 1 has no surplus behaviour to absorb.
+
+The earlier wording was taken from Theorem 1's *proof*, which discharges surplus LF behaviour with
+*"Since scheduler steps are internal to LF and have no corresponding observable transition in DTR, they
+are subsumed by the weak transition relation ⇒."* That sentence is reaching for a real gap and naming it
+wrongly. The step with no DTR counterpart is **microstep-only `TIME PROGRESS`**, which Table II labels
+`t`, observably — and for a zero-delay send, which is the default and which the paper's own tool note
+describes as translated to `after 0ms`, that surplus `t` breaks *both* of Definition 1's transfer
+conditions. That is a defect in the paper, filed as **P24**, and it is not repaired by Lemma 1, which
+tracks logical-time *equality* and is correct.
+
+**Stage G adopts P24's repair**: `TIME PROGRESS` is split so that an advance of the microstep alone is
+**τ** and an advance of logical time is **`t`**. This makes the proof's own sentence true, keeps `ϕ`'s
+`t ↦ t` a bijection on observable time actions, and is semantically right — microsteps exist only to
+order events within one logical time, so reporting one as an observable action reports a time the system
+has already reached. It is the stage's fourth documented divergence, listed below, and G2a-iii pins the
+zero-delay case as a regression so the split cannot silently regress to the paper's form.
+
+**Granularity: statement-level, with continuations. Settled 2026-08-24, and the settlement is forced.**
+This was the one question §4 left inherited rather than decided, and the inherited answer was wrong. §4
+mirrors the `GlobalMultiStorePayload*` development, which is strict lock-step — one target event per
+source event, no internal steps, no τ — i.e. **dispatch** granularity. But this section commits `R` to the
+paper's three components including `πx ≡ µr`, and the paper defines `πx` as *"remaining statements of"* the
+executing message server and `µr` as *"remaining statements of the currently"* executing reaction, with
+**both** `TAKE` rules premised on the continuation being `ε`. The two commitments are incompatible: at
+dispatch granularity the third component is permanently empty on both sides, `πx ≡ µr` is trivially true,
+and the stage would ship a relation reproducing the paper's `R` in shape while one of its three conjuncts
+did no work. So statement granularity is **required**.
+
+It is also **available and symmetric**, which is the part that had to be measured rather than assumed:
+`LF.GeneralStmt` has three constructors (`assign`, `schedule`, `setPort`), `DTR.GeneralStmt` has two
+(`assign`, `send`), `GeneralBody` is a statement list on both sides, and both families carry `GeneralType`
+and `GeneralValue` with identical `int : Int | bool : Bool` constructors — so a step relation can walk
+either body and the value correspondence is a rename. Had LF reaction bodies been opaque, fine granularity
+would have been impossible and §4's inherited choice would have been forced rather than mistaken. Note
+what coarsening would *not* have saved: the evaluators are needed either way, because a big-step dispatch
+rule still has to say what a body did to the valuation, or `ex ≡ ηr` compares two things that never
+change.
+
+**A fragment restriction this granularity exposes, and G6 must declare.** Tables I and II both carry
+`CONDITIONAL-T` and `CONDITIONAL-F`. Neither `GeneralStmt` has a conditional, and `GeneralBody` is a flat
+list whose docstring already states that the stage admitting branching must change the type. So G2a's step
+relations have no conditional rules and what stage G proves is the **conditional-free sub-fragment**. That
+is a restriction on the input, not a divergence from the semantics, and it belongs in **G6**'s declaration
+where a reader will find it — a theorem quantified over a body type that cannot branch says nothing about
+one that can.
+
+**A precondition the evaluators must cite rather than inherit.** The paper's `TAKE` sets the valuation to
+`ex ∪ v⃗`, merging message parameters into the actor's variable valuation, so one
+`Store VarName GeneralValue` serves both state variables and parameters and `DTR.GeneralExpr`'s separate
+`stateVar` and `parameterVar` constructors both resolve in it. That is sound **only because** stage E's
+`.parameterShadowsStateVariable` well-formedness clause already makes the collision ill-formed. Without
+it, one store would let a parameter silently overwrite a state variable of the same name, and no type
+error would catch it.
+
+**Deliverables.** Thirteen modules, not the five this section first named — see **F66 part 2** for the
+undercount and **F66 part 3** for why none of them sit in a `Relico/Semantics/` directory, which does not
+exist and which no family has ever used. Source semantics live beside source syntax, target beside target,
+cross-language results in `Correctness/`.
 
 ```
--- Relico/Semantics/GeneralLTS.lean                    (new)  both LTSs, the action type, tau
--- Relico/Semantics/GeneralCorrespondence.lean         (new)  R, and that it holds initially
--- Relico/Correctness/GeneralTimeEquivalence.lean      (new)  Lemma 1: the induction and its invariant
--- Relico/Correctness/GeneralWeakBisimulation.lean     (new)  Theorem 1: both transfer conditions
--- Relico/Correctness/WeakBisimulationTrace.lean       (new)  generic: bisimilarity to trace agreement
+-- G2a-i
+-- Relico/DTR/GeneralEvaluation.lean         (new)  expression + statement evaluation, source
+-- Relico/LF/GeneralEvaluation.lean          (new)  expression + statement evaluation, target
+-- Relico/Tests/GeneralEvaluation.lean       (new)  compile-time pins
+-- G2a-ii
+-- Relico/DTR/GeneralRuntime.lean            (new)  runtime state with continuation; GeneralDtrAction
+-- Relico/LF/GeneralRuntime.lean             (new)  runtime state, superdense tag, upd; GeneralLfAction
+-- Relico/Tests/GeneralRuntime.lean          (new)  compile-time pins, incl. upd on both delay cases
+-- G2a-iii
+-- Relico/DTR/GeneralSemantics.lean          (new)  Table I's rules, tau classification
+-- Relico/LF/GeneralSemantics.lean           (new)  Table II's rules, with P24's split TIME PROGRESS
+-- Relico/Tests/GeneralSemantics.lean        (new)  the zero-delay regression pin
+-- G2b
+-- Relico/Correctness/GeneralCorrespondence.lean    (new)  R, and that it holds initially
+-- Relico/Correctness/GeneralTimeEquivalence.lean   (new)  Lemma 1: the induction and its invariant
+-- G2c
+-- Relico/Correctness/GeneralWeakBisimulation.lean  (new)  Theorem 1: both transfer conditions
+-- G2d
+-- Relico/Correctness/WeakBisimulationTrace.lean    (new)  generic: bisimilarity to trace agreement
 ```
 
 The two transition relations are `GeneralDtrStep sourceModel config action configAfter` and
-`GeneralLfStep program state action stateAfter`, with `action : GeneralAction` carrying a `tau`
-constructor. **Neither takes a cohort parameter** — §4's one deliberate deviation from the multi-store
-precedent, for §3's reason.
+`GeneralLfStep program state action stateAfter`. **Neither takes a cohort parameter** — §4's one deliberate
+deviation from the multi-store precedent, for §3's reason.
+
+**The action types are two, and neither is named `GeneralAction`.** This section first specified a single
+`action : GeneralAction` carrying a `tau` constructor. That name is already taken:
+`Relico/LF/GeneralSyntax.lean` declares `structure GeneralAction`, the LF **logical action declaration**,
+between `GeneralStateVariableDecl` and `GeneralTrigger`. Reusing it would collide, and would put "LF
+logical action" and "LTS label" behind one identifier in a development whose entire subject is the
+correspondence between labels. `GeneralDtrAction` and `GeneralLfAction` are declared separately, which
+`ϕ : Act_1 → Act_2` argues for independently — a bijection between two action sets needs two types — and
+which preserves the `map_A` / `map_M` naming content stages E and F built. F66 part 7.
 
 **Theorems, in dependency order.**
 
@@ -335,7 +430,7 @@ precedent, for §3's reason.
 Infinite runs would need a coinductive treatment, which the paper does not give either, and which no
 part of this repository currently needs. That limit is a scope statement, not an owed theorem.
 
-**Divergences from the paper, kept to the minimum and documented precisely.** Three, and all three are
+**Divergences from the paper, kept to the minimum and documented precisely.** Four, and all four are
 forced:
 
 * **Lemma 2's different-actor mechanism is not realizable and stage F already routed around it.** The
@@ -356,6 +451,19 @@ forced:
   two conflict. The divergence is held to the minimum available: priority discriminates **only** among
   equal-arrival candidates, so the paper's arrival-first rule is untouched and the extension is confined
   to a case the SOS leaves unordered.
+* **Table II's `TIME PROGRESS` is split, because as printed Theorem 1 is false of a zero-delay send.**
+  `upd((t,m),d)` advances the microstep when `d = 0` and logical time when `d > 0`. For a zero-delay send
+  — the default, and what the paper's own tool note says is translated to `after 0ms` — the DTR message is
+  due immediately and `TAKE` fires, giving the trace `ms`; on the LF side the trigger sits at `(t,m+1)`,
+  `enabled_tr` fails, the body is `ε` so no τ is available, and Table II's `TIME PROGRESS` fires labelled
+  **`t`**, giving `t · rct`. Forward transfer needs `τ* rct τ*` with `t ∉ τ*`, and backward needs a DTR
+  `τ* t τ*` that cannot exist. Stage G therefore labels a microstep-only advance **τ** and a logical-time
+  advance **`t`**. This is the smallest available repair: it changes one rule's label, leaves Lemma 1
+  untouched, and makes Theorem 1's own proof sentence about "internal" surplus steps true for the first
+  time. The alternative repairs are worse and are named in **P24** — restricting the fragment to strictly
+  positive delays would reject the commonest DTR idiom, and adding a τ self-loop to absorb the step would
+  make `⇒` reflexive-by-fiat and weaken the theorem. **P24** carries the full argument, including the
+  dependency on **P16** it declares rather than hides; G2a-iii carries the regression pin.
 * **Finite executions only**, as above.
 
 Everything else follows the paper's shape deliberately, including the decision to prove transfer
@@ -509,26 +617,50 @@ Both are written **last** (§13, commit 9), because their content depends on G5:
 ## 13. Work plan, in commit order
 
 Each commit is independently green. Job counts assume one Lake job per new module, which has held for
-every stage since B (`503 → 506 → 507 → 508 → 511`); the current total is **511** with **120** PASS lines
-(24 frontend, 96 printer).
+every stage since B (`503 → 506 → 507 → 508 → 511`). The baseline is now **513** jobs with **120** PASS
+lines (24 frontend, 96 printer), measured after G1 landed at `cc7b0c7` — commit 2 added two modules and
+two Lake jobs and moved no PASS line, because a tests-only module contributes compile-time pins rather
+than gate output.
+
+**This table was resliced on 2026-08-24.** Row 3 previously read *"**G2a**
+`Relico/Semantics/GeneralLTS.lean` — both LTSs, the action type, the τ classification | 1 | 514"*. That is
+wrong by nine modules and by nine jobs: the general family has no evaluator, no runtime state and no step
+relation to build an LTS over, so G2a is three commits rather than one, and the stage is **twelve** commits
+rather than nine — eleven from the reslice plus the docs commit the reslice itself owes, row 3 below.
+**F66 parts 1 and 2** carry the measurement; **F66 part 3** is why none of the modules sits under
+`Relico/Semantics/`.
 
 | # | Content | New modules | Predicted jobs |
 |---|---|---|---|
-| 1 | This design + the F63 doc batch (docs only, no build owed) | 0 | 511 |
-| 2 | **G1** `Relico/DTR/GeneralActorSelection.lean` + `Relico/Tests/GeneralActorSelection.lean` | 2 | 513 |
-| 3 | **G2a** `Relico/Semantics/GeneralLTS.lean` — both LTSs, the action type, the τ classification | 1 | 514 |
-| 4 | **G2b** `Relico/Semantics/GeneralCorrespondence.lean` + `Relico/Correctness/GeneralTimeEquivalence.lean` — `R`, initial, Lemma 1 | 2 | 516 |
-| 5 | **G2c** `Relico/Correctness/GeneralWeakBisimulation.lean` — Lemmas 2 and 3 at run level, then both transfer conditions | 1 | 517 |
-| 6 | **G2d** `Relico/Correctness/WeakBisimulationTrace.lean` — the generic finite-trace corollary, aims 8 and 9 | 1 | 518 |
-| 7 | **G3** the `lfc` priority-attribute probe, then the LF well-formedness clause and the three theorem restatements | 0 | 518 |
-| 8 | **G5** `trace` on both sides, printer, statement walk, witness model, new gate marker | 0–1 | 518–519 |
-| 9 | **G6** the fragment declaration and the theorem-eligibility table (docs only) | 0 | — |
+| 1 | This design + the F63 doc batch (docs only, no build owed) | 0 | 511 ✅ |
+| 2 | **G1** `Relico/DTR/GeneralActorSelection.lean` + `Relico/Tests/GeneralActorSelection.lean` | 2 | 513 ✅ |
+| 3 | P24, F66, this revision, one stale count in `STAGE_C_DESIGN.md` (docs only, no build owed) | 0 | 513 |
+| 4 | **G2a-i** `DTR/GeneralEvaluation` + `LF/GeneralEvaluation` + `Tests/GeneralEvaluation` — expression and statement evaluation on both sides | 3 | 516 |
+| 5 | **G2a-ii** `DTR/GeneralRuntime` + `LF/GeneralRuntime` + `Tests/GeneralRuntime` — runtime state with continuations, the superdense tag and `upd`, `GeneralDtrAction` and `GeneralLfAction` | 3 | 519 |
+| 6 | **G2a-iii** `DTR/GeneralSemantics` + `LF/GeneralSemantics` + `Tests/GeneralSemantics` — both step relations, the τ classification, P24's split `TIME PROGRESS`, the zero-delay regression pin | 3 | 522 |
+| 7 | **G2b** `Correctness/GeneralCorrespondence` + `Correctness/GeneralTimeEquivalence` — `R`, its initial case, Lemma 1 | 2 | 524 |
+| 8 | **G2c** `Correctness/GeneralWeakBisimulation` — Lemmas 2 and 3 at run level, then both transfer conditions | 1 | 525 |
+| 9 | **G2d** `Correctness/WeakBisimulationTrace` — the generic finite-trace corollary, aims 8 and 9 | 1 | 526 |
+| 10 | **G3** the `lfc` priority-attribute probe, then the LF well-formedness clause and the three theorem restatements | 0 | 526 |
+| 11 | **G5** `trace` on both sides, printer, statement walk, witness model, new gate marker | 0–1 | 526–527 |
+| 12 | **G6** the fragment declaration and the theorem-eligibility table (docs only) | 0 | — |
 
-Commit 5 is the largest single step in the stage and the one most likely to split; if it does, the split
+The stage's endpoint is therefore an estimate near **526**, and the binding prediction is the one on each
+commit's own row — which is where this project's prediction discipline can actually check it, a commit at a
+time, rather than at a stage boundary eight commits away.
+
+Commit 8 is the largest single step in the stage and the one most likely to split; if it does, the split
 runs along Lemma 2 / Lemma 3 / transfer conditions, which are three independently statable results.
-Commits 3–6 are the G2 rewrite of 2026-08-23 and replace an earlier two-commit plan built around a source
-step relation and a target step relation — those two modules are no longer part of stage G, because the
-LTS subsumes them and keying a *step relation* on an explicit cohort argument is the defect §3 indicts.
+Commits 4–9 are the G2 rewrite of 2026-08-23, resliced 2026-08-24, and they replace an earlier two-commit
+plan built around a source step relation and a target step relation — those two modules are not restored
+by the reslice, because keying a *step relation* on an explicit cohort argument is the defect §3 indicts,
+and G2a-iii's relations take no cohort parameter.
+
+**Why G2a-i comes first, and why it cannot be skipped.** The evaluators are needed under *either*
+granularity: a big-step dispatch rule still has to say what a message-server body did to the valuation, or
+`R`'s `ex ≡ ηr` component compares two things that never change. Statement granularity (§7) adds the
+continuation, the small-step body relation and the τ classification on top of them — it does not create the
+evaluator requirement.
 
 
 **The precondition on commit 2 — asked, then settled the same day, and it resolved toward the harder
@@ -541,13 +673,15 @@ carries the full argument. The lexicographic form is therefore not a defensive c
 one, and the two predicates the old layer left to its caller — `cohortSimultaneous` and `earliestReady` —
 are exactly the half `selectedActor` now absorbs.
 
-**A count that moves with commit 5, flagged because this class of defect has cost the project four
-findings.** `LF.GeneralWellFormed` currently has **nine** clauses, and F49's whole content is that the
-ninth is independent of the other eight and therefore cannot be dropped. G3's clause makes it **ten**.
-Every prose count of those clauses moves together, and F49's own phrasing — which speaks of "the ninth
-clause" positionally — must be re-read rather than renumbered, since its independence argument is about a
-specific clause and not about an ordinal. Spelled-out English counts, not numerals, are the ones that go
-stale unnoticed; grep for the words.
+**A count that moves with G3's commit, flagged because this class of defect has cost the project four
+findings.** (This paragraph said "commit 5" before the 2026-08-24 reslice, and it was wrong before it too:
+the clause has always belonged to G3, which was row 7 and is now row 10. Naming the obligation rather than
+the row number is the repair.) `LF.GeneralWellFormed` currently has **nine** clauses, and F49's whole
+content is that the ninth is independent of the other eight and therefore cannot be dropped. G3's clause
+makes it **ten**. Every prose count of those clauses moves together, and F49's own phrasing — which speaks
+of "the ninth clause" positionally — must be re-read rather than renumbered, since its independence
+argument is about a specific clause and not about an ordinal. Spelled-out English counts, not numerals, are
+the ones that go stale unnoticed; grep for the words.
 
 ## 14. What would refute this plan
 
@@ -577,12 +711,13 @@ Stated as falsifiable predictions, so that a failure is informative rather than 
    by construction, and nothing in that model sends `drain`, so it never fires at all. More generally the
    translator emits no internal reaction anywhere (§7's measurement). The test that mattered survives,
    stated positively —
-   **a τ step must not change any state that `R` constrains** — but the risk it was guarding has moved to
-   **G2a's granularity choice**. If the LTSs are one step per dispatch, both τ sets are empty and §7's
-   `τ* γ τ*` machinery is dead weight threaded through five modules; if they are statement-granular, τ is
-   non-empty on both sides and the transfer conditions must genuinely use it. That is decidable at the
-   moment `GeneralLTS.lean` is written, before any correspondence is attempted, and it is now the
-   prediction whose failure would cost the most.
+   **a τ step must not change any state that `R` constrains** — and the risk it was guarding moved to
+   **G2a's granularity choice**, which is itself now **settled, 2026-08-24: statement-granular, and forced**
+   (§7, F66 part 5). Dispatch granularity would have made both τ sets empty *and* made `R`'s third
+   component `πx ≡ µr` trivially true, so it was not the cheaper option but an unsound one — it would have
+   shipped the paper's relation with one of its three conjuncts doing no work. τ is therefore non-empty on
+   both sides and the transfer conditions genuinely use it. What survives as a live prediction is the
+   positive test above, checkable at the point `R` is defined in G2b.
 4. **If the target LTS cannot be keyed on triggers alone** — because two reactions in one reactor share a
    trigger — then reaction identity needs the site keys from the F56 repair as an explicit index. F56's
    repair emits one action *and* one reaction per send **site**, so this is expected to be fine; it is
@@ -595,12 +730,33 @@ Stated as falsifiable predictions, so that a failure is informative rather than 
    existing flat `List`, the widening is larger than stages C and D were, and the honest response is to
    split G5 into its own stage rather than to quietly reduce it — the observability decision is settled,
    so the variable is scheduling, not scope.
+7. **If P24's split `TIME PROGRESS` breaks Lemma 1**, the repair is wrong and the alternative repairs named
+   in P24 come back into play. It should not: Lemma 1 tracks logical-time *equality* between corresponding
+   events, and relabelling a step that leaves logical time unchanged cannot disturb an invariant about
+   logical time. The signal is a Lemma 1 case that needs to know which label the microstep advance carried.
+   Stated because it is the one place the stage modifies a rule the paper's other results are proved over,
+   and an unstated assumption there would be the F53 failure — a repair outliving the argument for it.
+8. **If expression evaluation cannot be made total**, G2a-i's signature is wrong and the step relations
+   inherit a failure mode. An unbound variable, a type mismatch surviving well-formedness, or a partial
+   operator would force evaluation into `Option` and then every rule in Tables I and II acquires a
+   propagation case the paper does not have. The check is at G2a-i, before any rule is written: if the
+   evaluator can be given a total signature against a well-formed program, the semantics stay shaped like
+   the paper's; if it cannot, that is a finding about the well-formedness predicate's coverage rather than
+   about the evaluator.
+
+**What this section got wrong, recorded because the section's whole purpose is to be checkable.** Not one
+of F66's seven parts appears above, and F66 part 2 alone changed the stage from nine commits to twelve. The
+reason is visible in how the items are phrased: every one of them asks *what might go wrong when this is
+built*, and none asks *does what this plan names already exist, and does it say what I claim*. Those are
+different questions, and the second is answerable with `ls` and `grep` in minutes. The transferable rule
+now recorded in F66: **a design section that names a deliverable, a directory, an identifier or a rule
+should be checked against the artefact before the stage it governs opens.**
 
 
 ## 15. Decisions, and how each was settled
 
-All five are settled; this section is the record, not a request. Four were put to the decision-maker on
-2026-08-23 and one was resolved by measurement.
+All six are settled; this section is the record, not a request. Four were put to the decision-maker on
+2026-08-23, and two were resolved by measurement — one on 2026-08-23 and one on 2026-08-24.
 
 1. **G5 — proof-only or observable? → Observable.** The `trace` widening is stage G's deliverable, landing
    as the stage's last commit so G1–G3 are green without it. §10.
@@ -614,13 +770,23 @@ All five are settled; this section is the record, not a request. Four were put t
    with an owed lift is not the paper's architecture. A second reason offered the same day — that the
    strong form is refuted by our own `drain_reaction` — was **wrong, and is withdrawn as F64**; the
    decision rests on the paper alone. Stage G therefore proves weak bisimilarity (Definition 1) with
-   assignments and scheduler stuttering as τ — a classification the paper itself licenses — and derives
+   **assignments and both send forms** as τ on both sides — read off Tables I and II, *not* "assignments
+   and scheduler stuttering", which was this section's wording until 2026-08-24 and which inherited a
+   misnomer from Theorem 1's own proof (F66 part 4, and P24 for the defect it concealed) — and derives
    finite-trace agreement from it, so aims 8 and 9 are discharged for the general family rather than
-   owed. Three divergences are documented in §7; two were already forced by earlier findings and the
-   third is scope. §7.
-5. **Commit order — may G6's documents land last? → Yes, and it is now the ninth commit.** F63 is filed
+   owed. **Four** divergences are documented in §7: two were already forced by earlier findings, one is
+   scope, and the fourth is P24's split `TIME PROGRESS`, without which the theorem being claimed is false
+   of a zero-delay send. §7.
+5. **Commit order — may G6's documents land last? → Yes, and it is now the twelfth commit.** F63 is filed
    and `docs/supported-fragment.md` carries a scope marker pointing at it, so the interval is documented
-   rather than silent. §11, §13.
+   rather than silent. §11, §13. (It was the ninth until the 2026-08-24 reslice; the position moved, the
+   decision did not.)
+6. **G2a's LTS granularity — dispatch or statement? → Statement, with continuations.** Not delegated and
+   not asked, because it turned out not to be a judgment call: §7 had already committed `R` to the paper's
+   `πx ≡ µr` component, and the paper defines both continuations as remaining-statement lists with `ε`
+   premised on both `TAKE` rules, so dispatch granularity would have made that conjunct vacuous. Settled
+   by measurement on 2026-08-24 — the measurement being that statement granularity is *available and
+   symmetric*, which is the part that could have gone the other way. §7, F66 part 5.
 
 The precondition on G1 — priority minimum or lexicographic minimum — was **not** a judgment call and was
 not treated as one: it was measured against `earliestDueArrival` and `readyActorsOf`, and it refuted the
