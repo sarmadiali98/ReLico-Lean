@@ -643,7 +643,7 @@ Incidentally the fixture does satisfy `ActorPrioritiesDistinct` — its priority
 would qualify for the guard-relative theorem if its order disagreed. It is the order, not the guard,
 that disqualifies it.
 
-### 8.2 The new fixture (task #86)
+### 8.2 The disagreeing fan-in (task #86)
 
 A fan-in whose **declaration order is the reverse of its priority order**, so that the sort is the only
 thing that could produce the expected output:
@@ -686,6 +686,37 @@ the derangement above, asserting the emitted reaction order as text through `com
 comment above it. This needs no Java, no `artifact.zip` and no exporter run — Lean and a `lake build`.
 It is also the first priority annotation of any kind in that file.
 
+**(A) as landed, which differs from the sketch above in its names and in one forced design decision.**
+The model is `priorityFanInModel`: a `Probe` class sending `ping(1)` to its known rebec `hub`, and a
+`Collector` class with two message servers, `ping` (`@priority(2)`, one `int` parameter) and `drain`
+(`@priority(1)`, parameterless). Its instances are declared `collector, alpha, beta, gamma` carrying
+priorities `4, 3, 1, 2` and emit as `beta, gamma, alpha, collector` — a derangement with no fixed
+point, so the expected text fails under declaration order *and* under any single transposition of it.
+The expected reaction order is the literal
+
+```
+sample_reaction|ping_reaction,pingToHubFromBeta_reaction,pingToHubFromGamma_reaction,pingToHubFromAlpha_reaction,drain_reaction
+```
+
+and it is asserted **twice** — once against `compileGeneralModel`'s emitted reactors and once against
+`generalReactionNamesOf` over `routesOf` — because comparing those two to *each other* is finding
+**F60**, an assertion no permutation the sort can produce could fail. Comparing each to one shared
+literal makes them independent, so either can fail alone and say which side moved. Four assertions in
+all, the other two being source well-formedness and `ActorPrioritiesDistinct`, which §8.2 above
+requires so that the guard-relative theorem is exercised and not only the unconditional one. The
+receiver's two servers do carry the level-2 disagreement §8.2 asks for, but that is a **negative
+control** rather than a second claim: `DTR.GeneralMessageServerPriority` has zero references under
+`Relico/Translation/` and `Relico/Correctness/`, so level 2 is inert and `drain_reaction` is emitted
+last, where its *declaration* puts it. Task #87 must move it to the front, which makes the literal
+above a **prediction written before the behaviour exists** rather than text fitted to behaviour
+afterwards.
+
+Why the sketch's `Sensor`/`Gateway` names were not used: `ping` carries an `int` payload because a
+port must carry one — `generalPortPayloadFor` (`Relico/Translation/GeneralRouting.lean:871`) refuses
+arity zero, and that is the one refusal a well-formed model reaches. `sample` and `drain` stay
+parameterless because nothing sends to them across a port, with `pollMessageServer` as the
+already-asserted precedent for a parameterless server.
+
 **(B) The `.rebeca` plus `.parser.json` pair — strictly weaker, and about the frontend.** It pins that
 the exporter and the Lean decoder carry disagreeing priority annotations across the bridge intact. It
 does **not** move any emitted text, because nothing translates it. Everything that travels with a new
@@ -696,7 +727,12 @@ assertion total 24 → 25, and the **spelled-out English counts** in
 `frontend/fixtures/general/README.md`, which is read by a Python test, so a missed count fails a gate
 rather than merely reading wrong.
 
-(A) is a hand transcription of (B) and nothing checks the transcription; see §8.3.
+(A) landed first and **is not a transcription of (B)**, which is a change from what this section
+originally said. (B) does not exist, and (A) was written against the Lean constructors directly with
+its own class and instance names, so if (B) is ever added the two will be *independent* witnesses —
+one that the frontend carries disagreeing annotations across the bridge, one that the translator sorts
+by them — rather than one checking the other. That is the better arrangement, because nothing would
+check a transcription anyway; see §8.3.
 
 ### 8.3 What the gates can and cannot show
 
@@ -857,7 +893,10 @@ so that a rename of the `priority` field which missed `priorityOf` fails here.
 `GeneralBasic.lean:2467`'s emitted instance list (§7.2), and `frontend/check-general-lf-target.sh`
 (§8.3).
 
-**New fixture and its convoy.** Task #86, with every count in §8.2's list.
+**The disagreeing fan-in.** Task #86's artefact (A): a twelfth assertion block in the printer test
+main carrying four assertions, `EXPECTED_PRINTER_ASSERTIONS` 92 → **96**, and a twelfth entry in the
+block-by-block provenance comment above that literal. Artefact (B), the `.rebeca` pair and the convoy
+of counts in §8.2's list, is optional, strictly weaker, and unbuilt.
 
 `Relico.lean` gains three imports, and the job total moves from 508 to **511**. All three new files land
 in commit 1, so the total is already 511 there; commit 2 adds theorems to existing modules and does not

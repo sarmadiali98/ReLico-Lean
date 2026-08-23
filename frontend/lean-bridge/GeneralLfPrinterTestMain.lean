@@ -2702,8 +2702,14 @@ reactions. They are separate pieces of code that must agree, and the assertion b
 compares this against the reaction names of the program the translation produced.
 
 Nothing here is spelled as a literal, so a rename in `NameGeneration.lean` moves both
-sides at once and this assertion stays silent — correctly, because it is about *order*.
-The names themselves are pinned once, in the program text.
+sides at once and this assertion stays silent. That is a real limit and not the intended
+economy it was once described as: the sentence here used to end *"correctly, because it is
+about order"*, and finding **F60** records why that is backwards. Both sides consume
+`routesOf`, which is where level 1's sort is applied, so **order** is precisely what this
+comparison cannot see — every permutation the sort can produce moves the two sides
+together. What it can see, and what it is for, is the two pieces of code **drifting apart**.
+The names themselves are pinned once, in the program text, and the order is pinned against
+a literal in the priority fan-in block below.
 
 The routes come from `routesOf`, and a failure to route surfaces as a refusal rather than
 as an empty list: an empty list would drop every port reaction from the specified order
@@ -4013,11 +4019,19 @@ private def routedAssertions :
                     toString
                       port.payload.arity)))))
 
-      -- Construction against specification. `generalReactionNamesOf` is the function
-      -- §7.3's two replacement theorems are stated against;
-      -- `compileGeneralMessageServerReactionGroup` is what builds the reactions. Reaction
-      -- declaration order decides same-tag order in `lfc`, so these two agreeing is the
-      -- executable half of the ordering claim the theorems make.
+      -- Construction against specification, and **an agreement claim rather than an
+      -- ordering one**. `generalReactionNamesOf` is the function §7.3's two replacement
+      -- theorems are stated against; `compileGeneralMessageServerReactionGroup` is what
+      -- builds the reactions; this pins that the two do not drift apart.
+      --
+      -- It is not evidence for the ordering claim, and finding **F60** records that it once
+      -- said it was. Neither side is a literal, and both consume `routesOf` — where level
+      -- 1's sort is applied, upstream of both — so every permutation the sort can produce
+      -- moves both sides together and this assertion stays green. It is not blind to level
+      -- 2, whose sort enters on the constructor side only, but `routedModel` carries no
+      -- priority annotation at all, so that sensitivity is unreachable here. The
+      -- literal-backed version of the ordering claim is
+      -- `PRIORITY_FAN_IN_EMITTED_REACTION_ORDER` in the twelfth block.
       expectRendered
         "ROUTED_REACTION_ORDER_MATCHES_SPECIFICATION"
         (String.intercalate
@@ -4843,12 +4857,503 @@ private def repeatedSelfSendAssertions :
                   (fun reaction =>
                     reaction.name.value)))))
 
+/-!
+## The priority fan-in family
+
+**The first priority annotation of any kind in this file, and finding F59 is why it is
+owed.** Every one of the thirteen models above takes the default `priority := none`, so
+every pair of instances is *tied* under the reflexive `PriorityPrecedesOrEqual`
+(`Relico/DTR/GeneralPriority.lean:55`); `insert` (`:266`) tests that reflexive relation, so
+on all-tied input it never displaces an element and `normalize` (`:299`) is the identity.
+The ninety-two assertions above therefore could not have moved for *any* stable sort. They
+are a witness for **stability** — the one property the sortedness development structurally
+cannot pin, because `Sorted` holds for both orders of a tied pair — and they are not a
+witness for ordering. This family is the witness for ordering.
+
+Its instance list is a **derangement** of its priority order: declared `collector, alpha,
+beta, gamma` carrying priorities `4, 3, 1, 2`, emitted `beta, gamma, alpha, collector`. No
+instance keeps its declared position, so the expected text below fails under declaration
+order and fails under any single transposition of it.
+
+Two things are deliberately *not* here.
+
+There is no `.rebeca` fixture. By F59's first fact no gate carries a fixture through
+translation — `PRINTER_TEST_MAIN` is invoked with no arguments at
+`frontend/check-general-lean.sh:248-252` — so a fixture pair would add one decoder
+assertion and move no emitted text.
+
+And the expected order is a **literal**, never a value recomputed from `routesOf`. An
+assertion whose two sides both consume the sorted route table moves with the sort and
+cannot fail: that is finding **F60**, against
+`ROUTED_REACTION_ORDER_MATCHES_SPECIFICATION` above. Both assertions below are compared
+against the same literal precisely so that they cannot be satisfied by agreeing with each
+other.
+
+The receiver's two message servers carry distinct priorities in disagreeing declaration
+order as well, and that is a **negative control**, not a second claim. Level 2 is not
+written: `DTR.GeneralMessageServerPriority` has zero references under
+`Relico/Translation/` and `Relico/Correctness/`, so message-server priority is inert today
+and `drain_reaction` is emitted last, where its *declaration* puts it. Task #87 must move
+it to the front, and the literal below must then change in exactly that one way — which is
+one predicted permutation of text written before the behaviour existed, rather than text
+written to match behaviour after the fact.
+-/
+
+private def fanInSenderClassName :
+    ClassName :=
+  ⟨"Probe"⟩
+
+private def fanInReceiverClassName :
+    ClassName :=
+  ⟨"Collector"⟩
+
+private def fanInSampleMessageName :
+    MsgName :=
+  ⟨"sample"⟩
+
+private def fanInPingMessageName :
+    MsgName :=
+  ⟨"ping"⟩
+
+private def fanInDrainMessageName :
+    MsgName :=
+  ⟨"drain"⟩
+
+private def alphaInstanceName :
+    ActorName :=
+  ⟨"alpha"⟩
+
+private def betaInstanceName :
+    ActorName :=
+  ⟨"beta"⟩
+
+private def gammaInstanceName :
+    ActorName :=
+  ⟨"gamma"⟩
+
+private def collectorInstanceName :
+    ActorName :=
+  ⟨"collector"⟩
+
+/--
+The sender's one server, and the source of every route in this model.
+
+One external send to one known rebec, so `generalSiteSuffixFor`
+(`Relico/Translation/GeneralRouting.lean:454-468`) returns the empty string and the output
+port is `pingToHub` with no ordinal — the shape `resetToHub` has in the routed family,
+not the shape `reportToHub1` has.
+
+Its payload is arity one on purpose. Arity zero is the one refusal a well-formed model
+reaches (`Relico/Translation/GeneralRouting.lean:871`) and it fires on any message a
+*port* must carry, because a port carrying nothing has no measured spelling. `sample`
+itself takes no parameters and that is legal and deliberate: nothing sends to `sample`,
+so it has a logical action and no port, and `pollMessageServer` above is the
+already-asserted witness that a parameterless server compiles.
+-/
+private def fanInSampleMessageServer :
+    DTR.GeneralMessageServer where
+
+  name :=
+    fanInSampleMessageName
+
+  parameters :=
+    []
+
+  body :=
+    [
+      .send
+        (.knownRebec hubKnownRebecName)
+        fanInPingMessageName
+        [.intLiteral 1]
+        ⟨0⟩
+    ]
+
+/--
+The server every route lands on: declared **first**, priority **second**.
+
+Its body reads the formal and writes the state variable, so the reaction is not empty and
+the parameter is not an unused local.
+-/
+private def fanInPingMessageServer :
+    DTR.GeneralMessageServer where
+
+  name :=
+    fanInPingMessageName
+
+  parameters :=
+    [
+      {
+        name :=
+          levelParameter
+
+        declaredType :=
+          .int
+      }
+    ]
+
+  body :=
+    [
+      .assign
+        lastLevelStateName
+        (.parameterVar levelParameter)
+    ]
+
+  priority :=
+    some 2
+
+/--
+The server no route lands on: declared **second**, priority **first**.
+
+Nothing sends `drain`, so its group is one action reaction and nothing else — which is the
+whole reason it is shaped this way. Level 2 moving it is then a single token moving from
+the end of the expected literal to the front, and a one-token difference is the cheapest
+predicted permutation task #87 can be held to.
+-/
+private def fanInDrainMessageServer :
+    DTR.GeneralMessageServer where
+
+  name :=
+    fanInDrainMessageName
+
+  parameters :=
+    []
+
+  body :=
+    [
+      .assign
+        lastLevelStateName
+        (.intLiteral 0)
+    ]
+
+  priority :=
+    some 1
+
+/--
+The sending class. No state variables and an empty constructor, both legal:
+`Relico/DTR/GeneralSyntax.lean` records that a class may declare no known rebecs, no state
+variables and no message servers, because the paper's own figures need all three.
+-/
+private def fanInSenderClass :
+    DTR.GeneralReactiveClass where
+
+  name :=
+    fanInSenderClassName
+
+  knownRebecs :=
+    [
+      {
+        name :=
+          hubKnownRebecName
+
+        className :=
+          fanInReceiverClassName
+      }
+    ]
+
+  stateVariables :=
+    []
+
+  constructor :=
+    {
+      parameters :=
+        []
+
+      body :=
+        []
+    }
+
+  messageServers :=
+    [fanInSampleMessageServer]
+
+/--
+The receiving class, and the only reactor in this model whose reaction group has more than
+one entry.
+
+Its two servers are declared in the order `ping, drain` and prioritized in the order
+`drain, ping`, which is the level-2 disagreement this model carries as a negative control.
+-/
+private def fanInReceiverClass :
+    DTR.GeneralReactiveClass where
+
+  name :=
+    fanInReceiverClassName
+
+  knownRebecs :=
+    []
+
+  stateVariables :=
+    [
+      {
+        name :=
+          lastLevelStateName
+
+        declaredType :=
+          .int
+      }
+    ]
+
+  constructor :=
+    {
+      parameters :=
+        []
+
+      body :=
+        []
+    }
+
+  messageServers :=
+    [
+      fanInPingMessageServer,
+      fanInDrainMessageServer
+    ]
+
+/--
+The receiver: declared **first**, priority **last**.
+
+It contributes no route, so its own position in the walked instance list is not observable
+in the expected text at all. It carries a priority anyway, for two reasons. The whole
+instance list is then a derangement rather than only its sender prefix; and
+`ActorPrioritiesDistinct` is witnessed over four *explicit* priorities rather than three
+explicit ones plus an absence, which matters because an absence is a priority class of its
+own and would make the guard hold for a weaker reason than the one under test.
+-/
+private def collectorActor :
+    DTR.GeneralActorInstance where
+
+  name :=
+    collectorInstanceName
+
+  className :=
+    fanInReceiverClassName
+
+  bindings :=
+    []
+
+  arguments :=
+    []
+
+  priority :=
+    some 4
+
+/--
+The first sender declared, and the **last** of the three in priority.
+
+`arguments := []` because `Probe`'s constructor has no formals, so `instanceArgumentsMatch`
+holds vacuously rather than by agreement.
+-/
+private def alphaProbe :
+    DTR.GeneralActorInstance where
+
+  name :=
+    alphaInstanceName
+
+  className :=
+    fanInSenderClassName
+
+  bindings :=
+    [(hubKnownRebecName, collectorInstanceName)]
+
+  arguments :=
+    []
+
+  priority :=
+    some 3
+
+/--
+The second sender declared, and the **first** of the three in priority.
+
+A structure update on `alphaProbe`, so the name and the priority are the only differences
+and the emitted position cannot be explained by anything else — the discipline `spareActor`
+follows against `stationActor`.
+-/
+private def betaProbe :
+    DTR.GeneralActorInstance :=
+  {
+    alphaProbe with
+
+    name :=
+      betaInstanceName
+
+    priority :=
+      some 1
+  }
+
+/--
+The third sender declared, and the **second** of the three in priority.
+-/
+private def gammaProbe :
+    DTR.GeneralActorInstance :=
+  {
+    alphaProbe with
+
+    name :=
+      gammaInstanceName
+
+    priority :=
+      some 2
+  }
+
+/--
+The fan-in model.
+
+Class order fixes reactor order, so the expected text's two `|`-separated halves are
+`Probe` then `Collector`. Instance order is where the derangement lives: every one of the
+four instances moves, and the three senders move in a 3-cycle.
+-/
+private def priorityFanInModel :
+    DTR.GeneralModel where
+
+  classes :=
+    [
+      fanInSenderClass,
+      fanInReceiverClass
+    ]
+
+  instances :=
+    [
+      collectorActor,
+      alphaProbe,
+      betaProbe,
+      gammaProbe
+    ]
+
+/--
+The emitted reaction order: what `compileGeneralModel` actually built.
+-/
+private def priorityFanInEmittedReactionOrder :
+    Except String String := do
+  let program ←
+    Translation.compileGeneralModel
+      priorityFanInModel
+
+  pure
+    (String.intercalate
+      "|"
+      (program.reactors.map
+        (fun reactor =>
+          String.intercalate
+            ","
+            (reactor.messageReactions.map
+              (fun reaction =>
+                reaction.name.value)))))
+
+/--
+The specified reaction order: what `generalReactionNamesOf` predicts.
+
+The same shape as `routedSpecifiedReactionOrder` above and asserted very differently. There
+the two sides were compared to *each other*, which finding **F60** records as an assertion
+no permutation the sort can produce could fail. Here it is compared to a literal, and so is
+the constructor's own answer, so the two assertions are independent and each can fail
+alone. That matters for task #87 in particular: level 2's sort enters at the reaction-group
+walk on the *constructor* side, while this function still receives
+`reactiveClass.messageServers` unsorted, so if #87 moves only one of them these two
+assertions will disagree and say which one moved.
+-/
+private def priorityFanInSpecifiedReactionOrder :
+    Except String String := do
+  let routes ←
+    Translation.routesOf
+      priorityFanInModel
+
+  pure
+    (String.intercalate
+      "|"
+      (priorityFanInModel.classes.map
+        (fun reactiveClass =>
+          String.intercalate
+            ","
+            ((Translation.generalReactionNamesOf
+              (Translation.selfSendsOfClass reactiveClass)
+              routes
+              reactiveClass.name
+              reactiveClass.messageServers).map
+              (fun reactionName => reactionName.value)))))
+
+/--
+The one literal both orders are asserted against, and every token in it is derivable by
+hand.
+
+`Probe` first, because class order fixes reactor order. Its only group is `sample`'s, and
+`generalMessageReactionNamesOf` (`Relico/Translation/GeneralBasic.lean:4285`) yields the
+single name `sample_reaction` when nothing self-sends to the server. No route lands on
+`Probe`, so the group ends there.
+
+`Collector` second. `ping`'s group opens with its own action reaction, then carries one port
+reaction per route into it, in route order. A port reaction is named after the input port
+that triggers it, and the chain that spells that name is:
+`outputPortNameFor` → `ping` ++ `To` ++ `Hub` ++ `""` = `pingToHub`, the suffix empty
+because the class has exactly one send to that pair; then `inputPortNameFor` appends
+`From` ++ the capitalized *sender instance*; then `portReactionNameFor` appends
+`_reaction`. So the three names differ only in the sender, which is exactly what makes a
+name list able to witness sender-priority order at all.
+
+Route order is priority order, because `routesOf` walks
+`priorityOrderedInstances` (`Relico/Translation/GeneralRouting.lean:1496`) and filtering
+preserves order. Priorities `beta = 1`, `gamma = 2`, `alpha = 3` therefore give
+`Beta, Gamma, Alpha` — a 3-cycle away from the declared `alpha, beta, gamma`.
+
+`drain_reaction` closes the list, in **declaration** order rather than its priority order,
+and that is the negative control: it is where level 2 is not yet implemented becomes
+visible.
+-/
+private def expectedPriorityFanInReactionOrder :
+    String :=
+  "sample_reaction" ++
+    "|" ++
+    "ping_reaction," ++
+    "pingToHubFromBeta_reaction," ++
+    "pingToHubFromGamma_reaction," ++
+    "pingToHubFromAlpha_reaction," ++
+    "drain_reaction"
+
+/--
+Stage F's ordering evidence: four assertions on one model whose declaration order and
+priority order agree nowhere.
+-/
+private def priorityFanInAssertions :
+    IO Unit := do
+
+  -- Without this the group proves nothing about the translator: a source model the
+  -- frontend would reject makes anything downstream a fact about the frontend. The same
+  -- discipline `ALIASED_ENDPOINT_SOURCE_WELLFORMED` follows.
+  expectBool
+    "PRIORITY_FAN_IN_SOURCE_WELLFORMED"
+    true
+    priorityFanInModel.wellFormed
+
+  -- The level-1 theorems in `Relico/Correctness/GeneralPriorityOrder.lean` are
+  -- guard-relative: `portReactions_realizeActorPriority` composes the guard-relative split
+  -- result with instance declaration order, and its hypothesis is this predicate. A
+  -- witness that failed it would exercise the unconditional form only, so this pins that
+  -- the model is in the theorems' range. It is not in `DTR.GeneralModel.wellFormed` and
+  -- must not be — three servers in `expressions.rebeca` are unannotated — so nothing above
+  -- implies it.
+  expectBool
+    "PRIORITY_FAN_IN_ACTOR_PRIORITIES_DISTINCT"
+    true
+    (decide priorityFanInModel.ActorPrioritiesDistinct)
+
+  -- The claim itself. Under `normalize := id` this reads
+  -- `pingToHubFromAlpha_reaction,pingToHubFromBeta_reaction,pingToHubFromGamma_reaction`
+  -- and fails, which is the property the ninety-two assertions above do not have.
+  expectRendered
+    "PRIORITY_FAN_IN_EMITTED_REACTION_ORDER"
+    expectedPriorityFanInReactionOrder
+    priorityFanInEmittedReactionOrder
+
+  -- And the specification agrees with the same literal, rather than with the line above.
+  expectRendered
+    "PRIORITY_FAN_IN_SPECIFIED_REACTION_ORDER"
+    expectedPriorityFanInReactionOrder
+    priorityFanInSpecifiedReactionOrder
+
 /--
 Run every assertion: 34 printing, then 10 well-formedness, then 11 translation, then
 3 for the port-name collisions F34 and F42, then 5 for finding F32's counterexample,
 then 7 for the routed model, then 6 for the refusals routing reaches, then 6 for finding
 F48's aliased endpoints, then 4 for finding F49's shared target endpoint, then 2 for
-finding F50's doubled set port, then 4 for finding F56's repeated self-send, 92 in all.
+finding F50's doubled set port, then 4 for finding F56's repeated self-send, then 4 for
+stage F's priority fan-in, 96 in all.
 
 The count is stated here because `frontend/check-general-lean.sh` compares the
 number of `PASS_` lines against a literal. There are no fixtures to count, so a
@@ -4930,6 +5435,19 @@ asserted here as text, and it is also one of the four programs
 `frontend/check-general-lf-target.sh` compiles and runs against a real `lfc`. It is the only
 one of those four in which a message server owns more than one logical action, so it is the
 only one whose acceptance says anything about whether the repair produces legal LF.
+
+Then **92 to 96**, and this rise is unlike all of the ones above it: every earlier block was
+added because something in this repository or in `lfc` was found to be *false*, and this one
+is added because something was found to be **unfalsifiable**. Finding F59 measured that no
+gate carries a fixture through translation and that `grep -c priority` over this file
+returned zero, so every pair of instances in every model above was tied, `normalize` was the
+identity on all of them, and the ninety-two assertions could not have moved for any stable
+sort. They witness stability, which the sortedness theorems cannot pin, and they do not
+witness ordering. The twelfth block is the first model in this file with a priority
+annotation of any kind, and the first whose expected text a permutation of the emitted order
+would break. It is also the only block whose literal is written to be **changed** on a
+schedule: its last token is in declaration order because level 2 does not exist yet, and
+task #87 must move it to the front.
 -/
 def runGeneralLfPrinterTests :
     IO UInt32 := do
@@ -4956,6 +5474,8 @@ def runGeneralLfPrinterTests :
     perReactionSetPortAssertions
 
     repeatedSelfSendAssertions
+
+    priorityFanInAssertions
 
     IO.println
       "GENERAL_LF_PRINTER_TESTS_OK"

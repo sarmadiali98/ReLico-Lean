@@ -183,7 +183,8 @@ echo "=== the general LF printer, well-formedness and translation assertions"
 # 34 printing, 10 well-formedness, 11 translation, 3 for the port-name collisions F34
 # and F42, 5 for finding F32's counterexample, 7 for the routed model, 6 for the
 # refusals routing reaches, 6 for finding F48's aliased endpoints, 4 for finding F49's
-# shared target endpoint, 2 for finding F50's doubled set port. Ten blocks, 88, the same
+# shared target endpoint, 2 for finding F50's doubled set port, 4 for finding F56's
+# repeated self-send, 4 for stage F's priority fan-in. Twelve blocks, 96, the same
 # breakdown the runner's own docstring gives.
 #
 # That enumeration was itself stale until 2026-08-22, when it listed six blocks summing
@@ -196,8 +197,15 @@ echo "=== the general LF printer, well-formedness and translation assertions"
 # the first block added after that repair, and the list, the paragraph below, the runner
 # docstring and the literal all moved in the one edit -- which is the convention holding
 # once, not yet a convention. F50's two are the second block added after the repair and moved
-# the same four places in one edit, so the convention has now held twice. What would falsify
-# it is a count moving without this list moving with it, which is what to look for first.
+# the same four places in one edit, so the convention had then held twice. The falsifier this
+# paragraph named -- a count moving without this list moving with it -- then fired on the very
+# next occasion. Finding F56's eleventh block moved the literal, the runner docstring and the
+# paragraph below, and not this list, which read "Ten blocks, 88" under a literal of 92 from
+# that landing until stage F's twelfth block repaired the two together. Two holds were two
+# data points and not a convention, and the failure recurred inside the block that predicts
+# it. So the reader's check is the only one there is, and it is cheap on purpose: this list
+# states its own sum, making the check a comparison of two numerals rather than an addition
+# over twelve terms. Do it whenever the literal moves.
 #
 # Stage C ran 25, in two blocks; the third block is the one that mentions
 # `Relico.Translation`, so a translation that stopped being called would drop this
@@ -242,7 +250,27 @@ echo "=== the general LF printer, well-formedness and translation assertions"
 # one added because the *target* mishandled a construct rather than because this repository
 # claimed something false, so it is the only one that no earlier assertion could have been
 # failing on before it existed.
-EXPECTED_PRINTER_ASSERTIONS=92
+#
+# Then up to 96 for stage F's four -- PRIORITY_FAN_IN_SOURCE_WELLFORMED,
+# PRIORITY_FAN_IN_ACTOR_PRIORITIES_DISTINCT, PRIORITY_FAN_IN_EMITTED_REACTION_ORDER and
+# PRIORITY_FAN_IN_SPECIFIED_REACTION_ORDER -- and this twelfth block was added for a third
+# reason again: not because something was false and not because the target mishandled
+# something, but because the other ninety-two assertions were found to be **unfalsifiable**
+# for the property they were credited with. Finding F59 measured that this script hands
+# PRINTER_TEST_MAIN no arguments, so no fixture is ever translated, and that grep -c priority
+# over the printer test main returned zero, so every instance in every model above takes the
+# default priority and every pair is tied under a reflexive relation. The sort is the identity
+# on all of them. Those ninety-two pin *stability*, which the sortedness theorems structurally
+# cannot pin, and they do not pin ordering. This block is the first model in the file carrying
+# a priority annotation of any kind, and its instance declaration order is a derangement of
+# its priority order, so its expected text fails under declaration order and under any single
+# transposition of it. Both order assertions are compared against one shared literal rather
+# than against each other, which is finding F60's defect and the reason this block is four
+# assertions and not two. Its last token, drain_reaction, sits where *declaration* order puts
+# it because level 2 is not written yet; task #87 must move it to the front, so this is the
+# one block in the list whose literal is expected to change on a schedule, and a drop of four
+# here before then means the ordering evidence has left the repository entirely.
+EXPECTED_PRINTER_ASSERTIONS=96
 
 set +e
 PRINTER_OUTPUT="$(
