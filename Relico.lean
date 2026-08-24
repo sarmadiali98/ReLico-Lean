@@ -625,6 +625,7 @@ import Relico.DTR.GeneralWellFormed
 import Relico.DTR.GeneralPriority
 import Relico.DTR.GeneralState
 import Relico.DTR.GeneralActorSelection
+import Relico.DTR.GeneralEvaluation
 import Relico.Frontend.GeneralSchema
 import Relico.Frontend.GeneralDiagnostic
 import Relico.Frontend.GeneralElaborator
@@ -634,11 +635,14 @@ import Relico.Frontend.GeneralBridgeCheck
 import Relico.LF.GeneralSyntax
 import Relico.LF.GeneralWellFormed
 import Relico.LF.GeneralCppPrinter
+import Relico.LF.GeneralEvaluation
 
 import Relico.Translation.GeneralRouting
 import Relico.Translation.GeneralBasic
 
 import Relico.Correctness.GeneralPriorityOrder
+import Relico.Correctness.GeneralEvaluation
 
 import Relico.Tests.GeneralPriority
 import Relico.Tests.GeneralActorSelection
+import Relico.Tests.GeneralEvaluation
