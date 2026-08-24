@@ -165,9 +165,11 @@ cited for its *structure* has to say which of its properties travel.
 
 The one deviation is §3's: no cohort parameter. Concretely, where the multi-store relation reads
 `ActorPriorityDispatchStep request ready sourceModel actorName before after …`, the general source
-transition reads `GeneralDtrStep sourceModel config action configAfter` and obtains the cohort internally
-as `GeneralConfiguration.readyActors config`. The cohort is a *derived* quantity, so nothing outside the
-relation can supply a fabricated one.
+transition reads `DTR.GeneralStep sourceModel config label configAfter` and obtains the cohort internally
+as `config.erase.readyActors`. The cohort is a *derived* quantity, so nothing outside the
+relation can supply a fabricated one. Two corrections in that sentence, both recorded as **F71**: the
+relation is `DTR.GeneralStep`, not `GeneralDtrStep`, and `config` is a `GeneralRuntimeConfiguration`, so the
+cohort is read through `erase` rather than off `config` directly.
 
 
 ## 5. The guards, and why they are hypotheses rather than well-formedness clauses
@@ -364,20 +366,21 @@ one that can.
 it, one store would let a parameter silently overwrite a state variable of the same name, and no type
 error would catch it.
 
-**Deliverables.** Thirteen modules, not the five this section first named — see **F66 part 2** for the
-undercount and **F66 part 3** for why none of them sit in a `Relico/Semantics/` directory, which does not
-exist and which no family has ever used. Source semantics live beside source syntax, target beside target,
-cross-language results in `Correctness/`.
+**Deliverables.** Fourteen modules, not the five this section first named — see **F66 part 2** for the
+undercount, **F67 part 5** for the one module that decomposition itself missed, and **F66 part 3** for why
+none of them sit in a `Relico/Semantics/` directory, which does not exist and which no family has ever used.
+Source semantics live beside source syntax, target beside target, cross-language results in `Correctness/`.
 
 ```
 -- G2a-i
--- Relico/DTR/GeneralEvaluation.lean         (new)  expression + statement evaluation, source
--- Relico/LF/GeneralEvaluation.lean          (new)  expression + statement evaluation, target
--- Relico/Tests/GeneralEvaluation.lean       (new)  compile-time pins
+-- Relico/DTR/GeneralEvaluation.lean         (new)  expression evaluation, source
+-- Relico/LF/GeneralEvaluation.lean          (new)  expression evaluation, target
+-- Relico/Correctness/GeneralEvaluation.lean (new)  compileGeneralExpr preserves evaluation
+-- Relico/Tests/GeneralEvaluation.lean       (new)  compile-time pins, incl. the truncation pins
 -- G2a-ii
--- Relico/DTR/GeneralRuntime.lean            (new)  runtime state with continuation; GeneralDtrAction
--- Relico/LF/GeneralRuntime.lean             (new)  runtime state, superdense tag, upd; GeneralLfAction
--- Relico/Tests/GeneralRuntime.lean          (new)  compile-time pins, incl. upd on both delay cases
+-- Relico/DTR/GeneralRuntime.lean            (new)  runtime state with continuation; GeneralLabel
+-- Relico/LF/GeneralRuntime.lean             (new)  runtime state over the REUSED tag; GeneralLabel
+-- Relico/Tests/GeneralRuntime.lean          (new)  compile-time pins, incl. the attached continuation
 -- G2a-iii
 -- Relico/DTR/GeneralSemantics.lean          (new)  Table I's rules, tau classification
 -- Relico/LF/GeneralSemantics.lean           (new)  Table II's rules, with P24's split TIME PROGRESS
@@ -391,18 +394,49 @@ cross-language results in `Correctness/`.
 -- Relico/Correctness/WeakBisimulationTrace.lean    (new)  generic: bisimilarity to trace agreement
 ```
 
-The two transition relations are `GeneralDtrStep sourceModel config action configAfter` and
-`GeneralLfStep program state action stateAfter`. **Neither takes a cohort parameter** — §4's one deliberate
+The two transition relations are `DTR.GeneralStep sourceModel config label configAfter` and
+`LF.GeneralStep program state label stateAfter`. **Neither takes a cohort parameter** — §4's one deliberate
 deviation from the multi-store precedent, for §3's reason.
 
-**The action types are two, and neither is named `GeneralAction`.** This section first specified a single
+They are **not** spelled `GeneralDtrStep` and `GeneralLfStep`, which this section specified first and which
+the label-naming paragraph below argues against without having applied its own reasoning here. The corpus
+settles it: twenty-two step inductives are declared on both sides and not one carries a `Dtr` or `Lf` infix —
+`DTR.DetailedMultiStorePayloadStep` beside `LF.DetailedMultiStorePayloadStep`, and a bare `Step` on each side
+in `DTR/Semantics.lean` and `LF/Semantics.lean`. One name in two namespaces, as with the labels. **F71.**
+
+**The label types are two, and neither is named `GeneralAction`.** This section first specified a single
 `action : GeneralAction` carrying a `tau` constructor. That name is already taken:
 `Relico/LF/GeneralSyntax.lean` declares `structure GeneralAction`, the LF **logical action declaration**,
 between `GeneralStateVariableDecl` and `GeneralTrigger`. Reusing it would collide, and would put "LF
 logical action" and "LTS label" behind one identifier in a development whose entire subject is the
-correspondence between labels. `GeneralDtrAction` and `GeneralLfAction` are declared separately, which
-`ϕ : Act_1 → Act_2` argues for independently — a bijection between two action sets needs two types — and
-which preserves the `map_A` / `map_M` naming content stages E and F built. F66 part 7.
+correspondence between labels. Two types are declared separately, which `ϕ : Act_1 → Act_2` argues for
+independently — a bijection between two action sets needs two types — and which preserves the
+`map_A` / `map_M` naming content stages E and F built. F66 part 7.
+
+They are spelled `DTR.GeneralLabel` and `LF.GeneralLabel`, not the `GeneralDtrAction` and
+`GeneralLfAction` this section specified first. Three measurements forced the change and none of them
+touches the reasoning above: the repository declares **thirty-nine** `…Label` inductives for transition
+labels — thirty-seven predating G2a-ii, which contributes the other two — and **zero** `…Action`
+inductives, so `Label` is the house word; `GeneralLfAction` would not
+actually have removed the collision, since it would live in `namespace LF` one word away from
+`LF.GeneralAction`, whereas `LF.GeneralLabel` does remove it; and the `Dtr`/`Lf` infix is redundant inside
+`namespace DTR` and `namespace LF` and breaks the symmetry G2a-i established, where `DTR.GeneralValuation`
+and `LF.GeneralValuation` are one name in two namespaces. The paper's `Act` sets are unchanged and nothing
+in Theorem 1 reads an identifier, so this is a naming decision rather than a divergence; it is recorded in
+full in `Relico/DTR/GeneralRuntime.lean`'s module docstring, at the point of the decision.
+
+**The superdense tag and `upd` are reused, not built.** This section listed them as G2a-ii's work. They
+already exist, proved, from vertical slice v0 — `LF.Tag`, `LF.Tag.schedule` (which *is* the paper's `upd`),
+the lexicographic `LF.Tag.PrecedesOrEqual`, and its monotonicity lemma `Tag.precedesOrEqual_schedule`. What
+G2a-ii genuinely adds to the tag is narrower and scheduler-shaped: decidability, transitivity and
+totality of that order, absent until now because every earlier consumer proves one specific inequality
+rather than computing a minimum. **F69** carries the correction and the method error that produced it.
+
+**`Relico/Common/WeakTransition.lean` is instantiated, not rebuilt.** `TauSteps`, `WeakStep` and
+`observableProjection` are already generic and already proved, over an arbitrary `isTau : Label → Prop`.
+That signature reaches back into this obligation: G2a-ii's two `isTau` functions must be `Prop`-valued
+rather than `Bool`-valued, and each label type owes a `project` this section never mentioned. G2c and G2d
+instantiate the foundation. **F70**.
 
 **Theorems, in dependency order.**
 
@@ -623,31 +657,33 @@ two Lake jobs and moved no PASS line, because a tests-only module contributes co
 than gate output.
 
 **This table was resliced on 2026-08-24.** Row 3 previously read *"**G2a**
-`Relico/Semantics/GeneralLTS.lean` — both LTSs, the action type, the τ classification | 1 | 514"*. That is
-wrong by nine modules and by nine jobs: the general family has no evaluator, no runtime state and no step
-relation to build an LTS over, so G2a is three commits rather than one, and the stage is **twelve** commits
-rather than nine — eleven from the reslice plus the docs commit the reslice itself owes, row 3 below.
-**F66 parts 1 and 2** carry the measurement; **F66 part 3** is why none of the modules sits under
-`Relico/Semantics/`.
+`Relico/Semantics/GeneralLTS.lean` — both LTSs, the action type, the τ classification | 1 | 514"*. One
+module and one job where the honest decomposition is **ten modules and ten jobs**: the general family has no
+evaluator, no runtime state and no step relation to build an LTS over, so G2a is three commits rather than
+one, and the stage is **twelve** commits rather than nine — eleven from the reslice plus the docs commit the
+reslice itself owes, row 3 below.
+**F66 parts 1 and 2** carry the measurement, corrected from nine modules to ten by **F67 part 5**;
+**F66 part 3** is why none of the modules sits under `Relico/Semantics/`.
 
 | # | Content | New modules | Predicted jobs |
 |---|---|---|---|
 | 1 | This design + the F63 doc batch (docs only, no build owed) | 0 | 511 ✅ |
 | 2 | **G1** `Relico/DTR/GeneralActorSelection.lean` + `Relico/Tests/GeneralActorSelection.lean` | 2 | 513 ✅ |
 | 3 | P24, F66, this revision, one stale count in `STAGE_C_DESIGN.md` (docs only, no build owed) | 0 | 513 |
-| 4 | **G2a-i** `DTR/GeneralEvaluation` + `LF/GeneralEvaluation` + `Tests/GeneralEvaluation` — expression and statement evaluation on both sides | 3 | 516 |
-| 5 | **G2a-ii** `DTR/GeneralRuntime` + `LF/GeneralRuntime` + `Tests/GeneralRuntime` — runtime state with continuations, the superdense tag and `upd`, `GeneralDtrAction` and `GeneralLfAction` | 3 | 519 |
-| 6 | **G2a-iii** `DTR/GeneralSemantics` + `LF/GeneralSemantics` + `Tests/GeneralSemantics` — both step relations, the τ classification, P24's split `TIME PROGRESS`, the zero-delay regression pin | 3 | 522 |
-| 7 | **G2b** `Correctness/GeneralCorrespondence` + `Correctness/GeneralTimeEquivalence` — `R`, its initial case, Lemma 1 | 2 | 524 |
-| 8 | **G2c** `Correctness/GeneralWeakBisimulation` — Lemmas 2 and 3 at run level, then both transfer conditions | 1 | 525 |
-| 9 | **G2d** `Correctness/WeakBisimulationTrace` — the generic finite-trace corollary, aims 8 and 9 | 1 | 526 |
-| 10 | **G3** the `lfc` priority-attribute probe, then the LF well-formedness clause and the three theorem restatements | 0 | 526 |
-| 11 | **G5** `trace` on both sides, printer, statement walk, witness model, new gate marker | 0–1 | 526–527 |
+| 4 | **G2a-i** `DTR/GeneralEvaluation` + `LF/GeneralEvaluation` + `Correctness/GeneralEvaluation` + `Tests/GeneralEvaluation` — expression evaluation on both sides, and that `compileGeneralExpr` preserves it | 4 | 517 |
+| 5 | **G2a-ii** `DTR/GeneralRuntime` + `LF/GeneralRuntime` + `Tests/GeneralRuntime` — runtime state with continuations, the two `GeneralLabel` types with their τ classification and observable projection, and the three tag-order facts a scheduler needs. The superdense tag and `upd` are **reused, not built** — see **F69**; `isTau` is `Prop`-valued and each label owes a `project` because `Common.WeakTransition` demands it — see **F70** | 3 | 520 |
+| 6 | **G2a-iii** `DTR/GeneralSemantics` + `LF/GeneralSemantics` + `Tests/GeneralSemantics` — both step relations, the τ classification, P24's split `TIME PROGRESS`, the zero-delay regression pin | 3 | 523 |
+| 7 | **G2b** `Correctness/GeneralCorrespondence` + `Correctness/GeneralTimeEquivalence` — `R`, its initial case, Lemma 1 | 2 | 525 |
+| 8 | **G2c** `Correctness/GeneralWeakBisimulation` — Lemmas 2 and 3 at run level, then both transfer conditions, **instantiating** `Common.TauSteps` and `Common.WeakStep` rather than restating either — see **F70** | 1 | 526 |
+| 9 | **G2d** `Correctness/WeakBisimulationTrace` — the generic finite-trace corollary, aims 8 and 9, over `Common.observableProjection`, which is already proved with its three `@[simp]` lemmas — see **F70** | 1 | 527 |
+| 10 | **G3** the `lfc` priority-attribute probe, then the LF well-formedness clause and the three theorem restatements | 0 | 527 |
+| 11 | **G5** `trace` on both sides, printer, statement walk, witness model, new gate marker | 0–1 | 527–528 |
 | 12 | **G6** the fragment declaration and the theorem-eligibility table (docs only) | 0 | — |
 
-The stage's endpoint is therefore an estimate near **526**, and the binding prediction is the one on each
+The stage's endpoint is therefore an estimate near **527**, and the binding prediction is the one on each
 commit's own row — which is where this project's prediction discipline can actually check it, a commit at a
-time, rather than at a stage boundary eight commits away.
+time, rather than at a stage boundary eight commits away. Row 4 gained a module and every row below it
+gained a job after G2a-i was written; **F67 part 5** carries that correction and the reason.
 
 Commit 8 is the largest single step in the stage and the one most likely to split; if it does, the split
 runs along Lemma 2 / Lemma 3 / transfer conditions, which are three independently statable results.
@@ -744,6 +780,21 @@ Stated as falsifiable predictions, so that a failure is informative rather than 
    the paper's; if it cannot, that is a finding about the well-formedness predicate's coverage rather than
    about the evaluator.
 
+   **Outcome, recorded rather than substituted.** Evaluation is partial — all three causes this item
+   anticipated are real, and `Relico/DTR/GeneralEvaluation.lean` names them: an absent binding, an operand
+   type mismatch (`DTR.GeneralExpr`'s own docstring declines to enforce type-correctness), and a zero
+   divisor. But the item's **second branch is wrong**, and reading it as written would mislead G2a-iii into
+   work it does not owe. Partiality does *not* propagate into the rules and is *not* a finding about
+   well-formedness coverage, because the rules premise `evaluate … = some v`: where evaluation fails no
+   transition exists, the configuration is simply stuck, and
+   `Correctness.compileGeneralExpr_evaluation_none_iff` proves the two sides fail in exactly the same cases,
+   so a stuck source configuration has a stuck target counterpart. Nothing asymmetric is claimed and no rule
+   acquires a case. What partiality *does* cost is a fragment restriction for the zero-divisor cause alone,
+   because there the emitted C++ has undefined behaviour rather than a stuck state — **F67 part 4**, which
+   G6 owes and which also asks for a guard refusing the syntactically decidable instances. The precedent for
+   pairing a partial evaluator with a relative totality theorem is `DTR/StoreEvaluation.lean`, which this
+   item did not consult.
+
 **What this section got wrong, recorded because the section's whole purpose is to be checkable.** Not one
 of F66's seven parts appears above, and F66 part 2 alone changed the stage from nine commits to twelve. The
 reason is visible in how the items are phrased: every one of them asks *what might go wrong when this is
@@ -751,6 +802,28 @@ built*, and none asks *does what this plan names already exist, and does it say 
 different questions, and the second is answerable with `ls` and `grep` in minutes. The transferable rule
 now recorded in F66: **a design section that names a deliverable, a directory, an identifier or a rule
 should be checked against the artefact before the stage it governs opens.**
+
+**And the rule, once written here, was broken twice more — which says something the rule itself does not.**
+**F69** and **F70** are both instances of it: §7 and §13 named the superdense tag and `upd` as G2a-ii's work
+when four tag definitions already existed proved from v0, and named weak bisimulation as G2c's work when
+`Relico/Common/WeakTransition.lean` already proves it generically. Neither was caught by the F66 sweep,
+because that sweep checked *modules and identifiers* — things with names one can `ls` for — while what was
+missed here is a **proved theorem** and a **signature**. So the rule needs a second clause: ask not only
+whether the named artefact exists, but whether the *property* about to be proved is already proved
+somewhere, and whether an existing generic definition's argument types already dictate the shape of what is
+about to be declared. F70 is the sharper of the two, because its constraint reached **backwards** three
+commits — a foundation G2c consumes forced two declarations in G2a-ii — and no check that reads a design
+section in isolation can see that.
+
+**A third instance, and it is the cheapest kind to prevent.** **F71**: this section's respelling of the two
+label types settled that a `Dtr`/`Lf` infix is redundant inside `namespace DTR` and `namespace LF` — and §7
+went on specifying `GeneralDtrStep` and `GeneralLfStep` for the two step relations eleven lines above the
+paragraph making that argument. Unlike F69 and F70, nothing had to be measured to catch this beyond running
+the grep the decision itself implies; the failure was of *scope*, applying a decision to the identifiers that
+prompted it rather than to the convention it establishes. The same paragraph had also gone stale twice over —
+`action` where the later paragraph says `label`, and a cohort read off a configuration type G2a-ii replaced.
+That last one is the instructive part: a design sentence can be falsified by a *neighbouring obligation's*
+decision, with nobody editing the sentence.
 
 
 ## 15. Decisions, and how each was settled

@@ -331,19 +331,24 @@ structure (see Part 7). A grep for a general-family `eval` declaration returns n
 stops at the ready-cohort layer, and G1 added selection on top of it — the family reaches the point of
 deciding *which* actor runs and has never said what running *is*.
 
-### Part 2 — so §7's "one file, one Lake job" is wrong by nine modules
+### Part 2 — so §7's "one file, one Lake job" is really ten modules and ten jobs
 
 §13's work-plan row read `| 3 | **G2a** Relico/Semantics/GeneralLTS.lean — both LTSs, the action type, the
 τ classification | 1 | 514 |`. The honest decomposition, at the granularity Part 5 forces:
 
 | Commit | Modules | Jobs |
 |---|---|---|
-| G2a-i | `Relico/DTR/GeneralEvaluation.lean`, `Relico/LF/GeneralEvaluation.lean`, `Relico/Tests/GeneralEvaluation.lean` | 513 → 516 |
-| G2a-ii | `Relico/DTR/GeneralRuntime.lean`, `Relico/LF/GeneralRuntime.lean`, `Relico/Tests/GeneralRuntime.lean` | 516 → 519 |
-| G2a-iii | `Relico/DTR/GeneralSemantics.lean`, `Relico/LF/GeneralSemantics.lean`, `Relico/Tests/GeneralSemantics.lean` | 519 → 522 |
+| G2a-i | `Relico/DTR/GeneralEvaluation.lean`, `Relico/LF/GeneralEvaluation.lean`, `Relico/Correctness/GeneralEvaluation.lean`, `Relico/Tests/GeneralEvaluation.lean` | 513 → 517 |
+| G2a-ii | `Relico/DTR/GeneralRuntime.lean`, `Relico/LF/GeneralRuntime.lean`, `Relico/Tests/GeneralRuntime.lean` | 517 → 520 |
+| G2a-iii | `Relico/DTR/GeneralSemantics.lean`, `Relico/LF/GeneralSemantics.lean`, `Relico/Tests/GeneralSemantics.lean` | 520 → 523 |
 
-Nine modules where the design named one, and nine Lake jobs where it predicted one. The stage's endpoint of
-518/519 jobs is therefore void; the revision restates it as an estimate near **526** and moves the binding
+**This table was itself one module short when first written, and is corrected above — see F67 part 5.**
+G2a-i's fourth module is the `Correctness/` one, omitted because part 2 was written before part 3's
+convention was applied to it: a theorem about `Translation.compileGeneralExpr` cannot live in either
+language's module without inverting the dependency. The count below reads *ten* for the same reason.
+
+Ten modules where the design named one, and ten Lake jobs where it predicted one. The stage's endpoint of
+518/519 jobs is therefore void; the revision restates it as an estimate near **527** and moves the binding
 prediction onto each commit's own row, which is where the project's prediction discipline can actually
 check it.
 
@@ -428,9 +433,17 @@ already declares `structure GeneralAction` — the LF **logical action declarati
 `GeneralStateVariableDecl` and `GeneralTrigger`. Declaring an LTS label type of that name in the `LF`
 namespace is a clash, and declaring it anywhere is worse than a clash: it would put "LF logical action" and
 "LTS label" behind one identifier in a development whose whole subject is the correspondence between labels.
-The revision uses `GeneralDtrAction` and `GeneralLfAction`, which the paper's own `ϕ : Act_1 → Act_2` argues
-for independently — a bijection between two action sets needs two types, and collapsing them to one would
-also erase the `map_A` / `map_M` naming content stages E and F built.
+The revision therefore declares **two** label types rather than one, which the paper's own `ϕ : Act_1 → Act_2`
+argues for independently — a bijection between two action sets needs two types, and collapsing them to one
+would also erase the `map_A` / `map_M` naming content stages E and F built.
+
+The names this part first proposed, `GeneralDtrAction` and `GeneralLfAction`, are **not** the names that
+landed. G2a-ii declares `DTR.GeneralLabel` and `LF.GeneralLabel`; three measurements taken while writing the
+modules forced the respelling, and one of them is that `GeneralLfAction` would not have removed the very
+collision this part identifies, since it would have lived in `namespace LF` one word away from
+`LF.GeneralAction`. Nothing in the argument above changes — there are still two types, still one per
+language. `docs/STAGE_G_DESIGN.md` §13 carries the measurements, and
+`Relico/DTR/GeneralRuntime.lean`'s module docstring carries them at the point of the decision.
 
 ### One dependency stated rather than assumed: the single store
 
@@ -460,4 +473,597 @@ with one risk, which F64 then voided; none of these seven appear there, because 
 what might go wrong rather than by reading what is already there. **A design section that names a deliverable
 should be checked against `ls` and `grep` before the stage it governs opens**, and the check costs minutes
 against the several commits it saves.
+
+---
+
+## F67 — the general fragment's arithmetic is C++'s rather than chosen, division by zero is unguarded target undefined behaviour, and the correctness theorem is structurally unable to notice either
+
+*Read* for the target semantics and for both absence claims; *inferred* for the undefined-behaviour
+consequence, which names the fragment restriction that would settle it. Found while writing G2a-i's
+evaluators — the first modules in the general family that have to say what an operator *computes* rather
+than how it is spelled.
+
+### Part 1 — the operator semantics was never a modelling choice
+
+`LF.renderGeneralBinaryOp` emits `.div` as `"/"` and `.mod` as `"%"`, and its docstring already states why
+those spellings needed no `lfc` probe: every operator "appears inside a `{= … =}` block where the text is
+verbatim C++, so the spellings are guaranteed by the C++ standard rather than by anything about LF."
+
+That argument is correct, and it proves more than it claims. The same standard that fixes the *spelling*
+fixes the *arithmetic*: since C++11, integer division truncates toward zero and the remainder takes the
+sign of the dividend. So the general fragment's `/` and `%` are not operators this development gets to
+define — they are `Int.tdiv` and `Int.tmod`, and a model built on `Int.ediv`/`Int.emod` or on flooring
+division would agree with the emitted program on non-negative operands and disagree at `(-7) / 2`, which
+would make the correctness result a false statement about the artefact the tool produces.
+
+### Part 2 — there was no in-repo precedent, so the choice had to come from the target
+
+A repository-wide search for `Int.div`, `Int.mod`, `Int.tdiv`, `Int.tmod`, `Int.ediv`, `Int.emod`,
+`Int.fdiv` and `Int.fmod` across `Relico/`, excluding the two new evaluator modules, returns **nothing**.
+Five families of source semantics and four printers existed before stage G and not one of them ever divided
+an integer: the older families' expression languages have `+`, `-` and `*` and stop there.
+
+This is worth recording rather than filing as a triviality, because the project's usual safeguard was
+unavailable. Every other operator in G2a-i could be checked against an existing definition; these two had
+to be derived from the target's standard, and a wrong derivation would have been invisible to every
+instrument the repository owns. Which is Part 3.
+
+### Part 3 — the theorem that ought to catch a wrong choice cannot see it
+
+`Correctness.compileGeneralExpr_preserves_evaluation` is a **relative** statement: it says the two sides
+compute the same thing. Replace `Int.tdiv` with `Int.fdiv` and `Int.tmod` with `Int.fmod` in *both*
+`DTR.GeneralBinaryOp.apply` and `LF.GeneralBinaryOp.apply` and every theorem in G2a-i still holds — the two
+sides would still agree, and would simply agree on the wrong answer. The build stays green and the
+development now contains a false claim about generated C++.
+
+The only instrument that discriminates is a value pin at a **negative dividend**, because that is the sole
+input class on which truncating and flooring division differ: `-7 / 2` is `-3` truncating and `-4`
+flooring; `-7 % 2` is `-1` truncating and `1` flooring. `Relico/Tests/GeneralEvaluation.lean` therefore
+pins all four values, on both sides, as **literals**.
+
+Stating them as literals rather than as `Int.tdiv (-7) 2` is the load-bearing detail, and the reason is
+already on the record: **F60** is an entry about an assertion that was invariant under the very sort it was
+credited with pinning. An expected value written in terms of the function under test is a tautology that
+holds under any definition of it. The general lesson is that a *correspondence* theorem between two models
+can never establish either model's fidelity to a third thing — here, a C++ compiler — and only an absolute
+pin can.
+
+### Part 4 — a divide-by-zero program is well-formed, translated, printed, and undefined
+
+Division by zero is undefined behaviour in C++. The evaluators return `none`, which makes both sides stuck
+at the same statement and so keeps Theorem 1 true; `Correctness.compileGeneralExpr_evaluation_none_iff`
+proves the failure corresponds. But being stuck is not what the emitted program does, so the correctness
+result transfers to real target behaviour only on executions in which no division or modulo by zero occurs.
+
+And nothing excludes such a program. `DTR.GeneralWellFormed` places no restriction on expressions at all —
+it resolves the names an expression mentions and stops — so `x / 0` passes well-formedness, is translated,
+is printed, and reaches `lfc`. The gap is not hypothetical or hard to trigger; it is one literal.
+
+**This is where the project's target-fault doctrine applies, and where the current modules deliver only
+half of it.** The standing rule is that when a limitation is the *target's* fault, dependent source models
+go out of scope through a **checkable guard refusal plus a stated fragment restriction** — never through a
+quietly narrowed theorem. G2a-i's module notes state the fragment restriction and hand its declaration to
+G6. They do not propose a guard, and they should, because part of this defect *is* syntactically decidable:
+
+- **Decidable, so it should be refused.** A literal zero divisor — `.binary .div e (.intLiteral 0)` and the
+  `.mod` counterpart — is visible in the syntax tree. A well-formedness clause can reject it, and then a
+  refusal test can pin the rejection, which is the shape every other target limitation in this project has
+  been given since stage E.
+- **Undecidable, so it belongs in the fragment restriction.** `x / y` where `y` is zero only on some
+  execution cannot be refused without an analysis nothing here has. That residue is what G6 declares.
+
+**Sequencing is a decision, not an inference, and it is flagged rather than taken.** Adding this clause
+touches landed stage-E code and collides with **G3**, which is already scheduled to add a clause of its own
+for a populated LF reaction priority. Two clauses arriving in either order both renumber the same list, and
+**F49** is an entry about that exact hazard: its "ninth clause" prose is *positional*, so it must be
+re-read at each addition rather than mechanically renumbered. Whether the divide-by-zero guard lands before
+G3, after it, or is folded into G6 as restriction-only is left open here.
+
+### Part 5 — F66's own work-plan table is one module short, and F66 states the rule that makes it so
+
+F66 part 2 replaced §13's single-module `G2a` row with a three-commit decomposition, and gave G2a-i as
+`DTR/GeneralEvaluation.lean`, `LF/GeneralEvaluation.lean` and `Tests/GeneralEvaluation.lean` — three modules,
+513 → 516 jobs. Writing the commit showed it is **four**.
+
+The missing module is `Relico/Correctness/GeneralEvaluation.lean`, and it is missing for a reason F66 itself
+supplies. `Translation.compileGeneralExpr` is defined in `Relico/Translation/GeneralBasic.lean`, which
+imports both languages; a theorem about it therefore cannot live in either language's module without
+inverting the dependency. F66 **part 3** states the convention exactly — "source semantics live in `DTR/`,
+target semantics in `LF/`, and cross-language results in `Correctness/`" — and part 2's table then omits the
+`Correctness/` module that convention requires. The precedent it should have been read against is
+`Relico/Correctness/ExpressionStore.lean`, which is the integer-only family's module of precisely this kind.
+
+Two consequences beyond the count. The §7 deliverable list described G2a-i's two evaluators as "expression +
+statement evaluation" on each side, which cannot be right under the reslice: statement evaluation needs the
+continuation that G2a-ii introduces, so G2a-i is expression evaluation only. And every job number downstream
+of G2a-i moves by one — the corrected chain is 513 → **517** → 520 → 523 → 525 → 526 → **527**, and the
+stage endpoint estimate becomes **527**. Both documents are corrected in place; this part exists so that a
+reader who finds the old numbers quoted elsewhere can tell which way the correction ran.
+
+### Why this matters for the paper
+
+Parts 1 through 4 are a fragment question, and the paper currently has no sentence for it. Any theorem
+statement about the general fragment has to say *division-and-modulo-by-zero-free* alongside
+*conditional-free*, or it claims correctness for programs whose target behaviour is undefined — and **F63**
+is already an entry about a headline claim quantified over a fragment nothing declared. Part 3 is the
+sharper point for a referee: a mechanised correspondence between a source model and a target model is
+evidence about the translation and *no* evidence about either model's fidelity to the real compiler, so the
+absolute pins are not test hygiene but part of the argument.
+
+### The transferable check
+
+**When a model's behaviour is dictated by an external standard rather than chosen, the correspondence
+theorem cannot check it — so pin it absolutely, at an input where the plausible wrong answers differ.**
+Choosing the input matters as much as writing the pin: every non-negative dividend makes truncating,
+flooring and Euclidean division agree, so a pin at `7 / 2` would have looked like coverage while testing
+nothing. The generalisation of F60 is that an assertion earns its place only if some specific wrong
+implementation fails it, and it is worth naming that implementation when the pin is written.
+
+---
+
+## F68 — the AST fixes the absent-priority ordering convention for message servers only, and three sites credit it for actor priority as well
+
+**Provenance:** parts 1–3 **measured** (`grep`/`sed` over the named files, 2026-08-24); part 4 **read**;
+the repair **decided**, with the rejected alternative stated.
+
+Filed here rather than in [`STAGE_F_FINDINGS.md`](STAGE_F_FINDINGS.md) because that file's header already
+closes stage F's range at **F62** and directs the reader onward — *"F63 onward is in
+`STAGE_G_FINDINGS.md`"* — so the pointer a reader follows from stage F lands here without a new
+cross-reference. The subject matter is stage F's; the discovery is stage G's, made while verifying a cite
+that stage G's authoring had flagged as suspicious.
+
+### 1. What the AST actually says
+
+Both priority fields exist and both default to absent — `DTR.GeneralMessageServer.priority : Option Nat
+:= none` and `DTR.GeneralActorInstance.priority : Option Nat := none`. So absence is **representable**
+for both. What is stated for only one is how absence **orders**.
+
+`Relico/DTR/GeneralSyntax.lean:335-337` sits inside **`GeneralMessageServer`**'s docstring and opens by
+naming its subject:
+
+> *"`priority` is local message-server priority. An absent priority is a priority class in its own right
+> and is ordered after every explicit one, which is the convention the earlier payload family already
+> fixed."*
+
+The second source usually cited beside it, `:385-386`, is the projection
+`GeneralReactiveClass.messageServerPriorities` — message-server again.
+
+`GeneralActorInstance`'s own docstring says only:
+
+> *"`arguments` are the positional constructor arguments. `priority` is actor-level priority and is
+> independent of message-server priority."*
+
+It is **silent on absence**. Nothing in the AST says how an unannotated actor instance orders.
+
+### 2. Three sites credit the AST for actor priority anyway
+
+- **`Relico/DTR/GeneralPriority.lean:21`** — *"The convention is inherited, not chosen here."* plus
+  *"discharges the paper's P5 … and the tie half of P4 at the AST level"*. This is the **generic**
+  module, and its two instantiations are `GeneralActorPriority` and `GeneralMessageServerPriority`, so
+  the claim covers actor priority.
+- **`Relico/Translation/GeneralRouting.lean:1494`** — *"An unannotated **instance** is a priority class of
+  its own … that convention is the AST's, at `Relico/DTR/GeneralSyntax.lean:335-337`"*. Explicitly about
+  instances, cited to message-server text.
+- **`docs/STAGE_F_DESIGN.md` §4.1** — lists **both** priority fields, then *"More importantly, the AST
+  **already fixed the absence convention**, and stage F inherits it rather than choosing it"*, quoting
+  only the two message-server sources. This is the load-bearing site, because the paper is drafted from
+  these documents.
+
+The control that shows the defect is scope rather than citation: **`Relico/Translation/GeneralBasic.lean:1723`**
+makes the *same* cite to the *same* lines and is **correct**, because it speaks of an unannotated
+*server*. One citation, four uses, three of them over-scoped.
+
+### 3. Where the convention is really fixed
+
+`DTR.GeneralPriority.PriorityPrecedesOrEqual`, a generic order on `Option Nat` with four arms
+(`some/some` numeric, `some/none` true, `none/some` false, `none/none` true), whose docstring states it
+directly: *"Explicit priorities compare numerically, every explicit priority precedes an absent one, and
+two absences tie."* `GeneralActorPriority.priorityOf` merely projects `actor.priority` into it.
+
+So for actor priority the convention is fixed by a **shared, type-checked definition** — which is
+strictly better evidence than a docstring, and is the thing the design should have been claiming.
+
+### 4. The module contradicted a rationale written five lines above it
+
+`Relico/DTR/GeneralPriority.lean:14-19` argues against monomorphic copies on exactly this ground:
+
+> *"§1.1 … argues that the two levels compose … **on the assumption that both use the same convention for
+> an absent priority**. Two copies could drift on exactly that point, and the drift would be invisible …
+> Sharing one definition makes the shared convention a type-checked fact instead of a comment."*
+
+Two lines later the same docstring credited the AST with fixing the convention. The correct account was
+already written immediately above the incorrect one — the same shape as **F53**, where three
+"by construction" claims outlived the findings that refuted them, and as **F49**, where a docstring
+argued away a clause it sat beside.
+
+### Why this matters for the paper
+
+**P5** (priorities may be absent) and the tie half of **P4** are genuinely discharged; the defect is
+*where*. For actor priority they are discharged at the **sort** level, not the AST level. A paper
+sentence sourced from §4.1 would therefore be false of one of the two priorities it covers — and, less
+obviously, would **understate** the project's own guarantee, since one shared type-checked order is
+stronger than two independently worded docstrings that could drift.
+
+Stage F's own design corroborates that "already fixed" could not have been true of actor priority: the
+paragraph directly beneath the corrected sentence records that `GeneralActorInstance.priority` was read
+by *exactly one* place in the repository, *"inside a predicate that nothing enforces"*, and that level 1
+introduced *"the first consumer of actor priority in the translation"*. A convention cannot have been
+already fixed for a field nothing ordered.
+
+### The repair, and the alternative rejected
+
+The tempting repair is to **add** the absence sentence to `GeneralActorInstance`'s docstring, making all
+three cites true. **Rejected:** five cites into `Relico/DTR/GeneralSyntax.lean` sit above line 407
+(`:409`, `:422`, `:436`, and `:685` twice), so inserting lines at `GeneralActorInstance` shifts all five,
+and this project's standing rule is that **no line-number arithmetic detects a stale Lean cite** — each
+would need re-verifying, turning a two-docstring fix into a five-claim sweep.
+
+Adopted instead: rewrite the two *citing* docstrings, **line-neutral**, so nothing moves. Verified after
+editing — `GeneralPriority.lean` is still 1490 lines with `PriorityPrecedesOrEqual` still at `:55`, and
+`GeneralRouting.lean`'s closing `-/` is still at `:1495` with the two filed unused-`simp` warnings still
+at `:3790`/`:3796`. `docs/STAGE_F_DESIGN.md` §4.1 receives a **dated correction blockquote** beside the
+original rather than a substitution, per the convention `docs/STAGE_G_DESIGN.md` §14 uses; safe to append
+to because the only line-cites into that file are `:18`.
+
+### The transferable check
+
+**A citation can be accurate and mis-scoped at the same time, and only one of those is detectable by
+re-reading the cited lines.** The quoted text really is at `:335-337`; it is simply about a narrower
+subject than three of its four users needed. Line-number verification — the check this project runs
+often — catches staleness and is *blind* to over-scoping.
+
+So when a cite supports a claim about **two** things, check that the cited text mentions both; and prefer
+citing the **declaration whose docstring states the convention, by name**, over a line range that merely
+happens to contain the sentence. Here the honest cite is
+`DTR.GeneralPriority.PriorityPrecedesOrEqual`, which needs no line number and cannot go stale.
+
+---
+
+## F69 — the design specified four already-proved definitions as new work, and the method that produced the error would have landed a second definition of the tag order
+
+**Status:** corrected in `docs/STAGE_G_DESIGN.md` §7 and §13 before any of G2a-ii was built. No duplicate
+declaration reached a commit.
+
+### What the design said, and what the repository already had
+
+`docs/STAGE_G_DESIGN.md` §13's work plan listed G2a-ii as delivering *"runtime state with continuations, the
+superdense tag and `upd`"*, and §7's module table said *"runtime state, superdense tag, upd"*. Four of the
+things that phrasing covers already existed, proved, since vertical slice v0:
+
+| Design treats as new | Already exists | Where |
+|---|---|---|
+| the superdense tag | `structure LF.Tag` with `time` and `microstep` | `Relico/LF/State.lean` |
+| `upd` | `LF.Tag.schedule`, with `schedule_zero`, `schedule_positive`, `schedule_time` | `Relico/LF/State.lean` |
+| the tag order | `LF.Tag.PrecedesOrEqual`, lexicographic, plus five companion lemmas | `Relico/LF/Scheduling.lean` |
+| that `upd` never moves a tag earlier | `LF.Tag.precedesOrEqual_schedule` | `Relico/LF/PendingNotPast.lean` |
+
+`Tag.schedule` is not merely tag-shaped — it **is** P24's `upd`, branch for branch: a zero delay keeps the
+time and advances the microstep, a positive delay advances the time and resets the microstep to zero.
+
+### What is genuinely missing, and why it is missing
+
+`LF.Tag.PrecedesOrEqual` has no `Decidable` instance, no transitivity and no totality. Verified absent under
+any name rather than absent from one file.
+
+The reason is the interesting part, because it says which obligation owes them. Every existing consumer —
+thirty-three modules use the order, in `LF`, `Correctness` and `Tests` alike — proves **one specific
+inequality**: this pending action is not before the current tag, that microstep cannot precede this one.
+None of them **computes a minimum**. A scheduler does,
+and a scheduler needs exactly those three: decidability to compute, totality to know a minimum exists,
+transitivity to know the computed one is least. So the gap is real but narrower than the design implied,
+and it is scheduler-shaped rather than tag-shaped. G1 needed the same three facts about its *source*-side
+order one obligation earlier and declared them there; G2a-ii is the target-side other half.
+
+### The method error, which is the transferable part
+
+The false claim was not a slip. It was reached as a **load-bearing docstring argument**, by reading
+`namespace Tag` in `Relico/LF/State.lean`, counting its declarations, and concluding that the block contains
+exactly four — `schedule`, `schedule_zero`, `schedule_positive`, `schedule_time` — none of which compares two
+tags, and therefore that the tag order did not exist. Every step of that is **true of the file and false of
+the type**. `namespace Tag` is opened in four separate files besides the one this obligation
+adds — `State.lean`, `Scheduling.lean`, `PendingNotPast.lean`, `PriorityTimingInvariant.lean` — and the
+last two exist precisely to add tag lemmas from outside the declaring module. `Relico/LF/Scheduling.lean`'s
+block holds `PrecedesOrEqual` and five companion lemmas.
+
+Acting on it produced a draft of `Relico/LF/GeneralRuntime.lean` that declared a parallel `TagPrecedesOrEqual`
+with the same lexicographic body as the landed `LF.Tag.PrecedesOrEqual`, together with lemmas restating
+`precedesOrEqual_schedule` and `precedesOrEqual_refl`. That draft was never written to disk — it was replaced
+during authoring, so unlike most findings here **this one has no in-repo witness**, and the description of it
+is testimony rather than measurement. What is measurable is the state that survived: the landed module reopens
+`namespace Tag` and declares only the three facts that were genuinely absent. The defect avoided is the one
+this development keeps finding in its own history — two definitions of one convention, free to drift, with
+nothing type-checked holding them together — and it would have been introduced here by the module whose
+whole job is to *reuse* the target's tag.
+
+It was also drift against a measurement the project had already made and written down. G1's own module
+docstring in `Relico/DTR/GeneralActorSelection.lean` **cites `LF.Tag.PrecedesOrEqual` by name** as the
+shape `DTR.GeneralActorSelection` mirrors. The information needed to prevent this was one file away, in
+text written by the immediately preceding obligation.
+
+### The transferable check
+
+**A type's API is not the block that declares it.** Before declaring anything, grep the **qualified name**
+repository-wide (`Tag.PrecedesOrEqual`, not `PrecedesOrEqual`) and grep `^namespace <Type>` for every place
+the namespace is reopened. Reading the declaring file is necessary and not sufficient.
+
+The corollary matters as much as the check: because reopening a namespace from a later module is this
+repository's established convention, the right repair for a genuinely missing lemma is to **reopen the
+namespace where it is needed** — never to declare a parallel name in a parallel namespace. G2a-ii adds its
+three facts inside `namespace Tag`, leaving every existing call site untouched.
+
+There is a second, cheaper smell worth naming: a new identifier that gets **zero** grep hits outside the
+file introducing it is suspicious in a corpus this size — either it is genuinely new, or it is a second
+spelling of something that already has a name. That check is what caught F70.
+
+---
+
+## F70 — the weak-transition machinery stage G plans to build is already generic and already proved, and its signature silently constrains the label types G2a-ii declares
+
+**Status:** consumed while authoring G2a-ii. Two declarations in the new runtime modules were changed
+before any build as a direct result.
+
+### What exists
+
+`Relico/Common/WeakTransition.lean` is a 400-line, universe-polymorphic, **family-agnostic** weak-transition
+foundation. It is parameterised on an arbitrary `LabeledTransition State Label` and an arbitrary
+`isTau : Label → Prop`, and it already proves what stage G's §7 describes as work to be done:
+
+* `TauSteps`, the reflexive-transitive closure of τ steps, with `single` and a proved `trans`;
+* `WeakStep`, with its `tau` and `visible` constructors, plus `of_tauSteps`, `of_step` and `tau_refl`;
+* `observableProjection project trace = List.filterMap project trace`, with `_nil`, `_cons_none` and
+  `_cons_some` as `@[simp]` lemmas.
+
+This is a level below **F65**, which found aims 8 and 9 already proved *twice* for the multi-store family.
+F65's two proofs are instances; this is the generic layer they instantiate. So G2c and G2d should
+instantiate `Common.WeakStep` and `Common.observableProjection` rather than restate either, and G2d's
+"generic" file in the work plan is generic over a foundation that is *already* generic.
+
+### The constraint that was not visible from the design
+
+The signature is not neutral about how G2a-ii declares its labels. `TauSteps` and `WeakStep` both take
+`isTau : Label → Prop`. A draft of both runtime modules declared `isSilent : GeneralLabel → Bool` with
+three `@[simp] rfl` lemmas — which would have needed a coercion at every use in G2c and would have become
+a second spelling of one convention, the F69 defect again in a different place. Both were changed to
+`isTau : GeneralLabel → Prop` returning `True`/`False` by pattern match, which is also the built house
+idiom: `Relico/Tests/WeakTransitionFoundation.lean` declares exactly that shape as `exampleIsTau`.
+
+Two consequences follow that a reader of the design would not predict:
+
+1. **No `Decidable` instance on `isTau` is owed.** `Common.WeakStep.of_step` reaches for `classical` before
+   splitting on `isTau`, so the generic development already handles an undecidable τ predicate. This is the
+   opposite of the tag order, where decidability is exactly what F69 says is owed — the two look alike and
+   are not.
+2. **A projection is owed that the design never mentions.** `observableProjection` needs
+   `project : Label → Option Observable`; the draft declared no such function on either label type. Both
+   now declare `project`, with the label type itself as the observable alphabet, following `exampleProject`.
+
+`Relico/Tests/GeneralRuntime.lean` pins both projections **through** `Common.observableProjection` rather
+than in isolation, so the pins assert the composition and not merely the values — if a future edit changed
+either `project`'s type, those two pins stop compiling.
+
+### A second τ convention exists, and it is the one not to follow
+
+`Relico/DTR/DetailedMultiStorePayloadWeakSemantics.lean` and its LF counterpart classify τ with Prop-valued
+**inductives** — `DetailedMultiStorePayloadSilentLabel`, `…VisibleLabel`, one constructor per label case —
+rather than with a function into `Prop`. Both conventions are live and landed. The general family follows
+`Common.WeakTransition`'s function shape, because that is the one the generic machinery consumes; the
+inductive shape would have to be bridged to it.
+
+### The transferable check
+
+**Before building the shape a design names, grep for the shape's *signature*, not just its name.** The
+design said "weak bisimulation" and the repository had `WeakStep` — but the finding that mattered was not
+that a similar thing existed, it was that the existing thing's **argument types** dictated two declarations
+in a module three obligations earlier. A generic foundation constrains its future callers, and that
+constraint is invisible from any document that describes the foundation only by what it proves.
+
+---
+
+## F71 — a naming correction was applied to the identifiers that prompted it and not to their neighbours, and two adjacent claims went stale under the same edit
+
+*Read.* Found while reading `docs/STAGE_G_DESIGN.md` §7 for the names G2a-iii's two step relations should
+carry — that is, by going to the design to be told what to build, and finding it told me two different
+things. Repaired in the design before any G2a-iii Lean was written. Nothing was built against the rejected
+spelling, so this cost a measurement rather than a module.
+
+### The correction that stopped halfway
+
+F66 part 7 rejected `GeneralDtrAction` and `GeneralLfAction` for the two label types, and the reason it gave
+was general: the `Dtr`/`Lf` infix *"is redundant inside `namespace DTR` and `namespace LF`"*, and one name in
+two namespaces is the house convention. That reason does not mention labels. It is a claim about namespacing,
+and it applies verbatim to any identifier the two families both declare.
+
+Yet §7 continued to specify the two step relations as `GeneralDtrStep` and `GeneralLfStep`, in a paragraph
+sitting eleven lines above the one that explains why the infix was wrong for labels. The design therefore
+argued against a convention and specified it in the same section.
+
+Measured before repairing, because "the corpus prefers X" is the kind of claim this project has been wrong
+about twice: **the repository contains twenty-two step inductives declared on both sides, and not one carries
+a `Dtr` or `Lf` infix.** They are one name in two namespaces, without exception —
+`DTR.DetailedMultiStorePayloadStep` and `LF.DetailedMultiStorePayloadStep`, `DTR.MultiStoreStep` and
+`LF.MultiStoreStep`, and in `DTR/Semantics.lean` and `LF/Semantics.lean` a bare `Step` on each side. So the
+names that land are `DTR.GeneralStep` and `LF.GeneralStep`, and `GeneralStep` was free: it had zero hits
+repository-wide before this obligation.
+
+### Two neighbouring claims that went stale under edits that did touch the paragraph
+
+The same §7 sentence at the earlier site carries two more errors, and both are informative because the
+paragraph *was* revised — twice — without either being noticed.
+
+First, it reads `GeneralDtrStep sourceModel config action configAfter`, with `action` where the later
+paragraph already says `label`. The label renaming was applied at the site where the renaming was decided
+and not at the site that merely *uses* the name, which is the identical failure mode one level down.
+
+Second, and more consequential because it is a claim about behaviour rather than spelling: it says the
+relation *"obtains the cohort internally as `GeneralConfiguration.readyActors config`"*. That was true when
+the relation was to range over `GeneralConfiguration`. G2a-ii introduced `GeneralRuntimeConfiguration`, which
+carries continuations, so `config` is no longer a `GeneralConfiguration` and `config.readyActors` does not
+typecheck. The correct expression is `config.erase.readyActors` — and `erase` exists precisely so that this
+inheritance works, as its own docstring in `Relico/DTR/GeneralRuntime.lean` says. The claim was falsified by
+a *different* obligation's design decision, one section away, on the same day.
+
+### What was deliberately left alone
+
+`docs/STAGE_G_FINDINGS.md` F66 part 1 also contains `GeneralDtrStep … action …`, and it is **not** repaired.
+That sentence records what the design specified at the time F66 was written; editing it would rewrite the
+record of a past state to match the present one, which is the opposite of what a findings file is for. The
+two files have different jobs: the design says what will be built and must be true now, the findings say what
+was found and must stay true of then. Note that F66's text preserves `action` while the design has moved to
+`label` — that divergence is the mechanism working, not a defect.
+
+### The check was run, and it is noisy — here is how to read its output
+
+`grep -rnE 'General(Dtr|Lf)[A-Z]'` over every `.lean`, `.md` and `.sh` in the repository returns about
+seventy lines. Four of them mattered. A reader who runs this check and starts editing will do damage, so the
+classification is recorded here:
+
+* **Roughly fifty hits are `frontend/lean-bridge/GeneralLfPrinterTestMain.lean`**, cited by path from
+  documents and docstrings all over the corpus. That is a landed *file* in the bridge harness, not a type in
+  `namespace LF`, and it has no `GeneralDtrPrinterTestMain` counterpart — the convention F66 part 7 settled is
+  about identifiers the two families **both** declare. Out of scope; renaming it would churn fifty citations
+  to fix nothing.
+* **A dozen are the rejected names quoted inside the explanations of why they were rejected** — in
+  `Relico/DTR/GeneralRuntime.lean`, `Relico/LF/GeneralRuntime.lean`, `docs/STAGE_G_DESIGN.md` §7's
+  respelling paragraph, and F66 part 7 itself. Those must stay: an argument against a name has to be able to
+  print the name.
+* **One is a type that was never built.** `docs/STAGE_C_DESIGN.md` mentions a `GeneralLfState` in a sentence
+  explaining that stage C declined to invent one. It has exactly one occurrence repository-wide, nothing
+  declares it, and the role it would have filled is now `LF.GeneralRuntimeState`. Left as written, because a
+  correctly-recorded decision *not* to build something is not a false claim, and a hypothetical name cannot
+  be misspelled.
+* **The four that mattered** are `docs/STAGE_G_DESIGN.md:168` and `:395–396`.
+
+### The transferable check
+
+**A naming decision is a decision about a convention, so grep the convention, not the identifier.** After
+settling that `Dtr`/`Lf` infixes are wrong, the check owed was `grep -nE 'General(Dtr|Lf)[A-Z]'` across every
+document and module — not an edit to the two names under discussion. The same check, run once, would have
+caught both the step relations and the stale `action`. Run it, but classify before editing: on this corpus its
+signal-to-noise is four in seventy.
+
+And the corollary, which is the sharper half: **a design paragraph that names a type is a claim that decays
+when a neighbouring obligation renames the type.** `readyActors config` went false because G2a-ii introduced
+a richer configuration type, not because anyone edited the sentence. So the sweep after introducing a new
+state type is not "which modules mention it" — those do not exist yet — but "which documents describe code
+that will now be written against something else".
+
+
+---
+
+## F72 — `omega` is blind to the `LogicalTime` abbreviation, so two fields of one structure behave differently in one proof, and G1's proofs are not the precedent they appear to be
+
+**Provenance:** the tactic behaviour **measured**, from the diagnostics of the first `lake build` over the
+G2a-ii modules, 2026-08-24 — five failures whose messages enumerate the constraints the tactic collected. That
+transcript is a terminal capture and is **not** a file in this repository, so the reproduction instruction is
+below rather than a path. The three declarations the explanation rests on are **read**, at cited lines. The
+repair is **decided**; the alternative that was not taken is named, and the reason it was not taken is that it
+would have required a measurement this obligation did not need to make.
+
+`LF.Tag` has two fields, declared in `Relico/LF/State.lean`:
+
+```lean
+structure Tag where
+  time : LogicalTime
+  microstep : Nat
+```
+
+`LogicalTime` is `abbrev LogicalTime := Nat`, at `Relico/Common/Time.lean:10`. The two fields are therefore
+the same type. **`omega` does not treat them as the same type.** A hypothesis or goal whose comparison is at
+`LogicalTime` is silently ignored; the identical comparison at `Nat` is used.
+
+### The measurement
+
+G2a-ii's target-side runtime module owes a `Decidable` instance, transitivity and totality for
+`Tag.PrecedesOrEqual`, whose body is
+`left.time < right.time ∨ (left.time = right.time ∧ left.microstep ≤ right.microstep)` — one comparison per
+field. Written with `omega` discharging the arithmetic, five goals failed across the two theorems, and
+`omega`'s own diagnostics name the cause without ambiguity, because it prints the constraints it collected:
+
+* Where the branch had only time facts in context — `left.time < middle.time` and `middle.time < right.time`,
+  concluding `left.time < right.time` — the message was **"No usable constraints found."** Two usable
+  hypotheses were in scope and none was seen.
+* Where the branch mixed the fields, every collected atom was a microstep. Concluding `left.time < right.time`
+  from `left.time < middle.time` and `middle.time = right.time`, alongside an incidental
+  `middle.microstep ≤ right.microstep`, `omega` reported a counterexample over
+  `a := ↑right.microstep, b := ↑middle.microstep` only. The two time hypotheses and the time goal contributed
+  nothing.
+* The reverse case is the control, and it is decisive. In the totality proof one time fact **was** collected —
+  `a - b ≥ 0` over `a := ↑left.time, b := ↑right.time` — while `¬ (left.time = right.time)`, in the same
+  context, was not. The collected one had been produced by `Nat.lt_or_ge left.time right.time`, so its type is
+  literally `Nat`; the ignored one was written directly as a comparison of two `.time` projections, so its type
+  is `LogicalTime`. Same two terms, same proof, one visible and one invisible, discriminated by nothing but
+  which type the comparison was elaborated at.
+* Two `omega` calls in the same theorems **succeeded** throughout: both had `microstep` goals.
+
+The control has an exact counterpart on the source side, and it is the sharpest single item here.
+`DTR.GeneralActorSelection.precedesOrEqual_total` splits with
+`by_cases hTime : left.logicalTime = right.logicalTime` and closes its second branch with `Or.inl (by omega)`
+at `Relico/DTR/GeneralActorSelection.lean:336` — an `omega` call that **needs** the negated equality `hTime`,
+because `Nat.lt_or_ge` alone leaves it only `left.logicalTime ≥ right.logicalTime` and the goal is strict. That
+call is green. Transcribed to `LF.Tag` it is the call that failed, in the same position, in the same proof
+shape, on the same two hypotheses. Nothing distinguishes them but the field's declared type.
+
+What is measured here is the behaviour, not `omega`'s implementation. Whether the mechanism is the atom
+collector declining to reduce a reducible definition, or something about the instance argument, was not
+measured and is not claimed. Nor was it measured whether a `show`, a `simp only`, or a `Nat`-typed
+restatement could restore visibility — that is the alternative repair, and it was not taken because it costs
+a measurement to establish and the explicit-lemma repair costs none.
+
+**To reproduce:** in `Relico/LF/GeneralRuntime.lean`, replace the `Or.inl` argument of any one of the first
+three branches of `Tag.precedesOrEqual_trans` — those are the three whose goal is a time comparison — with
+`by omega`, and build. The failure is immediate and the message lists the atoms. The fourth branch is **not**
+a witness: its arithmetic component is a `microstep` goal, so `omega` closes it.
+
+### Why G1 is not the precedent
+
+The source-side counterpart, `DTR.GeneralActorSelection.precedesOrEqual_trans` and `…_total` (obligation G1,
+landed at `cc7b0c7`), proves the same two facts about the same lexicographic shape and uses `omega` freely —
+`Or.inl (by omega)` on three of four branches. It is green. It was read before writing the target side
+precisely *because* it was green, and its proof structure was mirrored deliberately.
+
+The mirror does not hold, and the reason is one word in a declaration. G1's structure is `ReadyActor`, in
+`Relico/DTR/GlobalMultiStorePayloadActorPriority.lean:24`, whose field is `logicalTime : Nat` — bare `Nat`,
+not `LogicalTime`. The second `ReadyActor`, in `Relico/Investigation/ActorPriority/IsolatedScheduler.lean:15`,
+also declares `logicalTime : Nat`. **No `omega` call on the source side has ever been handed a
+`LogicalTime`-typed hypothesis.** G1's greenness is therefore evidence that the proof *shape* is right, and no
+evidence at all about the tactic, which is the part that was being borrowed.
+
+This is the same defect as the missing `Relico.Common.Store` import in the same obligation, one level up: a
+property of the precedent was verified, and it was not the property being relied on. Existence is not
+reachability; a green proof of the analogous statement is not a green proof at the analogous type.
+
+### The repair
+
+Both theorems now avoid `omega` on any time comparison. `precedesOrEqual_trans` closes its four branches with
+`Nat.lt_trans`, `Nat.lt_of_lt_of_le`, `Nat.lt_of_le_of_lt` and `Nat.le_trans` — explicit terms, which
+typecheck up to reducible unfolding and so are indifferent to the abbreviation. `precedesOrEqual_total`
+deliberately does **not** copy G1's `by_cases` on time equality, because that tactic manufactures exactly the
+invisible hypothesis; it splits twice with `Nat.lt_or_ge` and recovers the tie with `Nat.le_antisymm`. One
+`omega` survives, on the sole genuinely `Nat`-typed goal. Both docstrings state the constraint and cite this
+finding, so that the next reader does not re-derive it from five error messages.
+
+### Scope, and why this is not merely a tactic note
+
+Every remaining stage G obligation reasons about tags. G2a-iii owes the time-progress rule and P24's
+zero-delay split; G2b owes Lemma 1, which relates `LF.GeneralRuntimeState.now` — a `.time` projection — to
+`DTR.GeneralConfiguration.now`; G2c and G2d owe the transfer conditions and trace agreement over the same
+projection. Each will present `omega` with `LogicalTime`-typed goals, and `omega` will not refuse them
+loudly — it reports a counterexample, which reads like a false statement rather than an invisible hypothesis.
+That failure mode is the finding's cost: it sent three wrong diagnoses ahead of the right one.
+
+### The transferable check
+
+**When a tactic reports "no usable constraints" or a counterexample over a strict subset of the hypotheses in
+scope, read the list of atoms it printed before rereading the proof.** The list is a direct statement of what
+the tactic could see. Here three messages named microsteps and no times, and a fourth named nothing at all,
+which identified the discriminating field immediately — and that information was already on disk during three
+successive wrong hypotheses, because the command that produced it printed only the error *line numbers* and not
+the error text. A diagnostic that is captured but not printed is not evidence.
+
+The corollary for borrowed proofs: **before mirroring a green proof, check the types of the fields it reasons
+about, not just the shape of the statement.** `logicalTime : Nat` beside `time : LogicalTime` is invisible at
+the level of statements — both read as "a lexicographic order on a time and a tie-breaker" — and decides
+whether the tactic in the borrowed proof works at all.
+
+
 

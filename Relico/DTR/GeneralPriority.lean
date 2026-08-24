@@ -18,10 +18,10 @@ same convention for an absent priority**. Two copies could drift on exactly that
 would be invisible: both would still compile and both would still be total preorders. Sharing one
 definition makes the shared convention a type-checked fact instead of a comment.
 
-**The convention is inherited, not chosen here.** `Relico/DTR/GeneralSyntax.lean:335-337` already
-fixed it: *"An absent priority is a priority class in its own right and is ordered after every explicit
-one."* That discharges the paper's P5 (priorities may be absent) and the tie half of P4 at the AST
-level, so this module implements the convention rather than deciding it.
+**The convention is inherited for message servers and fixed HERE for actor instances.**
+`Relico/DTR/GeneralSyntax.lean:335-337` states it for `GeneralMessageServer` only; the
+`GeneralActorInstance` docstring is silent on absence. So `PriorityPrecedesOrEqual` below is what fixes
+it for both, discharging P5 and the tie half of P4 as a type-checked fact. See F68.
 
 **Stability, and why it is not the obvious mechanism.** `insert` places the incoming element *before*
 the first element of equal-or-lower priority, and the test is reflexive, so an equal-priority element

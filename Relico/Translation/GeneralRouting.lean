@@ -1490,8 +1490,8 @@ reactions, and nothing downstream has to know that priority exists.
 
 Ties are resolved by source declaration order because `DTR.GeneralActorPriority.normalize` is a stable
 sort, which is the same convention decision `0041` fixed for equal LF microsteps. An unannotated
-instance is a priority class of its own, ordered after every explicit one; that convention is the
-AST's, at `Relico/DTR/GeneralSyntax.lean:335-337`, not this function's.
+instance is a priority class of its own, ordered after every explicit one; that convention is fixed by
+`DTR.GeneralPriority.PriorityPrecedesOrEqual`, not by this function and not by the AST — see F68.
 -/
 def priorityOrderedInstances
     (model : DTR.GeneralModel) :

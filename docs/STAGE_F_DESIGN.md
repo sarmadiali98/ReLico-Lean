@@ -217,6 +217,27 @@ is retained as `none` rather than dropped, because absence is a priority class a
 tie."* This discharges **P5** at the AST level — absent priorities are representable and ordered —
 and it fixes half of **P4**: two absences tie, and §4.4 says what a tie does.
 
+> **CORRECTION, 2026-08-24 — the two quotations above cover message servers ONLY. Recorded as F68 in
+> [`STAGE_G_FINDINGS.md`](STAGE_G_FINDINGS.md).**
+>
+> `:335-337` sits inside `GeneralMessageServer`'s docstring and names "local message-server priority";
+> `:385-386` is the projection `GeneralReactiveClass.messageServerPriorities`. `GeneralActorInstance`'s
+> own docstring says only that its `priority` "is actor-level priority and is independent of
+> message-server priority" — it is **silent on absence**. So the AST fixes the absence convention for one
+> of the two priorities listed above, and the sentence introducing these quotations should not be read as
+> covering both.
+>
+> What fixes it for actor priority is `DTR.GeneralPriority.PriorityPrecedesOrEqual`, the generic order on
+> `Option Nat` that both instantiations share: *"every explicit priority precedes an absent one, and two
+> absences tie."* That is a **stronger** guarantee than a docstring, because it is type-checked and cannot
+> drift between the two levels — which is the argument `Relico/DTR/GeneralPriority.lean` already makes for
+> itself, a few lines above the sentence F68 corrects there. The consequence for this section is only that
+> **P5 and the tie half of P4 are discharged at the sort level for actor priority, not at the AST level**;
+> nothing about level 1's design changes.
+>
+> The paragraph immediately below corroborates this: actor priority had no consumer in the translation at
+> all before level 1, so there was nothing for an AST-level ordering convention to have already fixed.
+
 The `GeneralActorInstance.priority` field is currently read by **exactly one** place in the entire
 repository, `Relico/DTR/GeneralWellFormed.lean:490`, inside a predicate that nothing enforces. Level 1
 therefore introduces the **first consumer of actor priority in the translation**, which is a
