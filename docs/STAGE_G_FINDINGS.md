@@ -1065,5 +1065,127 @@ about, not just the shape of the statement.** `logicalTime : Nat` beside `time :
 the level of statements — both read as "a lexicographic order on a time and a tie-breaker" — and decides
 whether the tactic in the borrowed proof works at all.
 
+## F73 — two docstring claims in one obligation were checked by nothing, and the instrument that would catch the class reports six false positives
+
+**Measured 2026-08-24, during G2a-iii (row 6 of twelve), before its first build.** Three defects with one
+root: in each case a claim's *checkability* was assumed rather than established. Two were in text this
+obligation authored; the third was in the audit I wrote to look for the first two, and it is the one that
+nearly produced a false finding.
+
+### Part 1 — the weak-transition instantiation was claimed by two modules and checked by neither
+
+`DTR.GeneralStep` and `LF.GeneralStep` each carry a docstring stating, and citing **F70**, that G2c may
+**instantiate** `Common.TauSteps` and `Common.WeakStep` at the relation rather than restate either, and that
+the `State → Label → State` index order was chosen for exactly that reason.
+
+Grepping `WeakStep`, `TauSteps` and `isTau` across both modules returns **only docstring lines** — two in the
+source module, one in the target module, zero lines of code. The claim is true, and it was worth writing down,
+but nothing established it. `Common.WeakStep.of_step` had never been applied at either relation; neither
+relation had ever been offered to `Common.LabeledTransition` as an inhabitant.
+
+This is the shape [`STAGE_E_FINDINGS.md`](STAGE_E_FINDINGS.md) F53 records — a "by construction" claim that
+outlives the finding refuting it — with the tense changed. F53's claims were about the past and had been
+falsified. This one is about a future stage, so it cannot be falsified yet, and that is what made it
+comfortable to leave unchecked. **A claim about work three obligations away is not deferred verification; it
+is unverified text that reads like verified text.**
+
+The generic machinery was already fully proved and generic before stage G began — that is F70's content — so
+there was never a cost argument for deferring. The instantiation is five lines per relation.
+
+### Part 2 — a citation took the right namespace from the wrong neighbour
+
+`LF.GeneralStep.tau_pending_not_past`'s docstring cited `LF.Tag.PendingNotPast.append_one`. The theorem is
+`LF.ActionQueue.PendingNotPast.append_one`: in `Relico/LF/PendingNotPast.lean`, `namespace Tag` closes and
+`namespace ActionQueue` opens two lines later, and `PendingNotPast.append_one` is inside the second.
+
+The wrong prefix was the *right* prefix for the other citation in the same sentence. That proof reaches for
+two theorems from that one file — `LF.Tag.precedesOrEqual_schedule`, which genuinely is in `Tag`, and
+`append_one`, which is not — and the `Tag.` that belonged to the first was carried onto the second. A reader
+looking for the cited name finds nothing and has no way to tell whether the theorem was renamed, moved, or
+never existed.
+
+The same docstring also claimed the proof follows `append_one` "step for step". Measured against it: the
+`simp only [List.mem_append, List.mem_singleton]` and the `rcases … with hExisting | hAdded` are indeed
+identical, and then the two **diverge at the final line** — `append_one` closes the added case with the
+ordering premise it was *given* as `hNew`, while the general version has no such premise and *derives* the
+ordering from `precedesOrEqual_schedule`. That divergence is not a detail: it is the whole reason the
+general statement can be proved one rule at a time while the full invariant needs a six-rule induction. The
+overstatement flattened the one interesting thing about the proof.
+
+### Part 3 — the audit instrument is format-blind, and the findings series has two formats
+
+To look for more of Part 2's defect I wrote the obvious check: collect every `F`/`P` number that has a record
+heading in `docs/`, collect every such number cited from Lean, and difference them. It reported **six dangling
+citations** — F22, F23, F25, F27, F28 and F29, across ten sites in six modules, one of them the module this
+very obligation authored.
+
+**All six are false positives.** Every one is recorded, in
+[`STAGE_D_FINDINGS.md`](STAGE_D_FINDINGS.md), as a **bold paragraph lead** (`**F22 — …**`) under a single
+grouped range heading, `## F21–F29 — carried over from the design, with their status after implementation`.
+Format census across all ninety-six `F`/`P` records: **eighty-seven use one heading each; nine — stage D's
+entire set — use the grouped form.** A format-aware re-run reports **zero** dangling citations. The
+repository is sound; the instrument was not.
+
+What makes this worth a finding rather than a shrug is that the artefact was *plausible*. The range heading
+`## F21–F29` matched the naive pattern well enough to yield exactly one number, F21, so the recorded set read
+as a clean run F1–F21 and then a jump to F30. A gap at precisely F22–F29 is believable to anyone who has read
+`STAGE_D_FINDINGS.md`, because that file documents a renumbering — the design's own `D1–D9` became `F21–F29`
+at review, and it records a second pass in which three findings were cited under wrong numbers and had to be
+corrected. An instrument artefact landing exactly on the range with a renumbering history is the most
+convincing possible false positive, and it was two keystrokes from being written up as eight missing records.
+
+The real defect underneath is structural and is **F54**'s lesson one level up: **a record that no
+structural index can see is reachable only by full-text search.** F54 was about a finding invisible from
+where a reader looks, and it cost a duplicate task. Here nine findings are invisible to any heading-level
+outline — an editor's document map, a generated table of contents, and any future automated citation check.
+`grep` still finds them; nothing else does.
+
+### The repair, and one repair deliberately not made
+
+Part 1: five pins in `Relico/Tests/GeneralSemantics.lean`, each failing under a different specific mistake.
+Two offer each relation to `Common.LabeledTransition` — a *declaration*-level check, the only pin here that a
+wrong index order breaks. One closes the microstep advance into `Common.TauSteps` via `TauSteps.single`, which
+demands `isTau label` as a **proposition** and so fails against a `Bool`-valued `isTau` — the shape a reader
+arriving from `GeneralTrigger.matchesKind` next door would reach for. One absorbs that advance into a
+`Common.WeakStep` at an internal label, which is **P24** at the weak level: the target may
+take that step and a bisimulation may match it with nothing at all on the source side. Two more build the
+observable time steps, one per language.
+
+Those last two use the `WeakStep.visible` **constructor** rather than `Common.WeakStep.of_step`, deliberately.
+`of_step` decides the two cases with a classical `by_cases` on the τ classification, so it elaborates
+*whichever way that classification goes* — it is invariant under the very thing being pinned, which is
+**F60**'s disqualifying property. `visible` takes `¬ isTau label` as an argument, so a τ
+set that wrongly swallowed `timeAdvance` fails those two pins and nothing else in the repository would
+notice. **F60's standard applies to a proof term exactly as it applies to a `decide`.**
+
+Part 2: both defects corrected in place, and the docstring now names the namespace trap explicitly and states
+where the two proofs diverge rather than claiming they do not.
+
+Part 3: the instrument is recorded here in its format-aware form. **Stage D's grouped block is deliberately
+not reformatted.** `STAGE_D_FINDINGS.md` documents what a renumbering pass over that exact block already
+cost — three findings cited under wrong numbers, caught only by re-reading the design — and the citations into
+it are live in six built modules. Trading a real risk of breaking live citations for an aesthetic consistency
+gain is the wrong trade. The two formats are now written down, which is what makes the difference navigable.
+
+### The transferable check
+
+**A claim about what a future obligation will be able to do is checkable now, and costs less now.** If a
+docstring says a later stage can instantiate, reuse, or extend something, the cheapest possible instance of
+that instantiation belongs in the same changeset. It is not extra work brought forward; it is the difference
+between a design note and a verified one, and it converts a defect discovered three obligations later into an
+elaboration error discovered on the first build.
+
+**When an audit reports a cluster of failures that falls exactly on a range with known history, suspect the
+instrument before the repository.** Real defects of this kind are scattered, because they come from
+independent authoring mistakes. A contiguous block is the signature of a format the instrument does not
+recognise. The cheap discriminator is to check one alleged failure by hand, full-text — which is what turned
+six missing records into one broken regex.
+
+**And cite a Lean declaration by its full name, read from the file, including the namespace it is actually
+in.** Two namespaces adjacent in one file, both containing a name the same proof uses, is enough to move a
+prefix from one citation to its neighbour. No line-number arithmetic and no build failure detects this: the
+proof was green throughout, because a docstring is not type-checked.
+
+
 
 

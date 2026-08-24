@@ -1,0 +1,680 @@
+import Relico.Common.WeakTransition
+import Relico.DTR.GeneralSemantics
+import Relico.LF.GeneralSemantics
+
+set_option autoImplicit false
+
+namespace Relico
+namespace Tests
+namespace GeneralSemantics
+
+/-!
+# Compile-time pins for the two general step relations
+
+`docs/STAGE_G_DESIGN.md` §13, obligation G2a-iii. `Relico/DTR/GeneralSemantics.lean` and
+`Relico/LF/GeneralSemantics.lean` declare the two step relations, their scheduler and lookup functions, and
+the inversion lemmas. This module pins what those theorems are structurally unable to see.
+
+The standard every pin below is held to is `docs/STAGE_F_FINDINGS.md` F60's: **a pin earns its place only if
+some specific wrong implementation fails it.** That is why the section "What is deliberately not pinned" at
+the end is as long as it is — several obvious-looking assertions are invariant under the very thing they
+would appear to check, and F60 records one that shipped.
+
+## The headline is P24's zero-delay case, and it is pinned as a witness rather than as arithmetic
+
+`Relico/LF/GeneralSemantics.lean`'s module docstring promises that this file "pins the zero-delay case as a
+regression so the two halves cannot be silently re-merged". Tests 6 through 10 are that promise.
+
+The chain is three steps and it is the whole of P24 made checkable. A `schedule` with **zero** delay enqueues
+an event at the same logical time and the next microstep (test 6). Reaching that event is a
+`microstepAdvance`, which carries `.tau` (test 7), and `now` is therefore unchanged across it (test 8) even
+though the state itself has changed (test 9). Contrast a **positive** delay: the same three steps produce a
+`timeAdvance` label carrying two distinct times (test 10).
+
+Merge the two advance rules back into one — which is exactly the single observable `TIME PROGRESS` the
+paper's Table II implies, and exactly what makes its Theorem 1 false — and tests 7 and 8 stop compiling,
+because there is no longer a τ-labelled step to build or a τ-labelled hypothesis to feed
+`now_eq_of_tau`. That is the regression this file exists to catch.
+
+Note the direction the states are written in. Each post-state below is a **hand-written literal**, and the
+step is then proved to relate the two. Deriving the post-state from the rule would make every one of these
+`rfl` by construction and would pin nothing — the wrong `Store.update`, the wrong tag, the wrong queue
+position would all still pass.
+
+## The scheduler's tie-break is pinned, because the fold is where it could be lost
+
+Tests 1 through 5. `LF.selectEarliestEvent` keeps its incumbent on a tie, which
+`LF.GeneralEventQueue`'s docstring specifies as the insertion-order tie-break. That convention lives in
+exactly one character — the `≤` inside `PrecedesOrEqual` rather than a `<` — and no theorem in the module
+sees it: `selectEarliestEvent_precedesOrEqual_of_mem` is satisfied by *either* choice, since both return a
+minimal element. Test 3 is the only instrument that distinguishes them.
+
+Test 2 matters for a different reason: it puts the earliest event in the queue's **tail**, so a scheduler
+that returned the head would fail it. That is not a hypothetical wrong implementation. It is the defect
+`Relico/DTR/GeneralSemantics.lean`'s `take` docstring records on the source side, where a head-only rule
+would have been stuck exactly where the state layer says an actor may run.
+
+## Declaration order, not priority, resolves a trigger
+
+Test 11. Two reactions triggered by one action, the first declared carrying the *worse* priority. A lookup
+that consulted `GeneralReaction.priority` returns the second; `findReactionForKind?` returns the first. Stage
+F established that reaction declaration order is observable in the target and that nothing in this family
+sorts a reaction list, and G3 is about to make a populated LF reaction priority a well-formedness
+*violation* — so a lookup that quietly honoured the field would contradict the stage that follows this one.
+
+## The generic weak-transition machinery is instantiated, not merely said to be instantiable
+
+The last five pins. Both step relations' docstrings claim, citing `docs/STAGE_G_FINDINGS.md` F70, that G2c
+may instantiate `Common.TauSteps` and `Common.WeakStep` at them rather than restate either. That was a claim
+about future work with nothing checking it, which is the shape `docs/STAGE_E_FINDINGS.md` F53 records: three
+"by construction" claims that outlived the findings refuting them. Each of the five is an elaboration check
+against a different specific mistake — the index order, a `Bool`-valued `isTau`, and a τ set that swallowed
+`timeAdvance`. The `visible` pins are built with the constructor rather than `Common.WeakStep.of_step`,
+because `of_step` splits classically on the τ classification and so elaborates whichever way that
+classification goes, making it invariant under the thing being pinned.
+-/
+
+/-! ## Shared names -/
+
+def probeName : ActorName :=
+  ActorName.mk "probe"
+
+def hubName : ActorName :=
+  ActorName.mk "hub"
+
+def pingActionName : ActionName :=
+  ActionName.mk "ping"
+
+def readingPortName : PortName :=
+  PortName.mk "reading"
+
+def firstReactionName : ReactionName :=
+  ReactionName.mk "reaction_first"
+
+def secondReactionName : ReactionName :=
+  ReactionName.mk "reaction_second"
+
+def zeroDelay : Delay :=
+  { value := 0 }
+
+def positiveDelay : Delay :=
+  { value := 3 }
+
+/-! ## The scheduler -/
+
+def eventAtOne : LF.GeneralPendingEvent :=
+  {
+    target := probeName
+    kind :=
+      LF.GeneralEventKind.logicalAction
+        pingActionName
+    tag :=
+      {
+        time := 1
+        microstep := 0
+      }
+  }
+
+def eventAtFive : LF.GeneralPendingEvent :=
+  {
+    target := hubName
+    kind :=
+      LF.GeneralEventKind.inputPort
+        readingPortName
+    tag :=
+      {
+        time := 5
+        microstep := 0
+      }
+  }
+
+/--
+Two events at one tag, distinguishable only by target, so a tie-break can be *observed* rather than merely
+asserted.
+-/
+def tiedProbeEvent : LF.GeneralPendingEvent :=
+  {
+    target := probeName
+    kind :=
+      LF.GeneralEventKind.logicalAction
+        pingActionName
+    tag :=
+      {
+        time := 2
+        microstep := 0
+      }
+  }
+
+def tiedHubEvent : LF.GeneralPendingEvent :=
+  {
+    target := hubName
+    kind :=
+      LF.GeneralEventKind.inputPort
+        readingPortName
+    tag :=
+      {
+        time := 2
+        microstep := 0
+      }
+  }
+
+/--
+A state carrying a given queue, with no reactors and the clock at the origin.
+
+The scheduler consults neither the reactors nor the current tag — it folds the queue — so leaving both
+trivial keeps each pin below about the one thing it is pinning.
+-/
+def queueState
+    (pending : LF.GeneralEventQueue) :
+    LF.GeneralRuntimeState :=
+  {
+    currentTag :=
+      {
+        time := 0
+        microstep := 0
+      }
+    reactors := []
+    pending := pending
+  }
+
+/- Test 1: an empty queue selects nothing. -/
+example :
+    LF.GeneralRuntimeState.earliestPendingEvent?
+        (queueState []) =
+      none := by
+  rfl
+
+/- Test 2: the earliest event is found in the TAIL. A head-only scheduler fails here, which is the defect
+   the source-side `take` docstring records. -/
+example :
+    LF.GeneralRuntimeState.earliestPendingEvent?
+        (queueState
+          [
+            eventAtFive,
+            eventAtOne
+          ]) =
+      some eventAtOne := by
+  decide
+
+/- Test 3: and it is still found when it is already the head, so test 2 is not passing by always
+   returning the last element. -/
+example :
+    LF.GeneralRuntimeState.earliestPendingEvent?
+        (queueState
+          [
+            eventAtOne,
+            eventAtFive
+          ]) =
+      some eventAtOne := by
+  decide
+
+/- Test 4: at a tie the INCUMBENT wins, which is the insertion-order tie-break. A fold written
+   `if candidate ≼ best then candidate else best` — or a `PrecedesOrEqual` whose second disjunct used `<`
+   instead of `≤` — returns `tiedHubEvent` and fails here. No theorem in the module sees this: the
+   minimality theorem is satisfied by either choice. -/
+example :
+    LF.GeneralRuntimeState.earliestPendingEvent?
+        (queueState
+          [
+            tiedProbeEvent,
+            tiedHubEvent
+          ]) =
+      some tiedProbeEvent := by
+  decide
+
+/- Test 5: reversing the two reverses the answer, so test 4 pins QUEUE POSITION and not some property of
+   the probe event. A scheduler that preferred one reactor over another at equal tags — an actor priority
+   the target language does not have — fails one of these two. -/
+example :
+    LF.GeneralRuntimeState.earliestPendingEvent?
+        (queueState
+          [
+            tiedHubEvent,
+            tiedProbeEvent
+          ]) =
+      some tiedHubEvent := by
+  decide
+
+/-! ## P24: the split time-progress rule -/
+
+/--
+A program with nothing in it.
+
+Neither advance rule has a premise that mentions `program` — they read the queue and the tag and nothing
+else — so the witnesses below need no reactors, and supplying some would only invite a reader to think the
+rules consulted them.
+-/
+def emptyProgram : LF.GeneralProgram :=
+  {
+    reactors := []
+    instances := []
+    connections := []
+  }
+
+/- Test 6: the tag arithmetic that forces the split. A ZERO delay holds the logical time and advances the
+   microstep... -/
+example :
+    LF.Tag.schedule
+        {
+          time := 5
+          microstep := 0
+        }
+        zeroDelay =
+      {
+        time := 5
+        microstep := 1
+      } := by
+  decide
+
+/- ...while a POSITIVE delay advances the logical time and resets the microstep. An implementation that
+   bumped the time in both cases, or the microstep in both, fails one of these two — and either way the two
+   advance rules below would collapse into one. -/
+example :
+    LF.Tag.schedule
+        {
+          time := 5
+          microstep := 0
+        }
+        positiveDelay =
+      {
+        time := 8
+        microstep := 0
+      } := by
+  decide
+
+/--
+The event a zero-delay self-send made available: the *same* logical time as the sender's tag, one microstep
+later.
+-/
+def microstepEvent : LF.GeneralPendingEvent :=
+  {
+    target := probeName
+    kind :=
+      LF.GeneralEventKind.logicalAction
+        pingActionName
+    tag :=
+      {
+        time := 5
+        microstep := 1
+      }
+    payload := []
+  }
+
+/--
+The state just before that event is reached. One event in the queue, so `earliestPendingEvent?` selects it
+without a single tag comparison and the rules' `hSelected` premise closes by `rfl`.
+-/
+def microstepState : LF.GeneralRuntimeState :=
+  {
+    currentTag :=
+      {
+        time := 5
+        microstep := 0
+      }
+    reactors := []
+    pending := [microstepEvent]
+  }
+
+/--
+The state after, written out by hand rather than derived from the rule.
+
+Deriving it would make the step below `rfl` by construction and pin nothing. Written this way, the wrong
+destination tag, a dropped queue or a disturbed reactor store each fail to typecheck.
+-/
+def microstepNext : LF.GeneralRuntimeState :=
+  {
+    currentTag :=
+      {
+        time := 5
+        microstep := 1
+      }
+    reactors := []
+    pending := [microstepEvent]
+  }
+
+/--
+Test 7: reaching that event is a real step of the relation, and **its label is `.tau`**.
+
+This is P24 made checkable. Merge the two advance rules back into the single observable `TIME PROGRESS` the
+paper reads off Table II and this theorem stops typechecking, because the label it is annotated with no
+longer exists on the merged rule.
+-/
+theorem microstepStep :
+    LF.GeneralStep
+      emptyProgram
+      microstepState
+      LF.GeneralLabel.tau
+      microstepNext :=
+  LF.GeneralStep.microstepAdvance
+    (event := microstepEvent)
+    rfl
+    rfl
+    (by decide)
+
+/- Test 8: so logical time does not move across it. Proved by feeding the witness to the inversion lemma,
+   which is what ties this pin to the theorem rather than to the arithmetic. -/
+example :
+    LF.GeneralRuntimeState.now microstepNext =
+      LF.GeneralRuntimeState.now microstepState :=
+  LF.GeneralStep.now_eq_of_tau
+    microstepStep
+
+/- Test 9: and yet the state DID change, so test 8 is not the empty observation that the step is a no-op.
+   The tag advanced; only the part of it `now` reads stayed put. -/
+example :
+    microstepState ≠ microstepNext := by
+  decide
+
+/--
+The contrasting event, from a positive delay: strictly later logical time.
+-/
+def timeEvent : LF.GeneralPendingEvent :=
+  {
+    target := probeName
+    kind :=
+      LF.GeneralEventKind.logicalAction
+        pingActionName
+    tag :=
+      {
+        time := 8
+        microstep := 0
+      }
+    payload := []
+  }
+
+def timeState : LF.GeneralRuntimeState :=
+  {
+    currentTag :=
+      {
+        time := 5
+        microstep := 0
+      }
+    reactors := []
+    pending := [timeEvent]
+  }
+
+def timeNext : LF.GeneralRuntimeState :=
+  {
+    currentTag :=
+      {
+        time := 8
+        microstep := 0
+      }
+    reactors := []
+    pending := [timeEvent]
+  }
+
+/--
+Test 10: the same shape of state, with the delay positive instead of zero, steps under an **observable**
+label carrying both times.
+
+Compare `microstepStep` directly above: same relation, same kind of premise, and the label differs. That
+contrast is the entire content of P24, and it is now two theorems that must both continue to elaborate.
+-/
+theorem timeStep :
+    LF.GeneralStep
+      emptyProgram
+      timeState
+      (LF.GeneralLabel.timeAdvance 5 8)
+      timeNext :=
+  LF.GeneralStep.timeAdvance
+    (event := timeEvent)
+    rfl
+    (by decide)
+
+/- and the label's two times are genuinely ordered, read back off the witness through the inversion lemma
+   rather than asserted. A rule that emitted `.timeAdvance after before` fails here. -/
+example :
+    (5 : LogicalTime) < 8 :=
+  LF.GeneralStep.lt_of_timeAdvance
+    timeStep
+
+/-! ## Declaration order, not priority, resolves a trigger -/
+
+/--
+The reaction declared **first**, carrying the **worse** priority.
+-/
+def firstReaction : LF.GeneralReaction :=
+  {
+    name := firstReactionName
+    trigger :=
+      LF.GeneralTrigger.logicalAction
+        pingActionName
+    parameters := []
+    body := []
+    priority := some 9
+  }
+
+/--
+The reaction declared **second**, carrying the **better** priority.
+-/
+def secondReaction : LF.GeneralReaction :=
+  {
+    name := secondReactionName
+    trigger :=
+      LF.GeneralTrigger.logicalAction
+        pingActionName
+    parameters := []
+    body := []
+    priority := some 1
+  }
+
+/- The instrument is only valid while the priorities run *against* declaration order. Pinned so that a later
+   edit tidying these literals cannot quietly make test 11 vacuous — which is the failure mode F60 records. -/
+example :
+    firstReaction.priority = some 9 ∧
+      secondReaction.priority = some 1 := by
+  decide
+
+/- Test 11: both reactions trigger on the same action, and the FIRST DECLARED one is returned. A lookup that
+   consulted `GeneralReaction.priority` returns `secondReaction` and fails here. That is not a hypothetical:
+   G3 is about to make a populated LF reaction priority a well-formedness *violation*, so a lookup that
+   honoured the field would contradict the stage that follows this one. -/
+example :
+    LF.findReactionForKind?
+        [
+          firstReaction,
+          secondReaction
+        ]
+        (LF.GeneralEventKind.logicalAction
+          pingActionName) =
+      some firstReaction := by
+  decide
+
+/- Swapping the declaration order swaps the answer, so test 11 pins ORDER rather than something about
+   `firstReaction` itself. This is the swap in which order and priority happen to agree, so a
+   priority-consulting lookup passes it — which is precisely why the previous test is the load-bearing one
+   and this one is only the control. -/
+example :
+    LF.findReactionForKind?
+        [
+          secondReaction,
+          firstReaction
+        ]
+        (LF.GeneralEventKind.logicalAction
+          pingActionName) =
+      some secondReaction := by
+  decide
+
+/- A kind no trigger matches finds nothing rather than falling back on the first reaction. This is the
+   lookup half of the deadlock G6 owes in writing: `fire` has no rule for an event whose target has no
+   matching reaction, so such an event is never consumed and never discarded. -/
+example :
+    LF.findReactionForKind?
+        [
+          firstReaction,
+          secondReaction
+        ]
+        (LF.GeneralEventKind.inputPort
+          readingPortName) =
+      none := by
+  decide
+
+/- And a startup trigger matches no pending event at all, which is why `reactionFor?` searches
+   `messageReactions` and leaves `startupReaction` out. -/
+example :
+    LF.GeneralTrigger.matchesKind
+        LF.GeneralTrigger.startup
+        (LF.GeneralEventKind.logicalAction
+          pingActionName) =
+      false := by
+  decide
+
+/-! ## The source side has no internal time step -/
+
+/--
+An empty source model, the DTR counterpart of `emptyProgram`. `timeProgress` names no class or instance in
+its premises, so nothing here needs populating.
+-/
+def emptyModel : DTR.GeneralModel :=
+  {
+    classes := []
+    instances := []
+  }
+
+/--
+A source configuration at time 5 with no actors, so `readyActors` is `[]` and the quiescence premise of
+`timeProgress` closes by `rfl`.
+-/
+def sourceConfig : DTR.GeneralRuntimeConfiguration :=
+  {
+    now := 5
+    actors := []
+  }
+
+def sourceNext : DTR.GeneralRuntimeConfiguration :=
+  {
+    now := 8
+    actors := []
+  }
+
+/--
+The **only** time step the source relation has, and it is `timeAdvance` — observable.
+
+This is the far side of P24. `microstepStep` above is an LF step at a τ label with no logical-time motion;
+there is no rule on this side that could match it, because `LogicalTime` has no microstep and this relation
+advances the clock or does nothing. A reader tempted to give the source an internal time step to restore
+Theorem 1 has to add a rule here, and this witness is what that reader's edit would sit beside.
+-/
+theorem sourceTimeStep :
+    DTR.GeneralStep
+      emptyModel
+      sourceConfig
+      (DTR.GeneralLabel.timeAdvance 5 8)
+      sourceNext :=
+  DTR.GeneralStep.timeProgress
+    (by decide)
+    rfl
+
+/- Its label is NOT internal: the source's time motion is always observable. Contrast `microstepStep`'s
+   `.tau`. The two together are the whole reason the merged single `TIME PROGRESS` of the paper's Table II
+   is unsound and the split is not. -/
+example :
+    ¬ DTR.GeneralLabel.isTau
+        (DTR.GeneralLabel.timeAdvance 5 8) :=
+  DTR.GeneralLabel.not_isTau_timeAdvance 5 8
+
+/- and the LF observable time step's label is likewise not internal, so `timeStep` and `sourceTimeStep` are
+   a matched observable pair while `microstepStep` stands alone. -/
+example :
+    ¬ LF.GeneralLabel.isTau
+        (LF.GeneralLabel.timeAdvance 5 8) :=
+  LF.GeneralLabel.not_isTau_timeAdvance 5 8
+
+/- whereas the LF microstep step's label IS internal — the asymmetry stated as a fact about the two labels
+   rather than about the rules that emit them. -/
+example :
+    LF.GeneralLabel.isTau LF.GeneralLabel.tau :=
+  LF.GeneralLabel.isTau_tau
+
+/-! ## Both relations instantiate the generic weak-transition machinery -/
+
+/-
+Each step relation's docstring states, citing F70, that G2c may **instantiate** `Common.TauSteps` and
+`Common.WeakStep` at it rather than restate either. Until these five pins, that was a claim about future work
+with nothing checking it — the same shape as the "by construction" claims F53 records, which outlived the
+findings that refuted them. Every pin below is an elaboration check, and each fails under a different
+specific mistake.
+
+First: the partial application at a fixed program really is a `Common.LabeledTransition`. This is the F70
+constraint itself, and it is the one pin that a *declaration* error breaks rather than a proof error — a
+relation indexed `State → State → Label → Prop`, which is the order a reader would reach for if they thought
+of a labelled step as "a step, labelled", does not inhabit this type.
+-/
+example :
+    Common.LabeledTransition
+      LF.GeneralRuntimeState
+      LF.GeneralLabel :=
+  LF.GeneralStep emptyProgram
+
+example :
+    Common.LabeledTransition
+      DTR.GeneralRuntimeConfiguration
+      DTR.GeneralLabel :=
+  DTR.GeneralStep emptyModel
+
+/- Second: a τ step closes into the internal-closure relation. `TauSteps.single` wants `isTau label` as a
+   *proposition*, so an `isTau` returning `Bool` — which is how a reader coming from `matchesKind` next door
+   would write it — fails here rather than three obligations later in G2c. -/
+example :
+    Common.TauSteps
+      (LF.GeneralStep emptyProgram)
+      LF.GeneralLabel.isTau
+      microstepState
+      microstepNext :=
+  Common.TauSteps.single
+    microstepStep
+    LF.GeneralLabel.isTau_tau
+
+/- Third, and this is P24 at the weak level: the microstep advance is absorbed into a weak step whose label is
+   internal, so a bisimulation may match it with *nothing* on the source side. That is precisely the
+   permission the paper's merged observable `TIME PROGRESS` would deny, and it is what makes the split sound
+   rather than merely convenient. -/
+example :
+    Common.WeakStep
+      (LF.GeneralStep emptyProgram)
+      LF.GeneralLabel.isTau
+      microstepState
+      LF.GeneralLabel.tau
+      microstepNext :=
+  Common.WeakStep.tau
+    LF.GeneralLabel.isTau_tau
+    (Common.TauSteps.single
+      microstepStep
+      LF.GeneralLabel.isTau_tau)
+
+/- Fourth and fifth: the two observable time steps are weak steps of the `visible` shape, one per language.
+   Built with the constructor rather than through `Common.WeakStep.of_step`, deliberately — `of_step` decides
+   the two cases with `classical` `by_cases` and so elaborates *whatever* the τ classification says, which
+   would make it invariant under the very thing being pinned. `visible` demands `¬ isTau label` as an
+   argument, so a τ set that wrongly swallowed `timeAdvance` fails these two and nothing else in the file
+   would notice. -/
+example :
+    Common.WeakStep
+      (LF.GeneralStep emptyProgram)
+      LF.GeneralLabel.isTau
+      timeState
+      (LF.GeneralLabel.timeAdvance 5 8)
+      timeNext :=
+  Common.WeakStep.visible
+    (LF.GeneralLabel.not_isTau_timeAdvance 5 8)
+    (Common.TauSteps.refl timeState)
+    timeStep
+    (Common.TauSteps.refl timeNext)
+
+example :
+    Common.WeakStep
+      (DTR.GeneralStep emptyModel)
+      DTR.GeneralLabel.isTau
+      sourceConfig
+      (DTR.GeneralLabel.timeAdvance 5 8)
+      sourceNext :=
+  Common.WeakStep.visible
+    (DTR.GeneralLabel.not_isTau_timeAdvance 5 8)
+    (Common.TauSteps.refl sourceConfig)
+    sourceTimeStep
+    (Common.TauSteps.refl sourceNext)
+
+end GeneralSemantics
+end Tests
+end Relico

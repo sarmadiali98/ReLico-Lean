@@ -627,6 +627,7 @@ import Relico.DTR.GeneralState
 import Relico.DTR.GeneralActorSelection
 import Relico.DTR.GeneralEvaluation
 import Relico.DTR.GeneralRuntime
+import Relico.DTR.GeneralSemantics
 import Relico.Frontend.GeneralSchema
 import Relico.Frontend.GeneralDiagnostic
 import Relico.Frontend.GeneralElaborator
@@ -638,6 +639,7 @@ import Relico.LF.GeneralWellFormed
 import Relico.LF.GeneralCppPrinter
 import Relico.LF.GeneralEvaluation
 import Relico.LF.GeneralRuntime
+import Relico.LF.GeneralSemantics
 
 import Relico.Translation.GeneralRouting
 import Relico.Translation.GeneralBasic
@@ -649,3 +651,4 @@ import Relico.Tests.GeneralPriority
 import Relico.Tests.GeneralActorSelection
 import Relico.Tests.GeneralEvaluation
 import Relico.Tests.GeneralRuntime
+import Relico.Tests.GeneralSemantics
