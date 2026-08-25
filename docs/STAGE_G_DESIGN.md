@@ -485,9 +485,17 @@ instantiate the foundation. **F70**.
    divergence note below.
 4. `generalCausalityPreservation` — Lemma 3, over `after d` delays, reusing stage E's delay machinery.
 5. `generalWeakBisimulation_forward` / `_backward` — Definition 1's two transfer conditions, each
-   producing a *weak* transition `τ* γ τ*` on the other side. **Guard-relative** on
-   `ActorPrioritiesDistinct`: without it the target's chosen reaction need not be the source's chosen
-   actor, and the witness for the existential cannot be constructed.
+   producing a *weak* transition `τ* γ τ*` on the other side. **This item is REFUTED as written — see
+   F76**, measured 2026-08-25 before any row 8 Lean existed. The two run-level selectors disagree:
+   `selectedActor` keys on `(arrival, priority)` and `earliestPendingEvent?` keys on `(time, microstep)`
+   and is priority-blind, so it breaks a same-tag tie by queue append order. Two positive-delay sends
+   landing at one logical time carry identical tags, and the forward condition then fails on a
+   two-send body. The guard this item named — `ActorPrioritiesDistinct` — does not repair it and is
+   aimed at the wrong side: it constrains the *source*, making the source's choice unique, which is
+   exactly the condition under which the source departs from queue order. F76 records five candidate
+   repairs and deliberately picks none, because choosing a remedy before the artefact was measured is
+   the error being corrected. **The rest of row 8 does not depend on this item**: the derived
+   quiescence lemma, Lemma 2's same-actor case and Lemma 3 are sound under every candidate repair.
 6. `weakBisimulation_traceAgreement` — **generic, model-independent**: from a weak bisimulation, the two
    systems agree on finite observable traces. This is what discharges `trusted-boundary.md` aims 8 and 9
    for the general family outright instead of owing them, and it is proved once over an abstract LTS, so
@@ -709,7 +717,7 @@ reslice itself owes, row 3 below.
 | 5 | **G2a-ii** `DTR/GeneralRuntime` + `LF/GeneralRuntime` + `Tests/GeneralRuntime` — runtime state with continuations, the two `GeneralLabel` types with their τ classification and observable projection, and the three tag-order facts a scheduler needs. The superdense tag and `upd` are **reused, not built** — see **F69**; `isTau` is `Prop`-valued and each label owes a `project` because `Common.WeakTransition` demands it — see **F70** | 3 | 520 |
 | 6 | **G2a-iii** `DTR/GeneralSemantics` + `LF/GeneralSemantics` + `Tests/GeneralSemantics` — both step relations, the τ classification, P24's split `TIME PROGRESS`, the zero-delay regression pin | 3 | 523 |
 | 7 | **G2b** `Correctness/GeneralCorrespondence` + `Correctness/GeneralTimeEquivalence` — `R`, its initial case, Lemma 1 | 2 | 525 |
-| 8 | **G2c** `Correctness/GeneralWeakBisimulation` — Lemmas 2 and 3 at run level, then both transfer conditions, **instantiating** `Common.TauSteps` and `Common.WeakStep` rather than restating either — see **F70** | 1 | 526 |
+| 8 | **G2c** `Correctness/GeneralWeakBisimulation` — Lemmas 2 and 3 at run level, plus the derived quiescence lemma the backward condition needs, **instantiating** `Common.TauSteps` and `Common.WeakStep` rather than restating either — see **F70**. The **two transfer conditions are held back**, because §7 item 5 is refuted by **F76**; the rest of the row is sound under every candidate repair and lands without them | 1 | 526 |
 | 9 | **G2d** `Correctness/WeakBisimulationTrace` — the generic finite-trace corollary, aims 8 and 9, over `Common.observableProjection`, which is already proved with its three `@[simp]` lemmas — see **F70** | 1 | 527 |
 | 10 | **G3** the `lfc` priority-attribute probe, then the LF well-formedness clause and the three theorem restatements | 0 | 527 |
 | 11 | **G5** `trace` on both sides, printer, statement walk, witness model, new gate marker | 0–1 | 527–528 |

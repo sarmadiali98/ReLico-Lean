@@ -1622,6 +1622,160 @@ checks are complements rather than substitutes: the mechanical audits find sente
 sentences*, and only re-reading the design against the code finds sentences that disagree with *the artefact*.
 A changeset that runs one and not the other will land looking clean either way.
 
+## F76 — the source selects the next message by priority and the target selects it by queue order, so the transfer condition the stage exists to prove is false, and the guard the design names for it is aimed at the wrong side
+
+Measured during row 8's opening research, before any row 8 Lean was authored, by the check F75 had just
+finished prescribing: re-read the design's description of what earlier rows *built*, against what they built.
+F75 found three claims that were merely unstateable. This one is load-bearing — it refutes row 8's central
+deliverable.
+
+### The two selectors
+
+Both languages choose the next message with the **same fold**: carry an incumbent, and at each candidate keep
+the incumbent when it precedes-or-equals the candidate, otherwise adopt the candidate. Both are therefore
+**first-wins on a tie**. They differ only in the key they compare.
+
+| side | selector | key | consults priority |
+|---|---|---|---|
+| source | `DTR.GeneralActorSelection.selectedActor`, via `selectMinimum` and its `PrecedesOrEqual` (`Relico/DTR/GeneralActorSelection.lean`) | `(ReadyActor.logicalTime, priorityOf model actor)`, lexicographic | **yes** |
+| target | `LF.GeneralRuntimeState.earliestPendingEvent?`, via `LF.selectEarliestEvent` (`Relico/LF/GeneralSemantics.lean`) and `LF.Tag.PrecedesOrEqual` (`Relico/LF/Scheduling.lean`) | `(Tag.time, Tag.microstep)`, lexicographic | **no** |
+
+The target's key cannot express priority, so the target's same-tag tie-break is decided entirely by the order
+of `state.pending`. That order is **append order**: both send rules build the queue with `state.pending ++
+[event]`, so it is the order in which sends were executed.
+
+The source's tie-break, when arrival *and* priority are equal, is the traversal order of `DTR.readyActorsOf`,
+which is the order of the `config.actors` store. Store order and queue order are unrelated quantities — the
+first is a declaration-time artefact, the second a run-time one — so the two sides do not even agree on their
+*fallbacks*.
+
+### Why the forward transfer condition is false
+
+`LF.Tag.schedule` is P24's `upd`: a zero delay keeps the time and increments the microstep, and a **positive**
+delay advances the time and leaves the microstep at zero. Two positive-delay sends that land at one logical
+time therefore carry **byte-identical tags**, and the target's key has nothing left to separate them.
+
+One body with two sends is enough. Let actor `a` hold a better priority than actor `b`, and let some body
+execute `b.m() after 5; a.m() after 5;`:
+
+* the queue afterwards is `[event → b @ (5,0), event → a @ (5,0)]`
+* the target's fold meets `b` first, the tie holds, the incumbent is kept, and `fire` consumes **`b`**
+* the source's `readyActors` holds both, the arrivals are equal, priority decides, and `take` consumes **`a`**
+
+The labels are `.consume b …` and `.consume a …`. G2b's `ϕ` drops the payload and nothing else, so the two do
+not become equal under it. A source step exists with no matching target step, which is exactly Definition 1's
+forward transfer condition failing.
+
+Two escape routes are already closed. `fire` carries `.consume` and is **observable**, not τ, so `τ*`
+absorption cannot reorder it — the surplus τ step P24 introduced buys nothing here. And **neither side can
+choose to accommodate the other**: `take` is premised on `hSelected : selectedActor model config.erase = some
+selected` and `fire` on `hSelected : earliestPendingEvent? state = some event`, so both selections are forced.
+This is not a nondeterminism that could be aligned by picking the right witness; both relations are
+deterministic at this point and deterministically disagree.
+
+### The guard the design names is aimed at the wrong side
+
+§7 item 5 makes the two transfer conditions guard-relative on `ActorPrioritiesDistinct`
+(`Relico/DTR/GeneralWellFormed.lean`), with the reason: *"without it the target's chosen reaction need not be
+the source's chosen actor, and the witness for the existential cannot be constructed."*
+
+The observation is right and the remedy is pointed backwards. `ActorPrioritiesDistinct` is a predicate on the
+**source** model, and its effect is to make the source's priority key a strict order, hence the source's choice
+unique. It says nothing whatever about `earliestPendingEvent?`, which is where the disagreement lives. Three
+consequences follow, and the third is the one worth keeping:
+
+1. The guard does not repair the counterexample above. Distinct priorities is exactly what that
+   counterexample assumes.
+2. Removing the guard does not repair it either. With priorities *equal*, the source falls back to store order
+   and the target to queue order, and those still differ.
+3. **The guard makes the divergence more reachable, not less.** Distinctness is precisely the condition under
+   which the source's priority component discriminates, and therefore the condition under which the source
+   overrides its own store order and departs from anything the target could be following. A guard that
+   increases the reachability of the failure it is named to prevent is worse than an absent one, because it
+   reads as a discharged obligation.
+
+### Why stage F does not bridge it
+
+§7 item 3 rests Lemma 2 on stage F's compile-time ordering theorems "rather than restating them", and stage F
+did land real ordering results. They are the wrong shape for this gap. §III-D orders the **port reactions of
+one reactor** by sender-actor priority; Lemma 2 orders the **reaction blocks of one reactor** by message-server
+priority. Both feed `LF.GeneralProgram.reactionFor?`, which answers *which reaction of the target reactor
+handles this event*. Neither is consulted when choosing *which of two reactors acts*, because that choice is
+made before `reactionFor?` is reached, by `earliestPendingEvent?`.
+
+The `fire` docstring states both halves of this itself, and is accurate: declaration order decides the
+reaction, and a lookup consulting `GeneralReaction.priority` "would be reading a field G3 is about to make a
+well-formedness violation". So the target's own design deliberately keeps priority out of the run-level
+choice, and G3 is about to harden that. Stage F's theorems are sound, in scope, and orthogonal.
+
+This also confirms the scope reading recorded when the paper's SOS rules were read for the same-arrival case:
+the paper's `take` has no priority term, and its Lemma 2 is the **same-actor** case. Row 8's Lemma 2, scoped to
+one actor as §7 item 3 already says, is unaffected by everything above. The transfer conditions are not.
+
+### What this costs, and what it promotes
+
+**Row 8's central deliverable cannot be proved as specified.** This is F75's class with a heavier bill: §7 item
+5 was written from the paper before rows 5 and 6 existed, describes a target selector those rows later built
+priority-blind, and passes every mechanical audit this file runs.
+
+**But the damage is confined to one label, and that is measurable rather than consoling.** `DTR.GeneralStep`
+has four constructors and `LF.GeneralStep` six; the observable labels are `.consume` and `.timeAdvance`, and
+priority enters the semantics only at `take`/`fire`. Both time rules are selector-driven yet priority-blind —
+the source tied to `nextArrival` by F74's repair, the target to `earliestPendingEvent?` — and Lemma 1 already
+equates the two selectors' answers. So the `.timeAdvance` case of **both** transfer conditions is provable
+exactly as §7 specifies, and is proved: `generalTimeAdvance_forward` and `generalTimeAdvance_backward` in
+`Relico/Correctness/GeneralWeakBisimulation.lean`, green with no guard and no scoping hypothesis. What the
+repair decision below governs is the `.consume` case **alone**. That case is deliberately not stated even in
+weakened form, because a quietly narrowed theorem is the under-delivery the standing doctrine forbids where the
+target is at fault. The practical consequence for the paper is that Definition 1 should be presented
+case-by-case rather than as a single claim, since one of its two labels is settled and the other is open.
+
+**The `lfc` reaction-priority probe is promoted.** It was recorded as gating G3 alone. It now also decides row
+8's repair, and the load-bearing half of it is not "does a priority attribute exist" but **"does any attribute
+order reactions across reactors, or only within one"**. If the target has no cross-reactor same-tag ordering
+mechanism, then it genuinely cannot implement cross-actor actor priority, and the project's standing doctrine —
+if the target is at fault, refuse the input rather than silently under-deliver — chooses a guard or fragment
+restriction over a narrowed theorem. The probe needs a terminal and is therefore not ours to run.
+
+**Row 9 inherits it.** G2d's finite-trace agreement fails on the same witness, because the two traces differ by
+a permutation inside one tag.
+
+**And the target is over-specified, which is a second finding inside the first.** Real LF does not order
+same-tag reactions in *independent* reactors; they are logically simultaneous. `earliestPendingEvent?` imposes
+a total order on them anyway. So the total order is our artefact rather than the target's semantics, and any
+statement that quantifies over it is stronger than the target supports. That observation is what makes a
+correspondence stated up to within-tag permutation a candidate repair rather than a retreat — and it is
+measurable rather than rhetorical, because `take` and `fire` each update a single store key and remove a single
+queue element, which for distinct actors are disjoint. Whether that yields a genuine commutation result is a
+confluence question over interleaved bodies, since both sides permit taking one actor's message while another
+actor's body is half-executed, and it is not settled here.
+
+### The decision, left open deliberately
+
+Five directions, all measured, none picked: guard on the absence of cross-actor same-tag contention and prove
+the scoped version; give the target a priority-aware tie-break, which needs the probe and may invent semantics
+the target does not have; drop priority from the source, which contradicts the standing scope decision that
+actor priorities are in scope and the repo is definitive; restrict the fragment and refuse such models, which
+is doctrine-preferred but would reject the two corpus models where actor priority is irreducible; or prove the
+commutation and state the correspondence up to within-tag permutation, which the paragraph above argues is the
+most faithful reading and the most work.
+
+Recording the five and choosing none is the point. The failure being repaired is a design sentence that chose a
+remedy before the artefact existed; replacing it with a second unmeasured choice would reproduce it.
+
+### The transferable check
+
+F75 prescribed re-reading the design's description of earlier rows against what they built, and this finding is
+that check paying for itself one row later. But note the sharpening it needs. F75's three claims were caught by
+reading §7 against **row 7's own outputs** — the relation, the state types, the τ sets. This one was caught by
+reading §7 against a **selector two rows upstream** that row 8 merely composes against and never mentions. The
+rule as F75 stated it — re-read the description of what rows 1..N−1 built — is broad enough to cover it, and
+the narrower reading that would have missed it is the tempting one: check the artefacts this obligation
+*produces*, not the ones it *consumes*. Both halves are required, and the consumed side is where the
+expensive errors are, because nothing in the obligation's own text points at them.
+
+
+
 
 
 
