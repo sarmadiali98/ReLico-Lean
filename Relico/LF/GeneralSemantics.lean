@@ -1317,6 +1317,84 @@ theorem GeneralStep.tau_pending_not_past
       exact Or.inl hEvent
 
 /--
+**Lemma 3 (Causality Preservation), at step level.** A τ step either enqueues nothing or enqueues exactly
+one event, and that event's tag is *strictly* after the tag the step ran at.
+
+The strict upgrade of `tau_pending_not_past` above, and the second rung of Lemma 3. Rung 1 is
+`LF.Tag.strictlyPrecedes_schedule`, a fact about `Tag` alone; this lifts it to the step relation, which is
+where the paper's statement actually lives — its `TT_i` is the tag the sending reaction runs at, here
+`state.currentTag`, and its `TT_j` is the tag of the event the send produces.
+
+**One statement covers both send routes, and that is what makes it Lemma 3 rather than half of it.** The
+two rules that enqueue are the only two rules that send: `schedule` for the self-send route and `setPort`
+for the connection route, and their two cases below are *identical* because both tag their event
+`LF.Tag.schedule state.currentTag d`. The paper's own proof reasons only about "an LF connection with
+`after d`" although its statement never requires the sending and receiving actors to differ, so it has no
+case for a self-send — the omission recorded as **P26**, and the reason this is phrased over the tag
+operator rather than over connections.
+
+**Stated equationally, not by membership**, which is the one place it departs from `tau_pending_not_past`.
+The membership form `event ∈ next.pending → event ∈ state.pending ∨ …` is weaker than it looks: pending
+events are values, so a send that enqueues an event *equal* to one already queued may be answered by the
+left disjunct, leaving the causality fact about the new event unstated. Pinning `next.pending` as
+`state.pending ++ [event]` names the event and fixes its position, which closes that corner and is also why
+no freshness premise is needed — one was considered and rejected, because `event ∉ state.pending` is
+awkward for exactly the same reason.
+
+**Restricted to τ deliberately, and this is not the full causality invariant.** `fire` only removes events,
+and `timeAdvance` moves `currentTag` forward, so extending the conclusion to them requires the six-rule
+pending-not-past induction that `tau_pending_not_past` also defers to the correctness development. What is
+proved here is the one-rule fact underneath it: no rule ever enqueues an event at or before the tag that
+enqueued it.
+
+Restricting to τ is also what makes the proof four cases rather than six, so the two queue-preserving rules
+are `rfl` and carry no arithmetic at all. The `cases` patterns match the explicit-field counts the inversion
+preamble records — `assign` 3, `schedule` 3, `setPort` 4, `microstepAdvance` 3 — and each existential
+witness is supplied as `_`, per the same preamble, because the event is built from implicit fields that are
+inaccessible after `cases`.
+-/
+theorem GeneralStep.tau_enqueue_strictly_future
+    {program : LF.GeneralProgram}
+    {state next : GeneralRuntimeState}
+    (hStep :
+      GeneralStep
+        program
+        state
+        LF.GeneralLabel.tau
+        next) :
+    next.pending = state.pending ∨
+      ∃ event : LF.GeneralPendingEvent,
+        next.pending =
+            state.pending ++ [event] ∧
+          LF.Tag.StrictlyPrecedes
+            state.currentTag
+            event.tag := by
+
+  cases hStep with
+
+  | assign _ _ _ =>
+      exact Or.inl rfl
+
+  | schedule _ _ _ =>
+      refine Or.inr
+        ⟨_, rfl, ?_⟩
+
+      exact LF.Tag.strictlyPrecedes_schedule
+        state.currentTag
+        _
+
+  | setPort _ _ _ _ =>
+      refine Or.inr
+        ⟨_, rfl, ?_⟩
+
+      exact LF.Tag.strictlyPrecedes_schedule
+        state.currentTag
+        _
+
+  | microstepAdvance _ _ _ =>
+      exact Or.inl rfl
+
+/--
 A `.consume` step leaves the tag exactly where it was — not merely its time component.
 
 Stronger than the τ statement above, and it has to be: firing happens *at* a tag, so a `fire` that moved the
