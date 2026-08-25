@@ -134,6 +134,104 @@ theorem not_matchesKind_startup
   | inputPort _ =>
       rfl
 
+/--
+**Matching an event kind pins the trigger completely.** Two triggers that both fire on one event are
+equal — not merely of the same shape, but the same trigger.
+
+This is the fact that makes a `Nodup`-of-triggers hypothesis strong enough to give
+`LF.UniquelyTriggered`, and it is a measurement of `matchesKind` rather than a design choice: each of
+its two matching cases is `decide` on equality of the *whole* payload, and its two cross-constructor
+cases are `false`, so a `.logicalAction` trigger and an `.inputPort` trigger can never fire on one
+kind. Nothing here is true of a hypothetical trigger carrying a predicate rather than a name — a
+`.startup` trigger already breaks it in the other direction, which is why the first case is a
+contradiction rather than a unification.
+
+Eleven leaves, spelled out. Three close on a `startup` trigger through `not_matchesKind_startup`, which
+holds at every kind and so collapses the `kind` split entirely; four are cross-constructor, where one side
+or the other is `false` by one of `matchesKind`'s two `false` cases; two are same-constructor but
+wrong-kind, contradictions for the same reason; the remaining two route both payloads through the shared
+`eventName`. The case analysis is on `left`, then `right`, then `kind`, in that order: splitting `kind`
+first raises the count from eleven to eighteen, because the `startup` leaves then have to be discharged
+once per kind.
+-/
+theorem eq_of_matchesKind
+    {left right : LF.GeneralTrigger}
+    {kind : LF.GeneralEventKind}
+    (hLeft :
+      matchesKind left kind = true)
+    (hRight :
+      matchesKind right kind = true) :
+    left = right := by
+
+  cases left with
+
+  | startup =>
+      simp at hLeft
+
+  | logicalAction leftName =>
+      cases right with
+
+      | startup =>
+          simp at hRight
+
+      | logicalAction rightName =>
+          cases kind with
+
+          | logicalAction eventName =>
+              have hLeftName :
+                  leftName = eventName := by
+                simpa [matchesKind] using hLeft
+
+              have hRightName :
+                  rightName = eventName := by
+                simpa [matchesKind] using hRight
+
+              rw [hLeftName, hRightName]
+
+          | inputPort _ =>
+              simp [matchesKind] at hLeft
+
+      | inputPort _ =>
+          cases kind with
+
+          | logicalAction _ =>
+              simp [matchesKind] at hRight
+
+          | inputPort _ =>
+              simp [matchesKind] at hLeft
+
+  | inputPort leftPort =>
+      cases right with
+
+      | startup =>
+          simp at hRight
+
+      | logicalAction _ =>
+          cases kind with
+
+          | logicalAction _ =>
+              simp [matchesKind] at hLeft
+
+          | inputPort _ =>
+              simp [matchesKind] at hRight
+
+      | inputPort rightPort =>
+          cases kind with
+
+          | logicalAction _ =>
+              simp [matchesKind] at hLeft
+
+          | inputPort eventName =>
+              have hLeftPort :
+                  leftPort = eventName := by
+                simpa [matchesKind] using hLeft
+
+              have hRightPort :
+                  rightPort = eventName := by
+                simpa [matchesKind] using hRight
+
+              rw [hLeftPort, hRightPort]
+
 end GeneralTrigger
 
 /--
@@ -190,8 +288,11 @@ well formed: `LF.GeneralReactor.wellFormed`'s conjuncts include `declaredNames.N
 declared *names* and says nothing about how many reactions trigger on one of them. So well-formedness cannot
 supply this predicate — it is a hypothesis here and an obligation on the translator's output.
 
-The `∀ x, x ∈ list → …` spelling rather than `∀ x ∈ list, …` matches `eq_of_nodup_map` in
-`Relico/LF/GeneralWellFormed.lean`, the one other place this development states a list-local injectivity.
+The `∀ x, x ∈ list → …` spelling rather than `∀ x ∈ list, …` matches `eq_of_nodup_map`, this
+development's other list-local injectivity statement. That lemma now exists **twice**, `private` in
+`Relico/LF/GeneralWellFormed.lean` and `private` again below in this file, for a reason the copy below
+records: the well-formedness module is not in this one's import closure, so the visibility keyword is not
+what makes it unreachable.
 -/
 def UniquelyTriggered
     (reactions : List LF.GeneralReaction)
@@ -381,6 +482,139 @@ theorem UniquelyTriggered.of_perm
     hSecondMatch
 
 /--
+On a list whose image has no duplicates, the mapped function is injective between members of that
+list.
+
+**A deliberate second copy.** `Relico/LF/GeneralWellFormed.lean` already proves exactly this, and this
+statement and proof are that one verbatim — but it is `private` there, and `private` is not the only
+obstacle: `LF.GeneralWellFormed` is not in this module's import closure at all (this file imports
+`LF.GeneralEvaluation`, `LF.GeneralRuntime` and `LF.PendingNotPast`, reaching 52 modules, and
+well-formedness is in none of them), so de-privatising it would not make it reachable. Copying is
+therefore the alternative to a new import edge, not to a one-word visibility change. Kept `private` on
+this side too, so that the duplication cannot spread.
+
+Hand-rolled in the first place because this development depends on Lean core alone. The statement
+needed is injectivity *on the list*, which is weaker than `Function.Injective` and so is not
+`nodup_map_of_injective`: two distinct reactions may well agree under some other projection.
+-/
+private theorem eq_of_nodup_map
+    {α β : Type}
+    (function : α → β) :
+    ∀ (values : List α),
+      (values.map function).Nodup →
+      ∀ (a b : α),
+        a ∈ values →
+        b ∈ values →
+        function a = function b →
+          a = b := by
+
+  intro values
+  induction values with
+
+  | nil =>
+      intro _ a b hMemberA _ _
+      cases hMemberA
+
+  | cons head remaining inductionHypothesis =>
+      intro hNodup a b hMemberA hMemberB hEqual
+
+      rw [List.map_cons] at hNodup
+
+      cases hNodup with
+
+      | cons hHead hTail =>
+
+          cases List.mem_cons.mp hMemberA with
+
+          | inl hA =>
+              subst hA
+
+              cases List.mem_cons.mp hMemberB with
+
+              | inl hB =>
+                  exact hB.symm
+
+              | inr hB =>
+                  exact
+                    absurd
+                      hEqual
+                      (hHead
+                        (function b)
+                        (List.mem_map.mpr
+                          ⟨b, hB, rfl⟩))
+
+          | inr hA =>
+
+              cases List.mem_cons.mp hMemberB with
+
+              | inl hB =>
+                  subst hB
+
+                  exact
+                    absurd
+                      hEqual.symm
+                      (hHead
+                        (function a)
+                        (List.mem_map.mpr
+                          ⟨a, hA, rfl⟩))
+
+              | inr hB =>
+                  exact
+                    inductionHypothesis
+                      hTail
+                      a
+                      b
+                      hA
+                      hB
+                      hEqual
+
+/--
+**The bridge from pairwise-distinct triggers to `UniquelyTriggered`, at every event kind at once.**
+
+`LF.UniquelyTriggered` deliberately does not state this, because the shape the translator can actually
+supply had to be measured first — writing a bridge against a guessed shape is the defect class
+`docs/STAGE_G_FINDINGS.md` F75 records. It has now been measured, and `Nodup` on the mapped trigger
+list is not merely *a* usable form but the **only** form the two sides can share:
+`Relico.Translation.GeneralBasic` cannot reach `Relico.LF.GeneralSemantics`, so no theorem stated
+beside the translator can so much as mention `UniquelyTriggered`. The two statements meet in
+`Relico/Correctness/GeneralCorrespondence.lean`, which is the cheapest of the three modules whose
+import closure contains both this file and `LF.GeneralWellFormed`.
+
+The hypothesis is strictly stronger than what any single use needs — `UniquelyTriggered` is per kind,
+and this discharges it at all of them — which is the right direction for an interface: the translator
+proves one statement about its output rather than one per event.
+
+Two ingredients, no induction of its own. `LF.GeneralTrigger.eq_of_matchesKind` turns "both match this
+kind" into "equal triggers", and `eq_of_nodup_map` turns "equal under the trigger projection" into
+"equal reactions". Neither step is available from `List.Nodup` alone: without the first, two reactions
+matching one kind need not have syntactically equal triggers as far as `Nodup` is concerned.
+-/
+theorem UniquelyTriggered.of_nodup_triggers
+    {reactions : List LF.GeneralReaction}
+    (hNodup :
+      (reactions.map (fun reaction => reaction.trigger)).Nodup)
+    (kind : LF.GeneralEventKind) :
+    UniquelyTriggered reactions kind := by
+
+  intro first hFirst second hSecond hFirstMatch hSecondMatch
+
+  have hTrigger :
+      first.trigger = second.trigger :=
+    LF.GeneralTrigger.eq_of_matchesKind
+      hFirstMatch
+      hSecondMatch
+
+  exact eq_of_nodup_map
+    (fun reaction => reaction.trigger)
+    reactions
+    hNodup
+    first
+    second
+    hFirst
+    hSecond
+    hTrigger
+
+/--
 **Permuting a uniquely-triggered reaction list does not change what the lookup returns.**
 
 The order-sensitivity of `findReactionForKind?` is real and deliberate — its own docstring records that
@@ -560,6 +794,48 @@ theorem reactionFor?_perm
     rightReactor.messageReactions
     hPerm
     hUnique
+
+/--
+The same statement against the hypothesis a caller can actually hold.
+
+`reactionFor?_perm`'s `LF.UniquelyTriggered` premise is per event kind, which is the weakest form the
+induction consumes and therefore the right form for *that* theorem. It is not the form anything
+upstream proves: a translator-side or well-formedness-side argument establishes one property of the
+emitted reaction list and cannot quantify over the kinds an execution will present. This corollary
+takes that one property and concludes the permutation invariance at every kind, so that the two halves
+of the argument compose without the caller reconstructing the bridge each time.
+
+Stated on `leftReactor` only, matching `reactionFor?_perm`: the permutation carries the property to
+`rightReactor` through `LF.UniquelyTriggered.of_perm`, and asking for it on both sides would be a
+redundant premise that a caller could satisfy inconsistently.
+-/
+theorem reactionFor?_perm_of_nodup_triggers
+    {left right : LF.GeneralProgram}
+    {target : ActorName}
+    {kind : LF.GeneralEventKind}
+    {leftReactor rightReactor : LF.GeneralReactor}
+    (hLeft :
+      left.reactorOfInstance? target =
+        some leftReactor)
+    (hRight :
+      right.reactorOfInstance? target =
+        some rightReactor)
+    (hPerm :
+      List.Perm
+        leftReactor.messageReactions
+        rightReactor.messageReactions)
+    (hNodup :
+      (leftReactor.messageReactions.map
+        (fun reaction => reaction.trigger)).Nodup) :
+    left.reactionFor? target kind =
+      right.reactionFor? target kind :=
+  reactionFor?_perm
+    hLeft
+    hRight
+    hPerm
+    (LF.UniquelyTriggered.of_nodup_triggers
+      hNodup
+      kind)
 
 end GeneralProgram
 
