@@ -7822,5 +7822,236 @@ theorem compileGeneralReactiveClass_reactionTriggers
       compiledMessageReactions
       hMessageServers
 
+/-!
+## One reaction group's triggers are distinct
+
+`compileGeneralReactiveClass_reactionTriggers` above turns
+`reactionFor?_perm_of_nodup_triggers`'s hypothesis into a question about
+`generalReactionTriggersOf`. This section answers it for **one message server's group**, which
+is the rung the class-level answer will induct over, and it is deliberately the same scoping
+choice `assembleGeneralPortReactions_names` records: a class-level statement needs a
+combinator over groups, and this development depends on no `List.flatMap`.
+
+**Why the group splits into exactly two arguments and one of them is free.** A group is the
+action reactions followed by the port reactions, so `List.nodup_append` reduces distinctness to
+three obligations: the action half, the port half, and no action trigger equal to a port
+trigger. The third is free, and free for a structural reason rather than by luck —
+`LF.GeneralTrigger.logicalAction` and `LF.GeneralTrigger.inputPort` are different constructors,
+so the two halves cannot meet whatever the names inside them are. That is the same fact
+`matchesKind`'s two cross-constructor `false` cases give the semantics side, arriving here from
+the syntax side.
+
+**The action half needed no new name reasoning, and measuring that removed two obligations.**
+The plan for this section carried an owed suffix-cancellation lemma in `NameGeneration.lean`
+plus an ordinal-distinctness argument over sites, on the assumption that distinctness of
+`generalActionNameAtSite` across a server's sites had to be *proved*. It does not:
+`generalMessageActionNamesOf` already specifies exactly those names, `generalMessageReactionTriggersOf`
+is that list under one constructor, and distinctness of the names is a **decided guard clause**,
+because action names are declared identifiers and `LF.GeneralReactor.declaredNames` carries them.
+So the action half is the port half's argument with a different constructor, and both are
+guard-relative in the `F50`/`#60` shape rather than claimed by construction.
+
+**Both hypotheses are stated at the list the conclusion is about, not projected from the guard
+here.** That is forced by a measured asymmetry inside one reactor: `assembleGeneralReactor`
+builds `logicalActions` from `reactiveClass.messageServers` but `messageReactions` from
+`generalPriorityOrderedMessageServers reactiveClass`. The two lists are permutations of each
+other, so every reaction still triggers on an action its reactor declares and there is no defect
+here — but a projection out of `declaredNames` would land on the *unsorted* list while this
+conclusion is about whichever list its caller names. Keeping the hypotheses at the caller's list
+leaves that permutation transfer to the step that composes, where the sort is visible, instead of
+burying it in a projection.
+-/
+
+/--
+A message server's action-reaction triggers are its action names under one constructor.
+
+Both sides branch on `generalSelfSendSitesOf`, and they agree branch for branch by construction
+rather than by argument — `generalMessageActionNamesOf` was written as the action-declaration
+counterpart of `generalMessageReactionNamesOf`, and F56's repair made the trigger list follow the
+same site list. Stating the equation is what lets the distinctness argument below run entirely on
+names, where the guard speaks, instead of on triggers, where it does not.
+
+The zero-site branch is the one that would break silently: both sides must spell the name with
+`actionNameFor` there, and they do, for the reason every zero-site branch in this file records —
+otherwise a reaction triggers on an action its own reactor never declares.
+-/
+private theorem generalMessageReactionTriggersOf_eq_map_logicalAction
+    (selfSends : List GeneralSelfSend)
+    (message : MsgName) :
+    generalMessageReactionTriggersOf
+        selfSends
+        message =
+      (generalMessageActionNamesOf
+        selfSends
+        message).map
+        LF.GeneralTrigger.logicalAction := by
+
+  cases hSites :
+      generalSelfSendSitesOf
+        message
+        selfSends with
+
+  | nil =>
+      simp [
+        generalMessageReactionTriggersOf,
+        generalMessageActionNamesOf,
+        hSites
+      ]
+
+  | cons firstSite remainingSites =>
+      simp [
+        generalMessageReactionTriggersOf,
+        generalMessageActionNamesOf,
+        hSites
+      ]
+
+/--
+Distinct action names give distinct action triggers.
+
+The `logicalAction` counterpart of the `inputPort` step inside
+`assembleGeneralPortReactions_triggers_nodup`, and it is the same instrument:
+`nodup_map_of_reflecting` wants only that equal triggers force equal names, which constructor
+injectivity supplies. `hReflect` is hoisted into an explicit `have` rather than passed as an
+inline `by` block, because an inline one leaves the goal as an un-beta-reduced application of the
+`target` lambda and the rewrite inside it then has nothing to fire on.
+-/
+private theorem nodup_map_logicalAction
+    (names : List ActionName)
+    (hNames :
+      (names.map
+        (fun name =>
+          name.value)).Nodup) :
+    (names.map
+      LF.GeneralTrigger.logicalAction).Nodup := by
+
+  have hReflect :
+      ∀ (first second : ActionName),
+        LF.GeneralTrigger.logicalAction first =
+            LF.GeneralTrigger.logicalAction second →
+          first.value = second.value := by
+
+    intro first second hTrigger
+
+    simp only [
+      LF.GeneralTrigger.logicalAction.injEq
+    ] at hTrigger
+
+    rw [hTrigger]
+
+  exact
+    nodup_map_of_reflecting
+      (fun name =>
+        name.value)
+      LF.GeneralTrigger.logicalAction
+      hReflect
+      names
+      hNames
+
+/--
+Every reaction in one message server's group carries a distinct trigger.
+
+The group-level rung of the distinctness ladder, and the exact analogue of
+`assembleGeneralPortReactions_triggers_nodup` one level up: that theorem covers the port half of
+one group, this one covers the whole group. Both are **guard-relative** — the two hypotheses are
+the distinctness facts a well-formed reactor's `declaredNames` carries, and neither is claimed by
+construction, because F42 measured that the translator can in fact emit two port declarations with
+one name and the standing doctrine is to state the scoped theorem rather than assert the
+unconditional one.
+
+`hCompiled` is discharged through `compileGeneralMessageServerReactionGroup_triggers`, so the
+`Nodup` argument never touches the compiler — it runs entirely on the specification, which is what
+that theorem was written for.
+
+The third `List.nodup_append` obligation is discharged by constructor disjointness alone. It is
+worth being explicit that this is not a convenience: it is the syntax-side form of the same fact
+`LF.GeneralTrigger.matchesKind` gives the semantics side in its two cross-constructor `false`
+cases, and it is why the action half and the port half can be reasoned about in isolation at all.
+Without it every cross pair would need an argument relating a generated action name to a generated
+port name, and no such relation is available or wanted.
+-/
+theorem compileGeneralMessageServerReactionGroup_triggers_nodup
+    {env : GeneralOutputPortEnv}
+    {selfSends : List GeneralSelfSend}
+    {routes : List GeneralRoute}
+    {className : ClassName}
+    {server : DTR.GeneralMessageServer}
+    {group : List LF.GeneralReaction}
+    (hCompiled :
+      compileGeneralMessageServerReactionGroup
+          env
+          selfSends
+          routes
+          className
+          server =
+        .ok group)
+    (hActionNames :
+      ((generalMessageActionNamesOf
+        selfSends
+        server.name).map
+        (fun name =>
+          name.value)).Nodup)
+    (hInputPortNames :
+      ((generalInputPortsOf
+        className
+        routes).map
+        (fun port =>
+          port.name.value)).Nodup) :
+    (group.map
+      (fun reaction =>
+        reaction.trigger)).Nodup := by
+
+  rcases exists_of_compileGeneralMessageServerReactionGroup_ok hCompiled with
+    ⟨compiledBody, _, _⟩
+
+  rw [
+    compileGeneralMessageServerReactionGroup_triggers hCompiled,
+    List.nodup_append
+  ]
+
+  refine ⟨?_, ?_, ?_⟩
+
+  · rw [generalMessageReactionTriggersOf_eq_map_logicalAction]
+
+    exact
+      nodup_map_logicalAction
+        (generalMessageActionNamesOf
+          selfSends
+          server.name)
+        hActionNames
+
+  · rw [
+      ← assembleGeneralPortReactions_triggers
+          className
+          server
+          compiledBody
+          routes
+    ]
+
+    exact
+      assembleGeneralPortReactions_triggers_nodup
+        className
+        server
+        compiledBody
+        routes
+        hInputPortNames
+
+  · intro actionTrigger hActionTrigger portTrigger hPortTrigger
+
+    rw [
+      generalMessageReactionTriggersOf_eq_map_logicalAction
+    ] at hActionTrigger
+
+    rcases List.mem_map.mp hActionTrigger with ⟨actionName, _, hActionEq⟩
+
+    rcases List.mem_map.mp hPortTrigger with ⟨route, _, hPortEq⟩
+
+    subst hActionEq
+
+    subst hPortEq
+
+    intro hSame
+
+    simp at hSame
+
 end Translation
 end Relico
