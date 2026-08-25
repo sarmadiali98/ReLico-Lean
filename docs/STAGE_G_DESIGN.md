@@ -60,7 +60,7 @@ it does not buy, and stage F's own design says so at §1.3, is any statement abo
 *does*. Three measurements bound the gap:
 
 1. **The DTR side selects nothing.** `GeneralConfiguration.readyActors`
-   (`Relico/DTR/GeneralState.lean:659`) returns the whole cohort, and its docstring says why: *"The
+   (`Relico/DTR/GeneralState.lean`) returns the whole cohort, and its docstring says why: *"The
    cohort is a function of the configuration alone. Nothing about the model is consulted, because
    whether an actor has a message it may take now is a question about its bag and the clock; which of
    the ready actors is then selected is what priority decides, and that is the next stage's concern."*
@@ -82,7 +82,7 @@ theory and no run-time order theory, and aims 8 and 9 live entirely in the secon
 ## 3. The defect stage G must close, already formalised as a theorem
 
 The actor-priority layer that does exist has a shape defect, and it is pinned by
-`readyActors_discriminates` (`Relico/DTR/GeneralState.lean:1149`, proved by `decide`). The theorem is a
+`readyActors_discriminates` (`Relico/DTR/GeneralState.lean`, proved by `decide`). The theorem is a
 five-way conjunction over a two-actor configuration at time 5 in which one actor holds a message due at
 3 and the other's bag is empty. It establishes, simultaneously:
 
@@ -221,7 +221,7 @@ records, with stage F's absence convention (annotated before unannotated) reused
 **Why lexicographic and not priority-first — measured 2026-08-23, before any code.** Timed Rebeca is
 time-driven first and priority-driven second, and the state layer permits the distinction to bite:
 `earliestDueArrival` (`Relico/DTR/GeneralState.lean:142`) returns the minimum arrival **among the messages
-whose arrival is `≤ now`**, and `readyActorsOf` (`:621`) puts that arrival into each record as its
+whose arrival is `≤ now`**, and `readyActorsOf` puts that arrival into each record as its
 `logicalTime` while contributing no record for an actor with nothing due. Nothing constrains two ready
 actors to carry the *same* arrival, so a cohort with mixed arrival times is reachable, and a priority-first
 selection would let a later message overtake an earlier one whenever the later actor had the better
@@ -703,7 +703,7 @@ evaluator requirement.
 branch.** The question was whether `selectedActor` may be a priority minimum or must be a lexicographic
 minimum on `(logicalTime, priority)`. **Measured: lexicographic.** `earliestDueArrival`
 (`Relico/DTR/GeneralState.lean:142`) minimises arrival over the messages due at `now` rather than
-requiring a unique arrival, and `readyActorsOf` (`:621`) records that arrival per actor, so a cohort with
+requiring a unique arrival, and `readyActorsOf` records that arrival per actor, so a cohort with
 mixed arrival times is reachable and priority must not be allowed to overtake an earlier message. §6
 carries the full argument. The lexicographic form is therefore not a defensive choice but the only sound
 one, and the two predicates the old layer left to its caller — `cohortSimultaneous` and `earliestReady` —
@@ -770,8 +770,11 @@ Stated as falsifiable predictions, so that a failure is informative rather than 
    in P24 come back into play. It should not: Lemma 1 tracks logical-time *equality* between corresponding
    events, and relabelling a step that leaves logical time unchanged cannot disturb an invariant about
    logical time. The signal is a Lemma 1 case that needs to know which label the microstep advance carried.
-   Stated because it is the one place the stage modifies a rule the paper's other results are proved over,
-   and an unstated assumption there would be the F53 failure — a repair outliving the argument for it.
+   Stated because it is the one place the stage modifies a rule the paper's other results are proved over
+   *away from* what the paper prints, and an unstated assumption there would be the F53 failure — a repair
+   outliving the argument for it. (**F74** later modified a second such rule, DTR's `TIME PROGRESS`, in the
+   opposite direction: it tightened our transcription back *onto* what the paper prints, after the loose
+   version turned out to make Lemma 1 false on its own, independently of P24's split.)
 8. **If expression evaluation cannot be made total**, G2a-i's signature is wrong and the step relations
    inherit a failure mode. An unbound variable, a type mismatch surviving well-formedness, or a partial
    operator would force evaluation into `Option` and then every rule in Tables I and II acquires a

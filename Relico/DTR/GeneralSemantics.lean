@@ -457,12 +457,43 @@ inductive GeneralStep
         }
 
   /--
-  `TIME PROGRESS`. Advance `now`, leaving every actor untouched.
+  `TIME PROGRESS`. Advance `now` to the next message arrival, leaving every actor untouched.
 
-  **Observable, carrying `.timeAdvance`.** Premised on the advance being strict and on no actor being
-  ready — time may not pass while work is due at the current instant. Without the second premise the
-  relation would admit skipping a due message, and G2c would prove a bisimulation with a target that does
-  not skip it.
+  **Observable, carrying `.timeAdvance`.** Three premises, and the third is **F74's repair**.
+
+  Strictness and quiescence alone — the two premises this rule shipped with — let the clock jump to an
+  *arbitrary* later time. Quiescence is decided by `readyActors`, which reaches `DTR.earliestDueArrival`,
+  and that function only ever inspects messages with `arrival ≤ now`. So a bag holding one message
+  arriving at 5 with `now = 3` is quiescent, and the rule admitted an advance to 100 — straight over the
+  arrival, with the message still sitting in the bag afterwards.
+
+  That made Lemma 1 false and broke Definition 1's **forward** condition, because
+  `LF.GeneralStep.timeAdvance` can only reach the earliest pending event's tag and so offers no
+  counterpart to the jump. The paper never allowed it: Lemma 1's time case advances "to the minimum
+  message arrival time `ar_min`", and Theorem 1's says "time progresses to the next message arrival
+  `ar_min`". `DTR.GeneralConfiguration.nextArrival` is that `ar_min`, up to the one restriction the paper
+  puts on the comprehension and this development drops — Table I minimises over actors whose continuation
+  is `ϵ`, which P17 records as vacuous there and which is not vacuous here, because this rule lets the
+  clock advance mid-body. `GeneralState.lean`'s section header argues that case; `hSelected` pins `future`
+  to the answer.
+
+  Note the direction. It would also close the gap to weaken the *target* until it too could jump, and the
+  docstring this repair replaces argued that way round. That is backwards: a bisimulation between two
+  relations that both over-approximate proves nothing about the translator, and the target rule is the one
+  matching a real LF scheduler. The permissive side was the source, so the source is what tightens.
+
+  `hForward` is kept even though it is now implied — `earliestFutureArrival` filters on
+  `now < message.arrival`, so `nextArrival` never answers with a time at or before `now`. Keeping it lets
+  `GeneralStep.lt_of_timeAdvance` read strictness straight off a premise; deriving it from `hSelected`
+  instead would need the store-level soundness lemma that row 7 owes.
+
+  Together the premises make the rule **refuse** rather than quietly under-deliver when nothing is
+  pending: `nextArrival` answers `none` on a store with no future message, so the clock cannot move at
+  all. That matches the target, whose `timeAdvance` likewise needs an event to advance to. The landed
+  witness in `Relico/Tests/GeneralSemantics.lean` had to be rewritten for it — it built a step on an
+  *empty* configuration, which this rule no longer admits — and its docstring records the substitution.
+  That rewrite is the evidence; nothing here pins the refusal itself, since a negative would have to
+  quantify over every `future`.
 
   P24's split lives on the **LF** side, where a tag has a microstep component. `LogicalTime` has no
   microstep, so this rule is the source's whole time story and stays observable.
@@ -473,7 +504,10 @@ inductive GeneralStep
       (hForward :
         config.now < future)
       (hQuiescent :
-        DTR.GeneralConfiguration.readyActors config.erase = []) :
+        DTR.GeneralConfiguration.readyActors config.erase = [])
+      (hSelected :
+        DTR.GeneralConfiguration.nextArrival config.erase =
+          some future) :
       GeneralStep
         model
         config
@@ -482,6 +516,8 @@ inductive GeneralStep
           now := future
           actors := config.actors
         }
+
+
 /-!
 ## Inversion
 
@@ -707,7 +743,7 @@ theorem GeneralStep.before_eq_of_timeAdvance
 
   cases hStep with
 
-  | timeProgress _ _ =>
+  | timeProgress _ _ _ =>
       rfl
 
 /--
@@ -727,7 +763,7 @@ theorem GeneralStep.now_eq_of_timeAdvance
 
   cases hStep with
 
-  | timeProgress _ _ =>
+  | timeProgress _ _ _ =>
       rfl
 
 /--
@@ -751,7 +787,7 @@ theorem GeneralStep.actors_eq_of_timeAdvance
 
   cases hStep with
 
-  | timeProgress _ _ =>
+  | timeProgress _ _ _ =>
       rfl
 
 /--
@@ -777,7 +813,7 @@ theorem GeneralStep.lt_of_timeAdvance
 
   cases hStep with
 
-  | timeProgress hForward _ =>
+  | timeProgress hForward _ _ =>
       exact hForward
 
 /--
@@ -801,8 +837,40 @@ theorem GeneralStep.quiescent_of_timeAdvance
 
   cases hStep with
 
-  | timeProgress _ hQuiescent =>
+  | timeProgress _ hQuiescent _ =>
       exact hQuiescent
+
+/--
+A time advance lands exactly on the next message arrival.
+
+**F74's payoff, and the theorem that makes the repaired premise usable.** The mirror of
+`LF.GeneralStep.selected_of_timeAdvance`, which ties the target's advance to its queue; this ties the
+source's to its bags. G2b's time case matches one source advance against one target advance, and with
+both selection theorems in hand the two chosen times are each pinned to a minimum rather than one being
+pinned and the other merely bounded — which is what Lemma 1 needs and what it could not have had while
+`future` was arbitrary.
+
+Row 7 still owes the store-level bridge from `nextArrival` to a named message: `earliestFutureArrival`
+carries soundness, completeness and minimality per bag, but `earliestFutureArrivalOf` has no lemmas yet,
+because their useful shape is decided by the bag-to-queue component of R rather than guessable here.
+-/
+theorem GeneralStep.selected_of_timeAdvance
+    {model : DTR.GeneralModel}
+    {config next : GeneralRuntimeConfiguration}
+    {before after : LogicalTime}
+    (hStep :
+      GeneralStep
+        model
+        config
+        (DTR.GeneralLabel.timeAdvance before after)
+        next) :
+    DTR.GeneralConfiguration.nextArrival config.erase =
+      some after := by
+
+  cases hStep with
+
+  | timeProgress _ _ hSelected =>
+      exact hSelected
 
 end DTR
 end Relico

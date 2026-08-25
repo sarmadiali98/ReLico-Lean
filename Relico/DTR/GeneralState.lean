@@ -598,6 +598,727 @@ theorem earliestDueArrival_complete
               hRemainingMember
 
 /-!
+### The next arrival, ignoring the due filter
+
+`earliestDueArrival` answers *"what may this actor take now"*, and it is the wrong
+question for a time step: it only looks at messages with `arrival ≤ now`, so a bag
+whose every message is still in the future answers `none`. Time progress needs the
+opposite — the earliest arrival **still ahead** — and nothing in the development
+computed it. Its absence is what let `DTR.GeneralStep.timeProgress` advance to an
+arbitrary `future`, recorded as **F74**.
+
+The paper is explicit that this is the quantity the rule uses. Lemma 1's
+time-progress case has DTR *"advance logical time to the minimum message arrival
+time ar_min"*, and Theorem 1's time case says *"time progresses to the next message
+arrival ar_min"*. `docs/PAPER_CORRECTIONS.md` had already transcribed
+`now := ar_min` correctly before the general step relation was written, so this
+module is catching up with our own record rather than revising the paper.
+
+**One deliberate difference from the paper's comprehension, and it is not a slip.**
+Table I restricts the minimum to actors whose continuation is `ϵ`, so in the paper
+an actor part-way through a message server contributes no arrival. P17's closing
+note already observes that the restriction is vacuous there — such an actor has a
+`τ`-transition, so TIME PROGRESS could not have fired in the first place. It is not
+vacuous here, because the general step relation deliberately lets the clock advance
+while an actor sits mid-body, in symmetry with the target (see
+`LF.GeneralStep`'s own docstring, and **F74**'s open item on whether that symmetry
+should be kept). Dropping the restriction is what keeps this definition matching
+the target's queue, which likewise ignores what any reactor is doing: were an
+arrival in a mid-body actor's bag excluded, the source could advance past a tag the
+target must stop at, which is the very failure F74 records in the other direction.
+
+Deliberately **not** the same shape as `earliestDueArrival`. That function fuses a
+filter with a minimum over one bag; this one takes a minimum over *every* bag in
+the configuration, because time is global — an actor with an empty bag must not
+stop the clock, and an arrival in some *other* actor's bag must. So the recursion
+is over the store, and the per-bag helper is the piece that recurses over messages.
+-/
+
+/--
+The earliest arrival strictly after `now` among the messages of one bag.
+
+`none` means this bag holds nothing in the future, which covers both an empty bag
+and a bag every message of which is already due. Those two are not distinguished,
+for the same reason `dueArrival` does not distinguish its two `none` cases:
+neither can move the clock, and no caller asks why not.
+
+The comparison is strict. A message arriving exactly at `now` is due, not future,
+and is `take`'s business rather than time progress's — `timeProgress` also carries
+a quiescence premise, so a bag holding such a message blocks the clock through
+that premise instead.
+-/
+def earliestFutureArrival :
+    DTR.GeneralMessageBag →
+    LogicalTime →
+    Option LogicalTime
+
+  | [], _ =>
+      none
+
+  | message :: remaining, now =>
+      if now < message.arrival then
+        match
+          earliestFutureArrival
+            remaining
+            now
+        with
+
+        | none =>
+            some message.arrival
+
+        | some best =>
+            if message.arrival ≤ best then
+              some message.arrival
+            else
+              some best
+      else
+        earliestFutureArrival
+          remaining
+          now
+
+/--
+The earliest arrival strictly after `now` anywhere in a store of actor states.
+
+Store order does not matter here, unlike in `readyActorsOf`: a minimum is
+order-independent, and no caller reads a position out of the answer. What matters
+is that *every* bag is consulted, which is what makes the answer a property of the
+configuration rather than of one actor.
+-/
+def earliestFutureArrivalOf :
+    Store ActorName DTR.GeneralActorState →
+    LogicalTime →
+    Option LogicalTime
+
+  | [], _ =>
+      none
+
+  | (_, state) :: remaining, now =>
+      match
+        DTR.earliestFutureArrival
+          state.bag
+          now
+      with
+
+      | none =>
+          earliestFutureArrivalOf
+            remaining
+            now
+
+      | some arrival =>
+          match
+            earliestFutureArrivalOf
+              remaining
+              now
+          with
+
+          | none =>
+              some arrival
+
+          | some best =>
+              if arrival ≤ best then
+                some arrival
+              else
+                some best
+
+
+/-!
+### What `earliestFutureArrival` guarantees
+
+The same two properties `earliestDueArrival` carries, for the same reason: without
+soundness the answer could name a time no message occupies, and `timeProgress`
+would advance to a fiction; without the lower-bound property the answer could skip
+an earlier arrival, which is precisely the defect F74 records. Both are proved in
+this file's established idiom — equation lemmas discharged by `simp` on the
+definition plus the branch hypotheses, then an inversion lemma with no induction
+hypothesis in scope, then the properties by `rcases` on it.
+-/
+
+theorem earliestFutureArrival_cons_not_future
+    (message : DTR.GeneralMessage)
+    (remaining : DTR.GeneralMessageBag)
+    (now : LogicalTime)
+    (hNotFuture :
+      ¬ now < message.arrival) :
+    DTR.earliestFutureArrival
+        (message :: remaining)
+        now =
+      DTR.earliestFutureArrival
+        remaining
+        now := by
+
+  simp [
+    DTR.earliestFutureArrival,
+    hNotFuture
+  ]
+
+theorem earliestFutureArrival_cons_future_none
+    (message : DTR.GeneralMessage)
+    (remaining : DTR.GeneralMessageBag)
+    (now : LogicalTime)
+    (hFuture :
+      now < message.arrival)
+    (hRemaining :
+      DTR.earliestFutureArrival
+          remaining
+          now =
+        none) :
+    DTR.earliestFutureArrival
+        (message :: remaining)
+        now =
+      some message.arrival := by
+
+  simp [
+    DTR.earliestFutureArrival,
+    hFuture,
+    hRemaining
+  ]
+
+theorem earliestFutureArrival_cons_future_some_le
+    (message : DTR.GeneralMessage)
+    (remaining : DTR.GeneralMessageBag)
+    (now best : LogicalTime)
+    (hFuture :
+      now < message.arrival)
+    (hRemaining :
+      DTR.earliestFutureArrival
+          remaining
+          now =
+        some best)
+    (hBetter :
+      message.arrival ≤ best) :
+    DTR.earliestFutureArrival
+        (message :: remaining)
+        now =
+      some message.arrival := by
+
+  simp [
+    DTR.earliestFutureArrival,
+    hFuture,
+    hRemaining,
+    hBetter
+  ]
+
+theorem earliestFutureArrival_cons_future_some_gt
+    (message : DTR.GeneralMessage)
+    (remaining : DTR.GeneralMessageBag)
+    (now best : LogicalTime)
+    (hFuture :
+      now < message.arrival)
+    (hRemaining :
+      DTR.earliestFutureArrival
+          remaining
+          now =
+        some best)
+    (hNotBetter :
+      ¬ message.arrival ≤ best) :
+    DTR.earliestFutureArrival
+        (message :: remaining)
+        now =
+      some best := by
+
+  simp [
+    DTR.earliestFutureArrival,
+    hFuture,
+    hRemaining,
+    hNotBetter
+  ]
+
+/--
+An answer for a non-empty bag came either from its head or from its tail.
+
+Mirrors `earliestDueArrival_cons_cases`, and is stated separately for the reason
+recorded there: it has no induction hypothesis in scope, so the case analysis on
+the recursive answer cannot interact with one.
+-/
+theorem earliestFutureArrival_cons_cases
+    (message : DTR.GeneralMessage)
+    (remaining : DTR.GeneralMessageBag)
+    (now arrival : LogicalTime)
+    (hEarliest :
+      DTR.earliestFutureArrival
+          (message :: remaining)
+          now =
+        some arrival) :
+    (message.arrival =
+          arrival ∧
+        now < arrival) ∨
+      DTR.earliestFutureArrival
+          remaining
+          now =
+        some arrival := by
+
+  by_cases hFuture :
+      now < message.arrival
+
+  · rcases
+        optionCases
+          (DTR.earliestFutureArrival
+            remaining
+            now)
+      with
+        hRemaining |
+          ⟨best, hRemaining⟩
+
+    · rw [
+        DTR.earliestFutureArrival_cons_future_none
+          message
+          remaining
+          now
+          hFuture
+          hRemaining
+      ] at hEarliest
+
+      injection hEarliest with hArrival
+
+      refine
+        Or.inl
+          ⟨hArrival,
+           ?_⟩
+
+      rw [← hArrival]
+      exact hFuture
+
+    · by_cases hBetter :
+          message.arrival ≤ best
+
+      · rw [
+          DTR.earliestFutureArrival_cons_future_some_le
+            message
+            remaining
+            now
+            best
+            hFuture
+            hRemaining
+            hBetter
+        ] at hEarliest
+
+        injection hEarliest with hArrival
+
+        refine
+          Or.inl
+            ⟨hArrival,
+             ?_⟩
+
+        rw [← hArrival]
+        exact hFuture
+
+      · rw [
+          DTR.earliestFutureArrival_cons_future_some_gt
+            message
+            remaining
+            now
+            best
+            hFuture
+            hRemaining
+            hBetter
+        ] at hEarliest
+
+        refine
+          Or.inr
+            ?_
+
+        rw [hRemaining]
+        exact hEarliest
+
+  · rw [
+      DTR.earliestFutureArrival_cons_not_future
+        message
+        remaining
+        now
+        hFuture
+    ] at hEarliest
+
+    exact
+      Or.inr
+        hEarliest
+
+/--
+Every answer names a real message of the bag, and that message really is ahead.
+
+The witness shape follows `earliestDueArrival_sound`: the message is produced
+existentially rather than returned, because the time step needs the *time* and a
+caller wanting the message would need a different function.
+-/
+theorem earliestFutureArrival_sound
+    (bag : DTR.GeneralMessageBag)
+    (now arrival : LogicalTime)
+    (hEarliest :
+      DTR.earliestFutureArrival
+          bag
+          now =
+        some arrival) :
+    ∃ message,
+      message ∈ bag ∧
+        message.arrival = arrival ∧
+        now < arrival := by
+
+  induction bag with
+
+  | nil =>
+      simp [
+        DTR.earliestFutureArrival
+      ] at hEarliest
+
+  | cons head remaining inductionHypothesis =>
+      rcases
+          DTR.earliestFutureArrival_cons_cases
+            head
+            remaining
+            now
+            arrival
+            hEarliest
+        with
+          ⟨hHeadArrival, hArrivalFuture⟩ |
+            hRemaining
+
+      · exact
+          ⟨head,
+           ⟨by simp,
+            ⟨hHeadArrival,
+             hArrivalFuture⟩⟩⟩
+
+      · rcases
+            inductionHypothesis
+              hRemaining
+          with
+            ⟨message,
+             hMember,
+             hMessageArrival,
+             hMessageFuture⟩
+
+        exact
+          ⟨message,
+           ⟨by simp [hMember],
+            ⟨hMessageArrival,
+             hMessageFuture⟩⟩⟩
+
+/--
+Whenever some message of the bag arrives ahead of `now`, there is an answer.
+
+The mirror of `earliestDueArrival_complete`, and it is what stops a `timeProgress`
+premise of the form `nextArrival … = some future` from being unusable: such a rule
+would never fire if this function could answer `none` while a future message sat in
+a bag.
+
+As with the due version the answer need not be the arrival of the message supplied.
+An earlier future arrival elsewhere wins, which is the point of taking a minimum, so
+only existence is claimed here. Minimality is the theorem after this one.
+-/
+theorem earliestFutureArrival_complete
+    (bag : DTR.GeneralMessageBag)
+    (now : LogicalTime)
+    (message : DTR.GeneralMessage)
+    (hMember :
+      message ∈ bag)
+    (hFuture :
+      now < message.arrival) :
+    ∃ arrival,
+      DTR.earliestFutureArrival
+          bag
+          now =
+        some arrival := by
+
+  induction bag with
+
+  | nil =>
+      cases hMember
+
+  | cons head remaining inductionHypothesis =>
+      by_cases hHeadFuture :
+          now < head.arrival
+
+      · rcases
+            optionCases
+              (DTR.earliestFutureArrival
+                remaining
+                now)
+          with
+            hRemaining |
+              ⟨best, hRemaining⟩
+
+        · exact
+            ⟨head.arrival,
+             DTR.earliestFutureArrival_cons_future_none
+               head
+               remaining
+               now
+               hHeadFuture
+               hRemaining⟩
+
+        · by_cases hBetter :
+              head.arrival ≤ best
+
+          · exact
+              ⟨head.arrival,
+               DTR.earliestFutureArrival_cons_future_some_le
+                 head
+                 remaining
+                 now
+                 best
+                 hHeadFuture
+                 hRemaining
+                 hBetter⟩
+
+          · exact
+              ⟨best,
+               DTR.earliestFutureArrival_cons_future_some_gt
+                 head
+                 remaining
+                 now
+                 best
+                 hHeadFuture
+                 hRemaining
+                 hBetter⟩
+
+      · simp only [
+          List.mem_cons
+        ] at hMember
+
+        rcases hMember with
+          hEqual |
+            hRemainingMember
+
+        · rw [hEqual] at hFuture
+
+          exact
+            absurd
+              hFuture
+              hHeadFuture
+
+        · rw [
+            DTR.earliestFutureArrival_cons_not_future
+              head
+              remaining
+              now
+              hHeadFuture
+          ]
+
+          exact
+            inductionHypothesis
+              hRemainingMember
+
+/--
+Nothing in the bag arrives strictly between `now` and the answer.
+
+**This is the theorem F74 exists for.** Soundness alone would still let a time step
+land on *some* real future arrival while stepping over an earlier one; this says the
+answer really is the minimum, which is what makes `DTR.GeneralStep.timeProgress`
+*match* the target's `timeAdvance` rather than merely resemble it.
+
+It is also the theorem the due-arrival machinery never had. That family proves
+soundness and completeness and stops there, so `earliest` was a name rather than a
+claim, and nothing in the development ever asked a minimum to be minimal until a
+source clock had to agree with a target tag.
+
+The arrival is quantified inside the statement rather than taken as a parameter,
+because the induction needs a fresh one for the tail: the minimum of a tail is not in
+general the minimum of the whole bag, so an arrival fixed before the induction would
+give an induction hypothesis too weak to use.
+-/
+theorem earliestFutureArrival_minimal
+    (bag : DTR.GeneralMessageBag)
+    (now : LogicalTime)
+    (message : DTR.GeneralMessage)
+    (hMember :
+      message ∈ bag)
+    (hFuture :
+      now < message.arrival) :
+    ∀ arrival,
+      DTR.earliestFutureArrival
+            bag
+            now =
+          some arrival →
+        arrival ≤ message.arrival := by
+
+  induction bag with
+
+  | nil =>
+      cases hMember
+
+  | cons head remaining inductionHypothesis =>
+      intro arrival hEarliest
+
+      simp only [
+        List.mem_cons
+      ] at hMember
+
+      rcases hMember with
+        hEqual |
+          hRemainingMember
+
+      · rw [← hEqual] at hEarliest
+
+        rcases
+            optionCases
+              (DTR.earliestFutureArrival
+                remaining
+                now)
+          with
+            hRemaining |
+              ⟨best, hRemaining⟩
+
+        · rw [
+            DTR.earliestFutureArrival_cons_future_none
+              message
+              remaining
+              now
+              hFuture
+              hRemaining
+          ] at hEarliest
+
+          simp only [
+            Option.some.injEq
+          ] at hEarliest
+
+          exact
+            Nat.le_of_eq
+              hEarliest.symm
+
+        · by_cases hBetter :
+              message.arrival ≤ best
+
+          · rw [
+              DTR.earliestFutureArrival_cons_future_some_le
+                message
+                remaining
+                now
+                best
+                hFuture
+                hRemaining
+                hBetter
+            ] at hEarliest
+
+            simp only [
+              Option.some.injEq
+            ] at hEarliest
+
+            exact
+              Nat.le_of_eq
+                hEarliest.symm
+
+          · rw [
+              DTR.earliestFutureArrival_cons_future_some_gt
+                message
+                remaining
+                now
+                best
+                hFuture
+                hRemaining
+                hBetter
+            ] at hEarliest
+
+            simp only [
+              Option.some.injEq
+            ] at hEarliest
+
+            rcases
+                Nat.lt_or_ge
+                  message.arrival
+                  best
+              with
+                hLess |
+                  hAtLeast
+
+            · exact
+                absurd
+                  (Nat.le_of_lt
+                    hLess)
+                  hBetter
+
+            · exact
+                Nat.le_trans
+                  (Nat.le_of_eq
+                    hEarliest.symm)
+                  hAtLeast
+
+      · rcases
+            DTR.earliestFutureArrival_complete
+              remaining
+              now
+              message
+              hRemainingMember
+              hFuture
+          with
+            ⟨best, hRemaining⟩
+
+        have hBestAtMost :
+            best ≤ message.arrival :=
+          inductionHypothesis
+            hRemainingMember
+            best
+            hRemaining
+
+        by_cases hHeadFuture :
+            now < head.arrival
+
+        · by_cases hBetter :
+              head.arrival ≤ best
+
+          · rw [
+              DTR.earliestFutureArrival_cons_future_some_le
+                head
+                remaining
+                now
+                best
+                hHeadFuture
+                hRemaining
+                hBetter
+            ] at hEarliest
+
+            simp only [
+              Option.some.injEq
+            ] at hEarliest
+
+            exact
+              Nat.le_trans
+                (Nat.le_of_eq
+                  hEarliest.symm)
+                (Nat.le_trans
+                  hBetter
+                  hBestAtMost)
+
+          · rw [
+              DTR.earliestFutureArrival_cons_future_some_gt
+                head
+                remaining
+                now
+                best
+                hHeadFuture
+                hRemaining
+                hBetter
+            ] at hEarliest
+
+            simp only [
+              Option.some.injEq
+            ] at hEarliest
+
+            exact
+              Nat.le_trans
+                (Nat.le_of_eq
+                  hEarliest.symm)
+                hBestAtMost
+
+        · rw [
+            DTR.earliestFutureArrival_cons_not_future
+              head
+              remaining
+              now
+              hHeadFuture,
+            hRemaining
+          ] at hEarliest
+
+          simp only [
+            Option.some.injEq
+          ] at hEarliest
+
+          exact
+            Nat.le_trans
+              (Nat.le_of_eq
+                hEarliest.symm)
+              hBestAtMost
+
+
+/-!
 ### The ready cohort of a configuration
 
 Every predicate in the actor-priority layer is stated over a `List ReadyActor`,
@@ -660,6 +1381,22 @@ def readyActors
     (config : DTR.GeneralConfiguration) :
     List ReadyActor :=
   DTR.readyActorsOf
+    config.actors
+    config.now
+
+/--
+The next arrival ahead of a configuration's current time, if there is one.
+
+This is the paper's `ar_min` with the `π_x = ϵ` restriction dropped for the reason
+the section header gives, and `DTR.GeneralStep.timeProgress` advances to exactly
+this time rather than to any later one (**F74**). `none` means no message is pending
+anywhere ahead of `now`, and then the clock does not move at all — matching the
+target, whose `timeAdvance` needs an event in its queue to advance to.
+-/
+def nextArrival
+    (config : DTR.GeneralConfiguration) :
+    Option LogicalTime :=
+  DTR.earliestFutureArrivalOf
     config.actors
     config.now
 

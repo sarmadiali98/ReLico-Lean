@@ -524,7 +524,8 @@ example :
 
 /--
 An empty source model, the DTR counterpart of `emptyProgram`. `timeProgress` names no class or instance in
-its premises, so nothing here needs populating.
+its premises, so the *model* still needs nothing populating — the configuration does, for **F74**'s reason
+below.
 -/
 def emptyModel : DTR.GeneralModel :=
   {
@@ -532,20 +533,66 @@ def emptyModel : DTR.GeneralModel :=
     instances := []
   }
 
+def futureMessageName : MsgName :=
+  MsgName.mk "tick"
+
 /--
-A source configuration at time 5 with no actors, so `readyActors` is `[]` and the quiescence premise of
-`timeProgress` closes by `rfl`.
+The one message these configurations hold, arriving strictly after their clock.
+
+**F74.** Before the repair this section ran on an empty configuration. `timeProgress` constrained `future`
+only by `config.now < future`, so `now := 5 → 8` elaborated with no message at `8` — with no message
+anywhere at all. That is the defect written as a witness: the source could advance to a time nothing was
+waiting for, and could advance *past* a time something was. The repaired rule advances to
+`DTR.GeneralConfiguration.nextArrival`, so a source time step now has to name the arrival it advances to,
+and this message is it.
+
+Its arrival is `8`, the tag time of `timeEvent` on the target side, so `sourceTimeStep` and `timeStep` carry
+one label over one pair of times — the matched observable pair G2b's time case is about.
+-/
+def futureMessage : DTR.GeneralMessage :=
+  {
+    sender := hubName
+    messageName := futureMessageName
+    payload := []
+    arrival := 8
+  }
+
+/--
+A source configuration at time 5 whose single actor holds `futureMessage`.
+
+Both premises about the bag are live here, and they read the same bag in opposite directions, which is the
+point. `readyActors` is `[]` because `DTR.earliestDueArrival` keeps only messages with `arrival ≤ now` and
+`8 ≤ 5` is false, so nothing is takeable and the clock *may* move. `nextArrival` is `some 8` because
+`DTR.earliestFutureArrival` keeps exactly the complement, so the clock may move *only* to `8`. An empty bag
+satisfies the first and refutes the second: under the repaired rule time cannot pass in a configuration with
+nothing pending, which is what the target has always required of itself — `LF.GeneralStep.timeAdvance` needs
+an event in the queue to advance to.
 -/
 def sourceConfig : DTR.GeneralRuntimeConfiguration :=
   {
     now := 5
-    actors := []
+    actors :=
+      [
+        (probeName,
+          {
+            state :=
+              {
+                valuation := []
+                bag := [futureMessage]
+              }
+            activeBody := []
+          })
+      ]
   }
 
+/--
+The same actors at the advanced time. `timeProgress` copies the store, so this is `sourceConfig.actors`
+rather than a second literal — a copy could drift and the rule would then simply not apply.
+-/
 def sourceNext : DTR.GeneralRuntimeConfiguration :=
   {
     now := 8
-    actors := []
+    actors := sourceConfig.actors
   }
 
 /--
@@ -555,6 +602,12 @@ This is the far side of P24. `microstepStep` above is an LF step at a τ label w
 there is no rule on this side that could match it, because `LogicalTime` has no microstep and this relation
 advances the clock or does nothing. A reader tempted to give the source an internal time step to restore
 Theorem 1 has to add a rule here, and this witness is what that reader's edit would sit beside.
+
+**Three premises, since F74.** The third pins `future` to `nextArrival`, and it is the one a reader will be
+tempted to drop as redundant — quiescence sounds like it should already forbid stepping over an arrival. It
+does not: quiescence is about messages at or before `now`, `nextArrival` is about messages after it, and the
+two ranges do not meet. Deleting the third premise makes this witness *easier*, not harder, which is why the
+defect it records survived a whole commit.
 -/
 theorem sourceTimeStep :
     DTR.GeneralStep
@@ -564,7 +617,17 @@ theorem sourceTimeStep :
       sourceNext :=
   DTR.GeneralStep.timeProgress
     (by decide)
-    rfl
+    (by decide)
+    (by decide)
+
+/- and the advance really is pinned to the bag, read back off the witness through the new inversion lemma
+   rather than asserted. A rule that let the clock run to an arbitrary later time cannot prove this. -/
+example :
+    DTR.GeneralConfiguration.nextArrival
+        sourceConfig.erase =
+      some 8 :=
+  DTR.GeneralStep.selected_of_timeAdvance
+    sourceTimeStep
 
 /- Its label is NOT internal: the source's time motion is always observable. Contrast `microstepStep`'s
    `.tau`. The two together are the whole reason the merged single `TIME PROGRESS` of the paper's Table II

@@ -593,18 +593,33 @@ The target step relation for the general family.
 `TAKE` becomes `fire`. `TIME PROGRESS` becomes `microstepAdvance`, which is **τ**, and `timeAdvance`, which
 is observable — that split is P24.
 
-**Both advance rules move the tag to the earliest pending event, and neither carries a quiescence premise
-beyond that.** This is deliberate symmetry with the source, and it took reading `readyActorsOf`
-(`Relico/DTR/GeneralState.lean:621`) to get right. That function walks a
-`Store ActorName DTR.GeneralActorState` — actor *states*, which carry bags but not continuations, because
-`GeneralRuntimeConfiguration.erase` drops them — so "ready" on the source side means "has a due message"
-and nothing more. `DTR.GeneralStep.timeProgress` therefore permits the clock to advance while some actor
-sits mid-body, and a target rule that forbade it would be *stricter* than the source: a source step would
-exist with no target step to match it, and G2c's transfer condition would fail in the direction that matters.
-So the premise here is the exact analogue — the earliest pending event is strictly beyond the current tag —
-and the mid-body permissiveness is a property of both models rather than a divergence between them. It is
-recorded as a finding rather than repaired here, because repairing it means changing the source relation
-too, and that is not row 6's obligation.
+**Both advance rules move the tag to the earliest pending event, and neither needs a separate quiescence
+premise.** `earliestPendingEvent?` minimises over the *whole* queue, so an event strictly beyond the current
+tag already witnesses that nothing is due at it. The source reaches the same condition by a different route,
+and the difference is shape rather than strength: `DTR.GeneralConfiguration.nextArrival` is filtered to
+arrivals strictly after `now`, so it can say nothing about the due ones, and `timeProgress` therefore states
+quiescence explicitly as `readyActors config.erase = []`. **F74** Part 7 records the equivalence, so that a
+reader comparing premise counts does not "fix" a rule that is already right.
+
+What both rules do leave open is the mid-body case, and getting that right took reading `readyActorsOf`
+(`Relico/DTR/GeneralState.lean`). That function walks a `Store ActorName DTR.GeneralActorState` — actor
+*states*, which carry bags but not continuations, because `GeneralRuntimeConfiguration.erase` drops them —
+so "ready" on the source side means "has a due message" and nothing more. Neither `timeProgress` nor this
+rule mentions a continuation, so both permit the clock to advance while some body sits half-executed, and a
+target rule that forbade it would be *stricter* than the source: a source step would exist with no target
+step to match it, and G2c's transfer condition would fail in the direction that matters. The permissiveness
+is therefore a property of both models rather than a divergence between them — though it over-approximates
+both the paper's DTR and real LF, which **F74** Part 7 leaves as an open question rather than deciding here.
+
+**Recorded as F74, which also corrects what row 6 did with that argument.** The reasoning above licenses
+*symmetric* permissiveness only, and row 6 additionally read it as licensing an asymmetry: `timeProgress`
+shipped with `future` unconstrained beyond `config.now < future`, so the source could advance to a time
+nothing was waiting for and past a time something was, while this rule could only ever advance to a real
+event's tag. That was a source-side defect against the paper's own `ar_min`, not a shared property, and it
+is repaired on the source side: `timeProgress` now premises
+`DTR.GeneralConfiguration.nextArrival config.erase = some future`. Where the two relations genuinely differ,
+the permissive one is what tightens — loosening this rule to meet a loose source would leave both sides
+over-approximating, and a bisimulation between two over-approximations says nothing about the translator.
 
 **Records are written field by field, never with `{ state with … }`**, following `DTR.GeneralStep` and
 `Relico/DTR/Semantics.lean`'s `Step`; a grep finds no `{ x with … }` anywhere under `Relico/`.
@@ -1355,12 +1370,17 @@ theorem GeneralStep.pending_eq_of_timeAdvance
 /--
 A `.timeAdvance` step advances to the tag of the event the scheduler selected.
 
-This is the theorem that ties the advance to the queue rather than to an arbitrary future time, and it is
-where the difference from the source shows most plainly. `DTR.GeneralStep.timeProgress` advances to *any*
-strictly later `future`, constrained only by no actor being ready; the target cannot, because a tag has to be
-the tag of something. G2b therefore matches one source advance against one target advance by *choosing* the
-source's `future` to be the target's event time — which is available in this direction and would not be if
-the quantifiers ran the other way.
+This is the theorem that ties the advance to the queue rather than to an arbitrary future time. It used to
+be the place where the difference from the source showed most plainly, because `DTR.GeneralStep.timeProgress`
+advanced to *any* strictly later time, constrained only by no actor being ready — and this docstring drew the
+wrong conclusion from that, treating the asymmetry as something G2b would work around by *choosing* the
+source's `future` to be the target's event time. **F74** records why that is backwards: choosing the source's
+witness hides an unmatched source step rather than removing it, and the forward transfer condition quantifies
+over *all* source steps, including the ones that jump over an arrival. The source rule now carries its own
+selection premise, `DTR.GeneralConfiguration.nextArrival config.erase = some future`, and
+`DTR.GeneralStep.selected_of_timeAdvance` is its mirror of this theorem. G2b's time case matches two pinned
+minima against each other; the residual work is relating a bag's minimum arrival to the queue's earliest tag,
+which is R's job and not a quantifier trick.
 -/
 theorem GeneralStep.selected_of_timeAdvance
     {program : LF.GeneralProgram}

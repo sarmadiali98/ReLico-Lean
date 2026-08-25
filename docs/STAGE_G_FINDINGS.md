@@ -1122,8 +1122,9 @@ very obligation authored.
 **All six are false positives.** Every one is recorded, in
 [`STAGE_D_FINDINGS.md`](STAGE_D_FINDINGS.md), as a **bold paragraph lead** (`**F22 — …**`) under a single
 grouped range heading, `## F21–F29 — carried over from the design, with their status after implementation`.
-Format census across all ninety-six `F`/`P` records: **eighty-seven use one heading each; nine — stage D's
-entire set — use the grouped form.** A format-aware re-run reports **zero** dangling citations. The
+Format census over the series as it stood when this entry was written: **eighty-seven of the then
+ninety-six `F`/`P` records use one heading each; nine — stage D's entire set — use the grouped form.** A
+format-aware re-run reports **zero** dangling citations. The
 repository is sound; the instrument was not.
 
 What makes this worth a finding rather than a shrug is that the artefact was *plausible*. The range heading
@@ -1185,6 +1186,282 @@ six missing records into one broken regex.
 in.** Two namespaces adjacent in one file, both containing a name the same proof uses, is enough to move a
 prefix from one citation to its neighbour. No line-number arithmetic and no build failure detects this: the
 proof was green throughout, because a docstring is not type-checked.
+
+---
+
+## F74 — the source's time rule advanced to *any* later time, which makes false the one lemma the next obligation exists to prove
+
+**Measured 2026-08-24, while deriving row 7's obligations (G2b, task #105) from the two relations row 6 had
+just landed — before a line of row 7 Lean was written.** Two defects with one root, and the root is that
+*"earliest"* was a name in this development long before it was a theorem. Repaired in the same changeset as
+this entry, on the **source** side, which is the side that was wrong.
+
+Grades: Part 1 **read**, Part 2 **inferred** (with a witness exhibited in Part 1), Part 3 **read**, Part 4
+**measured**, Part 5 **read** (absence established by a described search), Part 6 **decided**, Part 7
+**decided**, and Part 7 leaves one question for the user rather than answering it.
+
+### Part 1 — the two time rules were not each other's mirror, and quiescence did not make them one
+
+`DTR.GeneralStep.timeProgress` shipped with exactly two premises:
+
+```
+(hForward   : config.now < future)
+(hQuiescent : DTR.GeneralConfiguration.readyActors config.erase = [])
+```
+
+`future` is an implicit binder and nothing else mentions it. `LF.GeneralStep.timeAdvance` instead premises
+
+```
+(hSelected : GeneralRuntimeState.earliestPendingEvent? state = some event)
+(hForward  : state.currentTag.time < event.tag.time)
+```
+
+so the target may only land on the tag of an event that is actually in its queue, and the source could land
+anywhere later at all.
+
+**Quiescence looks like it closes this and does not.** `readyActors` reaches `readyActorsOf`, then
+`GeneralActorState.dueArrival`, then `DTR.earliestDueArrival` — and that function inspects only messages
+with `arrival ≤ now`. Its `none` therefore means *"nothing due"*, never *"nothing pending"*. A bag holding
+one message arriving at 5 with `now = 3` is quiescent by that measure, so the rule admitted
+
+```
+now = 3  →  now = 100
+```
+
+with the message still sitting unconsumed in the bag afterwards, at an arrival the clock had already passed.
+The two premises read the same bag over two ranges that do not meet: quiescence covers `arrival ≤ now`, and
+the constraint that was missing covers `now < arrival`. Neither range constrains the other, which is exactly
+why adding the second premise makes the rule strictly harder to apply and why its absence was invisible.
+
+### Part 2 — what it broke was row 7's own obligation
+
+Row 7 *is* Lemma 1: source logical time equals the logical-time component of the target tag, carried along
+the correspondence relation. The step above refutes it directly — the source reaches 100 while the target,
+holding the corresponding event at 5, cannot go past 5 — so the lemma was false of the relations as landed,
+not merely unproved.
+
+It also broke Definition 1's **forward** transfer condition, which is the direction G2c needs: a source step
+existed with no target step to match it. Worth stating plainly, because the forward direction is the one a
+reader is tempted to wave through as the easy one.
+
+Had the repair not been made, Lemma 1 could still have been *stated and proved* — by adding a hypothesis
+constraining `future`, or by quantifying the source's `future` existentially and choosing it to be the
+target's event time. Both were considered and both are hiding rather than fixing: the transfer condition
+quantifies over **all** source steps, so choosing a convenient witness leaves the inconvenient steps
+unmatched and the theorem's scope quietly narrower than its name. The standing rule for this repository is
+that a scoped theorem is the honest answer when the **target** is at fault and the input should be refused;
+it is not the answer when our own transcription of the source is the loose one. Here it was.
+
+### Part 3 — the paper is right, our own corrections file had already transcribed it right, and every other family in the repository does it right
+
+This is a **repo** defect, not a paper one, and it is worth being explicit about that because the P series
+had been the busier of the two in this stage.
+
+The paper constrains the advance in both places it discusses it. Lemma 1's time-progress case reads *"When no
+untimed transitions are enabled, DTR applies the time progress rule and advances logical time to the minimum
+message arrival time `ar_min`"*, and Theorem 1's time case opens *"Suppose in DTR time progresses to the next
+message arrival `ar_min`"*. Table I's TIME PROGRESS premise defines `ar_min` as a minimum over the bags. Both
+sentences are transcribed from the PDF for this entry; the subscript renders as `armin` in extracted text.
+
+`docs/PAPER_CORRECTIONS.md` had already transcribed it correctly, before the general step relation existed:
+**P24**'s dependency note writes *"TIME PROGRESS sets `now := ar_min` where `ar_min` is the minimum arrival in
+any bag"*, and uses exactly that to argue that an arrival equal to `now` must enable a take. P24 landed at
+task #113 and the general step relation at task #117, so the correct rule was in our own documentation, in
+prose, four tasks before the Lean that contradicts it — and the Lean was written without consulting it.
+
+**And every other family in the repository already ties its time advance to a selection, on both sides.**
+`DTR.DetailedMultiStoreStep.timeAdvance` (`Relico/DTR/DetailedMultiStoreSemantics.lean:176`) premises a
+`DTR.MultiStoreDispatchStep` carrying a `selectedMessage` and a `selectedServer`, plus `hFuture`;
+`LF.DetailedMultiStoreStep.timeAdvance` (`Relico/LF/DetailedMultiStoreSemantics.lean:229`) premises an
+`LF.MultiStoreDispatchStep` carrying a `selectedAction` and a `selectedReaction`, plus `hFuture`. That is the
+family with a *landed* weak bisimulation. The general family — the one whose bisimulation was being written —
+was the only one in the repository where a clock could move without anything selecting where it moved to.
+
+### Part 4 — the root cause: `earliest` was a name, and the neighbouring family had already shown what it costs to leave it one
+
+The due-arrival theory carries **soundness** (`earliestDueArrival_sound`: the answer is a real message's
+arrival), **completeness** (`earliestDueArrival_complete`: a due message forces an answer), and five equation
+lemmas. Full census of the family, `grep`ped by prefix: `_sound`, `_complete`, `_cons_cases`,
+`_cons_not_due`, `_cons_due_none`, `_cons_due_some_le`, `_cons_due_some_gt`. **There is no
+`earliestDueArrival_minimal`, and there never was.**
+
+Nothing before this obligation needed one. Soundness and completeness together answer *"is there something
+to take, and is it real"*, which is all `take` asks. A minimum only has to *be* a minimum once a source clock
+has to agree with a target tag — and that is the first thing row 7 does. So the word "earliest" carried the
+property in the reader's head for four modules and was never a theorem.
+
+What makes this a root cause rather than an excuse is that **the pattern was already in the repository, one
+row earlier.** G1 proved `selectedActor_minimal` (`Relico/DTR/GeneralActorSelection.lean:998`) for the
+lexicographic actor selection — a minimality theorem, deliberately written, about a minimum that a later
+proof would have to rely on. The very next obligation defined a second minimum for the clock and did not
+carry the pattern across. A convention that exists in one file and is not applied in its neighbour is worse
+than no convention: it makes the missing theorem look like a deliberate omission.
+
+The repaired module now carries the full quartet for the new function — `earliestFutureArrival_sound`,
+`_complete`, `_minimal`, plus the four equation lemmas and `_cons_cases` — and `_minimal` is the one the
+repair exists for.
+
+### Part 5 — a second defect in the same obligation: a docstring that defers to a finding nobody wrote, and argues in the wrong direction while doing it
+
+Row 6's `inductive GeneralStep` docstring on the target side analysed the mid-body case correctly and then
+closed the paragraph with *"It is recorded as a finding rather than repaired here, because repairing it means
+changing the source relation too, and that is not row 6's obligation."* The quotation is of the text **this**
+changeset replaces; it is recoverable from the row 6 landing, the commit immediately preceding this one.
+
+**No such record exists.** `grep -rniE "mid-body|midbody|mid body"` over all of `docs/` returns exactly two
+hits, and neither is it: **F66**'s bullet that both TAKE rules premise an `ε` continuation, which is about
+message acceptance rather than the clock, and `docs/PAPER_CORRECTIONS.md`'s **P17** note that the paper's
+`ar_min` comprehension is restricted to `π_x = ϵ` actors, which is about the paper rather than about us. The
+docstring is a forward reference to a document that was never written.
+
+That is **F73**'s class — a docstring claim that nothing checks — recurring one entry later, and in a form
+that is strictly harder to catch. F73's two claims were about the state of the file they sat in, so a reader
+of that file could refute them. This one is a claim about the *absence* of something in a *different*
+directory, and the only instrument that detects it is a grep for a record you have to already suspect is
+missing.
+
+The same paragraph also reasons in the wrong direction, and this is the part that cost real work. It observes
+that a target rule *forbidding* mid-body advance would be **stricter** than the source, so a source step
+would go unmatched and the forward condition would fail. That observation is true. The conclusion it draws is
+that the target's permissiveness is therefore correct and the matter is closed. But "the target must not be
+stricter than the source" has two solutions, and row 6 saw only one of them: make the target loose, or make
+the source tight. Where the source is the one that diverged from the paper, only the second is available.
+
+The workaround was already being planned in the same file. `LF.GeneralStep.selected_of_timeAdvance`'s
+docstring said that because `DTR.GeneralStep.timeProgress` advances to *any* strictly later `future`, G2b
+could satisfy the transfer condition by *choosing* the source's `future` at instantiation. That is precisely
+the quantifier trick Part 2 refutes: the forward condition quantifies over all source steps, so choosing a
+convenient one hides the unmatched steps instead of removing them. Both docstrings are rewritten in this
+changeset to record the verdict rather than the workaround.
+
+### Part 6 — the repair, as authored
+
+**Source side, `Relico/DTR/GeneralState.lean`.** A new `earliestFutureArrival` / `earliestFutureArrivalOf`
+pair computes the minimum arrival **strictly greater** than `now`, which is the range `earliestDueArrival`
+cannot see. It ships with four equation lemmas, `_cons_cases`, `_sound`, `_complete` and `_minimal`.
+`_minimal` quantifies its arrival inside the goal so that `induction` generalises it, and every arithmetic
+step uses an explicit `Nat` lemma rather than `omega`, per **F72**. `GeneralConfiguration.nextArrival` lifts
+it to the model-wide minimum over every actor's bag — the shape `ar_min` has in Table I.
+
+**Source side, `Relico/DTR/GeneralSemantics.lean`.** `timeProgress` gains a third premise,
+`hSelected : nextArrival config.erase = some future`, which removes `future`'s freedom: it is now determined
+by the store rather than merely bounded below by `now`. The five existing inversion theorems each gained a
+third `_` in their `| timeProgress` alternative, and a sixth theorem,
+`DTR.GeneralStep.selected_of_timeAdvance`, was added as the exact mirror of the target's
+`LF.GeneralStep.selected_of_timeAdvance`, so that a proof can read the constraint **back off** a step instead
+of having to re-derive it.
+
+**Target side: nothing changed.** `LF.GeneralStep.timeAdvance` already premised
+`earliestPendingEvent? state = some event`. The whole repair moves the source to meet the target, which is
+the direction Part 3 establishes is the correct one.
+
+**The landed regression pin had to be rewritten, and that rewrite is the evidence.**
+`Relico/Tests/GeneralSemantics.lean`'s `sourceTimeStep` built a time step on an **empty** configuration from
+5 to 8. The repaired rule refuses it: with no messages anywhere, `nextArrival` is `none` and no `future`
+satisfies `hSelected`. It is rebuilt around one actor holding one message arriving at 8 with `now = 5`, which
+makes the two premises read one bag in opposite directions — `8 ≤ 5` is false so `readyActors` is empty, and
+`earliestFutureArrival` returns 8. The three premises are discharged `by decide`, following
+`readyActors_discriminates`, the repository's measured precedent that `decide` reduces over a populated store.
+A new `example` then reads `nextArrival sourceConfig.erase = some 8` back out of the witness through the new
+inversion lemma, so the pin now *exercises* the premise rather than merely surviving it.
+
+What the pin does not do is witness the refusal. A negative would have to quantify over every `future`, and
+no test can. The evidence that the rule tightened is that the old pin stopped type-checking.
+
+**Deliberately not authored here.** Row 7 still owes the store-level lemmas that relate a per-actor
+`earliestFutureArrivalOf` to the model-wide `nextArrival`, and the bag↔queue component of `R` that turns
+`nextArrival config.erase = some t` into `earliestPendingEvent? state = some ⟨t, _⟩`. This changeset's job was
+to make Lemma 1 **true**, not to prove it; §13's work plan already assigns the proof to row 7.
+
+**Carried in the same changeset, because they are the same defect's blast radius.** Three docstrings that
+called `nextArrival` "the paper's `ar_min`" without recording the restriction we drop (Part 7); one
+F59-class evidence overclaim in the rule's docstring, which pointed at the Tests pin as evidence for a
+negative it cannot show; and two `docs/STAGE_G_DESIGN.md` citations that this changeset's own insertion
+staled, `GeneralConfiguration.readyActors` and `readyActors_discriminates` having each moved by several
+hundred lines. Their line numbers were **dropped** rather than corrected — a line-number cite into a file
+under active extension re-breaks on the next insertion, and the declaration names are unambiguous.
+
+### Part 7 — three things measured alongside the repair, one of which is a question for the user
+
+**(a) The repair deliberately drops one restriction the paper puts on `ar_min`, and the docstrings now say
+so.** Table I minimises over actors whose continuation is `ϵ`, so in the paper an actor part-way through a
+message server contributes no arrival at all. P17's closing note in `docs/PAPER_CORRECTIONS.md` already
+observes that the restriction is **vacuous there**: such an actor has a `τ`-transition available, so TIME
+PROGRESS could not have fired. It is *not* vacuous here, because our rules let the clock move while an actor
+is mid-body, so restoring the restriction would reintroduce F74's defect with the direction flipped. Witness:
+actor A mid-body holding a message arriving at 8, actor B idle holding one arriving at 20, `now = 5`. Under
+the restriction A contributes nothing, `ar_min` is 20, and the source advances 5 → 20 — while the target's
+queue, which ignores what any reactor is doing, advances 5 → 8. The source would step over a tag the target
+must stop at. Three docstrings that had called `nextArrival` "the paper's `ar_min`" without qualification are
+corrected; the difference is deliberate and its reason is recorded where the definition lives.
+
+**(b) The repaired source rule and the target rule reach the same condition by different shapes, and that is
+not a defect.** After the repair the source rule has three premises and the target rule has two, which looks
+like a residual asymmetry and is not one. The target's `earliestPendingEvent?` is an **unfiltered** minimum
+over the whole pending queue, so `hSelected` together with `hForward` already implies that no event is due —
+`microstepAdvance`'s own docstring makes exactly this argument. The source's `earliestFutureArrival` is
+**filtered** to arrivals strictly after `now`, so it cannot imply anything about the due ones, and quiescence
+has to stay an explicit premise. The two combinations are logically equivalent: filtered-minimum plus
+`readyActors = []` and unfiltered-minimum plus `now < future` each say *"nothing is due, and the next thing
+arrives at `future`"*. `readyActorsOf` was read to confirm the first half — it consults only
+`state.dueArrival now` and says nothing about `activeBody`, so `hQuiescent` is exactly arrival-quiescence.
+
+The filtered shape was chosen because `hQuiescent` is a landed premise with a landed consumer,
+`quiescent_of_timeAdvance`, and five inversion theorems whose statements stay true under an *added* premise
+but not under a *replaced* one. No theorem states the equivalence, because nothing needs it; it is recorded
+here so that a future reader comparing premise counts does not "fix" a rule that is already right.
+
+**(c) Both rules still permit the clock to advance while an actor or reactor sits mid-body. This is
+symmetric, so no transfer condition fails — and it is left as a question rather than decided.** Neither
+`DTR.GeneralStep.timeProgress` nor `LF.GeneralStep.timeAdvance` mentions `activeBody`, so both admit a time
+step in a state where some body is half-executed. Because the permissiveness is the same on both sides, the
+bisimulation is unaffected. What is affected is what the two relations *mean*: each over-approximates its own
+reference. The paper's DTR forbids it three ways over — Lemma 1's case opens *"When no untimed transitions
+are enabled"*, Table I's comprehension carries the `π_x = ϵ` restriction, and **F66** records that both TAKE
+rules premise an `ε` continuation. Real LF forbids it too: a reaction body runs to completion within a tag.
+So a bisimulation between the two as they stand is a true statement about two models that are each slightly
+larger than the thing they model, and **F74**'s own Part 2 argument — that a relation between two
+over-approximations proves less than it appears to — applies to it.
+
+The cost of closing it is measurable and small: one predicate per side asserting every continuation is empty,
+as a fourth premise on `timeProgress` and a third on `timeAdvance`, plus one extra `_` in five source and
+five target inversion alternatives and in both `microstepAdvance` sites. The rewritten source pin survives
+unchanged, since its single actor already has `activeBody := []`. The cost of leaving it open is that G2c's
+transfer conditions will be proved about a pair of relations that admit unreachable states, and the `π_x ≡ µ_r`
+component of `R` will do no work at time steps. **Nothing in the repair depends on the answer**, which is why
+it is not taken here.
+
+**(d) The bag↔queue component of `R` cannot reuse the landed `PendingCorresponds`, and this is a design fact
+rather than a defect.** `Correctness.PendingCorresponds` (`Relico/Correctness/Correspondence.lean`) has two
+fields: `logicalTime`, which equates `targetAction.tag.time` with `sourceMessage.arrivalTime`, and
+`actionName`, which equates `targetAction.name` with `Translation.actionNameFor sourceMessage.name`. The first
+is exactly what Lemma 1 needs and transfers unchanged. The second does not transfer at all: since **F56**'s
+repair the general action name is computed per **send site** by `generalActionNameAtSite`, and
+`DTR.GeneralMessage`'s four fields are `sender`, `messageName`, `payload` and `arrival` — a source message
+records no site. There is therefore no function from a general message's name to its action name for the field
+to equate. Row 7 has to relate the two collections by target actor and arrival, with the name related through
+the routing, or else carry the site in the source message. Recorded here so the choice is made deliberately
+rather than discovered while a proof is half-written.
+
+### The lesson
+
+The obligation that catches a defect is usually the first one that has to *use* a definition, not the one
+that writes it. `timeProgress` was written in row 6 and looked right; it was read in row 7, against the lemma
+it has to satisfy, and was wrong. Four modules of due-arrival theory had the same shape — sound, complete, and
+never asked to be minimal, because nothing had needed the minimality until a source clock had to agree with a
+target tag.
+
+Two habits would have caught it at authoring time, and both were available. The first is to write the
+consumer's statement before the producer's definition, even informally: *"Lemma 1 says the source advances to
+`ar_min`"* does not survive a premise that leaves `future` free. The second is the one this file keeps
+relearning — our own documentation is evidence. P24 had transcribed `now := ar_min` four tasks earlier, in
+prose, in a file the author of row 6 had written. The correct rule was already in the repository; nobody
+looked.
+
+And the corollary about deferral, which is Part 5's real content: **a docstring that defers to a finding is a
+claim that the finding exists.** "Recorded as a finding rather than repaired here" is checkable, it was
+false, and it converted a known defect into an unknown one for a whole obligation. If the record is not
+written in the same changeset as the deferral, the deferral is not a deferral.
 
 
 
