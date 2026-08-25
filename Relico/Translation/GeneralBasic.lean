@@ -7209,5 +7209,313 @@ theorem assembleGeneralPortReactions_instanceDeclarationOrder
       earlierRoutes
       laterRoutes⟩
 
+/-!
+## F80's second half — the emitted port reactions carry pairwise distinct triggers
+
+`LF.GeneralProgram.reactionFor?_perm_of_nodup_triggers` (`Relico/LF/GeneralSemantics.lean`) makes
+reaction lookup permutation-invariant once the reactions in a list have pairwise distinct triggers.
+F80 asks row 8 for the other half — that the translator always produces them distinct — and this
+section supplies it for one message server's group of port reactions, **relative to the guard**,
+which is the only honest form available.
+
+Unconditionally the claim is false, and the obvious route to it is closed. A port trigger is
+`.inputPort (generalInputPortOfRoute route)`, and `generalInputPortOfRoute` is
+`inputPortNameFor route.senderInstance route.outputPort`, which F42 (`docs/STAGE_E_FINDINGS.md`)
+measured to be **not injective**: `capitalizeName` folds case, so senders `hub` and `Hub` name one
+input port, and both spellings are legal Rebeca. What makes the emitted triggers distinct is
+therefore not the naming function but the guard — `LF.GeneralReactor.declaredNames` carries the input
+port names and `decide (reactor.declaredNames.Nodup)` is a `wellFormed` conjunct, so a colliding
+program is **refused** rather than mistranslated. This is the third appearance of the shape F50 and
+`#60` gave §10.2's refuted `setPort` obligation: the property is inherited from a decided guard
+clause, never claimed by construction.
+
+The hypothesis is taken in the spelling `Translation.generalRouteEndpoints_nodup` already uses —
+duplicate freedom of `(generalInputPortsOf className routes).map (fun port => port.name.value)` —
+because `inputPortNames_nodup_of_wellFormed` above is exactly the projection that discharges it from
+the guard, and `assembleGeneralReactor_inputPorts` above is what identifies a compiled reactor's
+input ports with the ports these routes declare.
+
+Scoped to one server's group, for the reason `assembleGeneralPortReactions_names` gives: a
+class-level statement would need a flattening combinator over groups, and `List.flatMap` is a core
+name this development has twice been burned by trusting. The concatenation across a class's message
+servers is in any case a sub-**multiset** of the routes into that class rather than a sub-list of
+them, so it needs a permutation argument rather than a stronger version of anything here.
+-/
+
+/--
+The triggers of one message server's port reactions, in route order.
+
+The trigger analogue of `mapNames_map_assembleGeneralPortReaction`, proved the same way and for the
+same reason: `change` names the head on both sides, and the tail is the induction hypothesis under
+`List.cons`. No list-map equation is used, so nothing here depends on `List.map_map` or on
+`Function.comp` reducing at the point of use.
+-/
+private theorem mapTriggers_map_assembleGeneralPortReaction
+    (server : DTR.GeneralMessageServer)
+    (compiledBody : LF.GeneralBody) :
+    ∀ (routes : List GeneralRoute),
+      (routes.map
+          (fun candidate =>
+            assembleGeneralPortReaction
+              server
+              candidate
+              compiledBody)).map
+          (fun reaction =>
+            reaction.trigger) =
+        routes.map
+          (fun candidate =>
+            LF.GeneralTrigger.inputPort
+              (generalInputPortOfRoute candidate)) := by
+
+  intro routes
+  induction routes with
+
+  | nil =>
+      rfl
+
+  | cons route remaining inductionHypothesis =>
+      change
+        LF.GeneralTrigger.inputPort
+              (generalInputPortOfRoute route) ::
+            (remaining.map
+                (fun candidate =>
+                  assembleGeneralPortReaction
+                    server
+                    candidate
+                    compiledBody)).map
+                (fun reaction =>
+                  reaction.trigger) =
+          LF.GeneralTrigger.inputPort
+              (generalInputPortOfRoute route) ::
+            remaining.map
+              (fun candidate =>
+                LF.GeneralTrigger.inputPort
+                  (generalInputPortOfRoute candidate))
+
+      exact
+        congrArg
+          (List.cons
+            (LF.GeneralTrigger.inputPort
+              (generalInputPortOfRoute route)))
+          inductionHypothesis
+
+/--
+Each of one message server's port reactions is triggered by the port its route lands on.
+
+The trigger companion of `assembleGeneralPortReactions_names`, and instantiated the same way: the
+private lemma above is stated over an arbitrary route list, and the filter is supplied here.
+-/
+theorem assembleGeneralPortReactions_triggers
+    (className : ClassName)
+    (server : DTR.GeneralMessageServer)
+    (compiledBody : LF.GeneralBody)
+    (routes : List GeneralRoute) :
+    (assembleGeneralPortReactions
+        className
+        server
+        compiledBody
+        routes).map
+        (fun reaction =>
+          reaction.trigger) =
+      (generalRoutesIntoMessageServer
+        className
+        server.name
+        routes).map
+        (fun candidate =>
+          LF.GeneralTrigger.inputPort
+            (generalInputPortOfRoute candidate)) :=
+  mapTriggers_map_assembleGeneralPortReaction
+    server
+    compiledBody
+    (generalRoutesIntoMessageServer
+      className
+      server.name
+      routes)
+
+/--
+The port names a route list declares are the routes' own port names, in route order.
+
+Stated over an arbitrary list and instantiated below rather than proved by induction on the routes
+`generalInputPortsOf` filters, because the recursion that matters is the one over the already
+filtered list. The proof is the `mapNames_map_assembleGeneralPortReaction` template a third time; in
+particular it is not `List.map_map`, which would leave a `Function.comp` to reduce in the statement
+the guard's hypothesis has to match.
+-/
+private theorem mapPortNames_map_generalInputPortDeclOf :
+    ∀ (routes : List GeneralRoute),
+      (routes.map
+          generalInputPortDeclOf).map
+          (fun port =>
+            port.name.value) =
+        routes.map
+          (fun candidate =>
+            (generalInputPortOfRoute candidate).value) := by
+
+  intro routes
+  induction routes with
+
+  | nil =>
+      rfl
+
+  | cons route remaining inductionHypothesis =>
+      change
+        (generalInputPortOfRoute route).value ::
+            (remaining.map
+                generalInputPortDeclOf).map
+                (fun port =>
+                  port.name.value) =
+          (generalInputPortOfRoute route).value ::
+            remaining.map
+              (fun candidate =>
+                (generalInputPortOfRoute candidate).value)
+
+      exact
+        congrArg
+          (List.cons
+            ((generalInputPortOfRoute route).value))
+          inductionHypothesis
+
+/--
+The guard's input-port clause, restated on the routes it came from.
+
+`generalInputPortsOf` is a map of `generalInputPortDeclOf` over the class filter, so this is the
+lemma above at that filter. It exists so that the theorem below can consume the hypothesis
+`generalRouteEndpoints_nodup` and `inputPortNames_nodup_of_wellFormed` already speak in, without
+either of them having to know about triggers.
+-/
+private theorem generalInputPortsOf_portNames
+    (className : ClassName)
+    (routes : List GeneralRoute) :
+    (generalInputPortsOf
+        className
+        routes).map
+        (fun port =>
+          port.name.value) =
+      (generalRoutesIntoClass
+        className
+        routes).map
+        (fun candidate =>
+          (generalInputPortOfRoute candidate).value) := by
+
+  unfold generalInputPortsOf
+
+  exact
+    mapPortNames_map_generalInputPortDeclOf
+      (generalRoutesIntoClass
+        className
+        routes)
+
+/--
+One message server's port reactions have pairwise distinct triggers — relative to the guard.
+
+This is the second half of what F80 asks row 8 for. The first half,
+`LF.GeneralProgram.reactionFor?_perm_of_nodup_triggers`, says reaction lookup is permutation-invariant
+when the reactions in a list have pairwise distinct triggers; this says the translator emits them
+distinct.
+
+`hInputPortNames` carries the whole content, and it is deliberately a hypothesis rather than a step
+of the proof. It is not provable here and it is not an assumption about the source model: F42
+measured `inputPortNameFor` to be non-injective, so two routes into one class really can name one
+input port. It is the `decide (reactor.declaredNames.Nodup)` clause of `LF.GeneralReactor.wellFormed`,
+projected — `inputPortNames_nodup_of_wellFormed` above does the projection, and
+`assembleGeneralReactor_inputPorts` above identifies a compiled reactor's input ports with the ports
+these routes declare. So the reading is that a program which would have collided is refused by the
+guard, not mistranslated; the composition that turns this into a statement about which reaction fires
+is stated where both `LF.GeneralSemantics` and `LF.GeneralWellFormed` are in scope, which this module
+is not.
+
+The proof has exactly two steps beyond rewriting. `nodup_map_of_reflecting` carries duplicate freedom
+from the `String` names the guard decides up to the triggers, because `PortName.value` is a function
+and `LF.GeneralTrigger.inputPort` is a constructor. `generalRoutesIntoMessageServer_nodup_map` then
+carries it from the class filter down to the message-server filter, which is the direction the
+argument needs and the one an order API is not required for.
+
+Two things this does **not** say, both deliberate. The action reactions
+`assembleGeneralMessageReactions` emits are not covered — their triggers are logical actions, and
+`LF.GeneralTrigger.matchesKind`'s two cross-constructor `false` cases already make an action trigger
+and a port trigger unable to collide with each other, so that side is a separate argument about
+`actionNameFor` and `generalActionNameAtSite`, not a stronger version of this one. And the
+concatenation across a class's message servers is not covered, for the reason the section header
+gives.
+-/
+theorem assembleGeneralPortReactions_triggers_nodup
+    (className : ClassName)
+    (server : DTR.GeneralMessageServer)
+    (compiledBody : LF.GeneralBody)
+    (routes : List GeneralRoute)
+    (hInputPortNames :
+      ((generalInputPortsOf
+        className
+        routes).map
+        (fun port =>
+          port.name.value)).Nodup) :
+    ((assembleGeneralPortReactions
+        className
+        server
+        compiledBody
+        routes).map
+        (fun reaction =>
+          reaction.trigger)).Nodup := by
+
+  rw [
+    generalInputPortsOf_portNames
+      className
+      routes
+  ] at hInputPortNames
+
+  have hReflect :
+      ∀ (first second : GeneralRoute),
+        LF.GeneralTrigger.inputPort
+            (generalInputPortOfRoute first) =
+          LF.GeneralTrigger.inputPort
+            (generalInputPortOfRoute second) →
+          (generalInputPortOfRoute first).value =
+            (generalInputPortOfRoute second).value := by
+
+    intro first second hTrigger
+
+    simp only [
+      LF.GeneralTrigger.inputPort.injEq
+    ] at hTrigger
+
+    rw [hTrigger]
+
+  have hClassLevel :
+      ((generalRoutesIntoClass
+        className
+        routes).map
+        (fun candidate =>
+          LF.GeneralTrigger.inputPort
+            (generalInputPortOfRoute candidate))).Nodup :=
+    nodup_map_of_reflecting
+      (fun candidate =>
+        (generalInputPortOfRoute candidate).value)
+      (fun candidate =>
+        LF.GeneralTrigger.inputPort
+          (generalInputPortOfRoute candidate))
+      hReflect
+      (generalRoutesIntoClass
+        className
+        routes)
+      hInputPortNames
+
+  rw [
+    assembleGeneralPortReactions_triggers
+      className
+      server
+      compiledBody
+      routes
+  ]
+
+  exact
+    generalRoutesIntoMessageServer_nodup_map
+      (fun candidate =>
+        LF.GeneralTrigger.inputPort
+          (generalInputPortOfRoute candidate))
+      className
+      server.name
+      routes
+      hClassLevel
+
 end Translation
 end Relico
