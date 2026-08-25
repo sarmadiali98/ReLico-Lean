@@ -8330,5 +8330,384 @@ theorem generalMessageServerReactionTriggers_nodup
 
     simp at hSame
 
+/-!
+### Distinct triggers across a whole reactive class
+
+The last translator-side step. `generalReactionTriggersOf` concatenates one group per message server,
+and `generalMessageServerReactionTriggers_nodup` above says each group is duplicate-free, so what is
+left is that no two groups collide. That is not free: `List.nodup_append`'s third component quantifies
+over the *tail's* triggers, and an induction hypothesis saying only "the tail is duplicate-free"
+cannot describe them. The inversion lemma below supplies the description — the same reason B3 needed
+a specification function before it could state anything about the list, arriving one level up.
+-/
+
+/--
+Every trigger of a class's reaction list is either one of its action names or one of its input ports,
+and in the port case the route is a route into the class whose message names one of the servers.
+
+The membership inversion the cross-group obligation needs. The `∃ server` component is the load-
+bearing half: without it a tail trigger's route is known only to route into the *class*, which is not
+enough to distinguish it from a head route, since both would then satisfy the same predicate. With
+it, the two routes carry the names of two different servers, and distinctness of server names does the
+rest.
+
+Both disjuncts are stated with `trigger` on the left of the equation so that a caller can `subst`
+them directly against a `List.mem_map` witness, which produces the equation the other way round.
+-/
+private theorem mem_generalReactionTriggersOf
+    (selfSends : List GeneralSelfSend)
+    (routes : List GeneralRoute)
+    (className : ClassName)
+    (trigger : LF.GeneralTrigger) :
+    ∀ (servers : List DTR.GeneralMessageServer),
+      trigger ∈
+        generalReactionTriggersOf
+          selfSends
+          routes
+          className
+          servers →
+        (∃ name,
+            name ∈
+              generalActionNamesOf
+                selfSends
+                servers ∧
+              trigger =
+                LF.GeneralTrigger.logicalAction
+                  name) ∨
+          (∃ route,
+              route ∈
+                generalRoutesIntoClass
+                  className
+                  routes ∧
+                (∃ server,
+                    server ∈ servers ∧
+                    route.message = server.name) ∧
+                trigger =
+                  LF.GeneralTrigger.inputPort
+                    (generalInputPortOfRoute route)) := by
+
+  intro servers
+  induction servers with
+
+  | nil =>
+      intro hMember
+
+      simp [
+        generalReactionTriggersOf
+      ] at hMember
+
+  | cons server remaining inductionHypothesis =>
+      intro hMember
+
+      simp only [
+        generalReactionTriggersOf
+      ] at hMember
+
+      rcases List.mem_append.mp hMember with hGroup | hTail
+
+      · rcases List.mem_append.mp hGroup with hAction | hPort
+
+        · rw [
+            generalMessageReactionTriggersOf_eq_map_logicalAction
+          ] at hAction
+
+          rcases List.mem_map.mp hAction with ⟨name, hName, hEqual⟩
+
+          refine Or.inl ⟨name, ?_, hEqual.symm⟩
+
+          simp only [
+            generalActionNamesOf
+          ]
+
+          exact List.mem_append.mpr (Or.inl hName)
+
+        · rcases List.mem_map.mp hPort with ⟨route, hRoute, hEqual⟩
+
+          exact
+            Or.inr
+              ⟨route,
+                mem_generalRoutesIntoClass_of_mem_generalRoutesIntoMessageServer
+                  className
+                  server.name
+                  route
+                  routes
+                  hRoute,
+                ⟨server,
+                  List.mem_cons.mpr (Or.inl rfl),
+                  message_of_mem_generalRoutesIntoMessageServer
+                    className
+                    server.name
+                    route
+                    routes
+                    hRoute⟩,
+                hEqual.symm⟩
+
+      · rcases inductionHypothesis hTail with
+          ⟨name, hName, hEqual⟩ |
+            ⟨route, hRoute, ⟨tailServer, hTailServer, hMessage⟩, hEqual⟩
+
+        · refine Or.inl ⟨name, ?_, hEqual⟩
+
+          simp only [
+            generalActionNamesOf
+          ]
+
+          exact List.mem_append.mpr (Or.inr hName)
+
+        · exact
+            Or.inr
+              ⟨route,
+                hRoute,
+                ⟨tailServer,
+                  List.mem_cons.mpr (Or.inr hTailServer),
+                  hMessage⟩,
+                hEqual⟩
+
+/--
+A reactive class's reactions have pairwise distinct triggers — relative to the guard.
+
+The statement `LF.GeneralProgram.reactionFor?_perm_of_nodup_triggers` asks for, transported to the
+translator's specification of the list by `compileGeneralReactiveClass_reactionTriggers`. Composing
+the two is the remaining commit; this is the last one that reasons about the translator alone.
+
+**All three hypotheses are stated at the caller's server list and none is projected from the guard
+here.** That is forced, not stylistic: `assembleGeneralReactor` builds `logicalActions` from
+`reactiveClass.messageServers` and `messageReactions` from
+`generalPriorityOrderedMessageServers reactiveClass`, and those two lists are permutations of each
+other rather than equal. A projection out of `LF.GeneralReactor.declaredNames` would therefore land
+on the unsorted list while this conclusion is about whichever list the caller names. The permutation
+transfer belongs to the step where the sort is visible, and `List.Perm.nodup` is its instrument —
+noting that permuting the *server* list permutes concatenated per-server blocks, which is not a free
+step.
+
+The three hypotheses, and where each is discharged. The action-name and port-name hypotheses are the
+`Nodup` clauses of `declaredNames`, in the spellings `generalActionNamesOf` and `generalInputPortsOf`
+already use. The server-name hypothesis is a conjunct of `DTR.GeneralModel.namesUniqueAndValid`; it
+is what makes two groups' port sets disjoint, and it is the only one of the three that plays no part
+in the single-group statement above.
+
+Four obligations, of which one is real. The head group is
+`generalMessageServerReactionTriggers_nodup`; the tail is the induction hypothesis; an action trigger
+and a port trigger can never be equal because they are different constructors of
+`LF.GeneralTrigger`; and the cross-group case splits into action-against-action, which the appended
+action names already forbid, and port-against-port, which is the argument the inversion lemma above
+exists for.
+-/
+theorem generalReactionTriggersOf_nodup
+    (selfSends : List GeneralSelfSend)
+    (routes : List GeneralRoute)
+    (className : ClassName)
+    (hInputPortNames :
+      ((generalInputPortsOf
+        className
+        routes).map
+        (fun port =>
+          port.name.value)).Nodup) :
+    ∀ (servers : List DTR.GeneralMessageServer),
+      ((generalActionNamesOf
+        selfSends
+        servers).map
+        (fun name =>
+          name.value)).Nodup →
+      (servers.map
+        (fun server =>
+          server.name)).Nodup →
+        (generalReactionTriggersOf
+          selfSends
+          routes
+          className
+          servers).Nodup := by
+
+  intro servers
+  induction servers with
+
+  | nil =>
+      intro _ _
+
+      simp [
+        generalReactionTriggersOf
+      ]
+
+  | cons server remaining inductionHypothesis =>
+      intro hActionNames hServerNames
+
+      simp only [
+        generalActionNamesOf,
+        List.map_append
+      ] at hActionNames
+
+      rw [List.nodup_append] at hActionNames
+
+      obtain ⟨hHeadActionNames, hTailActionNames, hActionCross⟩ := hActionNames
+
+      rw [
+        List.map_cons,
+        List.nodup_cons
+      ] at hServerNames
+
+      obtain ⟨hServerFresh, hRemainingServers⟩ := hServerNames
+
+      have hClassPortNames :
+          ((generalRoutesIntoClass
+            className
+            routes).map
+            (fun candidate =>
+              (generalInputPortOfRoute candidate).value)).Nodup := by
+        rw [
+          ← generalInputPortsOf_portNames
+            className
+            routes
+        ]
+
+        exact hInputPortNames
+
+      simp only [
+        generalReactionTriggersOf
+      ]
+
+      rw [List.nodup_append]
+
+      refine ⟨?_, ?_, ?_⟩
+
+      · exact
+          generalMessageServerReactionTriggers_nodup
+            className
+            server.name
+            selfSends
+            routes
+            hHeadActionNames
+            hInputPortNames
+
+      · exact
+          inductionHypothesis
+            hTailActionNames
+            hRemainingServers
+
+      · intro headTrigger hHeadTrigger tailTrigger hTailTrigger
+
+        rcases List.mem_append.mp hHeadTrigger with hHeadAction | hHeadPort
+
+        · rw [
+            generalMessageReactionTriggersOf_eq_map_logicalAction
+          ] at hHeadAction
+
+          rcases List.mem_map.mp hHeadAction with ⟨headName, hHeadName, hHeadEq⟩
+
+          rcases
+              mem_generalReactionTriggersOf
+                selfSends
+                routes
+                className
+                tailTrigger
+                remaining
+                hTailTrigger with
+            ⟨tailName, hTailName, hTailEq⟩ | ⟨_, _, _, hTailEq⟩
+
+          · subst hHeadEq
+
+            subst hTailEq
+
+            intro hSame
+
+            simp only [
+              LF.GeneralTrigger.logicalAction.injEq
+            ] at hSame
+
+            have hNameValues :
+                headName.value =
+                  tailName.value := by
+              rw [hSame]
+
+            exact
+              hActionCross
+                headName.value
+                (List.mem_map.mpr ⟨headName, hHeadName, rfl⟩)
+                tailName.value
+                (List.mem_map.mpr ⟨tailName, hTailName, rfl⟩)
+                hNameValues
+
+          · subst hHeadEq
+
+            subst hTailEq
+
+            intro hSame
+
+            simp at hSame
+
+        · rcases List.mem_map.mp hHeadPort with ⟨headRoute, hHeadRoute, hHeadEq⟩
+
+          rcases
+              mem_generalReactionTriggersOf
+                selfSends
+                routes
+                className
+                tailTrigger
+                remaining
+                hTailTrigger with
+            ⟨_, _, hTailEq⟩ |
+              ⟨tailRoute, hTailRoute, ⟨tailServer, hTailServer, hTailMessage⟩, hTailEq⟩
+
+          · subst hHeadEq
+
+            subst hTailEq
+
+            intro hSame
+
+            simp at hSame
+
+          · subst hHeadEq
+
+            subst hTailEq
+
+            intro hSame
+
+            simp only [
+              LF.GeneralTrigger.inputPort.injEq
+            ] at hSame
+
+            have hRoutesDistinct :
+                headRoute ≠ tailRoute := by
+              intro hEqualRoutes
+
+              apply hServerFresh
+
+              rw [
+                ← message_of_mem_generalRoutesIntoMessageServer
+                  className
+                  server.name
+                  headRoute
+                  routes
+                  hHeadRoute,
+                hEqualRoutes,
+                hTailMessage
+              ]
+
+              exact List.mem_map.mpr ⟨tailServer, hTailServer, rfl⟩
+
+            have hPortValues :
+                (generalInputPortOfRoute headRoute).value =
+                  (generalInputPortOfRoute tailRoute).value := by
+              rw [hSame]
+
+            exact
+              nodup_map_ne_of_mem
+                (fun candidate =>
+                  (generalInputPortOfRoute candidate).value)
+                (generalRoutesIntoClass
+                  className
+                  routes)
+                hClassPortNames
+                headRoute
+                (mem_generalRoutesIntoClass_of_mem_generalRoutesIntoMessageServer
+                  className
+                  server.name
+                  headRoute
+                  routes
+                  hHeadRoute)
+                tailRoute
+                hTailRoute
+                hRoutesDistinct
+                hPortValues
+
 end Translation
 end Relico

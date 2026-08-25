@@ -4356,6 +4356,96 @@ theorem mem_generalRoutesIntoClass_of_mem_generalRoutesIntoMessageServer
               hMember
 
 /--
+A route in the message-server filter carries that message.
+
+The projection the cross-server argument needs, and the sixth member of this family. It sits here
+beside `generalRoutesIntoMessageServer_cons_self`, `_cons_of_ne`, `_append`,
+`mem_generalRoutesIntoClass_of_mem_generalRoutesIntoMessageServer` and
+`generalRoutesIntoMessageServer_nodup_map` rather than beside its single caller in
+`Translation/GeneralBasic.lean`, because a fact about this filter is one a reader will look for here.
+**F54** is the defect class that decides such placements: a finding invisible from where a reader
+looks cost a duplicate task.
+
+What it buys, one level up: two routes into *different* message servers of one class carry different
+messages, hence are different routes, so the class-level duplicate-freedom hypothesis separates their
+input port names. Without it the reaction list of a whole class cannot be assembled from the
+per-server statements, because nothing would forbid one route appearing under two servers.
+
+Proved by the same `by_cases` on the pair equality as the two `cons` equations above, and only the
+`hPair.right` half of that equality is used — the class component is what
+`mem_generalRoutesIntoClass_of_mem_generalRoutesIntoMessageServer` already spends.
+-/
+theorem message_of_mem_generalRoutesIntoMessageServer
+    (className : ClassName)
+    (message : MsgName)
+    (route : GeneralRoute) :
+    ∀ (routes : List GeneralRoute),
+      route ∈
+        generalRoutesIntoMessageServer
+          className
+          message
+          routes →
+        route.message = message := by
+
+  intro routes
+  induction routes with
+
+  | nil =>
+      intro hMember
+
+      simp [
+        generalRoutesIntoMessageServer
+      ] at hMember
+
+  | cons head remaining inductionHypothesis =>
+      intro hMember
+
+      by_cases hMatch :
+          (head.receiverClass,
+            head.message) =
+            (className, message)
+
+      · have hPair := hMatch
+
+        simp only [
+          Prod.mk.injEq
+        ] at hPair
+
+        rw [
+          generalRoutesIntoMessageServer_cons_self
+            className
+            message
+            head
+            remaining
+            hMatch
+        ] at hMember
+
+        cases List.mem_cons.mp hMember with
+
+        | inl hEqual =>
+            rw [hEqual]
+
+            exact hPair.right
+
+        | inr hTail =>
+            exact
+              inductionHypothesis
+                hTail
+
+      · rw [
+          generalRoutesIntoMessageServer_cons_of_ne
+            className
+            message
+            head
+            remaining
+            hMatch
+        ] at hMember
+
+        exact
+          inductionHypothesis
+            hMember
+
+/--
 Duplicate freedom transfers from the class filter to the message-server filter.
 
 The composite of the two facts above, and the form the reaction assembly needs: the guard decides
