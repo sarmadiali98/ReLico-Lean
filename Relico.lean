@@ -646,6 +646,8 @@ import Relico.Translation.GeneralBasic
 
 import Relico.Correctness.GeneralPriorityOrder
 import Relico.Correctness.GeneralEvaluation
+import Relico.Correctness.GeneralCorrespondence
+import Relico.Correctness.GeneralTimeEquivalence
 
 import Relico.Tests.GeneralPriority
 import Relico.Tests.GeneralActorSelection

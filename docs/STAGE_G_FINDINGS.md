@@ -1464,5 +1464,164 @@ false, and it converted a known defect into an unknown one for a whole obligatio
 written in the same changeset as the deferral, the deferral is not a deferral.
 
 
+---
+
+## F75 — three claims stage G's design makes about row 7's own deliverables, and the semantics rows 5 and 6 landed refutes each one
+
+*Read*, all three, measured at the point `R` was defined and before any of row 7's Lean was authored. They
+are one finding because they share one cause: §7 was written from the paper on 2026-08-23 and revised twice
+against the *paper*, while the two artefacts it describes — the τ sets and the two runtime state types — were
+built afterwards, by rows 5 and 6. Nothing re-read §7 against them. Each part changes what row 7 can state,
+which is why none of the three is a wording nitpick.
+
+### Part 1 — "`τ*` has no surplus behaviour to absorb" is true of the paper's tables and false of ours, and it decides how many τ theorems row 7 can state
+
+§7's τ paragraph closes:
+
+> *"Nothing on either side is unmatched, and `τ*` in Definition 1 has no surplus behaviour to absorb."*
+
+and §15 item 4 summarises the stage as proving weak bisimilarity *"with **assignments and both send forms**
+as τ on both sides"*.
+
+Read against the landed relations, both sentences describe the paper's labelling rather than stage G's.
+`DTR.GeneralStep` has four constructors — `assign`, `send`, `take`, `timeProgress` — of which **two** carry
+`DTR.GeneralLabel.tau`. `LF.GeneralStep` has six — `assign`, `schedule`, `setPort`, `fire`,
+`microstepAdvance`, `timeAdvance` — of which **four** carry `LF.GeneralLabel.tau`. The fourth is
+`microstepAdvance`, and it is τ *because* P24's split is adopted, three paragraphs below the sentence quoted
+above. So the two τ sets are not in bijection, `τ*` has exactly one piece of surplus behaviour to absorb, and
+absorbing it is the entire purpose of the divergence the same section lists third.
+
+The plan is not self-contradictory: the sentence is scoped to Tables I and II *as printed*, where a
+microstep-only advance is labelled `t` and the τ sets really are matched pairwise. But nothing marks the
+scope, and §15 item 4 — whose subject is what stage G proves, not what the paper prints — states the paper's
+τ set as though it were ours.
+
+What makes this worth a finding rather than a re-reading is what the sentence implies if taken at face value
+about our semantics: that `R` survives every τ step. That is false for **five of the six** τ-emitting
+constructors, and not merely unproved. `R` constrains a valuation, a bag against a queue, and a
+continuation. DTR `assign` and LF `assign` each change a valuation; DTR `send` changes a bag; LF `schedule`
+and `setPort` each change the queue. For a matched τ pair `R` is *restored by the partner step*, never
+preserved by either half alone, so a single-step preservation theorem for any of those five would be a false
+statement. `microstepAdvance` is the one τ constructor that touches nothing `R` reads: it advances
+`Tag.microstep`, and `R`'s only tag component reads `Tag.time`. Row 7 therefore states exactly one τ
+theorem, `generalCorrespondence_microstepAdvance`, resting on the general fact
+`generalCorrespondence_retag` — and that one theorem is the whole checkable residue of the absorption claim.
+
+### Part 2 — the initial case is specified "Unconditional", and the general family has no initial state to be unconditional about
+
+§7's theorem list, item 1:
+
+> *"`generalCorrespondence_initial` — `R` relates the initial states. Unconditional; the paper's 'holds
+> initially' line, and cheap."*
+
+There are no initial states. Every other family in the repository has an initializer on each side —
+`Relico/DTR/Initialization.lean`, `DTR/StoreInitialization.lean`, `DTR/MultiStoreInitialization.lean` and
+`DTR/GlobalMultiStorePayloadInitialization.lean`, each mirrored under `Relico/LF/` — and the general family
+has none. What it has is `DTR.GeneralRuntimeConfiguration.ofConfiguration`, which lifts an *already
+existing* configuration by attaching empty continuations, and on the target side nothing at all:
+`Relico/LF/GeneralRuntime.lean` declares the two runtime structures, `idle`, `now`, the label type, `isTau`
+and `project`, and no state builder. Nor is there a function from a `DTR.GeneralModel` to a
+`DTR.GeneralConfiguration` anywhere in the repository: the only three definitions that produce a
+`DTR.GeneralConfiguration` are hand-built fixtures in `Relico/Tests/GeneralActorSelection.lean`. And §13's
+twelve rows create no initialization module in any of them.
+
+"The initial states" is therefore not nameable and the theorem cannot be stated as specified. Row 7 states
+the scoped form instead: quantify over an arbitrary source configuration and an arbitrary target reactor
+store, and hypothesise the three things an initializer would have established by construction — every bag
+empty, and each store covering the other with agreeing valuations and empty reaction bodies. The conclusion
+is about `ofConfiguration config` and a hand-built target state at microstep `0` with an empty queue.
+
+The word that is wrong is "Unconditional", not "cheap": the proof is one `rfl`, two symmetric applications of
+`generalActorCorresponds_idle`, and a `simp` on membership in the empty queue. Nor is the scoped form a dead
+end, which is why row 7 is not blocked on two new modules — the hypotheses are exactly what any initializer
+will satisfy, so the unconditional statement will follow by instantiation rather than by re-proof. It is
+nevertheless **owed**: as things stand the paper's "holds initially" line is discharged only relative to
+hypotheses. **G5 is where it belongs**, and not arbitrarily: a runnable witness has to start somewhere, and
+"somewhere" on each side is precisely the initial state this theorem cannot name. Filed against row 11 rather
+than left to be rediscovered by whoever writes the witness.
+
+### Part 3 — the paper gives each reactor its own queue and our target state has one for the program, so `R` has four components rather than three
+
+§7 transcribes the paper's relation and then commits to it:
+
+> *"Stage G defines `GeneralStateCorrespondence` with exactly these three components, per actor, keyed
+> through the existing translation's reactor naming rather than an abstract `map_A`."*
+
+In the paper the LF global state maps each reactor `r` to `(ηr, qr, µr)`, so `qr` is *that reactor's* trigger
+queue and `bx ≡ qr` compares two collections belonging to one actor-reactor pair. `LF.GeneralRuntimeState`,
+built by row 5, has three fields — `currentTag`, `reactors`, and a single `pending : LF.GeneralEventQueue`
+for the whole program — and `LF.GeneralReactorRuntime` carries a valuation and an active body and no queue.
+There is no `qr` to project. The information is the same, since `LF.GeneralPendingEvent` carries a `target`,
+but it is distributed differently and `R` has to do the redistribution.
+
+Two consequences, both visible in the landed module. The bag/queue component is
+`GeneralPendingAgrees name bag pending`: per actor, but extracted from the global queue by that actor's name —
+every message in the bag has a pending event targeted at the name and sharing its arrival, and every pending
+event targeted at the name has a message in the bag sharing its arrival. (Two implications rather than a
+bijection, and no multiplicity; **F74** part 7(d) records why the landed `PendingCorresponds` cannot be reused
+and why the name is related through the routing rather than by an equation.) And `R` acquires a **fourth**
+field, `pendingTargeted`: every pending event's target is an actor of the source configuration. Per-reactor
+queues make that free — an event in `qr` is an event of `r` by construction — and one global queue does not,
+because nothing in the state type stops an event naming a target no actor has.
+
+The fourth field is load-bearing rather than tidy. `generalSourceMessageOfEvent`, the bridge both directions
+of Lemma 1 run through, starts from an arbitrary member of `pending` and has to produce the *source* actor
+whose bag backs it before any arrival theorem applies. Without `pendingTargeted` there is no such actor and
+the backward direction of Lemma 1 is unprovable. This is a difference in representation rather than in
+semantics, so it is **not** a fifth divergence from the paper and is deliberately not added to §7's list of
+four; what has to change is the sentence that claims three components.
+
+### The repair
+
+Five edits to `docs/STAGE_G_DESIGN.md`, in this changeset, each at the sentence the part above quotes: the τ
+paragraph in §7 gains the scope it was missing and a pointer here; §15 item 4's τ summary is corrected to the
+τ set stage G actually uses; §7's theorem item 1 states the scoped form it will get and records the
+unconditional one as owed; §7's `R` transcription says four components and why the fourth exists; and §13
+gains one line under the work-plan table so the owed theorem is attached to row 11 where a reader of the plan
+will meet it. No job count in the table is changed, because whether the two initializers arrive as new modules
+or as additions to the existing `GeneralRuntime` pair is not yet decided, and inventing the number would be
+worse than recording the dependency.
+
+A sixth edit was forced by the third of those five rather than planned. Writing "not a fifth divergence" into
+part 3 meant asserting that there are four, which made it worth checking every place the design states that
+number: §7 says *"Four, and all four are forced"* directly above the list, §15 item 4 enumerates them as
+`two + one + one`, and the **provenance paragraph in the preamble said `three`** — stale since P24's split
+`TIME PROGRESS` became the fourth, in the same changeset that revised §7's list. The provenance sentence now
+defers to §7 rather than restating the number, because a count kept in two places is a count that will
+disagree with itself again. That is `F46`'s lesson (`docs/STAGE_E_FINDINGS.md`, *a count that was false the
+moment it was written*) reaching a second document, and the reason the repair removes the duplicate instead of
+correcting it.
+
+One thing is deliberately **not** repaired. §7's τ table still lists the paper's τ sets read off Tables I and
+II, unchanged, because that table's subject *is* the paper and F66 part 4 exists to keep it accurate. The
+sentence about our own τ sets is the one that needed scoping.
+
+### The transferable check
+
+The three parts differ in what they got wrong — a scope, a modality, an arity — and are identical in how they
+got there: **a design section that describes an artefact is stale the moment the artefact is built, and
+nothing re-reads it.** §7 was revised twice, both times against the paper, and both revisions were correct.
+What neither revision could do is check §7 against rows 5 and 6, which did not exist yet.
+
+So the check is cheap and mechanical, and it belongs at the start of every obligation rather than at the end
+of a stage: **before authoring row N, re-read the design's description of what rows 1..N−1 built, against
+what they actually built.** Three sentences failed it here, and each would have been caught by opening one
+Lean file. The alternative — discovering the mismatch while a proof is half-written — is what F74 part 7(d)
+was already filed to prevent, and it is more expensive every time.
+
+Note also which instrument would *not* have caught these. Every one of the three sentences is internally
+coherent, cites the paper accurately, and contains no stale identifier, no stale count and no unreachable
+citation. The audit habits this file has accumulated — grep for spelled-out counts, check citation
+reachability per changeset, check that a deferral's target exists — all pass. Only reading the design against
+the code refutes them.
+
+The count audit did fire in this changeset, and where it fired is the point. It caught nothing in the three
+sentences; it caught the preamble's `three`, in a paragraph no part of F75 quotes and no row-7 obligation
+touches, and only because part 3 had to commit to a number before it could say "not a fifth". So the two
+checks are complements rather than substitutes: the mechanical audits find sentences that disagree with *other
+sentences*, and only re-reading the design against the code finds sentences that disagree with *the artefact*.
+A changeset that runs one and not the other will land looking clean either way.
+
+
 
 

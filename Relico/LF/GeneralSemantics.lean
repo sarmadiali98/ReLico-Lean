@@ -461,6 +461,79 @@ theorem selectEarliestEvent_precedesOrEqual_of_mem
               event
               (List.mem_cons.mpr (Or.inr hInRemaining))
 
+/--
+**The fold really does return one of the events it walked past.**
+
+Minimality alone does not say this: a fold that invented a tag earlier than everything in the queue would
+satisfy `selectEarliestEvent_precedesOrEqual_of_mem` and still not correspond to any pending event. Lemma 1
+needs both halves — the target's `timeAdvance` moves the clock to `event.tag.time`, and the source can only
+match that instant if some real event carries it, which is what membership supplies.
+
+The induction is the same shape as minimality's, and for the same reason: the accumulator changes in the
+branch where the candidate wins, so `best` is quantified inside the goal rather than bound as a parameter.
+Both order facts are unnecessary here, because which branch was taken does not matter — only that whichever
+event survives came from the queue or was the seed.
+-/
+theorem selectEarliestEvent_mem
+    (queue : LF.GeneralEventQueue) :
+    ∀ best : LF.GeneralPendingEvent,
+      selectEarliestEvent
+          best
+          queue ∈
+        best :: queue := by
+
+  induction queue with
+
+  | nil =>
+      intro best
+
+      rw [selectEarliestEvent_nil]
+
+      exact List.mem_cons.mpr (Or.inl rfl)
+
+  | cons candidate remaining inductionHypothesis =>
+      intro best
+
+      by_cases hPrecedes :
+          LF.Tag.PrecedesOrEqual
+            best.tag
+            candidate.tag
+
+      · rw [selectEarliestEvent_cons_of_precedesOrEqual
+              remaining
+              hPrecedes]
+
+        rcases List.mem_cons.mp (inductionHypothesis best) with
+          hIsBest |
+          hInRemaining
+
+        · rw [hIsBest]
+          exact List.mem_cons.mpr (Or.inl rfl)
+
+        · exact List.mem_cons.mpr
+            (Or.inr
+              (List.mem_cons.mpr
+                (Or.inr hInRemaining)))
+
+      · rw [selectEarliestEvent_cons_of_not_precedesOrEqual
+              remaining
+              hPrecedes]
+
+        rcases List.mem_cons.mp (inductionHypothesis candidate) with
+          hIsCandidate |
+          hInRemaining
+
+        · rw [hIsCandidate]
+          exact List.mem_cons.mpr
+            (Or.inr
+              (List.mem_cons.mpr
+                (Or.inl rfl)))
+
+        · exact List.mem_cons.mpr
+            (Or.inr
+              (List.mem_cons.mpr
+                (Or.inr hInRemaining)))
+
 namespace GeneralRuntimeState
 
 /--
@@ -528,6 +601,131 @@ theorem earliestPendingEvent?_eq_of_cons
           first
           rest) := by
   rfl
+
+/--
+The selected event is a real member of the queue.
+
+The state-level lift of `LF.selectEarliestEvent_mem`, and the form Lemma 1 uses: `timeAdvance`'s premise
+hands over an event, and the source can only match its instant once that event is known to be one of the
+pending ones — an invented tag would satisfy the premise and correspond to nothing on the source side.
+-/
+theorem earliestPendingEvent?_mem
+    (state : GeneralRuntimeState)
+    (event : LF.GeneralPendingEvent)
+    (hSelected :
+      earliestPendingEvent? state =
+        some event) :
+    event ∈ state.pending := by
+
+  obtain ⟨currentTag, reactors, pending⟩ := state
+
+  cases pending with
+
+  | nil =>
+      simp at hSelected
+
+  | cons first rest =>
+      rw [earliestPendingEvent?_eq_of_cons] at hSelected
+
+      simp only [
+        Option.some.injEq
+      ] at hSelected
+
+      show event ∈ first :: rest
+
+      rw [← hSelected]
+
+      exact
+        LF.selectEarliestEvent_mem
+          rest
+          first
+
+/--
+A non-empty queue always selects something.
+
+The converse direction, and the one that keeps the target from stalling: if any event is pending then
+`earliestPendingEvent?` is not `none`, so the premise that `fire`, `microstepAdvance` and `timeAdvance` all
+share can be met, and which of the three applies is then decided by the tag comparison alone. Lemma 1 needs
+this to answer a source time advance, which `DTR.nextArrival_sound` has already shown rests on a real
+waiting message.
+-/
+theorem earliestPendingEvent?_isSome_of_mem
+    (state : GeneralRuntimeState)
+    (event : LF.GeneralPendingEvent)
+    (hMember :
+      event ∈ state.pending) :
+    ∃ selected,
+      earliestPendingEvent? state =
+        some selected := by
+
+  obtain ⟨currentTag, reactors, pending⟩ := state
+
+  cases pending with
+
+  | nil =>
+      simp at hMember
+
+  | cons first rest =>
+      exact
+        ⟨LF.selectEarliestEvent
+            first
+            rest,
+         earliestPendingEvent?_eq_of_cons
+           currentTag
+           reactors
+           first
+           rest⟩
+
+/--
+The selected event is no later than any pending event.
+
+The state-level lift of `LF.selectEarliestEvent_precedesOrEqual_of_mem`, and the half of Lemma 1 that
+carries *minimality* across the languages. The source instant the target must match is
+`DTR.GeneralConfiguration.nextArrival`, which is a minimum over the bags; showing the two agree needs the
+inequality in both directions, and this is the target-side direction — every pending event, hence every
+message the source could still be waiting on, is at or after the selected tag.
+
+Stated over `state.pending` rather than over a queue so that a caller holding the correspondence relation
+can use it directly: the relation quantifies its message component over membership in the *state's* queue,
+never over a queue supplied separately.
+
+The proof is the same destructuring as `earliestPendingEvent?_mem` above, and the `Option.some.injEq` step
+is what lets the goal be rewritten by the selection equation rather than by unfolding the `match` again.
+-/
+theorem earliestPendingEvent?_precedesOrEqual_of_mem
+    (state : GeneralRuntimeState)
+    (selected event : LF.GeneralPendingEvent)
+    (hSelected :
+      earliestPendingEvent? state =
+        some selected)
+    (hMember :
+      event ∈ state.pending) :
+    LF.Tag.PrecedesOrEqual
+      selected.tag
+      event.tag := by
+
+  obtain ⟨currentTag, reactors, pending⟩ := state
+
+  cases pending with
+
+  | nil =>
+      simp at hMember
+
+  | cons first rest =>
+      rw [earliestPendingEvent?_eq_of_cons] at hSelected
+
+      simp only [
+        Option.some.injEq
+      ] at hSelected
+
+      rw [← hSelected]
+
+      exact
+        LF.selectEarliestEvent_precedesOrEqual_of_mem
+          rest
+          first
+          event
+          hMember
 
 end GeneralRuntimeState
 

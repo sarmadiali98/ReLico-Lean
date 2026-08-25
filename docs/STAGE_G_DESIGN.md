@@ -10,8 +10,10 @@ name, a citation to a tracked document, a citation to the canonical paper, or ex
 proposal. Where this document disagrees with an earlier design document, the disagreement is stated rather
 than silently corrected — three such corrections already landed in `docs/STAGE_D_DESIGN.md` on
 2026-08-23, all of which credited stage G with work that stage F actually did. Where it diverges from the
-**paper**, §7 says so explicitly and gives the reason; there are exactly three such divergences and each
-is held to the narrowest form that still works.
+**paper**, §7 says so explicitly, enumerates the divergences, and gives the reason for each; every one is
+held to the narrowest form that still works. This sentence carried the count as well until 2026-08-24, and
+the count was `three` — stale from the moment P24's split `TIME PROGRESS` became the fourth. The number now
+appears only next to the list that can be counted.
 
 
 ---
@@ -294,8 +296,26 @@ carrying a bag↔queue bijection as its hypothesis.
 `ex ≡ ηr` (translated state variables hold identical values), `bx ≡ qr` (the Lemma 1 bijection between
 pending DTR messages and LF triggers, corresponding pairs sharing an arrival time), and `πx ≡ µr`
 (corresponding continuations). It holds initially because both executions start empty. Stage G defines
-`GeneralStateCorrespondence` with exactly these three components, per actor, keyed through the existing
+`GeneralStateCorrespondence` with these three components, per actor, keyed through the existing
 translation's reactor naming rather than an abstract `map_A`.
+
+**Four components, not three, and the reason is the target state type — F75 part 3.** This paragraph said
+"exactly these three components" until 2026-08-24. The paper's LF state gives each reactor its own `qr`;
+`LF.GeneralRuntimeState`, built by G2a-ii, carries **one** `pending` queue for the whole program whose events
+each name a `target`, and `LF.GeneralReactorRuntime` has no queue field. The same information, distributed
+differently — so `bx ≡ qr` becomes a per-actor agreement *extracted* from the global queue by target name
+(`GeneralPendingAgrees`), and `R` needs a fourth field, `pendingTargeted`, saying every pending event's target
+is an actor of the source. Per-reactor queues would make that free; one global queue does not. It is
+load-bearing: the bridge both directions of Lemma 1 run through starts from an arbitrary queue member and must
+produce a source actor before any arrival theorem applies. This is a representation difference, **not** a
+fifth divergence from the paper.
+
+**Both stores are related through membership, not lookup.** `Store` is an ordered association list whose
+header says only the first binding for a key is observable, while the source's arrival minimum ranges over
+*every* binding. So all four fields quantify over `∈` and none of them calls `Store.lookup`; a lookup-shaped
+`R` would silently agree with a shadowed binding the semantics can still see. This is **F74**'s root cause
+restated at the relation, and it is the reason G2b's support lemmas are membership lemmas
+(`DTR.mem_eraseContinuations` and its converse) rather than lookup lemmas.
 
 **What is τ — corrected 2026-08-24 by reading the two SOS tables, and recorded as F66 part 4.** This
 paragraph previously said τ was *"assignments on both sides, and on the LF side the scheduler's own
@@ -312,6 +332,16 @@ conditionals, `TAKE` and `TIME PROGRESS`. Read off the tables, the τ set is:
 `ASSIGN` matches `ASSIGN`, DTR's single `SEND` matches whichever of LF's two send forms the translation
 chose for that site, and the conditionals match pairwise. Nothing on either side is unmatched, and `τ*`
 in Definition 1 has no surplus behaviour to absorb.
+
+**That last sentence is about Tables I and II as printed, and it is false of stage G's own semantics.**
+Adopting P24's split three paragraphs below makes an LF microstep-only advance τ, and it has no DTR
+counterpart — so our τ sets are *not* in bijection and `τ*` has exactly one surplus step to absorb, which is
+the point of the split rather than an oversight in it. Measured after G2a-iii landed: two of
+`DTR.GeneralStep`'s four constructors carry `DTR.GeneralLabel.tau` and **four** of `LF.GeneralStep`'s six
+carry `LF.GeneralLabel.tau`. **F75** part 1 carries the measurement and the consequence for G2b — of those six
+τ-emitting constructors, only `microstepAdvance` supports a single-step `R`-preservation theorem, because the
+other five each change something `R` constrains and are *restored by their partner step* rather than preserved
+alone.
 
 The earlier wording was taken from Theorem 1's *proof*, which discharges surplus LF behaviour with
 *"Since scheduler steps are internal to LF and have no corresponding observable transition in DTR, they
@@ -440,8 +470,13 @@ instantiate the foundation. **F70**.
 
 **Theorems, in dependency order.**
 
-1. `generalCorrespondence_initial` — `R` relates the initial states. Unconditional; the paper's "holds
-   initially" line, and cheap.
+1. `generalCorrespondence_initial` — `R` relates the initial states. This said "Unconditional; the paper's
+   'holds initially' line, and cheap" until 2026-08-24, and **there are no initial states to be
+   unconditional about**: the general family has no initializer on either side, and §13's twelve rows create
+   none. What G2b lands is the **scoped** form — arbitrary source configuration, arbitrary target reactor
+   store, with the emptiness and valuation-agreement facts an initializer would establish by construction
+   taken as hypotheses. Cheap it is; unconditional it is not, and the unconditional statement is **owed at
+   G5**, which needs the two initializers anyway for its runnable witness. **F75** part 2.
 2. `generalTimeEquivalence` — Lemma 1. Every DTR event at logical time `t` corresponds to an LF event at
    tag `(t, m)`, by induction on transitions, carrying the bag↔queue bijection. This is where the
    chaining invariant lives, and it is the one genuinely inductive obligation.
@@ -680,6 +715,14 @@ reslice itself owes, row 3 below.
 | 11 | **G5** `trace` on both sides, printer, statement walk, witness model, new gate marker | 0–1 | 527–528 |
 | 12 | **G6** the fragment declaration and the theorem-eligibility table (docs only) | 0 | — |
 
+**One obligation row 11 acquired after row 7 was authored.** The general family has no initializer on either
+side, so `generalCorrespondence_initial` lands scoped rather than unconditional (§7, **F75** part 2). G5 needs
+the two initializers regardless — a runnable witness has to start somewhere — so the unconditional statement
+is attached to row 11, following by instantiation rather than re-proof. Row 11's module and job figures are
+left as they stand, because whether the initializers arrive as two new modules or as additions to the existing
+`DTR/GeneralRuntime` and `LF/GeneralRuntime` pair is not yet decided, and a made-up number would be worse than
+a recorded dependency.
+
 The stage's endpoint is therefore an estimate near **527**, and the binding prediction is the one on each
 commit's own row — which is where this project's prediction discipline can actually check it, a commit at a
 time, rather than at a stage boundary eight commits away. Row 4 gained a module and every row below it
@@ -848,7 +891,9 @@ All six are settled; this section is the record, not a request. Four were put to
    decision rests on the paper alone. Stage G therefore proves weak bisimilarity (Definition 1) with
    **assignments and both send forms** as τ on both sides — read off Tables I and II, *not* "assignments
    and scheduler stuttering", which was this section's wording until 2026-08-24 and which inherited a
-   misnomer from Theorem 1's own proof (F66 part 4, and P24 for the defect it concealed) — and derives
+   misnomer from Theorem 1's own proof (F66 part 4, and P24 for the defect it concealed) — plus, on the LF
+   side only, the microstep-only advance that P24's split relabels, so the two τ sets are **not** in
+   bijection and `τ*` has exactly one surplus step to absorb (**F75** part 1) — and derives
    finite-trace agreement from it, so aims 8 and 9 are discharged for the general family rather than
    owed. **Four** divergences are documented in §7: two were already forced by earlier findings, one is
    scope, and the fourth is P24's split `TIME PROGRESS`, without which the theorem being claimed is false

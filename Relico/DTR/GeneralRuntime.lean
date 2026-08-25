@@ -253,6 +253,276 @@ theorem eraseContinuations_attachEmptyContinuations
         inductionHypothesis
       ]
 
+/-!
+### Attachment through membership
+
+`eraseContinuations_lookup` is the projection's lookup lemma, and it is the right shape for anything
+that observes an actor by name. The two lemmas below are the *membership* shape, and G2b needs them
+instead.
+
+The reason is that `Store` is an ordered association list whose header records that only the first
+binding for a key is observable, while `DTR.GeneralConfiguration.nextArrival` minimises over **every**
+binding — including a shadowed one. A correspondence relation stated over `Store.lookup` would
+therefore say nothing about a shadowed actor, and its message could still decide when the source clock
+moves; the target, whose reactors are also keyed by name, would have no event to match it with, and
+Lemma 1 would be false for the same reason **F74** made it false. Quantifying over membership closes
+that, and `Store.mem_of_lookup` converts a lookup into the membership fact when a caller has one.
+-/
+
+/--
+Every binding of an attached store is an attached binding, continuation and all.
+
+The inversion direction: what a member of `attachEmptyContinuations actors` tells you about `actors`.
+-/
+theorem mem_attachEmptyContinuations
+    (actors : Store ActorName DTR.GeneralActorState)
+    (name : ActorName)
+    (actor : DTR.GeneralActorRuntime)
+    (hMember :
+      (name, actor) ∈
+        attachEmptyContinuations actors) :
+    (name, actor.state) ∈ actors ∧
+      actor.activeBody = [] := by
+
+  induction actors with
+
+  | nil =>
+      simp [
+        attachEmptyContinuations
+      ] at hMember
+
+  | cons head remaining inductionHypothesis =>
+      rcases head with
+        ⟨headName, headState⟩
+
+      simp only [
+        attachEmptyContinuations,
+        List.mem_cons
+      ] at hMember
+
+      rcases hMember with
+        hEqual |
+          hRemaining
+
+      · simp only [
+          Prod.mk.injEq
+        ] at hEqual
+
+        rcases hEqual with
+          ⟨hName, hActor⟩
+
+        subst hName
+
+        subst hActor
+
+        exact
+          ⟨List.mem_cons.mpr (Or.inl rfl),
+           rfl⟩
+
+      · rcases
+            inductionHypothesis
+              hRemaining
+          with
+            ⟨hState, hBody⟩
+
+        exact
+          ⟨List.mem_cons.mpr (Or.inr hState),
+           hBody⟩
+
+/--
+Every binding of the underlying store is a binding of the attached one.
+
+The forward direction, and the one an initial-state correspondence needs: the source configuration is
+given, the runtime configuration is built from it, and the relation has to be shown for every actor of
+the built store.
+-/
+theorem mem_attachEmptyContinuations_of_mem
+    (actors : Store ActorName DTR.GeneralActorState)
+    (name : ActorName)
+    (state : DTR.GeneralActorState)
+    (hMember :
+      (name, state) ∈ actors) :
+    (name,
+      ({
+        state := state
+        activeBody := []
+      } : DTR.GeneralActorRuntime)) ∈
+      attachEmptyContinuations actors := by
+
+  induction actors with
+
+  | nil =>
+      cases hMember
+
+  | cons head remaining inductionHypothesis =>
+      rcases head with
+        ⟨headName, headState⟩
+
+      simp only [
+        List.mem_cons
+      ] at hMember
+
+      simp only [
+        attachEmptyContinuations,
+        List.mem_cons
+      ]
+
+      rcases hMember with
+        hEqual |
+          hRemaining
+
+      · simp only [
+          Prod.mk.injEq
+        ] at hEqual
+
+        rcases hEqual with
+          ⟨hName, hState⟩
+
+        subst hName
+
+        subst hState
+
+        exact Or.inl rfl
+
+      · exact
+          Or.inr
+            (inductionHypothesis
+              hRemaining)
+
+/-!
+### Erasure through membership
+
+The same two directions for the projection. `eraseContinuations_lookup` above is the lookup shape and stays
+where it is: it is what a caller who observes an actor *by name* needs. G2b needs the membership shape for
+the reason the note above gives, and needs it in both directions because the correspondence relation and
+the results it composes live on opposite sides of the projection.
+
+Concretely: `GeneralStateCorrespondence` quantifies over the bindings of a `GeneralRuntimeConfiguration`,
+while `DTR.nextArrival_sound`, `DTR.nextArrival_complete`, `DTR.nextArrival_minimal` and
+`DTR.arrival_future_of_readyActors_nil` all quantify over the bindings of the `GeneralConfiguration` that
+`erase` produces. Lemma 1 crosses that boundary twice per direction — once to find the reactor matching an
+actor the arrival minimum produced, once to hand a message the relation produced back to the minimum — so
+both lemmas are spent, not just one.
+-/
+
+/--
+Every binding of an erased store comes from a binding of the original, continuation and all.
+
+The inversion direction. The continuation is not recovered as a value — it is existentially quantified,
+because erasure genuinely forgets it — but the *actor* is, which is all a caller needs: the relation is
+stated about the runtime actor, and this produces one whose state is the given one.
+-/
+theorem mem_eraseContinuations
+    (actors : Store ActorName DTR.GeneralActorRuntime)
+    (name : ActorName)
+    (state : DTR.GeneralActorState)
+    (hMember :
+      (name, state) ∈
+        eraseContinuations actors) :
+    ∃ actor : DTR.GeneralActorRuntime,
+      (name, actor) ∈ actors ∧
+        actor.state = state := by
+
+  induction actors with
+
+  | nil =>
+      simp [
+        eraseContinuations
+      ] at hMember
+
+  | cons head remaining inductionHypothesis =>
+      rcases head with
+        ⟨headName, headActor⟩
+
+      simp only [
+        eraseContinuations,
+        List.mem_cons
+      ] at hMember
+
+      rcases hMember with
+        hEqual |
+          hRemaining
+
+      · simp only [
+          Prod.mk.injEq
+        ] at hEqual
+
+        rcases hEqual with
+          ⟨hName, hState⟩
+
+        subst hName
+
+        exact
+          ⟨headActor,
+           List.mem_cons.mpr (Or.inl rfl),
+           hState.symm⟩
+
+      · rcases
+            inductionHypothesis
+              hRemaining
+          with
+            ⟨actor, hActorMember, hActorState⟩
+
+        exact
+          ⟨actor,
+           List.mem_cons.mpr (Or.inr hActorMember),
+           hActorState⟩
+
+/--
+Every binding of a store of runtimes has its state bound in the erasure.
+
+The forward direction: the relation hands over a runtime actor and a result about the erased configuration
+has to be applied to it.
+-/
+theorem mem_eraseContinuations_of_mem
+    (actors : Store ActorName DTR.GeneralActorRuntime)
+    (name : ActorName)
+    (actor : DTR.GeneralActorRuntime)
+    (hMember :
+      (name, actor) ∈ actors) :
+    (name, actor.state) ∈
+      eraseContinuations actors := by
+
+  induction actors with
+
+  | nil =>
+      cases hMember
+
+  | cons head remaining inductionHypothesis =>
+      rcases head with
+        ⟨headName, headActor⟩
+
+      simp only [
+        List.mem_cons
+      ] at hMember
+
+      simp only [
+        eraseContinuations,
+        List.mem_cons
+      ]
+
+      rcases hMember with
+        hEqual |
+          hRemaining
+
+      · simp only [
+          Prod.mk.injEq
+        ] at hEqual
+
+        rcases hEqual with
+          ⟨hName, hActor⟩
+
+        subst hName
+
+        subst hActor
+
+        exact Or.inl rfl
+
+      · exact
+          Or.inr
+            (inductionHypothesis
+              hRemaining)
+
 namespace GeneralRuntimeConfiguration
 
 /--

@@ -258,5 +258,65 @@ theorem contains_update_eq
   rw [lookup_update_eq]
   rfl
 
+/--
+A looked-up binding really is a binding.
+
+Only this direction holds, and the asymmetry is the point. The store `[(key, first), (key, second)]`
+contains both bindings while `lookup` observes only the first, exactly as the module note above says, so
+membership is the stronger fact and this lemma is how a caller who has the weaker one obtains it.
+
+Stated here rather than where it is used because it is a fact about `Store` and about nothing else. Its
+consumer is the general correspondence relation of stage G, which quantifies its per-actor components
+over membership so that a shadowed binding is constrained too — see
+`Relico/DTR/GeneralRuntime.lean`'s note on attachment through membership for why a lookup-shaped
+relation would be unsound there.
+-/
+theorem mem_of_lookup
+    {Key : Type u}
+    {Value : Type v}
+    [DecidableEq Key]
+    (store : Store Key Value)
+    (key : Key)
+    (value : Value)
+    (hLookup :
+      lookup store key =
+        some value) :
+    (key, value) ∈ store := by
+
+  induction store with
+
+  | nil =>
+      simp [
+        lookup
+      ] at hLookup
+
+  | cons head remaining inductionHypothesis =>
+      rcases head with
+        ⟨candidate, currentValue⟩
+
+      by_cases hCandidate :
+          candidate = key
+
+      · subst candidate
+
+        simp [
+          lookup
+        ] at hLookup
+
+        subst hLookup
+
+        exact List.mem_cons.mpr (Or.inl rfl)
+
+      · simp [
+          lookup,
+          hCandidate
+        ] at hLookup
+
+        exact
+          List.mem_cons.mpr
+            (Or.inr
+              (inductionHypothesis
+                hLookup))
+
 end Store
 end Relico
