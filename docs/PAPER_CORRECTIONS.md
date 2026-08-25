@@ -906,4 +906,94 @@ paper's misnomer instead of checking Table II.
 depends on P16 and says so above. It is not P17, which is about TIME PROGRESS writing its message tuple with
 sender and receiver transposed — a defect in the rule's *conclusion*, whereas this is a defect in its
 *label*. Both neighbours were checked before this number was opened, along with
-`docs/STAGE_F_DESIGN.md`'s record that P24 and P25 were considered and deliberately not issued.
+`docs/STAGE_F_DESIGN.md`'s record that P24 and P25 were considered and deliberately not issued **as
+restatements of P23's two defects**, which is what that record forbids. P25 below is not that: it is a
+third defect in the same signature, and it refutes P23's suggested edit instead of repeating its claim.
+
+## P25 — Definition 1's `ϕ` cannot be a bijection, because one DTR message server becomes several LF reactions in the paper's own Figure 2
+
+**Claim in the paper:** Definition 1 (Weak Bisimilarity) reads *"A relation `R ⊆ S1 × S2` is a weak
+bisimulation w.r.t. bijection `f : Act1 → Act2` if for all `(s1, s2) ∈ R`"*, with the two transfer
+conditions phrased over `f(α)` and `f⁻¹(β)`. §IV instantiates it: *"with action sets
+`Act_dtr = {ms, t} ∪ τ` and `Act_lf = {rct, t} ∪ τ`. A bijection `ϕ : Act_dtr → Act_lf` maps `ms ↦ rct`,
+`t ↦ t`, `τ ↦ τ` (with inverse `ϕ⁻¹`). This bridges actor-based and reactor-based labels: `ϕ(ms) = rct`
+captures that **each DTR message server maps to an LF reaction**, making the actions semantically
+equivalent."* Theorem 1 then claims weak bisimilarity *"w.r.t. bijection `ϕ`"*.
+
+**Why it is wrong — the paper's own Figure 2 is the counterexample.** Fig. 2a's `reactiveclass Controller(5)`
+(lines 29–34) declares exactly **one** message server, `msgsrv receiveReading(int w)` at line 31, and both
+sensors send to it: `c.receiveReading(v) after(2)` at line 10 in `TempSensor` and again at line 25 in
+`SmokeSensor`. Fig. 2b's corresponding `reactor Controller` (lines 24–33) has **two** input ports,
+`input readingFromTemp:int` and `input readingFromSmoke:int`, and **two** reactions,
+`reaction(readingFromTemp)` and `reaction(readingFromSmoke)`. So one message server maps to two reactions.
+`ϕ(ms) = rct` is not a function at `receiveReading`, and a fortiori not a bijection.
+
+This is *not* P23's defect and P23's repair does not reach it. P23 finds `map_M : MName → RName` untotalled
+by unannotated servers and underindexed across classes, and proposes `map_M : AID × MName → RName`. That
+indexed form is still refuted here: `receiveReading` is one server of one class, so supplying the actor
+changes nothing — `map_M(Controller, receiveReading)` faces the same two reactions. The defect P23 found is
+in the function's **domain**; this one is in its **codomain**, and the two are independent. P23 examined
+Fig. 2b closely enough to note that `TempSensor` and `SmokeSensor` each get their own `sendReading` action
+and reaction, and did not notice that the third reactor on the same page breaks the map a second way.
+
+**The dilemma, which is the substance of this entry.** `Act_dtr = {ms, t} ∪ τ` admits two readings and the
+paper needs both:
+
+*Read literally,* `{ms, t}` is an unindexed two-element set of generic symbols: one `ms` for "some message
+was consumed", one `t` for "time advanced". Then `ϕ` is trivially a bijection and the counterexample above
+evaporates — but the label alphabet can no longer say *which* message was consumed, so any take matches any
+take. Lemma 2 becomes unstatable, because it quantifies over `ms_i, ms_j` and applies `prty_l : MName → ℕ`
+to them, and a bisimulation over this alphabet cannot distinguish a target that consumes the wrong message
+first. Theorem 1 would then hold while asserting nothing about ordering, which is the property §III-D and
+Lemma 2 exist to establish.
+
+*Read as indexed by message server* — which is what the `ϕ(ms) = rct` gloss, `map_M`, `prty_l : MName → ℕ`
+and Lemma 2 all require — the alphabet is `{ms_m | m ∈ MName} ∪ {t} ∪ τ` and the theorem is meaningful, but
+`ϕ` is refuted by Fig. 2 as above.
+
+The paper cannot have both. Either `ϕ` is a bijection and the theorem does not constrain which message is
+consumed, or the theorem constrains it and `ϕ` is not a bijection.
+
+**Evidence:** grade (c), the paper's own figures and definitions, plus one target-language fact already
+recorded. Definition 1, the `Act_dtr` / `Act_lf` definitions, the `ϕ` sentence and Theorem 1's statement
+read directly from the PDF; Fig. 2a lines 10, 25, 29–34 and Fig. 2b lines 24–33 transcribed and compared
+reaction by reaction. The multiplicity is forced by LF and not chosen by either party: two `schedule` calls
+on one logical action at one tag lose a message (probe section 9, the finding F56 in
+[`docs/STAGE_E_FINDINGS.md`](STAGE_E_FINDINGS.md)), and the paper states the port-side half itself, in the
+column immediately left of Definition 1 — *"whereas LF retains only the last same-time port write, losing
+multiplicity. Fig. 2a, lines 12–13, illustrates this case."* Fig. 2a lines 12–13 are two occurrences of
+`//c.receiveReading(v);`, **commented out**. So the figure that refutes `ϕ` is also the figure in which the
+sharper form of the same problem was disabled to keep the example well-behaved.
+
+**Suggested edit:** make the label correspondence a **relation** `Φ ⊆ Act_dtr × Act_lf` and phrase
+Definition 1's two conditions over it — forward, a source `ms_m` step is matched by a target step on *some*
+`rct` with `Φ(ms_m, rct)`; backward, unchanged in force, because the target-to-source direction remains a
+total function. That asymmetry is the point and it is free: every reaction the translation emits comes from
+exactly one send site or one route of exactly one message server, so "which message server does this
+reaction serve" is always defined, while "which reaction serves this message server" is not. Equivalently,
+keep the word bijection but state it between source actions and *equivalence classes* of target actions.
+Either phrasing leaves Theorem 1's content intact, because the send site is invisible in `Act_dtr` — the
+quotient collapses nothing the source alphabet can express. Lemma 2's proof needs the same treatment: read
+`map_M(ms_i)` as the *block* of reactions compiled from `ms_i`, which is what "declared before" already
+means operationally, since the translation emits each server's block contiguously.
+
+**What the tool does:** it carries the relation form, and it is not free to do otherwise.
+`Relico/Translation/GeneralBasic.lean`'s `generalReactionNamesOf` emits, per message server, one reaction per
+self-send **site** followed by one per **route into** that server, so the reaction count for a server is
+`sites + routes` and the one-reaction case is the special case, not the rule;
+`compileGeneralReactiveClass_reactionNames` pins the reactor's whole reaction-name list to exactly that, and
+`keep-alive.rebeca` is the committed fixture whose route list is empty and whose group is still two
+reactions long. The action names are `<message>_action<suffix>` with the suffix empty for a single-site
+message and the site ordinal otherwise (`generalActionNameAtSite`, the F56 repair). Stage G's
+`.consume` label correspondence is therefore stated existentially over sites rather than functionally on the
+message, recorded as F79 in [`docs/STAGE_G_FINDINGS.md`](STAGE_G_FINDINGS.md) — which is also where the
+four candidate repairs are ranked and three of them refuted.
+
+**What this entry is not.** It is not P23, for the reason argued above — domain versus codomain, and P23's
+proposed fix is refuted here rather than extended. It is not P24, which is also about `ϕ` but about the
+`t ↦ t` component and the τ sets, and which leaves `ms ↦ rct` untouched and even relies on it staying a
+bijection on the *time* action. It is not P20, which asks for a port **naming** rule; the names in Fig. 2b
+are what made the multiplicity visible here, but the defect survives any naming choice. It is not P8, which
+is about a self-send contending with an external send at one tag — a *selection* question, whereas this is a
+question about what the labels can say. All four neighbours were read before this number was opened.
+

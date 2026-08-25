@@ -2094,6 +2094,13 @@ this question is **independent of F76's**: F76 decides *which* event is consumed
 consumption can be *related* to a source message at all. #129 is blocked on both, and a decision on F76
 alone does not unblock it.
 
+**Superseded the same day, by evidence rather than by a decision — see F79.** The first option is not the
+smallest of four choices; it is the only one left standing once the paper's own Fig. 2 is read, and the
+"user's call" framing above was wrong. Fig. 2a's `Controller` declares one message server and Fig. 2b's
+`Controller` reactor answers it with two reactions, so the functional shape is refuted in the paper's own
+illustrative translation and the fragment-restriction option would refuse that example. What remains of
+this paragraph is its last sentence, halved: **#129 is blocked on F76 alone.**
+
 ### The transferable check
 
 **An obstruction recorded for one component of a correspondence applies to every observable that mentions
@@ -2108,4 +2115,83 @@ The narrower lesson is about the shorthand. Calling the missing artefact "ϕ" ca
 that it is a function — for as long as it went unexamined, and all eleven of the repository's precedents
 are relations. A one-letter name for something that does not exist yet will quietly assert a type; check
 the precedents' *keyword* before adopting the design's notation.
+
+---
+
+## F79 — F78 part 3's four-way choice was already answered by the paper's own Figure 2, two pages from the definition it is about
+
+Graded *Read*: the paper's figures and §IV definitions, plus five declarations read in-tree. No build and
+no `lfc` probe. Measured 2026-08-25, after F78 landed at `e703c5d` and before any `.consume` Lean was
+authored. Issued as **P25** on the paper side.
+
+### What F78 left open, and why it should not have
+
+F78 part 3 established that the general `.consume` correspondence is refutable in the functional shape every
+other family uses, listed four candidate repairs, and handed the choice to the user on the ground that it
+"decides what stage G's headline theorem *observes*". Three of the four are refuted and the fourth is
+forced, by evidence that was already in the paper.
+
+Definition 1 requires a **bijection** `f : Act_1 → Act_2`, and §IV instantiates it as
+`ϕ : Act_dtr → Act_lf` mapping `ms ↦ rct`, glossed *"each DTR message server maps to an LF reaction"*.
+Fig. 2a's `reactiveclass Controller(5)` declares **one** message server, `msgsrv receiveReading(int w)` at
+line 31, and both sensors send to it (lines 10 and 25). Fig. 2b's `reactor Controller` answers with **two**
+input ports and **two** reactions, `reaction(readingFromTemp)` and `reaction(readingFromSmoke)`. One server,
+two reactions: `ϕ` is not a function, in the paper's own illustrative translation.
+
+### The four options, decided
+
+1. **Relate `.consume` on `(receiver, messageName)` with the site existentially quantified — TAKEN, and now
+   forced rather than preferred.** It is what all eleven precedents do structurally, what
+   `GeneralPendingAgrees` already does one level down, and what the paper's figure requires.
+2. **Add a site field to `DTR.GeneralMessage` — REFUSED.** It makes the source language's runtime state carry
+   target bookkeeping and diverges from Table I, and it is unnecessary: functionality is only ever needed in
+   the *target-to-source* direction, where it already holds. Each emitted reaction comes from exactly one
+   site or route of exactly one message server, so "which server does this reaction serve" is total.
+3. **Carry the site on the target label only and quotient at the trace statement — REFUSED as strictly
+   worse.** Same content as option 1, deferred to row 9, which needs the label relation regardless.
+4. **Restrict the fragment to bodies with no repeated identical self-send — REFUTED.** The standing doctrine
+   licenses refusal only when the *target* is at fault, and it is not; and Fig. 2a's `Controller` is the
+   fan-in shape, so this option would refuse the paper's own example.
+
+### The repo half, measured
+
+- `generalReactionNamesOf` (`Relico/Translation/GeneralBasic.lean`) emits, per message server, one reaction
+  per self-send **site** followed by one per **route into** that server. The count is `sites + routes`; one
+  reaction per server is the special case, not the rule.
+- `compileGeneralReactiveClass_reactionNames` pins a reactor's entire reaction-name list to exactly that
+  list, so the multiplicity is a proved property of the translation and not an accident of an emitter.
+- `keep-alive.rebeca` is the committed fixture whose route list is empty and whose group is still two
+  reactions long — an in-tree witness, no new fixture needed.
+- `generalActionNameAtSite` is `generalActionNameFor message (generalActionSiteSuffixFor …)`, and
+  `generalActionInfixFor s = "_action" ++ s`, so a target action name is `<message>_action<suffix>` with the
+  suffix empty for a single-site message and the site ordinal otherwise.
+- `generalActionNameFor_message_injective` is injectivity **with the site suffix fixed**. The unrestricted
+  form is neither proved nor needed: a forward-defined relation never inverts a name. Its own docstring says
+  the converse is unstated deliberately rather than pending, and the `/-!` section further down the same file
+  — *"What can be proved about the port names, and what cannot"* — records that the analogous both-components
+  reading is false outright for the port names, by case folding and by an unmarked suffix boundary.
+
+### What this changes
+
+**#129 is blocked on F76 alone.** F78 said it was blocked on two independent decisions; one of them is now
+answered, and the remaining one is the F76 repair, which genuinely is the user's because it decides
+*behaviour* rather than *notation*. The `.consume` statement can be authored the moment F76 is settled, in
+the shape option 1 fixes, and row 9's projection agreement inherits the same relation rather than an
+equality.
+
+### The transferable check
+
+**Before escalating a decision to the user, read the artefact the decision is about.** F78 offered four
+options on the shape of a label correspondence while the paper's illustrative translation — two pages from
+the Definition 1 text F78 quotes, in a figure this project has already cited in P20 and P23 — contained a
+worked counterexample that eliminates three of them. The escalation was not wrong to exist; it was wrong to
+be *cheap*, because writing down four options costs less than reading the figure and produces something that
+looks like diligence.
+
+The narrower version, and the reason this recurs: I read Fig. 2 for the question I had at the time. P23 read
+the same figure for `map_M`'s domain and noticed that `TempSensor` and `SmokeSensor` each get their own
+`sendReading` reaction — while the third reactor on the same page breaks the same map in a second, unrelated
+way. **A figure that has already refuted one claim is the first place to look when a neighbouring claim needs
+refuting, and the prior reading of it is not a substitute for a fresh one.**
+
 

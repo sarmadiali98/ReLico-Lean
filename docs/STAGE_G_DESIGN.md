@@ -291,6 +291,29 @@ executions** in the paper: whole-run agreement is what weak bisimilarity *means*
 is inside Lemma 1 (Time Equivalence), which is proved *"by induction on the number of DTR transitions"*
 carrying a bag↔queue bijection as its hypothesis.
 
+**The word "bijection" in the sentence above is the paper's, and it is refuted by the paper's own Figure 2 —
+recorded 2026-08-25 as F79 and issued as P25.** Fig. 2a's `reactiveclass Controller(5)` declares one message
+server, `msgsrv receiveReading(int w)`, and both sensors send to it; Fig. 2b's `reactor Controller` answers
+with two input ports and two reactions. So `ϕ(ms) = rct` is not a function under the only reading of
+`Act_dtr = {ms, t} ∪ τ` that makes Lemma 2 statable — the reading indexed by message server, which `map_M`
+and `prty_l` both require. Read the alphabet *literally* instead, as an unindexed two-element set, and `ϕ` is
+a bijection but the theorem cannot say which message was consumed, so Lemma 2 and F76's selection divergence
+become invisible to it. The paper cannot have both readings, and that dilemma is P25's substance rather than
+a wording complaint.
+
+**What stage G does about it.** The label correspondence is a **relation** `Φ ⊆ Act_dtr × Act_lf`, asymmetric
+in force and not in shape: forward, a source `ms_m` step is matched by a target step on *some* `rct` with
+`Φ(ms_m, rct)`; backward, nothing weakens, because target→source remains a total function — every emitted
+reaction comes from exactly one send site or route of exactly one message server. Equivalently `ϕ` is a
+bijection between source actions and *equivalence classes* of target actions, and the quotient collapses
+nothing the source alphabet can express, because the send site is invisible in `Act_dtr`. This is what all
+eleven of the repository's existing label correspondences already do, so it is a transcription correction
+here rather than a design change. It also decides **F78 part 3**, which had parked a four-way choice as the
+user's: three of the four options are refuted by Fig. 2 and the first is forced. **#129 is therefore blocked
+on F76 alone.** The `ϕ` transcription in the τ-table paragraph below inherits this correction; its `τ ↦ τ`
+and `t ↦ t` halves are unaffected, and the sentence there that *is* wrong for a different reason is
+corrected in place.
+
 **The relation, transcribed.** The paper's `R` relates a DTR global state mapping each actor `x` to
 `(ex, bx, πx)` with an LF global state mapping each reactor `r = map_A(x)` to `(ηr, qr, µr)`, requiring
 `ex ≡ ηr` (translated state variables hold identical values), `bx ≡ qr` (the Lemma 1 bijection between
@@ -496,6 +519,10 @@ instantiate the foundation. **F70**.
    repairs and deliberately picks none, because choosing a remedy before the artefact was measured is
    the error being corrected. **The rest of row 8 does not depend on this item**: the derived
    quiescence lemma, Lemma 2's same-actor case and Lemma 3 are sound under every candidate repair.
+   Separately, and settled rather than open, the *label* shape this item assumes is corrected by **F79**:
+   each condition produces a weak transition on **some** target action related to the source's by `Φ`, not
+   on `ϕ` of it, because one message server becomes several reactions (§7). Two halves of this item were
+   wrong for unrelated reasons; that one is now answered, and F76 is the one still open.
 6. `weakBisimulation_traceAgreement` — **generic, model-independent**: from a weak bisimulation, the two
    systems agree on finite observable traces. This is what discharges `trusted-boundary.md` aims 8 and 9
    for the general family outright instead of owing them, and it is proved once over an abstract LTS, so
@@ -731,6 +758,13 @@ left as they stand, because whether the initializers arrive as two new modules o
 `DTR/GeneralRuntime` and `LF/GeneralRuntime` pair is not yet decided, and a made-up number would be worse than
 a recorded dependency.
 
+**One constraint row 9 acquired after row 8 part 1 was authored.** The finite-trace corollary compares
+observable projections, and the target's observable `rct` labels carry a send site the source's `ms` labels
+cannot name — F79, §7 above. So the trace statement is agreement **up to `Φ`**, not equality of projected
+label lists, and the corollary quantifies existentially over the target label at each observable position.
+Row 9's module and job figures are unchanged: the relation is the one row 8's transfer conditions already
+state, so row 9 instantiates it rather than introducing a second notion.
+
 The stage's endpoint is therefore an estimate near **527**, and the binding prediction is the one on each
 commit's own row — which is where this project's prediction discipline can actually check it, a commit at a
 time, rather than at a stage boundary eight commits away. Row 4 gained a module and every row below it
@@ -809,6 +843,14 @@ Stated as falsifiable predictions, so that a failure is informative rather than 
    trigger — then reaction identity needs the site keys from the F56 repair as an explicit index. F56's
    repair emits one action *and* one reaction per send **site**, so this is expected to be fine; it is
    listed because it is an assumption §7's action type rests on.
+
+   **Outcome, 2026-08-25: right answer, wrong direction of concern.** Target reaction identity is fine, and
+   for the stated reason — `generalReactionNamesOf` emits one reaction per site plus one per route, so no two
+   reactions of a reactor share a trigger. What that same measurement exposes is the *cross-language* map:
+   sites + routes reactions per message server is exactly why `ϕ(ms) = rct` is not a function (**F79**, §7).
+   This item looked at the multiplicity from the target side, where it is harmless, and did not ask what it
+   does to a bijection on actions. The lesson is the one §16's closing paragraph already draws: the item asks
+   what might go wrong when this is built, not what the plan's own artefacts already say.
 5. **If `generalWeakBisimulation_backward` needs `MessageServerPrioritiesDistinct` as well as the actor
    guard**, then §5's claim that selection needs only the actor guard is wrong, and the membership-indexed
    bridge propagates further than predicted. The signal is a proof that cannot close without reaching into
@@ -916,6 +958,14 @@ All six are settled; this section is the record, not a request. Four were put to
    premised on both `TAKE` rules, so dispatch granularity would have made that conjunct vacuous. Settled
    by measurement on 2026-08-24 — the measurement being that statement granularity is *available and
    symmetric*, which is the part that could have gone the other way. §7, F66 part 5.
+7. **The label correspondence — bijection or relation? → Relation, and this one was delegated and then
+   withdrawn.** F78 escalated it as a four-way choice on 2026-08-25, on the ground that it decides what the
+   headline theorem observes. It is not a choice: Fig. 2a's `Controller` declares one message server and
+   Fig. 2b's answers with two reactions, so the functional shape is refuted in the paper's own illustrative
+   translation, and the fragment-restriction option would refuse that example. Settled the same day by
+   reading the figure the claim is about, which is what should have happened before the escalation. §7,
+   **F79**, **P25**. The other half of F78 — F76's selection divergence — stays delegated, because it
+   decides behaviour rather than notation.
 
 The precondition on G1 — priority minimum or lexicographic minimum — was **not** a judgment call and was
 not treated as one: it was measured against `earliestDueArrival` and `readyActorsOf`, and it refuted the
