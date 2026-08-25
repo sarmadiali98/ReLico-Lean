@@ -1712,6 +1712,17 @@ This also confirms the scope reading recorded when the paper's SOS rules were re
 the paper's `take` has no priority term, and its Lemma 2 is the **same-actor** case. Row 8's Lemma 2, scoped to
 one actor as §7 item 3 already says, is unaffected by everything above. The transfer conditions are not.
 
+**The two sentences above are REFUTED, by the paragraph above them — see F80.** Measured 2026-08-25, before
+any Lemma 2 Lean existed. `LF.selectEarliestEvent` compares tags only and cannot see a reactor, so *"that
+choice is made before `reactionFor?` is reached"* holds verbatim when the two same-tag events target **one**
+reactor: there too the order is queue insertion order, and declaration order is consulted only afterwards, to
+answer which reaction handles an event already chosen. Since a translated reactor's reactions all carry
+distinct kinds, `reactionFor?` is invariant under permutation of `messageReactions`, so stage F's two theorems
+are not *orthogonal* to Lemma 2 — they are **inert**, and Lemma 2 rests on them. F80 also finds Lemma 2's
+*premise* unrepresented on the source side, and finds that within one reactor the over-specification recorded
+below **inverts** into a mis-specification, which narrows candidate (e) to a partial quotient. What survives
+here is the mechanism; what does not is the exemption.
+
 ### What this costs, and what it promotes
 
 **Row 8's central deliverable cannot be proved as specified.** This is F75's class with a heavier bill: §7 item
@@ -2193,5 +2204,144 @@ the same figure for `map_M`'s domain and noticed that `TempSensor` and `SmokeSen
 `sendReading` reaction — while the third reactor on the same page breaks the same map in a second, unrelated
 way. **A figure that has already refuted one claim is the first place to look when a neighbouring claim needs
 refuting, and the prior reading of it is not a substitute for a fresh one.**
+
+## F80 — F76's own argument refutes the exemption F76 grants Lemma 2, and stage F's two ordering theorems are not orthogonal to it but inert
+
+*Measured.* No build and no new `lfc` probe: four in-repo reads, plus two `lfc` measurements this project
+has already landed. Written during `#106`'s pre-authoring measurement, before any Lemma 2 Lean existed.
+
+### The sentence, and the paragraph immediately above it
+
+F76's *Why stage F does not bridge it* section argues that stage F's ordering results are the wrong shape
+for the transfer conditions. The argument is correct, and worth quoting because it is the argument that
+refutes the sentence after it:
+
+> *"Both feed `LF.GeneralProgram.reactionFor?`, which answers* which reaction of the target reactor handles
+> this event. *Neither is consulted when choosing* which of two reactors acts, *because that choice is made
+> before `reactionFor?` is reached, by `earliestPendingEvent?`."*
+
+Two paragraphs later, the exemption:
+
+> *"Row 8's Lemma 2, scoped to one actor as §7 item 3 already says, is unaffected by everything above."*
+
+The first passage is phrased about two **reactors**, and the second reads the gap as confined to them.
+`LF.selectEarliestEvent` does not know what a reactor is. It folds on `LF.Tag.PrecedesOrEqual` and on
+nothing else, and its own docstring says so in terms that leave no room: *"The comparison is on tags only
+… nothing here consults the reactor, and nothing may."* So *"that choice is made before `reactionFor?` is
+reached"* is true word for word when the two events target **one** reactor. The exemption is refuted by
+the paragraph it follows.
+
+### Measured
+
+1. **`LF.selectEarliestEvent` compares tags and keeps the incumbent.** It is the accumulator fold
+   `if best.tag ≼ candidate.tag then best else candidate`, and `PrecedesOrEqual` is reflexive, so a tie
+   retains the earlier-inserted event. `earliestPendingEvent?` seeds it with the queue head. For two
+   events sharing a tag — whatever they target — the firing order is **queue insertion order**.
+2. **`reactionFor?` is keyed on the trigger name, not on list position.** It reaches
+   `LF.findReactionForKind?`, whose `matchesKind` is name equality on both `GeneralEventKind`
+   constructors. First match wins, so list position arbitrates **only** between two message reactions of
+   one reactor that share a trigger.
+3. **A translated program never contains two such reactions.** `generalReactionNamesOf` gives a message
+   server one logical action per self-send **site** and one input port per **route into** it, so every
+   emitted reaction of a reactor carries a distinct kind. Therefore `reactionFor?` — and with it every
+   `LF.GeneralStep` derivation, since `fire`'s `hReaction` is the only premise in either step relation
+   that reads `messageReactions` — is **invariant under permutation of `reactor.messageReactions`** on
+   all translated input.
+4. **Well-formedness does not forbid the sharing case, and G3 will not either.**
+   `LF.GeneralReactor.wellFormed` requires `declaredNames.Nodup` and then tests `messageReactions` with
+   `.all` twice; there is no distinct-trigger conjunct. `#108`'s tenth clause is about the reaction
+   `priority` **field**, a different gap.
+
+### The corollary, which is the sharp form
+
+Declaration order is consulted at run level in **exactly one** situation — two message reactions of one
+reactor sharing a trigger — and that situation is one **well-formedness permits and the translator never
+emits**. The mechanism is not merely inert on the input we produce; it is live only on input we cannot
+produce.
+
+So `portReactions_realizeActorPriority` and `messageServerReactions_realizeMessageServerPriority` are not,
+as F76 concludes, *"sound, in scope, and orthogonal."* Sound: yes. In scope: yes. Orthogonal: no — Lemma 2
+**rests** on them, and at run level they decide nothing. This is F60's class arriving at the step relation
+rather than at a printer assertion: a result invariant under the very thing it is credited with pinning.
+F60 caught it in an assertion whose two sides both moved with the sort; here both sides of the ordering
+question are settled by a fold that never sees the sorted list.
+
+### And the source has no order for Lemma 2 to preserve
+
+The target half above says the conclusion of Lemma 2 is not derivable. The source half says its
+**premise** has no run-level antecedent either.
+
+- `ReadyActor` carries `actorName` and `logicalTime` and nothing else. The general family reuses the
+  actor-priority layer's structure verbatim, so the selector's answer names an actor and a time — never a
+  message.
+- `DTR.GeneralStep.take` then chooses among that actor's due messages by an **arbitrary bag split**,
+  `hDue : actor.state.bag = earlier ++ message :: later`, tied to the selector only by `hArrival`. Message
+  server priority is not a premise of the rule.
+- `priorit` does not occur at all in `Relico/DTR/GeneralRuntime.lean`, and occurs in
+  `Relico/DTR/GeneralSemantics.lean` only in two comments naming the multi-store layer.
+
+`LF.GeneralStep.fire`'s docstring already states the asymmetry, and states it accurately: *"This is
+tighter than the source: the source's selection fixes only an actor and a time, leaving the choice among
+equally-early messages open, while here the fold picks a single event outright."* What it does not do is
+ask what that costs Lemma 2. It reads the source's looseness as a fact about the target being well
+behaved, in a docstring whose next paragraph is about declaration order — so the two halves of this
+finding sit four lines apart in the rule they are about.
+
+Run-level Lemma 2 in the paper's form is therefore not an unproved theorem. It is a theorem whose
+antecedent — *the source consumed `ms_i` before `ms_j` because `prty_l(ms_i) < prty_l(ms_j)`* — is not a
+fact about any source step this repository defines.
+
+### Within one reactor the target defect inverts, and that is what makes this decision-relevant
+
+F76 closes with a second finding: the target is **over-specified**, because real LF leaves same-tag
+reactions in *independent* reactors logically simultaneous while `earliestPendingEvent?` totally orders
+them anyway. That is correct, and it is why F76 promotes a correspondence stated up to within-tag
+permutation as its front-running repair.
+
+Within **one** reactor the direction reverses. Real `lfc` does order those, by reaction declaration order
+— measured in `#80` and reconfirmed in F77's own account of what preceded its cross-reactor probes:
+*"everything the file had measured before — section 1, and all six probes of section 15, in three trigger
+shapes — moved reaction declaration order within one reactor."* Our fold orders them by queue insertion
+instead. So within one reactor the model is not over-specified but **mis**-specified, and the two are not
+the same kind of defect: over-specification makes a theorem stronger than the target supports, while
+mis-specification makes it **false of** the target.
+
+**Consequence for the repair decision that is still open.** F76's candidate (e) — correspondence up to
+within-tag permutation — is **too coarse as stated**. It would quotient away the one same-tag ordering the
+target genuinely enforces, and which six `lfc` probes in three trigger shapes measured. It refines to a
+partial quotient: free permutation among **distinct** reactors at one tag, order-**preserving** within one
+reactor. Recording that refinement is a measurement and is done here; choosing among the candidates
+remains the user's, because it still decides behaviour.
+
+**The witness is the paper's own, and it is the same figure as P25's.** Fig. 2a's two sensors both send to
+one `Controller`, so two same-tag events target one reactor, and the two reactions they trigger are
+exactly the port reactions whose declaration order §III-D sorts by *sender actor* priority. The figure
+that refuted `ϕ` in P25 is the witness that §III-D's mechanism is run-level inert.
+
+### What row 8 can honestly deliver
+
+The standing doctrine forbids a quietly narrowed theorem where the target is at fault, and prescribes
+recording the defect and proving the scoped version. The scoped version here is not a weakened Lemma 2;
+it is the **refutation stated as a theorem**, in the shape §10.2's refuted `setPort` obligation took at
+F50/`#60`: that `reactionFor?`, and hence `LF.GeneralStep`, is invariant under permutation of a reactor's
+message reactions whenever their triggers are distinct — with a companion fact that the translator always
+makes them distinct. That converts "stage F's ordering theorems have no run-level consequence" from prose
+into something the build checks, and it is the honest statement of what the general family's LF semantics
+currently says about priority. Lemma 3, over `after d` delays, is untouched by any of this: it is
+priority-free, and `#106` can proceed with it.
+
+### The transferable check
+
+**A scope disclaimer is a claim, and it goes stale under the argument that precedes it.** F76 established
+that the run-level ordering choice is made by a selector that ignores everything stage F sorts, then
+exempted the same-actor case in one sentence by pointing at the design's scope wording rather than at the
+selector. The exemption was inherited by §7 item 5 as *"Lemma 2's same-actor case and Lemma 3 are sound
+under every candidate repair"*, and would have been inherited by row 8's Lean.
+
+The narrower version, and the reason this is the third finding of its family after F75 and F79: **the
+cheapest place for a false claim to survive is the sentence that says a finding does not apply.** Findings
+are audited; their scope limits are not, because a limit reads as modesty. F76 is a careful entry, it was
+right about the mechanism, and it disclaimed one case using the one word — "orthogonal" — it had just
+disproved.
 
 

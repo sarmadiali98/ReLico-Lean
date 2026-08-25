@@ -506,6 +506,21 @@ instantiate the foundation. **F70**.
 3. `generalPriorityPreservation` — Lemma 2 at *run* level, resting on stage F's compile-time ordering
    theorems rather than restating them. **Same-actor case only as the paper states it**; see the
    divergence note below.
+
+   **This item is REFUTED as written — see F80**, measured 2026-08-25 before any Lemma 2 Lean existed, and
+   it is refuted twice over. Its *conclusion* is not derivable: `LF.selectEarliestEvent` compares tags only
+   and keeps the incumbent, so two same-tag events targeting **one** reactor fire in queue insertion order,
+   and `reactionFor?` — keyed on the trigger name — is reached only afterwards, to say which reaction
+   handles an event already chosen. Because a translated reactor's reactions all carry distinct kinds,
+   `reactionFor?` and hence every `LF.GeneralStep` derivation is invariant under permutation of
+   `messageReactions`; the phrase *"resting on stage F's compile-time ordering theorems"* therefore rests on
+   theorems that decide nothing at run level. Its *premise* is not represented either: `ReadyActor` carries
+   an actor and a time, `take` picks its message by an arbitrary bag split, and message-server priority is
+   absent from the source's run-level modules — so there is no source ordering for the lemma to preserve.
+   What row 8 can honestly land in its place is the refutation as a theorem, in the shape F50 / `#60` used
+   for §10.2's refuted `setPort` obligation: permutation-invariance of `reactionFor?` under distinct
+   triggers, plus the fact that the translator always makes them distinct. **Lemma 3 (item 4) is untouched**
+   — it is priority-free.
 4. `generalCausalityPreservation` — Lemma 3, over `after d` delays, reusing stage E's delay machinery.
 5. `generalWeakBisimulation_forward` / `_backward` — Definition 1's two transfer conditions, each
    producing a *weak* transition `τ* γ τ*` on the other side. **This item is REFUTED as written — see
@@ -519,6 +534,13 @@ instantiate the foundation. **F70**.
    repairs and deliberately picks none, because choosing a remedy before the artefact was measured is
    the error being corrected. **The rest of row 8 does not depend on this item**: the derived
    quiescence lemma, Lemma 2's same-actor case and Lemma 3 are sound under every candidate repair.
+   **That last clause is itself REFUTED for Lemma 2 — see F80.** The quiescence lemma and Lemma 3 are
+   sound under every candidate repair; Lemma 2's same-actor case is not sound under any of them, because
+   its defect is not the selector disagreement this item records but the inertness of the mechanism it
+   rests on, plus a premise the source never establishes. F80 also narrows F76's candidate (e): within-tag
+   permutation as stated would quotient away the one same-tag ordering real `lfc` does enforce — reaction
+   declaration order **within one reactor**, measured in `#80` — so it refines to a partial quotient, free
+   across distinct reactors and order-preserving within one.
    Separately, and settled rather than open, the *label* shape this item assumes is corrected by **F79**:
    each condition produces a weak transition on **some** target action related to the source's by `Φ`, not
    on `ϕ` of it, because one message server becomes several reactions (§7). Two halves of this item were
@@ -548,6 +570,16 @@ forced:
   `generalPriorityPreservation` rests on that mechanism. The paper's same-actor case (`prty_l`, ordering
   a reactor's own reactions) is adopted unchanged; only the different-actor argument is replaced, and the
   *conclusion* of Lemma 2 is preserved in both cases.
+
+  **Corrected 2026-08-25 by F80.** *"where declaration order is decisive"* is true of real `lfc` — that is
+  `#80`'s measurement, in three trigger shapes — and **false of `Relico/LF/GeneralSemantics.lean`**, which
+  orders two same-tag events of one reactor by queue insertion and consults declaration order only to pick
+  which reaction handles an already-chosen event. Stage F's realization is therefore sound as a *compile-time*
+  result and inert at run level, so the final clause — *"the conclusion of Lemma 2 is preserved in both
+  cases"* — does not hold for either case in the modelled semantics. The divergence from the paper stands as
+  described; what does not stand is the claim that stage G recovers Lemma 2's conclusion through it. This is
+  a defect in **our LF model's fidelity**, not in the paper: the paper's within-one-reactor argument is the
+  half that real `lfc` confirms.
 * **Actor priority participates in selection, which the paper's SOS take rule does not do.** Priority
   appears in the paper's correctness development (`prty_l`, `prty_g`, Lemma 2) and not in either SOS
   table — the verdict recorded when `#79` closed. §6's `selectedActor` uses it, on the authority of the
