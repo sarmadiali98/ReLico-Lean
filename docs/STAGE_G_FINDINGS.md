@@ -1944,3 +1944,168 @@ automatically. Here the disappointing readings were taken correctly on the spot 
 confounding, 16h's refutation of a prediction stated in advance — and the one flattering reading, that a
 prior finding had been overtaken by a decisive measurement, was the one that went unexamined.
 
+---
+
+## F78 — the transfer conditions conclude with strong steps where the architecture claims weak ones, and the label correspondence the `.consume` case needs is not merely missing but refutable in the shape every other family uses
+
+*Read.* Established at the declarations, by four searches over `Relico/` described below, on 2026-08-25,
+after row 8 part 1 landed at `e47161d` and before any part 2 Lean was authored. Two defects with one
+cause; the second is the one that changes what later rows can claim, and it is **not** waiting on F76.
+
+### Part 1 — every family in the repository has a label correspondence except the one stage G is about
+
+Enumerating declarations whose names end in `LabelCorresponds` or `LabelsCompatible` across `Relico/`
+returns **eleven** relations of the first kind — nine `inductive`, two Prop-valued `def` — and **ten** of
+the second, spread over the machine, store, multi-store, multi-store-payload, payload, bound-payload,
+concrete-detailed, detailed-bound-payload and both direct-LF families. The count of those whose name
+begins `General` is **zero**. Four further inductives named `*WeakLabelTraceCorresponds` lift the relation
+to traces, and none of those is general either.
+
+So the general family is the only one whose two label types are never related to each other. Only four
+files in `Relico/` so much as mention `DTR.GeneralLabel` and `LF.GeneralLabel` together —
+`Relico/Tests/GeneralRuntime.lean`, `Relico/Tests/GeneralSemantics.lean`,
+`Relico/LF/GeneralRuntime.lean` and `Relico/Correctness/GeneralWeakBisimulation.lean` — and of those the
+first two are tests, the third mentions the source type only inside docstrings, and the fourth mentions
+both only because it holds one theorem per direction.
+
+The docstrings are worth crediting rather than faulting, because they are careful in exactly the place a
+stale claim would have been cheap. `LF.GeneralLabel`'s own note says the three shapes are "what makes a
+label translation **possible** at all" — possible, not present — and `LF.GeneralLabel.project`'s note
+says the two projections "must be independently statable" because row 9 compares
+`Common.observableProjection` on a source trace against the same function on a target trace. Neither
+oversells. What neither says, and what nothing in the repository says, is what relates the two
+projections' **outputs**.
+
+### Part 2 — the `.timeAdvance` cases evade this by inlining, which is why row 8 part 1 could land at all
+
+`generalTimeAdvance_forward` does not quantify over a label correspondence; it *constructs* the target
+label as the literal `LF.GeneralLabel.timeAdvance state.currentTag.time event.tag.time`. The
+correspondence is inlined into the statement rather than stated, and that is sound here for a structural
+reason: `timeAdvance` carries `(LogicalTime, LogicalTime)` on **both** sides, so the two constructors are
+interchangeable up to which namespace they are read in.
+
+The precedent confirms this is the right reading rather than a shortcut.
+`MultiStorePayloadDetailedLabelCorresponds`'s `timeAdvance` constructor relates the two labels by exactly
+two premises, `targetBefore = sourceBefore` and `targetAfter = sourceAfter` — which is what an inlined
+literal delivers definitionally. Row 8 part 1 therefore satisfies what the precedent's relation would
+demand at this label, without the relation existing.
+
+`consume` is where that stops working. The source constructor carries
+`(receiver : ActorName) (message : DTR.GeneralMessage)`; the target carries
+`(target : ActorName) (kind : LF.GeneralEventKind)`. Those are different types, no literal bridges them,
+and so the `.consume` case cannot be stated at all until something relates them. The design's shorthand
+for that something has been a label map ϕ, and **that shorthand is itself wrong**: all eleven
+`*LabelCorresponds` precedents are Prop-valued **relations** rather than functions, and the multi-store
+one has a `microstep` constructor sending source `.tau` to target `.microstepAdvance before after`. A
+function could not do that, and P24 measured that the general family needs precisely that asymmetry.
+
+### Part 3 — in the precedent's shape the general `.consume` correspondence is refutable, and F56's repair is the reason
+
+The precedent's `consume` constructor pins the target component **functionally**: its second premise is
+`targetReaction = Translation.compileMultiStorePayloadReaction sourceServer`. Transposed to the general
+family that would demand the target's `kind` be a function of the source's `message`. It cannot be.
+
+`LF.GeneralEventKind` is `.logicalAction (name : ActionName)` or `.inputPort (name : PortName)`, so the
+target's `.consume` label carries a **name**. Both families of name are **per send site**:
+`Translation.generalActionNameAtSite` computes its suffix from `selfSendOrdinalAt site message`, the F56
+repair, and P20 settled external port names per send site as well. `DTR.GeneralMessage` has four fields —
+`sender`, `messageName`, `payload`, `arrival` — and **no site**.
+
+That gives a two-element counterexample, not merely an absence of proof. A body that sends the same
+message to itself twice produces two source messages that are equal in all four fields, hence equal under
+the structure's derived `DecidableEq`, and two target events whose action names differ by ordinal. A
+function from the one to the other would have to send a single value to two distinct names. The witness is
+already in the repository: it is the two-sends-in-one-body fixture built for F56.
+
+`Relico/Correctness/GeneralCorrespondence.lean` had **already written this argument down**, one level
+below where it bites. Its module note says the multi-store `PendingCorresponds` "is not reusable" because
+it pins the action name as a function of the message name while general action names are per send site,
+and concludes that "an agreement that mentioned the action name would be unprovable rather than merely
+stronger" — which is why `GeneralPendingAgrees` relates a bag to a queue on `(target, logical time)` only
+and mentions neither the message name nor the event kind.
+
+The step this finding takes is to notice that the same obstruction applies to the **label**, where it is
+strictly worse. On `R`'s pending component the missing field is internal bookkeeping. On `.consume` it is
+part of an **observable** label, so the irrecoverable component is part of what a trace *says*. And the
+cause is a repair: F56 made action names per site to stop repeated identical self-sends silently
+collapsing into one, and per-site names are exactly what a source message cannot determine.
+
+### Part 4 — the transfer conditions produce strong steps, not weak ones
+
+Independent of all of the above, and cheaper to see. Both landed transfer conditions conclude with a bare
+step relation: `LF.GeneralStep program state (LF.GeneralLabel.timeAdvance …) …` forward, and
+`DTR.GeneralStep model config (DTR.GeneralLabel.timeAdvance …) … ∧ GeneralStateCorrespondence …`
+backward. The architecture stage G is building toward is a **weak** bisimulation, and a step
+correspondence with an owed lift proves something strictly weaker than that, because nothing in it
+permits the matched transition to sit inside internal traffic.
+
+`Relico/Correctness/GeneralWeakBisimulation.lean` did not import `Relico.Common.WeakTransition` at all,
+and no transitive import reached it: `GeneralTimeEquivalence`, `GeneralCorrespondence`,
+`DTR/GeneralSemantics`, `DTR/GeneralRuntime` and `LF/GeneralRuntime` were each measured at zero. The
+`Detailed*` families import it at their semantics file instead. So the weak machinery F70 recorded as
+already generic and already proved was, for the general family, exercised only by the five concrete pins
+at `emptyProgram`/`emptyModel` in `Relico/Tests/GeneralSemantics.lean` — which is F73 part 1's defect
+recurring one row later, in the module that exists to discharge it.
+
+This half **is** repaired in the same changeset as this entry. `generalTimeAdvance_forward_weak` and
+`generalTimeAdvance_backward_weak` restate both directions over `Common.WeakStep`, and the τ padding they
+supply is empty at both ends — which is the *stronger* statement, and the honest one for these two rules,
+since a source time advance is matched by exactly one target advance with no administrative traffic
+around it. Genuine padding is owed only at `.consume`, where P24 measured the microstep the source does
+not take.
+
+Both lifts go through the `WeakStep.visible` **constructor** rather than `WeakStep.of_step`. `of_step`
+takes only `hStep`, splits on `isTau label` with `classical` `by_cases`, and therefore elaborates
+whatever the τ classification says; a statement proved through it would still typecheck if `isTau` were
+changed to accept `.timeAdvance`, so it would be invariant under the very classification that decides
+whether the label is observable. The constructor demands `¬ isTau label`, discharged by
+`not_isTau_timeAdvance` on each side, which is the component that would break.
+
+### What this costs row 9
+
+Row 9's finite-trace agreement inherits a constraint §7 does not record. `Common.observableProjection`
+applied to a source trace yields `List DTR.GeneralLabel`; applied to a target trace it yields
+`List LF.GeneralLabel`. Those are different types, so "agreement" cannot be an equality, and by part 3 it
+cannot be a name-preserving relation either: the target's `.consume` names record a send site that the
+source alphabet has no field to record. What row 9 can state is agreement up to a relation that projects
+the site away, or agreement on `(receiver, messageName)` with the site existentially quantified. The four
+`*WeakLabelTraceCorresponds` inductives are the shape to copy, and they are relations for this reason.
+
+Definition 1 should also be re-specified in the design as **per-rule transfer lemmas plus an owed label
+relation**, rather than as one claim quantified over all labels. Row 8 landed two rules by inlining, #129
+owes the third, and the quantified form conceals that the third needs a definition before it can have a
+theorem.
+
+### The repair, and the question it leaves
+
+Part 4 is repaired here. Part 3 is recorded and **not** repaired, because closing it is a design choice
+with observable consequences, and per the standing doctrine a target-side obstruction is refused and
+recorded rather than quietly worked around. The choices are: relate `.consume` labels on
+`(receiver, messageName)` and existentially quantify the site, which keeps both alphabets and weakens the
+observable to what both sides can determine; add a site field to `DTR.GeneralMessage`, which makes the
+functional shape provable but changes the source language's runtime state to suit the target; carry the
+site only on the target label and quotient the trace statement by it; or restrict the fragment to bodies
+with no repeated identical self-send, which is conservative and rejects a case F56 exists to support.
+
+The first is the smallest and is what the existing `GeneralPendingAgrees` already does one level down, so
+it is the consistent choice rather than merely the cheapest. It is written down here rather than taken,
+because it decides what stage G's headline theorem *observes*, and that is the user's call. Note that
+this question is **independent of F76's**: F76 decides *which* event is consumed, this decides whether the
+consumption can be *related* to a source message at all. #129 is blocked on both, and a decision on F76
+alone does not unblock it.
+
+### The transferable check
+
+**An obstruction recorded for one component of a correspondence applies to every observable that mentions
+the same field.** The argument in part 3 was already written, in prose, in the module that defines `R`'s
+pending component — and it was written *well*, with the alternative named and the reason it is unprovable
+spelled out. It still failed to travel one level up to the label type, because nothing links a note on a
+`def` to the `inductive` in a different directory that will later need the same fact. The cheap version of
+this check: when a definition is deliberately coarsened to stay provable, list the other declarations that
+mention the dropped field, and record the coarsening against each of them.
+
+The narrower lesson is about the shorthand. Calling the missing artefact "ϕ" carried a false assumption —
+that it is a function — for as long as it went unexamined, and all eleven of the repository's precedents
+are relations. A one-letter name for something that does not exist yet will quietly assert a type; check
+the precedents' *keyword* before adopting the design's notation.
+

@@ -1,5 +1,6 @@
 import Relico.Correctness.GeneralTimeEquivalence
 import Relico.DTR.GeneralSemantics
+import Relico.Common.WeakTransition
 
 set_option autoImplicit false
 
@@ -34,6 +35,15 @@ Row 8 also owes a lemma §7 does not list. The source's time rule carries **thre
 **two**, so the backward direction cannot simply transcribe them: quiescence has to be *derived* on the
 target side. `generalQuiescent_of_earliestPendingEventFuture` below is that derivation, and it is what makes
 the backward `.timeAdvance` case go through at all.
+
+And it owes a second thing §7 does not list, measured as **F78**: the two transfer conditions above conclude
+with bare `DTR.GeneralStep`/`LF.GeneralStep`, whereas the architecture the paper states is a **weak**
+bisimulation. A step correspondence with an owed lift proves something strictly weaker, so
+`generalTimeAdvance_forward_weak` and `generalTimeAdvance_backward_weak` restate both directions over
+`Common.WeakStep`. The padding they supply is empty, which is the honest reading of these two rules rather
+than a shortcut — see the forward lift's own docstring. F78's *other* half is not repaired here and cannot be:
+there is no label correspondence ϕ anywhere in the repository, and the `.timeAdvance` cases avoid needing one
+only because that constructor carries the same payload type on both sides.
 -/
 
 /--
@@ -529,6 +539,181 @@ theorem generalTimeAdvance_backward
        rfl
        rfl
        hCorrespondence⟩
+
+/--
+**Forward, at the `.timeAdvance` label, lifted to a weak transition.**
+
+The lift `docs/STAGE_G_FINDINGS.md` **F78** records as owed. The architecture the paper states is a *weak*
+bisimulation, and `generalTimeAdvance_forward` above concludes with a bare `LF.GeneralStep` — a step
+correspondence, which is strictly **weaker** than the architecture claims, because nothing in it permits the
+matched target transition to sit inside internal traffic. Until this module produces a `Common.WeakStep`, the
+machinery in `Relico/Common/WeakTransition.lean` is exercised only by the five concrete pins at
+`emptyProgram`/`emptyModel` in `Relico/Tests/GeneralSemantics.lean`, and Definition 1's *weak* reading is
+checked nowhere against the general families.
+
+The τ padding is **empty at both ends**, and that is the content rather than a shortcut. `TauSteps.refl` on
+each side says the source's advance is matched by *exactly one* target advance with no administrative traffic
+around it, which is **stronger** than a padded statement, and it is what the two time rules actually do.
+Genuine padding is owed only at `.consume`, where **P24** measured that a zero-delay send costs the target a
+microstep the source does not take; `generalCorrespondence_microstepAdvance` is what absorbs that, so #129
+inherits the padded shape and this label does not.
+
+Proved through the `WeakStep.visible` **constructor**, never through `WeakStep.of_step`, for the reason the
+pins record in their own comment: `of_step` takes only `hStep`, splits on `isTau label` with `classical`
+`by_cases`, and so elaborates whatever the τ classification says. Routing through it would make this theorem
+invariant under the very classification that decides whether `.timeAdvance` is observable at all — the
+statement would still typecheck if `isTau` were changed to accept it. `hVisible` is therefore discharged
+explicitly by `LF.GeneralLabel.not_isTau_timeAdvance`, which is the one component that would break.
+
+Restated in full rather than derived by a `WeakStep`-valued corollary of a shared lemma, because the existential
+sits *outside* the conjunction: the event is chosen by the target and the weak transition is one conjunct of
+three, so there is nothing to abstract over without reproducing the whole statement anyway.
+-/
+theorem generalTimeAdvance_forward_weak
+    (program : LF.GeneralProgram)
+    (config : DTR.GeneralRuntimeConfiguration)
+    (state : LF.GeneralRuntimeState)
+    (future : LogicalTime)
+    (hCorrespondence :
+      GeneralStateCorrespondence config state)
+    (hForward :
+      config.now < future)
+    (hQuiescent :
+      DTR.GeneralConfiguration.readyActors config.erase =
+        [])
+    (hSelected :
+      DTR.GeneralConfiguration.nextArrival config.erase =
+        some future) :
+    ∃ event : LF.GeneralPendingEvent,
+      event.tag.time = future ∧
+        Common.WeakStep
+            (LF.GeneralStep program)
+            LF.GeneralLabel.isTau
+            state
+            (LF.GeneralLabel.timeAdvance
+              state.currentTag.time
+              event.tag.time)
+            {
+              currentTag := event.tag
+              reactors := state.reactors
+              pending := state.pending
+            } ∧
+          GeneralStateCorrespondence
+            {
+              now := future
+              actors := config.actors
+            }
+            {
+              currentTag := event.tag
+              reactors := state.reactors
+              pending := state.pending
+            } := by
+
+  obtain ⟨event, hEventTime, hStep, hNextCorrespondence⟩ :=
+    generalTimeAdvance_forward
+      program
+      config
+      state
+      future
+      hCorrespondence
+      hForward
+      hQuiescent
+      hSelected
+
+  refine
+    ⟨event,
+     hEventTime,
+     ?_,
+     hNextCorrespondence⟩
+
+  exact
+    Common.WeakStep.visible
+      (LF.GeneralLabel.not_isTau_timeAdvance
+        state.currentTag.time
+        event.tag.time)
+      (Common.TauSteps.refl state)
+      hStep
+      (Common.TauSteps.refl _)
+
+/--
+**Backward, at the `.timeAdvance` label, lifted to a weak transition.**
+
+F78's other half. Identical in shape to the forward lift and for the same reasons, with the source's step
+relation and the source's τ classification in place of the target's; the asymmetry that made the *underlying*
+directions differ — three premises against two, quiescence derived rather than crossed — is entirely inside
+`generalTimeAdvance_backward` and does not reach the lift.
+
+The one thing worth reading off this pair is that both `GeneralStep` relations inhabit
+`Common.LabeledTransition` after partial application, `LF.GeneralStep program` at
+`LF.GeneralRuntimeState`/`LF.GeneralLabel` and `DTR.GeneralStep model` at
+`DTR.GeneralRuntimeConfiguration`/`DTR.GeneralLabel`. That is what makes one piece of machinery serve both
+sides, and it is checked here on the general families rather than only at the empty pins.
+
+What this pair still does **not** give is Definition 1. A weak bisimulation is a *relation* closed under both
+transfer conditions at *every* label; these two theorems close it at one label in both directions. The
+`.consume` case is the other label, it is where F76's selector divergence lives, and F78 part 1 measured that
+it additionally needs a label correspondence ϕ that **does not exist anywhere in the repository** — the
+`.timeAdvance` cases evade that only because `timeAdvance` carries `(LogicalTime, LogicalTime)` on both sides,
+so ϕ can be inlined as a literal constructor application. `consume` carries `DTR.GeneralMessage` against
+`LF.GeneralEventKind`, and no literal bridges two different types.
+-/
+theorem generalTimeAdvance_backward_weak
+    (model : DTR.GeneralModel)
+    (config : DTR.GeneralRuntimeConfiguration)
+    (state : LF.GeneralRuntimeState)
+    (event : LF.GeneralPendingEvent)
+    (hCorrespondence :
+      GeneralStateCorrespondence config state)
+    (hSelected :
+      LF.GeneralRuntimeState.earliestPendingEvent? state =
+        some event)
+    (hForward :
+      state.currentTag.time <
+        event.tag.time) :
+    Common.WeakStep
+        (DTR.GeneralStep model)
+        DTR.GeneralLabel.isTau
+        config
+        (DTR.GeneralLabel.timeAdvance
+          config.now
+          event.tag.time)
+        {
+          now := event.tag.time
+          actors := config.actors
+        } ∧
+      GeneralStateCorrespondence
+        {
+          now := event.tag.time
+          actors := config.actors
+        }
+        {
+          currentTag := event.tag
+          reactors := state.reactors
+          pending := state.pending
+        } := by
+
+  obtain ⟨hStep, hNextCorrespondence⟩ :=
+    generalTimeAdvance_backward
+      model
+      config
+      state
+      event
+      hCorrespondence
+      hSelected
+      hForward
+
+  refine
+    ⟨?_,
+     hNextCorrespondence⟩
+
+  exact
+    Common.WeakStep.visible
+      (DTR.GeneralLabel.not_isTau_timeAdvance
+        config.now
+        event.tag.time)
+      (Common.TauSteps.refl config)
+      hStep
+      (Common.TauSteps.refl _)
 
 end Correctness
 end Relico
