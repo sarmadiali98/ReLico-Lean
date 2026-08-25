@@ -8709,5 +8709,211 @@ theorem generalReactionTriggersOf_nodup
                 hRoutesDistinct
                 hPortValues
 
+/-!
+### The emitted reaction list has distinct triggers
+
+`generalReactionTriggersOf_nodup` above is stated at whatever server list its caller names, and
+`compileGeneralReactiveClass_reactionTriggers` keys the emitted list to
+`generalPriorityOrderedMessageServers reactiveClass` — the **sorted** list. The two do not meet
+directly, because `assembleGeneralReactor` builds `logicalActions` from
+`reactiveClass.messageServers` (**unsorted**), so the action-name distinctness a caller can actually
+produce from the guard is the unsorted one.
+
+**The cheap direction is to permute the conclusion, not the hypotheses.** Applying the induction at
+the unsorted list makes all three hypotheses guard-shaped with no transfer at all, and leaves exactly
+one permutation obligation: that the trigger list itself is order-invariant under reordering of the
+servers. Transferring the *action-name* hypothesis instead would have needed the same flattened
+permutation **plus** a second one for the server names, and — if routed through injectivity of the
+generated names rather than the guard — would have resurrected the suffix-cancellation and
+site-ordinal arguments the group-level proof deliberately retired.
+-/
+
+/--
+Swapping the first two of three appended lists is a permutation.
+
+Stated separately, generic in the element type, and with `List.append_assoc` applied to **explicit**
+arguments. That last point is the reason this is a lemma rather than two `rw`s inline: the goal it
+serves has an appended head group, so `rw [← List.append_assoc]` with the arguments left implicit
+finds a *second*, unwanted match inside that group and reassociates the wrong pair. Fixing the three
+arguments makes the rewrite pattern unambiguous.
+-/
+private theorem perm_append_swap_middle
+    {α : Type}
+    (first second remaining : List α) :
+    List.Perm
+      (first ++
+        (second ++ remaining))
+      (second ++
+        (first ++ remaining)) := by
+
+  rw [
+    ← List.append_assoc
+      first
+      second
+      remaining,
+    ← List.append_assoc
+      second
+      first
+      remaining
+  ]
+
+  exact
+    List.Perm.append_right
+      remaining
+      List.perm_append_comm
+
+/--
+Reordering the message servers permutes the emitted trigger list.
+
+Proved by induction on the `List.Perm` derivation rather than on either list, which is what makes the
+four cases align with the four ways a permutation is built: `nil` is reflexivity, `cons` keeps a
+shared head group and recurses, `swap` is the append exchange above, and `trans` composes.
+
+`simp only` rather than `simp` throughout. Plain `simp` can reach `List.append_assoc` and
+reassociate `(actionPart ++ portPart) ++ recursive`, which would move the goal out from under the
+shape each case's closing lemma expects.
+
+This is the first `List.Perm` statement in this file. It is deliberately about the specification
+function and not about `reactor.messageReactions`, so it composes with the rung-3 description rather
+than duplicating it.
+-/
+theorem generalReactionTriggersOf_perm
+    (selfSends : List GeneralSelfSend)
+    (routes : List GeneralRoute)
+    (className : ClassName)
+    {first second : List DTR.GeneralMessageServer}
+    (hPerm :
+      List.Perm
+        first
+        second) :
+    List.Perm
+      (generalReactionTriggersOf
+        selfSends
+        routes
+        className
+        first)
+      (generalReactionTriggersOf
+        selfSends
+        routes
+        className
+        second) := by
+
+  induction hPerm with
+
+  | nil =>
+      simp only [
+        generalReactionTriggersOf
+      ]
+
+      exact List.Perm.nil
+
+  | cons _ _ inductionHypothesis =>
+      simp only [
+        generalReactionTriggersOf
+      ]
+
+      exact
+        List.Perm.append_left
+          _
+          inductionHypothesis
+
+  | swap _ _ _ =>
+      simp only [
+        generalReactionTriggersOf
+      ]
+
+      exact
+        perm_append_swap_middle
+          _
+          _
+          _
+
+  | trans _ _ inductionHypothesisFirst inductionHypothesisSecond =>
+      exact
+        inductionHypothesisFirst.trans
+          inductionHypothesisSecond
+
+/--
+A compiled reactive class emits reactions with pairwise distinct triggers — relative to the guard.
+
+The translator-side half of item 1b, packaged in the shape
+`LF.GeneralProgram.reactionFor?_perm_of_nodup_triggers` asks for: `hNodup` about
+`reactor.messageReactions.map (fun reaction => reaction.trigger)`. Everything after this is the
+composition in `Relico/Correctness/GeneralCorrespondence.lean`, which is the only cheap module that
+sees both `LF.GeneralSemantics` and `LF.GeneralWellFormed`; this file can reach neither, which is why
+`Nodup` and not `LF.UniquelyTriggered` is the interface the whole ladder speaks.
+
+**All three distinctness facts are hypotheses at `reactiveClass.messageServers`, the source model's
+own list.** None is claimed by construction — the F50/`#60` shape. Two of the three are exactly the
+`Nodup` clauses a well-formed reactor's `declaredNames` carries, and the third is a conjunct of
+`DTR.GeneralModel.namesUniqueAndValid`. `generalActionNamesOf` is keyed to the unsorted list on
+purpose: that is the list `assembleGeneralReactor` declares its logical actions from, so a caller
+projecting out of the guard lands here and needs no permutation of its own.
+
+The sort is bridged by `DTR.GeneralMessageServerPriority.normalize_perm` and
+`generalReactionTriggersOf_perm`, so stage F's level-2 message-server order is **visible in the proof
+and absent from the statement** — which is the honest reading: distinctness of triggers is a fact
+about the *set* of servers, and the sort only decides the order the reactions are emitted in.
+-/
+theorem compileGeneralReactiveClass_reactionTriggers_nodup
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {reactor : LF.GeneralReactor}
+    (hCompiled :
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok reactor)
+    (hInputPortNames :
+      ((generalInputPortsOf
+        reactiveClass.name
+        routes).map
+        (fun port =>
+          port.name.value)).Nodup)
+    (hActionNames :
+      ((generalActionNamesOf
+        (selfSendsOfClass
+          reactiveClass)
+        reactiveClass.messageServers).map
+        (fun name =>
+          name.value)).Nodup)
+    (hServerNames :
+      (reactiveClass.messageServers.map
+        (fun server =>
+          server.name)).Nodup) :
+    (reactor.messageReactions.map
+      (fun reaction =>
+        reaction.trigger)).Nodup := by
+
+  rw [
+    compileGeneralReactiveClass_reactionTriggers
+      hCompiled
+  ]
+
+  unfold generalPriorityOrderedMessageServers
+
+  refine
+    (generalReactionTriggersOf_perm
+      (selfSendsOfClass
+        reactiveClass)
+      routes
+      reactiveClass.name
+      (DTR.GeneralMessageServerPriority.normalize_perm
+        reactiveClass.messageServers)).nodup_iff.mpr
+    ?_
+
+  exact
+    generalReactionTriggersOf_nodup
+      (selfSendsOfClass
+        reactiveClass)
+      routes
+      reactiveClass.name
+      hInputPortNames
+      reactiveClass.messageServers
+      hActionNames
+      hServerNames
+
 end Translation
 end Relico
