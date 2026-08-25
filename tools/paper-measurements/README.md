@@ -46,5 +46,16 @@ compiles and executes small Lingua Franca programs to settle questions the LF do
 ambiguous. It established that `lfc 0.11.0` rejects `reaction(in[0])`, so multiports cannot carry the
 §III-D fan-in construction and named ports are forced; that reaction declaration order does decide
 same-tag order within one reactor; and that unconnected input ports are legal. Ledger entries P1, P2
-and P3 rest on it. It was last run against `lfc 0.11.0` on 2026-08-17, and its conclusions should be
+and P3 rest on it. It was last run against `lfc 0.11.0` on 2026-08-25, and its conclusions should be
 re-established rather than assumed if the toolchain version moves.
+
+One caveat belongs here rather than only in the findings file, because it applies to how every result in
+this script should be read. Most probes observe behaviour by calling `std::printf` from a reaction body,
+which is a channel LF does not model: the language fixes port values and reactor state at a tag, not the
+interleaving of raw target-language statements. Where a probe's question is "does this compile" or "does
+this value survive", that does not matter. Where the question is about **order**, it matters entirely —
+such a probe measures `reactor-cpp` at one version, not the language, and cannot license a theorem. See
+**F77** in [`../../docs/STAGE_G_FINDINGS.md`](../../docs/STAGE_G_FINDINGS.md), which was written after
+section 16 produced nine order measurements of which exactly one is citable. The rule it lands on: name
+the construct of the specification the observed quantity is meant to follow from, before reading the
+output.

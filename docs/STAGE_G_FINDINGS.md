@@ -1737,6 +1737,17 @@ mechanism, then it genuinely cannot implement cross-actor actor priority, and th
 if the target is at fault, refuse the input rather than silently under-deliver — chooses a guard or fragment
 restriction over a narrowed theorem. The probe needs a terminal and is therefore not ours to run.
 
+**The probe has since been run, and the paragraph above needed one correction — see F77.**
+Nine probes against `lfc` 0.11.0 on 2026-08-25. Summary: `@priority` does not exist, and no attribute
+could have worked anyway because attributes attach to a reaction and hence to a *class*, never to one of
+two instances; instance-declaration order influences the runtime but by no rule three instances confirm;
+and a zero-delay `uses` edge **does** order reactions across reactors, which is the one mechanism that
+rests on a construct LF assigns meaning to. The correction is to the sentence above beginning *"If the
+target has no cross-reactor same-tag ordering mechanism"*: it presents that as the only route to a guard
+or fragment restriction, whereas F77 finds the ordering mechanism to exist and the guard to be warranted
+anyway, because the mechanism costs a topology the source model does not have. The conclusion survives;
+the reasoning offered for it does not.
+
 **Row 9 inherits it.** G2d's finite-trace agreement fails on the same witness, because the two traces differ by
 a permutation inside one tag.
 
@@ -1763,6 +1774,16 @@ most faithful reading and the most work.
 Recording the five and choosing none is the point. The failure being repaired is a design sentence that chose a
 remedy before the artefact existed; replacing it with a second unmeasured choice would reproduce it.
 
+**Revised after the probe: F77 closes one direction, prices a second, and promotes a third.** The
+reaction-attribute route is gone — `@priority` does not exist, and no attribute could serve, because
+attributes attach to a reaction and therefore to a *class*, never to one of two instances of it. The
+priority-aware tie-break survives but is realisable only by injecting zero-delay dependency edges among
+receivers, which buys a language-level ordering guarantee at the price of ports, connections and forced
+serialisation the source model does not have. And the within-tag-permutation reading is strengthened,
+because the over-specification argued above is now established a second way, from our own two definitions
+rather than from a reading of LF. Four directions remain rather than five, and the choice is still the
+user's.
+
 ### The transferable check
 
 F75 prescribed re-reading the design's description of earlier rows against what they built, and this finding is
@@ -1774,8 +1795,152 @@ the narrower reading that would have missed it is the tempting one: check the ar
 *produces*, not the ones it *consumes*. Both halves are required, and the consumed side is where the
 expensive errors are, because nothing in the obligation's own text points at them.
 
+---
 
+## F77 — the probe commissioned to decide F76 observed the order through a channel the language does not model, so it settles the runtime and not the semantics, and the finding it appeared to refute is confirmed
 
+*Measured, with one part graded read.* Nine probes, `tools/paper-measurements/lf_semantics_probe.sh`
+section 16, run against `lfc` 0.11.0 on 2026-08-25. The measurement succeeded; the inference drawn from
+it in the same session did not, and that is the transferable half of this entry.
 
+### What was asked
 
+F76 left the repair open and promoted one measurement above the others. The load-bearing question was
+recorded deliberately as **"does any mechanism order reactions across reactors at one tag"** rather than
+the narrower "does a priority attribute exist", because F76's counterexample puts two same-tag events on
+two **different** actors, and everything the file had measured before — section 1, and all six probes of
+section 15, in three trigger shapes — moved reaction **declaration** order *within one reactor*. A
+declaration list belongs to a reactor **class**; F76's divergence is between two **instances**. Nothing
+in the file before section 16 had ever put two reactions in two different reactors at one tag.
+
+### What the nine probes returned
+
+All nine share F76's counterexample shape: one sender body, two sends, two receiving instances, one tag.
+
+| probe | what varies from the control | measured |
+|---|---|---|
+| 16a `stageG_xr_control` | — | `sink2` then `sink1` |
+| 16b `stageG_xr_sendorder_swap` | the two `set()` lines only | `sink2`, `sink1` — **unmoved** |
+| 16c `stageG_xr_instorder_swap` | the two `new Sink` lines only | `sink1`, `sink2` — **moved** |
+| 16d `stageG_xr_determinism` | byte-identical, run 7× | all 7 agree; `--workers 1` and `4` agree |
+| 16e `stageG_attr_label_control` | adds `@label(...)` | compiles; order unchanged |
+| 16f `stageG_attr_priority` | `@priority(2)` / `@priority(1)` | **rejected**: `Unknown attribute: priority`, 2 errors |
+| 16g `stageG_uses_reverse_chain` | `k2.done -> k1.gate` | **confounded, do not cite** |
+| 16h `stageG2_xr_three_instances` | three instances `k1,k2,k3` | `sink3`, `sink1`, `sink2` |
+| 16i `stageG2_uses_forward_chain` | `k1.done -> k2.gate` | `sink1`, `sink2` — **overrides the default** |
+
+Three of these are worth reading twice. **16f is a measured absence, not a syntax accident**, and it is
+readable as one only because 16e exists: without a control establishing that *some* attribute is accepted
+in that position, the rejection would have been ambiguous between "no priority attribute" and "no
+attributes here at all". **16g is confounded by its own design** — it was built so that a `sink2`-first
+result would be unexplainable by anything but the dependency edge, and 16a then revealed `sink2`-first to
+be the default, so the outcome is equally consistent with the edge doing everything or nothing. It is
+marked `DO NOT CITE` in the script and replaced by 16i, which chains **forward** so that the edge's
+prediction *opposes* the measured default. And **16h refuted the rule 16c appeared to establish**: at two
+instances the order is consistent with reversal, at three it is `sink3, sink1, sink2`, which reversal does
+not predict. The function fitting both points is *last-declared first, then the rest in declaration
+order* — a two-point fit to an undocumented scheduler, with n ≥ 4 unmeasured. It is recorded in the
+script as a shape and explicitly not as a rule.
+
+### The defect: every probe but one measures an unmodelled channel
+
+Each probe observes order by calling `std::printf` from a reaction body. That is the flaw, and it is
+structural rather than a matter of probe hygiene.
+
+LF's determinism guarantee fixes **port values and reactor state** at a tag. It does not fix the
+execution interleaving of raw target-language statements inside reaction bodies. Two reactions in
+independent reactors at one tag cannot observe each other through anything LF models: had the two sinks
+written to output ports instead of stdout, a downstream reactor would read identical values at that tag
+whichever body executed first. `printf` reaches the terminal *outside* the model, so it exposes an
+ordering the semantics deliberately leaves free.
+
+So sections 16a through 16h measured **reactor-cpp 0.11.0 being incidentally stable on a channel the
+language does not specify**. The stability is real — seven runs, two worker counts — and it is worth
+having recorded, because it means a generated program's stdout is reproducible in practice. But
+reproducibility of an unmodelled side effect cannot license a correctness theorem, and in particular
+16c and 16h cannot license a printer that realises actor priority by ordering its instance declarations.
+Such a printer would be correct against this runtime at this version and against nothing stated.
+
+### The one probe that escapes, and why it escapes by construction
+
+16i is the exception, and not by luck. A zero-delay connection into a `uses` clause creates a genuine LF
+**dependency** between the two reactions, and dependencies are precisely what LF's semantics **do**
+order — the same mechanism §III-E of the paper already relies on when it treats connections without
+`after` as instantaneous and rejects causality cycles. 16i's result is therefore a language-level
+guarantee; every other result in section 16 is an implementation observation. That distinction, not the
+list of outcomes, is what the section is for.
+
+Its cost is equally structural and must travel with any repair that uses it: the chain injects input
+ports, output ports and connections the source model does not have, and it **serialises reactors the
+source leaves concurrent**. The generated program stops being a transliteration of the source topology
+and starts encoding a scheduling decision in its dependency graph.
+
+### A limit that holds regardless of any measurement
+
+`@priority` turned out not to exist, but even a version of `lfc` that accepted it could not have repaired
+F76 in general. An attribute annotates a **reaction**; a reaction belongs to a reactor **class**; so no
+attribute can distinguish two **instances** of one class. The corpus model that makes actor priority
+irreducible, `phils`, is built from instances of one class. This is an argument about where attributes
+attach, so it survives any future `lfc` release, and it removes an entire branch of the candidate space
+without needing a run.
+
+### What this does to F76, including one thing it does not do
+
+**F76's over-specification paragraph is confirmed, and was briefly and wrongly reported as refuted.**
+That paragraph says real LF does not order same-tag reactions in independent reactors, so
+`earliestPendingEvent?`'s total order is our artefact rather than the target's semantics. On seeing
+16d's seven agreeing runs the immediate reading taken was the opposite — that the target *does* order
+them deterministically, so our model merely picks the wrong total order rather than inventing one. That
+reading survived about as long as it took to ask which channel the agreement was observed on. It is
+recorded here rather than quietly dropped, because it is the same error the two findings above it
+record, arriving one level further up: F75 caught a design describing artefacts it predated, F76 caught
+a design describing a selector built after it, and this is a *measurement* being read as evidence for a
+proposition it does not address. The instrument that caught it was the probe's own pre-run comment,
+which already said in as many words that a confirmed rule "would be true of this runtime rather than of
+the language" — written before the run, forgotten within an hour of reading the output, and recovered
+only by re-reading the script rather than the results.
+
+**The over-specification is provable from our own definitions, with no probe at all.** This is worth
+separating out, because it means the load-bearing claim does not rest on the flawed channel. `pending`
+is extended by `++ [event]` at both send rules, so queue order is send order; `selectEarliestEvent` is
+first-wins on a tag tie. Therefore swapping two sends in one source body changes which event our model
+consumes first, and `.consume` is an **observable** label in `LF.GeneralStep`. Our target model thus
+promotes to observable behaviour a choice LF's semantics do not determine at all. The probes were needed
+to learn whether the target *could* be made to determine it; the over-specification itself is a reading
+of two of our own definitions.
+
+**The candidate space F76 left open has changed shape.** Of its five recorded options: dropping priority
+from the source is still excluded by the standing scope decision; giving the target a priority-aware
+tie-break survives but is now known to be realisable **only** by 16i's dependency injection, with the
+port, connection and forced-serialisation costs named above; the fragment restriction survives unchanged
+and remains conservative enough to reject `phils`; and stating the correspondence up to within-tag
+permutation is **promoted** rather than demoted, since the over-specification that justifies it is now
+confirmed from two independent directions. The reaction-attribute route is closed outright, by
+measurement and, more durably, by the class-versus-instance argument above.
+
+**And one option is safe to exercise before the decision is made.** Guarding on the absence of
+cross-actor same-tag contention and proving the scoped `.consume` case is monotone with respect to every
+remaining choice: a theorem proved under an explicit guard stays true if the guard is later discharged
+by dependency injection, subsumed by a permutation-quotiented statement, or made vacuous by a narrowed
+fragment. It is not the same as quietly weakening the theorem, which is what the standing doctrine
+forbids, provided the guard is named in the statement and the unguarded case is left recorded and open.
+That distinction — a guard written into the statement versus a scope silently assumed — is the whole
+difference between a scoped result and an under-delivered one.
+
+### The transferable check
+
+**Name the channel before citing the result.** A probe does not measure a semantics; it measures
+whatever channel its output travels on, and the two coincide only when that channel is one the semantics
+constrains. Section 16 ran nine probes through `printf` and produced exactly one citable result, and the
+one that survived did so because it was built around a **dependency** — a construct the language assigns
+meaning to — rather than around an observation. The check is cheap and belongs beside every probe in
+this file: write down which construct of the specification the observed quantity is supposed to be a
+consequence of, before reading the output. Where the answer is "none", the probe measures the
+implementation, which is worth knowing and is not evidence.
+
+The companion check is narrower and specific to how this session failed. A measurement that appears to
+strengthen the position of whoever commissioned it deserves the re-read that a disappointing one gets
+automatically. Here the disappointing readings were taken correctly on the spot — 16f's rejection, 16g's
+confounding, 16h's refutation of a prediction stated in advance — and the one flattering reading, that a
+prior finding had been overtaken by a decisive measurement, was the one that went unexamined.
 

@@ -1221,6 +1221,639 @@ main reactor {
 }
 LF
 
+# ---------------------------------------------------------------------------
+# SECTION 16 (2026-08-25) -- IS THERE ANY CROSS-REACTOR ORDER AT ONE TAG?
+# Seven probes, one filter: PROBE_FILTER=stageG
+#
+# This section exists because of F76 (docs/STAGE_G_FINDINGS.md). At run level the
+# source selector `DTR.GeneralActorSelection.selectedActor` keys on (arrival,
+# PRIORITY) while the target selector `LF.GeneralRuntimeState.earliestPendingEvent?`
+# keys on (tag.time, tag.microstep) and is priority-BLIND. So for two events at one
+# tag targeting DIFFERENT actors the two sides can select differently, and the
+# `.consume` case of Definition 1's transfer conditions is false as specified.
+#
+# Every ordering result this file already holds is WITHIN one reactor. Section 1
+# and section 15 measured reaction DECLARATION order, in three trigger shapes, and
+# all six section-15 probes swapped -- but a declaration list belongs to a reactor
+# CLASS, and F76's divergence is between two INSTANCES. Nothing here has ever put
+# two reactions in two DIFFERENT reactors at one tag and asked which runs first.
+#
+# The load-bearing question is therefore not "does a priority attribute exist" but:
+#
+#     DOES ANY MECHANISM ORDER REACTIONS ACROSS REACTORS AT ONE TAG?
+#
+# and it has three possible answers, each of which forces a different repair:
+#
+#   ORDERED BY SOMETHING THE PRINTER CONTROLS (instantiation order, an attribute,
+#     a dependency edge) -> the target CAN implement actor priority, and F76's
+#     repair is to teach the printer to emit in priority order. The theorem is
+#     then provable without a guard, and no fragment need be refused.
+#   ORDERED, BUT ONLY BY SENDER STATEMENT ORDER -> the order is real yet lives in
+#     generated C++ where the Lean development cannot see it. That is the multiport
+#     fallback this project already rejected twice (sections 12 and 14a); it would
+#     be rejected a third time for the same reason.
+#   NOT ORDERED AT ALL -> `earliestPendingEvent?`'s total order OVER-SPECIFIES real
+#     LF, our target model is stricter than its target, and by the standing
+#     doctrine the answer is to REFUSE such models rather than narrow the theorem.
+#
+# The third answer is the one no pair of probes can establish, because a pair only
+# shows that an order MOVED. Absence of order is a claim about repeated runs, which
+# is why this section adds a second runner instead of reusing `probe`.
+#
+# ---------------------------------------------------------------------------
+# MEASURED VERDICT, 2026-08-25, lfc 0.11.0 -- READ THIS BEFORE CITING SECTION 16
+# ---------------------------------------------------------------------------
+# The trichotomy above is WRONG, and its first branch is the dangerous one. It
+# treats "the printer controls it" as sufficient for "the target CAN implement
+# actor priority". It is not sufficient, because the printer controlling an order
+# says nothing about whether LF ASSIGNS that order any meaning.
+#
+# What the nine probes measured:
+#
+#   * an order exists and is stable -- 16d, seven runs, --workers 1 and 4 agreeing
+#   * sender statement order does NOT produce it (16b unmoved)
+#   * instance declaration order DOES influence it (16c moved), but by no rule two
+#     instances revealed: at three instances the order is sink3, sink1, sink2, so
+#     reverse instantiation is refuted (16h)
+#   * `@priority` does not exist -- "Unknown attribute: priority", and the `@label`
+#     control (16e) compiled, so this is a MEASURED ABSENCE not a syntax accident
+#   * a zero-delay `uses` edge overrides the default and forces the order (16i)
+#
+# And the limitation that governs all of it: every probe here observes order
+# through `std::printf`, an UNMODELLED side effect. LF's determinism guarantee
+# fixes port values and reactor state, not the interleaving of raw C++ statements.
+# Two independent reactors reacting at one tag hand identical values downstream
+# whichever body ran first. So 16a-16h measured this RUNTIME being incidentally
+# stable on a channel the LANGUAGE leaves free, and cannot license a theorem.
+#
+# 16i is the one probe that escapes this, and escapes it by construction rather
+# than by luck. A zero-delay connection into a `uses` clause creates a genuine LF
+# DEPENDENCY, and dependencies are precisely what LF's semantics DO order. Its
+# result is a language-level guarantee; every other result in this section is an
+# implementation observation.
+#
+# So the branch that actually fired is the THIRD one, and F76's over-specification
+# paragraph is CONFIRMED, not refuted: `earliestPendingEvent?`'s total order is
+# stronger than LF supports. The surviving repairs are therefore (i) inject
+# dependency edges to MAKE the order real, per 16i, at the cost of ports and
+# connections the source model does not have and of serialising reactors the source
+# leaves concurrent; or (ii) stop claiming an order the target does not have, i.e.
+# state the correspondence up to within-tag permutation. Instantiation order (16c,
+# 16h) and a refused fragment are weaker fallbacks. That decision is the user's.
+#
+# Read 16a/16b as a pair and 16a/16c as a pair; 16a is the shared control for both.
+# In 16a every candidate order agrees on sink1-before-sink2 (it is declared first,
+# instantiated first, and sent to first), which is exactly why 16a alone proves
+# nothing and each partner moves exactly one of those three.
+# ---------------------------------------------------------------------------
+
+# probe_repeat <name> <expectation>   ... LF source on stdin
+# Stages and compiles exactly as `probe` does, then runs the binary FIVE times at
+# the default worker count and once each at --workers 1 and --workers 4. A single
+# run cannot distinguish "the order is fixed" from "the order came out this way
+# once", and every earlier question in this file was about what compiles or about
+# an order a PAIR isolates, so no runner here needed repetition before now.
+# An unrecognised --workers flag must be VISIBLE rather than fatal: the exit code
+# is printed per run and a non-zero one does not stop the loop, so a flag that does
+# not exist cannot be misread as an absence of output.
+probe_repeat() {
+  NAME=$1; EXPECT=$2
+
+  case "$NAME" in
+    *$PROBE_FILTER*) ;;
+    *)
+      printf '\n========== %s ==========\n' "$NAME"
+      printf '  SKIPPED by PROBE_FILTER=%s -- this log is NOT a full run\n' "$PROBE_FILTER"
+      cat > /dev/null
+      return ;;
+  esac
+
+  W=$ROOT/$NAME
+  mkdir -p "$W/src"
+  cat > "$W/src/V0Controller.lf"
+
+  printf '\n========== %s ==========\n' "$NAME"
+  printf '  expectation: %s\n' "$EXPECT"
+
+  ( cd "$W" && "$LFC" src/V0Controller.lf ) > "$W/lfc.log" 2>&1
+  CRC=$?
+  printf '  lfc exit: %s\n' "$CRC"
+  if [ "$CRC" != 0 ]; then
+    printf '  --- lfc diagnostics (last 15 lines) ---\n'
+    tail -15 "$W/lfc.log" | sed 's/^/    /'
+    printf '  RESULT: DID NOT COMPILE\n'
+    return
+  fi
+  if [ ! -x "$W/bin/V0Controller" ]; then
+    printf '  RESULT: compiled but no executable at bin/V0Controller\n'; return
+  fi
+
+  for ATTEMPT in 1 2 3 4 5; do
+    ( cd "$W" && ./bin/V0Controller --timeout "5 msec" --fast ) > "$W/run.$ATTEMPT.log" 2>&1
+    RRC=$?
+    printf '  default-workers run %s (exit %s): %s\n' "$ATTEMPT" "$RRC" \
+      "$(grep 'RELICO_' "$W/run.$ATTEMPT.log" | tr '\n' ' ')"
+  done
+
+  for WK in 1 4; do
+    ( cd "$W" && ./bin/V0Controller --timeout "5 msec" --fast --workers "$WK" ) > "$W/run.w$WK.log" 2>&1
+    RRC=$?
+    printf '  --workers %s (exit %s): %s\n' "$WK" "$RRC" \
+      "$(grep 'RELICO_' "$W/run.w$WK.log" | tr '\n' ' ')"
+    if [ "$RRC" != 0 ]; then
+      printf '    --- last 6 lines, in case the flag is unrecognised ---\n'
+      tail -6 "$W/run.w$WK.log" | sed 's/^/      /'
+    fi
+  done
+}
+
+# --- 16a. THE SHARED CONTROL. One sender writes two ports in ONE reaction body,
+# both connections carry `after 0 msec`, and the two receivers are two INSTANCES
+# OF ONE CLASS -- so the class's reaction declaration order, the only ordering
+# mechanism this file has ever measured, is held constant and cannot explain
+# anything observed here. This is F76's counterexample shape: one body, two sends,
+# two different target actors, one tag.
+# In this member sink1 is declared first, instantiated first, and sent to first,
+# so all three of those candidate orders predict "sink1 payload1" then "sink2
+# payload2". That agreement is why 16a alone proves nothing, and why 16b and 16c
+# each move exactly one of the three.
+#
+# MEASURED 2026-08-25, lfc 0.11.0: the control prints sink2 FIRST. None of the
+# three candidate orders enumerated above predicts that, so the enumeration was
+# INCOMPLETE -- the missing candidate is REVERSE instantiation order, which 16c
+# then confirmed by swapping. This comment originally concluded "so EVERY candidate
+# order predicts sink1 first"; that inference was wrong and is corrected here
+# rather than deleted, because missing a candidate while believing the list was
+# exhaustive is the same error F75 and F76 record one level up.
+
+probe stageG_xr_control 'CONTROL -- expect RELICO_XR sink1 payload1 then RELICO_XR sink2 payload2; every candidate order agrees here' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Src {
+    output outA: int
+    output outB: int
+    reaction(startup) -> outA, outB {=
+        outA.set(1);
+        outB.set(2);
+    =}
+}
+
+reactor Sink(id: int = 0) {
+    input in: int
+    reaction(in) {=
+        std::printf("RELICO_XR sink%d payload%d\n", id, *in.get());
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    s = new Src()
+    k1 = new Sink(id=1)
+    k2 = new Sink(id=2)
+    s.outA -> k1.in after 0 msec
+    s.outB -> k2.in after 0 msec
+}
+LF
+
+# --- 16b. ONLY the two set() statements in the sender body are swapped. Nothing
+# else moves: same classes, same instantiation order, same connection order.
+# If the output swaps, cross-reactor order is decided by generated C++ STATEMENT
+# order. That would make the order real but invisible to the Lean development,
+# which is the multiport fallback rejected in sections 12 and 14a for the same
+# reason -- and it would also mean the order is NOT a function of the LF text the
+# printer is proved to emit.
+# If the output does NOT swap, send order is ruled out, which is the answer that
+# lets 16c be read cleanly.
+
+probe stageG_xr_sendorder_swap 'ONLY the sender body statements swapped -- does RELICO_XR sink2 now print FIRST?' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Src {
+    output outA: int
+    output outB: int
+    reaction(startup) -> outA, outB {=
+        outB.set(2);
+        outA.set(1);
+    =}
+}
+
+reactor Sink(id: int = 0) {
+    input in: int
+    reaction(in) {=
+        std::printf("RELICO_XR sink%d payload%d\n", id, *in.get());
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    s = new Src()
+    k1 = new Sink(id=1)
+    k2 = new Sink(id=2)
+    s.outA -> k1.in after 0 msec
+    s.outB -> k2.in after 0 msec
+}
+LF
+
+# --- 16c. ONLY the two instantiation lines are swapped. The sender body stays
+# outA-then-outB and the two connection lines stay in their original textual
+# order, so the single moved thing is the order the two Sink instances are
+# DECLARED in the main reactor.
+# This is the probe with a cheap repair attached. If the output swaps,
+# instantiation order orders reactions across reactors, the printer already
+# controls that order, and F76's repair is to emit instances in actor-priority
+# order -- no guard, no refused fragment, and the `.consume` case becomes
+# provable. If it does not swap, that repair does not exist.
+
+probe stageG_xr_instorder_swap 'ONLY the two new Sink lines swapped -- does RELICO_XR sink2 now print FIRST? a swap means the printer can implement actor priority' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Src {
+    output outA: int
+    output outB: int
+    reaction(startup) -> outA, outB {=
+        outA.set(1);
+        outB.set(2);
+    =}
+}
+
+reactor Sink(id: int = 0) {
+    input in: int
+    reaction(in) {=
+        std::printf("RELICO_XR sink%d payload%d\n", id, *in.get());
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    s = new Src()
+    k2 = new Sink(id=2)
+    k1 = new Sink(id=1)
+    s.outA -> k1.in after 0 msec
+    s.outB -> k2.in after 0 msec
+}
+LF
+
+# --- 16d. DOES AN ORDER EXIST AT ALL? Byte-identical to 16a, run seven times
+# instead of once: five at the default worker count, then once each at --workers 1
+# and --workers 4. No pair of probes can establish the ABSENCE of an order, because
+# a pair only shows that an order moved; this is the only probe in the file whose
+# result is a property of repeated runs.
+# If the marker order varies between any two of the seven lines, real LF leaves
+# same-tag reactions in independent reactors UNORDERED, our `earliestPendingEvent?`
+# total order over-specifies the target, and by the standing doctrine the answer to
+# F76 is to REFUSE such models rather than narrow the theorem.
+# If all seven agree, an order exists and 16b/16c/16f/16g are about which mechanism
+# produces it. Note that agreement at --workers 1 with disagreement at --workers 4
+# is the most informative outcome of all: it would mean the order is an artefact of
+# the scheduler's thread count and not a language guarantee, which no amount of
+# printer discipline can fix.
+
+probe_repeat stageG_xr_determinism 'byte-identical to 16a -- do all SEVEN runs print the same order? any disagreement means real LF does not order these at all' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Src {
+    output outA: int
+    output outB: int
+    reaction(startup) -> outA, outB {=
+        outA.set(1);
+        outB.set(2);
+    =}
+}
+
+reactor Sink(id: int = 0) {
+    input in: int
+    reaction(in) {=
+        std::printf("RELICO_XR sink%d payload%d\n", id, *in.get());
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    s = new Src()
+    k1 = new Sink(id=1)
+    k2 = new Sink(id=2)
+    s.outA -> k1.in after 0 msec
+    s.outB -> k2.in after 0 msec
+}
+LF
+
+# --- 16e. ATTRIBUTE CONTROL. Nothing in this repository has ever emitted or probed
+# an LF attribute -- there is no `@` in any committed fixture and no printer site
+# produces one -- so "does a priority attribute exist" is not yet a well-posed
+# question. This probe asks the prior one: is ANY attribute accepted in front of a
+# reaction declaration? `@label` is used because it is documented for diagram
+# rendering and so should be semantically inert, which is what makes it a control.
+# Without this, a rejection in 16f cannot be read: it would be ambiguous between
+# "no priority attribute" and "no attributes in this position at all".
+
+probe stageG_attr_label_control 'CONTROL -- is ANY attribute accepted before a reaction? @label should compile and change nothing' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Src {
+    output outA: int
+    output outB: int
+    reaction(startup) -> outA, outB {=
+        outA.set(1);
+        outB.set(2);
+    =}
+}
+
+reactor Sink(id: int = 0) {
+    input in: int
+    @label("relico probe")
+    reaction(in) {=
+        std::printf("RELICO_XR sink%d payload%d\n", id, *in.get());
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    s = new Src()
+    k1 = new Sink(id=1)
+    k2 = new Sink(id=2)
+    s.outA -> k1.in after 0 msec
+    s.outB -> k2.in after 0 msec
+}
+LF
+
+# --- 16f. THE ATTRIBUTE ITSELF, on TWO DIFFERENT CLASSES. Two classes rather than
+# two instances, deliberately: an attribute sits on a reaction, a reaction belongs
+# to a CLASS, and so no attribute can ever distinguish two instances of one class.
+# That is a structural limit worth stating whatever this probe returns -- it means
+# even a working priority attribute could not order two instances of one Rebeca
+# reactive class, which `phils` is made of.
+# SinkA is declared first and instantiated first but annotated with the LARGER
+# number, so the attribute and the default order disagree. Which polarity counts as
+# "better" is unknown, so the reading is not "does sinkB come first" but "does the
+# order DIFFER from 16a's":
+#   does not compile   -> no such attribute; combined with 16e passing, that is a
+#                         measured absence rather than a syntax accident
+#   compiles, same order as 16a -> accepted but INERT, which is worse than a
+#                         rejection: a printer could emit it and prove nothing
+#   compiles, order differs     -> a real cross-reactor mechanism exists
+
+probe stageG_attr_priority 'does @priority exist? SinkA is declared first but annotated 2 vs SinkB 1 -- read as "does the order DIFFER from 16a", not as a polarity' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Src {
+    output outA: int
+    output outB: int
+    reaction(startup) -> outA, outB {=
+        outA.set(1);
+        outB.set(2);
+    =}
+}
+
+reactor SinkA {
+    input in: int
+    @priority(2)
+    reaction(in) {=
+        std::printf("RELICO_PRIO sinkA payload%d\n", *in.get());
+        std::fflush(stdout);
+    =}
+}
+
+reactor SinkB {
+    input in: int
+    @priority(1)
+    reaction(in) {=
+        std::printf("RELICO_PRIO sinkB payload%d\n", *in.get());
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    s = new Src()
+    a = new SinkA()
+    b = new SinkB()
+    s.outA -> a.in after 0 msec
+    s.outB -> b.in after 0 msec
+}
+LF
+
+# --- 16g. THE ONE MECHANISM THAT CERTAINLY ORDERS ACROSS REACTORS, and the
+# question is what it costs. A zero-delay connection into a reaction's USES clause
+# makes that reaction depend on the upstream one without making it a trigger, so
+# the dependency graph must order them at a shared tag.
+# The chain is deliberately REVERSED -- k2.done feeds k1.gate -- so the expected
+# order is sink2 BEFORE sink1, which is the opposite of what declaration order,
+# instantiation order and send order all predict. One probe therefore suffices:
+# nothing except the uses edge can explain sink2 printing first.
+#
+# MEASURED 2026-08-25: it compiled and printed sink2 before sink1 -- and the probe
+# is therefore CONFOUNDED and proves nothing. The sentence above rests on 16a's
+# default being sink1-first, which 16a refuted in the same run: sink2-first IS the
+# default, so this result is equally consistent with the uses edge deciding
+# everything and with it deciding nothing. DO NOT CITE THIS PROBE. 16i is the
+# un-confounded version, chaining FORWARD so that the expected order opposes the
+# measured default instead of agreeing with it.
+# If this compiles and reverses the order, F76 gains a SIXTH repair candidate that
+# is expressible in real LF: realise actor priority as a causal chain among the
+# receivers. It is not free -- it injects ports and connections the source model
+# does not have, and it serialises reactors the source leaves concurrent -- so it
+# is a candidate to put to the user, not a decision to take here.
+# If it does NOT compile, the `reaction(trigger) uses -> effect` spelling is what
+# failed, not the mechanism; the follow-up is the heavier pipeline shape, where k1
+# forwards the payload to k2 as a real trigger.
+
+probe stageG_uses_reverse_chain 'a REVERSED zero-delay uses edge -- expect RELICO_USES sink2 BEFORE sink1, which no default order predicts' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Src {
+    output outA: int
+    output outB: int
+    reaction(startup) -> outA, outB {=
+        outA.set(1);
+        outB.set(2);
+    =}
+}
+
+reactor Sink(id: int = 0) {
+    input in: int
+    input gate: int
+    output done: int
+    reaction(in) gate -> done {=
+        std::printf("RELICO_USES sink%d payload%d\n", id, *in.get());
+        std::fflush(stdout);
+        done.set(1);
+    =}
+}
+
+main reactor {
+    s = new Src()
+    k1 = new Sink(id=1)
+    k2 = new Sink(id=2)
+    s.outA -> k1.in after 0 msec
+    s.outB -> k2.in after 0 msec
+    k2.done -> k1.gate
+}
+LF
+
+# ---------------------------------------------------------------------------
+# 16h + 16i (2026-08-25, added AFTER the first seven ran) -- two follow-ups the
+# first run made necessary. Filter: PROBE_FILTER=stageG2
+#
+# 16a/16b/16c measured that cross-reactor same-tag order IS decided, deterministically
+# and stably across worker counts, by INSTANTIATION order -- in REVERSE: the
+# last-declared instance fired first, in both members of the 16a/16c pair. That is
+# the answer F76 needed, and it means the printer controls the order. But it was
+# measured at n = 2, where "reverse" is indistinguishable from any other
+# non-identity permutation, and a printer repair would rely on the rule holding
+# generally. 16h is the cheapest thing that separates them.
+#
+# 16i repairs 16g, which came out confounded: 16g chained k2 -> k1 expecting
+# sink2-first as the tell, and sink2-first turned out to be the DEFAULT.
+# ---------------------------------------------------------------------------
+
+# --- 16h. THREE instances, declared k1, k2, k3, all sent to at one tag.
+# If the rule is reverse instantiation order the output is sink3, sink2, sink1.
+# Any other permutation means the n = 2 result was not the rule it looked like, and
+# the printer cannot implement actor priority by ordering its instance declarations
+# -- which would move F76's repair back to a refused fragment.
+# Worth stating plainly: even a confirmed rule here is a reactor-cpp 0.11.0
+# property, not a documented LF guarantee. LF specifies reactions in INDEPENDENT
+# reactors at one tag as logically concurrent, i.e. unordered. So a theorem resting
+# on this would be true of this runtime rather than of the language, and that is a
+# fidelity cost to record however 16h comes out.
+#
+# MEASURED 2026-08-25, lfc 0.11.0: sink3, sink1, sink2. NOT sink3, sink2, sink1.
+# So REVERSE instantiation order is REFUTED, and with it the correction written on
+# 16a above, which named reverse order as the missing candidate the n = 2 result
+# implied. Both are left standing rather than deleted: the n = 2 datum is genuinely
+# consistent with reversal, and the point of this comment is that being consistent
+# with a rule is not evidence FOR it when the alternatives were never enumerated.
+# The function that fits BOTH data points is "the LAST-declared instance fires
+# first, then the remaining instances in declaration order", which at n = 2 is
+# indistinguishable from reversal. That is a two-point fit to an undocumented
+# scheduler and n >= 4 is unmeasured, so it is recorded as a shape, NOT as a rule.
+#
+# The caveat four lines above is the load-bearing part of this probe, and it grew
+# TEETH once all nine probes were read together. Every probe in this section
+# observes order through `std::printf`, which is an UNMODELLED side effect: LF's
+# determinism guarantee fixes port values and reactor state, not the execution
+# interleaving of raw C++ statements. Had the sinks written to output ports instead
+# of stdout, a downstream reactor would read identical values at that tag whichever
+# body ran first. So this section did not measure "the order LF gives"; it measured
+# reactor-cpp 0.11.0 being incidentally stable on a channel LF leaves free. 16c and
+# 16h therefore CANNOT license a printer that orders by instantiation, and F76's
+# over-specification paragraph is CONFIRMED rather than refuted. 16i is the sole
+# exception, and deliberately so -- see its own comment.
+
+probe stageG2_xr_three_instances 'THREE instances declared k1,k2,k3 -- reverse instantiation order predicts sink3, sink2, sink1; any other permutation refutes the rule' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Src {
+    output outA: int
+    output outB: int
+    output outC: int
+    reaction(startup) -> outA, outB, outC {=
+        outA.set(1);
+        outB.set(2);
+        outC.set(3);
+    =}
+}
+
+reactor Sink(id: int = 0) {
+    input in: int
+    reaction(in) {=
+        std::printf("RELICO_XR3 sink%d payload%d\n", id, *in.get());
+        std::fflush(stdout);
+    =}
+}
+
+main reactor {
+    s = new Src()
+    k1 = new Sink(id=1)
+    k2 = new Sink(id=2)
+    k3 = new Sink(id=3)
+    s.outA -> k1.in after 0 msec
+    s.outB -> k2.in after 0 msec
+    s.outC -> k3.in after 0 msec
+}
+LF
+
+# --- 16i. THE UNCONFOUNDED USES EDGE. Identical to 16g except the chain runs
+# FORWARD: k1.done feeds k2.gate, so the uses edge demands sink1 before sink2 while
+# the measured default (16a, 16b, 16e all agree) is sink2 first. The two now
+# disagree, which is what 16g needed and did not have.
+#   prints sink1 first -> the uses edge OVERRIDES instantiation order, and there are
+#     two independent printer-controlled mechanisms rather than one. Useful as a
+#     fallback if 16h refutes the instantiation rule.
+#   prints sink2 first -> the uses edge does NOT order these reactions, and 16g's
+#     apparent success was entirely the default order.
+#   does not compile -> the `reaction(trigger) uses -> effect` spelling is what
+#     failed, not the mechanism; the follow-up is the heavier pipeline shape where
+#     k1 forwards the payload to k2 as a real trigger.
+
+probe stageG2_uses_forward_chain 'k1.done feeds k2.gate, so the uses edge demands sink1 FIRST while the measured default is sink2 first -- the two disagree, which is what 16g lacked' <<'LF'
+target Cpp
+
+public preamble {=
+#include <cstdio>
+=}
+
+reactor Src {
+    output outA: int
+    output outB: int
+    reaction(startup) -> outA, outB {=
+        outA.set(1);
+        outB.set(2);
+    =}
+}
+
+reactor Sink(id: int = 0) {
+    input in: int
+    input gate: int
+    output done: int
+    reaction(in) gate -> done {=
+        std::printf("RELICO_USES sink%d payload%d\n", id, *in.get());
+        std::fflush(stdout);
+        done.set(1);
+    =}
+}
+
+main reactor {
+    s = new Src()
+    k1 = new Sink(id=1)
+    k2 = new Sink(id=2)
+    s.outA -> k1.in after 0 msec
+    s.outB -> k2.in after 0 msec
+    k1.done -> k2.gate
+}
+LF
+
 printf '\n\n========== HOW TO READ THIS ==========\n'
 cat <<'NOTE'
   The single most important line in this log is whether
@@ -1358,6 +1991,47 @@ cat <<'NOTE'
   one reaction for k actions drops firings (14a). The design document and the paper
   should make that claim in exactly that form, because it is stronger than an
   argument from preference and it is the form the evidence actually supports.
+
+
+  Ninth, section 16 (2026-08-25) is the only section here whose question is still
+  OPEN at the time it was written, and it is written that way on purpose: the rule
+  for reading it is recorded before the run, as sections 12 and 13 did, so that the
+  result cannot be reverse-fitted to a preference. F76 measured that our two
+  run-level selectors disagree -- the source keys on (arrival, PRIORITY), the target
+  on (tag.time, tag.microstep) and is priority-blind -- and every ordering fact this
+  file already holds is WITHIN one reactor, because a reaction declaration list
+  belongs to a reactor CLASS while F76's divergence is between two INSTANCES.
+
+  The load-bearing question is not whether a priority attribute exists. It is
+  whether ANY mechanism orders reactions across reactors at one tag, and the three
+  answers force three different repairs:
+
+    ordered by something the printer controls (16c instantiation order, 16f an
+      attribute, 16g a uses edge) -> the target CAN implement actor priority, F76 is
+      repaired by emitting in priority order, and the `.consume` case of Definition
+      1 becomes provable with no guard and no refused fragment.
+    ordered only by sender STATEMENT order (16b) -> the order is real but lives in
+      generated C++ where the Lean development cannot see it. That is the multiport
+      fallback rejected in sections 12 and 14a, and the reason has not changed.
+    not ordered at all (16d) -> `earliestPendingEvent?`'s total order OVER-SPECIFIES
+      real LF. Our target model would then be stricter than its own target, and the
+      standing doctrine says refuse such models rather than quietly narrow the
+      theorem.
+
+  16d is the reason this section adds a second runner. Every other probe in this
+  file answers "what compiles" or "did a pair swap", and neither shape can establish
+  an ABSENCE of order -- that is a claim about repeated runs. Its most informative
+  outcome is agreement at --workers 1 with disagreement at --workers 4, which would
+  mean the order is an artefact of the scheduler's thread count rather than a
+  language guarantee, and no printer discipline could fix it.
+
+  Two things section 16 settles regardless of how it comes out. First, an attribute
+  annotates a reaction, a reaction belongs to a class, and so no attribute can ever
+  distinguish two INSTANCES of one class -- which is what `phils` is made of. Second,
+  16f compiling but leaving the order unchanged would be worse than 16f being
+  rejected, because an inert annotation is one a printer could emit while proving
+  nothing, and this project has already been burned once by an assertion that was
+  invariant under the sort it was credited with pinning (F60).
 
   Nothing in the repo was read or written. Scratch tree: /tmp/relico_lf_probe
 NOTE
