@@ -167,6 +167,298 @@ def findReactionForKind? :
           remaining
           kind
 
+/--
+**At most one reaction in a list is triggered by a given event kind.**
+
+The hypothesis under which `findReactionForKind?` stops depending on declaration order, and therefore the
+hypothesis stage F's priority sort needs in order to be provably harmless. The lookup returns the **first**
+match, so on a list where two reactions match one kind the answer is decided by position and permuting the
+list can change which reaction fires. Where at most one reaction matches, "the first match" and "the match"
+coincide and position stops mattering.
+
+**Stated per kind rather than as global trigger distinctness, and that is deliberate.** Pairwise-distinct
+triggers across the whole list would imply this at every kind, so this is the weaker hypothesis and hence
+the stronger theorem — and it is exactly what the induction in
+`findReactionForKind?_eq_some_of_mem` consumes. The bridge from a `Nodup`-of-triggers form is *not* stated
+here, because which form the translator actually yields is decided by the translator-side proof, and writing
+a bridge against a guessed shape is the defect class `docs/STAGE_G_FINDINGS.md` F75 records.
+
+**The hypothesis cannot be dropped, and the witness is already built.** Test 11 of
+`Relico/Tests/GeneralSemantics.lean` is a reactor holding two reactions triggered by one action, the first
+declared carrying the worse priority, and it pins `findReactionForKind?` returning the first. That reactor is
+well formed: `LF.GeneralReactor.wellFormed`'s conjuncts include `declaredNames.Nodup`, which constrains
+declared *names* and says nothing about how many reactions trigger on one of them. So well-formedness cannot
+supply this predicate — it is a hypothesis here and an obligation on the translator's output.
+
+The `∀ x, x ∈ list → …` spelling rather than `∀ x ∈ list, …` matches `eq_of_nodup_map` in
+`Relico/LF/GeneralWellFormed.lean`, the one other place this development states a list-local injectivity.
+-/
+def UniquelyTriggered
+    (reactions : List LF.GeneralReaction)
+    (kind : LF.GeneralEventKind) :
+    Prop :=
+  ∀ first,
+    first ∈ reactions →
+      ∀ second,
+        second ∈ reactions →
+          LF.GeneralTrigger.matchesKind first.trigger kind = true →
+          LF.GeneralTrigger.matchesKind second.trigger kind = true →
+            first = second
+
+/--
+A found reaction is a member of the list, and does match the kind.
+
+No hypothesis is needed: this direction holds on every list, including one where several reactions match.
+That is what makes the permutation argument below independent of *which* reaction the lookup happened to
+return. Named after `earliestPendingEvent?_mem` further down this file, the other lookup-soundness result
+here.
+-/
+theorem findReactionForKind?_mem
+    (kind : LF.GeneralEventKind) :
+    ∀ (reactions : List LF.GeneralReaction)
+      (reaction : LF.GeneralReaction),
+      findReactionForKind? reactions kind =
+          some reaction →
+        reaction ∈ reactions ∧
+          LF.GeneralTrigger.matchesKind reaction.trigger kind = true := by
+
+  intro reactions
+  induction reactions with
+
+  | nil =>
+      intro reaction hFound
+      simp [findReactionForKind?] at hFound
+
+  | cons head remaining inductionHypothesis =>
+      intro reaction hFound
+
+      by_cases hMatch :
+          LF.GeneralTrigger.matchesKind head.trigger kind = true
+
+      · have hStep :
+            findReactionForKind? (head :: remaining) kind =
+              some head := by
+          simp [findReactionForKind?, hMatch]
+
+        rw [hStep] at hFound
+
+        simp only [
+          Option.some.injEq
+        ] at hFound
+
+        subst hFound
+
+        exact ⟨by simp, hMatch⟩
+
+      · have hStep :
+            findReactionForKind? (head :: remaining) kind =
+              findReactionForKind? remaining kind := by
+          simp [findReactionForKind?, hMatch]
+
+        rw [hStep] at hFound
+
+        obtain ⟨hMember, hReactionMatch⟩ :=
+          inductionHypothesis
+            reaction
+            hFound
+
+        exact ⟨List.mem_cons_of_mem head hMember,
+          hReactionMatch⟩
+
+/--
+Under `UniquelyTriggered`, a matching member **is** what the lookup returns.
+
+The converse of `findReactionForKind?_mem`, and the direction that needs the hypothesis. The head case is
+where it does its work: the head matches, so the lookup returns the head, and uniqueness is what identifies
+that head with the member the caller handed over. Without it the two could be different reactions and the
+equation would be false — which is precisely Test 11.
+
+The induction weakens `UniquelyTriggered` from the whole list to its tail, which is sound because the
+predicate is quantified over membership and `List.mem_cons_of_mem` embeds the tail. In the tail case the
+member cannot be the head, because the member matches and the head does not.
+-/
+theorem findReactionForKind?_eq_some_of_mem
+    (kind : LF.GeneralEventKind) :
+    ∀ (reactions : List LF.GeneralReaction),
+      UniquelyTriggered reactions kind →
+        ∀ (reaction : LF.GeneralReaction),
+          reaction ∈ reactions →
+          LF.GeneralTrigger.matchesKind reaction.trigger kind = true →
+            findReactionForKind? reactions kind =
+              some reaction := by
+
+  intro reactions
+  induction reactions with
+
+  | nil =>
+      intro _ reaction hMember _
+      cases hMember
+
+  | cons head remaining inductionHypothesis =>
+      intro hUnique reaction hMember hReactionMatch
+
+      by_cases hMatch :
+          LF.GeneralTrigger.matchesKind head.trigger kind = true
+
+      · have hEqual :
+            head = reaction :=
+          hUnique
+            head
+            (by simp)
+            reaction
+            hMember
+            hMatch
+            hReactionMatch
+
+        have hStep :
+            findReactionForKind? (head :: remaining) kind =
+              some head := by
+          simp [findReactionForKind?, hMatch]
+
+        rw [hStep, hEqual]
+
+      · have hMemberTail :
+            reaction ∈ remaining := by
+          rcases List.mem_cons.mp hMember with
+            hHead |
+            hTail
+
+          · subst hHead
+            exact absurd hReactionMatch hMatch
+
+          · exact hTail
+
+        have hUniqueTail :
+            UniquelyTriggered remaining kind := by
+          intro first hFirst second hSecond hFirstMatch hSecondMatch
+
+          exact hUnique
+            first
+            (List.mem_cons_of_mem head hFirst)
+            second
+            (List.mem_cons_of_mem head hSecond)
+            hFirstMatch
+            hSecondMatch
+
+        have hStep :
+            findReactionForKind? (head :: remaining) kind =
+              findReactionForKind? remaining kind := by
+          simp [findReactionForKind?, hMatch]
+
+        rw [hStep]
+
+        exact inductionHypothesis
+          hUniqueTail
+          reaction
+          hMemberTail
+          hReactionMatch
+
+/--
+`UniquelyTriggered` is a property of the reaction *set*, so it transfers along a permutation.
+
+`normalize_perm` (`Relico/DTR/GeneralPriority.lean`) argues that because stage F's sort only permutes,
+"every property of the route or reaction *set* rather than its order transfers through it". This predicate
+is one such property. `findReactionForKind?` is **not**, which is exactly why
+`findReactionForKind?_perm` has to be proved rather than inherited from that lemma.
+-/
+theorem UniquelyTriggered.of_perm
+    {kind : LF.GeneralEventKind}
+    {left right : List LF.GeneralReaction}
+    (hPerm :
+      List.Perm left right)
+    (hUnique :
+      UniquelyTriggered left kind) :
+    UniquelyTriggered right kind := by
+
+  intro first hFirst second hSecond hFirstMatch hSecondMatch
+
+  exact hUnique
+    first
+    (hPerm.mem_iff.mpr hFirst)
+    second
+    (hPerm.mem_iff.mpr hSecond)
+    hFirstMatch
+    hSecondMatch
+
+/--
+**Permuting a uniquely-triggered reaction list does not change what the lookup returns.**
+
+The order-sensitivity of `findReactionForKind?` is real and deliberate — its own docstring records that
+"first match wins, and declaration order is what decides", because stage F established that reaction
+declaration order is observable in the target. This theorem says exactly where that sensitivity stops: at
+one event kind matched by at most one reaction, the lookup is a function of the reaction *set*.
+
+Both cases go through the two lemmas above rather than through a second induction. The `none` case is the
+one worth reading: it argues by contradiction from the *other* list, because a `none` on the left cannot be
+inspected directly — if the right list found something, that something is a member there, hence a member on
+the left by `List.Perm.mem_iff`, and completeness on the left then contradicts the `none`.
+-/
+theorem findReactionForKind?_perm
+    (kind : LF.GeneralEventKind)
+    (left right : List LF.GeneralReaction)
+    (hPerm :
+      List.Perm left right)
+    (hUnique :
+      UniquelyTriggered left kind) :
+    findReactionForKind? left kind =
+      findReactionForKind? right kind := by
+
+  have hUniqueRight :
+      UniquelyTriggered right kind :=
+    UniquelyTriggered.of_perm
+      hPerm
+      hUnique
+
+  cases hLeft :
+      findReactionForKind? left kind with
+
+  | none =>
+      cases hRight :
+          findReactionForKind? right kind with
+
+      | none =>
+          rfl
+
+      | some reaction =>
+          obtain ⟨hMember, hMatch⟩ :=
+            findReactionForKind?_mem
+              kind
+              right
+              reaction
+              hRight
+
+          have hFound :
+              findReactionForKind? left kind =
+                some reaction :=
+            findReactionForKind?_eq_some_of_mem
+              kind
+              left
+              hUnique
+              reaction
+              (hPerm.mem_iff.mpr hMember)
+              hMatch
+
+          exact absurd
+            (hLeft.symm.trans hFound)
+            (by simp)
+
+  | some reaction =>
+      obtain ⟨hMember, hMatch⟩ :=
+        findReactionForKind?_mem
+          kind
+          left
+          reaction
+          hLeft
+
+      exact
+        (findReactionForKind?_eq_some_of_mem
+            kind
+            right
+            hUniqueRight
+            reaction
+            (hPerm.mem_iff.mp hMember)
+            hMatch).symm
+
 namespace GeneralProgram
 
 /--
@@ -196,6 +488,78 @@ def reactionFor?
       LF.findReactionForKind?
         reactor.messageReactions
         kind
+
+/--
+**The run-level refutation of Lemma 2, stated as a theorem.** Permuting a reactor's `messageReactions`
+cannot change which reaction an event dispatches to, provided at most one of them is triggered by that
+event's kind.
+
+`docs/STAGE_G_FINDINGS.md` F80 records that stage F's two ordering theorems —
+`portReactions_realizeActorPriority` and `messageServerReactions_realizeMessageServerPriority` — are
+**inert at run level**: they fix the order of the emitted reaction list, and nothing the runtime does
+consults that order. This states that inertness positively rather than as an absence, in the shape
+`docs/STAGE_E_FINDINGS.md` F50 and task `#60` used for §10.2's refuted `setPort` obligation — when an owed
+claim turns out to be false, state and prove what is true in its place.
+
+**The full argument has two halves and this is the first.** `normalize_perm`
+(`Relico/DTR/GeneralPriority.lean`) gives that stage F's sort only *permutes* the reaction list; this gives
+that `reactionFor?` is invariant under permutation. Together they say the priority sort provably cannot
+change which reaction fires. The second half — that the translator's emitted reactions really are uniquely
+triggered — is an obligation on the translator's **output**, proved separately, for the reason
+`LF.UniquelyTriggered` records: well-formedness cannot supply it, and Test 11 of
+`Relico/Tests/GeneralSemantics.lean` is the well-formed reactor that shows why.
+
+**Both programs' resolutions are hypotheses rather than one shared program, because permuting a list
+*inside* a program is not an operation this development has.** `reactionFor?` composes
+`reactorOfInstance?` with `findReactionForKind?`, so the honest statement names the two reactors that the
+two programs resolve the instance to and relates only their reaction lists. Anything stronger would need a
+program-rebuilding function no stage has needed, and inventing one to make a theorem look tidier would put
+a definition in the tree with no caller.
+-/
+theorem reactionFor?_perm
+    {left right : LF.GeneralProgram}
+    {target : ActorName}
+    {kind : LF.GeneralEventKind}
+    {leftReactor rightReactor : LF.GeneralReactor}
+    (hLeft :
+      left.reactorOfInstance? target =
+        some leftReactor)
+    (hRight :
+      right.reactorOfInstance? target =
+        some rightReactor)
+    (hPerm :
+      List.Perm
+        leftReactor.messageReactions
+        rightReactor.messageReactions)
+    (hUnique :
+      LF.UniquelyTriggered
+        leftReactor.messageReactions
+        kind) :
+    left.reactionFor? target kind =
+      right.reactionFor? target kind := by
+
+  have hLeftValue :
+      left.reactionFor? target kind =
+        LF.findReactionForKind?
+          leftReactor.messageReactions
+          kind := by
+    simp [reactionFor?, hLeft]
+
+  have hRightValue :
+      right.reactionFor? target kind =
+        LF.findReactionForKind?
+          rightReactor.messageReactions
+          kind := by
+    simp [reactionFor?, hRight]
+
+  rw [hLeftValue, hRightValue]
+
+  exact LF.findReactionForKind?_perm
+    kind
+    leftReactor.messageReactions
+    rightReactor.messageReactions
+    hPerm
+    hUnique
 
 end GeneralProgram
 
