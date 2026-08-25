@@ -8053,5 +8053,282 @@ theorem compileGeneralMessageServerReactionGroup_triggers_nodup
 
     simp at hSame
 
+/-!
+## Three tools the class-level trigger `Nodup` needs
+
+`compileGeneralMessageServerReactionGroup_triggers_nodup` above settles one group. Concatenating
+groups across a class needs strictly more than "each group is `Nodup`" — the cross-group obligation
+`List.nodup_append` hands back quantifies over the *other* group's triggers — and the three
+declarations here are exactly the missing pieces, each stated in the form that walk consumes.
+
+**Why the port half is restated rather than reused directly.**
+`assembleGeneralPortReactions_triggers_nodup` is indexed by a `compiledBody` that its own conclusion
+never mentions, because it speaks about `assembleGeneralPortReactions`. A statement about the
+*specification* list cannot supply such a body: `LF.GeneralBody` has no `Inhabited` instance, and
+inventing a phantom parameter to feed a lemma that ignores it would push that awkwardness onto every
+later caller. `generalPortReactionTriggers_nodup` below is therefore the body-free form of the same
+fact, proved by the same two steps, and it is the shape the group- and class-level statements both
+want.
+
+**Why injectivity-on-membership has to be stated here.** The cross-group argument compares a route
+into one message server against a route into another. Both live in `generalRoutesIntoClass`, whose
+port names the guard makes `Nodup`, and the two routes differ because they carry different messages —
+but getting from "different routes in a list whose image is `Nodup`" to "different images" is
+precisely the content of `eq_of_nodup_map`, which is `private` in `LF/GeneralWellFormed.lean` and out
+of reach. `nodup_map_ne_of_mem` states the contrapositive directly, which is the direction every use
+here wants, and keeps the dependency to `List.nodup_cons` and `List.mem_map`.
+-/
+
+/--
+In a list whose image under `projection` is duplicate-free, distinct members have distinct images.
+
+The positive form of the fact `eq_of_nodup_map` (`LF/GeneralWellFormed.lean:562`) states negatively,
+restated because that one is `private` in a module this file cannot reach. Stating it as an
+inequality rather than as an injectivity-on-membership equation is deliberate: every consumer here
+is discharging a `List.nodup_append` cross obligation, whose goal is already an inequality, so the
+equation form would be immediately contraposed at each of the four call sites.
+
+`∀ values` sits after `projection` so that `induction` leaves the induction hypothesis as the whole
+implication rather than only its conclusion — the placement `mem_generalRoutesIntoClass` and
+`generalRoutesIntoMessageServer_nodup_map` both use, and for the same reason.
+-/
+private theorem nodup_map_ne_of_mem
+    {α β : Type}
+    (projection : α → β) :
+    ∀ (values : List α),
+      (values.map
+        projection).Nodup →
+        ∀ first,
+          first ∈ values →
+            ∀ second,
+              second ∈ values →
+                first ≠ second →
+                  projection first ≠ projection second := by
+
+  intro values
+
+  induction values with
+
+  | nil =>
+      intro _ first hFirst
+      simp at hFirst
+
+  | cons head remaining inductionHypothesis =>
+      intro hNodup first hFirst second hSecond hDistinct
+
+      rw [
+        List.map_cons,
+        List.nodup_cons
+      ] at hNodup
+
+      rcases List.mem_cons.mp hFirst with hFirstHead | hFirstTail
+
+      · rcases List.mem_cons.mp hSecond with hSecondHead | hSecondTail
+
+        · exact
+            absurd
+              (hFirstHead.trans hSecondHead.symm)
+              hDistinct
+
+        · subst hFirstHead
+
+          intro hEqual
+
+          exact
+            hNodup.left
+              (hEqual ▸
+                List.mem_map.mpr
+                  ⟨second, hSecondTail, rfl⟩)
+
+      · rcases List.mem_cons.mp hSecond with hSecondHead | hSecondTail
+
+        · subst hSecondHead
+
+          intro hEqual
+
+          exact
+            hNodup.left
+              (hEqual.symm ▸
+                List.mem_map.mpr
+                  ⟨first, hFirstTail, rfl⟩)
+
+        · exact
+            inductionHypothesis
+              hNodup.right
+              first
+              hFirstTail
+              second
+              hSecondTail
+              hDistinct
+
+/--
+The port-reaction triggers of one message server are distinct, stated about the specification list.
+
+The body-free counterpart of `assembleGeneralPortReactions_triggers_nodup`, proved by the same two
+steps: constructor injectivity lifts the guard's port-name `Nodup` to the class-level trigger list,
+then `generalRoutesIntoMessageServer_nodup_map` descends to one server, the filtered list being a
+sublist of the class-level one in the only sense that matters — membership, which is what B1's
+`mem_generalRoutesIntoClass_of_mem_generalRoutesIntoMessageServer` supplies.
+
+Generalised from `server.name` to an arbitrary `serverName` because the class-level walk applies it
+at each server in turn, and at a server it has only the name of.
+-/
+private theorem generalPortReactionTriggers_nodup
+    (className : ClassName)
+    (serverName : MsgName)
+    (routes : List GeneralRoute)
+    (hInputPortNames :
+      ((generalInputPortsOf
+        className
+        routes).map
+        (fun port =>
+          port.name.value)).Nodup) :
+    (((generalRoutesIntoMessageServer
+      className
+      serverName
+      routes).map
+      (fun route =>
+        LF.GeneralTrigger.inputPort
+          (generalInputPortOfRoute route)))).Nodup := by
+
+  rw [
+    generalInputPortsOf_portNames
+      className
+      routes
+  ] at hInputPortNames
+
+  have hReflect :
+      ∀ (first second : GeneralRoute),
+        LF.GeneralTrigger.inputPort
+              (generalInputPortOfRoute first) =
+            LF.GeneralTrigger.inputPort
+              (generalInputPortOfRoute second) →
+          (generalInputPortOfRoute first).value =
+            (generalInputPortOfRoute second).value := by
+
+    intro first second hTrigger
+
+    simp only [
+      LF.GeneralTrigger.inputPort.injEq
+    ] at hTrigger
+
+    rw [hTrigger]
+
+  have hClassLevel :
+      ((generalRoutesIntoClass
+        className
+        routes).map
+        (fun candidate =>
+          LF.GeneralTrigger.inputPort
+            (generalInputPortOfRoute candidate))).Nodup :=
+    nodup_map_of_reflecting
+      (fun candidate =>
+        (generalInputPortOfRoute candidate).value)
+      (fun candidate =>
+        LF.GeneralTrigger.inputPort
+          (generalInputPortOfRoute candidate))
+      hReflect
+      (generalRoutesIntoClass
+        className
+        routes)
+      hInputPortNames
+
+  exact
+    generalRoutesIntoMessageServer_nodup_map
+      (fun candidate =>
+        LF.GeneralTrigger.inputPort
+          (generalInputPortOfRoute candidate))
+      className
+      serverName
+      routes
+      hClassLevel
+
+/--
+One message server's whole reaction group has distinct triggers, stated about the specification list.
+
+The body-free counterpart of `compileGeneralMessageServerReactionGroup_triggers_nodup`, and the form
+the class-level walk consumes: an induction over `generalReactionTriggersOf` never mentions a compiled
+body, so a hypothesis that needs one cannot be threaded through it.
+
+The three obligations `List.nodup_append` produces are the action half from the guard's action names,
+the port half from the guard's port names, and no action trigger equal to a port trigger — the last
+discharged by constructor disjointness alone, which is the syntax-side form of the two
+cross-constructor `false` cases in `LF.GeneralTrigger.matchesKind`.
+
+Both name hypotheses are stated at the arguments the conclusion is about rather than projected from
+`LF.GeneralReactor.declaredNames` here. That is not stylistic: `assembleGeneralReactor` builds
+`logicalActions` from `reactiveClass.messageServers` while `messageReactions` goes through
+`generalPriorityOrderedMessageServers reactiveClass`, so a projection would land on the unsorted list
+while this statement is used at whichever list its caller names. The two are permutations of each
+other — every reaction still triggers on an action its reactor declares, so there is nothing wrong
+with the translator here — but the transfer between them belongs to the step where the sort is
+visible, not buried inside this lemma.
+-/
+theorem generalMessageServerReactionTriggers_nodup
+    (className : ClassName)
+    (serverName : MsgName)
+    (selfSends : List GeneralSelfSend)
+    (routes : List GeneralRoute)
+    (hActionNames :
+      ((generalMessageActionNamesOf
+        selfSends
+        serverName).map
+        (fun name =>
+          name.value)).Nodup)
+    (hInputPortNames :
+      ((generalInputPortsOf
+        className
+        routes).map
+        (fun port =>
+          port.name.value)).Nodup) :
+    (generalMessageReactionTriggersOf
+      selfSends
+      serverName ++
+      (generalRoutesIntoMessageServer
+        className
+        serverName
+        routes).map
+        (fun route =>
+          LF.GeneralTrigger.inputPort
+            (generalInputPortOfRoute route))).Nodup := by
+
+  rw [List.nodup_append]
+
+  refine ⟨?_, ?_, ?_⟩
+
+  · rw [generalMessageReactionTriggersOf_eq_map_logicalAction]
+
+    exact
+      nodup_map_logicalAction
+        (generalMessageActionNamesOf
+          selfSends
+          serverName)
+        hActionNames
+
+  · exact
+      generalPortReactionTriggers_nodup
+        className
+        serverName
+        routes
+        hInputPortNames
+
+  · intro actionTrigger hActionTrigger portTrigger hPortTrigger
+
+    rw [
+      generalMessageReactionTriggersOf_eq_map_logicalAction
+    ] at hActionTrigger
+
+    rcases List.mem_map.mp hActionTrigger with ⟨actionName, _, hActionEq⟩
+
+    rcases List.mem_map.mp hPortTrigger with ⟨route, _, hPortEq⟩
+
+    subst hActionEq
+
+    subst hPortEq
+
+    intro hSame
+
+    simp at hSame
+
 end Translation
 end Relico
