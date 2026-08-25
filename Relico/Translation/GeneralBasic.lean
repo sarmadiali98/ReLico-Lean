@@ -7517,5 +7517,310 @@ theorem assembleGeneralPortReactions_triggers_nodup
       routes
       hClassLevel
 
+/-!
+## The reactor-level trigger list
+
+`assembleGeneralPortReactions_triggers_nodup` above states distinctness for **one message server's
+port-reaction group**. What consumes it —
+`LF.GeneralProgram.reactionFor?_perm_of_nodup_triggers` — asks for distinctness of
+`reactor.messageReactions.map (fun reaction => reaction.trigger)`, the whole reactor's list. This
+section closes that distance, and the shape it takes was forced rather than chosen.
+
+**Why a specification is unavoidable.** The direct route — induct through the `Except` layer proving
+`Nodup` of the accumulated reaction list — does not close. `Nodup` of `xs ++ ys` needs `xs` and `ys`
+to be individually duplicate-free *and disjoint from each other*, and the disjointness obligation
+quantifies over the tail's triggers. An induction hypothesis that says only "the tail is `Nodup`"
+cannot discharge it, because it does not say **what** the tail's triggers are. So the aggregation
+needs a description of the list, not merely a property of it, and the description has to come first.
+
+**The description mirrors an existing, reviewed one exactly.** `generalReactionNamesOf` and its
+three-rung ladder — `compileGeneralMessageServerReactionGroup_names`,
+`compileGeneralMessageServerReactions_names`, `compileGeneralReactiveClass_reactionNames` — already
+do this for reaction *names*. The four declarations here are the trigger analogue, rung for rung,
+and both group-level ingredients were already in the tree: `assembleGeneralMessageReactions_triggers`
+for the action half and `assembleGeneralPortReactions_triggers` for the port half. Since
+`compileGeneralMessageServerReactionGroup` is literally an append of those two assemblies,
+`List.map_append` splits the group-level goal into exactly them.
+
+**Names and triggers are independent, and that is the reason both ladders exist.** The point is
+recorded on `assembleGeneralMessageReactions_triggers`: sibling reaction names in one group are
+identical by design, so which sibling listens to which action is invisible in names. A `Nodup`
+statement about names would therefore be *false* where the trigger statement is true, and neither
+ladder can be derived from the other.
+
+**This section adds no runtime assertion, and claims none.** `generalReactionNamesOf` is checked
+against emitted output in `frontend/lean-bridge/GeneralLfPrinterTestMain.lean`;
+`generalMessageReactionTriggersOf` is not, and occurs nowhere outside this file. Proof-only is
+therefore the established precedent for the trigger side, and crediting these theorems with gate
+coverage they do not have is the shape findings **F45**, **F47** and **F59** each recorded.
+
+Stage F's level-2 sort stays visible in the last rung's right-hand side, for the reason **F60**
+gives: a version that pushed the permutation down inside the specification would prove the same
+equation while saying nothing about order.
+-/
+
+/--
+The triggers one class's reactions carry, in the order they are declared.
+
+The trigger counterpart of `generalReactionNamesOf`, and deliberately its exact shape: groups are
+**concatenated** rather than consed, because a message server reached from outside contributes more
+than one reaction, so the trigger list is longer than the server list exactly when some server is
+routed to.
+
+`selfSends`, `routes` and `className` all sit before the colon for the same reason they do there:
+none of the three varies in the recursion, and the self-send list belongs to the sending *class*, so
+it is fixed for the whole server list.
+
+The port half is written inline rather than given its own definition, again matching
+`generalReactionNamesOf`. There is nothing to name: a port reaction's trigger is its input port and
+its input port is `generalInputPortOfRoute`, so a wrapper would only restate the `map`. The action
+half *does* have a definition, `generalMessageReactionTriggersOf`, because it has real content — the
+site list decides how many actions there are and which one each reaction listens to.
+-/
+def generalReactionTriggersOf
+    (selfSends : List GeneralSelfSend)
+    (routes : List GeneralRoute)
+    (className : ClassName) :
+    List DTR.GeneralMessageServer →
+    List LF.GeneralTrigger
+
+  | [] =>
+      []
+
+  | server :: remaining =>
+      (generalMessageReactionTriggersOf
+            selfSends
+            server.name ++
+          (generalRoutesIntoMessageServer
+            className
+            server.name
+            routes).map
+            (fun route =>
+              LF.GeneralTrigger.inputPort
+                (generalInputPortOfRoute route))) ++
+        generalReactionTriggersOf
+          selfSends
+          routes
+          className
+          remaining
+
+/--
+One message server's reaction group triggers on its self-send actions first — one per site, in site
+order — then on one input port per route into it, in route order.
+
+Rung one, and the group-level half of the aggregation. The division of labour against
+`compileGeneralMessageServerReactionGroup_names` is the one the two group ingredients already draw:
+that theorem fixes how many reactions there are and what they are called, this one fixes what each
+of them listens to.
+
+The proof is the names rung with the two ingredients swapped. `List.map_append` splits the mapped
+append, and then the goal is exactly `assembleGeneralMessageReactions_triggers` on the left and
+`assembleGeneralPortReactions_triggers` on the right — the second of which is what
+`assembleGeneralPortReactions_triggers_nodup` above is stated against, so the two halves of this
+section meet at the same spelling rather than at two that need reconciling.
+
+The `Except` inversion is unavoidable: compiling a body can fail, so the group is not a function of
+the server alone, and `exists_of_compileGeneralMessageServerReactionGroup_ok` is what turns a
+successful compilation back into the append. The compiled body itself is discarded — every reaction
+in the group shares it, and no trigger mentions it.
+-/
+theorem compileGeneralMessageServerReactionGroup_triggers
+    {env : GeneralOutputPortEnv}
+    {selfSends : List GeneralSelfSend}
+    {routes : List GeneralRoute}
+    {className : ClassName}
+    {server : DTR.GeneralMessageServer}
+    {group : List LF.GeneralReaction}
+    (hCompiled :
+      compileGeneralMessageServerReactionGroup
+          env
+          selfSends
+          routes
+          className
+          server =
+        .ok group) :
+    group.map
+        (fun reaction =>
+          reaction.trigger) =
+      generalMessageReactionTriggersOf
+          selfSends
+          server.name ++
+        (generalRoutesIntoMessageServer
+          className
+          server.name
+          routes).map
+          (fun route =>
+            LF.GeneralTrigger.inputPort
+              (generalInputPortOfRoute route)) := by
+
+  rcases
+      exists_of_compileGeneralMessageServerReactionGroup_ok
+        hCompiled with
+    ⟨
+      compiledBody,
+      _,
+      hGroup
+    ⟩
+
+  subst hGroup
+
+  simp [
+    List.map_append,
+    assembleGeneralMessageReactions_triggers,
+    assembleGeneralPortReactions_triggers
+  ]
+
+/--
+Compiled reactions carry the triggers their message servers specify, groups in the order the server
+list gives them.
+
+Rung two. The list is not a `map` of the server list — a body can fail to compile — so the induction
+inverts a successful compilation at each step, which is what the two private inversion lemmas are
+for. The recursion is over the server list rather than the reaction list for the same reason the
+names rung is: the reaction list has no structure of its own to recurse on, since group lengths vary
+with routing and with self-send sites independently.
+
+Everything after the colon is universally quantified so that `induction servers` gets an induction
+hypothesis general in `compiled`. The compiled list is *not* fixed before the induction: each step
+splits it into a group and a remainder, and the remainder is what the hypothesis is applied to.
+
+Note what this rung does **not** say. It fixes the trigger list of a compiled reaction list against
+a given server list, in that server list's order; it says nothing about which server list a reactor
+is compiled from. That is rung three's content, and it is where stage F's sort enters.
+-/
+theorem compileGeneralMessageServerReactions_triggers :
+    ∀ (env : GeneralOutputPortEnv)
+      (selfSends : List GeneralSelfSend)
+      (routes : List GeneralRoute)
+      (className : ClassName)
+      (servers : List DTR.GeneralMessageServer)
+      (compiled : List LF.GeneralReaction),
+      compileGeneralMessageServerReactions
+          env
+          selfSends
+          routes
+          className
+          servers =
+          .ok compiled →
+        compiled.map
+            (fun reaction =>
+              reaction.trigger) =
+          generalReactionTriggersOf
+            selfSends
+            routes
+            className
+            servers := by
+
+  intro env selfSends routes className servers
+  induction servers with
+
+  | nil =>
+      intro compiled hCompiled
+
+      simp [
+        generalReactionTriggersOf,
+        eq_nil_of_compileGeneralMessageServerReactions_nil_ok
+          hCompiled
+      ]
+
+  | cons server remaining inductionHypothesis =>
+      intro compiled hCompiled
+
+      rcases
+          exists_of_compileGeneralMessageServerReactions_cons_ok
+            hCompiled with
+        ⟨
+          group,
+          compiledRemaining,
+          hServer,
+          hRemaining,
+          hCompiledEq
+        ⟩
+
+      subst hCompiledEq
+
+      simp [
+        generalReactionTriggersOf,
+        compileGeneralMessageServerReactionGroup_triggers
+          hServer,
+        inductionHypothesis
+          compiledRemaining
+          hRemaining
+      ]
+
+/--
+A compiled reactor's message reactions trigger on its message servers' actions and input ports, in
+**message-server priority order**.
+
+Rung three, and the statement the aggregation was built for: it describes
+`reactor.messageReactions.map (fun reaction => reaction.trigger)`, which is exactly the list
+`LF.GeneralProgram.reactionFor?_perm_of_nodup_triggers` asks to be duplicate-free. With this equation
+in hand that `Nodup` obligation becomes a question about `generalReactionTriggersOf`, a total
+function of the class and the routes, rather than a question about a compilation.
+
+`generalPriorityOrderedMessageServers reactiveClass` appears on the right, not
+`reactiveClass.messageServers`, matching `compileGeneralReactiveClass_reactionNames`. Keeping stage
+F's level-2 sort in the statement is deliberate: **F60** caught the opposite shape, where a
+permutation pushed down inside a specification let a theorem prove the same equation while saying
+nothing about order.
+
+The sort is also why the `Nodup` this rung feeds is worth having. Stage F's sort permutes whole
+groups, so it changes this list; `reactionFor?_perm_of_nodup_triggers` says that under distinct
+triggers the permutation cannot change which reaction fires. That is **F80**'s point stated
+positively — stage F's ordering theorems are run-level inert — and this equation is the last piece
+of the translator-side half of it.
+-/
+theorem compileGeneralReactiveClass_reactionTriggers
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {reactor : LF.GeneralReactor}
+    (hCompiled :
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok reactor) :
+    reactor.messageReactions.map
+        (fun reaction =>
+          reaction.trigger) =
+      generalReactionTriggersOf
+        (selfSendsOfClass
+          reactiveClass)
+        routes
+        reactiveClass.name
+        (generalPriorityOrderedMessageServers
+          reactiveClass) := by
+
+  rcases
+      exists_of_compileGeneralReactiveClass_ok
+        hCompiled with
+    ⟨
+      env,
+      _,
+      compiledMessageReactions,
+      _,
+      _,
+      hMessageServers,
+      hReactor
+    ⟩
+
+  subst hReactor
+
+  rw [
+    assembleGeneralReactor_messageReactions
+  ]
+
+  exact
+    compileGeneralMessageServerReactions_triggers
+      env
+      (selfSendsOfClass reactiveClass)
+      routes
+      reactiveClass.name
+      (generalPriorityOrderedMessageServers
+        reactiveClass)
+      compiledMessageReactions
+      hMessageServers
+
 end Translation
 end Relico
