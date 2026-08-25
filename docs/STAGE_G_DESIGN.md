@@ -522,6 +522,36 @@ instantiate the foundation. **F70**.
    triggers, plus the fact that the translator always makes them distinct. **Lemma 3 (item 4) is untouched**
    — it is priority-free.
 4. `generalCausalityPreservation` — Lemma 3, over `after d` delays, reusing stage E's delay machinery.
+
+   **Expanded 2026-08-25, before authoring, because this line was the whole specification.** Lemma 3 is
+   never stated anywhere in `docs/`, and the phrase *"Causality Preservation"* — its actual name — appeared
+   in no document here until now, so the obligation was carried through the stage as a name without content.
+   Verbatim: *"Let `ms_i` in actor `x` send a message to `ms_j` in actor `y` with delay `d ≥ 0`. Then the
+   corresponding LF reactions `r_i` in `map_A(x)` and `r_j` in `map_A(y)` satisfy `TT_i < TT_j`."* Three
+   things follow that this line did not say.
+
+   First, **the conclusion is strict and no strict tag order exists.** `Relico/LF/Scheduling.lean` defines
+   `LF.Tag.PrecedesOrEqual` and five lemmas about it; there is no `Tag`-level strict precedence anywhere in
+   the repository. So the statement needs either a new strict definition or the `PrecedesOrEqual ∧ ≠`
+   phrasing, and either way it is new API — the same omission class as the quiescence lemma of item 5's
+   backward direction, which §7 also did not list. Note `namespace Tag` is reopened in **five** files, so the
+   *qualified* name must be grepped across all of them before anything is added.
+
+   Second, **the non-strict half is already landed and is family-independent.**
+   `LF.Tag.precedesOrEqual_schedule` proves `PrecedesOrEqual currentTag (Tag.schedule currentTag delay)` for
+   every delay, by cases on `delay.value = 0`. It lives in `Relico/LF/PendingNotPast.lean` — a file with no
+   general-family content at all — but it is a `Tag` lemma, so the general family may use it directly. Only
+   the strict upgrade is genuinely new. *"Reusing stage E's delay machinery"* pointed at the wrong place:
+   what is reusable here is a tag lemma sitting in a multi-store file.
+
+   Third, **the paper's proof of this lemma is defective in two ways, and neither breaks the lemma** — see
+   **P26**. Its `d > 0` case states `TT_j = (t + d, m)` where the paper's own `upd` yields `(t + d, 0)`; the
+   conclusion survives because `t < t + d` settles the lexicographic order first. And both its cases
+   attribute the tag to an *"LF connection with `after d`"*, while its statement never requires `x ≠ y`, so
+   the self-send route — which §III maps to `schedule()` on a logical action — has no case. Our side is
+   uniform over both routes because one `Tag.schedule` serves `LF.GeneralStep.schedule` and
+   `LF.GeneralStep.setPort` alike, so the theorem we state is the one the paper's proof was reaching for.
+   **Lemma 3 is priority-free and is therefore untouched by F76 and F80** — it is the row's authorable core.
 5. `generalWeakBisimulation_forward` / `_backward` — Definition 1's two transfer conditions, each
    producing a *weak* transition `τ* γ τ*` on the other side. **This item is REFUTED as written — see
    F76**, measured 2026-08-25 before any row 8 Lean existed. The two run-level selectors disagree:

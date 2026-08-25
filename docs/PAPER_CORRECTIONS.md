@@ -997,3 +997,84 @@ are what made the multiplicity visible here, but the defect survives any naming 
 is about a self-send contending with an external send at one tag — a *selection* question, whereas this is a
 question about what the labels can say. All four neighbours were read before this number was opened.
 
+---
+
+## P26 — Lemma 3's positive-delay case states a tag the paper's own `upd` cannot produce, and its proof covers only the connection route its statement does not restrict to
+
+**Claim in the paper:** the LF-semantics preliminaries define the tag-update operator, *"We also use
+`upd(TT, d)` to update the time tag `TT` according to the delay `d` as follows"*:
+
+```
+upd((t, m), d) =  (t + d, 0)   if d > 0
+                  (t, m + 1)   if d = 0
+```
+
+Lemma 3 (Causality Preservation) then reads *"Let `ms_i` in actor `x` send a message to `ms_j` in actor `y`
+with delay `d ≥ 0`. Then the corresponding LF reactions `r_i` in `map_A(x)` and `r_j` in `map_A(y)` satisfy
+`TT_i < TT_j`."* Its proof is two cases: *"Let `ms_i` execute at logical time `t`. By Lemma 1, `r_i` has tag
+`TT_i = (t, m)`. Case `d > 0`: DTR processes `ms_j` at `t + d`; LF connection with `after d` gives
+`TT_j = (t + d, m)`. Case `d = 0`: DTR processes `ms_j` at same `t`; LF connection with `after 0ms` yields
+`TT_j = (t, m + 1)`. Hence `(t, m) < (t, m + 1)`."*
+
+**Why the positive-delay case is wrong.** `upd` resets the microstep to zero whenever `d > 0`, so the tag is
+`(t + d, 0)` and not `(t + d, m)`. The proof states a value its own operator does not return, in a document
+that defines that operator explicitly and correctly. The zero-delay case is consistent with `upd` and is not
+at issue here — it is at issue in **P24**, for an unrelated reason.
+
+**The conclusion survives, and recording that is half the point of this entry.** With `TT_i = (t, m)` and
+`TT_j = (t + d, 0)` for `d > 0`, the lexicographic order is settled by `t < t + d` before the microsteps are
+ever compared, so `TT_i < TT_j` holds under the correct tag exactly as it does under the stated one. This is
+therefore a defect in the **proof text**, not in the lemma, and a corrected paper fixes it by substitution
+rather than by reworking the argument. Overstating it would be the error; a reader who patches `(t + d, m)`
+to `(t + d, 0)` has fixed everything this half of the entry asks for.
+
+**The contrast that makes it a slip rather than a misunderstanding.** Lemma 1's send case, in the same proof
+section, gets this right: *"LF schedules a trigger at time `upd((t′, m), d)`, which has logical time
+`t′ + d = t + d` which matches the DTR arrival time."* It names the operator instead of evaluating it by
+hand, and claims only the logical-time component — the component it needs. Lemma 3 evaluates the operator
+inline and mis-evaluates it. The paper knows the rule where it is careful to invoke it.
+
+**The second defect: the proof's mechanism does not cover the case its statement admits.** Lemma 3 is stated
+over *"`ms_i` in actor `x` send a message to `ms_j` in actor `y`"* and **never requires `x ≠ y`**. Both cases
+of the proof attribute the resulting tag to an *"LF connection with `after d`"* / *"`after 0ms`"* — the
+external-send route only. But §III maps an internal send to a different construct entirely: *"The internal
+send `self.msg()` in DTR is mapped to a `schedule()` call on a corresponding logical action `msg` in LF."*
+There is no connection in that translation, so for `x = y` the mechanism the proof reasons about does not
+exist, and the lemma has no case for the route its own statement covers. A self-send is not a corner of the
+fragment — it is the idiom every periodic and every recursive Rebeca model is written in.
+
+**The repair is one the paper is already holding.** `upd` is the operator **both** routes reach: a connection
+with `after d` and a `schedule()` with delay `d` both stamp the new tag by `upd(TT, d)`. So restating both
+cases over `upd(TT_i, d)` instead of over connections covers `x = y` and `x ≠ y` at once, and it fixes the
+first defect in the same stroke, because naming the operator is precisely what stops it being mis-evaluated.
+The two defects have one edit.
+
+**Evidence:** grade (c) for both, every passage quoted from the PDF — the `upd` display, Lemma 3's statement
+and proof, Lemma 1's send case, and §III's internal-send mapping. Grade (a) corroboration for what the
+operator actually does comes from this repository's landed transcription of it: `LF.Tag.schedule`
+(`Relico/LF/State.lean`) branches on `delay.value = 0` to `⟨time, microstep + 1⟩` and otherwise to
+`⟨LogicalTime.after time delay, 0⟩`, with `schedule_zero` and `schedule_positive` pinning the two branches
+and `schedule_time` pinning the logical-time component across both. The uniformity claim is measured too:
+the same `LF.Tag.schedule` serves **both** general-family send rules — `LF.GeneralStep.schedule` for the
+logical-action route and `LF.GeneralStep.setPort` for the connection route — and `setPort`'s docstring records
+this as *"a measured fact about the printer rather than an assumption"*, because
+`LF.renderGeneralConnection` emits `" after " ++ renderLfTime connection.delay` **unconditionally** and
+`renderLfTime` renders a zero delay as `0 msec` rather than as nothing. So the repo's model is uniform over
+the two routes exactly where the paper's proof is not, and it is uniform for a reason that was checked
+against the printer rather than assumed.
+
+**Suggested edit:** in Lemma 3's proof, replace `TT_j = (t + d, m)` with `TT_j = (t + d, 0)`, and restate
+both cases over `upd(TT_i, d)` rather than over the connection, adding a clause noting that an internal send
+reaches the same operator through `schedule()`. No change to the statement of Lemma 3 is needed, and none to
+its use in Theorem 1's Send case, which already invokes `upd(η_r(TT), d)` by name.
+
+**What this entry is not.** It is not **P24**, which is about the `d = 0` branch of the same operator and
+about the *label* the resulting LF time step carries — P24 transcribes `upd` correctly and breaks Theorem 1
+with it, whereas P26 is the `d > 0` branch and is about Lemma 3's proof text disagreeing with the definition
+P24 quotes. Neither entry weakens the other and the two must not be merged: P24 refutes a theorem, P26
+corrects a proof whose theorem stands. It is not **P19**, which is about `Connection`'s `after` clause being
+optional in Fig. 5 and mandatory in §III-E; that entry is about which connections may be emitted, this one
+about a case where no connection is emitted at all. It is not **P25**, which is about `ϕ` and the
+message-server-to-reaction multiplicity. All three neighbours were read before this number was opened.
+
+
