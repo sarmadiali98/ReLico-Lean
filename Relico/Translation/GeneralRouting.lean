@@ -4127,5 +4127,382 @@ theorem generalRoutesIntoMessageServer_append
           inductionHypothesis
         ]
 
+/-!
+## Duplicate-free port names, on the route side
+
+`docs/STAGE_G_FINDINGS.md` F80 asks row 8 not for a weakened Lemma 2 but for the refutation stated
+as a theorem, in two halves. The first half is landed, in `Relico/LF/GeneralSemantics.lean` as
+`LF.GeneralProgram.reactionFor?_perm_of_nodup_triggers`: reaction lookup stops reading declaration
+order once the triggers are pairwise distinct. The second half is that the translator's triggers
+*are* pairwise distinct — and that half is **guard relative**, not unconditional. F42 in
+`docs/STAGE_E_FINDINGS.md` refutes injectivity of `inputPortNameFor`: `capitalizeName` folds case,
+so senders `hub` and `Hub` name one input port, and both spellings are legal Rebeca. What makes the
+emitted port triggers distinct is therefore not that a collision cannot arise. It is that
+`LF.GeneralReactor.declaredNames` carries those same names and `decide declaredNames.Nodup` is one
+of `LF.GeneralReactor.wellFormed`'s conjuncts, so a colliding program is **refused**. That is the
+third appearance of the shape F50 and `#60` gave §10.2's refuted `setPort` obligation: the property
+is inherited from a decided guard clause, never claimed by construction.
+
+This module owes that argument its route-level combinatorics and nothing more. The guard clause is
+in `LF.GeneralWellFormed`, which this file deliberately does not import — the same restriction
+recorded at `generalConnectionsOf_targetEndpoints_nodup` above — and the reaction assembly is in
+`Relico/Translation/GeneralBasic.lean`, so the statement that closes the argument lives there.
+Three facts travel from here: duplicate freedom passes from a finer projection to a coarser one that
+reflects its collisions; the message-server filter keeps only routes the class filter keeps; and
+therefore duplicate freedom passes from the class filter to the message-server filter.
+
+`List.Sublist` would say the second of those more directly and is still not used, for the reason the
+section above gives. A membership implication says exactly as much as the induction consumes.
+
+Appended at file end, on the convention stated above.
+-/
+
+/--
+Duplicate freedom passes from a finer projection to a coarser one, provided the coarse projection
+reflects the collisions of the fine one.
+
+`hReflect` is the whole content: two values agreeing under `target` agree under `source`, so a
+duplicate under `target` produces a duplicate under `source`, which `source`'s duplicate freedom
+forbids. Stated list-locally — `∀ first second`, not `Function.Injective` — for the reason
+`LF.GeneralWellFormed`'s `eq_of_nodup_map` gives, except that here the weakness is not even needed
+yet and is taken because the projections this is used with are injective on the routes surviving a
+filter and on nothing wider.
+
+Not `nodup_map_of_injective` (`Relico/Correctness/MultiStoreStructural.lean`, `private`), which runs
+the other way — from duplicate freedom of the *list* to duplicate freedom of a map of it, under
+global injectivity — and sits in a module this one cannot import.
+
+The direction of use is structured names from string names: the guard decides `Nodup` of a list of
+`String`, a trigger holds a `PortName`, and `PortName` collisions reflect into `String` collisions
+because `PortName.value` is a function.
+-/
+theorem nodup_map_of_reflecting
+    {α β γ : Type}
+    (source : α → β)
+    (target : α → γ)
+    (hReflect :
+      ∀ (first second : α),
+        target first = target second →
+          source first = source second) :
+    ∀ (values : List α),
+      (values.map source).Nodup →
+        (values.map target).Nodup := by
+
+  intro values
+  induction values with
+
+  | nil =>
+      intro _
+      simp
+
+  | cons head remaining inductionHypothesis =>
+      intro hNodup
+
+      rw [List.map_cons] at hNodup
+
+      cases hNodup with
+
+      | cons hHeadFresh hTail =>
+
+          constructor
+
+          · intro mapped hMapped hEqual
+
+            rcases
+                List.mem_map.mp
+                  hMapped
+              with
+                ⟨witness,
+                 hWitness,
+                 hMappedWitness⟩
+
+            exact
+              hHeadFresh
+                (source witness)
+                (List.mem_map.mpr
+                  ⟨witness,
+                   hWitness,
+                   rfl⟩)
+                (hReflect
+                  head
+                  witness
+                  (hEqual.trans
+                    hMappedWitness.symm))
+
+          · exact
+              inductionHypothesis
+                hTail
+
+/--
+Every route the message-server filter keeps, the class filter keeps too.
+
+The stronger filter tests the pair `(receiverClass, message)` where the weaker one tests
+`receiverClass` alone, so this is the one-line content of the two filters standing in a refinement
+relation. Said as a membership implication rather than with `List.Sublist`, which the section above
+excludes by a recorded decision and which would supply nothing the induction below uses: the
+`Nodup` transfer needs to know that the head's collisions have not grown, and membership is exactly
+that.
+
+Mirrors `mem_generalRoutesIntoClass` above in shape, including the `∀ routes` placed after the fixed
+route so that the induction hypothesis is the implication rather than only its conclusion. The
+`(head.receiverClass, head.message)` case split is the one `generalRoutesIntoMessageServer_append`
+uses, and `Prod.mk.injEq` recovers the class component the weaker filter tests, the way
+`generalRouteEndpoints_nodup` recovers it above.
+-/
+theorem mem_generalRoutesIntoClass_of_mem_generalRoutesIntoMessageServer
+    (className : ClassName)
+    (message : MsgName)
+    (route : GeneralRoute) :
+    ∀ (routes : List GeneralRoute),
+      route ∈
+        generalRoutesIntoMessageServer
+          className
+          message
+          routes →
+        route ∈
+          generalRoutesIntoClass
+            className
+            routes := by
+
+  intro routes
+  induction routes with
+
+  | nil =>
+      intro hMember
+
+      simp [
+        generalRoutesIntoMessageServer
+      ] at hMember
+
+  | cons head remaining inductionHypothesis =>
+      intro hMember
+
+      by_cases hMatch :
+          (head.receiverClass,
+            head.message) =
+            (className, message)
+
+      · have hPair := hMatch
+
+        simp only [
+          Prod.mk.injEq
+        ] at hPair
+
+        rw [
+          generalRoutesIntoMessageServer_cons_self
+            className
+            message
+            head
+            remaining
+            hMatch
+        ] at hMember
+
+        rw [
+          generalRoutesIntoClass_cons_self
+            className
+            head
+            remaining
+            hPair.left,
+          List.mem_cons
+        ]
+
+        cases List.mem_cons.mp hMember with
+
+        | inl hEqual =>
+            exact Or.inl hEqual
+
+        | inr hTail =>
+            exact
+              Or.inr
+                (inductionHypothesis
+                  hTail)
+
+      · rw [
+          generalRoutesIntoMessageServer_cons_of_ne
+            className
+            message
+            head
+            remaining
+            hMatch
+        ] at hMember
+
+        by_cases hClass :
+            head.receiverClass = className
+
+        · rw [
+            generalRoutesIntoClass_cons_self
+              className
+              head
+              remaining
+              hClass,
+            List.mem_cons
+          ]
+
+          exact
+            Or.inr
+              (inductionHypothesis
+                hMember)
+
+        · rw [
+            generalRoutesIntoClass_cons_of_ne
+              className
+              head
+              remaining
+              hClass
+          ]
+
+          exact
+            inductionHypothesis
+              hMember
+
+/--
+Duplicate freedom transfers from the class filter to the message-server filter.
+
+The composite of the two facts above, and the form the reaction assembly needs: the guard decides
+duplicate freedom once per receiving *class*, while port reactions are assembled one message
+*server* at a time, so the property has to survive the second filter. The head step is the whole
+argument — a later route colliding with the head under `projection` survives the weaker filter too,
+by the membership implication above, and the class-level hypothesis forbids it there.
+
+Proved by the same induction as the two `cons` equations rather than by a general `List.filter`
+lemma, because neither filter is a `List.filter` application; each is its own recursion, for the
+reason `generalRoutesIntoClass`'s docstring gives.
+
+`projection` stays arbitrary so that the caller chooses it — the input port name for the guard's
+clause, the trigger for the lookup theorem — and `nodup_map_of_reflecting` above is what relates the
+two choices.
+-/
+theorem generalRoutesIntoMessageServer_nodup_map
+    {β : Type}
+    (projection : GeneralRoute → β)
+    (className : ClassName)
+    (message : MsgName) :
+    ∀ (routes : List GeneralRoute),
+      ((generalRoutesIntoClass
+        className
+        routes).map
+        projection).Nodup →
+        ((generalRoutesIntoMessageServer
+          className
+          message
+          routes).map
+          projection).Nodup := by
+
+  intro routes
+  induction routes with
+
+  | nil =>
+      intro _
+
+      simp [
+        generalRoutesIntoMessageServer
+      ]
+
+  | cons head remaining inductionHypothesis =>
+      intro hNodup
+
+      by_cases hMatch :
+          (head.receiverClass,
+            head.message) =
+            (className, message)
+
+      · have hPair := hMatch
+
+        simp only [
+          Prod.mk.injEq
+        ] at hPair
+
+        rw [
+          generalRoutesIntoClass_cons_self
+            className
+            head
+            remaining
+            hPair.left,
+          List.map_cons
+        ] at hNodup
+
+        rw [
+          generalRoutesIntoMessageServer_cons_self
+            className
+            message
+            head
+            remaining
+            hMatch
+        ]
+
+        cases hNodup with
+
+        | cons hHeadFresh hTail =>
+
+            constructor
+
+            · intro mapped hMapped hEqual
+
+              rcases
+                  List.mem_map.mp
+                    hMapped
+                with
+                  ⟨witness,
+                   hWitness,
+                   hMappedWitness⟩
+
+              exact
+                hHeadFresh
+                  mapped
+                  (List.mem_map.mpr
+                    ⟨witness,
+                     mem_generalRoutesIntoClass_of_mem_generalRoutesIntoMessageServer
+                       className
+                       message
+                       witness
+                       remaining
+                       hWitness,
+                     hMappedWitness⟩)
+                  hEqual
+
+            · exact
+                inductionHypothesis
+                  hTail
+
+      · rw [
+          generalRoutesIntoMessageServer_cons_of_ne
+            className
+            message
+            head
+            remaining
+            hMatch
+        ]
+
+        by_cases hClass :
+            head.receiverClass = className
+
+        · rw [
+            generalRoutesIntoClass_cons_self
+              className
+              head
+              remaining
+              hClass,
+            List.map_cons
+          ] at hNodup
+
+          cases hNodup with
+
+          | cons _ hTail =>
+              exact
+                inductionHypothesis
+                  hTail
+
+        · rw [
+            generalRoutesIntoClass_cons_of_ne
+              className
+              head
+              remaining
+              hClass
+          ] at hNodup
+
+          exact
+            inductionHypothesis
+              hNodup
+
 end Translation
 end Relico
