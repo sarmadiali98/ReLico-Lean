@@ -715,5 +715,184 @@ theorem generalTimeAdvance_backward_weak
       hStep
       (Common.TauSteps.refl _)
 
+/-!
+## Reaction order is not observable at the weak level either
+
+The closing rung of `#106` item 3, and the last thing F80 asked row 8 for. F80's sentence is that every
+`LF.GeneralStep` derivation is invariant under permuting a reactor's `messageReactions`, "and hence
+`LF.GeneralStep`" — the step relation, not just the lookup. Three pieces meet here, each proved where it
+belonged and none of them mentioning the other two:
+
+* `Common.WeakStep.mono` — a weak transition survives a pointwise weakening of the step relation. Generic
+  to the foundation, so it lives in `Relico/Common/WeakTransition.lean` with no consumer in its own file.
+* `LF.GeneralStep.congr_of_projections` — two programs agreeing on `connections` and on `reactionFor?`
+  admit the same steps. The whole content of that theorem is that `GeneralStep` reads its program through
+  **exactly two** projections, which is a fact about the inductive and belongs beside it.
+* `Correctness.generalReactionFor?_perm_of_compiled_pointwise` — the translator's output resolves reactions
+  the same way under any reordering, at every instance. That one mentions the translator and the target
+  semantics at once, so `Correctness/` is its boundary.
+
+This module is the only place in the repository that can see all three: it imports
+`Relico.Common.WeakTransition` directly and reaches `Relico.Correctness.GeneralCorrespondence` through
+`Relico.Correctness.GeneralTimeEquivalence`. `GeneralCorrespondence.lean` itself cannot host the
+composition — it never imports `Common.WeakTransition`, and `Relico/LF/GeneralSemantics.lean` records
+under **F70** that instantiating `Common.WeakStep` is G2c's job rather than the foundation's.
+
+**No `TauSteps` counterpart is stated.** `WeakStep.mono` consumes `TauSteps.mono` internally on its three
+internal segments, so a general-family `TauSteps` wrapper would be a declaration with no caller — F75's
+defect, which this stage has now recorded twice.
+
+**No biconditional either, and that is a difference from the step level rather than an oversight.**
+`LF.GeneralStep.congr_iff_of_projections` is two-way because both of its hypotheses are symmetric
+equations. The composition below is not symmetric: the translator hypothesis sits on `left` only, exactly
+as `generalReactionFor?_perm_of_compiled` intends — its docstring says `right` "is not required to be a
+translation of anything". Turning this into an `Iff` would force a translation hypothesis onto the
+reordered side, strengthening a premise that was deliberately left one-sided. The two-way statement
+belongs at the step level, where it is free.
+-/
+
+/--
+A weak transition of the target semantics survives replacing the program by one with the same
+`connections` and the same `reactionFor?`.
+
+Nothing here is about permutation or about the translator; it is `Common.WeakStep.mono` instantiated at
+`LF.GeneralStep`, with `LF.GeneralStep.congr_of_projections` supplying the pointwise implication. Stated
+separately from the composition below because the two hypotheses are the honest interface — a caller
+holding them for any reason at all, not only because one side is a reordering of a translated program,
+gets the conclusion.
+-/
+theorem generalWeakStep_congr_of_projections
+    {left right : LF.GeneralProgram}
+    {state next : LF.GeneralRuntimeState}
+    {label : LF.GeneralLabel}
+    (hConnections :
+      left.connections = right.connections)
+    (hReactionFor :
+      ∀ (target : ActorName)
+        (kind : LF.GeneralEventKind),
+        left.reactionFor? target kind =
+          right.reactionFor? target kind)
+    (hWeakStep :
+      Common.WeakStep
+        (LF.GeneralStep left)
+        LF.GeneralLabel.isTau
+        state
+        label
+        next) :
+    Common.WeakStep
+      (LF.GeneralStep right)
+      LF.GeneralLabel.isTau
+      state
+      label
+      next :=
+  Common.WeakStep.mono
+    (fun _before _transitionLabel _after hStep =>
+      LF.GeneralStep.congr_of_projections
+        hConnections
+        hReactionFor
+        hStep)
+    hWeakStep
+
+/--
+**F80's closing statement.** Reordering the message reactions of a translated reactor changes no weak
+transition of the target semantics.
+
+This is the run-level refutation of Lemma 2 in its strongest available form. Stage F's two ordering
+theorems — `portReactions_realizeActorPriority` and
+`messageServerReactions_realizeMessageServerPriority` — fix the order of the emitted reaction list, and
+this says that order is invisible not merely to the reaction lookup, not merely to a single step, but to
+whole weak transitions with their internal τ traffic on both sides. F80 calls those theorems *inert* at
+run level; this is the positive form of that word, in the `#60`/F50 shape the repository uses whenever an
+owed claim turns out to be false.
+
+`hConnections` is `rfl` for the caller this is written for, since permuting a reaction list inside one
+reactor leaves the connection list untouched; it is a hypothesis rather than an assumption because there
+is no program-rebuilding function to make it an equation about.
+
+**What this does not do is unblock `#129`.** Both programs here are targets. The `.consume` transfer
+conditions compare a *source* step against a target one, and they still wait on F76's repair decision,
+which is not a consequence of anything proved here. F80 narrowed the candidate space for that decision;
+it did not make it.
+
+The premises `generalReactionFor?_perm_of_compiled_pointwise` inherits are guard-relative and, per **F81**,
+have no public discharger yet, so this theorem is sound and satisfiable but not yet applicable to a
+concrete translated program without assuming them. `hElsewhere` is the one premise **F82** adds, and F82
+records why the closing theorem needs it at all.
+-/
+theorem generalWeakStep_perm_of_compiled
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List Translation.GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {leftReactor rightReactor : LF.GeneralReactor}
+    {left right : LF.GeneralProgram}
+    {target : ActorName}
+    {state next : LF.GeneralRuntimeState}
+    {label : LF.GeneralLabel}
+    (hCompiled :
+      Translation.compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok leftReactor)
+    (hInputPortNames :
+      ((Translation.generalInputPortsOf
+        reactiveClass.name
+        routes).map
+        (fun port =>
+          port.name.value)).Nodup)
+    (hActionNames :
+      ((Translation.generalActionNamesOf
+        (Translation.selfSendsOfClass
+          reactiveClass)
+        reactiveClass.messageServers).map
+        (fun name =>
+          name.value)).Nodup)
+    (hServerNames :
+      (reactiveClass.messageServers.map
+        (fun server =>
+          server.name)).Nodup)
+    (hLeft :
+      left.reactorOfInstance? target =
+        some leftReactor)
+    (hRight :
+      right.reactorOfInstance? target =
+        some rightReactor)
+    (hPerm :
+      List.Perm
+        leftReactor.messageReactions
+        rightReactor.messageReactions)
+    (hConnections :
+      left.connections = right.connections)
+    (hElsewhere :
+      ∀ (other : ActorName),
+        other ≠ target →
+        left.reactorOfInstance? other =
+          right.reactorOfInstance? other)
+    (hWeakStep :
+      Common.WeakStep
+        (LF.GeneralStep left)
+        LF.GeneralLabel.isTau
+        state
+        label
+        next) :
+    Common.WeakStep
+      (LF.GeneralStep right)
+      LF.GeneralLabel.isTau
+      state
+      label
+      next :=
+  generalWeakStep_congr_of_projections
+    hConnections
+    (generalReactionFor?_perm_of_compiled_pointwise
+      hCompiled
+      hInputPortNames
+      hActionNames
+      hServerNames
+      hLeft
+      hRight
+      hPerm
+      hElsewhere)
+    hWeakStep
+
 end Correctness
 end Relico

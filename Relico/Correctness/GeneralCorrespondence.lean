@@ -751,5 +751,103 @@ theorem generalReactionFor?_perm_of_compiled
       hActionNames
       hServerNames)
 
+/--
+The same fact at **every** instance and every event kind, which is the shape a step-level consumer needs.
+
+`generalReactionFor?_perm_of_compiled` above is stated at one `target` and one `kind`, and those two
+restrictions are not alike. The `kind` half is not a restriction at all: no hypothesis of that theorem
+mentions `kind`, so quantifying over it is `fun kind => …` and costs nothing. The `target` half is real,
+because `hLeft` and `hRight` pin the one instance whose reactor is permuted and **nothing constrains
+either program anywhere else**.
+
+Hence `hElsewhere`, and hence **F82**. A `GeneralStep` derivation may resolve reactions at any instance
+the runtime reaches, so a statement about one permuted reactor cannot become a statement about the step
+relation without saying what the two programs do at the other instances. What holds of the situation this
+theorem exists for — one reactor's reaction list reordered, the rest of the program untouched — is that
+they agree there, so that is stated as a hypothesis. It is *not* built into a program-rebuilding function,
+for the reason `LF.GeneralProgram.reactionFor?_perm` records: no stage has needed one, and inventing one
+here would put a definition in the tree with no caller.
+
+The proof splits on whether the instance asked about is the permuted one. Off it, the resolutions agree
+because `reactionFor?` matches on `reactorOfInstance?` and on nothing else, so rewriting the lookup is the
+whole argument — the same move `reactionFor?_perm` makes at both of its own `simp` calls.
+-/
+theorem generalReactionFor?_perm_of_compiled_pointwise
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List Translation.GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {leftReactor rightReactor : LF.GeneralReactor}
+    {left right : LF.GeneralProgram}
+    {target : ActorName}
+    (hCompiled :
+      Translation.compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok leftReactor)
+    (hInputPortNames :
+      ((Translation.generalInputPortsOf
+        reactiveClass.name
+        routes).map
+        (fun port =>
+          port.name.value)).Nodup)
+    (hActionNames :
+      ((Translation.generalActionNamesOf
+        (Translation.selfSendsOfClass
+          reactiveClass)
+        reactiveClass.messageServers).map
+        (fun name =>
+          name.value)).Nodup)
+    (hServerNames :
+      (reactiveClass.messageServers.map
+        (fun server =>
+          server.name)).Nodup)
+    (hLeft :
+      left.reactorOfInstance? target =
+        some leftReactor)
+    (hRight :
+      right.reactorOfInstance? target =
+        some rightReactor)
+    (hPerm :
+      List.Perm
+        leftReactor.messageReactions
+        rightReactor.messageReactions)
+    (hElsewhere :
+      ∀ (other : ActorName),
+        other ≠ target →
+        left.reactorOfInstance? other =
+          right.reactorOfInstance? other) :
+    ∀ (instanceName : ActorName)
+      (kind : LF.GeneralEventKind),
+      left.reactionFor? instanceName kind =
+        right.reactionFor? instanceName kind := by
+
+  intro instanceName kind
+
+  by_cases hSame : instanceName = target
+
+  · subst hSame
+
+    exact
+      generalReactionFor?_perm_of_compiled
+        hCompiled
+        hInputPortNames
+        hActionNames
+        hServerNames
+        hLeft
+        hRight
+        hPerm
+
+  · have hLookup :
+        left.reactorOfInstance? instanceName =
+          right.reactorOfInstance? instanceName :=
+      hElsewhere
+        instanceName
+        hSame
+
+    simp
+      [LF.GeneralProgram.reactionFor?,
+       hLookup]
+
 end Correctness
 end Relico

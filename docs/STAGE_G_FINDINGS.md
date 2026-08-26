@@ -2426,4 +2426,75 @@ against artefacts, this one is about a claim that was never checkable from the p
 The check is cheap and belongs in every commit that lands a guard-relative theorem — for each
 hypothesis, name the declaration that concludes it, or record that none does.
 
+## F82 — the invariance F80 asked for holds, but only against a premise about every part of the program the permutation did not touch, and F80's own sentence has no room for it
+
+F80 asks for the refutation of Lemma 2's run-level content "stated as a theorem", in the shape
+`reactionFor?` is permutation-invariant "and hence `LF.GeneralStep`". Item 3 delivers that, and the
+delivery is clean: `Common.WeakStep.mono`, `LF.GeneralStep.congr_of_projections` and
+`Correctness.generalReactionFor?_perm_of_compiled_pointwise` compose into
+`Correctness.generalWeakStep_perm_of_compiled`, which says that reordering a translated reactor's message
+reactions changes no weak transition. What is worth recording is the premise that composition needed and
+F80 did not name.
+
+**The measurement.** `generalReactionFor?_perm_of_compiled` is stated at one instance and one event kind,
+and those two restrictions behave differently. The `kind` restriction is not one: no hypothesis of that
+theorem mentions `kind`, so quantifying over it is `fun kind => …`. The instance restriction is real.
+`hLeft` and `hRight` pin the instance whose reactor is permuted, and **nothing in the statement constrains
+either program at any other instance** — the two programs may disagree arbitrarily elsewhere and the
+theorem still holds, because it never looks there.
+
+The step relation does look there. `LF.GeneralStep.fire` resolves its reaction at `event.target`, and the
+event is chosen by the runtime out of the pending queue, not by whoever states the theorem. So a claim
+about one permuted reactor cannot become a claim about the step relation without saying what the two
+programs do at the instances the permutation left alone. The closing theorem therefore carries
+
+```
+hElsewhere : ∀ other, other ≠ target → left.reactorOfInstance? other = right.reactorOfInstance? other
+```
+
+which is true of the situation the theorem exists for and absent from the sentence that commissioned it.
+
+**Why a hypothesis and not a construction.** The alternative is a function that rebuilds a program with one
+reactor's reaction list permuted, from which `hElsewhere` would follow by computation. That function does
+not exist, and `LF.GeneralProgram.reactionFor?_perm` already records why it should not be written: no stage
+has needed it, and adding it so that a theorem reads more tidily puts a definition in the tree with no
+caller. The premise is the honest form. It also composes: the caller that eventually applies this — the
+`.consume` case, once F76 is decided — will hold `hElsewhere` for the same reason it holds `hConnections`,
+namely that it permuted one list and touched nothing else.
+
+**What it costs.** One more guard-relative premise, on top of the three F81 measured. The count of premises
+with no public discharger in this ladder is now four, and the honest reading of that is not that the
+theorem is weak but that the ladder has consistently chosen to state true things against decidable
+hypotheses rather than to widen module surfaces ahead of consumers.
+
+**Two things deliberately not stated, recorded so their absence does not read as an oversight.** There is no
+general-family `TauSteps` corollary: `WeakStep.mono` consumes `TauSteps.mono` internally on its three
+segments, so a wrapper would have no caller. And there is no biconditional at the weak level, although
+there is one at the step level (`LF.GeneralStep.congr_iff_of_projections`) — the step-level hypotheses are
+symmetric equations, whereas the weak-level composition carries a translator hypothesis on one side only,
+which `generalReactionFor?_perm_of_compiled` intends ("`right` is not required to be a translation of
+anything"). An `Iff` here would force a translation hypothesis onto the reordered side.
+
+**A placement fact worth keeping.** `Relico/Correctness/GeneralWeakBisimulation.lean` is the only module in
+the repository that can see all three ingredients: it imports `Relico.Common.WeakTransition` directly and
+reaches `Relico.Correctness.GeneralCorrespondence` through `Relico.Correctness.GeneralTimeEquivalence`.
+`GeneralCorrespondence.lean` cannot host the composition — it never imports `Common.WeakTransition` — and
+`Relico/LF/GeneralSemantics.lean` records under F70 that instantiating `Common.WeakStep` is G2c's job, not
+the foundation's. The composition's home was therefore forced by the import graph, which is the third time
+in this stage that graph has decided a placement rather than taste deciding it.
+
+### The transferable check
+
+**An invariance claim about a local edit needs a premise about everything the edit did not touch, and the
+sentence commissioning the claim almost never contains that premise.** F80's wording is about a reactor's
+reaction list; the theorem that discharges it is about a whole program, because the relation it quantifies
+over reads the program at instances the wording never mentions. The gap is not an error in F80 — it is what
+happens when a finding is written at the granularity of the thing that changed and discharged at the
+granularity of the thing that observes it.
+
+So when lifting a local invariance to a relation: list what the relation reads, not what the edit wrote.
+Here that list was already available and already short — `LF.GeneralStep` reads its program through exactly
+two projections — and reading it off is what turned the lift into three composition steps with no
+induction anywhere.
+
 
