@@ -650,5 +650,106 @@ theorem generalCorrespondence_initial
 
     simp at hEvent
 
+/-!
+## Reaction order is not observable at the run level
+
+The closing theorem of `#106` item 1, and the one place in the general family where stage F's two
+ordering theorems are confronted with the semantics that is supposed to consume them. F80 asks for
+"the refutation stated as a theorem", in the shape `#60` gave §10.2's refuted `setPort` obligation:
+not a weakened Lemma 2, but the fact that makes Lemma 2's run-level content empty.
+
+The two halves were built in `Relico/LF/GeneralSemantics.lean` and `Relico/Translation/GeneralBasic.lean`
+respectively — `reactionFor?` is permutation-invariant when a reactor's triggers are distinct, and the
+translator always emits distinct triggers. This is the first place they meet, which is why it lives here
+and not in either of those modules: the composition mentions the translator and the target semantics at
+once, and `Correctness/` is the boundary for that.
+-/
+
+/--
+`reactionFor?` cannot see the order of a translated reactor's message reactions.
+
+If the reactor sitting at `target` in `left` is one `Translation.compileGeneralReactiveClass` produced
+from `reactiveClass`, and the reactor at `target` in `right` holds the same message reactions in any
+order, then the two programs resolve every event kind to the same reaction. Since `reactionFor?` is
+the only route from a program to the reaction a step fires, no permutation of the emitted reaction list
+changes which reaction fires — which is exactly what F80 says stage F's level-1 and level-2 sorts do
+*not* change at run level.
+
+Only `hPerm` and the distinctness of `leftReactor`'s triggers are needed; `right` is not required to be
+a translation of anything. That asymmetry is deliberate: the theorem is meant to be applied with the
+translator's output on one side and an arbitrary reordering on the other, which is the situation F80's
+Fig. 2a witness describes.
+
+`LF.GeneralProgram.reactionFor?_perm_of_nodup_triggers` composes
+`LF.UniquelyTriggered.of_nodup_triggers` internally, so the trigger `Nodup` is supplied directly and
+`UniquelyTriggered` is never mentioned here.
+
+**The three distinctness hypotheses are guard-relative, and nothing public discharges them yet**
+(measured 2026-08-26, recorded as F81). `Translation.inputPortNames_nodup_of_wellFormed` is the
+projection that turns a decided `LF.GeneralReactor.declaredNames` `Nodup` into the first hypothesis, and
+it is `private`; for the action names and the message-server names there is no such projection anywhere
+in the repository, only the conjunct of `DTR.GeneralModel.namesUniqueAndValid` that would supply the
+third. So the hypotheses are passed at the source model's own lists, in the same spelling
+`Translation.generalRouteEndpoints_nodup` and
+`Translation.compileGeneralReactiveClass_reactionTriggers_nodup` already use. Discharging them belongs to
+the commit that first has a consumer, not to this one.
+
+**What this does not reach.** F80's sentence continues "and hence `LF.GeneralStep`". That step is item 3's
+weak-step lifting, not this theorem: nothing below concerns the step relation, and reading a step-level
+consequence into it would be the F75 defect — crediting a statement with the deliverable of a later one.
+-/
+theorem generalReactionFor?_perm_of_compiled
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List Translation.GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {leftReactor rightReactor : LF.GeneralReactor}
+    {left right : LF.GeneralProgram}
+    {target : ActorName}
+    {kind : LF.GeneralEventKind}
+    (hCompiled :
+      Translation.compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok leftReactor)
+    (hInputPortNames :
+      ((Translation.generalInputPortsOf
+        reactiveClass.name
+        routes).map
+        (fun port =>
+          port.name.value)).Nodup)
+    (hActionNames :
+      ((Translation.generalActionNamesOf
+        (Translation.selfSendsOfClass
+          reactiveClass)
+        reactiveClass.messageServers).map
+        (fun name =>
+          name.value)).Nodup)
+    (hServerNames :
+      (reactiveClass.messageServers.map
+        (fun server =>
+          server.name)).Nodup)
+    (hLeft :
+      left.reactorOfInstance? target =
+        some leftReactor)
+    (hRight :
+      right.reactorOfInstance? target =
+        some rightReactor)
+    (hPerm :
+      List.Perm
+        leftReactor.messageReactions
+        rightReactor.messageReactions) :
+    left.reactionFor? target kind =
+      right.reactionFor? target kind :=
+  LF.GeneralProgram.reactionFor?_perm_of_nodup_triggers
+    hLeft
+    hRight
+    hPerm
+    (Translation.compileGeneralReactiveClass_reactionTriggers_nodup
+      hCompiled
+      hInputPortNames
+      hActionNames
+      hServerNames)
+
 end Correctness
 end Relico

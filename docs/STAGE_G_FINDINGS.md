@@ -2344,4 +2344,86 @@ are audited; their scope limits are not, because a limit reads as modesty. F76 i
 right about the mechanism, and it disclaimed one case using the one word — "orthogonal" — it had just
 disproved.
 
+---
+
+## F81 — stage F's message-server sort is now a proof obligation of a theorem it cannot affect, and that theorem's own premises have no public discharger
+
+*Measured and read.* Filed with the commit that lands
+`Correctness.generalReactionFor?_perm_of_compiled`, the closing theorem F80 asked for, and about that
+theorem's own text rather than about anything it replaces. Two parts. The first completes F80 with
+something F80 could not see, because it is visible only once the theorem exists; the second is a limit on
+what the theorem can currently be used for, and it is the reason `#129` does not become unblocked by it.
+
+### Part 1 — the sort has to be reasoned around to prove a property it does not change
+
+F80 established by argument that stage F's two ordering theorems are run-level **inert**: the selector
+that decides which reaction fires ignores everything stage F sorts. The closing theorem converts that
+from prose into something the build checks. What the build now also shows is stronger, and is a cost
+rather than a defect in either language.
+
+`Translation.compileGeneralReactiveClass_reactionTriggers` keys the emitted trigger list to
+`generalPriorityOrderedMessageServers reactiveClass` — the **sorted** list,
+`DTR.GeneralMessageServerPriority.normalize reactiveClass.messageServers`. The distinctness ladder
+underneath it is proved at the model's **own** list, because that is where the guard's hypotheses live.
+So `Translation.compileGeneralReactiveClass_reactionTriggers_nodup` has to `unfold
+generalPriorityOrderedMessageServers` and cross the sort by
+`DTR.GeneralMessageServerPriority.normalize_perm`, permuting its conclusion, before the ladder applies.
+
+The sort therefore appears in the **proof** of the closing theorem and nowhere in its **statement** —
+and by the theorem itself it *cannot* appear in the statement, since `reactionFor?` is invariant under
+exactly the permutation being crossed. Stage F's level-2 ordering is, at this point in the development,
+a step that every downstream distinctness result must pay for and that no downstream statement can
+mention. That is a real observation about the design and not a complaint about the proof: a sort whose
+only reachable consequence is an extra permutation lemma in each consumer is carrying cost with no
+theorem attached. Stage G row 9 (`#108`), which makes a populated LF reaction `priority` a
+well-formedness violation, is the first place that could change — it is the only tracked work that gives
+the target a way to *observe* an order at all.
+
+### Part 2 — three guard-relative hypotheses, and no public route to any of them
+
+The closing theorem takes the three distinctness facts as hypotheses, at the source model's own lists.
+That is the `#60`/F50 shape and it is deliberate. What is new, and measured 2026-08-26 by enumerating
+every `Nodup`-concluding theorem in `Relico/Translation/GeneralBasic.lean` and
+`Relico/Translation/GeneralRouting.lean` and then reading each one, is that **nothing public discharges
+any of the three**:
+
+*Input port names.* `Translation.inputPortNames_nodup_of_wellFormed` is exactly the projection wanted —
+it turns a decided `LF.GeneralReactor.declaredNames` `Nodup` into this hypothesis's spelling — and it is
+declared `private`. Its own docstring names the consumer it was written for,
+`Translation.generalRouteEndpoints_nodup`, which is in the same module.
+
+*Action names* and *message-server names.* There is no theorem anywhere in the repository whose
+conclusion is either `Nodup`. The third fact is a conjunct of `DTR.GeneralModel.namesUniqueAndValid`, so
+a projection could be written; the second has no obvious decided source at all, because
+`generalActionNamesOf` mixes per-server names with the per-site names the F56 repair introduced.
+
+The measurement that finds this is worth naming, because the obvious one fails. Grepping the
+hypotheses' spellings is reassuring and wrong: `hInputPortNames` occurs twenty-seven times across three
+modules, `hActionNames` twelve, `hServerNames` seven — and **every** occurrence is a hypothesis being
+taken or forwarded, never a conclusion being produced. A hypothesis threaded through a long ladder looks
+identical, under grep, to a hypothesis that gets discharged somewhere. Enumerate theorems by what they
+**conclude**.
+
+*Consequence, stated so it is not read as more than it is.* The theorem is sound and its premises are
+satisfiable — they hold of every well-formed model. But it cannot yet be **applied** to a concrete
+translated program without assuming them, so it does not by itself unblock `#129`, whose `.consume` case
+still waits on F76's repair decision. Discharging the premises belongs to the commit that first has a
+consumer, not to the one that states the theorem; de-privatising
+`inputPortNames_nodup_of_wellFormed` ahead of that consumer would widen a module's public surface for a
+caller that does not exist, which is the F75 defect in the other direction.
+
+### The transferable check
+
+**A guard-relative theorem is only as finished as the projection that discharges its guard, and the
+theorem cannot show you whether that projection exists.** The `#60`/F50 shape — record the refuted
+obligation, prove the scoped version against hypotheses the guard decides — is the right instrument, and
+it has now been used often enough in this repository that its one blind spot is worth stating: the
+scoped version reads as complete from its own text. Nothing in a statement distinguishes a hypothesis
+that a public lemma supplies from one that no lemma anywhere supplies.
+
+Narrower than F75 and F80, and a different family from both: those two are about claims going stale
+against artefacts, this one is about a claim that was never checkable from the place a reader checks.
+The check is cheap and belongs in every commit that lands a guard-relative theorem — for each
+hypothesis, name the declaration that concludes it, or record that none does.
+
 
