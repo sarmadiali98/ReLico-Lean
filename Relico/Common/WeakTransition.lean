@@ -396,5 +396,136 @@ theorem observableProjection_cons_some
     hProject
   ]
 
+/-!
+## Monotonicity in the step relation
+
+`TauSteps` and `WeakStep` take the step relation as a *parameter*, not as an index, so a pointwise
+implication between two step relations carries every derivation built from one over to the other.
+The two lemmas below are that observation and nothing more. Neither knows why two step relations
+might agree, and neither touches `isTau`: only the transitions change relation, and which labels
+count as internal is the same question before and after.
+
+They sit at the end of the file rather than inside the `TauSteps` and `WeakStep` namespace blocks
+above because each of those blocks fixes a *single* `step` in a `variable` declaration, and a
+monotonicity statement needs two. Opening a competing `variable` block at the tail of a foundation
+file that most of the development imports would buy nothing, so each statement carries its own
+binders explicitly instead.
+
+There is no consumer in this file, and the observation is generic to the foundation rather than to
+any one family, so it is proved next to the definitions it is about.
+-/
+
+/--
+An internal closure survives a pointwise weakening of the step relation.
+-/
+theorem TauSteps.mono
+    {State : Type u}
+    {Label : Type v}
+    {stepLeft stepRight : LabeledTransition State Label}
+    {isTau : Label → Prop}
+    {source target : State}
+    (hImplies :
+      ∀ (before : State)
+        (transitionLabel : Label)
+        (after : State),
+        stepLeft
+          before
+          transitionLabel
+          after →
+        stepRight
+          before
+          transitionLabel
+          after)
+    (hSteps :
+      TauSteps
+        stepLeft
+        isTau
+        source
+        target) :
+    TauSteps
+      stepRight
+      isTau
+      source
+      target := by
+
+  induction hSteps with
+
+  | refl state =>
+      exact TauSteps.refl state
+
+  | cons headStep headIsTau remainingSteps inductionHypothesis =>
+      exact
+        TauSteps.cons
+          (hImplies _ _ _ headStep)
+          headIsTau
+          inductionHypothesis
+
+/--
+A weak transition survives a pointwise weakening of the step relation.
+
+`cases` rather than `induction`: `WeakStep` has no premise of its own type, so both alternatives are
+rebuilt from `TauSteps.mono` on their internal segments together with `hImplies` on the single
+visible step.
+-/
+theorem WeakStep.mono
+    {State : Type u}
+    {Label : Type v}
+    {stepLeft stepRight : LabeledTransition State Label}
+    {isTau : Label → Prop}
+    {source target : State}
+    {label : Label}
+    (hImplies :
+      ∀ (before : State)
+        (transitionLabel : Label)
+        (after : State),
+        stepLeft
+          before
+          transitionLabel
+          after →
+        stepRight
+          before
+          transitionLabel
+          after)
+    (hWeakStep :
+      WeakStep
+        stepLeft
+        isTau
+        source
+        label
+        target) :
+    WeakStep
+      stepRight
+      isTau
+      source
+      label
+      target := by
+
+  cases hWeakStep with
+
+  | tau hTau hSteps =>
+      exact
+        WeakStep.tau
+          hTau
+          (TauSteps.mono
+            hImplies
+            hSteps)
+
+  | visible
+      hVisible
+      hPrefix
+      hVisibleStep
+      hSuffix =>
+
+      exact
+        WeakStep.visible
+          hVisible
+          (TauSteps.mono
+            hImplies
+            hPrefix)
+          (hImplies _ _ _ hVisibleStep)
+          (TauSteps.mono
+            hImplies
+            hSuffix)
+
 end Common
 end Relico
