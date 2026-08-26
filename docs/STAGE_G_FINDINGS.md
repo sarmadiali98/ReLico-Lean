@@ -2497,4 +2497,83 @@ Here that list was already available and already short — `LF.GeneralStep` read
 two projections — and reading it off is what turned the lift into three composition steps with no
 induction anywhere.
 
+## F83 — the design says row 9 discharges aims 8 and 9 "for the general family outright", but the general family holds the transfer conditions for one label constructor out of two
+
+Row 9 (`G2d`) lands `Correctness.weakBisimulation_traceAgreement_forward` and `_backward`: from a weak
+bisimulation, two systems agree on the observable projection of every finite execution. That is aims 8 and 9
+of `docs/trusted-boundary.md`, and the theorems are true, generic and unconditional in everything except
+their two transfer-condition hypotheses. The finding is about the sentence that commissioned them.
+
+**The claim.** `docs/STAGE_G_DESIGN.md` §7 item 6 says the result is
+
+> generic, model-independent: from a weak bisimulation, the two systems agree on finite observable traces.
+> This is what discharges `trusted-boundary.md` aims 8 and 9 for the general family outright instead of
+> owing them, and it is proved once over an abstract LTS, so it costs nothing per family.
+
+Everything in that sentence is right except *"for the general family outright instead of owing them"*.
+
+**The measurement.** `Relico/Correctness/GeneralWeakBisimulation.lean` contains eight theorems, and a census
+of them by name is the whole finding:
+
+```
+generalCorrespondence_advance
+generalQuiescent_of_earliestPendingEventFuture
+generalTimeAdvance_forward
+generalTimeAdvance_backward
+generalTimeAdvance_forward_weak
+generalTimeAdvance_backward_weak
+generalWeakStep_congr_of_projections
+generalWeakStep_perm_of_compiled
+```
+
+The two weak-level transfer conditions the general family holds are `generalTimeAdvance_forward_weak` and
+`generalTimeAdvance_backward_weak`. Both are named for the label constructor they cover, and it is the only
+one they cover. There is no `generalConsume_forward_weak`, because that case is task `#129`, blocked on the
+selection divergence F76 measured: the source picks its next event by actor priority and the target picks by
+queue order, so the `.consume` transfer conditions are *false* as stated, and their repair is a decision
+about the paper rather than a proof to be found. F80 narrowed the candidate repair to (e′) but did not close
+it.
+
+Row 9's hypotheses are `∀`-quantified over every weak step. A family that proves them for one constructor
+cannot supply them. So the general-family instantiation of row 9 does not exist yet, and cannot exist before
+`#129` closes.
+
+**Why this is not a reason to change row 9.** The two theorems are correct and are exactly what §7 item 6
+otherwise describes: generic, proved once, costing nothing per family, and stated over an abstract LTS that
+never mentions reactors. Narrowing them to what the general family currently holds would be the opposite of
+the right move — it would bake a temporary gap into a permanent statement, and it would violate the standing
+rule that a target-side fault is refused rather than quietly under-delivered. The theorems land as designed;
+the design line is what gets repaired, to *"discharges aims 8 and 9 generically, so that no family proves
+them again; the general-family instantiation waits on the `.consume` transfer conditions, task `#129`"*.
+
+**What was actually gained, since the design also overstated the precedent once before.** F65 corrected §4
+by recording that the multi-store family already proves finite-execution correspondence, in
+`Correctness/GlobalMultiStorePayloadFiniteExecutionCorrespondence.lean` (`finite_forward`,
+`finite_backward`). Reading those two before authoring row 9 settles that row 9 is not a re-proof: the
+multi-store `Steps` relation carries **no label list and no observable projection**, so it relates
+executions by their endpoints only and there is nothing in it to project. Row 9 relates executions *and*
+their traces, and absorbs τ segments while doing it. Both facts are worth keeping together, because they cut
+in opposite directions — F65 says the design undersold what existed, F83 says it oversold what row 9
+delivers, and the two are the same kind of error made in the two available directions.
+
+**A second, smaller measurement, recorded so it does not have to be made again.** `Common/WeakExecution.lean`
+provides `WeakSteps.refl`, `WeakSteps.cons`, `WeakSteps.single`, `WeakSteps.append` and
+`observableProjection_append`, and it does **not** provide a `WeakSteps.mono` — item 3's C1 stopped at
+`TauSteps.mono` and `WeakStep.mono`. Row 9 does not need one, and adding it would be F75's defect: a
+generalisation with no consumer.
+
+### The transferable check
+
+**A design that says a generic theorem discharges an obligation "for family X" is making two claims, and only
+one of them is about the theorem.** The first — that the statement is strong enough — is checked by reading
+the statement. The second — that family X can supply its hypotheses — is checked by enumerating what family
+X has *proved*, which is a different file and a different question.
+
+The instrument that separated them here was the cheapest one available: list the theorem names in the
+family's own module and read them. Every transfer condition the general family holds is named for the label
+constructor it covers, so the census answers the coverage question directly, without reading a single proof.
+When a generic result is about to be credited with discharging a family's obligation, census the family
+first — the names are usually already telling you what is missing.
+
+
 

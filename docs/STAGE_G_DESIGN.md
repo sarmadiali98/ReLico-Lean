@@ -576,11 +576,17 @@ instantiate the foundation. **F70**.
    on `ϕ` of it, because one message server becomes several reactions (§7). Two halves of this item were
    wrong for unrelated reasons; that one is now answered, and F76 is the one still open.
 6. `weakBisimulation_traceAgreement` — **generic, model-independent**: from a weak bisimulation, the two
-   systems agree on finite observable traces. This is what discharges `trusted-boundary.md` aims 8 and 9
-   for the general family outright instead of owing them, and it is proved once over an abstract LTS, so
-   it costs nothing per family. It is **not** what first gives this repository a finite-execution result:
-   the multi-store family already has two, in a strict lock-step shape — see §4, and **F65** for the
-   correction this sentence replaces.
+   systems agree on finite observable traces. Landed as the pair
+   `weakBisimulation_traceAgreement_forward` / `_backward`, per this section's own rule that aims 8 and 9
+   are two implications rather than one `Iff`. It discharges `trusted-boundary.md` aims 8 and 9
+   **generically**, so that no family proves them again, and it is proved once over an abstract LTS, so it
+   costs nothing per family. It does **not** discharge them for the general family outright, and an earlier
+   wording of this line said it did: the theorems consume transfer conditions holding at *every* weak step,
+   and the general family proves its `.timeAdvance` case only — the `.consume` case is `#129`, blocked on
+   F76. So the general-family instantiation waits; see **F83**. It is also **not** what first gives this
+   repository a finite-execution result: the multi-store family already has two, in a strict lock-step
+   shape with no label list and no projection — see §4, and **F65** for the correction this sentence
+   replaces.
 
 **Scope limit, stated rather than discovered.** Aims 8 and 9 are discharged for **finite** executions.
 Infinite runs would need a coinductive treatment, which the paper does not give either, and which no
