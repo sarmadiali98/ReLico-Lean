@@ -563,11 +563,25 @@ deriving Repr, DecidableEq, BEq, Inhabited
 /--
 A generated reaction.
 
-`priority` is carried and never consulted. Priority distinctness is a theorem
-hypothesis rather than a well-formedness conjunct — the settled decision — so
-well-formedness must not mention this field, and neither may the printer, which
-honours declaration *order* instead. It is here so that the later stage which
-makes priority observable has somewhere to attach it.
+`priority` is carried, never consulted, and — since G3 — required to be absent.
+The printer honours declaration *order* instead, because that is the only thing
+Lingua Franca offers: `lfc 0.11.0` rejects a reaction attribute named `priority`
+outright, measured as probe 16f of F77, so there is no target spelling for a
+populated field to compile to. `LF.GeneralProgram.wellFormed`'s tenth conjunct,
+`reactionPrioritiesAbsent`, therefore rejects a program whose reactions carry one.
+
+That inverts the earlier note here, and the inversion is the point. This field was
+originally left inert *"so that the later stage which makes priority observable has
+somewhere to attach it"*, on the assumption that such a stage would arrive. Stage G
+is that stage, and what it measured is that the attachment point cannot exist: the
+field is a place where a value can be written and then silently dropped. It is kept
+rather than deleted so that the refusal has something to name — a translator that
+computes a priority and discards it is a defect the guard can report, whereas a
+translator with nowhere to put one cannot be caught doing it.
+
+Priority *distinctness* remains a theorem hypothesis rather than a well-formedness
+conjunct; that separate decision is untouched. Absence and distinctness are
+different properties, and only absence is checked here.
 
 `name` identifies a reaction inside Lean and nothing else. LF reactions are
 anonymous in concrete syntax: a printer emits `reaction(<trigger>)` and never the

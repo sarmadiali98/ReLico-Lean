@@ -2575,5 +2575,103 @@ constructor it covers, so the census answers the coverage question directly, wit
 When a generic result is about to be credited with discharging a family's obligation, census the family
 first — the names are usually already telling you what is missing.
 
+## F84 — G3's design derives the three priority theorems from its new clause, but the direction it needs is the opposite one, and that direction is not proved
+
+Row 10 (`G3`) adds `LF.GeneralProgram.reactionPrioritiesAbsent` as the tenth conjunct of
+`LF.GeneralProgram.wellFormed`, so a reaction carrying a priority is a well-formedness violation rather than
+an inert no-op. The clause is landed and the guard decides it on the translator's output and refuses. The
+finding is about a sentence in the decision that commissioned it, and about two smaller things the same edit
+turned up.
+
+**The claim.** `docs/STAGE_G_DESIGN.md` §8, deciding G3, says:
+
+> The three inert theorems then become consequences of the clause instead of coincidences, and the alarm
+> becomes an invariant.
+
+The three theorems are `assembleGeneralMessageReaction_priority`, `assembleGeneralPortReaction_priority` and
+`assembleGeneralStartupReaction_priority`, each stating `… .priority = none` and each proved by `rfl`.
+
+**Why the direction is backwards.** The three theorems are unconditional: they hold for *arbitrary*
+arguments, with no program in sight and no well-formedness hypothesis. The clause is a requirement on an
+assembled `LF.GeneralProgram`. So the theorems cannot be consequences of the clause — nothing about them
+mentions a program to which the clause could apply, and they would still be true if the clause were deleted.
+They are independent of it, and strictly stronger at their own granularity.
+
+The implication that *would* be load-bearing runs the other way: the three per-reaction equations, composed
+up the assembly walk, are what proves the emitted program satisfies the clause. That composition is not part
+of row 10. It needs the reaction-list ladder `generalReactionTriggersOf` needed for triggers — the trigger
+version cost five commits, `#139` through `#143` — and row 10 is one commit with no new modules. It is filed
+as task `#147` and named in the docstrings of `reactionPrioritiesAbsent` and
+`assembleGeneralMessageReaction_priority`, so that it is an owed theorem rather than a silence.
+
+What the clause delivers without it is still the decided content: a populated priority is now refused, with
+its own diagnostic sentence, instead of being dropped silently. What it does not deliver is a proof that our
+own translator never trips it. Both statements are true and neither implies the other.
+
+**A precondition that outlived its discharge.** §8 also carries a blocking precondition — *"Before G3 lands,
+one probe must run"*, with the consequence that *"If `lfc` accepts one, G3 flips from 'justify' to
+'reverse'"* — and §14's prediction 2 repeats it. That probe had already run when row 10 began: it is row 16f
+of F77's table above, `@priority(2)` / `@priority(1)` against `lfc 0.11.0`, **rejected** with *"Unknown
+attribute: priority"*, measured 2026-08-25 under task `#102`. G3 therefore stays "justify" and no probe was
+owed. This is F75's class seen from a new angle: the precondition and its discharge lived in two different
+files, filed under two different tasks, with no pointer from either to the other, so the only thing standing
+between row 10 and a duplicated `lfc` run was reading the findings file first. A design's precondition should
+name the task that can discharge it.
+
+**Two count-coupled claims that a conjunct addition invalidates, neither of which a build can report.**
+Adding a tenth conjunct broke two pieces of prose that no count-word grep would have found.
+`Relico/Translation/GeneralBasic.lean` argued against a rejected design by pricing it at *"a
+five-hundred-and-twelve-leaf case split over nine independent booleans"* — 2⁹, so a tenth boolean doubles it
+to one thousand and twenty-four. And the duplicated `targetEndpointsUnique_of_wellFormed` was titled
+*"Extract the last conjunct"* and justified its tactic as working *"for the last conjunct specifically"*;
+`targetEndpointsUnique` is now the ninth of ten. The proof needed no edit, because it case-splits on its own
+named clause rather than projecting out of a fixed nesting — which is precisely the precaution the sibling
+comment in `Relico/LF/GeneralWellFormed.lean` gives as its reason for existing, now confirmed by measurement
+rather than by argument.
+
+**The check then found seven more sites, in files this row had no reason to open, and one of them was
+executable.** Run repository-wide rather than over row 10's own changeset, the same check returned
+`Relico/Translation/GeneralRouting.lean` twice, `Relico/Translation/GeneralBasic.lean` three more times
+(passages the row had not visited), `frontend/check-general-lean.sh` once and
+`frontend/lean-bridge/GeneralLfPrinterTestMain.lean` five times. All of them are F49's independence result
+phrased as *"the other eight clauses"*, and all are now count-free — *"every other clause"* — because the
+count is the part that moves while the claim does not. Positional statements that remain **true** were left
+exactly as written: `targetEndpointsUnique` is still the ninth of ten, so `GeneralBasic.lean`'s *"The ninth
+well-formedness clause, derived from the third"* and the gate script's *"that same ninth one"* need no edit.
+So were the historical records in `docs/STAGE_E_FINDINGS.md`, `docs/STAGE_E_DESIGN.md` and
+`docs/STAGE_F_DESIGN.md`, which report what was measured when there were nine clauses and are correct as
+statements about that measurement.
+
+**One of those sites was not prose, and fixing it *strengthened* a landed result.** `sharedTargetOtherClauses`
+in the bridge test main is F49's witness rendered as a string: it names each clause other than
+`targetEndpointsUnique` with its own verdict, and `SHARED_TARGET_EIGHT_CLAUSES_HOLD` pins the whole string.
+Left alone it would have kept measuring eight of the now-nine other clauses, quietly weakening F49 from
+"independent of the other clauses" to "independent of most of them". `LF.GeneralReaction.priority` defaults to
+`none` and the witness's two startup reactions do not set it, so `reactionPrioritiesAbsent` holds there and
+one list entry plus one string extension restores the claim — and *improves* it, since independence from a
+larger set of clauses is the stronger statement. It costs no new assertion, so no gate total moves. The marker
+name still says `EIGHT` while the group checks nine, and that was left deliberately: four transcripts in
+`docs/STAGE_E_FINDINGS.md` quote `PASS_SHARED_TARGET_EIGHT_CLAUSES_HOLD` as run, and renaming it would make
+those records irreproducible to buy what the adjacent comment now states outright. The count survives in one
+label and nowhere else.
+
+### The transferable check
+
+**When a clause count changes, grepping the spelled-out English word is necessary and not sufficient.** That
+is `docs/STAGE_E_FINDINGS.md` F45/F46's advice and it remains right as far as it goes. Also grep for
+*arithmetic derived from* the count — powers of two, leaf counts, "one per" phrasings — and for *positional*
+adjectives: "last", "final", "ninth", "the other eight". Those are the claims that name a count without
+containing it, and this row broke one of each.
+
+**Run the check over the whole repository, not over the changeset.** Seven of the nine stale sites were in
+files row 10 had no reason to open, so a sweep scoped to the diff would have reported clean. The changeset is
+where the count *changed*; it is not where the claims about the count live.
+
+**And a count-coupled claim can be executable.** An assertion that enumerates "the other clauses" by name
+does not go stale when a clause is added — it silently narrows to a weaker measurement, stays green, and
+keeps its old label. No count-word grep sees it, no build reports it, and the finding it supports quietly
+loses scope. That is the one failure mode in this class that a reader cannot catch by reading prose.
+
+
 
 

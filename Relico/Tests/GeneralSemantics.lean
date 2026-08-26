@@ -59,8 +59,14 @@ would have been stuck exactly where the state layer says an actor may run.
 Test 11. Two reactions triggered by one action, the first declared carrying the *worse* priority. A lookup
 that consulted `GeneralReaction.priority` returns the second; `findReactionForKind?` returns the first. Stage
 F established that reaction declaration order is observable in the target and that nothing in this family
-sorts a reaction list, and G3 is about to make a populated LF reaction priority a well-formedness
-*violation* — so a lookup that quietly honoured the field would contradict the stage that follows this one.
+sorts a reaction list, and G3 made a populated LF reaction priority a well-formedness *violation* — so a
+lookup that quietly honoured the field would contradict a property the guard now enforces.
+
+The two reactions below are therefore, deliberately, reactions that no accepted program contains. That is
+sound because the claim under test is about a *lookup* over a reaction list, and `findReactionForKind?` is
+total: it does not ask whether the list came from a well-formed program. The tempting repair — setting both
+literals to `none` so the witnesses satisfy the new conjunct — would make this test **vacuous**, which is
+exactly the failure mode F60 records and the reason the `decide` pin below exists.
 
 ## The generic weak-transition machinery is instantiated, not merely said to be instantiable
 
@@ -460,7 +466,9 @@ def secondReaction : LF.GeneralReaction :=
   }
 
 /- The instrument is only valid while the priorities run *against* declaration order. Pinned so that a later
-   edit tidying these literals cannot quietly make test 11 vacuous — which is the failure mode F60 records. -/
+   edit tidying these literals cannot quietly make test 11 vacuous — which is the failure mode F60 records.
+   G3 gave that tidy-up a fresh motive: these two priorities are now well-formedness *violations*, so an
+   author reading `reactionPrioritiesAbsent` may well reach for `none` here. This pin is what stops it. -/
 example :
     firstReaction.priority = some 9 ∧
       secondReaction.priority = some 1 := by
@@ -468,8 +476,9 @@ example :
 
 /- Test 11: both reactions trigger on the same action, and the FIRST DECLARED one is returned. A lookup that
    consulted `GeneralReaction.priority` returns `secondReaction` and fails here. That is not a hypothetical:
-   G3 is about to make a populated LF reaction priority a well-formedness *violation*, so a lookup that
-   honoured the field would contradict the stage that follows this one. -/
+   G3 made a populated LF reaction priority a well-formedness *violation*, so a lookup that honoured the
+   field would contradict a property the guard now enforces. These two reactions sit in no
+   `LF.GeneralProgram`, so nothing here evaluates `wellFormed` on them. -/
 example :
     LF.findReactionForKind?
         [

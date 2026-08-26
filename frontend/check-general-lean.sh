@@ -232,7 +232,7 @@ echo "=== the general LF printer, well-formedness and translation assertions"
 # proof of `targetEndpointsUnique` deferred rather than false. The eighth block is the first
 # one that asserts a named clause of `LF.GeneralProgram.wellFormed` to be false, so a drop of
 # six here means the repository has stopped holding a witness for a property it claims. Then up
-# to 86 for finding F49's four: a hand-built LF program satisfying the other eight clauses and
+# to 86 for finding F49's four: a hand-built LF program satisfying every other clause and
 # failing that same ninth one, which makes the clause independent of them rather than merely
 # unproved, and refutes the relative theorem F48's entry had recorded as provable. This ninth
 # block is the only one whose program is built by hand *for a clause* rather than to be printed

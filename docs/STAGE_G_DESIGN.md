@@ -670,13 +670,27 @@ coincidences, and the alarm becomes an invariant. This is an application of the 
 than a free choice, and it was put to the decision-maker in those terms and confirmed.
 
 
-**Precondition, and it is a probe not an argument.** The justification above asserts something about
-`lfc` that this repository has not measured: that there is no accepted reaction-priority attribute in
-Lingua Franca 0.11.0. Before G3 lands, one probe must run — emit a reaction carrying a candidate
-priority attribute and record whether `lfc` accepts, rejects, or silently ignores it. **If `lfc` accepts
-one, G3 flips from "justify" to "reverse"** and the field gets wired to the printer instead, which is a
-larger change and belongs in its own commit. Writing the justification before the probe would be an
+**Precondition — DISCHARGED 2026-08-25, and it was a probe not an argument.** The justification above
+asserts something about `lfc` that this repository had not measured when this section was written: that
+there is no accepted reaction-priority attribute in Lingua Franca 0.11.0. The probe was to emit a reaction
+carrying a candidate priority attribute and record whether `lfc` accepts, rejects, or silently ignores it,
+with the consequence that **if `lfc` accepted one, G3 would flip from "justify" to "reverse"** and the
+field would be wired to the printer instead. Writing the justification before the probe would have been an
 inferred claim dressed as a read, which is the failure mode F51 records.
+
+It ran under task `#102` and it **rejected**: row 16f of F77's probe table in
+`docs/STAGE_G_FINDINGS.md` records `@priority(2)` / `@priority(1)` producing *"Unknown attribute:
+priority, 2 errors"*, and F77's summary adds that no attribute could serve. G3 therefore stays "justify",
+and the flip described above is settled negatively rather than pending.
+
+That the discharge sat in a different file under a different task, with nothing here pointing to it, is
+itself recorded — see **F84**. A precondition should name the task that can discharge it.
+
+**Landed.** Row 10 added `LF.GeneralProgram.reactionPrioritiesAbsent` as the tenth conjunct, with a tenth
+mirrored refusal sentence in `Relico/Translation/GeneralBasic.lean`. One sentence of the decision above
+did not survive contact: *"The three inert theorems then become consequences of the clause"* has the
+implication backwards, and the direction that is actually load-bearing — the three per-reaction equations
+composing up to the clause, for our own output — is owed as task `#147`. F84 has the argument.
 
 ## 9. G4 — the `switch-pair` benchmark, which does not exist
 
@@ -814,7 +828,7 @@ reslice itself owes, row 3 below.
 | 7 | **G2b** `Correctness/GeneralCorrespondence` + `Correctness/GeneralTimeEquivalence` — `R`, its initial case, Lemma 1 | 2 | 525 |
 | 8 | **G2c** `Correctness/GeneralWeakBisimulation` — Lemmas 2 and 3 at run level, plus the derived quiescence lemma the backward condition needs, **instantiating** `Common.TauSteps` and `Common.WeakStep` rather than restating either — see **F70**. The **two transfer conditions are held back**, because §7 item 5 is refuted by **F76**; the rest of the row is sound under every candidate repair and lands without them | 1 | 526 |
 | 9 | **G2d** `Correctness/WeakBisimulationTrace` — the generic finite-trace corollary, aims 8 and 9, over `Common.observableProjection`, which is already proved with its three `@[simp]` lemmas — see **F70** | 1 | 527 |
-| 10 | **G3** the `lfc` priority-attribute probe, then the LF well-formedness clause and the three theorem restatements | 0 | 527 |
+| 10 | **G3** the LF well-formedness clause `reactionPrioritiesAbsent`, its mirrored refusal sentence, and the three theorem re-attributions — the `lfc` priority-attribute probe this row listed as its own first step had already run under row 0 as F77's probe 16f, so it was **not** re-run | 0 | 527 |
 | 11 | **G5** `trace` on both sides, printer, statement walk, witness model, new gate marker | 0–1 | 527–528 |
 | 12 | **G6** the fragment declaration and the theorem-eligibility table (docs only) | 0 | — |
 
@@ -862,15 +876,21 @@ carries the full argument. The lexicographic form is therefore not a defensive c
 one, and the two predicates the old layer left to its caller — `cohortSimultaneous` and `earliestReady` —
 are exactly the half `selectedActor` now absorbs.
 
-**A count that moves with G3's commit, flagged because this class of defect has cost the project four
+**A count that moved with G3's commit, flagged because this class of defect has cost the project four
 findings.** (This paragraph said "commit 5" before the 2026-08-24 reslice, and it was wrong before it too:
 the clause has always belonged to G3, which was row 7 and is now row 10. Naming the obligation rather than
-the row number is the repair.) `LF.GeneralWellFormed` currently has **nine** clauses, and F49's whole
-content is that the ninth is independent of the other eight and therefore cannot be dropped. G3's clause
-makes it **ten**. Every prose count of those clauses moves together, and F49's own phrasing — which speaks
-of "the ninth clause" positionally — must be re-read rather than renumbered, since its independence
-argument is about a specific clause and not about an ordinal. Spelled-out English counts, not numerals, are
-the ones that go stale unnoticed; grep for the words.
+the row number is the repair.) `LF.GeneralWellFormed` had **nine** clauses, and F49's whole content is that
+the ninth is independent of the other eight and therefore cannot be dropped. G3's clause made it **ten**.
+Every prose count of those clauses moved together, and F49's own phrasing — which speaks of "the ninth
+clause" positionally — was re-read rather than renumbered, since its independence argument is about a
+specific clause and not about an ordinal, and appending a tenth leaves `targetEndpointsUnique` ninth. The
+historical F49 sites in `docs/STAGE_E_FINDINGS.md`, `docs/STAGE_E_DESIGN.md` and `docs/STAGE_F_DESIGN.md`
+are therefore correct as written and were deliberately left alone.
+
+Spelled-out English counts, not numerals, are the ones that go stale unnoticed; grep for the words. Row 10
+found that necessary but not sufficient: two claims named the count without containing it — a leaf count
+that was 2⁹, and a tactic justified as working "for the last conjunct specifically". **F84** records both
+and extends the check to derived arithmetic and positional adjectives.
 
 ## 14. What would refute this plan
 
@@ -885,9 +905,12 @@ Stated as falsifiable predictions, so that a failure is informative rather than 
    arrival-relative, so the guard alone does not give uniqueness — two distinct-priority actors with
    *different* arrivals are ordered by arrival, and the guard does no work there. A proof that closes
    without using the arrival component would be evidence the statement is too weak.
-2. **If `lfc` accepts a reaction priority attribute**, G3 inverts from justification to reversal (§8),
+2. ~~**If `lfc` accepts a reaction priority attribute**, G3 inverts from justification to reversal (§8),
    and the "byte-identical" argument in `docs/STAGE_F_DESIGN.md` §7.4 becomes a statement about our
-   printer rather than about the target.
+   printer rather than about the target.~~ **Settled negatively, 2026-08-25.** F77's probe 16f emitted
+   `@priority(2)` / `@priority(1)` and `lfc 0.11.0` answered *"Unknown attribute: priority"*. No inversion:
+   G3 landed as a refusal, and §7.4's argument remains a statement about the target. Kept rather than
+   deleted because the prediction was the thing that made G3 a measurement instead of an assumption.
 3. ~~**If a `drain_reaction` firing turns out to be observable**, the τ classification of §7 collapses and
    with it the whole architecture. The check is concrete: a τ step must not change any state that `R`
    constrains — no state variable in `ex ≡ ηr`, no pending trigger in `bx ≡ qr`. `drain_reaction`

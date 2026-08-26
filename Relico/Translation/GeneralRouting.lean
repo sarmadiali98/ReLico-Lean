@@ -1802,8 +1802,8 @@ and what F48 measured on translation output. So two rows can share a target endp
 `guardGeneralProgram` is what refuses it — checked, not earned, which is how
 `Relico/Translation/GeneralBasic.lean` states it in both of the places that state it correctly.
 
-The clause cannot be dropped as redundant either. F49 exhibits a program satisfying the other
-eight clauses of `LF.GeneralProgram.wellFormed` and failing this one, so it is independent of
+The clause cannot be dropped as redundant either. F49 exhibits a program satisfying every other
+clause of `LF.GeneralProgram.wellFormed` and failing this one, so it is independent of
 them, and independence is a stronger reason to keep a clause than the absence of a construction
 proof is. What is true is *relative*: for connections and input ports built from the **same**
 routes, two connections sharing a target endpoint are two distinct rows, both survive
@@ -3157,9 +3157,9 @@ theorem mem_externalSendsOfClass_of_mem_messageServer
 /-!
 ## Endpoint uniqueness, indexed by the routing table
 
-Finding F49 measured that `LF.GeneralProgram.targetEndpointsUnique` is **independent** of the
-other eight clauses of `LF.GeneralProgram.wellFormed`: a hand-built program satisfies all eight
-and fails the ninth. No theorem can therefore derive that clause from them, and the guard cannot
+Finding F49 measured that `LF.GeneralProgram.targetEndpointsUnique` is **independent** of every
+other clause of `LF.GeneralProgram.wellFormed`: a hand-built program satisfies all of them and
+fails this one. No theorem can therefore derive that clause from them, and the guard cannot
 retire it.
 
 What this section proves is the statement that survives F49. It is relative to the routing

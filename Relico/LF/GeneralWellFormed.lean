@@ -533,7 +533,56 @@ def targetEndpointsUnique
         ))).Nodup)
 
 /--
+No reaction of any reactor carries a priority.
+
+**G3, and it is a refusal rather than a feature.** `LF.GeneralReaction.priority` is a field that
+is always emitted as `none` and read by nothing: not by this predicate before now, not by the C++
+printer, and not by `LF.findReactionForKind?`. A field in that position is a **silent drop** — an
+author who populates it gets a green build and byte-identical output text. This clause converts
+that from an alarm into an invariant.
+
+**Measured, not argued.** Lingua Franca 0.11.0 has no reaction-priority attribute for such a
+field to compile to: probe 16f of F77 emitted `@priority(2)` and `@priority(1)` and `lfc` rejected
+the source with *"Unknown attribute: priority"*. Precedence between the reactions of one reactor
+is expressed by **declaration order** instead, which is the mechanism stage F's two ordering
+theorems are about. So a populated priority is not an unimplemented feature but a request the
+target cannot express, and the standing doctrine for a target-caused limitation is a checkable
+refusal rather than a quiet under-delivery.
+
+**Why this is a program-level conjunct rather than part of `reactionWellFormed`.** Both placements
+accept and reject exactly the same programs; they differ in what the guard *says*.
+`Relico/Translation/GeneralBasic.lean` mirrors this predicate's conjuncts one refusal sentence
+each, so a check folded into `GeneralReactor.wellFormed` would reject a priority-carrying program
+with the sentence about a generated name collision — a misleading diagnostic, on precisely the
+class of defect this clause exists to make legible. A conjunct here earns its own sentence.
+
+Both reaction lists are walked, because `LF.GeneralReactor` has no single `reactions` field: the
+startup reaction is a field of its own and the rest are `messageReactions`, a split F50 records.
+
+**Not proved of the translator's own output, and that is a scope statement rather than an
+oversight.** Nothing here says `compileGeneralModel` cannot emit a populated priority; what says
+it is the guard, which decides this predicate on the assembled program and refuses. The
+per-reaction halves are pinned by `assembleGeneralMessageReaction_priority`,
+`assembleGeneralPortReaction_priority` and `assembleGeneralStartupReaction_priority`; composing
+those into a program-level theorem needs the reaction-list ladder that
+`generalReactionTriggersOf` needed for triggers, and that theorem is **owed rather than absent** —
+see F84.
+-/
+def reactionPrioritiesAbsent
+    (program : LF.GeneralProgram) :
+    Bool :=
+  program.reactors.all
+    (fun reactor =>
+      reactor.startupReaction.priority.isNone &&
+        reactor.messageReactions.all
+          (fun reaction =>
+            reaction.priority.isNone))
+
+/--
 A well-formed general LF program.
+
+Ten conjuncts. The tenth, `reactionPrioritiesAbsent`, is the only one that refuses a program for
+something the *target language* cannot express rather than for an internal inconsistency.
 -/
 def wellFormed
     (program : LF.GeneralProgram) :
@@ -546,7 +595,8 @@ def wellFormed
     program.instancesResolve &&
     program.instanceArgumentsMatch &&
     program.connectionsWellFormed &&
-    program.targetEndpointsUnique
+    program.targetEndpointsUnique &&
+    program.reactionPrioritiesAbsent
 
 end GeneralProgram
 
@@ -641,6 +691,9 @@ analysis on its own named clause rather than a projection out of a conjunction, 
 that it does not depend on how `&&` associates — a projection chain reads a fixed
 nesting shape, and under the other associativity the same chain proves a different
 clause while still compiling, which is the kind of error a build cannot report.
+
+G3 turned that precaution into a measurement: appending `reactionPrioritiesAbsent` as a tenth
+conjunct changed the nesting shape, and neither proof below needed an edit.
 -/
 
 private theorem instancesResolve_of_wellFormed

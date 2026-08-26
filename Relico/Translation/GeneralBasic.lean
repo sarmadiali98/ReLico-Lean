@@ -129,11 +129,13 @@ Two details of that guard are deliberate. The decision is written `match program
 with` rather than `if program.wellFormed then`, so the discriminant stays a `Bool` with no
 `Bool → Prop` coercion and each branch gives an inversion lemma one equation to name. And the
 *explanation* is a separate total function, `generalProgramExplanation`, which walks a list
-mirroring `wellFormed`'s nine conjuncts and returns the first that fails: §9 requires a
+mirroring `wellFormed`'s ten conjuncts and returns the first that fails: §9 requires a
 message that says which conjunct failed, and the decision on its own yields one bit. The
 mirror can drift from what it mirrors, and rather than leave that as a silence it has a
-fallback string that names its own drift, so a tenth conjunct added upstream and not here
-reports itself in the gate log instead of producing an empty complaint. What the mirror
+fallback string that names its own drift, so a conjunct added upstream and not here
+reports itself in the gate log instead of producing an empty complaint. G3 walked that path
+deliberately rather than accidentally: its tenth conjunct and the tenth mirrored sentence
+landed in one commit, so the fallback stayed unreachable. What the mirror
 cannot do is make the guard unsound, because the guard does not consult it.
 
 **The self-send characterization chain is deleted, not weakened.** Some twenty-two
@@ -1190,9 +1192,20 @@ theorem assembleGeneralMessageReaction_body
 /--
 The dropped message-server priority, as a theorem.
 
-Stage G cannot wire `DTR.GeneralMessageServer.priority` into the generated reaction without
-breaking this proof, which is the cheapest possible alarm that the boundary has moved. It
-is the same device §9.1 uses for `compileGeneralModel_connections`.
+**Re-attributed by G3.** Until G3 this was an *alarm*: `LF.GeneralReaction.priority` was inert,
+nothing read it, and the cheapest available guard against a later stage quietly wiring
+`DTR.GeneralMessageServer.priority` through was to make that wiring break a `rfl`. G3 added
+`LF.GeneralProgram.reactionPrioritiesAbsent` as the tenth conjunct of well-formedness, so a
+populated priority is now a **refusal** rather than a silent no-op, and this theorem's job
+changed with it: it is the message-reaction half of what discharges that conjunct for our own
+output. The alarm reading still holds, and it is no longer the only thing standing there.
+
+The scope is honest about what "discharges" means here. This is a per-reaction equation; the
+conjunct is a property of a whole `LF.GeneralProgram`. Composing this theorem and its two
+siblings into `compileGeneralModel …  → program.reactionPrioritiesAbsent = true` needs the
+reaction-list ladder that `generalReactionTriggersOf` needed for triggers, and that theorem is
+**owed rather than absent** — F84 records it, and until it lands the property of the emitted
+program is decided by the guard at run time rather than proved.
 -/
 @[simp]
 theorem assembleGeneralMessageReaction_priority
@@ -1295,6 +1308,15 @@ theorem assembleGeneralPortReaction_body
       compiledBody := by
   rfl
 
+/--
+The port-reaction half of G3's tenth conjunct — see
+`assembleGeneralMessageReaction_priority` for the attribution and for the scope of "half".
+
+Stage E's port reactions are the reactions with no source-side priority to drop in the first
+place: a route has no priority field, so `none` here is not a dropped value but the absence of
+one. The equation is still needed, because `reactionPrioritiesAbsent` walks every reaction of
+every reactor and does not care where each came from.
+-/
 @[simp]
 theorem assembleGeneralPortReaction_priority
     (server : DTR.GeneralMessageServer)
@@ -1610,6 +1632,15 @@ theorem assembleGeneralStartupReaction_body
       compiledBody := by
   rfl
 
+/--
+The startup-reaction half of G3's tenth conjunct — see
+`assembleGeneralMessageReaction_priority` for the attribution and for the scope of "half".
+
+This is the equation that makes the conjunct's two-part walk necessary rather than tidy:
+`LF.GeneralReactor` has no single `reactions` field, so `reactionPrioritiesAbsent` checks
+`startupReaction` as a field of its own and `messageReactions` as a list, and this theorem
+covers the field. F50 records that split.
+-/
 @[simp]
 theorem assembleGeneralStartupReaction_priority
     (classConstructor : DTR.GeneralConstructor)
@@ -2645,7 +2676,7 @@ mention `DTR.GeneralModel.wellFormed` at all.
 
 The guard is the only place in this file where a refusal is not about a *source* construct.
 Its message therefore has to name a property of the generated program, and there is a real
-design tension in that: the nine clauses live in `Relico/LF/GeneralWellFormed.lean` and none
+design tension in that: the ten clauses live in `Relico/LF/GeneralWellFormed.lean` and none
 of them carries prose fit for a diagnostic. The resolution below is a **mirror** — a list
 pairing each clause with a sentence — and the mirror is used for the refusal *text only*. The
 decision itself is made on `LF.GeneralProgram.wellFormed`, never on the mirror.
@@ -2653,7 +2684,7 @@ decision itself is made on `LF.GeneralProgram.wellFormed`, never on the mirror.
 That split is deliberate and was the second design considered, not the first. A guard that
 decided on an `Option String` diagnostic built from the mirror would need
 `diagnostic program = none ↔ program.wellFormed = true` as its anti-drift tripwire, and that
-biconditional unfolds into a five-hundred-and-twelve-leaf case split over nine independent
+biconditional unfolds into a one-thousand-and-twenty-four-leaf case split over ten independent
 booleans, on a module that has never elaborated. One unclosed leaf would surface as a gate
 failure with no way to tell a real defect from a proof-engineering gap. Deciding on the real
 predicate makes acceptance-implies-well-formedness a **two-case** proof, and pays for it with
@@ -2668,8 +2699,9 @@ One sentence per conjunct of `LF.GeneralProgram.wellFormed`, in the same order.
 
 The order is not load-bearing for correctness — the refusal lists whatever is false — but it
 is kept identical to `wellFormed`'s so that a reader comparing the two files can do it by
-sight. Nine entries; if `Relico/LF/GeneralWellFormed.lean` gains a tenth conjunct, this list
-does not, and `generalProgramExplanation`'s fallback is what says so.
+sight. Ten entries, the tenth added by G3 in the same commit as the conjunct it mirrors; if
+`Relico/LF/GeneralWellFormed.lean` gains an eleventh conjunct, this list does not, and
+`generalProgramExplanation`'s fallback is what says so.
 
 Reaction names are **absent on purpose**, and the absence is the finding, not an omission.
 `Relico/LF/GeneralWellFormed.lean:37` records that reaction names need not be unique because
@@ -2719,6 +2751,12 @@ private def generalProgramClauses :
       "two connections target the same input port of the same instance, which the LF "
         ++ "compiler rejects as a many-to-one connection",
       LF.GeneralProgram.targetEndpointsUnique
+    ),
+    (
+      "some reaction carries a priority, which Lingua Franca has no way to express: `lfc "
+        ++ "0.11.0` rejects a reaction attribute named `priority` outright, and precedence "
+        ++ "between the reactions of one reactor is given by their declaration order instead",
+      LF.GeneralProgram.reactionPrioritiesAbsent
     )
   ]
 
@@ -5226,19 +5264,22 @@ theorem compileGeneralModel_wellFormed
       hCompiled
 
 /--
-Extract the last conjunct of well-formedness.
+Extract one conjunct of well-formedness — the ninth of ten, and until G3 the last.
 
 A local copy of a lemma `Relico/LF/GeneralWellFormed.lean` already proves, duplicated because
 that copy is `private` and this file is not the module it is private to. Duplicated rather than
 de-privatised on purpose: the LF module's copy exists to serve proofs *about* well-formedness,
 and making it public would invite translation-side proofs to reach past the `wellFormed`
-interface for the other eight conjuncts one at a time, which is the habit that turns a
-nine-clause predicate into nine independent obligations.
+interface for the other nine conjuncts one at a time, which is the habit that turns a
+ten-clause predicate into ten independent obligations.
 
-The proof is the house pattern — revert, unfold, split the conjunct — and it works for the last
-conjunct specifically because `&&` is strict on the right: the `false` branch makes the whole
-chain `false`, which contradicts the hypothesis, and the `true` branch leaves the goal
-trivially true.
+The proof is the house pattern — revert, unfold, split the conjunct — and it survived G3
+appending a tenth conjunct *after* this one without an edit, because it case-splits on its own
+named clause instead of projecting out of a fixed nesting: `&&` is right-associated and strict,
+so a `false` anywhere collapses the whole chain and contradicts the hypothesis, while the `true`
+branch leaves the goal trivially true. An earlier version of this comment credited the proof to
+`targetEndpointsUnique` being *last*, which was a fact about the clause count of the day rather
+than a property of the tactic.
 -/
 private theorem targetEndpointsUnique_of_wellFormed
     {program : LF.GeneralProgram}
@@ -5294,8 +5335,8 @@ run instead of being described here.
 
 This docstring used to close by offering a *relative* statement — `reactorsWellFormed` together
 with `instancesResolve` implies this clause — as what remained achievable. **F49 measured that as
-false**: a hand-built program satisfies all eight other clauses, including both of those, and
-fails this one, so the ninth clause is independent and no implication of that shape exists.
+false**: a hand-built program satisfies every other clause, including both of those, and
+fails this one, so the clause is independent and no implication of that shape exists.
 `instancesResolve` cannot supply the missing link, because a target endpoint pairs an *instance*
 with a port name while input ports are declared on a *class*; resolution says the class exists,
 not that two routes to one instance were filtered into one reactor.
@@ -5304,7 +5345,7 @@ The implication that does hold is indexed by the routing table rather than state
 `LF.GeneralProgram`, and it is proved below as `assembleGeneralProgram_targetEndpointsUnique`: for
 a program whose connections and whose reactor input ports are built from the *same* routes, and
 whose routes agree about which class an instance has, `reactorsWellFormed` implies this clause.
-That is the nine-clauses-to-eight reduction §8's acceptance condition wants. It still derives one
+That is the one-clause-fewer reduction §8's acceptance condition wants. It still derives one
 guard clause from another rather than from the construction, so it licenses retiring nothing.
 -/
 theorem compileGeneralModel_targetEndpointsUnique
@@ -5429,7 +5470,7 @@ private theorem inputPortNames_nodup_of_wellFormed
 /--
 The ninth well-formedness clause, derived from the third — on assembled programs, not in general.
 
-F49 measured `targetEndpointsUnique` to be independent of the other eight clauses, so this is the
+F49 measured `targetEndpointsUnique` to be independent of every other clause, so this is the
 strongest statement of its kind available: it is indexed by the routing table the assembler was
 given, and `reactorsWellFormed` is what discharges it.
 

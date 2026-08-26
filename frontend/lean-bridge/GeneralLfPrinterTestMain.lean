@@ -3974,9 +3974,11 @@ private def routedAssertions :
 
       -- Not implied by the text assertion above. The printer's refusals are excluded by
       -- this predicate, so a program it prints happily could still be one no theorem in
-      -- `GeneralWellFormed.lean` ranges over. Its nine conjuncts are what say the three
-      -- connections resolve at both ends, agree on payload at both ends, and land on
-      -- three distinct target endpoints.
+      -- `GeneralWellFormed.lean` ranges over. Its `connectionsWellFormed` and
+      -- `targetEndpointsUnique` clauses are what say the three connections resolve at
+      -- both ends, agree on payload at both ends, and land on three distinct target
+      -- endpoints. Named rather than counted, because the conjunct count moves: G3
+      -- appended a tenth.
       expectWellFormed
         "ACCEPT_TRANSLATED_ROUTED_PROGRAM"
         program
@@ -4281,9 +4283,9 @@ private def aliasedEndpointModel :
 The aliased-endpoint model's translated program, assembled but not guarded.
 
 Built for the reason `assembledCollisionProgram` is built and in the same three steps: the
-guard collapses nine clauses into one `String`, and `reactorsWellFormed` precedes
-`targetEndpointsUnique` in `LF.GeneralProgram.wellFormed`'s `&&` chain, so a claim about the
-second clause cannot be read off the guarded result. Two separate definitions rather than one
+guard collapses every clause of `LF.GeneralProgram.wellFormed` into one `String`, and
+`reactorsWellFormed` precedes `targetEndpointsUnique` in that `&&` chain, so a claim about the
+later clause cannot be read off the guarded result. Two separate definitions rather than one
 parameterised helper, because each is a witness for a different finding and folding them would
 make a change made for F32's sake silently change F48's.
 -/
@@ -4461,7 +4463,7 @@ private def aliasedEndpointAssertions :
 
 Hand-built LF rather than a translated model, and that is the point of the group. F48's witness
 came out of `compileGeneralModel` and answered "can routing produce a repeated target endpoint".
-This one answers a different question — "is `targetEndpointsUnique` derivable from the other eight
+This one answers a different question — "is `targetEndpointsUnique` derivable from the other
 clauses of `LF.GeneralProgram.wellFormed`" — and no translated program can answer it, because on
 translation output the relative statement is *true*: routing that duplicates an endpoint
 duplicates an input port name too, so `reactorsWellFormed` fails alongside it, which is exactly
@@ -4472,8 +4474,8 @@ The construction is minimal on purpose. One sender declaring two **different** o
 receiver declaring **one** input port, and two connections from the two different outputs both
 landing on that one port. Every connection resolves, since `connectionWellFormed` finds each
 source in the sender's output list and each target in the receiver's input list; the receiver's
-`declaredNames` holds `incoming` exactly once; both reactors are well-formed. Eight clauses hold
-and the ninth does not.
+`declaredNames` holds `incoming` exactly once; both reactors are well-formed. Every other clause
+holds and this one does not.
 
 Both startup reactions have empty bodies, which keeps `reactionWellFormed` down to
 `triggerWellFormed`, and `.startup` satisfies that outright. Nothing here is contrived except the
@@ -4583,11 +4585,18 @@ private def sharedTargetProgram :
         sharedTargetSecondOutputPortName ]
 
 /--
-The eight clauses other than `targetEndpointsUnique`, each named with its own verdict.
+Every clause of `LF.GeneralProgram.wellFormed` other than `targetEndpointsUnique`, each named
+with its own verdict.
 
 Rendered as a string rather than folded into one `Bool` so that a failure names the clause that
-moved. A conjunction would report `false` for any of the eight and leave the reader to find out
-which, and the whole content of F49 is *which*.
+moved. A conjunction would report `false` for any of them and leave the reader to find out which,
+and the whole content of F49 is *which*.
+
+There were eight when F49 landed and there are nine since G3 appended `reactionPrioritiesAbsent`,
+which is why neither this docstring nor the list is written in terms of a count. The new clause
+holds here for a reason worth stating: `LF.GeneralReaction.priority` defaults to `none` and the
+two startup reactions this witness builds do not set it, so adding the entry *strengthened* F49 —
+independence from a larger set of clauses is the stronger statement, and it cost one line.
 -/
 private def sharedTargetOtherClauses :
     String :=
@@ -4609,12 +4618,14 @@ private def sharedTargetOtherClauses :
       "instanceArgumentsMatch=" ++
         toString sharedTargetProgram.instanceArgumentsMatch,
       "connectionsWellFormed=" ++
-        toString sharedTargetProgram.connectionsWellFormed
+        toString sharedTargetProgram.connectionsWellFormed,
+      "reactionPrioritiesAbsent=" ++
+        toString sharedTargetProgram.reactionPrioritiesAbsent
     ]
 
 /--
-Finding F49, asserted rather than argued: `targetEndpointsUnique` is **independent** of the other
-eight clauses, so it cannot be dropped from `LF.GeneralProgram.wellFormed`, and these four
+Finding F49, asserted rather than argued: `targetEndpointsUnique` is **independent** of every
+other clause, so it cannot be dropped from `LF.GeneralProgram.wellFormed`, and these four
 assertions are what say so.
 
 The claim these replace was two docstrings in `Relico/Translation/GeneralRouting.lean` — one
@@ -4640,13 +4651,19 @@ witness loudly rather than by becoming vacuous.
 private def sharedTargetAssertions :
     IO Unit := do
 
-  -- The load-bearing half. Every clause but the ninth, each by name, so that a failure here
-  -- says which one and this group does not quietly weaken into "some clause holds".
+  -- The load-bearing half. Every clause but `targetEndpointsUnique`, each by name, so that a
+  -- failure here says which one and this group does not quietly weaken into "some clause holds".
+  --
+  -- The label says EIGHT and the group now checks nine, and that is left alone on purpose: four
+  -- transcripts in `docs/STAGE_E_FINDINGS.md` quote `PASS_SHARED_TARGET_EIGHT_CLAUSES_HOLD` as
+  -- run, and renaming the marker would make those records irreproducible to buy something the
+  -- expected string below already says. The count survives in the label and nowhere else.
   expectString
     "SHARED_TARGET_EIGHT_CLAUSES_HOLD"
     ("reactorsNonEmpty=true instancesNonEmpty=true reactorsWellFormed=true " ++
       "reactorNamesUnique=true instanceNamesUnique=true instancesResolve=true " ++
-      "instanceArgumentsMatch=true connectionsWellFormed=true")
+      "instanceArgumentsMatch=true connectionsWellFormed=true " ++
+      "reactionPrioritiesAbsent=true")
     sharedTargetOtherClauses
 
   -- What separates F49 from F48: there the receiver declared its input port twice, so the
@@ -5444,7 +5461,7 @@ docstring had over-claimed. F48's own entry recorded a relative statement as pro
 `reactorsWellFormed` and `instancesResolve` do **not** imply `targetEndpointsUnique` over an
 arbitrary program, and the four assertions here are the counterexample, which is finding F49.
 What they buy is the reverse of what a counterexample usually buys: the clause is independent of
-the other eight, so it must **stay** in `wellFormed`, and independence is a stronger reason to
+every other clause, so it must **stay** in `wellFormed`, and independence is a stronger reason to
 keep it than the absence of a construction proof was. The ninth block is also the only one whose
 program is built by hand *for a clause*, rather than to be printed or to be refused — the eighth
 block's model has to go through the translation to be a witness, and this one has to not.
