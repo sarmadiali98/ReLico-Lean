@@ -2320,5 +2320,187 @@ theorem GeneralStep.selected_of_timeAdvance
       exact ⟨_, hSelected, rfl, hForward⟩
 
 
+/-!
+## Congruence in the program's two projections
+
+`GeneralStep` takes its program as a **parameter**, and it reads that program through exactly two
+projections: `program.connections`, in `setPort`'s `hConnection`, and `LF.GeneralProgram.reactionFor?`,
+in `fire`'s `hReaction`. The remaining four rules mention the program only in their conclusion, and no
+rule has a `GeneralStep` premise — six conclusion occurrences for six constructors. So two programs
+agreeing on those two projections have *the same step relation*, and the case analysis below is the whole
+proof: four alternatives re-apply their constructor unchanged, and two rewrite one premise first.
+
+**Why this is a congruence and not a permutation.** F80 concludes that every `GeneralStep` derivation is
+invariant under permuting a reactor's `messageReactions`. Permuting a list *inside* a program is not an
+operation this development has, for the reason `GeneralProgram.reactionFor?_perm` above records: it would
+need a program-rebuilding function no stage has needed, and inventing one to make a theorem look tidier
+would put a definition in the tree with no caller. The honest statement is therefore about two programs
+whose projections agree; `Correctness.generalReactionFor?_perm_of_compiled` is what discharges the second
+hypothesis on translated input, and that composition is where the word "permutation" belongs.
+
+**Why the two hypotheses have different shapes.** `connections` is compared by equality, `reactionFor?`
+pointwise. A reaction permutation leaves `connections` literally unchanged, so equality is what every
+prospective caller has; weakening it to pointwise agreement of `connectionFrom?` would be generality for
+a caller that does not exist. That is **F75**'s defect read backwards, and F75 is also why the asymmetry
+is argued here rather than left looking like an oversight.
+
+**Nothing here is about the source language.** Both programs are targets, so no F76 repair decision is
+presupposed and none of this bears on the `.consume` transfer conditions, which compare a source step
+against a target one.
+-/
+
+/--
+Two programs agreeing on `connections` and on `reactionFor?` admit exactly the same steps.
+
+Four of the six alternatives are pure re-application: `assign`, `schedule`, `microstepAdvance` and
+`timeAdvance` premise nothing about the program, only about the runtime state. `setPort` rewrites
+`hConnection`, `fire` rewrites `hReaction`.
+
+Both rewrites are **uninstantiated** — `rw [hReactionFor] at hReaction`, not
+`rw [hReactionFor event.target event.kind] at hReaction` — and that is forced rather than terse. As the
+inversion section above records, a `cases` alternative binds a constructor's *explicit* fields only, so
+`fire`'s `event` is inaccessible here and cannot be named. Unification recovers it from the hypothesis
+being rewritten.
+-/
+theorem GeneralStep.congr_of_projections
+    {left right : LF.GeneralProgram}
+    {state next : GeneralRuntimeState}
+    {label : LF.GeneralLabel}
+    (hConnections :
+      left.connections = right.connections)
+    (hReactionFor :
+      ∀ (target : ActorName)
+        (kind : LF.GeneralEventKind),
+        LF.GeneralProgram.reactionFor?
+            left
+            target
+            kind =
+          LF.GeneralProgram.reactionFor?
+            right
+            target
+            kind)
+    (hStep :
+      GeneralStep
+        left
+        state
+        label
+        next) :
+    GeneralStep
+      right
+      state
+      label
+      next := by
+
+  cases hStep with
+
+  | assign hReactor hBody hEvaluate =>
+      exact
+        GeneralStep.assign
+          hReactor
+          hBody
+          hEvaluate
+
+  | schedule hReactor hBody hArguments =>
+      exact
+        GeneralStep.schedule
+          hReactor
+          hBody
+          hArguments
+
+  | setPort hReactor hBody hArguments hConnection =>
+      rw [hConnections] at hConnection
+
+      exact
+        GeneralStep.setPort
+          hReactor
+          hBody
+          hArguments
+          hConnection
+
+  | fire hSelected hTag hQueue hReactor hIdle hReaction =>
+      rw [hReactionFor] at hReaction
+
+      exact
+        GeneralStep.fire
+          hSelected
+          hTag
+          hQueue
+          hReactor
+          hIdle
+          hReaction
+
+  | microstepAdvance hSelected hTime hMicrostep =>
+      exact
+        GeneralStep.microstepAdvance
+          hSelected
+          hTime
+          hMicrostep
+
+  | timeAdvance hSelected hForward =>
+      exact
+        GeneralStep.timeAdvance
+          hSelected
+          hForward
+
+/--
+The same fact as a biconditional, which is the form F80's claim actually takes: "invariant" is a two-way
+statement, and an implication would under-deliver on the finding that asked for this.
+
+Cheap, because both hypotheses are symmetric — the reverse direction is the forward one applied to
+`hConnections.symm` and to the pointwise `symm` of `hReactionFor`. The implication is kept as its own
+declaration rather than replaced by this one, because a caller that already knows which side it is on
+should not have to project out of an `Iff`, and Definition 1's two transfer conditions run in opposite
+directions.
+-/
+theorem GeneralStep.congr_iff_of_projections
+    {left right : LF.GeneralProgram}
+    {state next : GeneralRuntimeState}
+    {label : LF.GeneralLabel}
+    (hConnections :
+      left.connections = right.connections)
+    (hReactionFor :
+      ∀ (target : ActorName)
+        (kind : LF.GeneralEventKind),
+        LF.GeneralProgram.reactionFor?
+            left
+            target
+            kind =
+          LF.GeneralProgram.reactionFor?
+            right
+            target
+            kind) :
+    GeneralStep
+        left
+        state
+        label
+        next ↔
+      GeneralStep
+        right
+        state
+        label
+        next := by
+
+  constructor
+
+  · intro hStep
+
+    exact
+      GeneralStep.congr_of_projections
+        hConnections
+        hReactionFor
+        hStep
+
+  · intro hStep
+
+    exact
+      GeneralStep.congr_of_projections
+        hConnections.symm
+        (fun target kind =>
+          (hReactionFor
+            target
+            kind).symm)
+        hStep
+
+
 end LF
 end Relico
