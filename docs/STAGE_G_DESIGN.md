@@ -766,6 +766,18 @@ on both sides: so that a new constructor is a **build error** at every case anal
 default branch. The work is mechanical but wide. It lands as the **last** commit of the stage, so that
 G1–G3 are green independently of it.
 
+**Landed in three parts, the last on 2026-08-27.** Part one, the plumbing (`trace` on both sides,
+printer, statement walk), and part two, Option A's τ semantics, landed first; part three is the witness
+itself: `priorityWitnessModel` in `frontend/lean-bridge/GeneralLfPrinterTestMain.lean` (selector
+`emit-priority-witness`), compiled with real `lfc`, run natively, and asserted on by
+`frontend/check-general-lf-target.sh` under the new marker `GENERAL_LF_PRIORITY_WITNESS_OK` — the
+observed stdout is `LATE` then `EARLY`, against a declaration order that says `early` first at both
+levels. The model carries one derangement per sort: the hub's servers are declared `early, late` and
+prioritised `late, early` (level 2, run-time observable through reaction declaration order), and the
+senders are declared `early, late` with priorities `2, 1` (level 1, observable in the emitted
+connection order only, because LF's cross-reactor order comes from the dependency graph — P1). The four
+pre-existing target-gate cycles keep their exit-code-only contract untouched. This discharges audit
+item C3 (`RELICO_FORWARD_ROADMAP_AUDIT.md` §C) and completes §13 row 11.
 
 ## 11. G6 — the tracked fragment declaration F63 owes
 

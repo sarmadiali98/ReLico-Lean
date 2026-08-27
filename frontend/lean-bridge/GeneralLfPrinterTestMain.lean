@@ -5672,6 +5672,403 @@ def emitRepeatedSelfSendProgram :
 
       pure 1
 
+/-!
+### The G5 witness: priority order deranging declaration order, observed at run time
+
+`docs/STAGE_G_DESIGN.md` §10 asks for one model whose run distinguishes priority order
+from declaration order, because everything before it gated priority as *text*: a
+translator that emitted the right declaration order while running in the wrong one would
+pass every gate in this repository. This model is that witness, and the observation
+happens in `frontend/check-general-lf-target.sh`, not here.
+
+Two derangements are carried, one per level, and only one of them is observable at run
+time — that asymmetry is a property of the target, not a choice of this file:
+
+* **Level 2, observable.** `WitnessHub` declares its servers in the order
+  `early, late`, and annotates only `late` (`priority := some 0`); an absent priority is
+  a priority class ordered after every explicit one, so
+  `Translation.generalPriorityOrderedMessageServers` walks them `late, early`, and the
+  hub reactor's reactions are **declared** in that order. Both deliveries arrive at one
+  complete tag on two port-triggered reactions of one reactor — the exact shape stage F
+  measured (`STAGE_F_DESIGN.md` §2.1, probe pair `stageF_onesender_twoports`): at one
+  tag, **declaration order decides**. So the run prints `LATE` before `EARLY`, while the
+  class declares `early` first.
+* **Level 1, text only.** The two senders are declared `early, late` and prioritised the
+  other way round (`some 2` vs `some 1`), so `routesOf` emits `late`'s connection first.
+  Cross-reactor and connection order are not run-time observables (P1: LF's cross-reactor
+  order comes from the dependency graph), so this derangement is visible in the emitted
+  text and nowhere else. The senders' payloads differ (`1` vs `2`) so the two connections
+  are distinguishable in that text.
+
+Both senders send from their constructors with `after 0`, the hub's servers send nothing,
+and the hub's constructor is empty, so the event queue empties and the binary exits — the
+termination property every program in the target gate owes.
+
+What this witness does **not** claim: that stdout is part of the formal observable
+alphabet. Option A (F-milestone `general: add G5 trace semantics`) made `.trace` a τ
+step on both sides precisely so the theorem boundary stays where it was; the bytes on
+stdout are target-runtime evidence, owned by the gate, not by `GeneralLabel`.
+-/
+
+private def witnessHubClassName :
+    ClassName :=
+  ⟨"WitnessHub"⟩
+
+private def earlySenderClassName :
+    ClassName :=
+  ⟨"EarlySender"⟩
+
+private def lateSenderClassName :
+    ClassName :=
+  ⟨"LateSender"⟩
+
+private def witnessHubInstanceName :
+    ActorName :=
+  ⟨"hub"⟩
+
+private def earlySenderInstanceName :
+    ActorName :=
+  ⟨"early"⟩
+
+private def lateSenderInstanceName :
+    ActorName :=
+  ⟨"late"⟩
+
+private def earlyMessageName :
+    MsgName :=
+  ⟨"early"⟩
+
+private def lateMessageName :
+    MsgName :=
+  ⟨"late"⟩
+
+private def witnessValueParameter :
+    VarName :=
+  ⟨"value"⟩
+
+private def witnessStateName :
+    VarName :=
+  ⟨"last"⟩
+
+/--
+The server declared **first** and prioritised **last**.
+
+Its priority field is omitted rather than set to `none`: an absent priority is a priority
+class of its own — the convention fixed at `Relico/DTR/GeneralSyntax.lean`'s
+`GeneralMessageServer` docstring — and omitting the field is how the syntax spells that
+class, so the omission *is* the point being witnessed.
+
+The formal is read rather than ignored, so the emitted reaction neither warns about an
+unused parameter nor runs empty; the trace tag is the observable.
+-/
+private def witnessEarlyMessageServer :
+    DTR.GeneralMessageServer where
+
+  name :=
+    earlyMessageName
+
+  parameters :=
+    [
+      {
+        name :=
+          witnessValueParameter
+
+        declaredType :=
+          .int
+      }
+    ]
+
+  body :=
+    [
+      .assign
+        witnessStateName
+        (.parameterVar
+          witnessValueParameter),
+
+      .trace
+        "EARLY"
+    ]
+
+/--
+The server declared **second** and prioritised **first**.
+
+The only annotated server in the model, and therefore the whole of the level-2
+derangement: `generalPriorityOrderedMessageServers` puts this block ahead of `early`'s
+despite the declaration order, and that block order is what `lfc` executes first.
+-/
+private def witnessLateMessageServer :
+    DTR.GeneralMessageServer where
+
+  name :=
+    lateMessageName
+
+  parameters :=
+    [
+      {
+        name :=
+          witnessValueParameter
+
+        declaredType :=
+          .int
+      }
+    ]
+
+  body :=
+    [
+      .assign
+        witnessStateName
+        (.parameterVar
+          witnessValueParameter),
+
+      .trace
+        "LATE"
+    ]
+
+  priority :=
+    some 0
+
+/--
+The receiving class: servers declared `early, late`, prioritised `late, early`.
+
+No message servers send anything and its constructor is empty, so the hub contributes no
+routes; its role is to own the two port-triggered reaction blocks whose declaration order
+the level-2 sort deranges.
+-/
+private def witnessHubClass :
+    DTR.GeneralReactiveClass where
+
+  name :=
+    witnessHubClassName
+
+  knownRebecs :=
+    []
+
+  stateVariables :=
+    [
+      {
+        name :=
+          witnessStateName
+
+        declaredType :=
+          .int
+      }
+    ]
+
+  constructor :=
+    {
+      parameters :=
+        []
+
+      body :=
+        []
+    }
+
+  messageServers :=
+    [
+      witnessEarlyMessageServer,
+      witnessLateMessageServer
+    ]
+
+/--
+The sender declared **first**, prioritised **last** (`some 2`).
+
+Sends payload `1` so the two connections are distinguishable in the emitted text — the
+same discipline the F56 model follows for its two schedules.
+-/
+private def earlySenderClass :
+    DTR.GeneralReactiveClass where
+
+  name :=
+    earlySenderClassName
+
+  knownRebecs :=
+    [
+      {
+        name :=
+          hubKnownRebecName
+
+        className :=
+          witnessHubClassName
+      }
+    ]
+
+  stateVariables :=
+    []
+
+  constructor :=
+    {
+      parameters :=
+        []
+
+      body :=
+        [
+          .send
+            (.knownRebec
+              hubKnownRebecName)
+            earlyMessageName
+            [.intLiteral 1]
+            ⟨0⟩
+        ]
+    }
+
+  messageServers :=
+    []
+
+/--
+The sender declared **second**, prioritised **first** (`some 1`).
+
+A structure update on `earlySenderClass` differing in name, message and payload only, so
+the emitted difference between the two senders cannot be explained by anything else.
+-/
+private def lateSenderClass :
+    DTR.GeneralReactiveClass :=
+  {
+    earlySenderClass with
+
+    name :=
+      lateSenderClassName
+
+    constructor :=
+      {
+        parameters :=
+          []
+
+        body :=
+          [
+            .send
+              (.knownRebec
+                hubKnownRebecName)
+              lateMessageName
+              [.intLiteral 2]
+              ⟨0⟩
+          ]
+      }
+  }
+
+/--
+The sender declared first, priority `some 2`.
+-/
+private def earlySenderActor :
+    DTR.GeneralActorInstance where
+
+  name :=
+    earlySenderInstanceName
+
+  className :=
+    earlySenderClassName
+
+  bindings :=
+    [(hubKnownRebecName, witnessHubInstanceName)]
+
+  arguments :=
+    []
+
+  priority :=
+    some 2
+
+/--
+The sender declared second, priority `some 1` — the level-1 derangement.
+-/
+private def lateSenderActor :
+    DTR.GeneralActorInstance :=
+  {
+    earlySenderActor with
+
+    name :=
+      lateSenderInstanceName
+
+    className :=
+      lateSenderClassName
+
+    priority :=
+      some 1
+  }
+
+/--
+The receiver. No priority annotation: it sends nothing, a non-sender's priority is inert,
+and leaving it absent keeps the two annotated priorities exactly the two the derangement
+is about.
+-/
+private def witnessHubActor :
+    DTR.GeneralActorInstance where
+
+  name :=
+    witnessHubInstanceName
+
+  className :=
+    witnessHubClassName
+
+  bindings :=
+    []
+
+  arguments :=
+    []
+
+/--
+The witness model.
+
+Class order fixes reactor order; instance order is declared `early, late, hub` and
+prioritised `late, early, (hub absent)`; the hub's servers are declared `early, late` and
+prioritised `late, early`. Every order that a sort controls disagrees with every order
+that declaration controls, which is what makes this a witness rather than a fixture.
+-/
+private def priorityWitnessModel :
+    DTR.GeneralModel where
+
+  classes :=
+    [
+      earlySenderClass,
+      lateSenderClass,
+      witnessHubClass
+    ]
+
+  instances :=
+    [
+      earlySenderActor,
+      lateSenderActor,
+      witnessHubActor
+    ]
+
+/--
+Translate the witness model and print it, in one `Except`.
+
+The same shared-text discipline as `widenedProgramText` and `routedProgramText`: the
+bytes the target gate hands to `lfc` come from here and from nowhere else, so the
+witness cannot compile something no other path ever saw.
+-/
+private def priorityWitnessProgramText :
+    Except String String := do
+
+  let program ←
+    Translation.compileGeneralModel
+      priorityWitnessModel
+
+  LF.CppPrinter.renderGeneralProgram
+    program
+
+/--
+Print the priority-witness program, for the target gate to hand to `lfc`.
+
+The only emitted program in this file whose *run* is asserted on, not just its exit
+code: the gate captures stdout and requires `LATE` to precede `EARLY`, against a
+declaration order that says the opposite.
+-/
+def emitPriorityWitnessProgram :
+    IO UInt32 :=
+  match priorityWitnessProgramText with
+
+  | .ok programText => do
+      IO.print programText
+
+      pure 0
+
+  | .error reason => do
+      IO.eprintln
+        ("the translation or the printer refused the priority-witness model: " ++
+          reason)
+
+      pure 1
+
 end GeneralLfPrinterTests
 end Relico
 
@@ -5701,8 +6098,11 @@ def main
   | ["emit-repeated"] =>
       Relico.GeneralLfPrinterTests.emitRepeatedSelfSendProgram
 
+  | ["emit-priority-witness"] =>
+      Relico.GeneralLfPrinterTests.emitPriorityWitnessProgram
+
   | _ => do
       IO.eprintln
-        "usage: GeneralLfPrinterTestMain [emit-program|emit-widened|emit-routed|emit-repeated]"
+        "usage: GeneralLfPrinterTestMain [emit-program|emit-widened|emit-routed|emit-repeated|emit-priority-witness]"
 
       pure 2

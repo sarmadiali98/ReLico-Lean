@@ -32,7 +32,7 @@ set -euo pipefail
 # same program the assertions pin, and nothing else -- so this gate cannot pass
 # against a hand-transcribed variant that drifted from what the printer does.
 #
-# FOUR programs are emitted, compiled and run. `emit-program` prints a hand-built
+# FIVE programs are emitted, compiled and run. `emit-program` prints a hand-built
 # LF program and so asks only whether this printer's output is legal LF.
 # `emit-widened` prints the translation of a single-actor Timed Rebeca model --
 # `compileGeneralModel` then the printer -- and so asks the question stage D exists
@@ -80,6 +80,28 @@ set -euo pipefail
 #
 # It terminates for the reason the two models above do: `tick` assigns to a state
 # variable and sends nothing, so the queue empties once both deliveries have run.
+#
+# `emit-priority-witness` is G5's witness (STAGE_G_DESIGN §10), and the first program in
+# this gate whose *run* is asserted on rather than only its exit code. Every ordering
+# claim before it was gated as text; this one is gated as behaviour. The model carries
+# two derangements, one per level: the hub declares its servers `early, late` and
+# annotates only `late`, so the level-2 sort emits the hub's reaction blocks
+# late-first; and the two senders are declared `early, late` with priorities `2` and
+# `1`, so the level-1 sort emits `late`'s connection first. Both senders send from
+# their constructors `after 0`, so both deliveries arrive at one complete tag on two
+# port-triggered reactions of one reactor -- the exact shape stage F measured
+# (STAGE_F_DESIGN §2.1: at one tag, declaration order decides). The assertion below
+# therefore requires stdout to read `LATE` before `EARLY`, against a declaration order
+# that says the opposite at both levels. A translator that emitted the right
+# declaration order while running in the wrong one now fails here and nowhere else.
+#
+# The four cycles above keep their exit-code-only contract untouched; this is a new
+# marker extending the gate, not a reinterpretation of the old ones. Stage E's "forced,
+# not lazy" verdict on exit-code checking stands for them: they have no output to diff.
+# This program does, because G5 added the `trace` statement whose only job is to put
+# one there. The bytes on stdout are target-runtime evidence and stay outside the
+# formal observable alphabet -- Option A made `.trace` a tau step on both sides
+# precisely so the theorem boundary does not move.
 
 REPO="$(
   cd "$(dirname "$0")/.." &&
@@ -104,6 +126,7 @@ BASE_PROGRAM_NAME="GeneralPrinterProgram"
 WIDENED_PROGRAM_NAME="GeneralTranslatedProgram"
 ROUTED_PROGRAM_NAME="GeneralRoutedProgram"
 REPEATED_PROGRAM_NAME="GeneralRepeatedSelfSendProgram"
+PRIORITY_WITNESS_PROGRAM_NAME="GeneralPriorityWitnessProgram"
 
 WORK="${TMPDIR:-/tmp}/relico_general_lf_target"
 
@@ -268,6 +291,50 @@ check_program \
   emit-routed \
   "$ROUTED_PROGRAM_NAME" \
   "the translated program from the routed two-class Rebeca model"
+
+# G5's witness cycle. The compile-and-run half reuses `check_program` unchanged, so the
+# four programs above keep their exit-code-only contract; what is new starts after it:
+# the assertion on the OBSERVED OUTPUT ORDER.
+check_program \
+  emit-priority-witness \
+  "$PRIORITY_WITNESS_PROGRAM_NAME" \
+  "the translated program from the priority-witness Rebeca model"
+
+echo
+echo "=== asserting the observed output order of the priority witness"
+
+WITNESS_RUN_LOG="$WORK/$PRIORITY_WITNESS_PROGRAM_NAME/run.log"
+
+if [ ! -f "$WITNESS_RUN_LOG" ]; then
+  echo "no run log at $WITNESS_RUN_LOG; the witness binary never ran"
+  exit 1
+fi
+
+# Command substitution strips the trailing newline, so both sides are compared without
+# one: exactly two lines, LATE then EARLY, and nothing else.
+WITNESS_OBSERVED="$(cat "$WITNESS_RUN_LOG")"
+WITNESS_EXPECTED="LATE
+EARLY"
+
+echo "observed stdout:"
+cat "$WITNESS_RUN_LOG"
+
+if [ "$WITNESS_OBSERVED" != "$WITNESS_EXPECTED" ]; then
+  echo
+  echo "the witness ran in the wrong order."
+  echo
+  echo "expected stdout (priority order -- the hub's only annotated server is 'late'):"
+  echo "$WITNESS_EXPECTED"
+  echo
+  echo "A translator that emits the right declaration order while running in the wrong"
+  echo "one passes every other gate in this repository; this is the one it cannot pass."
+  exit 1
+fi
+
+echo
+echo "priority order beat declaration order: LATE ran before EARLY"
+echo
+echo "GENERAL_LF_PRIORITY_WITNESS_OK"
 
 echo
 echo "GENERAL_LF_TARGET_OK"
