@@ -6,25 +6,19 @@ The translation is implemented in Lean and connected directly to structural and 
 
 ## Supported executable fragment
 
-The current generalized source fragment supports:
+The live translation surface is the **general family**: multiple reactive classes, multiple actor
+instances, known rebecs, external sends, ports and inter-reactor connections, message parameters
+and payloads, `int`/`boolean` state, thirteen binary and two unary operators, assignments, sends
+with nonnegative constant delays, and a `trace` statement used as the runnable-witness instrument.
+Actor priorities and message-server priorities are carried into reaction declaration order.
 
-- one reactive class and one actor instance;
-- a finite nonempty list of integer state variables;
-- one constructor and one message server;
-- integer literals and references to any declared state variable;
-- assignments to any declared state variable;
-- cross-variable assignments;
-- delayed self-sends with nonnegative constant delays.
+The accepted fragment — what passes the frontend diagnostics, `DTR.GeneralModel.wellFormed` and the
+translation guard, and what each excludes — is declared in
+[`docs/supported-fragment-general.md`](docs/supported-fragment-general.md). That declaration, not
+this summary, is the authority.
 
-The generated LF subset contains:
-
-- one reactor and one reactor instance;
-- one LF state declaration for every source state variable;
-- one logical action;
-- one startup reaction;
-- one message reaction.
-
-The original singleton vertical slice remains available as the schema-version-1 compatibility path.
+The earlier singleton, finite-store and multi-store families remain in-tree as compatibility and
+regression paths; the singleton schema-version-1 path is still available.
 
 ## Executable pipeline
 

@@ -25,7 +25,8 @@ executable Lean translator
 well-formed generated LF AST
 ~~~
 
-For every well-formed source model in the supported fragment, the project aims to prove that:
+For every well-formed source model in the supported fragment — declared for the general family in
+[`supported-fragment-general.md`](supported-fragment-general.md) — the project aims to prove that:
 
 1. translation succeeds;
 2. the generated LF model is well formed;
@@ -59,6 +60,6 @@ These components must be stated explicitly as being outside the verified boundar
 
 After the executable translator, correctness theorem, and tool integration are complete, the intended claim is:
 
-> The executable DTR-AST-to-LF-AST translation core implemented in ReLico-Lean is formally verified for the declared supported fragment.
+> The executable DTR-AST-to-LF-AST translation core implemented in ReLico-Lean is formally verified for the declared supported fragment — for the general family, the fragment declared in [`supported-fragment-general.md`](supported-fragment-general.md).
 
 This does not mean that the complete Rebeca parser, LF toolchain, runtime, or deployed system is formally verified.

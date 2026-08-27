@@ -789,16 +789,22 @@ listed five. Two documents are owed:
    vertical slice v0 and is now marked as historical; but `README.md:3` and
    `docs/trusted-boundary.md:28`/`:62` quantify the project's claim over "the supported fragment", so
    something must declare the current one. It should be derived from the executable predicates —
-   `GeneralModel.wellFormed`'s four clauses plus the guards — not from prose, and it should state
+   `GeneralModel.wellFormed`'s clauses (five in source, not the four this sentence said until
+   2026-08-27; the fifth, `namesUniqueAndValid`, postdates the approved stage-B design, as
+   `docs/STAGE_B_FINDINGS.md` records) plus the guards — not from prose, and it should state
    `arbitrary LF programs` as excluded *by design* rather than by schedule.
+   **Landed 2026-08-27** as `docs/supported-fragment-general.md`, with the three quantification sites
+   (`README.md`'s fragment section, `trusted-boundary.md`'s two phrases) and the v0 scope marker
+   repointed at it. F63's first half is discharged.
 2. **The theorem-eligibility table.** The binding 2026-08-18 decision required that the
    "elaborable but not theorem-eligible" boundary "has to be legible" and that §7's table graduate into
    the tracked docs. It never did — the phrase occurs once repo-wide, in the sentence promising it. Five
    tie fixtures elaborate and are excluded from every correctness theorem, and no tracked document says
-   which five. This table names them.
+   which five. This table names them. **Still owed.**
 
 Both are written **last** (§13, commit 9), because their content depends on G5: a fragment that includes a
-`trace` statement is a different fragment, and G5 is settled but not yet built.
+`trace` statement is a different fragment. G5 has since landed in full — plumbing, τ semantics, and the
+runnable witness — and document 1 above declares the fragment with `trace` in it.
 
 
 ## 12. What stage G does not do

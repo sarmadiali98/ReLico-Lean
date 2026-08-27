@@ -25,11 +25,11 @@ The initial fragment is intentionally small. We will complete an executable tran
 > **F63** in [`STAGE_G_FINDINGS.md`](STAGE_G_FINDINGS.md).
 >
 > The repair — a tracked declaration of the general family's accepted fragment, together with the
-> theorem-eligibility boundary inside it — is specified in `docs/STAGE_G_DESIGN.md` and is not yet
-> written. Until it exists, the accepted fragment is documented only by the stage design documents
-> (`STAGE_B_DESIGN.md` through `STAGE_F_DESIGN.md`), and the authority over all of that prose is the
-> executable predicate: `GeneralModel.wellFormed` and the two priority-distinctness predicates in
-> `Relico/DTR/GeneralWellFormed.lean`.
+> theorem-eligibility boundary inside it — is specified in `docs/STAGE_G_DESIGN.md`. Its first half
+> landed on 2026-08-27 as [`supported-fragment-general.md`](supported-fragment-general.md), which is
+> now the declaration the sites above resolve to; the theorem-eligibility table is G6 document 2 and
+> is still owed. Until that second half lands, the boundary between elaborable and theorem-eligible
+> inside the accepted fragment is documented only by the hypotheses of the theorems themselves.
 
 ## Vertical slice v0
 
