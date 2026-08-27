@@ -499,6 +499,27 @@ theorem typeOf_compileGeneralValue
       compileGeneralType value.typeOf := by
   cases value <;> rfl
 
+/--
+A state variable's translated default is the translation of its default.
+
+Both `initialValue` functions are identity-shaped — zero for `int`, false for `boolean` —
+and `compileGeneralValue` never changes a literal, so the square commutes by case analysis
+on the type. Stated because the initial valuation correspondence is exactly this square
+applied once per declared variable: the source initializer builds
+`DTR.GeneralType.initialValue` and the target initializer builds
+`LF.GeneralType.initialValue ∘ compileGeneralType`, and without this lemma the two are two
+independent computations that happen to agree today.
+-/
+@[simp]
+theorem compileGeneralValue_initialValue
+    (declaredType : DTR.GeneralType) :
+    compileGeneralValue
+        (DTR.GeneralType.initialValue
+          declaredType) =
+    LF.GeneralType.initialValue
+      (compileGeneralType declaredType) := by
+  cases declaredType <;> rfl
+
 @[simp]
 theorem compileGeneralStateVariableDecl_name
     (declaration : DTR.GeneralStateVariableDecl) :
@@ -3981,6 +4002,149 @@ theorem compileGeneralReactiveClass_name
   simp
 
 /--
+A compiled reactor's startup reaction body is a successful compilation of its class's constructor body.
+
+The shape a state initializer on the target side needs: the body an initial `LF.GeneralReactorRuntime`
+receives is not an arbitrary list of statements but exactly the compiled constructor body, under the port
+environment and self-send list the reactor itself was compiled against. The existential is not slack —
+`outputPortEnvOf` and `selfSendsOfClass` are functions of the class, and the pair only introduces names
+for them, following `compileGeneralReactiveClass_outputPorts`' convention for the same situation.
+-/
+theorem compileGeneralReactiveClass_startupBody
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {reactor : LF.GeneralReactor}
+    (hCompiled :
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok reactor) :
+    ∃ env compiledBody,
+      outputPortEnvOf
+          classes
+          reactiveClass =
+          .ok env ∧
+        compileGeneralBody
+            env
+            { bodyKey := .constructor,
+              selfSends :=
+                selfSendsOfClass reactiveClass }
+            0
+            reactiveClass.constructor.body =
+          .ok compiledBody ∧
+        reactor.startupReaction.body =
+          compiledBody := by
+
+  rcases
+      exists_of_compileGeneralReactiveClass_ok
+        hCompiled with
+    ⟨
+      env,
+      compiledStartupReaction,
+      _,
+      hEnv,
+      hConstructor,
+      _,
+      hReactor
+    ⟩
+
+  subst hReactor
+
+  rcases
+      exists_of_compileGeneralConstructor_ok
+        hConstructor with
+    ⟨
+      compiledBody,
+      hBody,
+      hStartupReaction
+    ⟩
+
+  exact
+    ⟨
+      env,
+      compiledBody,
+      hEnv,
+      hBody,
+      by
+        rw [
+          assembleGeneralReactor_startupReaction,
+          hStartupReaction,
+          assembleGeneralStartupReaction_body
+        ]
+    ⟩
+
+/--
+A compiled reactor's state variables are the translations of its class's, in declaration order.
+-/
+theorem compileGeneralReactiveClass_stateVariables
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {reactor : LF.GeneralReactor}
+    (hCompiled :
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok reactor) :
+    reactor.stateVariables =
+      reactiveClass.stateVariables.map
+        compileGeneralStateVariableDecl := by
+
+  rcases
+      exists_of_compileGeneralReactiveClass_ok
+        hCompiled with
+    ⟨
+      _,
+      _,
+      _,
+      _,
+      _,
+      _,
+      hReactor
+    ⟩
+
+  subst hReactor
+  simp
+
+/--
+A compiled reactor's parameters are the translations of its class's constructor parameters, in
+declaration order.
+-/
+theorem compileGeneralReactiveClass_parameters
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {reactor : LF.GeneralReactor}
+    (hCompiled :
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok reactor) :
+    reactor.parameters =
+      reactiveClass.constructor.parameters.map
+        compileGeneralTypedParameter := by
+
+  rcases
+      exists_of_compileGeneralReactiveClass_ok
+        hCompiled with
+    ⟨
+      _,
+      _,
+      _,
+      _,
+      _,
+      _,
+      hReactor
+    ⟩
+
+  subst hReactor
+  simp
+
+/--
 Every reactor of a compiled class list has some class's ports, and both port lists are routing
 projections of that class.
 
@@ -4102,6 +4266,208 @@ theorem compileGeneralReactiveClasses_ports :
               hEnv,
               hInputPorts,
               hOutputPorts
+            ⟩
+
+/--
+On a list whose image has no duplicates, an injective function's preimage list has no duplicates
+either.
+
+Public because the initial correspondence needs it in exactly one place — deriving that a compiled
+program's duplicate-free reactor names mean the model's class names were duplicate-free — and a second
+private copy in another module would be the duplication this repository prefers to avoid. Hand-rolled
+because this development depends on Lean core alone.
+-/
+theorem nodup_of_nodup_map_injective
+    {α β : Type}
+    (function : α → β) :
+    ∀ (values : List α),
+      (values.map function).Nodup →
+        Function.Injective function →
+          values.Nodup := by
+
+  intro values
+  induction values with
+
+  | nil =>
+      simp
+
+  | cons head remaining inductionHypothesis =>
+      intro hNodup hInjective
+
+      refine
+        List.nodup_cons.mpr
+          ⟨
+            ?_,
+            inductionHypothesis
+              (List.nodup_cons.mp hNodup).2
+              hInjective
+          ⟩
+
+      intro hMember
+
+      have hMapped :
+          function head ∈
+            remaining.map function :=
+        List.mem_map_of_mem hMember
+
+      exact
+        (List.nodup_cons.mp hNodup).1
+          hMapped
+
+/--
+Every reactor of a compiled class list comes from a class of that list, with the startup body and state
+variables that class compiled to.
+
+The membership companion of `compileGeneralReactiveClasses_ports`, answering the question that one
+cannot: which **class** produced this reactor? The answer is the witness the initial correspondence
+needs — it walks a compiled program's reactors and must, for each, name the source class whose
+constructor parameters and state variables the initial states on the two sides were built from.
+
+`allClasses` and `classes` are again independently quantified, for the same reason as
+`compileGeneralReactiveClasses_ports`: `compileGeneralModel` instantiates both to `model.classes`, and
+no consumer needs them related.
+
+On a compiled class list whose class names are distinct — which every compiled *program* guarantees
+through `reactorNamesUnique`, `compileGeneralModel_reactorNames` and
+`Translation.reactorNameFor_injective` — the witness class is unique, but uniqueness is deliberately
+not concluded here: no consumer needs it, and a uniqueness clause would force every caller to carry a
+`Nodup` hypothesis through the membership walk.
+-/
+theorem compileGeneralReactiveClasses_startupBody :
+    ∀ (allClasses : List DTR.GeneralReactiveClass)
+      (routes : List GeneralRoute)
+      (classes : List DTR.GeneralReactiveClass)
+      (compiled : List LF.GeneralReactor),
+      compileGeneralReactiveClasses
+          allClasses
+          routes
+          classes =
+          .ok compiled →
+        ∀ (reactor : LF.GeneralReactor),
+          reactor ∈ compiled →
+            ∃ reactiveClass env compiledBody,
+              reactiveClass ∈ classes ∧
+                compileGeneralReactiveClass
+                    allClasses
+                    routes
+                    reactiveClass =
+                    .ok reactor ∧
+                  outputPortEnvOf
+                      allClasses
+                      reactiveClass =
+                      .ok env ∧
+                compileGeneralBody
+                    env
+                    { bodyKey := .constructor,
+                      selfSends :=
+                        selfSendsOfClass reactiveClass }
+                    0
+                    reactiveClass.constructor.body =
+                    .ok compiledBody ∧
+                  reactor.startupReaction.body =
+                    compiledBody ∧
+                reactor.stateVariables =
+                    reactiveClass.stateVariables.map
+                      compileGeneralStateVariableDecl ∧
+              reactor.parameters =
+                  reactiveClass.constructor.parameters.map
+                    compileGeneralTypedParameter := by
+
+  intro allClasses routes classes
+  induction classes with
+
+  | nil =>
+      intro compiled hCompiled reactor hMember
+
+      rw [
+        eq_nil_of_compileGeneralReactiveClasses_nil_ok
+          hCompiled
+      ] at hMember
+
+      cases hMember
+
+  | cons reactiveClass remaining inductionHypothesis =>
+      intro compiled hCompiled reactor hMember
+
+      rcases
+          exists_of_compileGeneralReactiveClasses_cons_ok
+            hCompiled with
+        ⟨
+          compiledReactor,
+          compiledRemaining,
+          hClass,
+          hRemaining,
+          hCompiledEq
+        ⟩
+
+      subst hCompiledEq
+
+      cases List.mem_cons.mp hMember with
+
+      | inl hHead =>
+          subst hHead
+
+          rcases
+              compileGeneralReactiveClass_startupBody
+                hClass with
+            ⟨
+              env,
+              compiledBody,
+              hEnv,
+              hBody,
+              hStartupBody
+            ⟩
+
+          exact
+            ⟨
+              reactiveClass,
+              env,
+              compiledBody,
+              List.mem_cons.mpr
+                (Or.inl rfl),
+              hClass,
+              hEnv,
+              hBody,
+              hStartupBody,
+              compileGeneralReactiveClass_stateVariables
+                hClass,
+              compileGeneralReactiveClass_parameters
+                hClass
+            ⟩
+
+      | inr hTail =>
+          rcases
+              inductionHypothesis
+                compiledRemaining
+                hRemaining
+                reactor
+                hTail with
+            ⟨
+              witnessClass,
+              env,
+              compiledBody,
+              hWitnessMember,
+              hWitnessClass,
+              hEnv,
+              hBody,
+              hStartupBody,
+              hStateVariables,
+              hParameters
+            ⟩
+
+          exact
+            ⟨
+              witnessClass,
+              env,
+              compiledBody,
+              List.mem_cons.mpr
+                (Or.inr hWitnessMember),
+              hWitnessClass,
+              hEnv,
+              hBody,
+              hStartupBody,
+              hStateVariables,
+              hParameters
             ⟩
 
 /--
@@ -4244,6 +4610,93 @@ theorem compileGeneralModel_ports
 
   exact
     compileGeneralReactiveClasses_ports
+      model.classes
+      routes
+      model.classes
+      compiledReactors
+      hClasses
+      reactor
+      hMember
+
+/--
+Every reactor of a compiled program comes from a class of the model, with that class's compiled startup
+body and state variables.
+
+The program-level form of `compileGeneralReactiveClasses_startupBody`, shaped like
+`compileGeneralModel_ports` — the routes existentially bound, because they are recovered from the
+compilation rather than named in the theorem's head — and it is the theorem the initial
+correspondence consumes: given a reactor of a successfully compiled program it names the source class
+behind it, the successful compilation of that class, the port environment the startup body was compiled
+under, the compiled constructor body itself, and the translated state-variable list — everything an
+initial-state argument needs to line one side's constructor entry up against the other's.
+-/
+theorem compileGeneralModel_startupBody
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    (hCompiled :
+      compileGeneralModel model =
+        .ok program) :
+    ∃ routes,
+      routesOf model =
+          .ok routes ∧
+        ∀ (reactor : LF.GeneralReactor),
+          reactor ∈ program.reactors →
+            ∃ reactiveClass env compiledBody,
+              reactiveClass ∈ model.classes ∧
+                compileGeneralReactiveClass
+                    model.classes
+                    routes
+                    reactiveClass =
+                    .ok reactor ∧
+                  outputPortEnvOf
+                      model.classes
+                      reactiveClass =
+                      .ok env ∧
+                compileGeneralBody
+                    env
+                    { bodyKey := .constructor,
+                      selfSends :=
+                        selfSendsOfClass reactiveClass }
+                    0
+                    reactiveClass.constructor.body =
+                    .ok compiledBody ∧
+                  reactor.startupReaction.body =
+                      compiledBody ∧
+                reactor.stateVariables =
+                    reactiveClass.stateVariables.map
+                      compileGeneralStateVariableDecl ∧
+              reactor.parameters =
+                  reactiveClass.constructor.parameters.map
+                    compileGeneralTypedParameter := by
+
+  rcases
+      exists_of_compileGeneralModel_ok
+        hCompiled with
+    ⟨
+      routes,
+      compiledReactors,
+      hRoutes,
+      hClasses,
+      hProgram
+    ⟩
+
+  subst hProgram
+
+  refine
+    ⟨
+      routes,
+      hRoutes,
+      ?_
+    ⟩
+
+  intro reactor hMember
+
+  rw [
+    assembleGeneralProgram_reactors
+  ] at hMember
+
+  exact
+    compileGeneralReactiveClasses_startupBody
       model.classes
       routes
       model.classes
@@ -5184,6 +5637,42 @@ theorem compileGeneralReactiveClass_startupParameters
   exact
     (compileGeneralTypedParameter_names
       reactiveClass.constructor.parameters).symm
+
+/--
+A compiled reactor's startup reaction carries the constructor's parameter names, in declaration order.
+
+Composed from the two facts just above — `compileGeneralReactiveClass_startupParameters` ties the
+startup reaction's parameters to the reactor's, and `compileGeneralReactiveClass_parameters` ties the
+reactor's to the class's constructor declarations — rather than proved a third time by inverting the
+constructor compilation. The composition is the form the initial correspondence consumes: the target
+initializer binds `reactor.startupReaction.parameters` against the instance's compiled arguments, the
+source initializer binds the class's parameter names against the instance's arguments, and this lemma
+says the two walks are the same names in the same order.
+-/
+theorem compileGeneralReactiveClass_startupParameterNames
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {reactor : LF.GeneralReactor}
+    (hCompiled :
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok reactor) :
+    reactor.startupReaction.parameters =
+      reactiveClass.constructor.parameters.map
+        (fun parameter =>
+          parameter.name) := by
+
+  rw [
+    compileGeneralReactiveClass_startupParameters
+      hCompiled,
+    compileGeneralReactiveClass_parameters
+      hCompiled,
+    compileGeneralTypedParameter_names
+      reactiveClass.constructor.parameters
+  ]
 
 /-!
 ## What acceptance guarantees

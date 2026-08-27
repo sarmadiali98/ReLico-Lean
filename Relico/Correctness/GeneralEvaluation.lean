@@ -155,6 +155,127 @@ theorem generalValuationAgrees_image
         exact inductionHypothesis
 
 /--
+Updating both valuations at one name — the target with the compiled value — keeps them agreeing.
+
+The one-step fact the parameter-binding induction runs on, stated on its own because it is also the
+`assign` step's shape: a source `Store.update` at a name paired with a target `Store.update` at the same
+name with the translated value. The head case is `Store.lookup_update_eq` on both sides and the
+`Option.map` of a compiled value; the tail case is `Store.lookup_update_ne` on both sides, which is why
+the name inequality is the only case split the proof needs.
+-/
+theorem generalValuationAgrees_update
+    (source : DTR.GeneralValuation)
+    (target : LF.GeneralValuation)
+    (name : VarName)
+    (value : DTR.GeneralValue)
+    (hAgrees :
+      GeneralValuationAgrees source target) :
+    GeneralValuationAgrees
+      (Store.update source name value)
+      (Store.update
+          target
+          name
+          (Translation.compileGeneralValue
+            value)) := by
+
+  intro other
+
+  by_cases hOther :
+      other = name
+
+  · subst hOther
+
+    simp only [
+      Store.lookup_update_eq
+    ]
+
+    rfl
+
+  · simp only [
+      Store.lookup_update_ne
+        source
+        value
+        (Ne.symm hOther),
+      Store.lookup_update_ne
+        target
+        (Translation.compileGeneralValue
+          value)
+        (Ne.symm hOther)
+    ]
+
+    exact
+      hAgrees other
+
+/--
+The default valuation of a class's state variables agrees with the default valuation of the compiled
+reactor's.
+
+One initial-state half: both initializers build their base valuation from the declaration list — the
+source from the class's declarations with `DTR.GeneralType.initialValue`, the target from the
+reactor's with `LF.GeneralType.initialValue` — and this lemma says the two agree before any parameter
+is bound. It is an induction on the declaration list whose head case is exactly
+`Translation.compileGeneralValue_initialValue`, the bridge between the two `initialValue` functions,
+together with `Translation.compileGeneralStateVariableDecl_name` for the key.
+
+The parameter-binding half lives in `Relico/Correctness/GeneralCorrespondence.lean`, not here, because
+`DTR.bindParameters` and `LF.bindReactionParameters` are defined in the two semantics modules and those
+import this one.
+-/
+theorem generalValuationAgrees_defaults
+    (declarations : List DTR.GeneralStateVariableDecl) :
+    GeneralValuationAgrees
+      (declarations.map
+        (fun declaration =>
+          (
+            declaration.name,
+            DTR.GeneralType.initialValue
+              declaration.declaredType
+          )))
+      ((declarations.map
+          Translation.compileGeneralStateVariableDecl).map
+        (fun declaration =>
+          (
+            declaration.name,
+            LF.GeneralType.initialValue
+              declaration.declaredType
+          ))) := by
+
+  intro name
+
+  induction declarations with
+
+  | nil =>
+      rfl
+
+  | cons declaration remaining inductionHypothesis =>
+      by_cases hHead :
+          declaration.name = name
+
+      · simp only [
+          List.map_cons,
+          Translation.compileGeneralStateVariableDecl_name,
+          Translation.compileGeneralStateVariableDecl_declaredType,
+          Store.lookup,
+          if_pos hHead,
+          Option.map_some
+        ]
+
+        congr 1
+
+        exact
+          (Translation.compileGeneralValue_initialValue
+            declaration.declaredType).symm
+
+      · simp only [
+          List.map_cons,
+          Translation.compileGeneralStateVariableDecl_name,
+          Store.lookup,
+          if_neg hHead
+        ]
+
+        exact inductionHypothesis
+
+/--
 Applying a compiled binary operator to compiled operands agrees with compiling the result.
 
 Proved by explicit case analysis rather than by a single `cases … <;> rfl`, because `.div` and `.mod`

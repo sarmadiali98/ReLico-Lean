@@ -551,8 +551,12 @@ theorem erase_actors
 /--
 Build a runtime configuration from a configuration, with every actor idle.
 
-The initial state of a run: no actor has begun a body, so every continuation is empty. G2b's
-`generalCorrespondence_initial` starts here.
+The continuation-free lift of a configuration, and deliberately **not** the initial state of a run:
+with every continuation empty and every bag as given, no rule of `DTR.GeneralStep` can ever begin a
+constructor, so a lifted configuration is dead unless its bags already carry messages. The initial
+state of a run is `DTR.GeneralModel.initialState` in `Relico/DTR/GeneralInitialization.lean`, which
+installs constructor bodies; G2b's scoped `generalCorrespondence_initial_scoped` starts from this
+function, and the unconditional `generalCorrespondence_initial` starts from that one.
 -/
 def ofConfiguration
     (config : DTR.GeneralConfiguration) :

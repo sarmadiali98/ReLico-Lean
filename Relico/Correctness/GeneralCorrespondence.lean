@@ -1,5 +1,7 @@
 import Relico.DTR.GeneralRuntime
 import Relico.LF.GeneralSemantics
+import Relico.DTR.GeneralInitialization
+import Relico.LF.GeneralInitialization
 import Relico.Correctness.GeneralEvaluation
 
 set_option autoImplicit false
@@ -579,27 +581,25 @@ theorem generalCorrespondence_microstepAdvance
         hCorrespondence
 
 /--
-The relation holds at the start of a run.
+The relation holds at the start of a run — **the scoped form**, for callers holding two arbitrary
+states.
 
-**Scoped, with named hypotheses, and that is a finding rather than a choice.** `docs/STAGE_G_DESIGN.md` §7
-specifies this theorem as *unconditional*, which would require an initial-state constructor on each side to
-quantify over. There is none: the source has
-`DTR.GeneralRuntimeConfiguration.ofConfiguration`, which builds a runtime configuration from a
-configuration that is itself given, and the target side has no `ofProgram` at all — the general family's
-initialization modules do not exist, and §13's twelve rows create none. F75 part 2 records this, and the
-unconditional statement is owed at G5, where the LF initial state must be built anyway to produce a
-runnable witness.
+Renamed from `generalCorrespondence_initial` when row 11's initializers landed, because the
+unconditional statement took that name: this variant quantifies over an arbitrary source configuration
+and an arbitrary target reactor store, hypothesising the three things an initializer establishes by
+construction — every source bag empty, and the two stores covering each other with agreeing valuations
+and idle bodies.
 
-So the theorem takes the target store as a parameter and three hypotheses that say what "initial" means:
-every source bag is empty, and the two stores relate pointwise with every reactor idle. The source
-continuations need no hypothesis — `ofConfiguration` sets them all to `[]` by construction, and
-`DTR.mem_attachEmptyContinuations` is how that fact is recovered from membership rather than from a lookup.
+The hypotheses are exactly what a caller relating two states it did not build must check, which is why
+the theorem survives its unconditional sibling: nothing downstream should re-derive the initial states
+just to apply the initial case. `docs/STAGE_G_DESIGN.md` §7 item 1 records the scoped form's history,
+and **F75** part 2 the reason both exist.
 
-The pending queue is the literal `[]` rather than a parameter, because an initial LF state has nothing
-scheduled: `pendingTargeted` and both directions of `GeneralPendingAgrees` would otherwise need
-hypotheses of their own, and they would be hypotheses about a state the design has no way to build yet.
+The source continuations need no hypothesis — `ofConfiguration` sets them all to `[]` by construction,
+and `DTR.mem_attachEmptyContinuations` is how that fact is recovered from membership rather than from a
+lookup. The pending queue is the literal `[]` for the same reason.
 -/
-theorem generalCorrespondence_initial
+theorem generalCorrespondence_initial_scoped
     (config : DTR.GeneralConfiguration)
     (reactors : Store ActorName LF.GeneralReactorRuntime)
     (hBags :
@@ -728,6 +728,1324 @@ theorem generalCorrespondence_initial
             hStateMember)
           rfl
           hReactorBody
+
+  · intro event hEvent
+
+    simp at hEvent
+
+/-!
+## Constructor entry: the initial states the paper's "holds initially" line is about
+
+Row 11's acquired obligation (**F75** part 2). `generalCorrespondence_initial` below is the
+unconditional statement §7 item 1 specified and G2b could not state, over the two initializers
+`DTR.GeneralModel.initialState` and `LF.GeneralProgram.initialState`. Its scoped predecessor is kept,
+renamed `generalCorrespondence_initial_scoped`, because its three hypotheses are exactly what a caller
+holding two arbitrary states must check, and F75's argument that the unconditional form follows "by
+instantiation rather than re-proof" turned out to be **false in one respect worth recording**: the
+scoped theorem relates idle actors with empty continuations, while the initializers install constructor
+bodies as the active bodies. **F85** carries the discrepancy; the constructor-entry case needed its own
+actor correspondence, `generalActorCorresponds_constructorEntry` below, rather than an instance of the
+idle one.
+-/
+
+/--
+Binding the constructor's parameters to the instance's arguments, on both sides, keeps two agreeing
+valuations agreeing.
+
+The source initializer's `DTR.bindParameters` and the target initializer's
+`LF.bindReactionParameters` are the same recursion on two different declaration walks, and this is the
+lemma that says so: the compiled name list is `parameters.map (·.name)` — which
+`Translation.compileGeneralReactiveClass_startupParameterNames` proves is the startup reaction's
+parameter list — and the compiled values are the pointwise image of the source's, which
+`Translation.compileGeneralActorInstance_arguments` proves is the instance's compiled argument list.
+
+The lockstep induction is the one both bind functions' equations dictate. A surplus on either side is
+dropped by *both* — their own definitions do it, not this lemma — so the recursion needs no length
+hypothesis at all.
+-/
+theorem generalValuationAgrees_bind :
+    ∀ (parameters : List DTR.GeneralTypedParameter)
+      (values : List DTR.GeneralValue)
+      (source : DTR.GeneralValuation)
+      (target : LF.GeneralValuation),
+      GeneralValuationAgrees source target →
+        GeneralValuationAgrees
+          (DTR.bindParameters
+              parameters
+              values
+              source)
+          (LF.bindReactionParameters
+              (parameters.map
+                (fun parameter =>
+                  parameter.name))
+              (values.map
+                Translation.compileGeneralValue)
+              target) := by
+
+  intro parameters
+  induction parameters with
+
+  | nil =>
+      intro values source target hAgrees
+
+      exact hAgrees
+
+  | cons parameter remaining inductionHypothesis =>
+      intro values source target hAgrees
+
+      cases values with
+
+      | nil =>
+          exact hAgrees
+
+      | cons head tail =>
+          exact
+            inductionHypothesis
+              tail
+              (Store.update
+                  source
+                  parameter.name
+                  head)
+              (Store.update
+                  target
+                  parameter.name
+                  (Translation.compileGeneralValue
+                    head))
+              (generalValuationAgrees_update
+                source
+                target
+                parameter.name
+                head
+                hAgrees)
+
+/-!
+### Private lookup helpers
+
+Four small facts about the repository's recursive find functions, none of which the syntax modules
+state: a found element carries the queried name, a lookup that answers can be turned into membership,
+and — the one place the well-formedness layers' uniqueness clauses enter the initial correspondence —
+a *member* of a list with duplicate-free names is the element its own name finds. Each is proved by
+the same induction the find functions themselves are defined by.
+-/
+
+private theorem findActor?_name_of_eq_some :
+    ∀ (instances : List DTR.GeneralActorInstance)
+      (actorName : ActorName)
+      (actor : DTR.GeneralActorInstance),
+      DTR.findActor? instances actorName = some actor →
+        actor.name = actorName := by
+
+  intro instances
+  induction instances with
+
+  | nil =>
+      intro actorName actor hFound
+
+      simp [
+        DTR.findActor?
+      ] at hFound
+
+  | cons head remaining inductionHypothesis =>
+      intro actorName actor hFound
+
+      by_cases hHead :
+          head.name = actorName
+
+      · rw [
+          DTR.findActor?,
+          if_pos hHead
+        ] at hFound
+
+        injection hFound with hFound
+
+        subst hFound
+
+        exact hHead
+
+      · rw [
+          DTR.findActor?,
+          if_neg hHead
+        ] at hFound
+
+        exact
+          inductionHypothesis
+            actorName
+            actor
+            hFound
+
+private theorem findActor?_of_mem_of_nodup :
+    ∀ (instances : List DTR.GeneralActorInstance)
+      (actor : DTR.GeneralActorInstance),
+      actor ∈ instances →
+        (instances.map
+          (fun instanceDecl =>
+            instanceDecl.name)).Nodup →
+          DTR.findActor?
+              instances
+              actor.name =
+            some actor := by
+
+  intro instances
+  induction instances with
+
+  | nil =>
+      intro actor hMember _
+
+      cases hMember
+
+  | cons head remaining inductionHypothesis =>
+      intro actor hMember hNodup
+
+      cases List.mem_cons.mp hMember with
+
+      | inl hHead =>
+          subst hHead
+
+          simp [
+            DTR.findActor?
+          ]
+
+      | inr hTail =>
+          have hHeadName :
+              head.name ≠ actor.name := by
+            intro hEqual
+
+            have hMapped :
+                head.name ∈
+                  remaining.map
+                    (fun instanceDecl =>
+                      instanceDecl.name) := by
+              rw [hEqual]
+
+              exact
+                List.mem_map_of_mem
+                  hTail
+
+            exact
+              (List.nodup_cons.mp hNodup).1
+                hMapped
+
+          rw [
+            DTR.findActor?,
+            if_neg hHeadName
+          ]
+
+          exact
+            inductionHypothesis
+              actor
+              hTail
+              (List.nodup_cons.mp hNodup).2
+
+private theorem findInstance?_of_mem_of_nodup :
+    ∀ (instances : List LF.GeneralReactorInstance)
+      (reactorInstance : LF.GeneralReactorInstance),
+      reactorInstance ∈ instances →
+        (instances.map
+          (fun instanceDecl =>
+            instanceDecl.name)).Nodup →
+          LF.findInstance?
+              instances
+              reactorInstance.name =
+            some reactorInstance := by
+
+  intro instances
+  induction instances with
+
+  | nil =>
+      intro reactorInstance hMember _
+
+      cases hMember
+
+  | cons head remaining inductionHypothesis =>
+      intro reactorInstance hMember hNodup
+
+      cases List.mem_cons.mp hMember with
+
+      | inl hHead =>
+          subst hHead
+
+          simp [
+            LF.findInstance?
+          ]
+
+      | inr hTail =>
+          have hHeadName :
+              head.name ≠ reactorInstance.name := by
+            intro hEqual
+
+            have hMapped :
+                head.name ∈
+                  remaining.map
+                    (fun instanceDecl =>
+                      instanceDecl.name) := by
+              rw [hEqual]
+
+              exact
+                List.mem_map_of_mem
+                  hTail
+
+            exact
+              (List.nodup_cons.mp hNodup).1
+                hMapped
+
+          rw [
+            LF.findInstance?,
+            if_neg hHeadName
+          ]
+
+          exact
+            inductionHypothesis
+              reactorInstance
+              hTail
+              (List.nodup_cons.mp hNodup).2
+
+private theorem findReactor?_of_mem_of_nodup :
+    ∀ (reactors : List LF.GeneralReactor)
+      (reactor : LF.GeneralReactor),
+      reactor ∈ reactors →
+        (reactors.map
+          (fun candidate =>
+            candidate.name)).Nodup →
+          LF.findReactor?
+              reactors
+              reactor.name =
+            some reactor := by
+
+  intro reactors
+  induction reactors with
+
+  | nil =>
+      intro reactor hMember _
+
+      cases hMember
+
+  | cons head remaining inductionHypothesis =>
+      intro reactor hMember hNodup
+
+      cases List.mem_cons.mp hMember with
+
+      | inl hHead =>
+          subst hHead
+
+          simp [
+            LF.findReactor?
+          ]
+
+      | inr hTail =>
+          have hHeadName :
+              head.name ≠ reactor.name := by
+            intro hEqual
+
+            have hMapped :
+                head.name ∈
+                  remaining.map
+                    (fun candidate =>
+                      candidate.name) := by
+              rw [hEqual]
+
+              exact
+                List.mem_map_of_mem
+                  hTail
+
+            exact
+              (List.nodup_cons.mp hNodup).1
+                hMapped
+
+          rw [
+            LF.findReactor?,
+            if_neg hHeadName
+          ]
+
+          exact
+            inductionHypothesis
+              reactor
+              hTail
+              (List.nodup_cons.mp hNodup).2
+
+private theorem findClass?_of_mem_of_nodup :
+    ∀ (classes : List DTR.GeneralReactiveClass)
+      (reactiveClass : DTR.GeneralReactiveClass),
+      reactiveClass ∈ classes →
+        (classes.map
+          (fun candidate =>
+            candidate.name)).Nodup →
+          DTR.findClass?
+              classes
+              reactiveClass.name =
+            some reactiveClass := by
+
+  intro classes
+  induction classes with
+
+  | nil =>
+      intro reactiveClass hMember _
+
+      cases hMember
+
+  | cons head remaining inductionHypothesis =>
+      intro reactiveClass hMember hNodup
+
+      cases List.mem_cons.mp hMember with
+
+      | inl hHead =>
+          subst hHead
+
+          simp [
+            DTR.findClass?
+          ]
+
+      | inr hTail =>
+          have hHeadName :
+              head.name ≠ reactiveClass.name := by
+            intro hEqual
+
+            have hMapped :
+                head.name ∈
+                  remaining.map
+                    (fun candidate =>
+                      candidate.name) := by
+              rw [hEqual]
+
+              exact
+                List.mem_map_of_mem
+                  hTail
+
+            exact
+              (List.nodup_cons.mp hNodup).1
+                hMapped
+
+          rw [
+            DTR.findClass?,
+            if_neg hHeadName
+          ]
+
+          exact
+            inductionHypothesis
+              reactiveClass
+              hTail
+              (List.nodup_cons.mp hNodup).2
+
+private theorem mem_of_findReactor?_eq_some :
+    ∀ (reactors : List LF.GeneralReactor)
+      (reactorName : ReactorName)
+      (reactor : LF.GeneralReactor),
+      LF.findReactor? reactors reactorName = some reactor →
+        reactor ∈ reactors := by
+
+  intro reactors
+  induction reactors with
+
+  | nil =>
+      intro reactorName reactor hFound
+
+      simp [
+        LF.findReactor?
+      ] at hFound
+
+  | cons head remaining inductionHypothesis =>
+      intro reactorName reactor hFound
+
+      by_cases hHead :
+          head.name = reactorName
+
+      · rw [
+          LF.findReactor?,
+          if_pos hHead
+        ] at hFound
+
+        injection hFound with hFound
+
+        subst hFound
+
+        exact
+          List.mem_cons.mpr
+            (Or.inl rfl)
+
+      · rw [
+          LF.findReactor?,
+          if_neg hHead
+        ] at hFound
+
+        exact
+          List.mem_cons.mpr
+            (Or.inr
+              (inductionHypothesis
+                reactorName
+                reactor
+                hFound))
+
+private theorem findReactor?_name_of_eq_some :
+    ∀ (reactors : List LF.GeneralReactor)
+      (reactorName : ReactorName)
+      (reactor : LF.GeneralReactor),
+      LF.findReactor? reactors reactorName = some reactor →
+        reactor.name = reactorName := by
+
+  intro reactors
+  induction reactors with
+
+  | nil =>
+      intro reactorName reactor hFound
+
+      simp [
+        LF.findReactor?
+      ] at hFound
+
+  | cons head remaining inductionHypothesis =>
+      intro reactorName reactor hFound
+
+      by_cases hHead :
+          head.name = reactorName
+
+      · rw [
+          LF.findReactor?,
+          if_pos hHead
+        ] at hFound
+
+        injection hFound with hFound
+
+        subst hFound
+
+        exact hHead
+
+      · rw [
+          LF.findReactor?,
+          if_neg hHead
+        ] at hFound
+
+        exact
+          inductionHypothesis
+            reactorName
+            reactor
+            hFound
+
+/-!
+### What a successful compilation already guarantees
+
+Three local copies of `LF.GeneralProgram.wellFormed`'s conjunct extractors — private in
+`Relico/LF/GeneralWellFormed.lean`, and duplicated here rather than de-privatised for the reason that
+module records: a ten-clause predicate must not become ten independent obligations. The house proof
+shape, `revert` then case-analysis on the clause's own name, survives appended conjuncts.
+-/
+
+private theorem instancesResolve_of_wellFormed
+    {program : LF.GeneralProgram}
+    (hWellFormed :
+      program.wellFormed = true) :
+    program.instancesResolve = true := by
+  revert hWellFormed
+  unfold LF.GeneralProgram.wellFormed
+  cases program.instancesResolve <;> simp
+
+private theorem instanceNamesUnique_of_wellFormed
+    {program : LF.GeneralProgram}
+    (hWellFormed :
+      program.wellFormed = true) :
+    program.instanceNamesUnique = true := by
+  revert hWellFormed
+  unfold LF.GeneralProgram.wellFormed
+  cases program.instanceNamesUnique <;> simp
+
+private theorem reactorNamesUnique_of_wellFormed
+    {program : LF.GeneralProgram}
+    (hWellFormed :
+      program.wellFormed = true) :
+    program.reactorNamesUnique = true := by
+  revert hWellFormed
+  unfold LF.GeneralProgram.wellFormed
+  cases program.reactorNamesUnique <;> simp
+
+/--
+A successfully compiled program instantiates no actor name twice.
+
+The first of the three facts the initial correspondence needs and the model itself does not provide:
+`DTR.GeneralModel.wellFormed` does constrain instance names through its topology clause, but the
+theorem below takes none of that — compilation already refuses a program whose instance names collide,
+through `instanceNamesUnique`, and pulling the fact off the compiled side is one proof where assuming
+the model's well-formedness would be a second hypothesis saying the same thing.
+-/
+private theorem modelInstanceNames_nodup_of_compiled
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    (hCompiled :
+      Translation.compileGeneralModel model =
+        .ok program) :
+    (model.instances.map
+      (fun instanceDecl =>
+        instanceDecl.name)).Nodup := by
+  have hProgramNames :
+      (program.instances.map
+        (fun instanceDecl =>
+          instanceDecl.name)).Nodup :=
+    of_decide_eq_true
+      (instanceNamesUnique_of_wellFormed
+        (Translation.compileGeneralModel_wellFormed
+          hCompiled))
+
+  rw [
+    Translation.compileGeneralModel_instances
+      hCompiled,
+    List.map_map
+  ] at hProgramNames
+
+  have hNameFunction :
+      (fun instanceDecl =>
+          instanceDecl.name) ∘
+        Translation.compileGeneralActorInstance =
+        (fun instanceDecl =>
+          instanceDecl.name) := by
+    funext instanceDecl
+
+    exact
+      Translation.compileGeneralActorInstance_name
+        instanceDecl
+
+  rw [hNameFunction] at hProgramNames
+
+  exact hProgramNames
+
+/--
+A successfully compiled program's instance names are duplicate-free, on the target's own list.
+-/
+private theorem programInstanceNames_nodup_of_compiled
+    {program : LF.GeneralProgram}
+    (hWellFormed :
+      program.wellFormed = true) :
+    (program.instances.map
+      (fun instanceDecl =>
+        instanceDecl.name)).Nodup :=
+  of_decide_eq_true
+    (instanceNamesUnique_of_wellFormed
+      hWellFormed)
+
+/--
+A successfully compiled program declares no class name twice.
+
+Pulled back through `reactorNamesUnique` and `Translation.reactorNameFor_injective`: reactor names are
+the class names wrapped, so a duplicate class name would be a duplicate reactor name, which the guard
+refuses. The map-map rearrangement is the whole proof.
+-/
+private theorem modelClassNames_nodup_of_compiled
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    (hCompiled :
+      Translation.compileGeneralModel model =
+        .ok program) :
+    (model.classes.map
+      (fun reactiveClass =>
+        reactiveClass.name)).Nodup := by
+  have hReactorNames :
+      (program.reactors.map
+        (fun reactor =>
+          reactor.name)).Nodup :=
+    of_decide_eq_true
+      (reactorNamesUnique_of_wellFormed
+        (Translation.compileGeneralModel_wellFormed
+          hCompiled))
+
+  rw [
+    Translation.compileGeneralModel_reactorNames
+      hCompiled
+  ] at hReactorNames
+
+  have hRewritten :
+      ((model.classes.map
+          (fun reactiveClass =>
+            reactiveClass.name)).map
+        Translation.reactorNameFor).Nodup := by
+    rw [List.map_map]
+
+    exact hReactorNames
+
+  exact
+    Translation.nodup_of_nodup_map_injective
+      Translation.reactorNameFor
+      _
+      hRewritten
+      Translation.reactorNameFor_injective
+
+/--
+Everything the initial correspondence needs to know about one instance of a successfully compiled
+model: its class resolves, that class compiled to a reactor of the program, and the reactor's startup
+body, state variables and parameter names are that class's compilations.
+
+This is the bridge between the two initializers. The source initializer resolves
+`model.classOfActor?` and the target initializer resolves `program.reactorOfInstance?`, and nothing
+upstream says the two resolutions agree — the model's instance may name a class the program's reactors
+say nothing about. Compilation is what makes them agree, and this lemma is where that agreement becomes
+usable: one bundle per instance, consumed once in each direction of the theorem below.
+
+The last conjunct is stated through `reactor?` under the **instance's own class name**, because that is
+the lookup `LF.GeneralProgram.initialState_lookup` needs, and it is what
+`LF.GeneralReactorInstance.reactorName` holds after `Translation.compileGeneralActorInstance`.
+-/
+private theorem initialResolution
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    (hCompiled :
+      Translation.compileGeneralModel model =
+        .ok program) :
+    ∀ (instanceDecl : DTR.GeneralActorInstance),
+      instanceDecl ∈ model.instances →
+      ∃ (reactiveClass : DTR.GeneralReactiveClass)
+         (routes : List Translation.GeneralRoute)
+         (env : Translation.GeneralOutputPortEnv)
+         (compiledBody : LF.GeneralBody)
+         (reactor : LF.GeneralReactor),
+        model.classOfActor? instanceDecl.name =
+          some reactiveClass ∧
+        Translation.compileGeneralReactiveClass
+            model.classes
+            routes
+            reactiveClass =
+          .ok reactor ∧
+        reactor ∈ program.reactors ∧
+        Translation.compileGeneralBody
+            env
+            { bodyKey := .constructor,
+              selfSends :=
+                Translation.selfSendsOfClass
+                  reactiveClass }
+            0
+            reactiveClass.constructor.body =
+          .ok compiledBody ∧
+        reactor.startupReaction.body =
+          compiledBody ∧
+        reactor.stateVariables =
+          reactiveClass.stateVariables.map
+            Translation.compileGeneralStateVariableDecl ∧
+        reactor.startupReaction.parameters =
+          reactiveClass.constructor.parameters.map
+            (fun parameter =>
+              parameter.name) ∧
+        program.reactor?
+            (Translation.reactorNameFor
+              instanceDecl.className) =
+          some reactor := by
+
+  intro instanceDecl hInstanceMember
+
+  have hWellFormed :
+      program.wellFormed = true :=
+    Translation.compileGeneralModel_wellFormed
+      hCompiled
+
+  have hCompiledInstanceMember :
+      (Translation.compileGeneralActorInstance
+          instanceDecl) ∈
+        program.instances := by
+    rw [
+      Translation.compileGeneralModel_instances
+        hCompiled
+    ]
+
+    exact
+      List.mem_map_of_mem
+        hInstanceMember
+
+  have hReactorLookup :
+      ∃ reactor : LF.GeneralReactor,
+        program.reactor?
+            (Translation.reactorNameFor
+              instanceDecl.className) =
+          some reactor := by
+    have hResolve :=
+      (List.all_eq_true.mp
+        (instancesResolve_of_wellFormed
+          hWellFormed))
+        _
+        hCompiledInstanceMember
+
+    rw [
+      Translation.compileGeneralActorInstance_reactorName
+    ] at hResolve
+
+    cases hFound :
+        program.reactor?
+          (Translation.reactorNameFor
+            instanceDecl.className) with
+
+    | none =>
+        rw [hFound] at hResolve
+
+        simp at hResolve
+
+    | some reactor =>
+        exact
+          ⟨reactor, rfl⟩
+
+  obtain ⟨reactor, hReactorLookup⟩ :=
+    hReactorLookup
+
+  have hReactorMember :
+      reactor ∈ program.reactors :=
+    mem_of_findReactor?_eq_some
+      program.reactors
+      (Translation.reactorNameFor
+        instanceDecl.className)
+      reactor
+      hReactorLookup
+
+  obtain
+      ⟨routes,
+       _hRoutes,
+       walk⟩ :=
+    Translation.compileGeneralModel_startupBody
+      hCompiled
+
+  obtain
+      ⟨reactiveClass,
+       env,
+       compiledBody,
+       hClassMember,
+       hClassCompiled,
+       _hEnv,
+       hBody,
+       hStartupBody,
+       hStateVariables,
+       _hParameters⟩ :=
+    walk reactor hReactorMember
+
+  have hStartupParameters :
+      reactor.startupReaction.parameters =
+        reactiveClass.constructor.parameters.map
+          (fun parameter =>
+            parameter.name) :=
+    Translation.compileGeneralReactiveClass_startupParameterNames
+      hClassCompiled
+
+  have hClassName :
+      reactiveClass.name = instanceDecl.className := by
+    apply
+      Translation.reactorNameFor_injective
+
+    rw [
+      ← Translation.compileGeneralReactiveClass_name
+        hClassCompiled,
+      findReactor?_name_of_eq_some
+        program.reactors
+        (Translation.reactorNameFor
+          instanceDecl.className)
+        reactor
+        hReactorLookup
+    ]
+
+  refine
+    ⟨
+      reactiveClass,
+      routes,
+      env,
+      compiledBody,
+      reactor,
+      ?_,
+      hClassCompiled,
+      hReactorMember,
+      hBody,
+      hStartupBody,
+      hStateVariables,
+      hStartupParameters,
+      hReactorLookup
+    ⟩
+
+  have hActorFound :
+      DTR.findActor? model.instances instanceDecl.name =
+        some instanceDecl :=
+    findActor?_of_mem_of_nodup
+      model.instances
+      instanceDecl
+      hInstanceMember
+      (modelInstanceNames_nodup_of_compiled
+        hCompiled)
+
+  have hClassFound :
+      DTR.findClass? model.classes instanceDecl.className =
+        some reactiveClass := by
+    have hByOwnName :
+        DTR.findClass? model.classes reactiveClass.name =
+          some reactiveClass :=
+      findClass?_of_mem_of_nodup
+        model.classes
+        reactiveClass
+        hClassMember
+        (modelClassNames_nodup_of_compiled
+          hCompiled)
+
+    rw [hClassName] at hByOwnName
+
+    exact hByOwnName
+
+  simp only [
+    DTR.GeneralModel.classOfActor?,
+    DTR.GeneralModel.actor?,
+    DTR.GeneralModel.class?,
+    hActorFound,
+    hClassFound
+  ]
+
+/--
+One actor at constructor entry corresponds to one reactor at startup-entry, given the compilation facts
+that connect the two.
+
+The constructor-entry counterpart of `generalActorCorresponds_idle`, and — **F85** — the reason the
+unconditional initial theorem is not an instance of the scoped one: both initializers install bodies
+(the constructor's on the source side, the compiled startup reaction's on the target side), so neither
+side is idle, and the idle lemma's two `activeBody = []` premises are unprovable here. What replaces
+them is the continuation conjunct's real content: the target body is a successful `compileGeneralBody`
+of the source body, witnessed by the environment and self-send list the reactor itself was compiled
+against — which is exactly `GeneralContinuationCompiles`' existential.
+
+The parameter correspondence is in the two bind hypotheses: the startup reaction's parameter names are
+the class's (`hStartupParameters`), and the compiled instance's arguments are the source's
+(`hArguments`), so `generalValuationAgrees_bind` applies to the two initial valuations once their
+default halves are related by `generalValuationAgrees_defaults`.
+-/
+theorem generalActorCorresponds_constructorEntry
+    (name : ActorName)
+    (reactiveClass : DTR.GeneralReactiveClass)
+    (sourceInstance : DTR.GeneralActorInstance)
+    (env : Translation.GeneralOutputPortEnv)
+    (compiledBody : LF.GeneralBody)
+    (reactor : LF.GeneralReactor)
+    (compiledInstance : LF.GeneralReactorInstance)
+    (hBody :
+      Translation.compileGeneralBody
+          env
+          { bodyKey := .constructor,
+            selfSends :=
+              Translation.selfSendsOfClass
+                reactiveClass }
+          0
+          reactiveClass.constructor.body =
+        .ok compiledBody)
+    (hStartupBody :
+      reactor.startupReaction.body =
+        compiledBody)
+    (hStateVariables :
+      reactor.stateVariables =
+        reactiveClass.stateVariables.map
+          Translation.compileGeneralStateVariableDecl)
+    (hStartupParameters :
+      reactor.startupReaction.parameters =
+        reactiveClass.constructor.parameters.map
+          (fun parameter =>
+            parameter.name))
+    (hArguments :
+      compiledInstance.arguments =
+        sourceInstance.arguments.map
+          Translation.compileGeneralValue) :
+    GeneralActorCorresponds
+      name
+      (DTR.GeneralModel.initialActorRuntime
+          reactiveClass
+          sourceInstance)
+      (LF.GeneralProgram.initialReactorRuntime
+          reactor
+          compiledInstance)
+      [] := by
+
+  refine
+    {
+      valuation := ?_
+      messages := ?_
+      continuation := ?_
+    }
+
+  · simp only [
+      DTR.GeneralModel.initialActorRuntime,
+      DTR.GeneralModel.initialValuation,
+      LF.GeneralProgram.initialReactorRuntime
+    ]
+
+    rw [
+      hStartupParameters,
+      hArguments,
+      hStateVariables
+    ]
+
+    exact
+      generalValuationAgrees_bind
+        reactiveClass.constructor.parameters
+        sourceInstance.arguments
+        _
+        _
+        (generalValuationAgrees_defaults
+          reactiveClass.stateVariables)
+
+  · rw [
+      DTR.GeneralModel.initialActorRuntime_bag
+    ]
+
+    exact
+      generalPendingAgrees_empty
+        name
+
+  · simp only [
+      DTR.GeneralModel.initialActorRuntime,
+      LF.GeneralProgram.initialReactorRuntime
+    ]
+
+    rw [
+      hStartupBody
+    ]
+
+    exact
+      ⟨
+        env,
+        {
+          bodyKey := .constructor
+          selfSends :=
+            Translation.selfSendsOfClass
+              reactiveClass
+        },
+        0,
+        hBody
+      ⟩
+
+/--
+The relation `R` holds at the initial states of a model and its compiled program. Unconditional.
+
+The paper's *"holds initially"* line, stated as specified. The only hypothesis is that the program is
+the model's successful compilation, which is the standing shape of every translation-side theorem here
+and says nothing about correspondence — everything an initializer would establish is established, by
+the two initializers this theorem quantifies over.
+
+No model well-formedness is assumed, and the omission is a theorem rather than an oversight: the guard
+already refuses programs with duplicate instance names (`instanceNamesUnique`) or duplicate reactor
+names (`reactorNamesUnique`), and reactor names are class names wrapped injectively, so a successfully
+compiled model has duplicate-free instance names and duplicate-free class names whether or not
+`DTR.GeneralModel.wellFormed` was ever consulted. The three derivations live above, and each direction
+of the proof consumes them through `initialResolution`.
+
+**F75 part 2 is discharged here, and part of its argument was wrong**: the prediction that the
+unconditional statement would follow *"by instantiation rather than re-proof"* of the scoped form does
+not survive contact with the initializers the prediction was waiting for. The scoped theorem relates
+idle actors — empty continuations on both sides — while the initializers are at **constructor entry**,
+with bodies installed on both sides (`DTR.GeneralStep.take` cannot install a constructor body, and
+`LF.GeneralEventKind` has no `startup` arm, so nothing else ever will). **F85** records the gap; the
+constructor-entry case is `generalActorCorresponds_constructorEntry`, and the scoped theorem survives
+under its own name for callers relating two states they did not build.
+-/
+theorem generalCorrespondence_initial
+    (model : DTR.GeneralModel)
+    (program : LF.GeneralProgram)
+    (hCompiled :
+      Translation.compileGeneralModel model =
+        .ok program) :
+    GeneralStateCorrespondence
+      (DTR.GeneralModel.initialState model)
+      (LF.GeneralProgram.initialState program) := by
+
+  have hWellFormed :
+      program.wellFormed = true :=
+    Translation.compileGeneralModel_wellFormed
+      hCompiled
+
+  have hInstancesEq :
+      program.instances =
+        model.instances.map
+          Translation.compileGeneralActorInstance :=
+    Translation.compileGeneralModel_instances
+      hCompiled
+
+  refine
+    {
+      logicalTime := ?_
+      reactorOfActor := ?_
+      actorOfReactor := ?_
+      pendingTargeted := ?_
+    }
+
+  · rfl
+
+  · intro name actorRuntime hMember
+
+    unfold DTR.GeneralModel.initialState at hMember
+
+    obtain
+        ⟨instanceDecl,
+         hInstanceMember,
+         hPair⟩ :=
+      List.mem_map.mp hMember
+
+    obtain ⟨hName, hRuntime⟩ :=
+      Prod.mk.inj hPair
+
+    obtain
+        ⟨reactiveClass,
+         _routes,
+         env,
+         compiledBody,
+         reactor,
+         hClassOfActor,
+         _hClassCompiled,
+         _hReactorMember,
+         hBody,
+         hStartupBody,
+         hStateVariables,
+         hStartupParameters,
+         hReactorLookup⟩ :=
+      initialResolution
+        hCompiled
+        instanceDecl
+        hInstanceMember
+
+    rw [hClassOfActor] at hRuntime
+
+    dsimp only at hRuntime
+
+    subst hRuntime
+
+    have hCompiledInstanceMember :
+        (Translation.compileGeneralActorInstance
+            instanceDecl) ∈
+          program.instances := by
+      rw [hInstancesEq]
+
+      exact
+        List.mem_map_of_mem
+          hInstanceMember
+
+    have hInstanceFound :
+        LF.findInstance?
+            program.instances
+            (Translation.compileGeneralActorInstance
+              instanceDecl).name =
+          some
+            (Translation.compileGeneralActorInstance
+              instanceDecl) :=
+      findInstance?_of_mem_of_nodup
+        program.instances
+        _
+        hCompiledInstanceMember
+        (programInstanceNames_nodup_of_compiled
+          hWellFormed)
+
+    have hReactorFound :
+        program.reactor?
+            (Translation.compileGeneralActorInstance
+              instanceDecl).reactorName =
+          some reactor := by
+      rw [
+        Translation.compileGeneralActorInstance_reactorName,
+        hReactorLookup
+      ]
+
+    have hLookup :
+        Store.lookup
+            (LF.GeneralProgram.initialState
+              program).reactors
+            (Translation.compileGeneralActorInstance
+              instanceDecl).name =
+        some
+          (LF.GeneralProgram.initialReactorRuntime
+              reactor
+              (Translation.compileGeneralActorInstance
+                instanceDecl)) :=
+      LF.GeneralProgram.initialState_lookup
+        program
+        _
+        reactor
+        hInstanceFound
+        hReactorFound
+
+    rw [
+      Translation.compileGeneralActorInstance_name
+        instanceDecl,
+      hName
+    ] at hLookup
+
+    refine
+      ⟨
+        LF.GeneralProgram.initialReactorRuntime
+          reactor
+          (Translation.compileGeneralActorInstance
+            instanceDecl),
+        Store.mem_of_lookup
+          _ _ _ hLookup,
+        ?_
+      ⟩
+
+    exact
+      generalActorCorresponds_constructorEntry
+        name
+        reactiveClass
+        instanceDecl
+        env
+        compiledBody
+        reactor
+        _
+        hBody
+        hStartupBody
+        hStateVariables
+        hStartupParameters
+        (Translation.compileGeneralActorInstance_arguments
+          instanceDecl)
+
+  · intro name reactorRuntime hMember
+
+    unfold LF.GeneralProgram.initialState at hMember
+
+    obtain
+        ⟨compiledInstance,
+         hCompiledInstanceMember,
+         hPair⟩ :=
+      List.mem_map.mp hMember
+
+    obtain ⟨hName, hRuntime⟩ :=
+      Prod.mk.inj hPair
+
+    rw [hInstancesEq] at hCompiledInstanceMember
+
+    obtain
+        ⟨instanceDecl,
+         hInstanceMember,
+         hInstanceEq⟩ :=
+      List.mem_map.mp hCompiledInstanceMember
+
+    obtain
+        ⟨reactiveClass,
+         _routes,
+         env,
+         compiledBody,
+         reactor,
+         hClassOfActor,
+         _hClassCompiled,
+         _hReactorMember,
+         hBody,
+         hStartupBody,
+         hStateVariables,
+         hStartupParameters,
+         hReactorLookup⟩ :=
+      initialResolution
+        hCompiled
+        instanceDecl
+        hInstanceMember
+
+    have hInstanceFound :
+        program.instance?
+            (Translation.compileGeneralActorInstance
+              instanceDecl).name =
+          some
+            (Translation.compileGeneralActorInstance
+              instanceDecl) := by
+      have hMembership :
+          (Translation.compileGeneralActorInstance
+              instanceDecl) ∈
+            program.instances := by
+        rw [hInstancesEq]
+
+        exact
+          List.mem_map_of_mem
+            hInstanceMember
+
+      exact
+        findInstance?_of_mem_of_nodup
+          program.instances
+          _
+          hMembership
+          (programInstanceNames_nodup_of_compiled
+            hWellFormed)
+
+    have hReactorOfInstance :
+        program.reactorOfInstance? compiledInstance.name =
+          some reactor := by
+      rw [← hInstanceEq]
+
+      simp only [
+        LF.GeneralProgram.reactorOfInstance?,
+        hInstanceFound,
+        Translation.compileGeneralActorInstance_reactorName,
+        hReactorLookup
+      ]
+
+    rw [hReactorOfInstance] at hRuntime
+
+    dsimp only at hRuntime
+
+    subst hRuntime
+
+    have hActorFound :
+        model.actor? instanceDecl.name =
+          some instanceDecl :=
+      findActor?_of_mem_of_nodup
+        model.instances
+        instanceDecl
+        hInstanceMember
+        (modelInstanceNames_nodup_of_compiled
+          hCompiled)
+
+    have hClassFound :
+        model.class? instanceDecl.className =
+          some reactiveClass := by
+      have hResolution :=
+        hClassOfActor
+
+      simp only [
+        DTR.GeneralModel.classOfActor?,
+        hActorFound
+      ] at hResolution
+
+      exact hResolution
+
+    have hLookup :
+        Store.lookup
+            (DTR.GeneralModel.initialState
+              model).actors
+            instanceDecl.name =
+        some
+          (DTR.GeneralModel.initialActorRuntime
+              reactiveClass
+              instanceDecl) :=
+      DTR.GeneralModel.initialState_lookup
+        model
+        instanceDecl
+        reactiveClass
+        hActorFound
+        hClassFound
+
+    have hSourceName :
+        instanceDecl.name = name := by
+      rw [
+        ← Translation.compileGeneralActorInstance_name
+          instanceDecl,
+        hInstanceEq
+      ]
+
+      exact hName
+
+    rw [
+      hSourceName
+    ] at hLookup
+
+    refine
+      ⟨
+        DTR.GeneralModel.initialActorRuntime
+          reactiveClass
+          instanceDecl,
+        Store.mem_of_lookup
+          _ _ _ hLookup,
+        ?_
+      ⟩
+
+    exact
+      generalActorCorresponds_constructorEntry
+        name
+        reactiveClass
+        instanceDecl
+        env
+        compiledBody
+        reactor
+        compiledInstance
+        hBody
+        hStartupBody
+        hStateVariables
+        hStartupParameters
+        (by
+          rw [← hInstanceEq]
+
+          exact
+            Translation.compileGeneralActorInstance_arguments
+              instanceDecl)
 
   · intro event hEvent
 

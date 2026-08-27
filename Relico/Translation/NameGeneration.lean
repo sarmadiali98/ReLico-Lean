@@ -238,6 +238,30 @@ theorem actionNameFor_injective :
     hEqual
 
 /--
+A class's name determines its reactor's name.
+
+The identity on underlying strings, so injectivity is one constructor injection. Stated
+because the initial correspondence needs the converse of `assembleGeneralReactor_name`: to
+recover a class from a compiled program's reactor it must be known that two classes cannot
+share one reactor name, and without this lemma that recovery is an unstated assumption.
+
+The proof is the same shape as `actionNameFor_injective`, which is the pattern this file
+establishes for a name function that wraps its input in one structure constructor.
+-/
+theorem reactorNameFor_injective :
+    Function.Injective reactorNameFor := by
+
+  intro left right hEqual
+
+  cases left
+  cases right
+
+  simpa [
+    reactorNameFor
+  ] using
+    hEqual
+
+/--
 With the site suffix fixed, a general action's name determines the message.
 
 Suffix cancellation, the same one-line proof as `actionNameFor_injective` and the same shape as

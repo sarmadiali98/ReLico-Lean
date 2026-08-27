@@ -500,6 +500,12 @@ instantiate the foundation. **F70**.
    store, with the emptiness and valuation-agreement facts an initializer would establish by construction
    taken as hypotheses. Cheap it is; unconditional it is not, and the unconditional statement is **owed at
    G5**, which needs the two initializers anyway for its runnable witness. **F75** part 2.
+   Row 11 landed both halves (2026-08-27): `DTR.GeneralModel.initialState` and
+   `LF.GeneralProgram.initialState` under `Relico/{DTR,LF}/GeneralInitialization.lean`, and the
+   unconditional `generalCorrespondence_initial` in `Relico/Correctness/GeneralCorrespondence.lean`,
+   quantifying over a successful compilation and nothing else. The scoped form survives as
+   `generalCorrespondence_initial_scoped` for callers relating two states they did not build, and F75's
+   "by instantiation rather than re-proof" prediction was wrong in both halves — **F85**.
 2. `generalTimeEquivalence` — Lemma 1. Every DTR event at logical time `t` corresponds to an LF event at
    tag `(t, m)`, by induction on transitions, carrying the bag↔queue bijection. This is where the
    chaining invariant lives, and it is the one genuinely inductive obligation.
@@ -839,6 +845,18 @@ is attached to row 11, following by instantiation rather than re-proof. Row 11's
 left as they stand, because whether the initializers arrive as two new modules or as additions to the existing
 `DTR/GeneralRuntime` and `LF/GeneralRuntime` pair is not yet decided, and a made-up number would be worse than
 a recorded dependency.
+
+**Resolved 2026-08-27, after the two G5 trace commits landed.** The initializers arrived as **three new
+modules** — `Relico/DTR/GeneralInitialization.lean`, `Relico/LF/GeneralInitialization.lean` and
+`Relico/Tests/GeneralInitialization.lean` — and the unconditional statement did **not** follow by
+instantiation: constructor entry installs bodies on both sides (no step rule on either side can start a
+constructor), so the scoped theorem's idle-pairing hypotheses are false at the initial states and a third
+actor correspondence, `generalActorCorresponds_constructorEntry`, carries the case. The unconditional
+`generalCorrespondence_initial` quantifies over a successful compilation and nothing else — the guard's
+uniqueness clauses already force the model's name-distinctness for anything that compiles — and the scoped
+form survives as `generalCorrespondence_initial_scoped`. **F85** records the prediction's failure and the
+semantics decision it hid: constructor arguments are bound into the initial valuation, because
+`GeneralActorState` has no second store for them.
 
 **One constraint row 9 acquired after row 8 part 1 was authored.** The finite-trace corollary compares
 observable projections, and the target's observable `rct` labels carry a send site the source's `ms` labels

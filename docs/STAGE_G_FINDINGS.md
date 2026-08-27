@@ -2675,3 +2675,60 @@ loses scope. That is the one failure mode in this class that a reader cannot cat
 
 
 
+
+## F85 — F75 predicted the unconditional initial correspondence would follow "by instantiation rather than re-proof"; the initializers that arrived make both halves of that prediction false
+
+**Finding.** F75 part 2 closed stage G's row-10 gap by predicting that once initializers existed, the
+unconditional `generalCorrespondence_initial` would follow *"by instantiation rather than re-proof"* of the
+scoped theorem G2b had landed. Row 11 built the two initializers — `DTR.GeneralModel.initialState` and
+`LF.GeneralProgram.initialState` — and the prediction failed in both halves.
+
+The scope of the failure is precise. The scoped theorem (now
+`Correctness.generalCorrespondence_initial_scoped`) relates actors whose continuations are **empty on both
+sides**: its `reactorOfActor` case applies `generalActorCorresponds_idle`, and its per-actor hypotheses are
+exactly "valuation agrees, bag empty, target body compiles from `[]`". The initializers are not in that
+state and cannot be:
+
+* The source initializer installs the **constructor body** as the active body, because
+  `DTR.GeneralStep.take` reaches message servers only through `GeneralModel.messageServerFor?`, which
+  resolves by message name — no rule of the source semantics can ever install a constructor body, so if
+  the initializer does not, nothing runs.
+* The target initializer installs the **compiled startup reaction's body**, for the mirrored reason:
+  `LF.GeneralEventKind` has no `startup` arm, so `LF.GeneralStep.fire` can never start one.
+
+So instantiation was impossible, and so was plain re-proof through the idle lemma: an initial state has
+bodies on both sides, and `generalActorCorresponds_idle`'s two `activeBody = []` premises are false there.
+What the unconditional theorem needed was a *third* actor correspondence —
+`Correctness.generalActorCorresponds_constructorEntry` — whose continuation conjunct is the real content
+(`GeneralContinuationCompiles`' existential, witnessed by the environment and self-send list the reactor
+itself was compiled against) rather than the idle lemma's trivial `[]` case.
+
+The second half of the prediction failed quietly, which is why this is a finding and not a note.
+"Constructor arguments are constructor parameters bound into the initial valuation" is a *semantics
+decision* that F75 never recorded: `GeneralActorState` has one store, no second environment, so the
+arguments had nowhere to live except the valuation, and binding them there — with
+`DTR.bindParameters` on the source and `LF.bindReactionParameters` on the target — is what made the
+valuation correspondence provable. Had the family carried a separate parameter environment, the
+correspondence relation would have needed a fifth conjunct and the relation itself would have moved. The
+decision was forced by the state type, but it was a decision, and it now has a regression pin
+(`Relico/Tests/GeneralInitialization.lean`, tests 2 and 6) rather than a docstring.
+
+One more discrepancy the prediction hid: the unconditional theorem needed **no model well-formedness
+hypothesis at all**, which the scoped form's shape made look inevitable. The guard's
+`instanceNamesUnique` and `reactorNamesUnique`, with `Translation.reactorNameFor_injective`, already
+force the model's instance and class names to be duplicate-free for any model that compiles, so the
+theorem quantifies over successful compilation alone.
+
+**Consequence.** F75 part 2's sentence should be read as a plan, not a proof sketch; the correspondence
+relation itself was unchanged, and correctly so — constructor entry is inside its existing conjuncts,
+which is evidence the relation was defined at the right granularity in G2b.
+
+### The transferable check
+
+When a theorem is stated "scoped, pending a definition that does not exist yet", re-derive what the
+pending definition will have to make true *before* trusting any prediction about how the unconditional
+form will follow. The prediction's verb — instantiate, re-proof, compose — encodes an assumption about
+the shape of the missing definition, and the definition, when it arrives, has its own constraints (here:
+two step relations that cannot start a constructor) that the prediction could not see. A one-hour
+derivation of "what can the initial state even be, given the step rules" would have replaced both halves
+of the prediction with the actual proof obligations.
