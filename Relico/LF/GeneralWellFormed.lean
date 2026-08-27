@@ -238,6 +238,9 @@ def stmtWellFormed
           parameters
           value
 
+  | .trace _ =>
+      true
+
   | .schedule action arguments _ =>
       reactor.logicalActions.any
           (fun declared =>

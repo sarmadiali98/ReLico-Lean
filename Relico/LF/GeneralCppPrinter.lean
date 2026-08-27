@@ -349,6 +349,10 @@ Four of those six arms refuse. Each is unreachable from a well-formed program �
 `LF.GeneralPortPayload.arity` — which is what lets them be refusals with distinct messages
 rather than bytes chosen by guesswork. A struct payload of arity 0 or 1 is representable and
 never built, since the translation emits `scalar` at arity 1 and refuses arity 0.
+
+The output-only `.trace` arm emits one `std::printf` line for its literal tag. It
+does not contribute an effect name; `generalProgramPreambleEntries` derives the
+corresponding `<cstdio>` preamble entry from the bodies that contain such a line.
 -/
 def renderGeneralStmt
     (reactorName : ReactorName)
@@ -364,6 +368,12 @@ def renderGeneralStmt
           renderGeneralExpr
             expression ++
           ";")
+
+  | .trace tag =>
+      .ok
+        ("std::printf(\"" ++
+          tag ++
+          "\\n\");")
 
   | .schedule
       action
@@ -498,6 +508,9 @@ def generalEffectNames
       match statement with
 
       | .assign _ _ =>
+          names
+
+      | .trace _ =>
           names
 
       | .schedule action _ _ =>
@@ -1558,7 +1571,58 @@ def generalProgramStructDecls
       reactors)
 
 /--
-Render the program-level preamble, or nothing at all when no struct is needed.
+Whether a program contains a target-output trace statement.
+
+The C++ line emitted by `renderGeneralStmt` uses `std::printf`, so the
+program-level preamble must include `<cstdio>` exactly when a trace body needs
+it. The check is derived from the same reaction bodies that are rendered; no
+caller can forget to update a stored preamble flag.
+-/
+def generalBodyHasTrace :
+    LF.GeneralBody →
+    Bool
+
+  | [] =>
+      false
+
+  | .trace _ :: _ =>
+      true
+
+  | _ :: remaining =>
+      generalBodyHasTrace remaining
+
+/--
+Whether any startup or message reaction in a program contains a trace.
+-/
+def generalProgramHasTrace
+    (program : LF.GeneralProgram) :
+    Bool :=
+  program.reactors.any
+    (fun reactor =>
+      generalBodyHasTrace reactor.startupReaction.body ||
+        reactor.messageReactions.any
+          (fun reaction =>
+            generalBodyHasTrace reaction.body))
+
+/--
+The derived entries for a program-level preamble, including the C++ header
+needed by trace statements.
+-/
+def generalProgramPreambleEntries
+    (program : LF.GeneralProgram) :
+    List String :=
+  let declarations :=
+    generalProgramStructDecls
+      program.reactors
+
+  if generalProgramHasTrace program then
+    "#include <cstdio>" :: declarations
+  else
+    declarations
+
+/--
+Render the program-level preamble, or nothing at all when no struct or trace
+support is needed.
 
 **Derived from the reactors, never stored.** This follows the rule `generalEffectNames`
 states above: a stored struct list could declare a struct nothing uses, or omit one an
@@ -1568,9 +1632,9 @@ two *different* reactors, so a stored list would have to be kept in agreement wi
 declarations at once, and the failure would be a program that names a type its own preamble
 does not declare.
 
-The empty case emits the empty string, so a program with no multi-value payload — which
-includes every existing fixture and the byte-pinned base program of the `lfc` gate — gets no
-preamble and its bytes do not move.
+The empty case emits the empty string, so a program with no multi-value payload
+and no trace — which includes every existing fixture and the byte-pinned base
+program of the `lfc` gate — gets no preamble and its bytes do not move.
 
 Takes the derived declarations rather than the program, for the same reason
 `renderGeneralParameterList` does: the empty case is then `rfl`, and the derivation stays
@@ -1609,8 +1673,8 @@ def renderGeneralProgram
     (targetHeader ++
       "\n\n" ++
       renderGeneralPreamble
-        (generalProgramStructDecls
-          program.reactors) ++
+        (generalProgramPreambleEntries
+          program) ++
       String.intercalate
         "\n"
         reactors ++

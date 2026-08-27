@@ -79,6 +79,9 @@ def statementTargetDeclared
   | .assign _ _ =>
       true
 
+  | .trace _ =>
+      true
+
   | .send target _ _ _ =>
       match target with
 
@@ -264,6 +267,9 @@ def statementResolves
   match statement with
 
   | .assign _ _ =>
+      true
+
+  | .trace _ =>
       true
 
   | .send target messageName payload _ =>

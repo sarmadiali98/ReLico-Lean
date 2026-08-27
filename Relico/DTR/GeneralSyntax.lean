@@ -239,11 +239,20 @@ The delay is a `Delay` rather than an optional one. The frontend carries an
 absent `after` through as null because its output is an abstract syntax tree,
 and applying the zero default is this side's responsibility; the elaborator
 does it, so by the time a statement exists the delay is always present.
+
+`trace` carries a literal tag for generated target output. It is intentionally
+part of the syntax before any executable trace semantics: this milestone wires
+the tag through translation and printing, while the target printer remains the
+owner of the observable output.
 -/
 inductive GeneralStmt where
   | assign :
       VarName →
       DTR.GeneralExpr →
+      GeneralStmt
+
+  | trace :
+      String →
       GeneralStmt
 
   | send :

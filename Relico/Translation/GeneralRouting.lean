@@ -232,14 +232,14 @@ deriving Repr, DecidableEq, BEq, Inhabited
 The external sends of one body, from a given starting index.
 
 Explicit recursion with the index in the *matched* position rather than as a leading
-parameter, which is the shape `DTR.findKnownRebec?` and its three siblings use. Self-sends
-and assignments advance the index and contribute nothing, which is what makes the index a
-statement position rather than a send count.
+parameter, which is the shape `DTR.findKnownRebec?` and its three siblings use. Self-sends,
+traces and assignments advance the index and contribute nothing, which is what makes the
+index a statement position rather than a send count.
 
 §7.1 suggests `List.zipIdx` for the index, and it would compute the same list. It is not used
 for the reason `String.capitalize` is not used in `NameGeneration.lean`: this development
 depends on no library function whose name has churned across Lean releases, and that one was
-`List.enum` until recently. A four-line recursion cannot be renamed underneath a build.
+`List.enum` until recently. This small explicit recursion cannot be renamed underneath a build.
 
 There is no wildcard on the send arm's target: `.selfTarget` is matched explicitly, so the
 stage that adds a third send target gets a build error here rather than a silently dropped
@@ -255,6 +255,12 @@ def externalSendsFromIndex
       []
 
   | index, .assign _ _ :: remaining =>
+      externalSendsFromIndex
+        bodyKey
+        (index + 1)
+        remaining
+
+  | index, .trace _ :: remaining =>
       externalSendsFromIndex
         bodyKey
         (index + 1)
@@ -522,8 +528,8 @@ The self-sends of one body, from a given starting index.
 The mirror of `externalSendsFromIndex`, and the indices agree with it by construction because
 both advance on **every** statement rather than only on the ones they collect. That is what
 lets one site identify one statement whichever list it was drawn from, and it is why the
-`.assign` arm is not a wildcard here either: a stage that adds a statement form gets a build
-error rather than a site numbering that has silently shifted.
+The `.assign` and `.trace` arms are not wildcards here either: a stage that adds a statement
+form gets a build error rather than a site numbering that has silently shifted.
 -/
 def selfSendsFromIndex
     (bodyKey : GeneralBodyKey) :
@@ -535,6 +541,12 @@ def selfSendsFromIndex
       []
 
   | index, .assign _ _ :: remaining =>
+      selfSendsFromIndex
+        bodyKey
+        (index + 1)
+        remaining
+
+  | index, .trace _ :: remaining =>
       selfSendsFromIndex
         bodyKey
         (index + 1)
@@ -2954,6 +2966,30 @@ theorem externalSendsFromIndex_assign
           .assign
               variableName
               expression ::
+            remaining
+        ) =
+      externalSendsFromIndex
+        bodyKey
+        (index + 1)
+        remaining := by
+  simp [
+    externalSendsFromIndex
+  ]
+
+/-
+An output-only trace contributes no send and still advances the statement index.
+-/
+theorem externalSendsFromIndex_trace
+    (bodyKey : GeneralBodyKey)
+    (index : Nat)
+    (tag : String)
+    (remaining : DTR.GeneralBody) :
+    externalSendsFromIndex
+        bodyKey
+        index
+        (
+          .trace
+              tag ::
             remaining
         ) =
       externalSendsFromIndex

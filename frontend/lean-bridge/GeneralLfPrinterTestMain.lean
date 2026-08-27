@@ -3385,6 +3385,15 @@ private def printerAssertions :
         ⟨0⟩))
 
   expectRendered
+    "TRACE_STATEMENT"
+    "std::printf(\"G5_TRACE\\n\");"
+    (LF.CppPrinter.renderGeneralStmt
+      receiverReactorName
+      receiverReactor.outputPorts
+      (.trace
+        "G5_TRACE"))
+
+  expectRendered
     "SINGLE_VALUE_PAYLOAD_SCHEDULE"
     "deliver.schedule(1, 0ms);"
     (LF.CppPrinter.renderGeneralStmt
@@ -5388,7 +5397,7 @@ private def priorityFanInAssertions :
 
   -- The claim itself. Under `normalize := id` this reads
   -- `pingToHubFromAlpha_reaction,pingToHubFromBeta_reaction,pingToHubFromGamma_reaction`
-  -- and fails, which is the property the ninety-two assertions above do not have.
+  -- and fails, which is the property the ninety-three assertions above do not have.
   expectRendered
     "PRIORITY_FAN_IN_EMITTED_REACTION_ORDER"
     expectedPriorityFanInReactionOrder
@@ -5401,12 +5410,12 @@ private def priorityFanInAssertions :
     priorityFanInSpecifiedReactionOrder
 
 /--
-Run every assertion: 34 printing, then 10 well-formedness, then 11 translation, then
+Run every assertion: 35 printing, then 10 well-formedness, then 11 translation, then
 3 for the port-name collisions F34 and F42, then 5 for finding F32's counterexample,
 then 7 for the routed model, then 6 for the refusals routing reaches, then 6 for finding
 F48's aliased endpoints, then 4 for finding F49's shared target endpoint, then 2 for
 finding F50's doubled set port, then 4 for finding F56's repeated self-send, then 4 for
-stage F's priority fan-in, 96 in all.
+stage F's priority fan-in, 97 in all.
 
 The count is stated here because `frontend/check-general-lean.sh` compares the
 number of `PASS_` lines against a literal. There are no fixtures to count, so a

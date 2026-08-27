@@ -180,11 +180,11 @@ echo "=== the general LF printer, well-formedness and translation assertions"
 # running: the completion marker alone cannot, since a `try` block that skipped
 # twenty assertions still reaches its final `IO.println`.
 #
-# 34 printing, 10 well-formedness, 11 translation, 3 for the port-name collisions F34
+# 35 printing, 10 well-formedness, 11 translation, 3 for the port-name collisions F34
 # and F42, 5 for finding F32's counterexample, 7 for the routed model, 6 for the
 # refusals routing reaches, 6 for finding F48's aliased endpoints, 4 for finding F49's
 # shared target endpoint, 2 for finding F50's doubled set port, 4 for finding F56's
-# repeated self-send, 4 for stage F's priority fan-in. Twelve blocks, 96, the same
+# repeated self-send, 4 for stage F's priority fan-in. Twelve blocks, 97, the same
 # breakdown the runner's own docstring gives.
 #
 # That enumeration was itself stale until 2026-08-22, when it listed six blocks summing
@@ -251,16 +251,16 @@ echo "=== the general LF printer, well-formedness and translation assertions"
 # claimed something false, so it is the only one that no earlier assertion could have been
 # failing on before it existed.
 #
-# Then up to 96 for stage F's four -- PRIORITY_FAN_IN_SOURCE_WELLFORMED,
+# Then up to 97 for stage F's four -- PRIORITY_FAN_IN_SOURCE_WELLFORMED,
 # PRIORITY_FAN_IN_ACTOR_PRIORITIES_DISTINCT, PRIORITY_FAN_IN_EMITTED_REACTION_ORDER and
 # PRIORITY_FAN_IN_SPECIFIED_REACTION_ORDER -- and this twelfth block was added for a third
 # reason again: not because something was false and not because the target mishandled
-# something, but because the other ninety-two assertions were found to be **unfalsifiable**
+# something, but because the other ninety-three assertions were found to be **unfalsifiable**
 # for the property they were credited with. Finding F59 measured that this script hands
 # PRINTER_TEST_MAIN no arguments, so no fixture is ever translated, and that grep -c priority
 # over the printer test main returned zero, so every instance in every model above takes the
 # default priority and every pair is tied under a reflexive relation. The sort is the identity
-# on all of them. Those ninety-two pin *stability*, which the sortedness theorems structurally
+# on all of them. Those ninety-three pin *stability*, which the sortedness theorems structurally
 # cannot pin, and they do not pin ordering. This block is the first model in the file carrying
 # a priority annotation of any kind, and its instance declaration order is a derangement of
 # its priority order, so its expected text fails under declaration order and under any single
@@ -271,7 +271,7 @@ echo "=== the general LF printer, well-formedness and translation assertions"
 # scheduled literal change this list ever carried, and it is discharged. A drop of four here
 # still means the ordering evidence has left the repository entirely, because no other block
 # in the file carries a priority annotation at all.
-EXPECTED_PRINTER_ASSERTIONS=96
+EXPECTED_PRINTER_ASSERTIONS=97
 
 set +e
 PRINTER_OUTPUT="$(

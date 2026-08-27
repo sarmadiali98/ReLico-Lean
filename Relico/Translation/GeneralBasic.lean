@@ -680,6 +680,10 @@ def compileGeneralStmt
           target
           (compileGeneralExpr value))
 
+  | .trace tag =>
+      .ok
+        (.trace tag)
+
   | .send .selfTarget message arguments delay =>
       .ok
         (.schedule
@@ -5845,6 +5849,46 @@ theorem exists_compileGeneralBody
                hStatement
                hRemaining⟩
 
+      | trace tag =>
+
+          have hStatement :
+              compileGeneralStmt
+                  env
+                  context
+                  index
+                  (
+                    .trace
+                      tag
+                  ) =
+                .ok
+                  (.trace
+                    tag) := by
+            simp [
+              compileGeneralStmt
+            ]
+
+          obtain ⟨compiledRemaining, hRemaining⟩ :=
+            inductionHypothesis
+              (index + 1)
+              (by
+                intro send hMember
+
+                exact
+                  hSends
+                    send
+                    (by
+                      rw [
+                        externalSendsFromIndex_trace
+                      ]
+
+                      exact hMember))
+
+          exact
+            ⟨_,
+             compileGeneralBody_cons_ok
+               hStatement
+               hRemaining⟩
+
       | send target message arguments delay =>
 
           cases target with
@@ -6463,6 +6507,11 @@ private theorem compileGeneralStmt_setPort_inversion
         compileGeneralStmt
       ] at hStatement
 
+  | trace tag =>
+      simp [
+        compileGeneralStmt
+      ] at hStatement
+
   | send target message sendArguments delay =>
 
       cases target with
@@ -6584,6 +6633,27 @@ private theorem compileGeneralBody_setPortNames_provenance
       cases compiledStatement with
 
       | assign _ _ =>
+
+          simp only [
+            LF.setPortNamesOfBody
+          ] at hPort
+
+          obtain ⟨site, entry, hSite, hEntry, hPortName⟩ :=
+            inductionHypothesis
+              (index + 1)
+              compiledRemaining
+              hRemaining
+              port
+              hPort
+
+          exact
+            ⟨site,
+             entry,
+             by omega,
+             hEntry,
+             hPortName⟩
+
+      | trace _ =>
 
           simp only [
             LF.setPortNamesOfBody
@@ -6767,6 +6837,17 @@ theorem compileGeneralBody_setPortNames_nodup
       cases compiledStatement with
 
       | assign _ _ =>
+          simp only [
+            LF.setPortNamesOfBody
+          ]
+
+          exact
+            inductionHypothesis
+              (index + 1)
+              compiledRemaining
+              hRemaining
+
+      | trace _ =>
           simp only [
             LF.setPortNamesOfBody
           ]

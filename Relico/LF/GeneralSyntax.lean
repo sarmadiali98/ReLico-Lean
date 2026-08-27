@@ -345,11 +345,19 @@ stage on both sides at once, and adding the LF half alone would create a constru
 nothing can produce. It is also what keeps stage E's central invariant true: with
 flat bodies one statement performs at most one `set()` per firing, so no reaction can
 set one port twice at one tag.
+
+`trace` carries the literal tag that the C++ printer writes as target output.
+It has no effect-list entry and no runtime label in this milestone: the output
+is deliberately owned by the generated reaction body.
 -/
 inductive GeneralStmt where
   | assign :
       VarName →
       LF.GeneralExpr →
+      GeneralStmt
+
+  | trace :
+      String →
       GeneralStmt
 
   | schedule :
@@ -912,13 +920,13 @@ saying *"no reaction of an emitted reactor sets one output port twice"*; that se
 claim about `Nodup` of exactly this list, and it cannot be stated without a list that would
 show the repeat if there were one.
 
-Explicit recursion over all three `LF.GeneralStmt` constructors rather than
+Explicit recursion over all four `LF.GeneralStmt` constructors rather than
 `List.filterMap` with a pattern-matching function, for the two reasons
 `Translation.compileGeneralBody` gives for its own shape: every equation below then holds by
 `rfl`, so the induction in `Translation.compileGeneralBody_setPortNames_nodup` rewrites with
 `rfl` lemmas instead of unfolding a combinator; and this development depends on no library
 function whose name has churned across Lean releases, which `List.filterMap`'s neighbours
-`flatMap` and `flatten` both have. Writing the `.assign` and `.schedule` arms out instead of
+`flatMap` and `flatten` both have. Writing the `.assign`, `.trace` and `.schedule` arms out instead of
 using a catch-all is deliberate too: a fourth statement constructor should break this
 function loudly rather than be silently classified as setting nothing.
 
@@ -937,6 +945,9 @@ def setPortNamesOfBody :
       []
 
   | .assign _ _ :: remaining =>
+      setPortNamesOfBody remaining
+
+  | .trace _ :: remaining =>
       setPortNamesOfBody remaining
 
   | .schedule _ _ _ :: remaining =>
