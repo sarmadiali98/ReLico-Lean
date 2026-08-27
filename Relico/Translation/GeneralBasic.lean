@@ -1238,10 +1238,12 @@ output. The alarm reading still holds, and it is no longer the only thing standi
 
 The scope is honest about what "discharges" means here. This is a per-reaction equation; the
 conjunct is a property of a whole `LF.GeneralProgram`. Composing this theorem and its two
-siblings into `compileGeneralModel …  → program.reactionPrioritiesAbsent = true` needs the
-reaction-list ladder that `generalReactionTriggersOf` needed for triggers, and that theorem is
-**owed rather than absent** — F84 records it, and until it lands the property of the emitted
-program is decided by the guard at run time rather than proved.
+siblings into the program-level theorem needed the reaction-list ladder, and **that ladder has
+landed**: `compileGeneralReactiveClass_prioritiesAbsent` is the reactor-granularity rung,
+`assembleGeneralProgram_reactionPrioritiesAbsent` says the pre-guard assembly satisfies the
+clause, and `compileGeneralModel_reactionPrioritiesAbsent` is the program-level theorem —
+proved by composition, not by reading the guard's decision back. F84 recorded the debt while
+it was open; the section comment above the ladder has the epistemics.
 -/
 @[simp]
 theorem assembleGeneralMessageReaction_priority
@@ -5863,6 +5865,521 @@ theorem compileGeneralModel_targetEndpointsUnique
   targetEndpointsUnique_of_wellFormed
     (compileGeneralModel_wellFormed
       hCompiled)
+
+/-!
+### The priority ladder — task `#147`, F84's owed theorem
+
+G3's clause made a populated reaction priority a refusal, and the two theorems above say what
+acceptance guarantees. Neither of them says the translator **never trips** the clause: a guard
+that refuses is compatible with a translator that emits the offence and relies on the refusal.
+`compileGeneralModel_targetEndpointsUnique` is proved *through* the guard, so for the ninth
+clause that is exactly its epistemic position — the guard decided, and we read the decision off.
+
+The tenth clause is different, and the difference is the whole content of **F84**: for priorities
+we own the per-reaction equations (`assembleGeneralMessageReaction_priority`,
+`assembleGeneralPortReaction_priority`, `assembleGeneralStartupReaction_priority`), and those can
+be **composed up the assembly walk** — per-reaction, per-list, per-group, per-reactor, per-program —
+into a proof that the assembled program satisfies the clause *before the guard ever sees it*. That
+is the direction §8's original sentence had backwards, and it is what the ladder below proves.
+
+The top two rungs are public because each states an invariant in its own words:
+`assembleGeneralProgram_reactionPrioritiesAbsent` says the pre-guard assembly satisfies the
+clause — the translator cannot trip it — and `compileGeneralModel_reactionPrioritiesAbsent`
+says the accepted program does, **proved by composition rather than by reading the guard's
+decision back**: the only guard fact its proof uses is `eq_of_guardGeneralProgram_ok`, which is
+shape transparency (what the guard accepts, it returns unchanged), not the guard's verdict. Swap
+the proof for `reactionPrioritiesAbsent_of_wellFormed ∘ compileGeneralModel_wellFormed` and the
+statement survives while the invariant silently dies — which is why the docstring says so, and
+why the assembly-level rung above it exists at all.
+-/
+
+/--
+The at-site sibling of `assembleGeneralMessageReaction_priority`.
+
+Stated for the ladder below: a message server with self-send sites contributes one action
+reaction **per site**, each assembled by `assembleGeneralMessageReactionAtSite`, and every one
+of those carries `priority := none` for the same reason the unsuffixed reaction does. Without
+this leaf the ladder would cover the zero-site branch only, which is nine of the ten fixtures
+and exactly the shape of gap that stays green while it narrows.
+-/
+@[simp]
+theorem assembleGeneralMessageReactionAtSite_priority
+    (allSelfSends : List GeneralSelfSend)
+    (site : SendSite)
+    (server : DTR.GeneralMessageServer)
+    (compiledBody : LF.GeneralBody) :
+    (assembleGeneralMessageReactionAtSite
+        allSelfSends
+        site
+        server
+        compiledBody).priority =
+      none := by
+  rfl
+
+private theorem assembleGeneralMessageReactions_prioritiesAbsent
+    (allSelfSends : List GeneralSelfSend)
+    (server : DTR.GeneralMessageServer)
+    (compiledBody : LF.GeneralBody) :
+    (assembleGeneralMessageReactions
+        allSelfSends
+        server
+        compiledBody).all
+        (fun reaction =>
+          reaction.priority.isNone) =
+      true := by
+
+  unfold
+    assembleGeneralMessageReactions
+
+  cases
+      generalSelfSendSitesOf
+        server.name
+        allSelfSends with
+
+  | nil =>
+      simp
+
+  | cons site remaining =>
+      simp only [
+        List.all_eq_true
+      ]
+
+      intro reaction hMember
+
+      rw [
+        List.mem_map
+      ] at hMember
+
+      obtain
+          ⟨send, _, hReaction⟩ :=
+        hMember
+
+      rw [
+        ← hReaction,
+        assembleGeneralMessageReactionAtSite_priority
+      ]
+
+      rfl
+
+private theorem assembleGeneralPortReactions_prioritiesAbsent
+    (className : ClassName)
+    (server : DTR.GeneralMessageServer)
+    (compiledBody : LF.GeneralBody)
+    (routes : List GeneralRoute) :
+    (assembleGeneralPortReactions
+        className
+        server
+        compiledBody
+        routes).all
+        (fun reaction =>
+          reaction.priority.isNone) =
+      true := by
+
+  simp only [
+    List.all_eq_true
+  ]
+
+  intro reaction hMember
+
+  unfold
+    assembleGeneralPortReactions
+      at hMember
+
+  rw [
+    List.mem_map
+  ] at hMember
+
+  obtain
+      ⟨route, _, hReaction⟩ :=
+    hMember
+
+  rw [
+    ← hReaction,
+    assembleGeneralPortReaction_priority
+  ]
+
+  rfl
+
+/--
+One message server's whole reaction group carries no priority.
+
+The group is the append of the action reactions and the port reactions, so this rung is
+`List.all_append` over the two list rungs above. Inverting a successful group compilation goes
+through `compileGeneralMessageServerReactionGroup_ok`, whose right-hand side names both lists —
+which is what makes the inversion one `injection` rather than a walk.
+-/
+private theorem compileGeneralMessageServerReactionGroup_prioritiesAbsent
+    {env : GeneralOutputPortEnv}
+    {selfSends : List GeneralSelfSend}
+    {routes : List GeneralRoute}
+    {className : ClassName}
+    {server : DTR.GeneralMessageServer}
+    {group : List LF.GeneralReaction}
+    (hGroup :
+      compileGeneralMessageServerReactionGroup
+          env
+          selfSends
+          routes
+          className
+          server =
+        .ok group) :
+    group.all
+        (fun reaction =>
+          reaction.priority.isNone) =
+      true := by
+
+  cases hBody :
+      compileGeneralBody
+        env
+        { bodyKey := .messageServer server.name,
+          selfSends := selfSends }
+        0
+        server.body with
+
+  | error message =>
+      rw [
+        compileGeneralMessageServerReactionGroup_error
+          hBody
+      ] at hGroup
+
+      simp at hGroup
+
+  | ok compiledBody =>
+      rw [
+        compileGeneralMessageServerReactionGroup_ok
+          hBody
+      ] at hGroup
+
+      injection hGroup with hGroup
+
+      subst hGroup
+
+      rw [
+        List.all_append,
+        Bool.and_eq_true
+      ]
+
+      exact
+        ⟨
+          assembleGeneralMessageReactions_prioritiesAbsent
+            selfSends
+            server
+            compiledBody,
+          assembleGeneralPortReactions_prioritiesAbsent
+            className
+            server
+            compiledBody
+            routes
+        ⟩
+
+/--
+Every reaction of every message server of a class carries no priority, given that the reaction
+list compiled.
+
+The induction consumes one server per step through
+`exists_of_compileGeneralMessageServerReactions_cons_ok`, which names the group and the tail —
+so the append shape of the compiled list is available without unfolding the compilation at all.
+-/
+private theorem compileGeneralMessageServerReactions_prioritiesAbsent
+    {env : GeneralOutputPortEnv}
+    {selfSends : List GeneralSelfSend}
+    {routes : List GeneralRoute}
+    {className : ClassName} :
+    ∀ (servers : List DTR.GeneralMessageServer)
+      (compiled : List LF.GeneralReaction),
+      compileGeneralMessageServerReactions
+          env
+          selfSends
+          routes
+          className
+          servers =
+        .ok compiled →
+        compiled.all
+            (fun reaction =>
+              reaction.priority.isNone) =
+          true := by
+
+  intro servers
+  induction servers with
+
+  | nil =>
+      intro compiled hCompiled
+
+      rw [
+        eq_nil_of_compileGeneralMessageServerReactions_nil_ok
+          hCompiled
+      ]
+
+      rfl
+
+  | cons server remaining inductionHypothesis =>
+      intro compiled hCompiled
+
+      rcases
+          exists_of_compileGeneralMessageServerReactions_cons_ok
+            hCompiled with
+        ⟨
+          group,
+          compiledRemaining,
+          hGroup,
+          hRemaining,
+          hCompiledEq
+        ⟩
+
+      subst hCompiledEq
+
+      rw [
+        List.all_append,
+        Bool.and_eq_true
+      ]
+
+      exact
+        ⟨
+          compileGeneralMessageServerReactionGroup_prioritiesAbsent
+            hGroup,
+          inductionHypothesis
+            compiledRemaining
+            hRemaining
+        ⟩
+
+/--
+The reactor-granularity rung of the priority ladder: a successfully compiled reactor's startup
+reaction and every one of its message reactions carry no priority.
+
+This is the composition the three per-reaction theorems were always halves of. The startup half
+inverts `compileGeneralConstructor` to recover the `assembleGeneralStartupReaction` shape and
+applies `assembleGeneralStartupReaction_priority`; the message half is the server-list rung
+above, over the very list `compileGeneralReactiveClass` assembled — including that it is
+`generalPriorityOrderedMessageServers` that was walked, which is why the rung is stated against
+the compilation rather than against the class's declaration order.
+-/
+theorem compileGeneralReactiveClass_prioritiesAbsent
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {reactor : LF.GeneralReactor}
+    (hCompiled :
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok reactor) :
+    (reactor.startupReaction.priority.isNone &&
+      reactor.messageReactions.all
+        (fun reaction =>
+          reaction.priority.isNone)) =
+      true := by
+
+  rcases
+      exists_of_compileGeneralReactiveClass_ok
+        hCompiled with
+    ⟨
+      env,
+      compiledStartupReaction,
+      compiledMessageReactions,
+      _hEnv,
+      hConstructor,
+      hMessageReactions,
+      hReactor
+    ⟩
+
+  subst hReactor
+
+  show
+    (compiledStartupReaction.priority.isNone &&
+      compiledMessageReactions.all
+        (fun reaction =>
+          reaction.priority.isNone)) =
+      true
+
+  rw [
+    Bool.and_eq_true
+  ]
+
+  constructor
+
+  · rcases
+        exists_of_compileGeneralConstructor_ok
+          hConstructor with
+      ⟨
+        compiledBody,
+        _hBody,
+        hStartupReaction
+      ⟩
+
+    rw [
+      hStartupReaction,
+      assembleGeneralStartupReaction_priority
+    ]
+
+    rfl
+
+  · exact
+      compileGeneralMessageServerReactions_prioritiesAbsent
+        (generalPriorityOrderedMessageServers
+          reactiveClass)
+        compiledMessageReactions
+        hMessageReactions
+
+private theorem compileGeneralReactiveClasses_prioritiesAbsent
+    {allClasses : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute} :
+    ∀ (classes : List DTR.GeneralReactiveClass)
+      (compiled : List LF.GeneralReactor),
+      compileGeneralReactiveClasses
+          allClasses
+          routes
+          classes =
+        .ok compiled →
+        compiled.all
+          (fun reactor =>
+            reactor.startupReaction.priority.isNone &&
+              reactor.messageReactions.all
+                (fun reaction =>
+                  reaction.priority.isNone)) =
+          true := by
+
+  intro classes
+  induction classes with
+
+  | nil =>
+      intro compiled hCompiled
+
+      rw [
+        eq_nil_of_compileGeneralReactiveClasses_nil_ok
+          hCompiled
+      ]
+
+      rfl
+
+  | cons reactiveClass remaining inductionHypothesis =>
+      intro compiled hCompiled
+
+      rcases
+          exists_of_compileGeneralReactiveClasses_cons_ok
+            hCompiled with
+        ⟨
+          reactor,
+          compiledRemaining,
+          hClass,
+          hRemaining,
+          hCompiledEq
+        ⟩
+
+      subst hCompiledEq
+
+      rw [
+        List.all_cons,
+        Bool.and_eq_true
+      ]
+
+      exact
+        ⟨
+          compileGeneralReactiveClass_prioritiesAbsent
+            hClass,
+          inductionHypothesis
+            compiledRemaining
+            hRemaining
+        ⟩
+
+/--
+The assembled program satisfies the tenth clause — **before the guard sees it**.
+
+This is the invariant the ladder exists for, and the reason it is stated over
+`assembleGeneralProgram` rather than over `compileGeneralModel`: no guard is mentioned, accepted
+or refused, so the theorem says the translator *cannot* emit a reaction with a populated
+priority, not merely that it cannot get away with one. `reactionPrioritiesAbsent` is a guard
+clause today; if a later stage moved the check elsewhere, this theorem would still be true and
+still be about the same artefact.
+-/
+theorem assembleGeneralProgram_reactionPrioritiesAbsent
+    {model : DTR.GeneralModel}
+    {routes : List GeneralRoute}
+    {compiledReactors : List LF.GeneralReactor}
+    (hClasses :
+      compileGeneralReactiveClasses
+          model.classes
+          routes
+          model.classes =
+        .ok compiledReactors) :
+    (assembleGeneralProgram
+        model
+        routes
+        compiledReactors).reactionPrioritiesAbsent =
+      true := by
+
+  unfold
+    LF.GeneralProgram.reactionPrioritiesAbsent
+
+  rw [
+    assembleGeneralProgram_reactors
+  ]
+
+  exact
+    compileGeneralReactiveClasses_prioritiesAbsent
+      model.classes
+      compiledReactors
+      hClasses
+
+/--
+An accepted program satisfies the tenth clause — **by composition, not by the guard's verdict**.
+
+Task `#147`, the theorem F84 recorded as owed. The statement is one a reader could get from the
+guard in two lines (`compileGeneralModel_wellFormed`, then a conjunct extraction), and the
+two-line proof exists; it is deliberately not the proof here. Reading the clause off the guard's
+decision establishes only that *if* the translator emitted a populated priority, *then* nobody
+would see it — the refusal would hide it. Composing the per-reaction equations up through
+`assembleGeneralProgram_reactionPrioritiesAbsent` establishes that the offence is never emitted
+in the first place. Same conclusion, different theorem, and the weaker one is a strict subset of
+the evidence.
+
+The only guard fact this proof uses is `eq_of_guardGeneralProgram_ok` — what the guard accepts,
+it returns unchanged — which is shape transparency rather than the guard's judgment. If a later
+edit swaps this proof for the guard-extraction one, the statement survives and the invariant
+silently dies; the assembly-level theorem above is what keeps that detectable.
+-/
+theorem compileGeneralModel_reactionPrioritiesAbsent
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    (hCompiled :
+      compileGeneralModel model =
+        .ok program) :
+    program.reactionPrioritiesAbsent =
+      true := by
+
+  rcases
+      exists_of_compileGeneralModel_ok
+        hCompiled with
+    ⟨
+      routes,
+      compiledReactors,
+      _hRoutes,
+      hClasses,
+      _hProgram
+    ⟩
+
+  rw [
+    compileGeneralModel_ok
+      _hRoutes
+      hClasses
+  ] at hCompiled
+
+  have hAssembled :
+      assembleGeneralProgram
+          model
+          routes
+          compiledReactors =
+        program :=
+    eq_of_guardGeneralProgram_ok
+      hCompiled
+
+  rw [
+    ← hAssembled
+  ]
+
+  exact
+    assembleGeneralProgram_reactionPrioritiesAbsent
+      hClasses
 
 /--
 `Nodup` of an append restricts to either side.

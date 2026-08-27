@@ -696,7 +696,19 @@ itself recorded — see **F84**. A precondition should name the task that can di
 mirrored refusal sentence in `Relico/Translation/GeneralBasic.lean`. One sentence of the decision above
 did not survive contact: *"The three inert theorems then become consequences of the clause"* has the
 implication backwards, and the direction that is actually load-bearing — the three per-reaction equations
-composing up to the clause, for our own output — is owed as task `#147`. F84 has the argument.
+composing up to the clause, for our own output — was owed as task `#147`. F84 has the argument.
+
+**`#147` landed 2026-08-28**, as the priority ladder in `Relico/Translation/GeneralBasic.lean`'s
+"What acceptance guarantees" section: `assembleGeneralMessageReactionAtSite_priority` (the fourth leaf,
+for multi-site servers), two list rungs, the group and server-list rungs,
+`compileGeneralReactiveClass_prioritiesAbsent` (reactor granularity),
+`assembleGeneralProgram_reactionPrioritiesAbsent` — the pre-guard invariant, the translator cannot
+emit a populated priority — and `compileGeneralModel_reactionPrioritiesAbsent`, the program-level
+theorem proved **by composition rather than by reading the guard's decision back**: the only guard
+fact its proof uses is `eq_of_guardGeneralProgram_ok`, shape transparency, not the verdict. F84
+warned the ladder would be expensive — the trigger ladder it is modelled on cost five commits,
+`#139` through `#143` — but this one is a single ladder in a single place, because the inversion
+lemmas it needed (`exists_of_compileGeneral*`) already existed for other consumers.
 
 ## 9. G4 — the `switch-pair` benchmark, which does not exist
 

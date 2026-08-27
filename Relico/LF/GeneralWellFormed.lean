@@ -567,9 +567,12 @@ oversight.** Nothing here says `compileGeneralModel` cannot emit a populated pri
 it is the guard, which decides this predicate on the assembled program and refuses. The
 per-reaction halves are pinned by `assembleGeneralMessageReaction_priority`,
 `assembleGeneralPortReaction_priority` and `assembleGeneralStartupReaction_priority`; composing
-those into a program-level theorem needs the reaction-list ladder that
-`generalReactionTriggersOf` needed for triggers, and that theorem is **owed rather than absent** —
-see F84.
+those into a program-level theorem needed the reaction-list ladder that
+`generalReactionTriggersOf` needed for triggers, and **that ladder has landed**:
+`Translation.compileGeneralModel_reactionPrioritiesAbsent` composes the three equations up
+through the assembly walk, and `Translation.assembleGeneralProgram_reactionPrioritiesAbsent`
+states the pre-guard invariant — the translator cannot emit the offence, rather than merely
+cannot get away with one. F84 recorded the debt while it was open.
 -/
 def reactionPrioritiesAbsent
     (program : LF.GeneralProgram) :
