@@ -245,13 +245,19 @@ Grouped by module; each row's "hypotheses" column lists everything beyond succes
 Two further rows belong to the table but have no theorem to name, and they are the table's most
 important content:
 
-* **The `.consume` transfer halves do not exist.** `generalTimeAdvance_forward_weak` and
-  `_backward_weak` cover one label constructor of two; the `.consume` case is task `#129`, blocked on
-  the F76 repair decision (a user decision; audit item C6). The consequence, per **F83**: the
-  generic finite-trace agreement of row 9 (`weakBisimulation_traceAgreement_forward`/`_backward`)
-  quantifies over *both* transfer conditions, so the general family cannot instantiate it — aims 8
-  and 9 of `docs/trusted-boundary.md` are proved over an abstract LTS and **not yet for the general
-  family**. No model, tie-carrying or not, is eligible for a theorem that does not exist.
+* **The `.consume` transfer halves do not exist yet.** `generalTimeAdvance_forward_weak` and
+  `_backward_weak` cover one label constructor of two; the `.consume` case is task `#129`. The repair
+  direction was decided 2026-08-28 — the partial within-tag quotient,
+  `docs/decisions/0042-within-tag-partial-quotient.md` (free permutation among distinct reactors at one
+  tag, order-preserving within one) — so the case is **commissioned rather than blocked**, but the
+  commission's proof obligations (the commutation argument, and relating queue insertion order to the
+  declaration order the target enforces) are unsettled questions, not routine work. The consequence,
+  per **F83**: the generic finite-trace agreement of row 9
+  (`weakBisimulation_traceAgreement_forward`/`_backward`) quantifies over *both* transfer conditions, so
+  the general family cannot instantiate it until `#129` lands — aims 8 and 9 of
+  `docs/trusted-boundary.md` are proved over an abstract LTS and **not yet for the general family**. No
+  model, tie-carrying or not, is eligible for a theorem that does not exist. The decision refuses
+  nothing: contention models will become theorem-eligible when the quotient correspondence lands.
 * **Division and modulo by zero carry a transfer restriction.** The model-side correspondence holds
   unconditionally — `compileGeneralExpr_preserves_evaluation` and
   `compileGeneralExpr_evaluation_none_iff` make both sides stuck together — but generated C++ has

@@ -581,6 +581,15 @@ instantiate the foundation. **F70**.
    each condition produces a weak transition on **some** target action related to the source's by `Φ`, not
    on `ϕ` of it, because one message server becomes several reactions (§7). Two halves of this item were
    wrong for unrelated reasons; that one is now answered, and F76 is the one still open.
+   **No longer open: decided 2026-08-28, (e′).** `docs/decisions/0042-within-tag-partial-quotient.md`
+   adopts F80's refinement — the correspondence for `.consume` is stated up to within-tag permutation,
+   free among events targeting distinct reactors, order-preserving among events targeting one reactor;
+   both semantics unchanged, nothing refused. Candidates (a)–(d) are recorded as rejected in the decision,
+   with reasons. The commission this creates is task `#129` (audit C7): the commutation proof for the
+   distinct-reactor half — F76's "not settled here" — plus an order-preserving within-one-reactor half
+   that must relate queue insertion order to the declaration order the target really enforces. Until
+   `#129` lands, the `.consume` transfer conditions remain unproved, and the eligibility table in
+   `docs/supported-fragment-general.md` remains the statement of that fact.
 6. `weakBisimulation_traceAgreement` — **generic, model-independent**: from a weak bisimulation, the two
    systems agree on finite observable traces. Landed as the pair
    `weakBisimulation_traceAgreement_forward` / `_backward`, per this section's own rule that aims 8 and 9

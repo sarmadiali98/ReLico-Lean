@@ -1795,6 +1795,16 @@ because the over-specification argued above is now established a second way, fro
 rather than from a reading of LF. Four directions remain rather than five, and the choice is still the
 user's.
 
+**Decided 2026-08-28: (e′), the partial quotient** — `docs/decisions/0042-within-tag-partial-quotient.md`.
+Free permutation among events targeting distinct reactors at one tag, order-preserving among events
+targeting one reactor; both semantics unchanged; nothing refused. The rejected-alternatives record in the
+decision includes (e) as originally stated — F80's measurement that real `lfc` enforces
+within-one-reactor order is what makes the total quotient too coarse, and the decision adopts F80's
+refinement rather than this entry's original candidate. Task `#129` (audit C7) is commissioned as the
+commutation proof this direction requires, and the unsettled question this entry flags — whether the
+disjointness of `take`/`fire` updates yields a genuine commutation over interleaved bodies — is now the
+first thing that proof must settle.
+
 ### The transferable check
 
 F75 prescribed re-reading the design's description of earlier rows against what they built, and this finding is
@@ -2312,6 +2322,16 @@ target genuinely enforces, and which six `lfc` probes in three trigger shapes me
 partial quotient: free permutation among **distinct** reactors at one tag, order-**preserving** within one
 reactor. Recording that refinement is a measurement and is done here; choosing among the candidates
 remains the user's, because it still decides behaviour.
+
+**The choice is made, and it is this refinement: (e′).** Decided 2026-08-28,
+`docs/decisions/0042-within-tag-partial-quotient.md`. The measurement recorded here is what the decision
+adopted — the approved quotient is free permutation among distinct reactors, order-preserving within one
+— and the commission for `#129` (audit C7) is to prove the `.consume` transfer conditions against it.
+The within-one-reactor half of that commission has an additional obligation this entry's
+mis-specification finding creates: the correspondence must relate queue insertion order to the
+declaration order the target really enforces, which is the stage-F order the G5 witness observed — so
+the proof will have to confront the difference between the fold's order and the declaration order
+rather than assume they agree.
 
 **The witness is the paper's own, and it is the same figure as P25's.** Fig. 2a's two sensors both send to
 one `Controller`, so two same-tag events target one reactor, and the two reactions they trigger are
