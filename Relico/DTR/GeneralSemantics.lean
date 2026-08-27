@@ -217,10 +217,12 @@ The source step relation for the general family.
 `abbrev LabeledTransition (State) (Label) := State → Label → State → Prop` and G2c must *instantiate*
 `Common.TauSteps` and `Common.WeakStep` at this relation rather than restate either. Recorded as **F70**.
 
-**Four rules.** Table I's are `ASSIGN`, `SEND`, `CONDITIONAL-T`, `CONDITIONAL-F`, `TAKE` and
+**Five rules.** Table I's are `ASSIGN`, `SEND`, `CONDITIONAL-T`, `CONDITIONAL-F`, `TAKE` and
 `TIME PROGRESS`; the two conditionals are absent because `DTR.GeneralStmt` has no conditional, so what
-stage G proves is the conditional-free sub-fragment (§7, and G6 owes the declaration). `assign` and `send`
-carry `.tau`; `take` carries `.consume`; `timeProgress` carries `.timeAdvance`.
+stage G proves is the conditional-free sub-fragment (§7, and G6 owes the declaration). `assign`, `trace` and
+`send` carry `.tau`; `take` carries `.consume`; `timeProgress` carries `.timeAdvance`. A `trace` step is
+internal instrumentation: it consumes its statement without changing any modeled state, and generated
+`printf` output remains outside this formal relation.
 
 **Records are written field by field, never with `{ config with … }`.** `Relico/DTR/Semantics.lean`'s
 `Step` — the corpus's only other source step relation — writes every field of every state explicitly, and
@@ -277,6 +279,34 @@ inductive GeneralStep
                         value
                     bag := actor.state.bag
                   }
+                activeBody := remaining
+              }
+        }
+
+  /-- Internal instrumentation. Consume the trace statement without changing modeled state. -/
+  | trace
+      {config : GeneralRuntimeConfiguration}
+      {actorName : ActorName}
+      {actor : GeneralActorRuntime}
+      {tag : String}
+      {remaining : DTR.GeneralBody}
+      (hActor :
+        Store.lookup config.actors actorName = some actor)
+      (hBody :
+        actor.activeBody =
+          DTR.GeneralStmt.trace tag :: remaining) :
+      GeneralStep
+        model
+        config
+        DTR.GeneralLabel.tau
+        {
+          now := config.now
+          actors :=
+            Store.update
+              config.actors
+              actorName
+              {
+                state := actor.state
                 activeBody := remaining
               }
         }
@@ -528,7 +558,7 @@ re-derived at each of its cases.
 This section is deliberately equalities and extractions, **not** a structural characterization.
 `Relico/DTR/GlobalMultiStorePayloadOneStep.lean`'s `Step.iff_externalSendFrame_or_dispatch` can state its
 inversion as a disjunction of existentials because each of its disjuncts is a separately *named* relation.
-`GeneralStep`'s four rules are not named separately, so the same shape here would be a disjunction of four
+`GeneralStep`'s five rules are not named separately, so the same shape here would be a disjunction of five
 seven-binder existentials — a second spelling of the constructor list, free to drift from it, which is the
 mistake this repository has already paid for twice. `cases` delivers the structure for free. What it does
 not deliver is the clock arithmetic, so that is what is proved.
@@ -547,8 +577,8 @@ Names are dotted at the top level rather than wrapped in a `namespace GeneralSte
 /--
 A τ step leaves the clock alone.
 
-Both τ rules rebuild the configuration with `now := config.now`, so this is `rfl` twice; the content is in
-the *absence* of a third case. `take` and `timeProgress` are eliminated by index unification — their labels
+All three τ rules rebuild the configuration with `now := config.now`, so this is `rfl` in each case; the content is in
+the *absence* of a fourth case. `take` and `timeProgress` are eliminated by index unification — their labels
 are `.consume` and `.timeAdvance`, neither of which unifies with `.tau` — so this theorem says that no
 internal source step can move logical time. G2b needs exactly that to keep a τ step's target tag at the
 same time component.
@@ -567,6 +597,9 @@ theorem GeneralStep.now_eq_of_tau
   cases hStep with
 
   | assign _ _ _ =>
+      rfl
+
+  | trace _ _ =>
       rfl
 
   | send _ _ _ _ _ =>

@@ -1,6 +1,7 @@
 import Relico.Common.WeakTransition
 import Relico.DTR.GeneralSemantics
 import Relico.LF.GeneralSemantics
+import Relico.Correctness.GeneralCorrespondence
 
 set_option autoImplicit false
 
@@ -541,6 +542,165 @@ def emptyModel : DTR.GeneralModel :=
     classes := []
     instances := []
   }
+
+/-! ## Option A: internal trace steps -/
+
+def sourceTraceActor : DTR.GeneralActorRuntime :=
+  {
+    state :=
+      {
+        valuation := []
+        bag := []
+      }
+    activeBody := [DTR.GeneralStmt.trace "audit"]
+  }
+
+def sourceTraceConfig : DTR.GeneralRuntimeConfiguration :=
+  {
+    now := 3
+    actors := [(probeName, sourceTraceActor)]
+  }
+
+def sourceTraceNext : DTR.GeneralRuntimeConfiguration :=
+  {
+    now := 3
+    actors :=
+      [
+        (probeName,
+          {
+            state := sourceTraceActor.state
+            activeBody := []
+          })
+      ]
+  }
+
+/- The source trace rule consumes only the continuation and is τ-labelled. -/
+theorem sourceTraceStep :
+    DTR.GeneralStep
+      emptyModel
+      sourceTraceConfig
+      DTR.GeneralLabel.tau
+      sourceTraceNext :=
+  DTR.GeneralStep.trace
+    (actorName := probeName)
+    (actor := sourceTraceActor)
+    (tag := "audit")
+    (remaining := [])
+    rfl
+    rfl
+
+example :
+    sourceTraceNext.now = sourceTraceConfig.now :=
+  DTR.GeneralStep.now_eq_of_tau sourceTraceStep
+
+example :
+    Store.lookup sourceTraceNext.actors probeName =
+      some
+        {
+          state := sourceTraceActor.state
+          activeBody := []
+        } := by
+  rfl
+
+def targetTraceReactor : LF.GeneralReactorRuntime :=
+  {
+    valuation := []
+    activeBody := [LF.GeneralStmt.trace "audit"]
+  }
+
+def targetTraceState : LF.GeneralRuntimeState :=
+  {
+    currentTag :=
+      {
+        time := 3
+        microstep := 0
+      }
+    reactors := [(probeName, targetTraceReactor)]
+    pending := []
+  }
+
+def targetTraceNext : LF.GeneralRuntimeState :=
+  {
+    currentTag := targetTraceState.currentTag
+    reactors :=
+      [
+        (probeName,
+          {
+            valuation := targetTraceReactor.valuation
+            activeBody := []
+          })
+      ]
+    pending := []
+  }
+
+/- The LF trace rule has the same τ/no-modeled-state behavior. -/
+theorem targetTraceStep :
+    LF.GeneralStep
+      emptyProgram
+      targetTraceState
+      LF.GeneralLabel.tau
+      targetTraceNext :=
+  LF.GeneralStep.trace
+    (instanceName := probeName)
+    (reactor := targetTraceReactor)
+    (tag := "audit")
+    (remaining := [])
+    rfl
+    rfl
+
+example :
+    targetTraceNext.currentTag = targetTraceState.currentTag :=
+  rfl
+
+example :
+    LF.GeneralRuntimeState.now targetTraceNext =
+      LF.GeneralRuntimeState.now targetTraceState :=
+  LF.GeneralStep.now_eq_of_tau targetTraceStep
+
+example :
+    targetTraceNext.pending = targetTraceState.pending :=
+  rfl
+
+example :
+    ∀ event : LF.GeneralPendingEvent,
+      event ∈ targetTraceNext.pending →
+        event ∈ targetTraceState.pending ∨
+          LF.Tag.PrecedesOrEqual
+            targetTraceState.currentTag
+            event.tag :=
+  LF.GeneralStep.tau_pending_not_past targetTraceStep
+
+example :
+    targetTraceNext.pending = targetTraceState.pending ∨
+      ∃ event : LF.GeneralPendingEvent,
+        targetTraceNext.pending = targetTraceState.pending ++ [event] ∧
+          LF.Tag.StrictlyPrecedes
+            targetTraceState.currentTag
+            event.tag :=
+  LF.GeneralStep.tau_enqueue_strictly_future targetTraceStep
+
+example :
+    Store.lookup targetTraceNext.reactors probeName =
+      some
+        {
+          valuation := targetTraceReactor.valuation
+          activeBody := []
+        } := by
+  rfl
+
+/- The compiler/correspondence continuation fact is live on the same one-statement body. -/
+def traceContinuationCompiles :
+    Correctness.GeneralContinuationCompiles
+      [DTR.GeneralStmt.trace "audit"]
+      [LF.GeneralStmt.trace "audit"] :=
+  ⟨[], default, 0, by rfl⟩
+
+example :
+    Correctness.GeneralContinuationCompiles
+      []
+      [] :=
+  Correctness.generalContinuationCompiles_trace_tail
+    traceContinuationCompiles
 
 def futureMessageName : MsgName :=
   MsgName.mk "tick"

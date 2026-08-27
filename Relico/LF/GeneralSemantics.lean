@@ -16,9 +16,9 @@ and the trigger matching that decides which reaction a fired event runs. The spl
 `Relico/LF/DetailedMultiStorePayloadRuntime.lean` and its `…Semantics.lean` companion, and mirrors
 `Relico/DTR/GeneralSemantics.lean` on the source side.
 
-## Six rules where the source has four
+## Seven rules where the source has five
 
-The source's four rules are `assign`, `send`, `take` and `timeProgress`. Two of them split here.
+The source's five rules are `assign`, `trace`, `send`, `take` and `timeProgress`. Two of them split here.
 
 `SEND` splits because the target has two send mechanisms and §III-E chooses between them by what the
 statement *is*: a self-send becomes a `schedule` of a logical action, an external send becomes a `setPort`
@@ -63,7 +63,7 @@ is declared `Nat`. Every time comparison here closes with an explicit `Nat` lemm
 ## What is owed and deliberately not proved here
 
 That no pending event is ever in the past. `Relico/LF/PendingNotPast.lean` proves this for the multi-store
-family as an invariant preserved by its step relation, and the general-family analogue is a six-rule
+family as an invariant preserved by its step relation, and the general-family analogue is a seven-rule
 induction that belongs with the correctness development rather than with the rules. What *is* proved here
 is the one-rule fact underneath it — `schedules_not_past`, a direct consequence of
 `Tag.precedesOrEqual_schedule` — and the two advance rules carry the ordering they need as an explicit
@@ -1426,7 +1426,7 @@ The target step relation for the general family.
 `Relico/Common/WeakTransition.lean` is declared `State → Label → State → Prop`, and G2c instantiates
 `Common.TauSteps` and `Common.WeakStep` at both relations rather than restating either. Recorded as **F70**.
 
-**Six rules against the source's four.** `assign` matches one-for-one. `SEND` becomes `schedule` and
+**Seven rules against the source's five.** `assign` and `trace` match one-for-one. `SEND` becomes `schedule` and
 `setPort`, chosen by §III-E on what the statement is rather than on any runtime condition, and both are τ.
 `TAKE` becomes `fire`. `TIME PROGRESS` becomes `microstepAdvance`, which is **τ**, and `timeAdvance`, which
 is observable — that split is P24.
@@ -1512,6 +1512,35 @@ inductive GeneralStep
                     reactor.valuation
                     target
                     value
+                activeBody := remaining
+              }
+          pending := state.pending
+        }
+
+  /-- Internal instrumentation. Consume the trace statement without changing modeled state. -/
+  | trace
+      {state : GeneralRuntimeState}
+      {instanceName : ActorName}
+      {reactor : GeneralReactorRuntime}
+      {tag : String}
+      {remaining : LF.GeneralBody}
+      (hReactor :
+        Store.lookup state.reactors instanceName = some reactor)
+      (hBody :
+        reactor.activeBody =
+          LF.GeneralStmt.trace tag :: remaining) :
+      GeneralStep
+        program
+        state
+        LF.GeneralLabel.tau
+        {
+          currentTag := state.currentTag
+          reactors :=
+            Store.update
+              state.reactors
+              instanceName
+              {
+                valuation := reactor.valuation
                 activeBody := remaining
               }
           pending := state.pending
@@ -1815,8 +1844,8 @@ inductive GeneralStep
 
 What a step's **label** already tells you about its endpoints, stated once so that G2b's cases do not
 re-derive it. The section mirrors `Relico/DTR/GeneralSemantics.lean`'s, including its refusal to state a
-structural iff-characterization: `GeneralStep`'s six rules are not separately named relations, so a
-disjunction of six existentials would be a second spelling of the constructor list, free to drift from it.
+structural iff-characterization: `GeneralStep`'s seven rules are not separately named relations, so a
+disjunction of seven existentials would be a second spelling of the constructor list, free to drift from it.
 `cases` delivers the structure; what it does not deliver is the tag arithmetic, so that is what is proved.
 
 Two conventions are inherited from `Relico/DTR/GlobalMultiStorePayloadOneStep.lean`, where both are green.
@@ -1825,14 +1854,14 @@ data fields are auto-named and inaccessible even when the indices do not determi
 existential witness for such a field is supplied as `_`. Unconsumed hypotheses are bound to `_` rather than
 named, so `unusedVariables` has nothing to report and the warning count does not move.
 
-The explicit-field counts, which the `cases` patterns below have to match exactly, are: `assign` 3,
+The explicit-field counts, which the `cases` patterns below have to match exactly, are: `assign` 3, `trace` 2,
 `schedule` 3, `setPort` 4, `fire` 6, `microstepAdvance` 3, `timeAdvance` 2.
 -/
 
 /--
 **A τ step does not move observable logical time — and that is P24 stated as a theorem.**
 
-Four cases, and the fourth is the whole point. `assign`, `schedule` and `setPort` rebuild the state with
+Five cases, and the fifth is the whole point. `assign`, `schedule`, `setPort` and `trace` rebuild the state with
 `currentTag := state.currentTag`, so they are `rfl`. `microstepAdvance` genuinely *changes* the tag, and this
 theorem still holds of it, because `GeneralRuntimeState.now` projects the time and drops the microstep: its
 premise says the earliest event shares the current time, so the advance is invisible to `now`.
@@ -1859,6 +1888,9 @@ theorem GeneralStep.now_eq_of_tau
   | assign _ _ _ =>
       rfl
 
+  | trace _ _ =>
+      rfl
+
   | schedule _ _ _ =>
       rfl
 
@@ -1874,7 +1906,7 @@ theorem GeneralStep.now_eq_of_tau
 The one-rule fact underneath the pending-not-past invariant, and the reason
 `Relico.LF.PendingNotPast` is imported: `LF.Tag.precedesOrEqual_schedule` discharges both send cases
 outright, for zero and positive delay alike. The full invariant — that *every* queued event is at or after
-the current tag, preserved by all six rules — is a six-rule induction that belongs with the correctness
+the current tag, preserved by all seven rules — is a seven-rule induction that belongs with the correctness
 development, and the two advance rules deliberately carry their ordering as a premise rather than borrowing
 it from an invariant that does not yet exist.
 
@@ -1909,6 +1941,10 @@ theorem GeneralStep.tau_pending_not_past
   cases hStep with
 
   | assign _ _ _ =>
+      intro event hEvent
+      exact Or.inl hEvent
+
+  | trace _ _ =>
       intro event hEvent
       exact Or.inl hEvent
 
@@ -1982,12 +2018,12 @@ no freshness premise is needed — one was considered and rejected, because `eve
 awkward for exactly the same reason.
 
 **Restricted to τ deliberately, and this is not the full causality invariant.** `fire` only removes events,
-and `timeAdvance` moves `currentTag` forward, so extending the conclusion to them requires the six-rule
+and `timeAdvance` moves `currentTag` forward, so extending the conclusion to them requires the seven-rule
 pending-not-past induction that `tau_pending_not_past` also defers to the correctness development. What is
 proved here is the one-rule fact underneath it: no rule ever enqueues an event at or before the tag that
 enqueued it.
 
-Restricting to τ is also what makes the proof four cases rather than six, so the two queue-preserving rules
+Restricting to τ is also what makes the proof five cases rather than seven, so the three queue-preserving rules
 are `rfl` and carry no arithmetic at all. The `cases` patterns match the explicit-field counts the inversion
 preamble records — `assign` 3, `schedule` 3, `setPort` 4, `microstepAdvance` 3 — and each existential
 witness is supplied as `_`, per the same preamble, because the event is built from implicit fields that are
@@ -2013,6 +2049,9 @@ theorem GeneralStep.tau_enqueue_strictly_future
   cases hStep with
 
   | assign _ _ _ =>
+      exact Or.inl rfl
+
+  | trace _ _ =>
       exact Or.inl rfl
 
   | schedule _ _ _ =>
@@ -2325,10 +2364,10 @@ theorem GeneralStep.selected_of_timeAdvance
 
 `GeneralStep` takes its program as a **parameter**, and it reads that program through exactly two
 projections: `program.connections`, in `setPort`'s `hConnection`, and `LF.GeneralProgram.reactionFor?`,
-in `fire`'s `hReaction`. The remaining four rules mention the program only in their conclusion, and no
-rule has a `GeneralStep` premise — six conclusion occurrences for six constructors. So two programs
+in `fire`'s `hReaction`. The remaining five rules mention the program only in their conclusion, and no
+rule has a `GeneralStep` premise — seven conclusion occurrences for seven constructors. So two programs
 agreeing on those two projections have *the same step relation*, and the case analysis below is the whole
-proof: four alternatives re-apply their constructor unchanged, and two rewrite one premise first.
+proof: five alternatives re-apply their constructor unchanged, and two rewrite one premise first.
 
 **Why this is a congruence and not a permutation.** F80 concludes that every `GeneralStep` derivation is
 invariant under permuting a reactor's `messageReactions`. Permuting a list *inside* a program is not an
@@ -2352,7 +2391,7 @@ against a target one.
 /--
 Two programs agreeing on `connections` and on `reactionFor?` admit exactly the same steps.
 
-Four of the six alternatives are pure re-application: `assign`, `schedule`, `microstepAdvance` and
+Five of the seven alternatives are pure re-application: `assign`, `trace`, `schedule`, `microstepAdvance` and
 `timeAdvance` premise nothing about the program, only about the runtime state. `setPort` rewrites
 `hConnection`, `fire` rewrites `hReaction`.
 
@@ -2399,6 +2438,12 @@ theorem GeneralStep.congr_of_projections
           hReactor
           hBody
           hEvaluate
+
+  | trace hReactor hBody =>
+      exact
+        GeneralStep.trace
+          hReactor
+          hBody
 
   | schedule hReactor hBody hArguments =>
       exact

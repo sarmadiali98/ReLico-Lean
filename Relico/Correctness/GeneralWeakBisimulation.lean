@@ -19,8 +19,8 @@ Stage G row 8 (**G2c**). This module holds the part of Definition 1's two transf
 breaking a same-tag tie by queue append order instead. So the transfer conditions are **false as stated in
 §7 item 5** for the `.consume` label, and the guard the design names for them constrains the wrong side.
 
-What F76 does *not* touch is the decomposition by label. `DTR.GeneralStep` has four rules and
-`LF.GeneralStep` six; the observable labels are `.consume` and `.timeAdvance`, and **priority enters only at
+What F76 does *not* touch is the decomposition by label. `DTR.GeneralStep` has five rules and
+`LF.GeneralStep` seven; the observable labels are `.consume` and `.timeAdvance`, and **priority enters only at
 `.consume`**. Both time rules are selector-driven but priority-free: `DTR.GeneralStep.timeProgress` is tied
 to `nextArrival` by F74's repair, `LF.GeneralStep.timeAdvance` to `earliestPendingEvent?`, and Lemma 1
 (`generalTimeEquivalence`) already equates the two. The `.timeAdvance` case of both transfer conditions is

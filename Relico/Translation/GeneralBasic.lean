@@ -738,6 +738,17 @@ def compileGeneralStmt
               "; every external send site is resolved by outputPortEnvOf, " ++
               "so this is a defect in the translator and not in the model")
 
+/-- Trace instrumentation is compiled literally and never refused. -/
+theorem compileGeneralStmt_trace
+    (env : GeneralOutputPortEnv)
+    (context : GeneralBodyContext)
+    (index : Nat)
+    (tag : String) :
+    compileGeneralStmt env context index (.trace tag) =
+      .ok (.trace tag) := by
+
+  rfl
+
 /--
 Translate a statement sequence, in order, stopping at the first refusal.
 

@@ -259,6 +259,46 @@ theorem generalContinuationCompiles_nil :
      0⟩
 
 /--
+Consuming a trace head preserves the compilation relation for the remaining continuations.
+
+The compiler emits the trace statement literally, so inversion of a successful body compilation exposes
+the same trace head and advances the statement index by one. This is the continuation fact used by any
+future correspondence transfer case for the internal instrumentation rule.
+-/
+theorem generalContinuationCompiles_trace_tail
+    {tag : String}
+    {sourceRemaining : DTR.GeneralBody}
+    {targetRemaining : LF.GeneralBody}
+    (hCompiles :
+      GeneralContinuationCompiles
+        (.trace tag :: sourceRemaining)
+        (.trace tag :: targetRemaining)) :
+    GeneralContinuationCompiles
+      sourceRemaining
+      targetRemaining := by
+
+  rcases hCompiles with
+    ⟨env, context, index, hCompiled⟩
+
+  obtain
+    ⟨compiledStatement, compiledRemaining, hStatement, hRemaining, hEqual⟩ :=
+      Translation.compileGeneralBody_cons_ok_inversion
+        hCompiled
+
+  rw [Translation.compileGeneralStmt_trace] at hStatement
+  injection hStatement with hStatement
+  subst compiledStatement
+
+  injection hEqual with hRemainingTarget
+  subst targetRemaining
+
+  exact
+    ⟨env,
+     context,
+     index + 1,
+     hRemaining⟩
+
+/--
 One actor against one reactor: the paper's three per-actor conjuncts.
 
 `valuation` **reuses** `GeneralValuationAgrees` from `Relico/Correctness/GeneralEvaluation.lean`, whose own
@@ -292,6 +332,49 @@ structure GeneralActorCorresponds
     GeneralContinuationCompiles
       actor.activeBody
       reactor.activeBody
+
+/-- A paired trace head may be removed from an actor correspondence. -/
+theorem generalActorCorresponds_trace_tail
+    {name : ActorName}
+    {actor : DTR.GeneralActorRuntime}
+    {reactor : LF.GeneralReactorRuntime}
+    {pending : LF.GeneralEventQueue}
+    {tag : String}
+    {sourceRemaining : DTR.GeneralBody}
+    {targetRemaining : LF.GeneralBody}
+    (hCorresponds :
+      GeneralActorCorresponds
+        name
+        actor
+        reactor
+        pending)
+    (hSource :
+      actor.activeBody =
+        .trace tag :: sourceRemaining)
+    (hTarget :
+      reactor.activeBody =
+        .trace tag :: targetRemaining) :
+    GeneralActorCorresponds
+      name
+      {
+        state := actor.state
+        activeBody := sourceRemaining
+      }
+      {
+        valuation := reactor.valuation
+        activeBody := targetRemaining
+      }
+      pending := by
+
+  refine
+    {
+      valuation := hCorresponds.valuation
+      messages := hCorresponds.messages
+      continuation := ?_
+    }
+
+  apply generalContinuationCompiles_trace_tail
+  simpa [hSource, hTarget] using hCorresponds.continuation
 
 /--
 The idle case: an actor with an empty bag and no work left corresponds to a reactor with no work left.
