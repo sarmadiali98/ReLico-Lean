@@ -800,11 +800,17 @@ listed five. Two documents are owed:
    "elaborable but not theorem-eligible" boundary "has to be legible" and that §7's table graduate into
    the tracked docs. It never did — the phrase occurs once repo-wide, in the sentence promising it. Five
    tie fixtures elaborate and are excluded from every correctness theorem, and no tracked document says
-   which five. This table names them. **Still owed.**
+   which five. This table names them. **Landed 2026-08-28** as the final section of
+   `docs/supported-fragment-general.md`: the five tie fixtures by name (four actor-tie —
+   `two-instances`, `two-classes`, `constructor-arguments`, `send-sites` — and one message-server-tie,
+   `expressions`; the stage-B count of three-and-two has drifted, and `control-flow` is not one of the
+   five because it never elaborates), a theorem-family table naming which theorems carry which guard,
+   and the two rows with no theorem to name — the missing `.consume` transfer halves (**F83**, `#129`)
+   and the div/mod-by-zero transfer restriction (**F67** part 4). F63 is discharged in full.
 
 Both are written **last** (§13, commit 9), because their content depends on G5: a fragment that includes a
 `trace` statement is a different fragment. G5 has since landed in full — plumbing, τ semantics, and the
-runnable witness — and document 1 above declares the fragment with `trace` in it.
+runnable witness — and both documents declare the fragment with `trace` in it.
 
 
 ## 12. What stage G does not do

@@ -27,9 +27,9 @@ The initial fragment is intentionally small. We will complete an executable tran
 > The repair — a tracked declaration of the general family's accepted fragment, together with the
 > theorem-eligibility boundary inside it — is specified in `docs/STAGE_G_DESIGN.md`. Its first half
 > landed on 2026-08-27 as [`supported-fragment-general.md`](supported-fragment-general.md), which is
-> now the declaration the sites above resolve to; the theorem-eligibility table is G6 document 2 and
-> is still owed. Until that second half lands, the boundary between elaborable and theorem-eligible
-> inside the accepted fragment is documented only by the hypotheses of the theorems themselves.
+> now the declaration the sites above resolve to; its second half, the theorem-eligibility table
+> naming the tie fixtures and the hypotheses each theorem family carries, landed 2026-08-28 as that
+> document's final section. F63 is discharged in full.
 
 ## Vertical slice v0
 

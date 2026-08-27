@@ -7,8 +7,9 @@
 > verified-boundary and intended-claim sections — and until now the only document declaring a
 > fragment was [`supported-fragment.md`](supported-fragment.md), which declares vertical slice v0 and
 > is a historical record. That misresolution is finding **F63**; this document is its repair, first
-> half. The second half — the theorem-eligibility table naming what elaborates but is excluded from
-> every correctness theorem — is G6 document 2 and is owed separately.
+> half. The second half — the theorem-eligibility table, naming what elaborates but is excluded from
+> which theorems — landed 2026-08-28 as this document's final section, G6 document 2 (audit item
+> C10).
 
 ## How to read this document
 
@@ -86,8 +87,8 @@ concern, reported as a frontend diagnostic (`duplicateStateVariable`, `duplicate
 **Priority is absent by decision.** Distinctness of priorities is a *hypothesis* of those correctness
 theorems that need deterministic selection — `DTR.MessageServerPrioritiesDistinct` and
 `DTR.ActorPrioritiesDistinct` — not a condition on being decodable at all. A model whose priorities
-tie elaborates, translates and runs; which theorems it is eligible for is the eligibility table's
-question (G6 document 2).
+tie elaborates, translates and runs; which theorems it is eligible for is the question of the
+theorem-eligibility table below.
 
 ## The frontend gate
 
@@ -175,6 +176,100 @@ stage H's work, each with its refusal reason already in the vocabulary.
 broadcast. None is refused by name — they simply have no constructor in the AST — so they are
 excluded by unrepresentability rather than by diagnostic.
 
+## The theorem-eligibility table
+
+> **G6 document 2**, landed 2026-08-28 (audit item C10). The binding 2026-08-18 decision
+> (`docs/STAGE_B_DESIGN.md`, option **D**) put the two priority-distinctness predicates *outside*
+> `wellFormed` and *inside* the theorems that need them, and its operative sentence is the rule this
+> section operationalizes: *"A theorem that needs determinism and does not name them is a bug in that
+> theorem."* The same decision required that the boundary between elaborable and theorem-eligible
+> "has to be legible"; until now it lived only in the hypotheses of the theorems themselves. This is
+> that table. The precedence rule of this document applies to it unchanged: where a row below and a
+> theorem's actual signature disagree, the theorem wins and this table is defective.
+
+### The rule, stated once
+
+Elaboration and eligibility are **different predicates**, on purpose. A tie-carrying model is
+accepted by the translator like any other, and remains eligible for every theorem whose statement
+does not name a distinctness guard — translation preservation, the initial correspondence, Lemma 1.
+What it loses is exactly the theorems that claim a *unique* selection or a *strict* order, because
+those are false without distinctness and the paper supplies no tie rule (P4, F27). One consequence
+worth stating because the decision's own prose blurs it: not every stage-F/G theorem carries the
+guards — only the determinism-needing ones do, which is what the operative sentence says and what
+the landed corpus does.
+
+### The five tie fixtures, by name
+
+The five fixtures of the committed corpus that elaborate and fail a distinctness guard, measured
+2026-08-28 against `frontend/fixtures/general/`:
+
+| fixture | instance priorities | per-class server priorities | fails |
+|---|---|---|---|
+| `two-instances` | none, none, none | — (all single) | `ActorPrioritiesDistinct` |
+| `two-classes` | none, none | — (all single) | `ActorPrioritiesDistinct` |
+| `constructor-arguments` | none, none | — (single) | `ActorPrioritiesDistinct` |
+| `send-sites` | none, none | — (single) | `ActorPrioritiesDistinct` |
+| `expressions` | none (single actor) | none, none, none | `MessageServerPrioritiesDistinct` |
+
+Two notes the count alone cannot carry. First, **`control-flow` is not one of the five**: it carries
+a message-server tie, but it is refused for control flow before eligibility is ever reached, so it
+is not elaborable at all. Second, **the stage-B decision's count has drifted**: it named "three
+actor-tie and two message-server-tie" fixtures, which described the nine-fixture corpus of that
+date. Stage E added `send-sites` — a fourth actor tie — and `control-flow`, one of the decision's
+two message-server ties, never elaborated. The names above, not the number five, are the durable
+record.
+
+The other four elaborable fixtures — `minimal-class`, `keep-alive`, `priorities`, `fan-in` — satisfy
+both guards and are eligible for everything below.
+
+### Theorem families and their hypotheses
+
+Grouped by module; each row's "hypotheses" column lists everything beyond successful compilation
+(or, for state-level theorems, beyond the state relation the statement already names).
+
+| family | module | hypotheses | tie models |
+|---|---|---|---|
+| translation preservation (`compileGeneralModel_wellFormed`, `guardGeneralProgram_wellFormed`, the structural field lemmas) | `Relico/Translation/GeneralBasic.lean` | none | eligible |
+| unconditional initial correspondence (`generalCorrespondence_initial`) | `Relico/Correctness/GeneralCorrespondence.lean` | none — successful compilation only | eligible |
+| Lemma 1 (`generalTimeEquivalence_forward`, `_backward`, combined) | `Relico/Correctness/GeneralTimeEquivalence.lean` | run-state facts (quiescence, correspondence) — state facts, not model-class restrictions | eligible |
+| selection, non-claiming (`selectMinimum_mem`, `selectedActor_isSome_iff`, `selectedActor_mem`, `selectedActor_minimal`, `selectedActor_ne_fabricated`) | `Relico/DTR/GeneralActorSelection.lean` | none — but `selectedActor_minimal` is non-strict and cannot see ties | eligible |
+| selection uniqueness (`selectedActor_unique`) | `Relico/DTR/GeneralActorSelection.lean` | `model.actorPriorities.Nodup` (the raw spelling; the named predicate unfolds to it) | **excluded** |
+| level-1 order, non-strict (`walkedInstances_precedes_of_split`) | `Relico/Correctness/GeneralPriorityOrder.lean` | none — cannot see ties | eligible |
+| level-1 strict order (`walkedInstances_strict_of_split`, `portReactions_realizeActorPriority`) | `Relico/Correctness/GeneralPriorityOrder.lean` | `ActorPrioritiesDistinct` | **excluded** |
+| level-2 order, non-strict (`walkedMessageServers_precedes_of_split`) | `Relico/Correctness/GeneralPriorityOrder.lean` | none | eligible |
+| level-2 strict order (`walkedMessageServers_strict_of_split`, `messageServerReactions_realizeMessageServerPriority`) | `Relico/Correctness/GeneralPriorityOrder.lean` | `MessageServerPrioritiesDistinct` | **excluded** |
+| τ-advance correspondence (`generalCorrespondence_retag`, `generalCorrespondence_microstepAdvance`, the trace-tail lemmas) | `Relico/Correctness/GeneralCorrespondence.lean` | the state relation | eligible |
+| single-step advance (`generalCorrespondence_advance`) and quiescence (`generalQuiescent_of_earliestPendingEventFuture`) | `Relico/Correctness/GeneralWeakBisimulation.lean` | the state relation | eligible |
+| weak transfer, `.timeAdvance` halves (`generalTimeAdvance_forward_weak`, `_backward_weak`) | `Relico/Correctness/GeneralWeakBisimulation.lean` | the state relation | eligible |
+
+Two further rows belong to the table but have no theorem to name, and they are the table's most
+important content:
+
+* **The `.consume` transfer halves do not exist.** `generalTimeAdvance_forward_weak` and
+  `_backward_weak` cover one label constructor of two; the `.consume` case is task `#129`, blocked on
+  the F76 repair decision (a user decision; audit item C6). The consequence, per **F83**: the
+  generic finite-trace agreement of row 9 (`weakBisimulation_traceAgreement_forward`/`_backward`)
+  quantifies over *both* transfer conditions, so the general family cannot instantiate it — aims 8
+  and 9 of `docs/trusted-boundary.md` are proved over an abstract LTS and **not yet for the general
+  family**. No model, tie-carrying or not, is eligible for a theorem that does not exist.
+* **Division and modulo by zero carry a transfer restriction.** The model-side correspondence holds
+  unconditionally — `compileGeneralExpr_preserves_evaluation` and
+  `compileGeneralExpr_evaluation_none_iff` make both sides stuck together — but generated C++ has
+  undefined behaviour there, so the result transfers to real target behaviour only on executions in
+  which no division or modulo by zero occurs (**F67** part 4). The decidable half — refusing a
+  literal zero divisor — is still owed (audit item C11); the undecidable residue is a permanent
+  restriction on transfer, not a pending task.
+
+### `trace` eligibility, in one paragraph
+
+The `trace` statement is theorem-eligible inside the formal semantics — it has a τ-classified step
+on both sides (Option A), and `generalContinuationCompiles_trace_tail` /
+`generalActorCorresponds_trace_tail` prove its correspondence — but the bytes a generated program
+prints are **not** an observable of the theorem boundary: `GeneralLabel` does not contain them, no
+theorem quantifies over stdout, and the G5 witness's observed output order is target-runtime
+evidence owned by the gate, not by the semantics. A model is no more or less eligible for carrying a
+`trace` than for carrying an `assign`.
+
 ## Relation to the earlier families
 
 The singleton (v0), finite-store, multi-store, multi-store-payload and global-multi-store-payload
@@ -189,5 +284,9 @@ fragment", this document is the one the current toolchain answers to.
 This declaration moves with the predicates. A commit that adds, removes or changes the meaning of a
 clause of `DTR.GeneralModel.wellFormed` or `LF.GeneralProgram.wellFormed`, a constructor of the
 syntax types, or a reason in `GeneralDiagnosticReason`, changes this document in the same commit —
-including the counts, which are the parts most likely to go stale silently. G6 document 2, the
-theorem-eligibility table, carries the same obligation for its exclusions.
+including the counts, which are the parts most likely to go stale silently. The theorem-eligibility
+table carries the same obligation for its rows: a commit that adds a guard hypothesis to a theorem,
+lands a previously missing transfer half, or changes the fixture corpus's tie census moves the table
+in the same commit. The tie census in particular is coupled to the fixture directory, not to this
+file — `send-sites` added a tie row that no edit here caused, and the next fixture addition can do
+the same again.
