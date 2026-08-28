@@ -246,13 +246,24 @@ Two further rows belong to the table but have no theorem to name, and they are t
 important content:
 
 * **The `.consume` transfer halves do not exist yet.** `generalTimeAdvance_forward_weak` and
-  `_backward_weak` cover one label constructor of two; the `.consume` case is task `#129`. The repair
-  direction was decided 2026-08-28 — the partial within-tag quotient,
-  `docs/decisions/0042-within-tag-partial-quotient.md` (free permutation among distinct reactors at one
-  tag, order-preserving within one) — so the case is **commissioned rather than blocked**, but the
-  commission's proof obligations (the commutation argument, and relating queue insertion order to the
-  declaration order the target enforces) are unsettled questions, not routine work. The consequence,
-  per **F83**: the generic finite-trace agreement of row 9
+  `_backward_weak` cover one label constructor of two; the `.consume` case is task `#129`,
+  commissioned by the partial within-tag quotient
+  (`docs/decisions/0042-within-tag-partial-quotient.md`: free permutation among distinct reactors at
+  one tag, order-preserving within one). `#129`'s first half is implemented in the working tree
+  (uncommitted): `Store.lookup_update_commute` settles the commutation question F76 left open
+  (disjoint updates commute observationally),
+  `LF.GeneralStep.fire_execution_commute_of_adjacent_queue_swap` is an execution commutation
+  across the adjacent same-tag distinct-target queue swap — both executions' steps constructed
+  from the two queue-swap-related starting states (a common-start diamond is impossible under the
+  head-seeded scheduler), the finals observationally equal — and
+  `Correctness.GeneralConsumeMatch` fixes the label correspondence F78 measured as absent (target,
+  logical time and compiled payload; the event kind deliberately left to the compiled program's
+  answer). The two transfer conditions themselves remain
+  unwritten, and **F86** records why: the proof attempt surfaced a relation-granularity question —
+  `GeneralPendingAgrees` is deliberately non-multiplicity-aware, and consuming one message and one
+  event preserves it only when the pair is matched — whose answer (strengthen the relation, or carry
+  multiplicity as a premise) changes what `generalCorrespondence_initial` means and is therefore a
+  user decision. The consequence, per **F83**: the generic finite-trace agreement of row 9
   (`weakBisimulation_traceAgreement_forward`/`_backward`) quantifies over *both* transfer conditions, so
   the general family cannot instantiate it until `#129` lands — aims 8 and 9 of
   `docs/trusted-boundary.md` are proved over an abstract LTS and **not yet for the general family**. No

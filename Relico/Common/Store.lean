@@ -259,6 +259,135 @@ theorem contains_update_eq
   rfl
 
 /--
+Two nested updates at distinct keys, read back through `lookup`.
+
+The lemma the general family's `.consume` commutation runs on (decision 0042, the partial
+within-tag quotient): two adjacent same-tag events targeting distinct reactors each update
+one store key, and the honest statement of "the updates commute" is observational, because
+`update` preserves insertion position — the store `update (update s x vx) y vy` lists `x`
+before `y` while `update (update s y vy) x vx` lists them the other way round, so an
+equation between the stores is false and an equation between their lookups is the theorem.
+F74's shadowed-binding caveat is the same phenomenon read from the other side: `lookup`
+observes one binding per key, and that is exactly the observation under which the two
+orders agree.
+
+Stated as a `lookup` characterization (a nested `if` in three branches) rather than as the
+commutation directly, because the characterization is independently useful — it is how a
+caller reads *any* doubly-updated store — and the commutation below is then a two-line
+corollary rather than a second induction.
+-/
+theorem lookup_update_two_eq
+    {Key : Type u}
+    {Value : Type v}
+    [DecidableEq Key]
+    (store : Store Key Value)
+    (x y : Key)
+    (vx vy : Value)
+    (hDistinct : x ≠ y)
+    (key : Key) :
+    lookup
+        (update
+            (update store x vx)
+            y
+            vy)
+        key =
+      if key = x then some vx
+      else if key = y then some vy
+      else lookup store key := by
+
+  by_cases hKey : key = x
+
+  · subst key
+
+    rw [
+      if_pos rfl,
+      lookup_update_ne
+        (update store x vx)
+        vy
+        (Ne.symm hDistinct),
+      lookup_update_eq
+    ]
+
+  · by_cases hKeyY : key = y
+
+    · subst key
+
+      rw [
+        if_neg hKey,
+        if_pos rfl,
+        lookup_update_eq
+      ]
+
+    · rw [
+        if_neg hKey,
+        if_neg hKeyY,
+        lookup_update_ne
+          (update store x vx)
+          vy
+          (Ne.symm hKeyY),
+        lookup_update_ne
+          store
+          vx
+          (Ne.symm hKey)
+      ]
+
+/--
+Nested updates at distinct keys commute observationally: every key reads the same under
+either order.
+
+The two-line corollary of `lookup_update_two_eq`, and the precise form of the "disjoint
+updates commute" fact F76 measured and decision 0042 adopts as the generating case of the
+within-tag quotient. The `hDistinct` premise is load-bearing in both directions of the
+characterization: with a shared key the two orders would write the same key twice and
+`update_same` would make them agree at that key for the *second* value, so the lemma is
+false rather than merely unprovable without it.
+-/
+theorem lookup_update_commute
+    {Key : Type u}
+    {Value : Type v}
+    [DecidableEq Key]
+    (store : Store Key Value)
+    (x y : Key)
+    (vx vy : Value)
+    (hDistinct : x ≠ y)
+    (key : Key) :
+    lookup
+        (update
+            (update store x vx)
+            y
+            vy)
+        key =
+      lookup
+        (update
+            (update store y vy)
+            x
+            vx)
+        key := by
+
+  rw [
+    lookup_update_two_eq
+      store
+      x
+      y
+      vx
+      vy
+      hDistinct
+      key,
+    lookup_update_two_eq
+      store
+      y
+      x
+      vy
+      vx
+      (Ne.symm hDistinct)
+      key
+  ]
+
+  by_cases hKey : key = x <;>
+    by_cases hKeyY : key = y <;>
+    simp [hKey, hKeyY, hDistinct, Ne.symm hDistinct]
+
+/--
 A looked-up binding really is a binding.
 
 Only this direction holds, and the asymmetry is the point. The store `[(key, first), (key, second)]`

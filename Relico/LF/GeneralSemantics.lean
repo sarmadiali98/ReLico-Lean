@@ -2547,5 +2547,1134 @@ theorem GeneralStep.congr_iff_of_projections
         hStep
 
 
+/-!
+## Adjacent same-tag distinct-target queue swaps: execution commutes
+
+Decision `docs/decisions/0042-within-tag-partial-quotient.md` (2026-08-28) commissions the partial
+within-tag quotient for the `.consume` correspondence: free permutation among events targeting
+**distinct** reactors at one tag, order-preserving within one reactor. F76 recorded as *unsettled*
+whether the disjointness of the state updates yields a genuine commutation; this section settles it
+for the generating case — the adjacent swap — as an **execution commutation across
+adjacent-permutation-related initial states**, with all four steps of both executions constructed
+rather than hypothesised.
+
+**What that classification means, stated once and precisely.** This is **not** a classical local
+diamond: a diamond would run both orders from one common state, and the audit of the first draft
+(shows below) established why that is impossible here — from `earlier ++ first :: second :: rest`
+only `first` can fire. What the theorem proves is: take a state whose queue is
+`earlier ++ first :: second :: rest`, and its **queue-swap partner** — same tag, same reactors,
+pending `earlier ++ second :: first :: rest`. Execute `first` then `second` from the first state;
+execute `second` then `first` from the second. The two end states agree in current tag, in pending
+queue, and under every reactor lookup.
+
+**For a future quotient construction, this is a candidate generating lemma — not a proved
+diamond.** The two starting states differ by one admissible adjacent queue permutation, so a
+quotient whose equivalence includes admissible pending-queue permutation would identify them. But
+the two **final** states are not identified by queue permutation alone: their reactor stores are
+observationally equal (every lookup agrees) yet deliberately not literally equal, because
+`Store.update` preserves insertion position — the store that fired `first` first lists `first`'s
+binding ahead of `second`'s and the other order lists them reversed. So a quotient on which the
+two executions *would* form a diamond needs strictly more than queue-permutation equivalence: it
+must, at minimum, (1) include admissible pending-queue permutation equivalence; (2) also identify
+extensionally equal reactor-store representations — `Store.lookup` agreement at every key, which
+no existing relation in this repository states as a state-level equivalence; (3) prove the
+combined relation is an equivalence at all; and (4) prove it is compatible with the transition
+semantics — that steps lift from representatives to classes. None of that exists today, and none
+of it is claimed here: this theorem supplies the *generating step* such a construction would
+consume — both executions constructed, the finals agreeing observationally — and its fitness for
+that role is exactly what the four requirements above would establish. No quotient is defined in
+this section.
+
+**An audit corrected an earlier draft of this section, and the correction is recorded here because
+the draft's defect is instructive.** The first draft stated the commutation as a per-key
+`Store.lookup` equality behind two `fire` hypotheses. That theorem was true and green, and it proved
+almost nothing: the two hypotheses stepped from two *different* states, neither conclusion state
+matched the queue a fire of the adjacent pair would produce (`first` was still in the queue after
+being "fired"), the equal-tag premise the docstring named was not in the statement, and the proof
+never consulted either step. A theorem whose hypotheses do not describe the configuration its name
+claims, and whose proof does not use them, is a store lemma wearing a commutation theorem's name.
+A second correction, same day, is terminological: the repaired draft called itself a "two-fire
+diamond", which a diamond is not — the two executions start from two states — and the name and
+docstrings now say *execution commutation across the adjacent queue swap*, which is what is proved.
+
+**Why the two executions start from two states.** The scheduler is deterministic:
+`earliestPendingEvent?` seeds from the queue head and `selectEarliestEvent` keeps the incumbent on
+equal tags, so from `earlier ++ first :: second :: rest` only `first` can fire, and the swapped
+execution must start from the queue-swapped state. Decision 0042's "permutation may be ignored" is
+exactly this: the quotient relates executions whose queues differ by the admissible swap, and the
+theorem's second execution starts from that swapped queue — same tag, same reactors, permuted
+pending.
+
+**Why `first ∉ earlier` is a premise.** Without it the execution commutation is false. If `earlier`
+holds a duplicate of `first` — say the queue is `e :: e :: eB` with `first := e` — the original
+selection is `e` and firing it leaves `[e, eB]`, which selects `e` *again*, so the first execution
+ends with pending `[eB]`; the swapped queue `e :: eB :: e` selects the seed `e` too, and its
+execution ends with pending `[e]`. A duplicate of `first` ahead of the pair is the one queue shape
+where the swap changes which event the scheduler prefers on the second fire; excluding it is what
+makes the pair genuinely adjacent *for the scheduler*. The premise also bounds the theorem's reach
+as a quotient generator — see the limitation paragraph at the end of this section.
+
+**The final relation is observational, and literal equality is false.** `Store.update` preserves
+insertion position, so the reactors store that fired `first` first lists `first`'s binding ahead of
+`second`'s while the other order lists them reversed; `Store.lookup_update_commute`
+(`Relico/Common/Store.lean`) is the theorem that every key reads the same either way. The two finals
+therefore agree on the tag (both fires preserve it), on the remaining queue (both orders remove
+exactly the pair), and under every reactor lookup — three conjuncts, stated rather than packaged
+into a relation no other consumer shares.
+
+**What this section deliberately does not state.** Two boundaries, both recorded so that no later
+consumer mistakes reach for width that is not here. First, a permutation closure over arbitrary
+queues (`List.Permutation` in the Lean sense) would need the adjacent-swap lemma lifted through
+every interleaving position, and no consumer yet asks for that: the `.consume` transfer conditions
+F86 leaves open need the generating shape, not its closure. Second, the `first ∉ earlier` premise
+means the theorem does not generate swaps for queues holding a duplicate of `first` ahead of the
+pair at all — and duplicates are exactly the configurations a multiplicity-aware treatment (the β
+decision F86 leaves open) must confront. Whether the multiplicity repair makes those queues
+reachable-and-pairable by other means, or whether a duplicate-tolerant swap lemma is owed, is part
+of that open decision, not of this section.
+-/
+
+/--
+The fold never returns a queue element the seed does not strictly precede in tag order.
+
+The precise form the swap derivation below consumes: if `selectEarliestEvent seed queue = event`
+and `event` is not the seed, then the seed's tag does not precede `event`'s. Otherwise the seed —
+or some incumbent at most as late as it — would have been kept when the walk reached `event`, and
+`event` could never have become the result.
+
+Stated with a negation rather than through `StrictlyPrecedes` because the negation is exactly
+what the vacuous case consumes, and converting it through `precedesOrEqual_total` would buy
+nothing. The induction is over the queue with the seed and the result generalised, because the
+fold that took a candidate continues from it — the negative branch needs the hypothesis at the
+*new* seed.
+-/
+theorem selectEarliestEvent_not_precedesOrEqual_of_ne :
+    ∀ (seed event : LF.GeneralPendingEvent)
+      (queue : LF.GeneralEventQueue),
+      LF.selectEarliestEvent
+          seed
+          queue =
+        event →
+        event ≠ seed →
+          ¬ LF.Tag.PrecedesOrEqual
+              seed.tag
+              event.tag := by
+
+  intro seed event queue
+
+  induction queue generalizing seed event with
+
+  | nil =>
+      intro hEqual hNe
+
+      rw [
+        LF.selectEarliestEvent_nil
+      ] at hEqual
+
+      exact
+        absurd
+          hEqual.symm
+          hNe
+
+  | cons candidate remaining inductionHypothesis =>
+      intro hEqual hNe
+
+      by_cases hKeep :
+          LF.Tag.PrecedesOrEqual
+              seed.tag
+              candidate.tag
+
+      · rw [
+          LF.selectEarliestEvent_cons_of_precedesOrEqual
+            remaining
+            hKeep
+        ] at hEqual
+
+        exact
+          inductionHypothesis
+            seed
+            event
+            hEqual
+            hNe
+
+      · rw [
+          LF.selectEarliestEvent_cons_of_not_precedesOrEqual
+            remaining
+            hKeep
+        ] at hEqual
+
+        by_cases hEventCandidate :
+            event = candidate
+
+        · rw [hEventCandidate]
+
+          exact hKeep
+
+        · have hMin :=
+              LF.selectEarliestEvent_precedesOrEqual_of_mem
+                remaining
+                candidate
+                candidate
+                (List.mem_cons.mpr (Or.inl rfl))
+
+          rw [hEqual] at hMin
+
+          intro hSeedPrecedes
+
+          exact
+            hKeep
+              (LF.Tag.precedesOrEqual_trans
+                hSeedPrecedes
+                hMin)
+
+/--
+A seed that precedes every candidate is never replaced.
+
+The survival half of the swap derivation: it is how the *remaining* event of an equal-tag pair is
+shown to be selected once its partner has fired — the partner's minimality over the tail transfers
+to it through the shared tag.
+-/
+theorem selectEarliestEvent_of_all_precedesOrEqual
+    (seed : LF.GeneralPendingEvent) :
+    ∀ (queue : LF.GeneralEventQueue),
+      (∀ event ∈ queue,
+        LF.Tag.PrecedesOrEqual
+            seed.tag
+            event.tag) →
+      LF.selectEarliestEvent
+          seed
+          queue =
+        seed := by
+
+  intro queue
+  induction queue with
+
+  | nil =>
+      intro _
+
+      rfl
+
+  | cons candidate remaining inductionHypothesis =>
+      intro hAll
+
+      rw [
+        LF.selectEarliestEvent_cons_of_precedesOrEqual
+          remaining
+          (hAll candidate
+            (List.mem_cons.mpr (Or.inl rfl)))
+      ]
+
+      exact
+        inductionHypothesis
+          (fun event hMember =>
+            hAll event
+              (List.mem_cons.mpr
+                (Or.inr hMember)))
+
+/--
+The fold composes over list concatenation: walking a prefix and then the rest is the same fold as
+walking the whole queue from the prefix's result.
+
+This is what lets the swap derivation talk about the incumbent *after* the queue's earlier
+segment — the prefix fold's result is the incumbent the two swapped orders share, and everything
+that matters about the swap happens after it.
+-/
+theorem selectEarliestEvent_comp :
+    ∀ (best : LF.GeneralPendingEvent)
+      (front queue : LF.GeneralEventQueue),
+      LF.selectEarliestEvent
+          best
+          (front ++ queue) =
+        LF.selectEarliestEvent
+          (LF.selectEarliestEvent
+              best
+              front)
+          queue := by
+
+  intro best front queue
+
+  induction front generalizing best with
+
+  | nil =>
+      rfl
+
+  | cons candidate remaining inductionHypothesis =>
+      by_cases hKeep :
+          LF.Tag.PrecedesOrEqual
+              best.tag
+              candidate.tag
+
+      · rw [
+          List.cons_append,
+          LF.selectEarliestEvent_cons_of_precedesOrEqual
+            (remaining ++ queue)
+            hKeep,
+          LF.selectEarliestEvent_cons_of_precedesOrEqual
+            remaining
+            hKeep,
+          inductionHypothesis best
+        ]
+
+      · rw [
+          List.cons_append,
+          LF.selectEarliestEvent_cons_of_not_precedesOrEqual
+            (remaining ++ queue)
+            hKeep,
+          LF.selectEarliestEvent_cons_of_not_precedesOrEqual
+            remaining
+            hKeep,
+          inductionHypothesis candidate
+        ]
+
+namespace GeneralRuntimeState
+
+/--
+Selection depends only on the pending queue.
+
+The `fire` rule's first premise speaks about whole states, while the swap machinery below speaks
+about queues; this is the bridge. Proved by destructuring both states and case-splitting the
+queue, so the two matches reduce together — no equational reasoning about the ignored fields.
+-/
+theorem earliestPendingEvent?_congr_pending
+    {state state' : GeneralRuntimeState}
+    (hPending :
+      state.pending = state'.pending) :
+    earliestPendingEvent? state =
+      earliestPendingEvent? state' := by
+
+  rcases state with ⟨_, _, pending⟩
+  rcases state' with ⟨_, _, pending'⟩
+
+  cases hPending
+
+  cases pending with
+  | nil => rfl
+  | cons head tail => rfl
+
+/--
+Swapping two adjacent equal-tag events swaps the scheduler's selection — and firing the first of
+the pair leaves the second selected. Three facts, one derivation.
+
+The execution-commutation theorem below consumes all three: the first says the queue-swapped state selects
+`second` (path two's first fire), the second says the state after firing `first` selects `second`
+(path one's second fire), the third says the state after firing `second` selects `first` (path
+two's second fire).
+
+Each conclusion is stated for **any** state with the relevant pending queue, because the states
+the diamond builds differ from `state` in their reactor stores (the first fire's update) while
+selection reads the queue alone; `earliestPendingEvent?_congr_pending` transfers the fact, and
+stating it this way saves every consumer the transfer.
+
+The derivation is where `hNotInEarlier` is spent. With `earlier = head :: tail`, the incumbent
+after the earlier segment is `selectEarliestEvent head tail` — a member of `earlier`, so not
+`first`. If that incumbent preceded `first`, the fold would have kept it and the selection could
+not be `first` (the vacuous case, discharged by
+`selectEarliestEvent_not_precedesOrEqual_of_ne`); so it does not, the fold takes `first`, and the
+swapped orders take `second` symmetrically. `first.tag ≼ rest` — the minimality the selection
+premise pins — is what lets `second` survive the tail through the shared tag.
+-/
+theorem earliestPendingEvent?_adjacent_selections
+    (state : GeneralRuntimeState)
+    (first second : LF.GeneralPendingEvent)
+    (earlier rest : LF.GeneralEventQueue)
+    (hTag :
+      first.tag = second.tag)
+    (hNotInEarlier :
+      first ∉ earlier)
+    (hQueue :
+      state.pending =
+        earlier ++ first :: second :: rest)
+    (hSelected :
+      earliestPendingEvent? state =
+        some first) :
+    (∀ stateSwapped : GeneralRuntimeState,
+      stateSwapped.pending =
+        earlier ++ second :: first :: rest →
+      earliestPendingEvent? stateSwapped =
+        some second) ∧
+    (∀ stateAfterFirst : GeneralRuntimeState,
+      stateAfterFirst.pending =
+        earlier ++ second :: rest →
+      earliestPendingEvent? stateAfterFirst =
+        some second) ∧
+    ∀ stateAfterSecond : GeneralRuntimeState,
+      stateAfterSecond.pending =
+        earlier ++ first :: rest →
+      earliestPendingEvent? stateAfterSecond =
+        some first := by
+
+  have hFirstSecond :
+      LF.Tag.PrecedesOrEqual
+          first.tag
+          second.tag := by
+    rw [hTag]
+
+    exact
+      LF.Tag.precedesOrEqual_refl
+        second.tag
+
+  have hSecondFirst :
+      LF.Tag.PrecedesOrEqual
+          second.tag
+          first.tag := by
+    rw [← hTag]
+
+    exact
+      LF.Tag.precedesOrEqual_refl
+        first.tag
+
+  rcases state with ⟨currentTag, reactors, pending⟩
+
+  have hQueuePending :
+      pending =
+        earlier ++ first :: second :: rest := hQueue
+
+  rw [hQueuePending] at hSelected
+
+  cases earlier with
+
+  | nil =>
+      rw [
+        List.nil_append,
+        GeneralRuntimeState.earliestPendingEvent?_eq_of_cons
+      ] at hSelected
+
+      simp only [
+        Option.some.injEq
+      ] at hSelected
+
+      rw [
+        LF.selectEarliestEvent_cons_of_precedesOrEqual
+          rest
+          hFirstSecond
+      ] at hSelected
+
+      have hMinRest :
+          ∀ event ∈ rest,
+            LF.Tag.PrecedesOrEqual
+                first.tag
+                event.tag := by
+        intro event hMember
+
+        have hMin :=
+          LF.selectEarliestEvent_precedesOrEqual_of_mem
+            rest
+            first
+            event
+            (List.mem_cons.mpr (Or.inr hMember))
+
+        rw [hSelected] at hMin
+
+        exact hMin
+
+      have hMinRestSecond :
+          ∀ event ∈ rest,
+            LF.Tag.PrecedesOrEqual
+                second.tag
+                event.tag := by
+        intro event hMember
+
+        rw [← hTag]
+
+        exact
+          hMinRest event hMember
+
+      have hFactSwapped :
+          earliestPendingEvent?
+              {
+                currentTag := currentTag
+                reactors := reactors
+                pending := second :: first :: rest
+              } =
+            some second := by
+        rw [
+          GeneralRuntimeState.earliestPendingEvent?_eq_of_cons,
+          LF.selectEarliestEvent_cons_of_precedesOrEqual
+            rest
+            hSecondFirst,
+          LF.selectEarliestEvent_of_all_precedesOrEqual
+            second
+            rest
+            hMinRestSecond
+        ]
+
+      have hFactAfterFirst :
+          earliestPendingEvent?
+              {
+                currentTag := currentTag
+                reactors := reactors
+                pending := second :: rest
+              } =
+            some second := by
+        rw [
+          GeneralRuntimeState.earliestPendingEvent?_eq_of_cons,
+          LF.selectEarliestEvent_of_all_precedesOrEqual
+            second
+            rest
+            hMinRestSecond
+        ]
+
+      have hFactAfterSecond :
+          earliestPendingEvent?
+              {
+                currentTag := currentTag
+                reactors := reactors
+                pending := first :: rest
+              } =
+            some first := by
+        rw [
+          GeneralRuntimeState.earliestPendingEvent?_eq_of_cons,
+          hSelected
+        ]
+
+      exact
+        ⟨
+          fun stateSwapped hPending =>
+            (earliestPendingEvent?_congr_pending
+              hPending).trans
+              hFactSwapped,
+          fun stateAfterFirst hPending =>
+            (earliestPendingEvent?_congr_pending
+              hPending).trans
+              hFactAfterFirst,
+          fun stateAfterSecond hPending =>
+            (earliestPendingEvent?_congr_pending
+              hPending).trans
+              hFactAfterSecond
+        ⟩
+
+  | cons head tail =>
+      rw [
+        List.cons_append,
+        GeneralRuntimeState.earliestPendingEvent?_eq_of_cons
+      ] at hSelected
+
+      simp only [
+        Option.some.injEq
+      ] at hSelected
+
+      rw [
+        LF.selectEarliestEvent_comp
+      ] at hSelected
+
+      have hIncMember :
+          LF.selectEarliestEvent head tail ∈
+            head :: tail :=
+        LF.selectEarliestEvent_mem tail head
+
+      have hFirstNeInc :
+          first ≠
+            LF.selectEarliestEvent head tail := by
+        intro hEqual
+
+        apply hNotInEarlier
+
+        rw [hEqual]
+
+        exact hIncMember
+
+      by_cases hIncPrecedes :
+          LF.Tag.PrecedesOrEqual
+              (LF.selectEarliestEvent head tail).tag
+              first.tag
+
+      · rw [
+          LF.selectEarliestEvent_cons_of_precedesOrEqual
+            (second :: rest)
+            hIncPrecedes,
+          LF.selectEarliestEvent_cons_of_precedesOrEqual
+            rest
+            (by
+              rw [← hTag]
+
+              exact hIncPrecedes)
+        ] at hSelected
+
+        exact
+          absurd
+            hIncPrecedes
+            (LF.selectEarliestEvent_not_precedesOrEqual_of_ne
+              (LF.selectEarliestEvent head tail)
+              first
+              rest
+              hSelected
+              hFirstNeInc)
+
+      · rw [
+          LF.selectEarliestEvent_cons_of_not_precedesOrEqual
+            (second :: rest)
+            hIncPrecedes,
+          LF.selectEarliestEvent_cons_of_precedesOrEqual
+            rest
+            hFirstSecond
+        ] at hSelected
+
+        have hMinRest :
+            ∀ event ∈ rest,
+              LF.Tag.PrecedesOrEqual
+                  first.tag
+                  event.tag := by
+          intro event hMember
+
+          have hMin :=
+            LF.selectEarliestEvent_precedesOrEqual_of_mem
+              rest
+              first
+              event
+              (List.mem_cons.mpr (Or.inr hMember))
+
+          rw [hSelected] at hMin
+
+          exact hMin
+
+        have hMinRestSecond :
+            ∀ event ∈ rest,
+              LF.Tag.PrecedesOrEqual
+                  second.tag
+                  event.tag := by
+          intro event hMember
+
+          rw [← hTag]
+
+          exact
+            hMinRest event hMember
+
+        have hIncNotSecond :
+            ¬ LF.Tag.PrecedesOrEqual
+                (LF.selectEarliestEvent head tail).tag
+                second.tag := by
+          intro hIncSecond
+
+          apply hIncPrecedes
+
+          rw [hTag]
+
+          exact hIncSecond
+
+        have hFactSwapped :
+            earliestPendingEvent?
+                {
+                  currentTag := currentTag
+                  reactors := reactors
+                  pending :=
+                    head ::
+                      (tail ++
+                        second :: first :: rest)
+                } =
+              some second := by
+          rw [
+            GeneralRuntimeState.earliestPendingEvent?_eq_of_cons,
+            LF.selectEarliestEvent_comp,
+            LF.selectEarliestEvent_cons_of_not_precedesOrEqual
+              (first :: rest)
+              hIncNotSecond,
+            LF.selectEarliestEvent_cons_of_precedesOrEqual
+              rest
+              hSecondFirst,
+            LF.selectEarliestEvent_of_all_precedesOrEqual
+              second
+              rest
+              hMinRestSecond
+          ]
+
+        have hFactAfterFirst :
+            earliestPendingEvent?
+                {
+                  currentTag := currentTag
+                  reactors := reactors
+                  pending :=
+                    head :: (tail ++ second :: rest)
+                } =
+              some second := by
+          rw [
+            GeneralRuntimeState.earliestPendingEvent?_eq_of_cons,
+            LF.selectEarliestEvent_comp,
+            LF.selectEarliestEvent_cons_of_not_precedesOrEqual
+              rest
+              hIncNotSecond,
+            LF.selectEarliestEvent_of_all_precedesOrEqual
+              second
+              rest
+              hMinRestSecond
+          ]
+
+        have hFactAfterSecond :
+            earliestPendingEvent?
+                {
+                  currentTag := currentTag
+                  reactors := reactors
+                  pending :=
+                    head :: (tail ++ first :: rest)
+                } =
+              some first := by
+          rw [
+            GeneralRuntimeState.earliestPendingEvent?_eq_of_cons,
+            LF.selectEarliestEvent_comp,
+            LF.selectEarliestEvent_cons_of_not_precedesOrEqual
+              rest
+              hIncPrecedes,
+            hSelected
+          ]
+
+        exact
+          ⟨
+            fun stateSwapped hPending =>
+              (earliestPendingEvent?_congr_pending
+                hPending).trans
+                hFactSwapped,
+            fun stateAfterFirst hPending =>
+              (earliestPendingEvent?_congr_pending
+                hPending).trans
+                hFactAfterFirst,
+            fun stateAfterSecond hPending =>
+              (earliestPendingEvent?_congr_pending
+                hPending).trans
+                hFactAfterSecond
+          ⟩
+
+end GeneralRuntimeState
+
+/--
+**Execution commutation across an adjacent same-tag distinct-target queue swap** — the
+generating case of decision 0042's partial within-tag quotient, and the constructive answer to
+the question F76 left unsettled.
+
+Take a state whose pending queue is `earlier ++ first :: second :: rest`, and its queue-swap
+partner — the same current tag, the same reactor store, pending `earlier ++ second :: first ::
+rest`. The theorem **constructs** four steps: `first` then `second` from the first state, and
+`second` then `first` from the partner, and concludes that the two end states agree in current
+tag, in pending queue, and under every reactor lookup.
+
+This is deliberately **not** a common-start diamond, and cannot be one: the scheduler seeds from
+the queue head and keeps the incumbent on equal tags, so from the original queue only `first`
+can fire — the alternative execution exists only from the swapped queue. For a future quotient
+construction the theorem is a **candidate generating lemma**: the two starting states differ by
+one admissible adjacent permutation (equal tags, distinct targets — decision 0042's clause), so
+queue-permutation equivalence would identify them — but the two finals are *not* identified by
+queue permutation alone, because their reactor stores are observationally equal yet not
+literally equal (`Store.update` preserves insertion position). A quotient on which these two
+executions form a diamond would need, at minimum, admissible pending-queue permutation
+equivalence **and** extensional reactor-store equivalence, proved an equivalence and proved
+compatible with the transition semantics; none of that exists here, and the section header above
+records the four requirements in full. No quotient is defined.
+
+Every premise is used, and each earns its place. `hTag` with `hCurrentTag` makes both events
+fireable at the current tag (the second fire of each execution inherits the tag, since `fire`
+preserves it). `hDistinct` is spent twice: `Store.lookup_update_ne` keeps the unfired target's
+reactor untouched for each execution's second fire, and `Store.lookup_update_commute` makes the
+two doubly-updated reactor stores agree under every lookup. `hFirstNotInEarlier` excludes the
+one queue shape where the swap breaks the agreement — a duplicate of `first` ahead of the pair;
+the section header has the counterexample, and records the consequence: the theorem does not
+generate swaps for duplicate-bearing queues, which is part of the multiplicity decision F86
+leaves open. The selection premise pins `first` as the original queue's choice, from which
+`earliestPendingEvent?_adjacent_selections` derives all three remaining selections.
+
+The second fires are constructed, not assumed enabled: each execution's second `fire` is a
+conclusion, so its idle and reaction premises are discharged *by the theorem* — the first fire's
+update demonstrably does not touch the other target, because distinct targets are distinct store
+keys.
+
+The final relation is the three-conjunct observational agreement, not literal state equality:
+`Store.update` preserves insertion position, so the two reactor stores differ as lists while
+agreeing under every lookup. `Store.lookup_update_commute` is that third conjunct, consumed
+verbatim.
+-/
+theorem GeneralStep.fire_execution_commute_of_adjacent_queue_swap
+    (program : LF.GeneralProgram)
+    (state : GeneralRuntimeState)
+    (first second : LF.GeneralPendingEvent)
+    (earlier rest : LF.GeneralEventQueue)
+    (reactorFirst reactorSecond : GeneralReactorRuntime)
+    (reactionFirst reactionSecond : LF.GeneralReaction)
+    (hQueue :
+      state.pending =
+        earlier ++ first :: second :: rest)
+    (hTag :
+      first.tag = second.tag)
+    (hCurrentTag :
+      first.tag = state.currentTag)
+    (hDistinct :
+      first.target ≠ second.target)
+    (hFirstNotInEarlier :
+      first ∉ earlier)
+    (hReactorFirst :
+      Store.lookup
+          state.reactors
+          first.target =
+        some reactorFirst)
+    (hIdleFirst :
+      reactorFirst.idle = true)
+    (hReactionFirst :
+      LF.GeneralProgram.reactionFor?
+          program
+          first.target
+          first.kind =
+        some reactionFirst)
+    (hReactorSecond :
+      Store.lookup
+          state.reactors
+          second.target =
+        some reactorSecond)
+    (hIdleSecond :
+      reactorSecond.idle = true)
+    (hReactionSecond :
+      LF.GeneralProgram.reactionFor?
+          program
+          second.target
+          second.kind =
+        some reactionSecond)
+    (hSelectedFirst :
+      GeneralRuntimeState.earliestPendingEvent? state =
+        some first) :
+    ∃ intermediateOne finalOne intermediateTwo finalTwo :
+        GeneralRuntimeState,
+      GeneralStep
+          program
+          state
+          (LF.GeneralLabel.consume first.target first.kind)
+          intermediateOne ∧
+        GeneralStep
+          program
+          intermediateOne
+          (LF.GeneralLabel.consume second.target second.kind)
+          finalOne ∧
+      GeneralStep
+          program
+          {
+            currentTag := state.currentTag
+            reactors := state.reactors
+            pending := earlier ++ second :: first :: rest
+          }
+          (LF.GeneralLabel.consume second.target second.kind)
+          intermediateTwo ∧
+        GeneralStep
+          program
+          intermediateTwo
+          (LF.GeneralLabel.consume first.target first.kind)
+          finalTwo ∧
+        finalOne.currentTag = finalTwo.currentTag ∧
+          finalOne.pending = finalTwo.pending ∧
+        ∀ key : ActorName,
+          Store.lookup
+              finalOne.reactors
+              key =
+            Store.lookup
+                finalTwo.reactors
+                key := by
+
+  obtain ⟨hSelectedSwapped, hSelectedAfterFirst, hSelectedAfterSecond⟩ :=
+    GeneralRuntimeState.earliestPendingEvent?_adjacent_selections
+      state
+      first
+      second
+      earlier
+      rest
+      hTag
+      hFirstNotInEarlier
+      hQueue
+      hSelectedFirst
+
+  have hSecondCurrentTag :
+      second.tag = state.currentTag :=
+    hTag.symm.trans hCurrentTag
+
+  have hReactorSecondAfterFirst :
+      Store.lookup
+          (Store.update
+              state.reactors
+              first.target
+              {
+                valuation :=
+                  LF.bindReactionParameters
+                    reactionFirst.parameters
+                    first.payload
+                    reactorFirst.valuation
+                activeBody := reactionFirst.body
+              })
+          second.target =
+        some reactorSecond := by
+    rw [
+      Store.lookup_update_ne
+        state.reactors
+        _
+        hDistinct
+    ]
+
+    exact hReactorSecond
+
+  have hReactorFirstAfterSecond :
+      Store.lookup
+          (Store.update
+              state.reactors
+              second.target
+              {
+                valuation :=
+                  LF.bindReactionParameters
+                    reactionSecond.parameters
+                    second.payload
+                    reactorSecond.valuation
+                activeBody := reactionSecond.body
+              })
+          first.target =
+        some reactorFirst := by
+    rw [
+      Store.lookup_update_ne
+        state.reactors
+        _
+        (Ne.symm hDistinct)
+    ]
+
+    exact hReactorFirst
+
+  have stepOne :
+      GeneralStep
+          program
+          state
+          (LF.GeneralLabel.consume first.target first.kind)
+          {
+            currentTag := state.currentTag
+            reactors :=
+              Store.update
+                state.reactors
+                first.target
+                {
+                  valuation :=
+                    LF.bindReactionParameters
+                      reactionFirst.parameters
+                      first.payload
+                      reactorFirst.valuation
+                  activeBody := reactionFirst.body
+                }
+            pending := earlier ++ second :: rest
+          } :=
+    GeneralStep.fire
+      hSelectedFirst
+      hCurrentTag
+      hQueue
+      hReactorFirst
+      hIdleFirst
+      hReactionFirst
+
+  have stepTwo :
+      GeneralStep
+          program
+          {
+            currentTag := state.currentTag
+            reactors :=
+              Store.update
+                state.reactors
+                first.target
+                {
+                  valuation :=
+                    LF.bindReactionParameters
+                      reactionFirst.parameters
+                      first.payload
+                      reactorFirst.valuation
+                  activeBody := reactionFirst.body
+                }
+            pending := earlier ++ second :: rest
+          }
+          (LF.GeneralLabel.consume second.target second.kind)
+          {
+            currentTag := state.currentTag
+            reactors :=
+              Store.update
+                (Store.update
+                    state.reactors
+                    first.target
+                    {
+                      valuation :=
+                        LF.bindReactionParameters
+                          reactionFirst.parameters
+                          first.payload
+                          reactorFirst.valuation
+                      activeBody := reactionFirst.body
+                    })
+                second.target
+                {
+                  valuation :=
+                    LF.bindReactionParameters
+                      reactionSecond.parameters
+                      second.payload
+                      reactorSecond.valuation
+                  activeBody := reactionSecond.body
+                }
+            pending := earlier ++ rest
+          } := by
+    refine
+      GeneralStep.fire
+        ?_
+        hSecondCurrentTag
+        rfl
+        hReactorSecondAfterFirst
+        hIdleSecond
+        hReactionSecond
+
+    exact
+      hSelectedAfterFirst
+        {
+          currentTag := state.currentTag
+          reactors :=
+            Store.update
+              state.reactors
+              first.target
+              {
+                valuation :=
+                  LF.bindReactionParameters
+                    reactionFirst.parameters
+                    first.payload
+                    reactorFirst.valuation
+                activeBody := reactionFirst.body
+              }
+          pending := earlier ++ second :: rest
+        }
+        rfl
+
+  have stepThree :
+      GeneralStep
+          program
+          {
+            currentTag := state.currentTag
+            reactors := state.reactors
+            pending := earlier ++ second :: first :: rest
+          }
+          (LF.GeneralLabel.consume second.target second.kind)
+          {
+            currentTag := state.currentTag
+            reactors :=
+              Store.update
+                state.reactors
+                second.target
+                {
+                  valuation :=
+                    LF.bindReactionParameters
+                      reactionSecond.parameters
+                      second.payload
+                      reactorSecond.valuation
+                  activeBody := reactionSecond.body
+                }
+            pending := earlier ++ first :: rest
+          } := by
+    refine
+      GeneralStep.fire
+        ?_
+        hSecondCurrentTag
+        rfl
+        hReactorSecond
+        hIdleSecond
+        hReactionSecond
+
+    exact
+      hSelectedSwapped
+        {
+          currentTag := state.currentTag
+          reactors := state.reactors
+          pending := earlier ++ second :: first :: rest
+        }
+        rfl
+
+  have stepFour :
+      GeneralStep
+          program
+          {
+            currentTag := state.currentTag
+            reactors :=
+              Store.update
+                state.reactors
+                second.target
+                {
+                  valuation :=
+                    LF.bindReactionParameters
+                      reactionSecond.parameters
+                      second.payload
+                      reactorSecond.valuation
+                  activeBody := reactionSecond.body
+                }
+            pending := earlier ++ first :: rest
+          }
+          (LF.GeneralLabel.consume first.target first.kind)
+          {
+            currentTag := state.currentTag
+            reactors :=
+              Store.update
+                (Store.update
+                    state.reactors
+                    second.target
+                    {
+                      valuation :=
+                        LF.bindReactionParameters
+                          reactionSecond.parameters
+                          second.payload
+                          reactorSecond.valuation
+                      activeBody := reactionSecond.body
+                    })
+                first.target
+                {
+                  valuation :=
+                    LF.bindReactionParameters
+                      reactionFirst.parameters
+                      first.payload
+                      reactorFirst.valuation
+                  activeBody := reactionFirst.body
+                }
+            pending := earlier ++ rest
+          } := by
+    refine
+      GeneralStep.fire
+        ?_
+        hCurrentTag
+        rfl
+        hReactorFirstAfterSecond
+        hIdleFirst
+        hReactionFirst
+
+    exact
+      hSelectedAfterSecond
+        {
+          currentTag := state.currentTag
+          reactors :=
+            Store.update
+              state.reactors
+              second.target
+              {
+                valuation :=
+                  LF.bindReactionParameters
+                    reactionSecond.parameters
+                    second.payload
+                    reactorSecond.valuation
+                activeBody := reactionSecond.body
+              }
+          pending := earlier ++ first :: rest
+        }
+        rfl
+
+  refine
+    ⟨
+      _,
+      _,
+      _,
+      _,
+      stepOne,
+      stepTwo,
+      stepThree,
+      stepFour,
+      rfl,
+      rfl,
+      ?_
+    ⟩
+
+  intro key
+
+  exact
+    Store.lookup_update_commute
+      state.reactors
+      first.target
+      second.target
+      _
+      _
+      hDistinct
+      key
+
+
 end LF
 end Relico

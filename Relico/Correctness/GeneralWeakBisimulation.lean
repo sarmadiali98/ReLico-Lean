@@ -894,5 +894,79 @@ theorem generalWeakStep_perm_of_compiled
       hElsewhere)
     hWeakStep
 
+/-!
+## The `.consume` transfer conditions under the partial within-tag quotient
+
+Decision `docs/decisions/0042-within-tag-partial-quotient.md` (2026-08-28) commissions these
+statements — audit item C7, task `#129`. F76 measured the two selectors disagree at one tag; the
+decision's repair is to state the correspondence up to within-tag permutation, free among events
+targeting **distinct** reactors, order-preserving within one. Three things this section builds on,
+each implemented in the working tree (uncommitted):
+
+* `Store.lookup_update_commute` (`Relico/Common/Store.lean`) — disjoint updates commute
+  observationally, the generating case of the quotient, and the constructive answer to F76's
+  "not settled here" question;
+* `LF.GeneralStep.fire_execution_commute_of_adjacent_queue_swap`
+  (`Relico/LF/GeneralSemantics.lean`) — an execution commutation across an adjacent same-tag
+  distinct-target queue swap: both executions' steps constructed (the first from the original
+  queue, the second from the queue-swapped partner state — a common-start diamond is impossible,
+  since the scheduler selects only the head-most of an equal-tag pair), the finals equal in tag,
+  queue and every reactor lookup. An audit on 2026-08-28 replaced an earlier draft of that
+  theorem that proved only the store-lookup equality behind premises which did not describe the
+  adjacent-pair configuration; the audit, and the correction of the draft's "two-fire diamond"
+  terminology to the accurate execution-commutation classification, are recorded in the theorem's
+  section header;
+* P24's τ classification — a zero-delay send costs the target a microstep the source does not
+  take, so the forward condition's match may need one `microstepAdvance` before the fire. That is
+  the τ padding of the eventual conditions, and it is *genuine* padding, unlike the
+  `.timeAdvance` pair's empty padding.
+
+**The label correspondence is a hypothesis, not a definition** — F78's measurement, honoured here.
+`GeneralPendingAgrees` agrees messages and events on time and target only; it cannot see payloads
+(`DTR.GeneralPayload` vs `List LF.GeneralValue`) or message names vs event kinds. So each direction
+of the eventual conditions takes a *match* premise naming which target event answers which source
+message, with the payload bridge made explicit: the event's payload is the pointwise compilation
+of the message's. The `.timeAdvance` pair evaded this only because both labels carry
+`(LogicalTime, LogicalTime)`.
+
+**The transfer conditions themselves are not stated here.** The proof attempt recorded as **F86**
+surfaced a relation-granularity blocker — `GeneralPendingAgrees` is deliberately
+non-multiplicity-aware, and consuming one message and one event preserves it only for a matched
+pair — so the two conditions wait on that decision and on the quotient-placement question, and
+nothing below states them in a weakened form. `GeneralConsumeMatch` is the one ingredient of the
+eventual statements that exists today; the rest of this section's prose describes the shape they
+will take.
+-/
+
+/--
+A source message and a target event match, for the purposes of a `.consume` transfer.
+
+The label correspondence `#129` needs, stated as data rather than as a function because no total
+one exists (F78: `consume` carries different payload types on the two sides). A match fixes the
+event's target to the receiving actor's name, its logical time to the message's arrival, and its
+payload to the pointwise compilation of the message's payload.
+
+`name` is a parameter rather than read off the message for the same reason
+`GeneralPendingAgrees` takes it as a parameter: a message records its sender and its message name,
+never its receiver, so the receiver is the store position the correspondence already tracks.
+
+The event **kind** is deliberately not constrained here. Constraining it would mean relating a
+`DTR.MsgName` to an `LF.GeneralEventKind`, which is a property of the *compiled program* (which
+reaction of which reactor the translation emitted for this message server), not of the runtime
+states; the transfer conditions below take the resolved reaction as a premise instead, which is
+strictly more honest — it lets the caller hold the compiled program's answer rather than
+re-deriving a naming convention the runtime never consults.
+-/
+def GeneralConsumeMatch
+    (name : ActorName)
+    (message : DTR.GeneralMessage)
+    (event : LF.GeneralPendingEvent) :
+    Prop :=
+  event.target = name ∧
+    event.tag.time = message.arrival ∧
+      event.payload =
+        message.payload.map
+          Translation.compileGeneralValue
+
 end Correctness
 end Relico

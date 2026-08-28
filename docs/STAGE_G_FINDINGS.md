@@ -2752,3 +2752,81 @@ the shape of the missing definition, and the definition, when it arrives, has it
 two step relations that cannot start a constructor) that the prediction could not see. A one-hour
 derivation of "what can the initial state even be, given the step rules" would have replaced both halves
 of the prediction with the actual proof obligations.
+
+## F86 — the `.consume` transfer conditions need three ingredients decision 0042 did not name, and one of them, the queue agreement's multiplicity slack, is the same trap F66 part 5 recorded for the paper's own initial case
+
+*Measured, by attempting the proof.* Task `#129` (audit C7), commissioned 2026-08-28 by decision 0042.
+The decision named the commutation question and the within-one-reactor order question; the proof
+attempt surfaced three further obligations, two mechanical and one structural. This finding records
+all three, because the third is a class of trap this repository has already been caught by once.
+
+**What the working tree holds, and is real — after one correction.** The commutation F76 left
+unsettled is settled, constructively, for the generating case: `Store.lookup_update_commute`
+(`Relico/Common/Store.lean`) proves that two nested updates at distinct keys agree under every lookup —
+the honest form, because `Store.update` preserves insertion position and a literal store equality is
+*false*: the store `update (update s x vx) y vy` lists `x` before `y` and the other order lists them
+reversed. `Correctness.GeneralConsumeMatch` (`Relico/Correctness/GeneralWeakBisimulation.lean`) fixes
+the label correspondence F78 measured as absent: an event matches a message when target, logical time
+and compiled payload agree, with the event *kind* deliberately unconstrained because relating a
+`DTR.MsgName` to an `LF.GeneralEventKind` is a property of the compiled program, not of the runtime
+states. All of this is uncommitted working-tree state, and one piece of it needed an audit: the first
+draft of the adjacent-swap fire theorem
+(`Relico/LF/GeneralSemantics.lean`, now
+`LF.GeneralStep.fire_execution_commute_of_adjacent_queue_swap`) stated the commutation as a per-key
+`Store.lookup` equality behind
+two fire hypotheses the proof never used, stepping from two different states and leaving `first` in
+the queue its own conclusion claimed to have fired it from — a store lemma wearing a commutation
+theorem's name. A 2026-08-28 audit replaced it with an **execution commutation across the adjacent
+queue swap**: a state whose queue is `earlier ++ first :: second :: rest` and its queue-swap partner
+(same tag, same reactors, `second` ahead of `first`); all four steps of both executions constructed
+— the first order from the original state, the swapped order from the partner, since a common-start
+diamond is impossible under the head-seeded scheduler — and the finals equal in tag, queue and every
+reactor lookup, with a `first ∉ earlier` premise forced by the duplicate-queue counterexample
+recorded in its section header. The corrected module compiles with no
+`sorry`; nothing here is landed until committed and pushed.
+
+**The first two obligations are mechanical and were simply not named by the decision.** (1) The source
+`take` rule carries seven premises and the target `fire` six, and their *correspondence-relevant*
+halves must be transferred pairwise: the bag-split against the queue-split (both remove one element),
+`bindParameters` against `bindReactionParameters` (the payload bridge `GeneralConsumeMatch` supplies),
+and the server body against the reaction body (a `GeneralContinuationCompiles` obligation, the same
+existential shape the trace-tail lemmas discharge). (2) The forward condition's τ prefix is genuinely
+non-empty exactly when the matched event is not yet the earliest pending — P24's microstep — so the
+premise must be a `TauSteps` into a correspondence-preserving state where the event *is* earliest,
+which is one existential rather than zero work.
+
+**The third obligation is structural, and it is F66 part 5 again.** `GeneralPendingAgrees` is, by
+design, a weak two-directional agreement — every message has an event at the same time aimed at this
+actor, and conversely — with `docs/STAGE_G_DESIGN.md`'s own module note recording that multiplicity
+("a bag holding two identical messages meets a queue holding two matching events") is *the transfer
+conditions'* business, because they are the consumer, "and stating it here would mean proving it here
+with no consumer." The consumer has now arrived, and the prediction was correct in both directions:
+the transfer conditions **do** need multiplicity, and **cannot** have it without changing the relation.
+Removing one message from a bag and one matching event from a queue preserves the weak agreement only
+when the removed pair is a *matched* pair — with a bag of two identical messages and a queue of one
+matching event, both removals are possible and the weak agreement is destroyed. F66 part 5 caught the
+paper's own relation carrying a conjunct that was trivially true at the initial state and load-bearing
+after a step; this is that trap's mirror image, arrived at from the other side: a conjunct deliberately
+left weak, at a granularity its own note promised a future consumer would repair, and the repair turns
+out to be a relation change, not a lemma. The options — strengthening `GeneralPendingAgrees` to a
+multiset quotient, or carrying multiplicity as a transfer-condition premise in the
+`GeneralConsumeMatch` style — change what `generalCorrespondence_initial` and the τ lemmas mean, and
+are therefore a user decision in the F76 sense, not an implementation detail.
+
+**Consequence.** C7's ledger status is honest as PARTIAL: the commutation core and the label
+correspondence are implemented and green in the (uncommitted) working tree; the two transfer
+conditions wait on a relation-granularity
+decision that decision 0042 did not and could not anticipate, because the decision was written before
+anyone attempted the proof. `#129` remains open with a narrowed, named remainder.
+
+### The transferable check
+
+A decision record that commissions a theorem should be read as commissioning its *statement*, and the
+statement is not known until the proof is attempted. The cheap check is to write the statement first
+and try one case before treating the decision as complete: here, one hour of stating
+`generalConsume_forward_weak` exposed two unnamed mechanical obligations and one relation-granularity
+question, any of which could have been named in the decision record had the statement been drafted
+before the decision was ratified. The deeper check is F66's, restated: every "deliberately weak, the
+consumer will repair it" note in a relation definition is a promissory note, and the audit that
+matters is the one taken when the consumer finally arrives — because the repair may cost more than a
+lemma.
