@@ -3567,6 +3567,606 @@ theorem compileGeneralMessageServerReactions_append
     compiledEarlier
     hEarlier
 
+/-!
+### Route membership — the message-name ↔ event-kind bridge's translation half
+
+Task `#129`'s bridge has two halves. The target half lives in `Relico/LF/GeneralSemantics.lean`:
+`LF.findReactionForKind?_ne_none_of_mem` turns *membership plus a match* into *being found*, and
+`LF.GeneralProgram.reactionFor?_eq_findReactionForKind?_of_reactorOfInstance?` composes that with
+instance resolution. This block is the translation half, and it answers the question the C7 audit
+found no existing theorem answering: **is the reaction a source message's send compiled to
+actually present in the compiled reactor's reaction list?** For both routes the answer is a
+construction theorem — not a naming-convention argument — because both routes build the reaction
+and the list from one traversal, and these lemmas invert that traversal.
+
+The route shapes, once each:
+
+* **Action route** (a self-send): `send .selfTarget m …` compiles to `.schedule (generalActionNameAtSite selfSends site m) …` (`compileGeneralStmt_send_selfTarget`), and the receiving server's group emits one `.logicalAction` reaction per self-send site (`assembleGeneralMessageReactionAtSite`, trigger pinned by `assembleGeneralMessageReactionAtSite_trigger`).
+* **Port route** (an external send): `send (.knownRebec r) m …` compiles to `.setPort entry.outputPort …` (`compileGeneralStmt_send_knownRebec_ok`), and every route into the server emits one `.inputPort` reaction whose port is `generalInputPortOfRoute route` (`assembleGeneralPortReaction`, trigger pinned by `assembleGeneralPortReaction_trigger`).
+-/
+
+/--
+One server's compiled group is present, as a block, in any compiled list over a server list
+containing that server.
+
+The membership engine both route theorems run on. Two obligations in one induction: the server's
+group really did compile (the error case is impossible, because a list whose walk returned `.ok`
+cannot contain a server whose group errored — each cons step of the walk propagates the error),
+and every reaction of that group is a member of the compiled list, by `List.mem_append` at each
+cons step.
+
+Kept `private` because no consumer needs the block shape — both public theorems below project a
+single reaction out of the block — and public surface should be the two routes, not the walker.
+-/
+private theorem mem_of_compileGeneralMessageServerReactions
+    {env : GeneralOutputPortEnv}
+    {selfSends : List GeneralSelfSend}
+    {routes : List GeneralRoute}
+    {className : ClassName}
+    {server : DTR.GeneralMessageServer} :
+    ∀ (servers : List DTR.GeneralMessageServer)
+      (compiled : List LF.GeneralReaction),
+      server ∈ servers →
+        compileGeneralMessageServerReactions
+            env
+            selfSends
+            routes
+            className
+            servers =
+          .ok compiled →
+        ∃ group : List LF.GeneralReaction,
+          compileGeneralMessageServerReactionGroup
+              env
+              selfSends
+              routes
+              className
+              server =
+            .ok group ∧
+          group ⊆ compiled := by
+
+  intro servers
+  induction servers with
+
+  | nil =>
+      intro compiled hMember
+
+      cases hMember
+
+  | cons head remaining inductionHypothesis =>
+      intro compiled hMember hCompiled
+
+      rcases
+          exists_of_compileGeneralMessageServerReactions_cons_ok
+            hCompiled with
+        ⟨
+          headGroup,
+          compiledRemaining,
+          hHeadGroup,
+          hRemaining,
+          hCompiledEq
+        ⟩
+
+      subst hCompiledEq
+
+      cases hMemberSplit : List.mem_cons.mp hMember with
+
+      | inl hHead =>
+          subst hHead
+
+          exact
+            ⟨
+              headGroup,
+              hHeadGroup,
+              fun reaction hReaction =>
+                List.mem_append.mpr
+                  (Or.inl hReaction)
+            ⟩
+
+      | inr hTail =>
+          rcases
+              inductionHypothesis
+                compiledRemaining
+                hTail
+                hRemaining with
+            ⟨
+              tailGroup,
+              hTailGroup,
+              hTailSubset
+            ⟩
+
+          exact
+            ⟨
+              tailGroup,
+              hTailGroup,
+              fun reaction hReaction =>
+                List.mem_append.mpr
+                  (Or.inr
+                    (hTailSubset
+                      hReaction))
+            ⟩
+
+/--
+The reaction a self-send site compiles to is present in the compiled reactor's reaction list —
+the **action route** of the message-name ↔ event-kind bridge.
+
+Given a class that compiled to a reactor, a message server of that class (in declaration order —
+`generalPriorityOrderedMessageServers_mem_iff` transfers from the sorted list the compilation
+actually walked), and a self-send site of that class targeting the server's message, the theorem
+produces the **compiled body** of the server and pins the member reaction completely: it triggers
+on exactly that site's logical action, runs that compiled body, and has the server's parameter
+names. Every conjunct is the corresponding `rfl`-equation or inversion already in this file; the
+theorem's contribution is putting them behind one membership fact a consumer can rewrite with.
+
+The trigger conjunct is the load-bearing one for `#129`: with it,
+`LF.GeneralTrigger.matchesKind` decides the match on `.logicalAction`, and
+`LF.findReactionForKind?_ne_none_of_mem` (plus instance resolution) turns membership-plus-match
+into `reactionFor? = some …` — which is exactly the missing event-kind half of
+`Correctness.GeneralConsumeMatch`'s deliberate omission.
+
+The body is bound existentially rather than fixed by a premise, because a consumer holding only
+the class and the site has no way to name the body, and requiring it to would push a
+`compileGeneralBody` inversion into every caller. The theorem owns that inversion here, once.
+-/
+theorem compileGeneralReactiveClass_actionRoute_mem
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {reactor : LF.GeneralReactor}
+    (hCompiled :
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok reactor)
+    (server : DTR.GeneralMessageServer)
+    (hServer :
+      server ∈ reactiveClass.messageServers)
+    (selfSend : GeneralSelfSend)
+    (hSelfSend :
+      selfSend ∈
+        generalSelfSendSitesOf
+          server.name
+          (selfSendsOfClass reactiveClass)) :
+    ∃ compiledBody : LF.GeneralBody,
+      (
+        {
+          name :=
+            messageReactionNameFor
+              server.name
+
+          trigger :=
+            .logicalAction
+              (generalActionNameAtSite
+                (selfSendsOfClass reactiveClass)
+                selfSend.site
+                server.name)
+
+          parameters :=
+            server.parameters.map
+              (fun parameter =>
+                parameter.name)
+
+          body :=
+            compiledBody
+
+          priority :=
+            none
+        } :
+          LF.GeneralReaction
+      ) ∈
+        reactor.messageReactions ∧
+      ∃ env : GeneralOutputPortEnv,
+        outputPortEnvOf
+            classes
+            reactiveClass =
+          .ok env ∧
+        compileGeneralBody
+            env
+            { bodyKey := .messageServer server.name,
+              selfSends :=
+                selfSendsOfClass reactiveClass }
+            0
+            server.body =
+          .ok compiledBody := by
+  cases hEnv :
+      outputPortEnvOf
+        classes
+        reactiveClass with
+
+  | error message =>
+      rw [
+        compileGeneralReactiveClass_error_env
+          hEnv
+      ] at hCompiled
+
+      simp at hCompiled
+
+  | ok env =>
+      cases hConstructor :
+          compileGeneralConstructor
+            env
+            (selfSendsOfClass reactiveClass)
+            reactiveClass.constructor with
+
+      | error message =>
+          rw [
+            compileGeneralReactiveClass_error_constructor
+              hEnv
+              hConstructor
+          ] at hCompiled
+
+          simp at hCompiled
+
+      | ok compiledStartupReaction =>
+          cases hMessageServers :
+              compileGeneralMessageServerReactions
+                env
+                (selfSendsOfClass reactiveClass)
+                routes
+                reactiveClass.name
+                (generalPriorityOrderedMessageServers
+                  reactiveClass) with
+
+          | error message =>
+              rw [
+                compileGeneralReactiveClass_error_messageServers
+                  hEnv
+                  hConstructor
+                  hMessageServers
+              ] at hCompiled
+
+              simp at hCompiled
+
+          | ok compiledMessageReactions =>
+              rw [
+                compileGeneralReactiveClass_ok
+                  hEnv
+                  hConstructor
+                  hMessageServers
+              ] at hCompiled
+
+              injection hCompiled with hReactorEq
+
+              subst hReactorEq
+
+              have hSortedServer :
+                  server ∈
+                    generalPriorityOrderedMessageServers
+                      reactiveClass :=
+                (generalPriorityOrderedMessageServers_mem_iff
+                  server
+                  reactiveClass).mpr
+                  hServer
+
+              rcases
+                  mem_of_compileGeneralMessageServerReactions
+                    (generalPriorityOrderedMessageServers
+                      reactiveClass)
+                    compiledMessageReactions
+                    hSortedServer
+                    hMessageServers with
+                ⟨
+                  group,
+                  hGroup,
+                  hGroupSubset
+                ⟩
+
+              rcases
+                  exists_of_compileGeneralMessageServerReactionGroup_ok
+                    hGroup with
+                  ⟨
+                    compiledBody,
+                    hBody,
+                    hGroupEq
+                  ⟩
+
+              subst hGroupEq
+
+              refine
+                ⟨
+                  compiledBody,
+                  ?_,
+                  env,
+                  rfl,
+                  hBody
+                ⟩
+
+              refine
+                hGroupSubset
+                  (show
+                      ({
+                        name :=
+                          messageReactionNameFor
+                            server.name
+
+                        trigger :=
+                          .logicalAction
+                            (generalActionNameAtSite
+                              (selfSendsOfClass reactiveClass)
+                              selfSend.site
+                              server.name)
+
+                        parameters :=
+                          server.parameters.map
+                            (fun parameter =>
+                              parameter.name)
+
+                        body :=
+                          compiledBody
+
+                        priority :=
+                          none
+                      } :
+                          LF.GeneralReaction
+                      ) ∈
+                        (assembleGeneralMessageReactions
+                            (selfSendsOfClass reactiveClass)
+                            server
+                            compiledBody ++
+                          assembleGeneralPortReactions
+                            reactiveClass.name
+                            server
+                            compiledBody
+                            routes)
+                    from
+                      ?_)
+
+              cases hSites :
+                  generalSelfSendSitesOf
+                    server.name
+                    (selfSendsOfClass reactiveClass) with
+
+              | nil =>
+                  exact absurd
+                    hSelfSend
+                    (by
+                      rw [hSites]
+
+                      simp)
+
+              | cons siteHead siteTail =>
+                  refine
+                    List.mem_append.mpr
+                      (Or.inl ?_)
+
+                  rw [hSites] at hSelfSend
+
+                  simp only [
+                    assembleGeneralMessageReactions,
+                    hSites
+                  ]
+
+                  exact
+                    List.mem_map_of_mem
+                      hSelfSend
+
+/--
+The reaction an external route compiles to is present in the compiled reactor's reaction list —
+the **port route** of the message-name ↔ event-kind bridge.
+
+Given a class that compiled to a reactor, a message server of that class, and a route into that
+server, the theorem produces the server's compiled body and pins the member reaction completely:
+it triggers on exactly `generalInputPortOfRoute route` — the input port the connection emitted,
+the same name `compileGeneralStmt_send_knownRebec_ok`'s output-port entry feeds — runs that
+compiled body, and has the server's parameter names.
+
+The route hypothesis is membership in the **whole model's** route list, filtered to routes into
+this server of this class — the shape `assembleGeneralPortReactions` consumes — so a consumer
+holding a route need not prove it survives any per-class projection first. Which routes are in
+the list is decided by `generalRoutesIntoMessageServer`'s filter on `(receiverClass, message)`,
+unchanged here.
+-/
+theorem compileGeneralReactiveClass_portRoute_mem
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {reactor : LF.GeneralReactor}
+    (hCompiled :
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok reactor)
+    (server : DTR.GeneralMessageServer)
+    (hServer :
+      server ∈ reactiveClass.messageServers)
+    (route : GeneralRoute)
+    (hRoute :
+      route ∈
+        generalRoutesIntoMessageServer
+          reactiveClass.name
+          server.name
+          routes) :
+    ∃ compiledBody : LF.GeneralBody,
+      (
+        {
+          name :=
+            portReactionNameFor
+              (generalInputPortOfRoute route)
+
+          trigger :=
+            .inputPort
+              (generalInputPortOfRoute route)
+
+          parameters :=
+            server.parameters.map
+              (fun parameter =>
+                parameter.name)
+
+          body :=
+            compiledBody
+
+          priority :=
+            none
+        } :
+          LF.GeneralReaction
+      ) ∈
+        reactor.messageReactions ∧
+      ∃ env : GeneralOutputPortEnv,
+        outputPortEnvOf
+            classes
+            reactiveClass =
+          .ok env ∧
+        compileGeneralBody
+            env
+            { bodyKey := .messageServer server.name,
+              selfSends :=
+                selfSendsOfClass reactiveClass }
+            0
+            server.body =
+          .ok compiledBody := by
+  cases hEnv :
+      outputPortEnvOf
+        classes
+        reactiveClass with
+
+  | error message =>
+      rw [
+        compileGeneralReactiveClass_error_env
+          hEnv
+      ] at hCompiled
+
+      simp at hCompiled
+
+  | ok env =>
+      cases hConstructor :
+          compileGeneralConstructor
+            env
+            (selfSendsOfClass reactiveClass)
+            reactiveClass.constructor with
+
+      | error message =>
+          rw [
+            compileGeneralReactiveClass_error_constructor
+              hEnv
+              hConstructor
+          ] at hCompiled
+
+          simp at hCompiled
+
+      | ok compiledStartupReaction =>
+          cases hMessageServers :
+              compileGeneralMessageServerReactions
+                env
+                (selfSendsOfClass reactiveClass)
+                routes
+                reactiveClass.name
+                (generalPriorityOrderedMessageServers
+                  reactiveClass) with
+
+          | error message =>
+              rw [
+                compileGeneralReactiveClass_error_messageServers
+                  hEnv
+                  hConstructor
+                  hMessageServers
+              ] at hCompiled
+
+              simp at hCompiled
+
+          | ok compiledMessageReactions =>
+              rw [
+                compileGeneralReactiveClass_ok
+                  hEnv
+                  hConstructor
+                  hMessageServers
+              ] at hCompiled
+
+              injection hCompiled with hReactorEq
+
+              subst hReactorEq
+
+              have hSortedServer :
+                  server ∈
+                    generalPriorityOrderedMessageServers
+                      reactiveClass :=
+                (generalPriorityOrderedMessageServers_mem_iff
+                  server
+                  reactiveClass).mpr
+                  hServer
+
+              rcases
+                  mem_of_compileGeneralMessageServerReactions
+                    (generalPriorityOrderedMessageServers
+                      reactiveClass)
+                    compiledMessageReactions
+                    hSortedServer
+                    hMessageServers with
+                ⟨
+                  group,
+                  hGroup,
+                  hGroupSubset
+                ⟩
+
+              rcases
+                  exists_of_compileGeneralMessageServerReactionGroup_ok
+                    hGroup with
+                  ⟨
+                    compiledBody,
+                    hBody,
+                    hGroupEq
+                  ⟩
+
+              subst hGroupEq
+
+              refine
+                ⟨
+                  compiledBody,
+                  ?_,
+                  env,
+                  rfl,
+                  hBody
+                ⟩
+
+              refine
+                hGroupSubset
+                  (show
+                      ({
+                        name :=
+                          portReactionNameFor
+                            (generalInputPortOfRoute route)
+
+                        trigger :=
+                          .inputPort
+                            (generalInputPortOfRoute route)
+
+                        parameters :=
+                          server.parameters.map
+                            (fun parameter =>
+                              parameter.name)
+
+                        body :=
+                          compiledBody
+
+                        priority :=
+                          none
+                      } :
+                          LF.GeneralReaction
+                      ) ∈
+                        (assembleGeneralMessageReactions
+                            (selfSendsOfClass reactiveClass)
+                            server
+                            compiledBody ++
+                          assembleGeneralPortReactions
+                            reactiveClass.name
+                            server
+                            compiledBody
+                            routes)
+                    from
+                      ?_)
+
+              refine
+                List.mem_append.mpr
+                  (Or.inr ?_)
+
+              rw [
+                assembleGeneralPortReactions
+              ]
+
+              exact
+                List.mem_map_of_mem
+                  hRoute
+
 /--
 Inverting one class, which now has three sub-computations rather than two.
 

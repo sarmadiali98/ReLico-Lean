@@ -455,6 +455,64 @@ theorem findReactionForKind?_eq_some_of_mem
           hReactionMatch
 
 /--
+A reaction that matches the kind is found — the lookup never misses a member that matches.
+
+The unconditional half of the lookup's soundness that `findReactionForKind?_mem` does not give:
+that lemma reads a *found* reaction back into membership, while this one turns membership into
+being found. It needs `UniquelyTriggered` for the same reason its converse-with-content does —
+on a list where two reactions match one kind, the first one wins and a later matching member is
+silently passed over, so "a matching member is found" is false there and true here exactly
+because the hypothesis rules the shape out.
+
+The bridge the `.consume` transfer conditions' message-name ↔ event-kind work consumes (task
+`#129`, decision 0042): that work proves the compiled reaction *is* a member of the reactor's
+reaction list and matches the event's kind, and needs a lemma that turns those two facts into
+`reactionFor? = some …`. Stated for `findReactionForKind?` rather than `reactionFor?` because
+membership is a property of the reaction list alone; the composition to whole-program lookup is
+the next lemma's single job.
+-/
+theorem findReactionForKind?_ne_none_of_mem
+    {kind : LF.GeneralEventKind}
+    {reactions : List LF.GeneralReaction}
+    {reaction : LF.GeneralReaction}
+    (hUnique :
+      UniquelyTriggered
+        reactions
+        kind)
+    (hMember :
+      reaction ∈ reactions)
+    (hMatch :
+      LF.GeneralTrigger.matchesKind
+          reaction.trigger
+          kind =
+        true) :
+    findReactionForKind?
+        reactions
+        kind ≠
+      none := by
+
+  intro hNone
+
+  have hFound :
+      findReactionForKind?
+          reactions
+          kind =
+        some reaction :=
+    findReactionForKind?_eq_some_of_mem
+      kind
+      reactions
+      hUnique
+      reaction
+      hMember
+      hMatch
+
+  rw [
+    hNone
+  ] at hFound
+
+  simp at hFound
+
+/--
 `UniquelyTriggered` is a property of the reaction *set*, so it transfers along a permutation.
 
 `normalize_perm` (`Relico/DTR/GeneralPriority.lean`) argues that because stage F's sort only permutes,
@@ -722,6 +780,42 @@ def reactionFor?
       LF.findReactionForKind?
         reactor.messageReactions
         kind
+
+/--
+Whole-program reaction lookup is the reactor-local lookup under instance resolution.
+
+`reactionFor?` is `reactorOfInstance?` composed with `findReactionForKind?` over the resolved
+reactor's `messageReactions`; this lemma is that one-step unfolding, stated because the
+composition is the single seam between *which reactor* (an instance-level fact, decided by the
+program's instance table) and *which reaction* (a reactor-level fact, decided by trigger
+matching). Consumers holding both halves — an instance-resolution hypothesis and a
+reactor-local lookup result — pass through the seam in one rewrite instead of unfolding a
+definition each would otherwise spell differently.
+
+The `.consume` bridge (task `#129`, decision 0042) is the first consumer: its
+membership-and-match facts are reactor-local, while the `fire` rule consults the whole-program
+lookup, and this lemma is what connects them.
+-/
+theorem reactionFor?_eq_findReactionForKind?_of_reactorOfInstance?
+    {program : LF.GeneralProgram}
+    {target : ActorName}
+    {kind : LF.GeneralEventKind}
+    {reactor : LF.GeneralReactor}
+    (hReactor :
+      program.reactorOfInstance? target =
+        some reactor) :
+    reactionFor?
+        program
+        target
+        kind =
+      findReactionForKind?
+        reactor.messageReactions
+        kind := by
+
+  rw [
+    reactionFor?,
+    hReactor
+  ]
 
 /--
 **The run-level refutation of Lemma 2, stated as a theorem.** Permuting a reactor's `messageReactions`
