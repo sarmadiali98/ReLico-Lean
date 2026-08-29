@@ -2446,6 +2446,22 @@ against artefacts, this one is about a claim that was never checkable from the p
 The check is cheap and belongs in every commit that lands a guard-relative theorem — for each
 hypothesis, name the declaration that concludes it, or record that none does.
 
+**Discharged 2026-08-30: all three premises have public dischargers.** The consumer F81 waited
+for arrived with the routing/resolution theorems, and with it the projections: input-port names
+by `Translation.compileGeneralReactiveClass_inputPortNames_nodup` and action names by
+`Translation.compileGeneralReactiveClass_actionNames_nodup` (both per class, from the compiled
+reactor's own well-formedness — the decided source for the action names turned out to be the
+reactor's `declaredNames`, via `compileGeneralReactiveClass_actionNames`; F56's per-site
+suffixing never had to be re-derived), and message-server names by
+`DTR.GeneralModel.messageServerNames_nodup_of_wellFormed`. The model-level composition is
+`Correctness.generalTriggerDistinctness_of_wellFormed`: a well-formed model, its successful
+compilation, guard acceptance, and a reactor of the compiled program yield the class behind
+that reactor with all three premises in the resolution theorems' spelling. It cost one import
+edge (`Correctness/GeneralCorrespondence.lean` now imports `DTR.GeneralWellFormed`, no cycle).
+Of the four ladder premises F82 counted, three are discharged; its own `hElsewhere` remains
+premise-shaped by design — it is situational truth about what a permutation did not touch, not
+a well-formedness consequence, and F82's own text says why no construction should replace it.
+
 ## F82 — the invariance F80 asked for holds, but only against a premise about every part of the program the permutation did not touch, and F80's own sentence has no room for it
 
 F80 asks for the refutation of Lemma 2's run-level content "stated as a theorem", in the shape

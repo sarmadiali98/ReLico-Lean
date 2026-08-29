@@ -442,6 +442,107 @@ theorem namesUniqueAndValid_of_wellFormed
   unfold wellFormed
   cases model.namesUniqueAndValid <;> simp
 
+/--
+A well-formed model declares distinct message-server names in every class.
+
+The per-class projection of `namesUniqueAndValid`'s classes conjunct, and one of the three
+premises **F81** measured (2026-08-26) as having a decided source but no public route: the
+fact is a conjunct of this clause, and no theorem anywhere concluded it. The consumer arrived
+with the routing/resolution theorems of `Relico/Correctness/GeneralCorrespondence.lean`, so
+the projection is stated here, beside the clause's own extraction lemma.
+
+The extraction is two cases-steps rather than one projection, for the reason the extraction
+section above records: a projection chain reads a fixed `&&` nesting and can silently prove a
+different clause under the other associativity, while a `cases` on the wanted conjunct is
+correct under both. The outer step isolates the `classes.all` conjunct of
+`namesUniqueAndValid`; `List.all_eq_true` then instantiates it at the class the caller names;
+the inner step is a `by_cases` on the conclusion itself, whose negation makes the instantiated
+conjunction `false` and contradicts the `= true` the outer step produced.
+-/
+theorem messageServerNames_nodup_of_wellFormed
+    {model : DTR.GeneralModel}
+    (hWellFormed :
+      model.wellFormed =
+        true)
+    {reactiveClass : DTR.GeneralReactiveClass}
+    (hClass :
+      reactiveClass ∈ model.classes) :
+    (reactiveClass.messageServers.map
+      (fun server =>
+        server.name)).Nodup := by
+  have hUnique :
+      model.namesUniqueAndValid =
+        true :=
+    namesUniqueAndValid_of_wellFormed
+      model
+      hWellFormed
+
+  have hClasses :
+      model.classes.all
+        (fun reactiveClass =>
+          (reactiveClass.name.value != "") &&
+            decide
+              ((reactiveClass.knownRebecs.map
+                (fun declaration =>
+                  declaration.name)).Nodup) &&
+            decide
+              ((reactiveClass.messageServers.map
+                (fun messageServer =>
+                  messageServer.name)).Nodup) &&
+            reactiveClass.knownRebecs.all
+              (fun declaration =>
+                declaration.name.value != "")) =
+        true := by
+    revert hUnique
+    unfold namesUniqueAndValid
+    cases
+      model.classes.all
+        (fun reactiveClass =>
+          (reactiveClass.name.value != "") &&
+            decide
+              ((reactiveClass.knownRebecs.map
+                (fun declaration =>
+                  declaration.name)).Nodup) &&
+            decide
+              ((reactiveClass.messageServers.map
+                (fun messageServer =>
+                  messageServer.name)).Nodup) &&
+            reactiveClass.knownRebecs.all
+              (fun declaration =>
+                declaration.name.value != "")) <;>
+      simp
+
+  have hBody :
+      (fun reactiveClass =>
+          (reactiveClass.name.value != "") &&
+            decide
+              ((reactiveClass.knownRebecs.map
+                (fun declaration =>
+                  declaration.name)).Nodup) &&
+            decide
+              ((reactiveClass.messageServers.map
+                (fun messageServer =>
+                  messageServer.name)).Nodup) &&
+            reactiveClass.knownRebecs.all
+              (fun declaration =>
+                declaration.name.value != "")) reactiveClass =
+        true :=
+    List.all_eq_true.mp
+      hClasses
+      reactiveClass
+      hClass
+
+  by_cases hServers :
+    (reactiveClass.messageServers.map
+      (fun server =>
+        server.name)).Nodup
+
+  · exact hServers
+
+  · exfalso
+
+    simp [hServers] at hBody
+
 end GeneralModel
 
 

@@ -1,4 +1,5 @@
 import Relico.DTR.GeneralRuntime
+import Relico.DTR.GeneralWellFormed
 import Relico.LF.GeneralSemantics
 import Relico.DTR.GeneralInitialization
 import Relico.LF.GeneralInitialization
@@ -2620,15 +2621,20 @@ Fig. 2a witness describes.
 `LF.UniquelyTriggered.of_nodup_triggers` internally, so the trigger `Nodup` is supplied directly and
 `UniquelyTriggered` is never mentioned here.
 
-**The three distinctness hypotheses are guard-relative, and nothing public discharges them yet**
-(measured 2026-08-26, recorded as F81). `Translation.inputPortNames_nodup_of_wellFormed` is the
-projection that turns a decided `LF.GeneralReactor.declaredNames` `Nodup` into the first hypothesis, and
-it is `private`; for the action names and the message-server names there is no such projection anywhere
-in the repository, only the conjunct of `DTR.GeneralModel.namesUniqueAndValid` that would supply the
-third. So the hypotheses are passed at the source model's own lists, in the same spelling
-`Translation.generalRouteEndpoints_nodup` and
-`Translation.compileGeneralReactiveClass_reactionTriggers_nodup` already use. Discharging them belongs to
-the commit that first has a consumer, not to this one.
+**The three distinctness hypotheses are guard-relative; their public dischargers landed
+2026-08-30, closing the gap F81 measured.** At this theorem's landing (measured 2026-08-26,
+recorded as F81) nothing public concluded any of the three: the projection turning a decided
+`LF.GeneralReactor.declaredNames` `Nodup` into the first hypothesis was `private`, and for the
+action names and the message-server names there was no such projection anywhere in the
+repository, only the conjunct of `DTR.GeneralModel.namesUniqueAndValid` that would supply the
+third. The consumer F81 waited for — the resolution theorems at this file's end — has since
+arrived, and with it the dischargers:
+`Translation.compileGeneralReactiveClass_inputPortNames_nodup` and
+`Translation.compileGeneralReactiveClass_actionNames_nodup` (per class, from the compiled
+reactor's own well-formedness) and `DTR.GeneralModel.messageServerNames_nodup_of_wellFormed`,
+composed at model level by `generalTriggerDistinctness_of_wellFormed` below. The hypotheses
+keep their guard-relative spelling here — the theorem changes nothing about itself, and a
+caller that holds the guard applies the discharger rather than this theorem assuming it.
 
 **What this does not reach.** F80's sentence continues "and hence `LF.GeneralStep`". That step is item 3's
 weak-step lifting, not this theorem: nothing below concerns the step relation, and reading a step-level
@@ -2822,11 +2828,14 @@ theorem is the two composed; `kind` is an explicit binder so a consumer at one p
 applies it directly.
 
 The three distinctness hypotheses are the same three `generalReactionFor?_perm_of_compiled`
-passes at the source model's own lists, and they stay hypotheses for the reason that theorem
-records (F81): two are `LF.GeneralReactor.declaredNames` `Nodup` clauses in disguise, the third a
-conjunct of `DTR.GeneralModel.namesUniqueAndValid`, and no public projection discharges them —
-the one that exists for the first is `private` by a rule this repository keeps. Guard-relative is
-the house form and the strongest available; no well-formedness clause is added here.
+passes at the source model's own lists. They stayed hypotheses from this theorem's landing
+until 2026-08-30 because nothing public concluded them (F81): two are `LF.GeneralReactor.declaredNames`
+`Nodup` clauses in disguise, the third a conjunct of `DTR.GeneralModel.namesUniqueAndValid`,
+and the one projection that existed was `private` by a rule this repository keeps. The
+dischargers have since landed — the two per-class `Translation` theorems and the model-level
+`generalTriggerDistinctness_of_wellFormed` below — and the spelling is unchanged here:
+guard-relative remains the house form, no well-formedness clause was added, and a consumer
+holding the guard applies the discharger rather than this theorem assuming it.
 
 Startup reactions need nothing from this theorem: `LF.GeneralReactor` carries them in the
 separate `startupReaction` field, while the compiled `messageReactions`' trigger list is pinned
@@ -3187,6 +3196,132 @@ theorem generalReactionFor?_eq_some_of_portRoute
       hMember
       (by
         simp [LF.GeneralTrigger.matchesKind])
+
+/--
+The three F81 distinctness premises hold of every reactor of an accepted translation — the
+model-level composition F81 waited for.
+
+F81 measured that the routing/resolution theorems hypothesize three `Nodup` facts at the source
+model's own lists and that nothing public concluded any of them; the resolution theorems at
+this section's head became the consumers, and the per-class dischargers have landed beside
+their sources — `Translation.compileGeneralReactiveClass_inputPortNames_nodup` and
+`Translation.compileGeneralReactiveClass_actionNames_nodup` from the compiled reactor's own
+well-formedness, `DTR.GeneralModel.messageServerNames_nodup_of_wellFormed` from the model's.
+This theorem composes the three with the program-level plumbing between them: the guard's
+acceptance is the compiled program's well-formedness
+(`Translation.guardGeneralProgram_wellFormed`), whose `reactorsWellFormed` clause gives each
+reactor its own well-formedness, and `Translation.compileGeneralModel_startupBody` names the
+class and routes behind any reactor of a successful translation. What a future `.consume`
+consumer holds — a well-formed model, its compiled program, the guard's acceptance, and a
+reactor of that program — is exactly the premise set, and the conclusion is the three premises
+in the spelling the resolution theorems take.
+
+Two scope notes. The model well-formedness premise needs the model's own well-formedness
+module, which is why this file imports `Relico.DTR.GeneralWellFormed` — the one new import
+edge of the discharge, with no cycle, since that module imports only `DTR.GeneralSyntax`. And
+the theorem deliberately stops at the three premises: composing them further, into
+`generalUniquelyTriggered_of_compiled` or a resolution theorem, is the eventual consumer's one
+line, not a second packaging with no caller.
+
+This changes nothing about the frozen questions: no scheduler, selection, or ordering
+semantics is involved, and neither `.consume` transfer condition is any closer to being
+stated — F86's placement decision still gates those.
+-/
+theorem generalTriggerDistinctness_of_wellFormed
+    {model : DTR.GeneralModel}
+    {program accepted : LF.GeneralProgram}
+    (hModelWellFormed :
+      model.wellFormed =
+        true)
+    (hCompiled :
+      Translation.compileGeneralModel model =
+        .ok program)
+    (hGuard :
+      Translation.guardGeneralProgram program =
+        .ok accepted)
+    {reactor : LF.GeneralReactor}
+    (hReactor :
+      reactor ∈ program.reactors) :
+    ∃ (reactiveClass : DTR.GeneralReactiveClass)
+      (routes : List Translation.GeneralRoute),
+      reactiveClass ∈ model.classes ∧
+        Translation.routesOf model =
+          .ok routes ∧
+          Translation.compileGeneralReactiveClass
+              model.classes
+              routes
+              reactiveClass =
+            .ok reactor ∧
+          ((Translation.generalInputPortsOf
+              reactiveClass.name
+              routes).map
+            (fun port =>
+              port.name.value)).Nodup ∧
+          ((Translation.generalActionNamesOf
+              (Translation.selfSendsOfClass
+                reactiveClass)
+              reactiveClass.messageServers).map
+            (fun name =>
+              name.value)).Nodup ∧
+          (reactiveClass.messageServers.map
+            (fun server =>
+              server.name)).Nodup := by
+  have hProgramWellFormed :
+      program.wellFormed =
+        true :=
+    Translation.guardGeneralProgram_wellFormed
+      hGuard
+
+  have hReactorsWellFormed :
+      program.reactorsWellFormed =
+        true := by
+    revert hProgramWellFormed
+    unfold LF.GeneralProgram.wellFormed
+    cases program.reactorsWellFormed <;>
+      simp
+
+  have hReactorWellFormed :
+      reactor.wellFormed =
+        true :=
+    List.all_eq_true.mp
+      hReactorsWellFormed
+      reactor
+      hReactor
+
+  obtain ⟨routes, hRoutes, hForEach⟩ :=
+    Translation.compileGeneralModel_startupBody
+      hCompiled
+
+  obtain
+      ⟨reactiveClass, _, _, hClass, hClassCompiled, -⟩ :=
+    hForEach
+      reactor
+      hReactor
+
+  refine
+    ⟨reactiveClass,
+      routes,
+      hClass,
+      hRoutes,
+      hClassCompiled,
+      ?_,
+      ?_,
+      ?_⟩
+
+  · exact
+      Translation.compileGeneralReactiveClass_inputPortNames_nodup
+        hClassCompiled
+        hReactorWellFormed
+
+  · exact
+      Translation.compileGeneralReactiveClass_actionNames_nodup
+        hClassCompiled
+        hReactorWellFormed
+
+  · exact
+      DTR.GeneralModel.messageServerNames_nodup_of_wellFormed
+        hModelWellFormed
+        hClass
 
 end Correctness
 end Relico

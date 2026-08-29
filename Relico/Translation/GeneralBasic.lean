@@ -7089,6 +7089,115 @@ private theorem inputPortNames_nodup_of_wellFormed
             hNodup)))
 
 /--
+A compiled reactor's input-port names are distinct whenever the reactor is well formed —
+the **F81 discharge, input-port half**.
+
+F81 measured (2026-08-26) that the routing/resolution theorems of
+`Relico/Correctness/GeneralCorrespondence.lean` hypothesize this exact `Nodup` and that
+nothing public concluded it: the projection that turns a decided `declaredNames.Nodup` into
+it existed only as `inputPortNames_nodup_of_wellFormed` above, which is `private` by the rule
+that a module's public surface widens only with a consumer. The consumer has since arrived, so
+this theorem is the public, per-class restatement: `compileGeneralReactiveClass_inputPorts`
+identifies the compiled reactor's ports with the routing projection for its class, and the
+private projection supplies the distinctness. The private lemma is not de-privatised — this
+theorem is the consumer-facing form, and it lives beside the lemma it wraps.
+-/
+theorem compileGeneralReactiveClass_inputPortNames_nodup
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {reactor : LF.GeneralReactor}
+    (hCompiled :
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok reactor)
+    (hWellFormed :
+      reactor.wellFormed =
+        true) :
+    ((generalInputPortsOf
+        reactiveClass.name
+        routes).map
+      (fun port =>
+        port.name.value)).Nodup := by
+  rw [
+    ← compileGeneralReactiveClass_inputPorts
+        hCompiled
+  ]
+
+  exact
+    inputPortNames_nodup_of_wellFormed
+      hWellFormed
+
+/--
+A compiled reactor's action names are distinct whenever the reactor is well formed —
+the **F81 discharge, action-names half**, and the one F81 recorded as having *no* decided
+source at all: `generalActionNamesOf` mixes the per-server names with the per-site names the
+F56 repair introduced, and no theorem anywhere concluded its `Nodup`.
+
+The decided source turns out to be the compiled reactor itself. The reactor's
+`declaredNames.Nodup` — a `wellFormed` conjunct — has the logical-action names as its last
+segment (`assembleGeneralReactor` builds the list, and `++` chains left-associatively, so one
+`nodup_of_append_right` reaches it), and
+`compileGeneralReactiveClass_actionNames` states that those names *are*
+`generalActionNamesOf` for the class. The bridge is a map composition
+(`List.map_map`) — no injectivity argument, no per-site reasoning, and no induction over
+either function: F56's site-suffixing machinery is invisible because the distinctness is
+inherited wholesale from the declaration the guard already decided.
+
+Stated per class, like its input-port twin: the program-level plumbing that turns guard
+acceptance into reactor well-formedness is the composition theorem's job
+(`Correctness.generalTriggerDistinctness_of_wellFormed`), not this one's.
+-/
+theorem compileGeneralReactiveClass_actionNames_nodup
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {reactor : LF.GeneralReactor}
+    (hCompiled :
+      compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok reactor)
+    (hWellFormed :
+      reactor.wellFormed =
+        true) :
+    ((generalActionNamesOf
+        (selfSendsOfClass
+          reactiveClass)
+        reactiveClass.messageServers).map
+      (fun name =>
+        name.value)).Nodup := by
+  have hNodup :
+      reactor.declaredNames.Nodup := by
+    by_cases hCandidate :
+        reactor.declaredNames.Nodup
+
+    · exact hCandidate
+
+    · revert hWellFormed
+      unfold LF.GeneralReactor.wellFormed
+      simp [hCandidate]
+
+  unfold LF.GeneralReactor.declaredNames at hNodup
+
+  have hActions :
+      (reactor.logicalActions.map
+        (fun action =>
+          action.name.value)).Nodup :=
+    nodup_of_append_right _ _ hNodup
+
+  rw [
+    ← compileGeneralReactiveClass_actionNames
+        hCompiled,
+    List.map_map
+  ]
+
+  exact hActions
+
+/--
 The ninth well-formedness clause, derived from the third — on assembled programs, not in general.
 
 F49 measured `targetEndpointsUnique` to be independent of every other clause, so this is the
