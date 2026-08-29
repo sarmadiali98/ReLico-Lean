@@ -312,6 +312,434 @@ theorem generalPendingAgrees_message_of_event
 
   exact hArrival.symm
 
+/-!
+### Consuming one matched occurrence
+
+The β-(i) relation exists for one consumer: the `.consume` transfer conditions, which remove one
+message from the bag and one event from the queue and must know the remainders still agree. The
+theorem below is that fact, and nothing more beside it. It does not choose which message the
+source scheduler takes or which event the target scheduler fires — those are the two sides of
+F86's still-open scheduling question — and it does not discharge the commutation theorem's
+`first ∉ earlier` boundary, which is about execution order between fires, not about the
+invariant's survival under a removal that has already happened.
+
+The proof's interesting case exists because `GeneralConsumeMatch` pins target, time and compiled
+payload but cannot pin *which occurrence* carries them: the pair holding the message and the pair
+holding the event may be two different occurrences of the pairing. When they are, removing both
+and splicing the far sides together — `(message, e₁)` alongside `(m₂, event)` leaves `(m₂, e₁)` —
+is licensed by pure transitivity of the three conjuncts (all four values share target, time and
+compiled payload), and it is multiplicity-honest: two occurrences out, one in, exactly matching
+the two removals that shrank each side by one. Duplicates need no special treatment anywhere in
+the argument, which is the point of representing occurrences as a list rather than a set.
+
+The generic half — removing one occurrence of the same value from each side of a permutation
+leaves a permutation — is isolated as `perm_remove_middle` below. It is composed from core's
+`List.perm_middle`, `List.perm_append_comm` and `List.Perm.cons_inv`; Mathlib's
+`List.Perm.remove` does not exist in this core-only development, and core's `List.Perm.erase` is
+deliberately not used because `List.erase` runs on `BEq`, and this repository's types derive
+`BEq` and `DecidableEq` independently with no lawfulness bridge between them — the same hazard
+`LF.matchesKind`'s `decide`-only discipline records.
+-/
+
+/--
+Moving one occurrence from the middle of a list to its end is a permutation.
+
+Stated with the occurrence as a cons between explicit splits because that is the shape every
+consumer of this section produces: a removal exposes `earlier ++ a :: later`, and the repair
+below needs the removed value re-attached to the far end instead. Composed from core's
+`List.perm_middle` (middle to front) and `List.perm_append_comm` (front to end) rather than
+proved by induction.
+-/
+private theorem perm_middle_append
+    {α : Type}
+    {a : α}
+    {x y : List α} :
+    List.Perm
+      (x ++ a :: y)
+      ((x ++ y) ++ [a]) :=
+  List.perm_middle.trans
+    (List.perm_append_comm
+      (l₁ := [a])
+      (l₂ := x ++ y))
+
+/--
+Removing one occurrence of the same value from each side of a permutation leaves a permutation
+of the remainders.
+
+This is the occurrence-removal congruence the `.consume` transfer conditions need, in split
+form: both sides present the occurrence as `splits ++ a :: splits`, the value `a` is the *same*
+on both sides, and the conclusion drops it from each. It is the fact Mathlib packages as
+`List.Perm.remove`; here it is derived from `perm_middle_append` by moving both occurrences to
+the ends — `List.Perm.cons_inv` then cancels the common heads — which needs no induction over
+the permutation's derivation and no `BEq` lawfulness.
+-/
+private theorem perm_remove_middle
+    {α : Type}
+    {a : α}
+    {x y x' y' : List α}
+    (h :
+      List.Perm
+        (x ++ a :: y)
+        (x' ++ a :: y')) :
+    List.Perm
+      (x ++ y)
+      (x' ++ y') := by
+  have hLeft :
+      List.Perm
+        (x ++ a :: y)
+        ((x ++ y) ++ [a]) :=
+    perm_middle_append
+
+  have hRight :
+      List.Perm
+        (x' ++ a :: y')
+        ((x' ++ y') ++ [a]) :=
+    perm_middle_append
+
+  have hEnd :
+      List.Perm
+        ((x ++ y) ++ [a])
+        ((x' ++ y') ++ [a]) :=
+    hLeft.symm.trans
+      (h.trans hRight)
+
+  have hHeadLeft :
+      List.Perm
+        ((x ++ y) ++ [a])
+        (a :: (x ++ y)) :=
+    List.perm_append_comm
+      (l₁ := x ++ y)
+      (l₂ := [a])
+
+  have hHeadRight :
+      List.Perm
+        ((x' ++ y') ++ [a])
+        (a :: (x' ++ y')) :=
+    List.perm_append_comm
+      (l₁ := x' ++ y')
+      (l₂ := [a])
+
+  exact
+    List.Perm.cons_inv
+      (hHeadLeft.symm.trans
+        (hEnd.trans hHeadRight))
+
+/--
+Consuming one matched occurrence on each side preserves the agreement.
+
+The premise shape is exactly what the two `.consume` rules hand over: the source `take` splits
+the bag as `earlier ++ message :: later`, the target `fire` splits the queue as
+`earlier' ++ event :: later'`, and `GeneralConsumeMatch` is the pairing's own notion of the two
+occurrences being the same event. The conclusion is the β-(i) agreement of the remainders —
+`earlier ++ later` against `earlier' ++ later'`.
+
+The witness construction is where multiplicity lives. The pairing's list loses one
+*occurrence* — not all occurrences of a value — and when the message's pair and the event's
+pair are different occurrences, the proof removes both and appends their spliced remainder
+`(pair2.fst, pair1.snd)`, whose match is three transitivities of the hypotheses' conjuncts.
+Nothing forbids `message` or `event` occurring several times; each removal takes exactly one,
+because `List.Perm` counts occurrences, and the queue-side filter passes only the events that
+target this actor — the removed event's target being pinned by `hMatch` is what lets the filter
+computation expose that one occurrence while every other event's fate under the filter is
+untouched by the removal.
+
+What this theorem deliberately does **not** do: it does not relate the source's choice of
+`message` to the target's choice of `event` beyond `hMatch`, does not schedule, and does not
+order — the F86 questions stay open, and the commutation theorem's duplicate boundary
+(`first ∉ earlier`) is untouched, being about firing order rather than invariant preservation.
+-/
+theorem generalPendingAgrees_removeOne
+    (name : ActorName)
+    (bag : DTR.GeneralMessageBag)
+    (pending : LF.GeneralEventQueue)
+    (hAgrees :
+      GeneralPendingAgrees
+        name
+        bag
+        pending)
+    (message : DTR.GeneralMessage)
+    (event : LF.GeneralPendingEvent)
+    (hMatch :
+      GeneralConsumeMatch
+        name
+        message
+        event)
+    (earlier later : DTR.GeneralMessageBag)
+    (hBagSplit :
+      bag =
+        earlier ++ message :: later)
+    (earlier' later' : LF.GeneralEventQueue)
+    (hQueueSplit :
+      pending =
+        earlier' ++ event :: later') :
+    GeneralPendingAgrees
+      name
+      (earlier ++ later)
+      (earlier' ++ later') := by
+  obtain ⟨pairs, hPairsMatch, hBagPerm, hQueuePerm⟩ :=
+    hAgrees
+
+  obtain ⟨hMatchTarget, hMatchArrival, hMatchPayload⟩ :=
+    hMatch
+
+  have hEventPasses :
+      decide (event.target = name) = true := by
+    rw [hMatchTarget]
+
+    exact decide_eq_true rfl
+
+  have hFilterCons :
+      (event :: later').filter
+          (fun e => decide (e.target = name)) =
+        event ::
+          later'.filter
+            (fun e => decide (e.target = name)) :=
+    List.filter_cons_of_pos
+      (p := (fun e => decide (e.target = name)))
+      (a := event)
+      hEventPasses
+
+  have hMessageMem :
+      message ∈ bag := by
+    rw [hBagSplit]
+
+    exact
+      List.mem_append.mpr
+        (Or.inr List.mem_cons_self)
+
+  have hEventFiltered :
+      event ∈
+        pending.filter
+          (fun e => decide (e.target = name)) := by
+    rw [hQueueSplit, List.filter_append, hFilterCons]
+
+    exact
+      List.mem_append.mpr
+        (Or.inr List.mem_cons_self)
+
+  obtain ⟨pair1, hPair1Mem, hPair1Fst⟩ :=
+    List.mem_map.mp
+      (hBagPerm.mem_iff.mp hMessageMem)
+
+  obtain ⟨pair2, hPair2Mem, hPair2Snd⟩ :=
+    List.mem_map.mp
+      (hQueuePerm.mem_iff.mp hEventFiltered)
+
+  obtain ⟨h1Target, h1Arrival, h1Payload⟩ :=
+    hPairsMatch
+      pair1
+      hPair1Mem
+
+  obtain ⟨h2Target, h2Arrival, h2Payload⟩ :=
+    hPairsMatch
+      pair2
+      hPair2Mem
+
+  rw [hBagSplit] at hBagPerm
+
+  rw [hQueueSplit, List.filter_append, hFilterCons] at hQueuePerm
+
+  by_cases hDirect : pair1.snd = event
+
+  · obtain ⟨before1, after1, hSplit1⟩ :=
+      List.append_of_mem hPair1Mem
+
+    refine ⟨before1 ++ after1, ?_, ?_, ?_⟩
+
+    · intro pair hPairMem
+
+      rcases
+        List.mem_append.mp hPairMem with
+        hIn | hIn
+      · exact
+          hPairsMatch pair
+            (by
+              rw [hSplit1]
+
+              exact
+                List.mem_append.mpr
+                  (Or.inl hIn))
+      · exact
+          hPairsMatch pair
+            (by
+              rw [hSplit1]
+
+              exact
+                List.mem_append.mpr
+                  (Or.inr
+                    (List.mem_cons.mpr
+                      (Or.inr hIn))))
+
+    · rw [List.map_append]
+
+      rw [hSplit1, List.map_append, List.map_cons, hPair1Fst] at hBagPerm
+
+      exact perm_remove_middle hBagPerm
+
+    · rw [List.filter_append, List.map_append]
+
+      rw [hSplit1, List.map_append, List.map_cons, hDirect] at hQueuePerm
+
+      exact perm_remove_middle hQueuePerm
+
+  · obtain ⟨before1, after1, hSplit1⟩ :=
+      List.append_of_mem hPair1Mem
+
+    have hPair2Rest :
+        pair2 ∈ before1 ++ after1 := by
+      have hPair2In :
+          pair2 ∈ before1 ++ pair1 :: after1 := by
+        rw [← hSplit1]
+
+        exact hPair2Mem
+
+      rcases
+        List.mem_append.mp hPair2In with
+        hIn | hIn
+      · exact
+          List.mem_append.mpr
+            (Or.inl hIn)
+      · rcases
+          List.mem_cons.mp hIn with
+          hEq | hIn
+        · exact
+            absurd
+              (by
+                rw [← hEq]
+
+                exact hPair2Snd)
+              hDirect
+        · exact
+            List.mem_append.mpr
+              (Or.inr hIn)
+
+    obtain ⟨middle, tail2, hSplit2⟩ :=
+      List.append_of_mem hPair2Rest
+
+    refine
+      ⟨(middle ++ tail2) ++ [(pair2.fst, pair1.snd)],
+        ?_, ?_, ?_⟩
+
+    · intro pair hPairMem
+
+      rcases
+        List.mem_append.mp hPairMem with
+        hIn | hIn
+      · have hPairInRest :
+            pair ∈ before1 ++ after1 := by
+          rw [hSplit2]
+
+          rcases
+            List.mem_append.mp hIn with
+            hIn' | hIn'
+          · exact
+              List.mem_append.mpr
+                (Or.inl hIn')
+          · exact
+              List.mem_append.mpr
+                (Or.inr
+                  (List.mem_cons.mpr
+                    (Or.inr hIn')))
+
+        exact
+          hPairsMatch pair
+            (by
+              rw [hSplit1]
+
+              rcases
+                List.mem_append.mp hPairInRest with
+                hIn' | hIn'
+              · exact
+                  List.mem_append.mpr
+                    (Or.inl hIn')
+              · exact
+                  List.mem_append.mpr
+                    (Or.inr
+                      (List.mem_cons.mpr
+                        (Or.inr hIn'))))
+      · obtain rfl :=
+          List.mem_singleton.mp hIn
+
+        refine ⟨h1Target, ?_, ?_⟩
+
+        · rw [h1Arrival, hPair1Fst, ← hMatchArrival, ← h2Arrival, hPair2Snd]
+
+        · rw [h1Payload, hPair1Fst, ← hMatchPayload, ← h2Payload, hPair2Snd]
+
+    · rw [List.map_append, List.map_append, List.map_singleton]
+
+      have hBagExposed :
+          List.Perm
+            (earlier ++ message :: later)
+            (List.map Prod.fst before1 ++ message :: List.map Prod.fst after1) := by
+        rw [hSplit1, List.map_append, List.map_cons, hPair1Fst] at hBagPerm
+
+        exact hBagPerm
+
+      have hBagRest :
+          List.map Prod.fst before1 ++ List.map Prod.fst after1 =
+        List.map Prod.fst middle ++ pair2.fst :: List.map Prod.fst tail2 := by
+        rw [← List.map_append, hSplit2, List.map_append, List.map_cons]
+
+      have hBagRot :
+          List.Perm
+            (List.map Prod.fst middle ++ pair2.fst :: List.map Prod.fst tail2)
+            ((List.map Prod.fst middle ++ List.map Prod.fst tail2) ++ [pair2.fst]) :=
+        perm_middle_append
+
+      have hBagStep :=
+        perm_remove_middle hBagExposed
+
+      rw [hBagRest] at hBagStep
+
+      exact hBagStep.trans hBagRot
+
+    · rw [List.filter_append, List.map_append, List.map_append, List.map_singleton,
+        List.append_assoc]
+
+      have hQueueExposed :
+          pairs.map Prod.snd =
+        List.map Prod.snd before1 ++ pair1.snd :: List.map Prod.snd after1 := by
+        rw [hSplit1, List.map_append, List.map_cons]
+
+      rw [hQueueExposed] at hQueuePerm
+
+      have hQueueFront :
+          List.Perm
+            (List.map Prod.snd before1 ++ pair1.snd :: List.map Prod.snd after1)
+            (pair1.snd :: (List.map Prod.snd before1 ++ List.map Prod.snd after1)) :=
+        List.perm_middle
+
+      have hQueueMid :=
+        hQueuePerm.trans hQueueFront
+
+      have hQueueRest :
+          List.map Prod.snd before1 ++ List.map Prod.snd after1 =
+        List.map Prod.snd middle ++ event :: List.map Prod.snd tail2 := by
+        rw [← List.map_append, hSplit2, List.map_append, List.map_cons, hPair2Snd]
+
+      rw [hQueueRest] at hQueueMid
+
+      have hQueueEnd :
+          List.Perm
+            (pair1.snd :: (List.map Prod.snd middle ++ event :: List.map Prod.snd tail2))
+            ((List.map Prod.snd middle ++ event :: List.map Prod.snd tail2) ++ [pair1.snd]) :=
+        List.perm_append_comm
+          (l₁ := [pair1.snd])
+          (l₂ := List.map Prod.snd middle ++ event :: List.map Prod.snd tail2)
+
+      have hQueueMid2 :=
+        hQueueMid.trans hQueueEnd
+
+      have hQueueShuffle :
+          (List.map Prod.snd middle ++ event :: List.map Prod.snd tail2) ++ [pair1.snd] =
+        List.map Prod.snd middle ++ (event :: (List.map Prod.snd tail2 ++ [pair1.snd])) := by
+        rw [List.append_assoc, List.cons_append]
+
+      rw [hQueueShuffle] at hQueueMid2
+
+      exact perm_remove_middle hQueueMid2
+
 /--
 The target continuation is a compilation of the source continuation.
 
