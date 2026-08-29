@@ -56,26 +56,84 @@ therefore takes the actor's name and selects the global queue by it, and
 source does not have. Without it the two directions of the per-actor agreement could both hold while the
 queue carried events for a reactor that corresponds to nothing.
 
-**The queue agreement is on time and target, deliberately not a bijection.** Multiplicity — that a bag
-holding two identical messages meets a queue holding two matching events — is G2c's business, because it
-is the transfer conditions that consume it, and stating it here would mean proving it here with no
-consumer. What is stated is the two directions separately, so neither side may hold a message the other
-cannot account for at the same logical time.
+**The queue agreement is multiplicity-aware, as a pairing of matched occurrences.** The
+relation's first form (down to this module's own note of 2026-08-26) was two directional
+existentials on time and target — deliberately weaker than a bijection, because the transfer
+conditions that consume multiplicity did not exist yet, and F86 records that the prediction
+was right in both directions: the consume case did need multiplicity and could not have it
+without changing the relation. The measured counterexample is a bag holding two identical
+messages against a queue holding one matching event — the old relation held, both removals
+were possible, and either one destroyed it. `GeneralPendingAgrees` below is the approved
+repair (β-(i), decision of 2026-08-29): an existential pairing of `DTR.GeneralMessage ×
+LF.GeneralPendingEvent` in which every pair satisfies `GeneralConsumeMatch`, the bag is a
+permutation of the message projection, and this actor's events — the whole queue filtered by
+`target` — are a permutation of the event projection. Permutation carries occurrence
+multiplicity, so legal duplicates stay legal, and consuming one matched pair removes exactly
+one occurrence from each side. The two old directional facts follow (the accessors below), so
+every consumer of the weaker relation survives; the pairing itself is what the two `.consume`
+transfer conditions will consume, and they remain unwritten (F86's scheduler question is not
+answered here — this change fixes the *representation* of multiplicity, nothing else).
 
 The multi-store family's `PendingCorresponds` is not reusable for this. It pins the target action name as
 a function of the source message name, and general action names are per **send site**
 (`Translation.generalActionNameAtSite`, the F56 repair), while `DTR.GeneralMessage` records no site — its
 four fields are `sender`, `messageName`, `payload` and `arrival`. The site is not recoverable from a
 message, so an agreement that mentioned the action name would be unprovable rather than merely stronger.
-Logical time is recoverable, and that is what the definition uses.
+Logical time is recoverable, and that is what the pairing relates through `GeneralConsumeMatch`.
 -/
+
+/--
+A source message and a target event match, for the purposes of a `.consume` transfer.
+
+The label correspondence `#129` needs, stated as data rather than as a function because no total
+one exists (F78: `consume` carries different payload types on the two sides). A match fixes the
+event's target to the receiving actor's name, its logical time to the message's arrival, and its
+payload to the pointwise compilation of the message's payload.
+
+`name` is a parameter rather than read off the message for the same reason
+`GeneralPendingAgrees` takes it as a parameter: a message records its sender and its message name,
+never its receiver, so the receiver is the store position the correspondence already tracks.
+
+The event **kind** is deliberately not constrained here. Constraining it would mean relating a
+`DTR.MsgName` to an `LF.GeneralEventKind`, which is a property of the *compiled program* (which
+reaction of which reactor the translation emitted for this message server), not of the runtime
+states; the transfer conditions take the resolved reaction as a premise instead, which is
+strictly more honest — it lets the caller hold the compiled program's answer rather than
+re-deriving a naming convention the runtime never consults.
+
+**Moved here from `Relico/Correctness/GeneralWeakBisimulation.lean` when β-(i) landed its
+consumer:** the pairing relation below is stated through this definition, and the import graph
+runs the other way (`GeneralWeakBisimulation` imports `GeneralTimeEquivalence`, which imports
+this file), so the definition had to move to the module both sides can see. The content is
+unchanged by the move — the statement is the same three conjuncts, and it was a `def` with no
+proof to carry.
+-/
+def GeneralConsumeMatch
+    (name : ActorName)
+    (message : DTR.GeneralMessage)
+    (event : LF.GeneralPendingEvent) :
+    Prop :=
+  event.target = name ∧
+    event.tag.time = message.arrival ∧
+      event.payload =
+        message.payload.map
+          Translation.compileGeneralValue
 
 /--
 One actor's messages, against the events of the global queue that target it.
 
-Two directions, and each is weaker than a bijection on purpose — see the module note. The forward
-direction says every message in the bag has an event at the same logical time aimed at this actor; the
-backward direction says every event aimed at this actor has a message at the same logical time.
+An existential pairing of matched occurrences: every pair satisfies `GeneralConsumeMatch`, the
+bag is a permutation of the message projection, and the events targeting this actor are a
+permutation of the event projection. Permutation carries occurrence multiplicity — two
+identical messages are two pairs, and demand two events — so the shape the F86 counterexample
+broke (two messages, one event) is refused outright.
+
+The queue side is the whole queue filtered by target, not any pre-selected sublist, so an event
+the pairing forgets is a permutation failure rather than a silent omission. The filter decides
+on `decide (event.target = name)`, the same `DecidableEq`-only discipline `LF.matchesKind` and
+`LF.findReactor?` record: `ActorName` derives `DecidableEq` and `BEq` independently with no
+lawfulness bridge between them, and one notion of equality must decide the correspondence's
+own filter.
 
 `name` is a parameter rather than being read off the events because the source side has no target field
 to read: an actor's bag is identified by *where it is stored*, and the correspondence is what connects
@@ -86,18 +144,12 @@ def GeneralPendingAgrees
     (bag : DTR.GeneralMessageBag)
     (pending : LF.GeneralEventQueue) :
     Prop :=
-  (∀ message : DTR.GeneralMessage,
-      message ∈ bag →
-        ∃ event : LF.GeneralPendingEvent,
-          event ∈ pending ∧
-            event.target = name ∧
-              event.tag.time = message.arrival) ∧
-    (∀ event : LF.GeneralPendingEvent,
-        event ∈ pending →
-          event.target = name →
-            ∃ message : DTR.GeneralMessage,
-              message ∈ bag ∧
-                message.arrival = event.tag.time)
+  ∃ pairs : List (DTR.GeneralMessage × LF.GeneralPendingEvent),
+    (∀ pair ∈ pairs, GeneralConsumeMatch name pair.1 pair.2) ∧
+      List.Perm bag (pairs.map Prod.fst) ∧
+      List.Perm
+        (pending.filter (fun event => decide (event.target = name)))
+        (pairs.map Prod.snd)
 
 /--
 An empty bag agrees with an empty queue.
@@ -108,8 +160,10 @@ definition demonstrably **satisfiable**, so the results below are not theorems a
 trivially true, and a module that took an unsatisfiable hypothesis would repeat that defect while
 building green.
 
-Note that it is not enough to empty the bag: with a non-empty queue the backward direction would demand a
-message for every event that targets this actor. That asymmetry is the point of stating both directions.
+Under the pairing relation the witness is the empty pair list: both projections are `[]`, and the
+empty queue filtered by target is `[]` however the filter decides. What the pairing adds over the
+old existential form is exactly what this case shows off — the relation talks about *occurrences*,
+and zero occurrences is the smallest satisfiable state.
 -/
 theorem generalPendingAgrees_empty
     (name : ActorName) :
@@ -118,15 +172,15 @@ theorem generalPendingAgrees_empty
       []
       [] := by
 
-  constructor
+  refine ⟨[], ?_, ?_, ?_⟩
 
-  · intro message hMessage
+  · intro pair hPair
 
-    cases hMessage
+    cases hPair
 
-  · intro event hEvent
+  · exact List.Perm.nil
 
-    cases hEvent
+  · simp
 
 /-!
 ### Reading the two directions
@@ -145,7 +199,9 @@ inside a hypothesis, opened once so the delegated lemma applies.
 Every source message has a target event at its instant.
 
 The forward direction — the one Lemma 1 uses when the source is waiting and the target must be shown to
-have something pending to advance to.
+have something pending to advance to. A corollary of the pairing relation: the message is a member of the
+bag, hence of the message projection (`List.Perm.mem_iff` against the projection permutation), hence some
+pair carries it, and that pair's `GeneralConsumeMatch` is the whole existential.
 -/
 theorem generalPendingAgrees_event_of_message
     (name : ActorName)
@@ -164,12 +220,30 @@ theorem generalPendingAgrees_event_of_message
         event.target = name ∧
           event.tag.time = message.arrival := by
 
-  unfold GeneralPendingAgrees at hAgrees
+  obtain ⟨pairs, hPairs, hBagPerm, hQueuePerm⟩ :=
+    hAgrees
 
-  exact
-    hAgrees.left
-      message
-      hMessage
+  obtain ⟨pair, hPairMember, hPairFst⟩ :=
+    List.mem_map.mp
+      (hBagPerm.mem_iff.mp hMessage)
+
+  obtain ⟨hTarget, hArrival, _⟩ :=
+    hPairs
+      pair
+      hPairMember
+
+  have hEventMember :
+      pair.2 ∈ pending :=
+    (List.mem_filter.mp
+      (hQueuePerm.mem_iff.mpr
+        (List.mem_map.mpr
+          ⟨pair, hPairMember, rfl⟩))).left
+
+  refine ⟨pair.2, hEventMember, hTarget, ?_⟩
+
+  rw [← hPairFst]
+
+  exact hArrival
 
 /--
 Every target event aimed at this actor has a source message at its instant.
@@ -177,7 +251,9 @@ Every target event aimed at this actor has a source message at its instant.
 The backward direction — the one Lemma 1 uses when the target selects an event and the source must be shown
 to have a matching arrival, so that the instant the target moves to is one the source can also reach. The
 `target` premise is what makes this per-actor: the queue is global, and an event aimed elsewhere says
-nothing about this bag.
+nothing about this bag. A corollary of the pairing relation, symmetric to the forward one: the event is a
+member of the filtered queue, hence of the event projection, hence some pair carries it, and that pair's
+`GeneralConsumeMatch` supplies the message.
 -/
 theorem generalPendingAgrees_message_of_event
     (name : ActorName)
@@ -197,13 +273,44 @@ theorem generalPendingAgrees_message_of_event
       message ∈ bag ∧
         message.arrival = event.tag.time := by
 
-  unfold GeneralPendingAgrees at hAgrees
+  obtain ⟨pairs, hPairs, hBagPerm, hQueuePerm⟩ :=
+    hAgrees
 
-  exact
-    hAgrees.right
-      event
-      hEvent
-      hTarget
+  have hEventFiltered :
+      event ∈
+        pending.filter
+          (fun e => decide (e.target = name)) :=
+    List.mem_filter.mpr
+      ⟨hEvent,
+       by
+         show
+           decide (event.target = name) =
+             true
+
+         rw [hTarget]
+
+         exact decide_eq_true rfl⟩
+
+  obtain ⟨pair, hPairMember, hPairSnd⟩ :=
+    List.mem_map.mp
+      (hQueuePerm.mem_iff.mp hEventFiltered)
+
+  obtain ⟨_, hArrival, _⟩ :=
+    hPairs
+      pair
+      hPairMember
+
+  have hMessageMember :
+      pair.1 ∈ bag :=
+    hBagPerm.mem_iff.mpr
+      (List.mem_map.mpr
+        ⟨pair, hPairMember, rfl⟩)
+
+  refine ⟨pair.1, hMessageMember, ?_⟩
+
+  rw [← hPairSnd]
+
+  exact hArrival.symm
 
 /--
 The target continuation is a compilation of the source continuation.

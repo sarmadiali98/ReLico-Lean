@@ -922,51 +922,26 @@ each implemented in the working tree (uncommitted):
   `.timeAdvance` pair's empty padding.
 
 **The label correspondence is a hypothesis, not a definition** — F78's measurement, honoured here.
-`GeneralPendingAgrees` agrees messages and events on time and target only; it cannot see payloads
-(`DTR.GeneralPayload` vs `List LF.GeneralValue`) or message names vs event kinds. So each direction
-of the eventual conditions takes a *match* premise naming which target event answers which source
-message, with the payload bridge made explicit: the event's payload is the pointwise compilation
-of the message's. The `.timeAdvance` pair evaded this only because both labels carry
+`GeneralPendingAgrees` — since the β-(i) repair, a pairing through `Correctness.GeneralConsumeMatch`
+(see `Relico/Correctness/GeneralCorrespondence.lean`) — agrees occurrences on target, time and
+compiled payload, but still cannot see message names vs event kinds. So each direction of the
+eventual conditions takes a *match* premise naming which target event answers which source
+message; the payload bridge is now inside the relation rather than a premise, while the kind
+bridge stays a premise. The `.timeAdvance` pair evaded this only because both labels carry
 `(LogicalTime, LogicalTime)`.
 
 **The transfer conditions themselves are not stated here.** The proof attempt recorded as **F86**
-surfaced a relation-granularity blocker — `GeneralPendingAgrees` is deliberately
-non-multiplicity-aware, and consuming one message and one event preserves it only for a matched
-pair — so the two conditions wait on that decision and on the quotient-placement question, and
-nothing below states them in a weakened form. `GeneralConsumeMatch` is the one ingredient of the
-eventual statements that exists today; the rest of this section's prose describes the shape they
-will take.
+surfaced a relation-granularity blocker — `GeneralPendingAgrees` was, at that point,
+non-multiplicity-aware, and consuming one message and one event preserved it only for a matched
+pair — so the two conditions waited on that decision and on the quotient-placement question, and
+nothing below states them in a weakened form. The multiplicity decision has since been taken
+(β-(i), 2026-08-29): `GeneralPendingAgrees` is now a multiplicity-aware pairing stated through
+`Correctness.GeneralConsumeMatch`, and both definitions live in
+`Relico/Correctness/GeneralCorrespondence.lean` — the pairing needed the match, and the import
+graph runs through this module, so the match moved there when its consumer landed. The F86
+scheduler question and the quotient-placement question remain open, and this section still
+describes only the shape the eventual conditions will take.
 -/
-
-/--
-A source message and a target event match, for the purposes of a `.consume` transfer.
-
-The label correspondence `#129` needs, stated as data rather than as a function because no total
-one exists (F78: `consume` carries different payload types on the two sides). A match fixes the
-event's target to the receiving actor's name, its logical time to the message's arrival, and its
-payload to the pointwise compilation of the message's payload.
-
-`name` is a parameter rather than read off the message for the same reason
-`GeneralPendingAgrees` takes it as a parameter: a message records its sender and its message name,
-never its receiver, so the receiver is the store position the correspondence already tracks.
-
-The event **kind** is deliberately not constrained here. Constraining it would mean relating a
-`DTR.MsgName` to an `LF.GeneralEventKind`, which is a property of the *compiled program* (which
-reaction of which reactor the translation emitted for this message server), not of the runtime
-states; the transfer conditions below take the resolved reaction as a premise instead, which is
-strictly more honest — it lets the caller hold the compiled program's answer rather than
-re-deriving a naming convention the runtime never consults.
--/
-def GeneralConsumeMatch
-    (name : ActorName)
-    (message : DTR.GeneralMessage)
-    (event : LF.GeneralPendingEvent) :
-    Prop :=
-  event.target = name ∧
-    event.tag.time = message.arrival ∧
-      event.payload =
-        message.payload.map
-          Translation.compileGeneralValue
 
 end Correctness
 end Relico

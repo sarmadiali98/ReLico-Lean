@@ -258,12 +258,18 @@ important content:
   head-seeded scheduler), the finals observationally equal — and
   `Correctness.GeneralConsumeMatch` fixes the label correspondence F78 measured as absent (target,
   logical time and compiled payload; the event kind deliberately left to the compiled program's
-  answer). The two transfer conditions themselves remain
-  unwritten, and **F86** records why: the proof attempt surfaced a relation-granularity question —
-  `GeneralPendingAgrees` is deliberately non-multiplicity-aware, and consuming one message and one
-  event preserves it only when the pair is matched — whose answer (strengthen the relation, or carry
-  multiplicity as a premise) changes what `generalCorrespondence_initial` means and is therefore a
-  user decision. The consequence, per **F83**: the generic finite-trace agreement of row 9
+  answer); it lives in `Relico/Correctness/GeneralCorrespondence.lean`, where the multiplicity-aware
+  `GeneralPendingAgrees` (β-(i), decided 2026-08-29) is stated through it. The two transfer
+  conditions themselves remain
+  unwritten. **F86** recorded why the first attempt stalled — `GeneralPendingAgrees` was
+  non-multiplicity-aware, and consuming one message and one event preserved it only when the pair
+  is matched — and that blocker is now discharged at the level of *representation*: the β-(i)
+  repair replaces the two directional existentials with an occurrence pairing (permutation of the
+  bag against the message projection, permutation of this actor's filtered pending events against
+  the event projection), so consuming a matched pair removes one occurrence from each side and the
+  relation survives. What β-(i) does **not** answer is F86's other question — the scheduler-level
+  reorder the per-step transfer condition still cannot express — so the conditions stay unwritten
+  until that placement decision (α′-class) is taken. The consequence, per **F83**: the generic finite-trace agreement of row 9
   (`weakBisimulation_traceAgreement_forward`/`_backward`) quantifies over *both* transfer conditions, so
   the general family cannot instantiate it until `#129` lands — aims 8 and 9 of
   `docs/trusted-boundary.md` are proved over an abstract LTS and **not yet for the general family**. No

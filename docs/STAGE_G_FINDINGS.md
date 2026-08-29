@@ -2765,7 +2765,9 @@ unsettled is settled, constructively, for the generating case: `Store.lookup_upd
 (`Relico/Common/Store.lean`) proves that two nested updates at distinct keys agree under every lookup —
 the honest form, because `Store.update` preserves insertion position and a literal store equality is
 *false*: the store `update (update s x vx) y vy` lists `x` before `y` and the other order lists them
-reversed. `Correctness.GeneralConsumeMatch` (`Relico/Correctness/GeneralWeakBisimulation.lean`) fixes
+reversed. `Correctness.GeneralConsumeMatch` (in `Relico/Correctness/GeneralCorrespondence.lean`
+since the β-(i) repair of 2026-08-29; originally defined in
+`Relico/Correctness/GeneralWeakBisimulation.lean`) fixes
 the label correspondence F78 measured as absent: an event matches a message when target, logical time
 and compiled payload agree, with the event *kind* deliberately unconstrained because relating a
 `DTR.MsgName` to an `LF.GeneralEventKind` is a property of the compiled program, not of the runtime
@@ -2830,3 +2832,15 @@ before the decision was ratified. The deeper check is F66's, restated: every "de
 consumer will repair it" note in a relation definition is a promissory note, and the audit that
 matters is the one taken when the consumer finally arrives — because the repair may cost more than a
 lemma.
+
+**Decided 2026-08-29: β-(i), strengthen the relation.** The user decision F86 named has been taken:
+`GeneralPendingAgrees` is now an occurrence pairing — every pair satisfies `GeneralConsumeMatch`,
+the bag is a `List.Perm` of the message projection, and this actor's filtered pending events are a
+`List.Perm` of the event projection — and `GeneralConsumeMatch` moved unchanged in content to
+`Relico/Correctness/GeneralCorrespondence.lean` so the pairing can be stated through it without an
+import cycle. The two old directional accessors survive as corollaries with unchanged signatures, so
+no consumer of the weaker relation needed a rewrite; `generalCorrespondence_initial` and its test pin
+compile unchanged (the empty case is the empty pairing). What this discharges is the *representation*
+of multiplicity only: the F76 scheduler-level reorder the per-step transfer condition cannot express,
+and the commutation theorem's `first ∉ earlier` duplicate boundary, both remain open exactly as
+F86 left them.
