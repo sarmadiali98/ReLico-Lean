@@ -2250,5 +2250,408 @@ theorem generalReactionFor?_perm_of_compiled_pointwise
       [LF.GeneralProgram.reactionFor?,
        hLookup]
 
+/-!
+## Exact resolution of the compiled send routes
+
+The composition half of the message-name ↔ event-kind bridge (task `#129`, decision 0042), and
+prerequisite infrastructure only: nothing here states or prepares a `.consume` transfer
+condition, which F86 keeps waiting on the multiplicity and quotient-placement decisions.
+
+The bridge's two halves landed on either side of this file. The translator half —
+`Translation.compileGeneralReactiveClass_actionRoute_mem` and
+`Translation.compileGeneralReactiveClass_portRoute_mem` — proves each send route's compiled
+reaction is a member of the compiled reactor's list and pins its trigger. The target half —
+`LF.findReactionForKind?_eq_some_of_mem` and
+`LF.GeneralProgram.reactionFor?_eq_findReactionForKind?_of_reactorOfInstance?` — turns
+membership-plus-match into a whole-program lookup answer, under `LF.UniquelyTriggered`. What
+neither half could supply is the middle fact: that the translator's own output satisfies
+`UniquelyTriggered`, which no well-formedness clause gives, for the reason `LF.UniquelyTriggered`
+records (measured as Test 11 of `Relico/Tests/GeneralSemantics.lean`). The first theorem below is
+that middle fact, composed from `Translation.compileGeneralReactiveClass_reactionTriggers_nodup`
+and `LF.UniquelyTriggered.of_nodup_triggers` — the meeting this file exists for. The two after it
+resolve each send route exactly, in the shape `Correctness.GeneralConsumeMatch` deliberately left
+external: the eventual transfer conditions take the resolved reaction as a premise, and these
+theorems are how a caller discharges one.
+-/
+
+/--
+A compiled reactor's reaction list is uniquely triggered, at every event kind at once.
+
+The C7 prerequisite the routing bridge named and could not carry: the target half's lemmas
+condition on `LF.UniquelyTriggered`, well-formedness cannot supply it, and the translator half
+could not even state it. `Translation.compileGeneralReactiveClass_reactionTriggers_nodup` proved
+the output's trigger list carries no duplicates — in `Nodup` form, because
+`Relico.Translation.GeneralBasic` cannot reach `Relico.LF.GeneralSemantics` — and
+`LF.UniquelyTriggered.of_nodup_triggers` was designed as the bridge from exactly that shape. This
+theorem is the two composed; `kind` is an explicit binder so a consumer at one pinned kind
+applies it directly.
+
+The three distinctness hypotheses are the same three `generalReactionFor?_perm_of_compiled`
+passes at the source model's own lists, and they stay hypotheses for the reason that theorem
+records (F81): two are `LF.GeneralReactor.declaredNames` `Nodup` clauses in disguise, the third a
+conjunct of `DTR.GeneralModel.namesUniqueAndValid`, and no public projection discharges them —
+the one that exists for the first is `private` by a rule this repository keeps. Guard-relative is
+the house form and the strongest available; no well-formedness clause is added here.
+
+Startup reactions need nothing from this theorem: `LF.GeneralReactor` carries them in the
+separate `startupReaction` field, while the compiled `messageReactions`' trigger list is pinned
+to the action and port families `Translation.generalReactionTriggersOf` enumerates — and
+independently, `LF.GeneralTrigger.not_matchesKind_startup` records that a `.startup` trigger
+matches no event kind. Either fact alone keeps startup reactions out of every conclusion in
+this section.
+-/
+theorem generalUniquelyTriggered_of_compiled
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List Translation.GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {reactor : LF.GeneralReactor}
+    (hCompiled :
+      Translation.compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok reactor)
+    (hInputPortNames :
+      ((Translation.generalInputPortsOf
+        reactiveClass.name
+        routes).map
+        (fun port =>
+          port.name.value)).Nodup)
+    (hActionNames :
+      ((Translation.generalActionNamesOf
+        (Translation.selfSendsOfClass
+          reactiveClass)
+        reactiveClass.messageServers).map
+        (fun name =>
+          name.value)).Nodup)
+    (hServerNames :
+      (reactiveClass.messageServers.map
+        (fun server =>
+          server.name)).Nodup)
+    (kind : LF.GeneralEventKind) :
+    LF.UniquelyTriggered
+      reactor.messageReactions
+      kind :=
+  LF.UniquelyTriggered.of_nodup_triggers
+    (Translation.compileGeneralReactiveClass_reactionTriggers_nodup
+      hCompiled
+      hInputPortNames
+      hActionNames
+      hServerNames)
+    kind
+
+/--
+The action send route resolves exactly: the whole-program lookup returns the self-send site's
+compiled reaction — `reactionFor? = some …`, the conclusion the `#129` bridge was commissioned
+for.
+
+Three composed facts, each already proved:
+`Translation.compileGeneralReactiveClass_actionRoute_mem` pins the member reaction and the
+body's provenance; `LF.GeneralTrigger.matchesKind` decides the match on `.logicalAction` by
+`decide` on name equality, and the event kind below is the member's own trigger name, so the
+match holds definitionally; and `generalUniquelyTriggered_of_compiled` plus the two target-half
+lemmas turn member-and-match into the lookup answer through the `reactorOfInstance?` seam.
+
+Every conjunct except the resolution equation is the membership theorem's own, restated here so
+that one application yields resolution and body provenance together — the two existentials share
+one `compiledBody`, which is the point of the packaging: identifying a resolution theorem's body
+with the membership theorem's body would otherwise re-run the uniqueness argument, because the
+lookup's answer is only pinned to the member once `UniquelyTriggered` has spoken.
+
+What this does **not** reach: the `.consume` transfer conditions (F86 — they wait on the
+multiplicity and quotient-placement decisions), and any claim about *which pending event* a step
+selects. That is the scheduler's question; this theorem answers what an event kind resolves to
+once asked, which is all the eventual conditions were promised as a premise.
+-/
+theorem generalReactionFor?_eq_some_of_actionRoute
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List Translation.GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {reactor : LF.GeneralReactor}
+    {program : LF.GeneralProgram}
+    {target : ActorName}
+    (hCompiled :
+      Translation.compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok reactor)
+    (hInputPortNames :
+      ((Translation.generalInputPortsOf
+        reactiveClass.name
+        routes).map
+        (fun port =>
+          port.name.value)).Nodup)
+    (hActionNames :
+      ((Translation.generalActionNamesOf
+        (Translation.selfSendsOfClass
+          reactiveClass)
+        reactiveClass.messageServers).map
+        (fun name =>
+          name.value)).Nodup)
+    (hServerNames :
+      (reactiveClass.messageServers.map
+        (fun server =>
+          server.name)).Nodup)
+    (hReactor :
+      program.reactorOfInstance? target =
+        some reactor)
+    (server : DTR.GeneralMessageServer)
+    (hServer :
+      server ∈ reactiveClass.messageServers)
+    (selfSend : Translation.GeneralSelfSend)
+    (hSelfSend :
+      selfSend ∈
+        Translation.generalSelfSendSitesOf
+          server.name
+          (Translation.selfSendsOfClass
+            reactiveClass)) :
+    ∃ compiledBody : LF.GeneralBody,
+      program.reactionFor? target
+          (.logicalAction
+            (Translation.generalActionNameAtSite
+              (Translation.selfSendsOfClass
+                reactiveClass)
+              selfSend.site
+              server.name)) =
+        some
+          (
+            {
+              name :=
+                Translation.messageReactionNameFor
+                  server.name
+
+              trigger :=
+                .logicalAction
+                  (Translation.generalActionNameAtSite
+                    (Translation.selfSendsOfClass
+                      reactiveClass)
+                    selfSend.site
+                    server.name)
+
+              parameters :=
+                server.parameters.map
+                  (fun parameter =>
+                    parameter.name)
+
+              body :=
+                compiledBody
+
+              priority :=
+                none
+            } :
+              LF.GeneralReaction
+          ) ∧
+      ∃ env : Translation.GeneralOutputPortEnv,
+        Translation.outputPortEnvOf
+            classes
+            reactiveClass =
+          .ok env ∧
+        Translation.compileGeneralBody
+            env
+            { bodyKey := .messageServer server.name,
+              selfSends :=
+                Translation.selfSendsOfClass
+                  reactiveClass }
+            0
+            server.body =
+          .ok compiledBody := by
+  obtain ⟨compiledBody, hMember, env, hEnv, hBody⟩ :=
+    Translation.compileGeneralReactiveClass_actionRoute_mem
+      hCompiled
+      server
+      hServer
+      selfSend
+      hSelfSend
+
+  refine ⟨compiledBody, ?_, env, hEnv, hBody⟩
+
+  have hUnique :
+      LF.UniquelyTriggered
+        reactor.messageReactions
+        (.logicalAction
+          (Translation.generalActionNameAtSite
+            (Translation.selfSendsOfClass
+              reactiveClass)
+            selfSend.site
+            server.name)) :=
+    generalUniquelyTriggered_of_compiled
+      hCompiled
+      hInputPortNames
+      hActionNames
+      hServerNames
+      (.logicalAction
+        (Translation.generalActionNameAtSite
+          (Translation.selfSendsOfClass
+            reactiveClass)
+          selfSend.site
+          server.name))
+
+  rw [
+    LF.GeneralProgram.reactionFor?_eq_findReactionForKind?_of_reactorOfInstance?
+      hReactor
+  ]
+
+  exact
+    LF.findReactionForKind?_eq_some_of_mem
+      (.logicalAction
+        (Translation.generalActionNameAtSite
+          (Translation.selfSendsOfClass
+            reactiveClass)
+          selfSend.site
+          server.name))
+      reactor.messageReactions
+      hUnique
+      _
+      hMember
+      (by
+        simp [LF.GeneralTrigger.matchesKind])
+
+/--
+The port send route resolves exactly: the whole-program lookup returns the route's compiled
+reaction — the second half of the `#129` bridge's conclusion.
+
+The same three-part composition as `generalReactionFor?_eq_some_of_actionRoute`, with the port
+route's own member fact: `Translation.compileGeneralReactiveClass_portRoute_mem` pins the member
+reaction to trigger `.inputPort (Translation.generalInputPortOfRoute route)` — the input port
+the connection emitted, the same name `Translation.compileGeneralStmt_send_knownRebec_ok`'s
+output-port entry feeds — and the match is decided on `.inputPort` by `decide` on name equality,
+so member-and-kind agree definitionally here too.
+
+The two route theorems are stated separately rather than unified because their member facts are:
+the action route's membership is stated per self-send site and the port route's per route, and
+folding them into one theorem would need a trigger hypothesis neither consumer holds. Their
+proofs differ only in the member fact and the kind constructor.
+-/
+theorem generalReactionFor?_eq_some_of_portRoute
+    {classes : List DTR.GeneralReactiveClass}
+    {routes : List Translation.GeneralRoute}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {reactor : LF.GeneralReactor}
+    {program : LF.GeneralProgram}
+    {target : ActorName}
+    (hCompiled :
+      Translation.compileGeneralReactiveClass
+          classes
+          routes
+          reactiveClass =
+        .ok reactor)
+    (hInputPortNames :
+      ((Translation.generalInputPortsOf
+        reactiveClass.name
+        routes).map
+        (fun port =>
+          port.name.value)).Nodup)
+    (hActionNames :
+      ((Translation.generalActionNamesOf
+        (Translation.selfSendsOfClass
+          reactiveClass)
+        reactiveClass.messageServers).map
+        (fun name =>
+          name.value)).Nodup)
+    (hServerNames :
+      (reactiveClass.messageServers.map
+        (fun server =>
+          server.name)).Nodup)
+    (hReactor :
+      program.reactorOfInstance? target =
+        some reactor)
+    (server : DTR.GeneralMessageServer)
+    (hServer :
+      server ∈ reactiveClass.messageServers)
+    (route : Translation.GeneralRoute)
+    (hRoute :
+      route ∈
+        Translation.generalRoutesIntoMessageServer
+          reactiveClass.name
+          server.name
+          routes) :
+    ∃ compiledBody : LF.GeneralBody,
+      program.reactionFor? target
+          (.inputPort
+            (Translation.generalInputPortOfRoute
+              route)) =
+        some
+          (
+            {
+              name :=
+                Translation.portReactionNameFor
+                  (Translation.generalInputPortOfRoute
+                    route)
+
+              trigger :=
+                .inputPort
+                  (Translation.generalInputPortOfRoute
+                    route)
+
+              parameters :=
+                server.parameters.map
+                  (fun parameter =>
+                    parameter.name)
+
+              body :=
+                compiledBody
+
+              priority :=
+                none
+            } :
+              LF.GeneralReaction
+          ) ∧
+      ∃ env : Translation.GeneralOutputPortEnv,
+        Translation.outputPortEnvOf
+            classes
+            reactiveClass =
+          .ok env ∧
+        Translation.compileGeneralBody
+            env
+            { bodyKey := .messageServer server.name,
+              selfSends :=
+                Translation.selfSendsOfClass
+                  reactiveClass }
+            0
+            server.body =
+          .ok compiledBody := by
+  obtain ⟨compiledBody, hMember, env, hEnv, hBody⟩ :=
+    Translation.compileGeneralReactiveClass_portRoute_mem
+      hCompiled
+      server
+      hServer
+      route
+      hRoute
+
+  refine ⟨compiledBody, ?_, env, hEnv, hBody⟩
+
+  have hUnique :
+      LF.UniquelyTriggered
+        reactor.messageReactions
+        (.inputPort
+          (Translation.generalInputPortOfRoute
+            route)) :=
+    generalUniquelyTriggered_of_compiled
+      hCompiled
+      hInputPortNames
+      hActionNames
+      hServerNames
+      (.inputPort
+        (Translation.generalInputPortOfRoute
+          route))
+
+  rw [
+    LF.GeneralProgram.reactionFor?_eq_findReactionForKind?_of_reactorOfInstance?
+      hReactor
+  ]
+
+  exact
+    LF.findReactionForKind?_eq_some_of_mem
+      (.inputPort
+        (Translation.generalInputPortOfRoute
+          route))
+      reactor.messageReactions
+      hUnique
+      _
+      hMember
+      (by
+        simp [LF.GeneralTrigger.matchesKind])
+
 end Correctness
 end Relico
