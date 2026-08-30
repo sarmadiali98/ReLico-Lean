@@ -652,6 +652,7 @@ import Relico.Correctness.GeneralEvaluation
 import Relico.Correctness.GeneralCorrespondence
 import Relico.Correctness.GeneralTimeEquivalence
 import Relico.Correctness.GeneralWeakBisimulation
+import Relico.Correctness.GeneralInstantBlock
 import Relico.Correctness.WeakBisimulationTrace
 
 import Relico.Tests.GeneralPriority
