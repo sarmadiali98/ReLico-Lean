@@ -1,6 +1,7 @@
 import Relico.Correctness.GeneralTimeEquivalence
 import Relico.DTR.GeneralSemantics
 import Relico.Common.WeakTransition
+import Relico.LF.GeneralAlphaEquivalence
 
 set_option autoImplicit false
 
@@ -939,9 +940,1487 @@ nothing below states them in a weakened form. The multiplicity decision has sinc
 `Correctness.GeneralConsumeMatch`, and both definitions live in
 `Relico/Correctness/GeneralCorrespondence.lean` — the pairing needed the match, and the import
 graph runs through this module, so the match moved there when its consumer landed. The F86
-scheduler question and the quotient-placement question remain open, and this section still
-describes only the shape the eventual conditions will take.
+scheduler question and the quotient-placement question were then both settled: the placement by
+the light within-tag quotient (`Relico/LF/GeneralAlphaEquivalence.lean`, 2026-08-30), and with it
+the forward condition's **core lemma** below —
+`generalConsume_forward_weak_of_fireRepresentative`, the first of the two, stated against
+`LF.GeneralStepModulo`. The strength audit of 2026-08-30 fixed its classification: it is the
+non-scheduler half of the forward condition — the modulo weak step and the entire post-state
+correspondence, derived once an α-representative whose raw `fire` premises hold is *supplied* —
+and it is **not** the transfer clause itself, because the representative's existence and the
+fire's enablement are premises there, not conclusions. The full forward wrapper is not proved
+yet and needs, mechanically, a no-overdue/tag-alignment invariant, a kind-origin invariant
+(connecting a runtime event's kind to the send site/route that produced it), and
+reachable-state store-key uniqueness, plus two decision-class blockers the audit demonstrated
+with reachable counterexamples: the α′ cross-microstep policy and the F27 same-target same-tag
+source tie policy. The backward condition is also still unwritten: F86's audit recorded
+that it needs the DTR side's own within-instant modulo (the source's actor-priority selection is
+deterministic and cannot τ-hide its choice), and that obligation remains exactly where the audit
+left it.
 -/
+
+/-!
+### Store-update membership, privately
+
+Four facts about `Store.update` and list membership, none of which `Relico/Common/Store.lean`
+states — its public API is lookup-shaped, and that is deliberate (the lookup/agreement convention
+`lookup_update_commute`'s docstring records). The forward `.consume` condition below is the first
+theorem in the general family that must reason about *which entries* an updated store still has,
+because it updates both stores at one key and must re-establish the correspondence's
+membership-shaped fields around that update.
+
+The fourth lemma is the shadowed-binding discipline made occurrence-exact. `hUniqueT`-style
+hypotheses below say the updated key's entries filter to exactly one pair: a *value*-uniqueness
+premise would not do — `[(k, v), (k, v)]` has one value at `k` and two occurrences, `Store.update`
+replaces only the first, the duplicate survives into the post-state, and the correspondence's
+`actorOfReactor` would then demand a pairing for the stale occurrence that no side of the step
+produced. Reachable states have occurrence-unique keys throughout (the initializers build them
+that way and `update` preserves it), so the premises are free for any caller that starts from an
+initial state and steps; the relation `R` itself cannot see key multiplicity, which is why the
+first updating theorem carries these as premises rather than deriving them.
+-/
+
+/--
+An update at the head key replaces the head binding.
+-/
+private theorem update_cons_eq
+    {Key : Type}
+    {Value : Type}
+    [DecidableEq Key]
+    (candidate : Key)
+    (currentValue : Value)
+    (remaining : Store Key Value)
+    (key : Key)
+    (newValue : Value)
+    (hCandidate :
+      candidate = key) :
+    Store.update
+        ((candidate, currentValue) :: remaining)
+        key
+        newValue =
+      (key, newValue) :: remaining := by
+  simp [Store.update, hCandidate]
+
+/--
+An update at another key keeps the head binding and recurses.
+-/
+private theorem update_cons_ne
+    {Key : Type}
+    {Value : Type}
+    [DecidableEq Key]
+    (candidate : Key)
+    (currentValue : Value)
+    (remaining : Store Key Value)
+    (key : Key)
+    (newValue : Value)
+    (hCandidate :
+      candidate ≠ key) :
+    Store.update
+        ((candidate, currentValue) :: remaining)
+        key
+        newValue =
+      (candidate, currentValue) ::
+        Store.update
+          remaining
+          key
+          newValue := by
+  simp [Store.update, hCandidate]
+
+/--
+An entry at another key survives an update.
+-/
+private theorem store_mem_update_of_ne
+    {Key : Type}
+    {Value : Type}
+    [DecidableEq Key]
+    (store : Store Key Value)
+    (name key : Key)
+    (value newValue : Value)
+    (hMem :
+      (name, value) ∈ store)
+    (hNe :
+      name ≠ key) :
+    (name, value) ∈
+      Store.update
+        store
+        key
+        newValue := by
+  induction store with
+
+  | nil =>
+      cases hMem
+
+  | cons entry remaining inductionHypothesis =>
+      obtain ⟨candidate, currentValue⟩ := entry
+
+      by_cases hCandidate : candidate = key
+
+      · rw [
+          update_cons_eq
+            candidate
+            currentValue
+            remaining
+            key
+            newValue
+            hCandidate
+        ]
+
+        rcases
+          List.mem_cons.mp hMem with
+          hEq | hIn
+        · exact
+            absurd
+              ((Prod.mk.inj
+                  hEq).1.trans
+                hCandidate)
+              hNe
+        · exact
+            List.mem_cons_of_mem
+              _
+              hIn
+
+      · rw [
+          update_cons_ne
+            candidate
+            currentValue
+            remaining
+            key
+            newValue
+            hCandidate
+        ]
+
+        rcases
+          List.mem_cons.mp hMem with
+          hEq | hIn
+        · rw [hEq]
+
+          exact List.mem_cons_self
+        · exact
+            List.mem_cons_of_mem
+              _
+              (inductionHypothesis hIn)
+
+/--
+The updated binding itself is a member of the updated store.
+-/
+private theorem store_mem_update_self
+    {Key : Type}
+    {Value : Type}
+    [DecidableEq Key]
+    (store : Store Key Value)
+    (key : Key)
+    (newValue : Value) :
+    (key, newValue) ∈
+      Store.update
+        store
+        key
+        newValue := by
+  induction store with
+
+  | nil =>
+      simp [Store.update]
+
+  | cons entry remaining inductionHypothesis =>
+      obtain ⟨candidate, currentValue⟩ := entry
+
+      by_cases hCandidate : candidate = key
+
+      · rw [
+          update_cons_eq
+            candidate
+            currentValue
+            remaining
+            key
+            newValue
+            hCandidate
+        ]
+
+        exact List.mem_cons_self
+
+      · rw [
+          update_cons_ne
+            candidate
+            currentValue
+            remaining
+            key
+            newValue
+            hCandidate
+        ]
+
+        exact
+          List.mem_cons_of_mem
+            _
+            inductionHypothesis
+
+/--
+Every entry of an updated store is either an old entry or the new binding.
+-/
+private theorem store_mem_update_cases
+    {Key : Type}
+    {Value : Type}
+    [DecidableEq Key]
+    {store : Store Key Value}
+    {key : Key}
+    {newValue : Value}
+    {name : Key}
+    {value : Value}
+    (hMem :
+      (name, value) ∈
+        Store.update
+          store
+          key
+          newValue) :
+    (name, value) ∈ store ∨
+      (name, value) = (key, newValue) := by
+  induction store with
+
+  | nil =>
+      simp only [Store.update] at hMem
+
+      exact
+        Or.inr
+          (List.mem_singleton.mp hMem)
+
+  | cons entry remaining inductionHypothesis =>
+      obtain ⟨candidate, currentValue⟩ := entry
+
+      by_cases hCandidate : candidate = key
+
+      · rw [
+          update_cons_eq
+            candidate
+            currentValue
+            remaining
+            key
+            newValue
+            hCandidate
+        ] at hMem
+
+        rcases
+          List.mem_cons.mp hMem with
+          hEq | hIn
+        · exact Or.inr hEq
+        · exact
+            Or.inl
+              (List.mem_cons_of_mem
+                _
+                hIn)
+
+      · rw [
+          update_cons_ne
+            candidate
+            currentValue
+            remaining
+            key
+            newValue
+            hCandidate
+        ] at hMem
+
+        rcases
+          List.mem_cons.mp hMem with
+          hEq | hIn
+        · exact
+            Or.inl
+              (List.mem_cons.mpr
+                (Or.inl hEq))
+        · rcases inductionHypothesis hIn with
+            hOld | hNew
+          · exact
+              Or.inl
+                (List.mem_cons_of_mem
+                  _
+                  hOld)
+          · exact Or.inr hNew
+
+/--
+If a key's entries filter to exactly one pair, that pair is the key's only entry.
+
+The occurrence-exact form of "no shadowed binding at this key": the filter equation pins how many
+times the key occurs, which value-uniqueness cannot.
+-/
+private theorem store_mem_of_filter_unique
+    {Key : Type}
+    {Value : Type}
+    [DecidableEq Key]
+    (store : Store Key Value)
+    (key : Key)
+    (value value' : Value)
+    (hUnique :
+      store.filter
+          (fun entry =>
+            decide (entry.1 = key)) =
+        [(key, value)])
+    (hMem :
+      (key, value') ∈ store) :
+    value' = value := by
+  have hFiltered :
+      (key, value') ∈
+        store.filter
+          (fun entry =>
+            decide (entry.1 = key)) :=
+    List.mem_filter.mpr
+      ⟨hMem,
+       by
+         show
+           decide (key = key) =
+             true
+
+         exact decide_eq_true rfl⟩
+
+  rw [hUnique] at hFiltered
+
+  exact
+    (Prod.mk.inj
+        (List.mem_singleton.mp
+            hFiltered)).2
+
+/--
+Updating the one entry a key has keeps the key's entries at exactly one pair — the new one.
+
+The companion of `store_mem_of_filter_unique`: together they say the filter-single shape is
+invariant under the update, which is how the correspondence's membership fields stay
+occurrence-honest across a step that replaces one binding.
+-/
+private theorem store_filter_update_unique
+    {Key : Type}
+    {Value : Type}
+    [DecidableEq Key]
+    (store : Store Key Value)
+    (key : Key)
+    (oldValue newValue : Value)
+    (hUnique :
+      store.filter
+          (fun entry =>
+            decide (entry.1 = key)) =
+        [(key, oldValue)]) :
+    (Store.update
+          store
+          key
+          newValue).filter
+        (fun entry =>
+          decide (entry.1 = key)) =
+      [(key, newValue)] := by
+  induction store with
+
+  | nil =>
+      simp at hUnique
+
+  | cons entry remaining inductionHypothesis =>
+      obtain ⟨candidate, currentValue⟩ := entry
+
+      by_cases hCandidate : candidate = key
+
+      · rw [
+          List.filter_cons_of_pos
+            (p := fun entry =>
+              decide (entry.1 = key))
+            (a := (candidate, currentValue))
+            (by
+              show
+                decide (candidate = key) =
+                  true
+
+              rw [hCandidate]
+
+              exact decide_eq_true rfl)
+        ] at hUnique
+
+        rw [
+          update_cons_eq
+            candidate
+            currentValue
+            remaining
+            key
+            newValue
+            hCandidate
+        ]
+
+        injection hUnique with hPairEq hRestEq
+
+        rw [
+          List.filter_cons_of_pos
+            (p := fun entry =>
+              decide (entry.1 = key))
+            (a := (key, newValue))
+            (by
+              show
+                decide (key = key) =
+                  true
+
+              exact decide_eq_true rfl),
+          hRestEq
+        ]
+
+      · rw [
+          List.filter_cons_of_neg
+            (p := fun entry =>
+              decide (entry.1 = key))
+            (a := (candidate, currentValue))
+            (by
+              intro hEqual
+
+              exact
+                hCandidate
+                  (decide_eq_true_iff.mp
+                    hEqual))
+        ] at hUnique
+
+        rw [
+          update_cons_ne
+            candidate
+            currentValue
+            remaining
+            key
+            newValue
+            hCandidate,
+          List.filter_cons_of_neg
+            (p := fun entry =>
+              decide (entry.1 = key))
+            (a := (candidate, currentValue))
+            (by
+              intro hEqual
+
+              exact
+                hCandidate
+                  (decide_eq_true_iff.mp
+                    hEqual))
+        ]
+
+        exact inductionHypothesis hUnique
+
+/-!
+### The forward `.consume` core lemma
+
+`generalConsume_forward_weak_of_fireRepresentative` below is the forward `.consume` transfer
+condition's **core lemma** — not the transfer clause itself, a classification fixed by the
+strength audit of 2026-08-30. It is the non-scheduler half: given that the source has taken one
+occurrence of a matched message, and given an α-representative at which the target's raw `fire`
+premises already hold, it *derives* the target's answer — a modulo weak step at exactly the
+fired event's `.consume` label — and the full post-state correspondence. What it deliberately
+does **not** derive is the representative's existence and the fire's enablement: those are
+premises here, and they are the part of the transfer that belongs to the scheduler-alignment
+invariants and the frozen decision-class questions. The full forward wrapper — from an actual
+`DTR.GeneralStep.take` and the ordinary global assumptions to the existential target answer —
+is not proved yet. It is stated against `LF.GeneralStepModulo`, the light within-tag quotient
+of decision 0042: the target's answer may begin at an α-equivalent representative, which is how
+F76's measured selection divergence — the source's actor-priority order and the target's queue
+order disagreeing within one tag — is absorbed without touching either scheduler.
+
+Reading the premise set top to bottom:
+
+**The source step is given by its shape, not by its rule.** `hDue` plus the conclusion's
+post-configuration literal are the `take` rule's local content — bag split, parameter binding,
+body installation — and the theorem never consults the model or the selection machinery: the
+premises `DTR.GeneralStep.take` uses for actor selection (`hSelected`, `hName`, `hArrival`,
+`hIdle`) and server lookup are not consumed here, because nothing downstream of them survives
+into the correspondence. The one selection fact that *is* load-bearing is re-stated where it is
+needed: `hEventTime` says the matched event sits at the current logical time — the non-overdue
+alignment — which in any reachable configuration follows from `hArrival` together with the
+clock's quiescence discipline (`readyActors` names every actor with a due message, so the clock
+never passes one).
+
+**The match is a premise, per F78.** `GeneralConsumeMatch` names the target event that answers
+the taken message — target, time, compiled payload — and the kind bridge stays outside it. The
+resolution theorems of `Relico/Correctness/GeneralCorrespondence.lean`
+(`generalReactionFor?_eq_some_of_actionRoute`, `…_portRoute`) exist to discharge, at a call
+site, exactly the three premises `hReaction`, `hParams` and `hBody`: which reaction the event's
+kind resolves to, that its parameters are the server's parameter names, and that its body is a
+compilation of the server's body. None of that belongs in this statement — it is compiled-program
+truth, not runtime truth.
+
+**The target answer is given by its firing, at a representative.** `hAlignSteps` is the τ
+prefix — in the realistic flow either empty or one `microstepAdvance`, the P24 zero-delay
+padding — constrained by the two endpoint equations to have moved nothing but the tag
+(reactors and pending queue literally unchanged; body-execution τ steps change reactors and
+would strand every *other* actor's correspondence, so they are excluded by the endpoints rather
+than by rule inspection). `hAlpha`, `hEarliest`, `hTagAligned`, `hQueue`, `hReactorBefore` and
+`hIdleRT` are the `fire` rule's own premises at the α-representative: the representative is
+already at the event's tag, the event is its scheduler's selection, and the reactor that fires
+is the lookup reactor. That the representative exists as a *premise* rather than a construction
+is the honest residue of the frozen α′ question — when a same-time, different-microstep event
+for another reactor sits ahead of the match, no exact-tag quotient can promote it, and the
+caller's ability to supply `hAlpha` is exactly the statement that this configuration does not
+arise.
+
+**The store premises are the shadowed-binding discipline.** `hUniqueS` and `hUniqueT` say the
+updated key occurs exactly once in each store — occurrence-exact, because `Store.update`
+replaces only the first binding and a surviving duplicate would leave the correspondence's
+membership-shaped fields owing a pairing for a stale entry no side of the step produced.
+`hPaired` says the correspondence's actor-level pairing for the taking actor is realised at
+that same lookup reactor. All three are free for any caller that starts from the initial
+correspondence and steps: the initializers build occurrence-unique stores and `update` preserves
+that, but the relation `R` cannot see key multiplicity, so the first updating theorem in the
+family carries them as premises.
+
+What this theorem is **not**: not the forward transfer condition itself (the strength audit of
+2026-08-30 classified its representative package as undischarged — the wrapper needs the
+no-overdue/tag-alignment invariant, the kind-origin invariant behind `hReaction`/`hParams`/
+`hBody`, and reachable-state store-key uniqueness, and it stands behind two decision-class
+blockers with reachable counterexamples: α′ cross-microstep promotion and the F27 same-target
+same-tag source tie); not the backward direction (F86's audit recorded that it needs the
+DTR side's own within-instant modulo — the source's actor-priority selection is deterministic
+and cannot τ-hide its choice — still unwritten); not the trace-agreement row (which quantifies
+over both directions); and not a claim that the quotient's τ prefix was *necessary* — only that
+it is *permitted*.
+-/
+
+/--
+**Forward, at the `.consume` label, under the light within-tag quotient — the core lemma.**
+
+If the source takes one occurrence of a matched message, and an α-representative at which the
+target's raw `fire` premises hold is *supplied* — possibly after a reactor-and-queue-preserving
+τ alignment — then the target answers with a weak transition at exactly the fired event's
+`.consume` label, and the correspondence holds of both post-states. This is the non-scheduler
+half of the forward `.consume` transfer condition; the representative package it assumes is
+what the still-unproved full wrapper must derive (no-overdue/tag-alignment invariant,
+kind-origin invariant, reachable-state store-key uniqueness, and the α′ and F27-tie decisions).
+
+The conclusion's post-configuration is `DTR.GeneralStep.take`'s own output literal, and the
+weak step's final state is `LF.GeneralStep.fire`'s own output literal: nothing in the statement
+mentions a step derivation, so a caller holds a concrete take (with its rule premises) and a
+concrete firing (with the fire rule's premises at a representative) and reads off the transfer.
+The τ prefix is lifted into the quotient system by `LF.GeneralStepModulo.tauSteps_of_raw`, and
+the visible step itself is one modulo step — reflexivity on the post-state, the representative
+on the pre-state — so the raw `WeakStep` machinery runs unchanged over the lifted relation.
+-/
+theorem generalConsume_forward_weak_of_fireRepresentative
+    (program : LF.GeneralProgram)
+    (config : DTR.GeneralRuntimeConfiguration)
+    (state : LF.GeneralRuntimeState)
+    (hCorrespondence :
+      GeneralStateCorrespondence
+        config
+        state)
+    (actorName : ActorName)
+    (actor : DTR.GeneralActorRuntime)
+    (message : DTR.GeneralMessage)
+    (earlier later : DTR.GeneralMessageBag)
+    (hDue :
+      actor.state.bag =
+        earlier ++ message :: later)
+    (server : DTR.GeneralMessageServer)
+    (event : LF.GeneralPendingEvent)
+    (hMatch :
+      GeneralConsumeMatch
+        actorName
+        message
+        event)
+    (hEventTime :
+      event.tag.time =
+        state.currentTag.time)
+    (aligned : LF.GeneralRuntimeState)
+    (hAlignSteps :
+      Common.TauSteps
+        (LF.GeneralStep program)
+        LF.GeneralLabel.isTau
+        state
+        aligned)
+    (hAlignedReactors :
+      aligned.reactors = state.reactors)
+    (hAlignedPending :
+      aligned.pending = state.pending)
+    (before : LF.GeneralRuntimeState)
+    (hAlpha :
+      LF.generalStateAlphaEquiv
+        before
+        aligned)
+    (hEarliest :
+      LF.GeneralRuntimeState.earliestPendingEvent?
+          before =
+        some event)
+    (hTagAligned :
+      event.tag = before.currentTag)
+    (earlier' later' : LF.GeneralEventQueue)
+    (hQueue :
+      before.pending =
+        earlier' ++ event :: later')
+    (reactorRT : LF.GeneralReactorRuntime)
+    (hUniqueT :
+      before.reactors.filter
+          (fun entry =>
+            decide (entry.1 = event.target)) =
+        [(event.target, reactorRT)])
+    (hReactorBefore :
+      Store.lookup
+          before.reactors
+          event.target =
+        some reactorRT)
+    (hIdleRT :
+      reactorRT.idle = true)
+    (reaction : LF.GeneralReaction)
+    (hReaction :
+      LF.GeneralProgram.reactionFor?
+          program
+          event.target
+          event.kind =
+        some reaction)
+    (hParams :
+      reaction.parameters =
+        server.parameters.map
+          (fun parameter =>
+            parameter.name))
+    (hBody :
+      GeneralContinuationCompiles
+        server.body
+        reaction.body)
+    (hUniqueS :
+      config.actors.filter
+          (fun entry =>
+            decide (entry.1 = actorName)) =
+        [(actorName, actor)])
+    (hPaired :
+      GeneralActorCorresponds
+        actorName
+        actor
+        reactorRT
+        state.pending) :
+    ∃ state' : LF.GeneralRuntimeState,
+      Common.WeakStep
+          (LF.GeneralStepModulo program)
+          LF.GeneralLabel.isTau
+          state
+          (LF.GeneralLabel.consume
+            event.target
+            event.kind)
+          state' ∧
+        GeneralStateCorrespondence
+          {
+            now := config.now
+
+            actors :=
+              Store.update
+                config.actors
+                actorName
+                {
+                  state :=
+                    {
+                      valuation :=
+                        DTR.bindParameters
+                          server.parameters
+                          message.payload
+                          actor.state.valuation
+
+                      bag := earlier ++ later
+                    }
+
+                  activeBody := server.body
+                }
+          }
+          state' := by
+  have hMatchTarget :
+      event.target = actorName :=
+    hMatch.1
+
+  have hMatchPayload :
+      event.payload =
+        message.payload.map
+          Translation.compileGeneralValue :=
+    hMatch.2.2
+
+  have hAlphaMem :
+      ∀ (name : ActorName)
+          (reactor : LF.GeneralReactorRuntime),
+        (name, reactor) ∈ before.reactors ↔
+          (name, reactor) ∈ aligned.reactors :=
+    hAlpha.2.1
+
+  have hAlphaQueue :
+      LF.generalQueueAlphaEquiv
+        before.pending
+        aligned.pending :=
+    hAlpha.2.2.2
+
+  have hQueuePerm :
+      List.Perm
+        before.pending
+        state.pending := by
+    rw [← hAlignedPending]
+
+    exact hAlphaQueue.perm
+
+  have hMessagesBefore :
+      GeneralPendingAgrees
+        actorName
+        actor.state.bag
+        before.pending :=
+    generalPendingAgrees_of_queue_perm
+      actorName
+      actor.state.bag
+      hPaired.messages
+      hQueuePerm.symm
+
+  have hPostMessages :
+      GeneralPendingAgrees
+        actorName
+        (earlier ++ later)
+        (earlier' ++ later') :=
+    generalPendingAgrees_removeOne
+      actorName
+      actor.state.bag
+      before.pending
+      hMessagesBefore
+      message
+      event
+      hMatch
+      earlier
+      later
+      hDue
+      earlier'
+      later'
+      hQueue
+
+  have hPostValuation :
+      GeneralValuationAgrees
+        (DTR.bindParameters
+            server.parameters
+            message.payload
+            actor.state.valuation)
+        (LF.bindReactionParameters
+            reaction.parameters
+            event.payload
+            reactorRT.valuation) := by
+    have hBound :=
+      generalValuationAgrees_bind
+        server.parameters
+        message.payload
+        actor.state.valuation
+        reactorRT.valuation
+        hPaired.valuation
+
+    rw [hParams, hMatchPayload]
+
+    exact hBound
+
+  have hPostActorCorresponds :
+      GeneralActorCorresponds
+        actorName
+        {
+          state :=
+            {
+              valuation :=
+                DTR.bindParameters
+                  server.parameters
+                  message.payload
+                  actor.state.valuation
+
+              bag := earlier ++ later
+            }
+
+          activeBody := server.body
+        }
+        {
+          valuation :=
+            LF.bindReactionParameters
+              reaction.parameters
+              event.payload
+              reactorRT.valuation
+
+          activeBody := reaction.body
+        }
+        (earlier' ++ later') :=
+    {
+      valuation := hPostValuation
+
+      messages := hPostMessages
+
+      continuation := hBody
+    }
+
+  have hFire :
+      LF.GeneralStep
+          program
+          before
+          (LF.GeneralLabel.consume
+            event.target
+            event.kind)
+          {
+            currentTag := before.currentTag
+
+            reactors :=
+              Store.update
+                before.reactors
+                event.target
+                {
+                  valuation :=
+                    LF.bindReactionParameters
+                      reaction.parameters
+                      event.payload
+                      reactorRT.valuation
+
+                  activeBody := reaction.body
+                }
+
+            pending := earlier' ++ later'
+          } :=
+    LF.GeneralStep.fire
+      hEarliest
+      hTagAligned
+      hQueue
+      hReactorBefore
+      hIdleRT
+      hReaction
+
+  refine
+    ⟨{
+        currentTag := before.currentTag
+
+        reactors :=
+          Store.update
+            before.reactors
+            event.target
+            {
+              valuation :=
+                LF.bindReactionParameters
+                  reaction.parameters
+                  event.payload
+                  reactorRT.valuation
+
+              activeBody := reaction.body
+            }
+
+        pending := earlier' ++ later'
+      },
+      Common.WeakStep.visible
+        (LF.GeneralLabel.not_isTau_consume
+          event.target
+          event.kind)
+        (LF.GeneralStepModulo.tauSteps_of_raw
+          hAlignSteps)
+        ⟨before,
+          {
+            currentTag := before.currentTag
+
+            reactors :=
+              Store.update
+                before.reactors
+                event.target
+                {
+                  valuation :=
+                    LF.bindReactionParameters
+                      reaction.parameters
+                      event.payload
+                      reactorRT.valuation
+
+                  activeBody := reaction.body
+                }
+
+            pending := earlier' ++ later'
+          },
+          hAlpha,
+          LF.generalStateAlphaEquiv.refl
+            {
+              currentTag := before.currentTag
+
+              reactors :=
+                Store.update
+                  before.reactors
+                  event.target
+                  {
+                    valuation :=
+                      LF.bindReactionParameters
+                        reaction.parameters
+                        event.payload
+                        reactorRT.valuation
+
+                    activeBody := reaction.body
+                  }
+
+              pending := earlier' ++ later'
+            },
+          hFire⟩
+        (Common.TauSteps.refl
+          ({
+            currentTag := before.currentTag
+
+            reactors :=
+              Store.update
+                before.reactors
+                event.target
+                {
+                  valuation :=
+                    LF.bindReactionParameters
+                      reaction.parameters
+                      event.payload
+                      reactorRT.valuation
+
+                  activeBody := reaction.body
+                }
+
+            pending := earlier' ++ later'
+          } :
+            LF.GeneralRuntimeState)),
+      ?_⟩
+
+  have hPostActorsFilter :
+      (Store.update
+            config.actors
+            actorName
+            {
+              state :=
+                {
+                  valuation :=
+                    DTR.bindParameters
+                      server.parameters
+                      message.payload
+                      actor.state.valuation
+
+                  bag := earlier ++ later
+                }
+
+              activeBody := server.body
+            }).filter
+          (fun entry =>
+            decide (entry.1 = actorName)) =
+        [(actorName,
+          {
+            state :=
+              {
+                valuation :=
+                  DTR.bindParameters
+                    server.parameters
+                    message.payload
+                    actor.state.valuation
+
+                bag := earlier ++ later
+              }
+
+            activeBody := server.body
+          })] :=
+    store_filter_update_unique
+      config.actors
+      actorName
+      actor
+      {
+        state :=
+          {
+            valuation :=
+              DTR.bindParameters
+                server.parameters
+                message.payload
+                actor.state.valuation
+
+            bag := earlier ++ later
+          }
+
+        activeBody := server.body
+      }
+      hUniqueS
+
+  have hAfterReactorsFilter :
+      (Store.update
+            before.reactors
+            event.target
+            {
+              valuation :=
+                LF.bindReactionParameters
+                  reaction.parameters
+                  event.payload
+                  reactorRT.valuation
+
+              activeBody := reaction.body
+            }).filter
+          (fun entry =>
+            decide (entry.1 = event.target)) =
+        [(event.target,
+          {
+            valuation :=
+              LF.bindReactionParameters
+                reaction.parameters
+                event.payload
+                reactorRT.valuation
+
+            activeBody := reaction.body
+          })] :=
+    store_filter_update_unique
+      before.reactors
+      event.target
+      reactorRT
+      {
+        valuation :=
+          LF.bindReactionParameters
+            reaction.parameters
+            event.payload
+            reactorRT.valuation
+
+        activeBody := reaction.body
+      }
+      hUniqueT
+
+  exact
+    {
+      logicalTime := by
+        show
+          before.currentTag.time =
+            config.now
+
+        rw [← hTagAligned]
+
+        exact
+          hEventTime.trans
+            hCorrespondence.logicalTime
+
+      reactorOfActor := by
+        intro name actor' hMember
+
+        by_cases hName : name = actorName
+
+        · rw [hName] at hMember ⊢
+
+          have hActorEq :
+              actor' =
+                {
+                  state :=
+                    {
+                      valuation :=
+                        DTR.bindParameters
+                          server.parameters
+                          message.payload
+                          actor.state.valuation
+
+                      bag := earlier ++ later
+                    }
+
+                  activeBody := server.body
+                } :=
+            store_mem_of_filter_unique
+              (Store.update
+                  config.actors
+                  actorName
+                  {
+                    state :=
+                      {
+                        valuation :=
+                          DTR.bindParameters
+                            server.parameters
+                            message.payload
+                            actor.state.valuation
+
+                        bag := earlier ++ later
+                      }
+
+                    activeBody := server.body
+                  })
+              actorName
+              {
+                state :=
+                  {
+                    valuation :=
+                      DTR.bindParameters
+                        server.parameters
+                        message.payload
+                        actor.state.valuation
+
+                    bag := earlier ++ later
+                  }
+
+                activeBody := server.body
+              }
+              actor'
+              hPostActorsFilter
+              hMember
+
+          subst hActorEq
+
+          refine
+            ⟨{
+                valuation :=
+                  LF.bindReactionParameters
+                    reaction.parameters
+                    event.payload
+                    reactorRT.valuation
+
+                activeBody := reaction.body
+              },
+              ?_,
+              hPostActorCorresponds⟩
+
+          rw [hMatchTarget]
+
+          exact
+            store_mem_update_self
+              before.reactors
+              actorName
+              {
+                valuation :=
+                  LF.bindReactionParameters
+                    reaction.parameters
+                    event.payload
+                    reactorRT.valuation
+
+                activeBody := reaction.body
+              }
+
+        · rcases
+              store_mem_update_cases
+                hMember with
+            hOld | hNew
+          · obtain
+                ⟨reactorX, hReactorX, hCorrX⟩ :=
+              hCorrespondence.reactorOfActor
+                name
+                actor'
+                hOld
+
+            refine ⟨reactorX, ?_, ?_⟩
+
+            · have hInBefore :
+                  (name, reactorX) ∈
+                    before.reactors :=
+                (hAlphaMem name reactorX).mpr
+                  (by
+                    rw [hAlignedReactors]
+
+                    exact hReactorX)
+
+              exact
+                store_mem_update_of_ne
+                  before.reactors
+                  name
+                  event.target
+                  reactorX
+                  {
+                    valuation :=
+                      LF.bindReactionParameters
+                        reaction.parameters
+                        event.payload
+                        reactorRT.valuation
+
+                    activeBody := reaction.body
+                  }
+                  hInBefore
+                  (fun hEqual =>
+                    hName
+                      (hEqual.trans
+                        hMatchTarget))
+
+            · exact
+                {
+                  valuation :=
+                    hCorrX.valuation
+
+                  messages := by
+                    have hMessagesAtSplit :
+                        GeneralPendingAgrees
+                          name
+                          actor'.state.bag
+                          (earlier' ++ event :: later') := by
+                      rw [← hQueue]
+
+                      exact
+                        generalPendingAgrees_of_queue_perm
+                          name
+                          actor'.state.bag
+                          hCorrX.messages
+                          hQueuePerm.symm
+
+                    exact
+                      generalPendingAgrees_of_queue_drop
+                        name
+                        actor'.state.bag
+                        event
+                        earlier'
+                        later'
+                        hMessagesAtSplit
+                        (fun hEqual =>
+                          hName
+                            (hEqual.symm.trans
+                              hMatchTarget))
+
+                  continuation :=
+                    hCorrX.continuation
+                }
+
+          · obtain ⟨hNameEq, _⟩ :=
+              Prod.mk.inj hNew
+
+            exact absurd hNameEq hName
+
+      actorOfReactor := by
+        intro name reactor' hMember
+
+        by_cases hName : name = actorName
+
+        · rw [hName] at hMember ⊢
+
+          rw [← hMatchTarget] at hMember
+
+          have hMemberTarget :
+              (event.target, reactor') ∈
+                Store.update
+                  before.reactors
+                  event.target
+                  {
+                    valuation :=
+                      LF.bindReactionParameters
+                        reaction.parameters
+                        event.payload
+                        reactorRT.valuation
+
+                    activeBody := reaction.body
+                  } := hMember
+
+          have hReactorEq :
+              reactor' =
+                {
+                  valuation :=
+                    LF.bindReactionParameters
+                      reaction.parameters
+                      event.payload
+                      reactorRT.valuation
+
+                  activeBody := reaction.body
+                } :=
+            store_mem_of_filter_unique
+              (Store.update
+                  before.reactors
+                  event.target
+                  {
+                    valuation :=
+                      LF.bindReactionParameters
+                        reaction.parameters
+                        event.payload
+                        reactorRT.valuation
+
+                    activeBody := reaction.body
+                  })
+              event.target
+              {
+                valuation :=
+                  LF.bindReactionParameters
+                    reaction.parameters
+                    event.payload
+                    reactorRT.valuation
+
+                activeBody := reaction.body
+              }
+              reactor'
+              hAfterReactorsFilter
+              hMemberTarget
+
+          subst hReactorEq
+
+          refine
+            ⟨{
+                state :=
+                  {
+                    valuation :=
+                      DTR.bindParameters
+                        server.parameters
+                        message.payload
+                        actor.state.valuation
+
+                    bag := earlier ++ later
+                  }
+
+                activeBody := server.body
+              },
+              ?_,
+              hPostActorCorresponds⟩
+
+          exact
+            store_mem_update_self
+              config.actors
+              actorName
+              {
+                state :=
+                  {
+                    valuation :=
+                      DTR.bindParameters
+                        server.parameters
+                        message.payload
+                        actor.state.valuation
+
+                    bag := earlier ++ later
+                  }
+
+                activeBody := server.body
+              }
+
+        · rcases
+              store_mem_update_cases
+                hMember with
+            hOld | hNew
+          · have hInAligned :
+                (name, reactor') ∈
+                  aligned.reactors :=
+              (hAlphaMem name reactor').mp
+                hOld
+
+            rw [hAlignedReactors] at hInAligned
+
+            obtain
+                ⟨actorX, hActorX, hCorrX⟩ :=
+              hCorrespondence.actorOfReactor
+                name
+                reactor'
+                hInAligned
+
+            refine ⟨actorX, ?_, ?_⟩
+
+            · exact
+                store_mem_update_of_ne
+                  config.actors
+                  name
+                  actorName
+                  actorX
+                  {
+                    state :=
+                      {
+                        valuation :=
+                          DTR.bindParameters
+                            server.parameters
+                            message.payload
+                            actor.state.valuation
+
+                        bag := earlier ++ later
+                      }
+
+                    activeBody := server.body
+                  }
+                  hActorX
+                  hName
+
+            · exact
+                {
+                  valuation :=
+                    hCorrX.valuation
+
+                  messages := by
+                    have hMessagesAtSplit :
+                        GeneralPendingAgrees
+                          name
+                          actorX.state.bag
+                          (earlier' ++ event :: later') := by
+                      rw [← hQueue]
+
+                      exact
+                        generalPendingAgrees_of_queue_perm
+                          name
+                          actorX.state.bag
+                          hCorrX.messages
+                          hQueuePerm.symm
+
+                    exact
+                      generalPendingAgrees_of_queue_drop
+                        name
+                        actorX.state.bag
+                        event
+                        earlier'
+                        later'
+                        hMessagesAtSplit
+                        (fun hEqual =>
+                          hName
+                            (hEqual.symm.trans
+                              hMatchTarget))
+
+                  continuation :=
+                    hCorrX.continuation
+                }
+
+          · obtain ⟨hNameEq, _⟩ :=
+              Prod.mk.inj hNew
+
+            exact
+              absurd
+                (hNameEq.trans hMatchTarget)
+                hName
+
+      pendingTargeted := by
+        intro event' hMember
+
+        have hBefore :
+            event' ∈ before.pending := by
+          rcases
+              List.mem_append.mp
+                (show
+                  event' ∈ earlier' ++ later'
+                  from
+                    hMember) with
+            hIn | hIn
+          · rw [hQueue]
+
+            exact
+              List.mem_append.mpr
+                (Or.inl hIn)
+          · rw [hQueue]
+
+            exact
+              List.mem_append.mpr
+                (Or.inr
+                  (List.mem_cons.mpr
+                    (Or.inr hIn)))
+
+        obtain ⟨actorX, hActorX⟩ :=
+          hCorrespondence.pendingTargeted
+            event'
+            (hQueuePerm.mem_iff.mp hBefore)
+
+        by_cases hTarget :
+          event'.target = actorName
+
+        · refine
+            ⟨{
+                state :=
+                  {
+                    valuation :=
+                      DTR.bindParameters
+                        server.parameters
+                        message.payload
+                        actor.state.valuation
+
+                    bag := earlier ++ later
+                  }
+
+                activeBody := server.body
+              },
+              ?_⟩
+
+          rw [hTarget]
+
+          exact
+            store_mem_update_self
+              config.actors
+              actorName
+              {
+                state :=
+                  {
+                    valuation :=
+                      DTR.bindParameters
+                        server.parameters
+                        message.payload
+                        actor.state.valuation
+
+                    bag := earlier ++ later
+                  }
+
+                activeBody := server.body
+              }
+
+        · refine ⟨actorX, ?_⟩
+
+          exact
+            store_mem_update_of_ne
+              config.actors
+              event'.target
+              actorName
+              actorX
+              {
+                state :=
+                  {
+                    valuation :=
+                      DTR.bindParameters
+                        server.parameters
+                        message.payload
+                        actor.state.valuation
+
+                    bag := earlier ++ later
+                  }
+
+                activeBody := server.body
+              }
+              hActorX
+              hTarget
+    }
 
 end Correctness
 end Relico

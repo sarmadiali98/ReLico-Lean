@@ -2860,3 +2860,31 @@ compile unchanged (the empty case is the empty pairing). What this discharges is
 of multiplicity only: the F76 scheduler-level reorder the per-step transfer condition cannot express,
 and the commutation theorem's `first ∉ earlier` duplicate boundary, both remain open exactly as
 F86 left them.
+
+**Decided 2026-08-30: the placement, and with it the forward core lemma.** The scheduler-level
+question F86 left open is settled by the light within-tag quotient — α-equivalence on raw LF
+states (`LF.generalStateAlphaEquiv`: equal tags, stores agreeing on both membership and every
+`Store.lookup`, queues related by admissible same-tag distinct-target swaps) and the lifted
+`LF.GeneralStepModulo`, with no congruence claimed (the scheduler's representative-sensitivity
+makes it false) and no `Quotient` type. Against that system, the forward `.consume` **core
+lemma** `Correctness.generalConsume_forward_weak_of_fireRepresentative` is proved — the
+non-scheduler half: once a source take's local shape is given and an α-representative at which
+the raw `fire` premises hold is supplied, the target's answer (a modulo weak step at the
+matched event's `.consume` label) and the full post-state correspondence are *derived*. The
+strength audit of the same date fixed the classification: this is not the transfer clause
+itself, because the representative's existence and the fire's enablement are premises there,
+not conclusions. Its premise families are documented in the theorem's own section: the take's
+local shape (`hDue` plus the rule's post-configuration literal — selection premises are not
+consumed, the non-overdue alignment `hEventTime` is), the F78 match premise, the
+reactor-and-queue-preserving τ alignment plus the α-representative fire premises, the
+resolution bridges `hReaction`/`hParams`/`hBody` (their last mile is the landed routing
+theorems, but they sit behind a missing kind-origin invariant), and the occurrence-unique
+store entries `hUniqueS`/`hUniqueT` — the shadowed-binding discipline made occurrence-exact,
+because `Store.update` replaces only the first binding and a surviving duplicate would leave
+`R`'s membership fields owing a pairing no side of the step produced. The full forward
+**wrapper** is not proved and needs the no-overdue/tag-alignment invariant, the kind-origin
+invariant, and reachable-state store-key uniqueness — plus two decision-class blockers with
+reachable counterexamples: the α′ cross-microstep policy and the F27 same-target same-tag
+source tie policy. The backward condition is still unwritten and still needs the DTR
+side's own within-instant modulo; `first ∉ earlier` still bounds only the raw fire theorem's
+applicability, not the correspondence, not the quotient, and not this core lemma.

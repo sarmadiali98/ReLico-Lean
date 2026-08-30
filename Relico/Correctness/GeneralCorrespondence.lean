@@ -742,6 +742,110 @@ theorem generalPendingAgrees_removeOne
 
       exact perm_remove_middle hQueueMid2
 
+/-!
+### Transporting the agreement across queue equivalences
+
+Two small closure facts the `.consume` transfer conditions need: the pairing is invariant under a
+permutation of the pending queue, and under dropping an event the filter never selected. The first is
+what lets a transfer condition move the pairing from the correspondence's own queue to an
+α-representative's (F86's light quotient permutes queues and nothing else); the second is what lets
+every *other* actor's pairing survive one actor's event being consumed — the removed event fails the
+other actors' target filters, so their filtered projections never see it go.
+-/
+
+/--
+The agreement is invariant under permutation of the pending queue.
+
+The bag conjunct and the pair conjunct mention only the pairing itself; the queue conjunct filters the
+queue, and `List.Perm.filter` carries the permutation through the filter. No occurrence bookkeeping is
+needed — the permutation already carries it — which is the β-(i) design paying off twice over: the same
+clause that made multiplicity provable makes queue-permutation transport free.
+-/
+theorem generalPendingAgrees_of_queue_perm
+    (name : ActorName)
+    (bag : DTR.GeneralMessageBag)
+    {pending pending' : LF.GeneralEventQueue}
+    (hAgrees :
+      GeneralPendingAgrees
+        name
+        bag
+        pending)
+    (hPerm :
+      List.Perm
+        pending
+        pending') :
+    GeneralPendingAgrees
+      name
+      bag
+      pending' := by
+  obtain ⟨pairs, hPairsMatch, hBagPerm, hQueuePerm⟩ :=
+    hAgrees
+
+  exact
+    ⟨pairs,
+     hPairsMatch,
+     hBagPerm,
+     (List.Perm.filter
+        (fun event =>
+          decide (event.target = name))
+        hPerm).symm.trans
+       hQueuePerm⟩
+
+/--
+Dropping an event that targets another actor leaves this actor's agreement intact.
+
+The queue conjunct filters by target, so an event aimed elsewhere is invisible to it: filtering
+`earlier ++ event :: later` and filtering `earlier ++ later` produce the same list, and the same pairing
+witnesses both. This is the half of one consume that belongs to everyone else — the consumed occurrence
+is removed from the global queue, but only the consuming actor's projection ever contained it.
+-/
+theorem generalPendingAgrees_of_queue_drop
+    (name : ActorName)
+    (bag : DTR.GeneralMessageBag)
+    (event : LF.GeneralPendingEvent)
+    (earlier later : LF.GeneralEventQueue)
+    (hAgrees :
+      GeneralPendingAgrees
+        name
+        bag
+        (earlier ++ event :: later))
+    (hElsewhere :
+      event.target ≠ name) :
+    GeneralPendingAgrees
+      name
+      bag
+      (earlier ++ later) := by
+  obtain ⟨pairs, hPairsMatch, hBagPerm, hQueuePerm⟩ :=
+    hAgrees
+
+  refine
+    ⟨pairs,
+     hPairsMatch,
+     hBagPerm,
+     ?_⟩
+
+  have hFilter :
+      (earlier ++ event :: later).filter
+          (fun e =>
+            decide (e.target = name)) =
+        (earlier ++ later).filter
+          (fun e =>
+            decide (e.target = name)) := by
+    rw [
+      List.filter_append,
+      List.filter_append,
+      List.filter_cons_of_neg
+        (p := fun e =>
+          decide (e.target = name))
+        (a := event)
+        (by
+          simp [hElsewhere])
+    ]
+
+  rw [hFilter] at hQueuePerm
+
+  exact hQueuePerm
+
 /--
 The target continuation is a compilation of the source continuation.
 

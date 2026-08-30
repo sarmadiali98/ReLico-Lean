@@ -259,19 +259,30 @@ important content:
   `Correctness.GeneralConsumeMatch` fixes the label correspondence F78 measured as absent (target,
   logical time and compiled payload; the event kind deliberately left to the compiled program's
   answer); it lives in `Relico/Correctness/GeneralCorrespondence.lean`, where the multiplicity-aware
-  `GeneralPendingAgrees` (β-(i), decided 2026-08-29) is stated through it. The two transfer
-  conditions themselves remain
-  unwritten. **F86** recorded why the first attempt stalled — `GeneralPendingAgrees` was
+  `GeneralPendingAgrees` (β-(i), decided 2026-08-29) is stated through it. **F86** recorded why the
+  first attempt stalled — `GeneralPendingAgrees` was
   non-multiplicity-aware, and consuming one message and one event preserved it only when the pair
   is matched — and that blocker is now discharged at the level of *representation*: the β-(i)
   repair replaces the two directional existentials with an occurrence pairing (permutation of the
   bag against the message projection, permutation of this actor's filtered pending events against
   the event projection), so consuming a matched pair removes one occurrence from each side and the
-  relation survives. What β-(i) does **not** answer is F86's other question — the scheduler-level
-  reorder the per-step transfer condition still cannot express — so the conditions stay unwritten
-  until that placement decision (α′-class) is taken. The consequence, per **F83**: the generic finite-trace agreement of row 9
+  relation survives. F86's other question — the scheduler-level
+  reorder the per-step transfer condition could not express — was answered by the placement
+  decision of 2026-08-30: the light within-tag quotient (`LF.GeneralStepModulo`, exact full
+  superdense tags, distinct reactors only), against which the forward `.consume` **core lemma**
+  (`Correctness.generalConsume_forward_weak_of_fireRepresentative`) is proved — the
+  non-scheduler half: once an α-representative at which the raw `fire` premises hold is
+  supplied, the target's modulo weak step at the matched event's `.consume` label and the full
+  post-state correspondence are derived. This is not yet the transfer clause itself: the
+  representative package is assumed, and the full forward **wrapper** is not proved — it needs
+  the no-overdue/tag-alignment invariant, the kind-origin invariant behind the
+  routing/reaction premises, and reachable-state store-key uniqueness, and it stands behind
+  two decision-class blockers with reachable counterexamples (the α′ cross-microstep policy and
+  the F27 same-target same-tag source tie policy). The **backward** condition is also
+  unwritten: it needs the DTR side's own within-instant modulo (the source's actor-priority
+  selection is deterministic and cannot τ-hide its choice). The consequence, per **F83**: the generic finite-trace agreement of row 9
   (`weakBisimulation_traceAgreement_forward`/`_backward`) quantifies over *both* transfer conditions, so
-  the general family cannot instantiate it until `#129` lands — aims 8 and 9 of
+  the general family cannot instantiate it until `#129`'s wrapper lands — aims 8 and 9 of
   `docs/trusted-boundary.md` are proved over an abstract LTS and **not yet for the general family**. No
   model, tie-carrying or not, is eligible for a theorem that does not exist. The decision refuses
   nothing: contention models will become theorem-eligible when the quotient correspondence lands.
