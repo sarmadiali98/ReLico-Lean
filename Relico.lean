@@ -629,6 +629,7 @@ import Relico.DTR.GeneralEvaluation
 import Relico.DTR.GeneralRuntime
 import Relico.DTR.GeneralSemantics
 import Relico.DTR.GeneralInitialization
+import Relico.DTR.GeneralNoOverdue
 import Relico.Frontend.GeneralSchema
 import Relico.Frontend.GeneralDiagnostic
 import Relico.Frontend.GeneralElaborator
@@ -643,6 +644,7 @@ import Relico.LF.GeneralRuntime
 import Relico.LF.GeneralSemantics
 import Relico.LF.GeneralInitialization
 import Relico.LF.GeneralAlphaEquivalence
+import Relico.LF.GeneralNoPastPending
 
 import Relico.Translation.GeneralRouting
 import Relico.Translation.GeneralBasic
