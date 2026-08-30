@@ -1,6 +1,7 @@
 import Relico.DTR.GeneralRuntime
 import Relico.DTR.GeneralWellFormed
 import Relico.LF.GeneralSemantics
+import Relico.LF.GeneralAlphaEquivalence
 import Relico.DTR.GeneralInitialization
 import Relico.LF.GeneralInitialization
 import Relico.Correctness.GeneralEvaluation
@@ -1051,6 +1052,163 @@ theorem generalCorrespondence_retag
         hCorrespondence.actorOfReactor
       pendingTargeted :=
         hCorrespondence.pendingTargeted
+    }
+
+/-!
+### Compatibility with α-equivalence
+
+The F86 light-quotient layer (`Relico/LF/GeneralAlphaEquivalence.lean`) lets the eventual `.consume`
+transfer conditions step to an α-equivalent representative before firing. These two theorems are why
+that is free: the correspondence survives replacement of the whole target state by an α-equivalent one.
+Nothing here inspects the generator — the transport runs on the clauses of the state relation and
+the four fields of `GeneralStateCorrespondence`, which is the whole point of stating the queue clause as
+a closure with proved consequences (`List.Perm` for membership, filter equality for the per-actor
+projection) rather than as raw swaps.
+-/
+
+/--
+One actor's correspondence survives an α-exchange of the pending queue.
+
+Only the `messages` field reads the queue, and `GeneralPendingAgrees` reads it through exactly the
+filter whose equality `generalQueueAlphaEquiv.filter_target` preserves — so the same pairing witnesses
+both sides. The valuation and continuation fields are queue-blind and pass through untouched.
+-/
+theorem generalActorCorresponds_of_queueAlphaEquiv
+    (name : ActorName)
+    (actor : DTR.GeneralActorRuntime)
+    (reactor : LF.GeneralReactorRuntime)
+    {pending pending' : LF.GeneralEventQueue}
+    (hCorresponds :
+      GeneralActorCorresponds
+        name
+        actor
+        reactor
+        pending)
+    (hEquiv :
+      LF.generalQueueAlphaEquiv
+        pending
+        pending') :
+    GeneralActorCorresponds
+      name
+      actor
+      reactor
+      pending' := by
+  obtain
+      ⟨hValuation, ⟨pairs, hPairsMatch, hBagPerm, hQueuePerm⟩, hContinuation⟩ :=
+    hCorresponds
+
+  have hFilter :
+      pending.filter
+          (fun event =>
+            decide (event.target = name)) =
+        pending'.filter
+          (fun event =>
+            decide (event.target = name)) :=
+    LF.generalQueueAlphaEquiv.filter_target
+      name
+      hEquiv
+
+  refine
+    {
+      valuation := hValuation
+
+      messages :=
+        ⟨pairs,
+         hPairsMatch,
+         hBagPerm,
+         by
+           rw [← hFilter]
+
+           exact hQueuePerm⟩
+
+      continuation := hContinuation
+    }
+
+/--
+The correspondence is invariant under α-equivalence of the target state.
+
+This is the lemma the light-quotient transfer conditions consume whenever a step begins at (or lands
+in) a representative rather than the state the correspondence was stated at. Each field transports
+along the clause of `generalStateAlphaEquiv` that reads the same state component: `logicalTime` along
+tag equality, the two store fields along the membership half of the store component (the lookup half
+is for `GeneralStep`'s reading, not this relation's — `Store.mem_of_lookup`'s docstring records the
+shadowed-binding discipline the correspondence's own fields follow), and `pendingTargeted` along the
+`List.Perm` that every queue α-equivalence carries.
+-/
+theorem generalStateCorrespondence_of_generalStateAlphaEquiv
+    {config : DTR.GeneralRuntimeConfiguration}
+    {state state' : LF.GeneralRuntimeState}
+    (hCorresponds :
+      GeneralStateCorrespondence
+        config
+        state)
+    (hAlpha :
+      LF.generalStateAlphaEquiv
+        state
+        state') :
+    GeneralStateCorrespondence
+      config
+      state' := by
+  obtain ⟨hTag, hStore, _, hQueue⟩ :=
+    hAlpha
+
+  refine
+    {
+      logicalTime := by
+        rw [← hTag]
+
+        exact
+          hCorresponds.logicalTime
+
+      reactorOfActor := by
+        intro name actor hActor
+
+        obtain
+            ⟨reactor, hMember, hCorrespondsActor⟩ :=
+          hCorresponds.reactorOfActor
+            name
+            actor
+            hActor
+
+        exact
+          ⟨reactor,
+           (hStore name reactor).mp hMember,
+           generalActorCorresponds_of_queueAlphaEquiv
+             name
+             actor
+             reactor
+             hCorrespondsActor
+             hQueue⟩
+
+      actorOfReactor := by
+        intro name reactor hMember
+
+        obtain
+            ⟨actor, hActor, hCorrespondsActor⟩ :=
+          hCorresponds.actorOfReactor
+            name
+            reactor
+            ((hStore name reactor).mpr hMember)
+
+        exact
+          ⟨actor,
+           hActor,
+           generalActorCorresponds_of_queueAlphaEquiv
+             name
+             actor
+             reactor
+             hCorrespondsActor
+             hQueue⟩
+
+      pendingTargeted := by
+        intro event hEvent
+
+        exact
+          hCorresponds.pendingTargeted
+            event
+            ((LF.generalQueueAlphaEquiv.perm
+                hQueue).mem_iff.mpr
+              hEvent)
     }
 
 /--

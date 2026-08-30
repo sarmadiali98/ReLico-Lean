@@ -642,6 +642,7 @@ import Relico.LF.GeneralEvaluation
 import Relico.LF.GeneralRuntime
 import Relico.LF.GeneralSemantics
 import Relico.LF.GeneralInitialization
+import Relico.LF.GeneralAlphaEquivalence
 
 import Relico.Translation.GeneralRouting
 import Relico.Translation.GeneralBasic

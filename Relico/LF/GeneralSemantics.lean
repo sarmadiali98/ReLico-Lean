@@ -3349,8 +3349,13 @@ queue permutation alone, because their reactor stores are observationally equal 
 literally equal (`Store.update` preserves insertion position). A quotient on which these two
 executions form a diamond would need, at minimum, admissible pending-queue permutation
 equivalence **and** extensional reactor-store equivalence, proved an equivalence and proved
-compatible with the transition semantics; none of that exists here, and the section header above
-records the four requirements in full. No quotient is defined.
+compatible with the transition semantics; the section header above records the four requirements
+in full. **Update 2026-08-30:** the F86 decision landed the *light* form of that quotient —
+`Relico/LF/GeneralAlphaEquivalence.lean` defines α-equivalence on raw states and the lifted
+`GeneralStepModulo`, reuses this theorem only for the starting-state bridge
+(`generalStateAlphaEquiv_swapPartner`), and deliberately claims no compatibility with the
+transition semantics (the scheduler's representative-sensitivity makes congruence false), which
+is exactly why the lifted relation is ∃-shaped over representatives and no diamond is owed.
 
 Every premise is used, and each earns its place. `hTag` with `hCurrentTag` makes both events
 fireable at the current tag (the second fire of each execution inherits the tag, since `fire`
