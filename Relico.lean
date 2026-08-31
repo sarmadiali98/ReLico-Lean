@@ -657,6 +657,8 @@ import Relico.Correctness.GeneralWeakBisimulation
 import Relico.Correctness.GeneralInstantBlock
 import Relico.Correctness.WeakBisimulationTrace
 
+import Relico.LF.GeneralKindOrigin
+
 import Relico.Tests.GeneralPriority
 import Relico.Tests.GeneralActorSelection
 import Relico.Tests.GeneralEvaluation
