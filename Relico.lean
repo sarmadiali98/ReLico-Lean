@@ -655,6 +655,7 @@ import Relico.Correctness.GeneralCorrespondence
 import Relico.Correctness.GeneralTimeEquivalence
 import Relico.Correctness.GeneralWeakBisimulation
 import Relico.Correctness.GeneralInstantBlock
+import Relico.Correctness.GeneralStoreKeyUniqueness
 import Relico.Correctness.WeakBisimulationTrace
 
 import Relico.LF.GeneralKindOrigin
