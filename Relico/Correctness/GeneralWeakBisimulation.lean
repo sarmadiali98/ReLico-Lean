@@ -1600,40 +1600,75 @@ theorem generalConsume_forward_weak_of_fireRepresentative
         actor
         reactorRT
         state.pending) :
-    ∃ state' : LF.GeneralRuntimeState,
-      Common.WeakStep
-          (LF.GeneralStepModulo program)
-          LF.GeneralLabel.isTau
-          state
-          (LF.GeneralLabel.consume
-            event.target
-            event.kind)
-          state' ∧
-        GeneralStateCorrespondence
-          model
-          {
-            now := config.now
+    Common.WeakStep
+        (LF.GeneralStepModulo program)
+        LF.GeneralLabel.isTau
+        state
+        (LF.GeneralLabel.consume
+          event.target
+          event.kind)
+        {
+          currentTag := before.currentTag
 
-            actors :=
-              Store.update
-                config.actors
-                actorName
-                {
-                  state :=
-                    {
-                      valuation :=
-                        DTR.bindParameters
-                          server.parameters
-                          message.payload
-                          actor.state.valuation
+          reactors :=
+            Store.update
+              before.reactors
+              event.target
+              {
+                valuation :=
+                  LF.bindReactionParameters
+                    reaction.parameters
+                    event.payload
+                    reactorRT.valuation
 
-                      bag := earlier ++ later
-                    }
+                activeBody := reaction.body
+              }
 
-                  activeBody := server.body
-                }
-          }
-          state' := by
+          pending := earlier' ++ later'
+        } ∧
+      GeneralStateCorrespondence
+        model
+        {
+          now := config.now
+
+          actors :=
+            Store.update
+              config.actors
+              actorName
+              {
+                state :=
+                  {
+                    valuation :=
+                      DTR.bindParameters
+                        server.parameters
+                        message.payload
+                        actor.state.valuation
+
+                    bag := earlier ++ later
+                  }
+
+                activeBody := server.body
+              }
+        }
+        {
+          currentTag := before.currentTag
+
+          reactors :=
+            Store.update
+              before.reactors
+              event.target
+              {
+                valuation :=
+                  LF.bindReactionParameters
+                    reaction.parameters
+                    event.payload
+                    reactorRT.valuation
+
+                activeBody := reaction.body
+              }
+
+          pending := earlier' ++ later'
+        } := by
   have hMatchTarget :
       event.target = actorName :=
     hMatch.1
@@ -1789,26 +1824,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
       hReaction
 
   refine
-    ⟨{
-        currentTag := before.currentTag
-
-        reactors :=
-          Store.update
-            before.reactors
-            event.target
-            {
-              valuation :=
-                LF.bindReactionParameters
-                  reaction.parameters
-                  event.payload
-                  reactorRT.valuation
-
-              activeBody := reaction.body
-            }
-
-        pending := earlier' ++ later'
-      },
-      Common.WeakStep.visible
+    ⟨Common.WeakStep.visible
         (LF.GeneralLabel.not_isTau_consume
           event.target
           event.kind)
