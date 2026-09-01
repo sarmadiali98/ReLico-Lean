@@ -661,6 +661,7 @@ import Relico.Correctness.GeneralConnectionSourceUniqueness
 import Relico.Correctness.GeneralStatementForward
 import Relico.Correctness.GeneralInstantBlockForward
 import Relico.Correctness.GeneralInstantBlockBackward
+import Relico.Correctness.GeneralObservable
 import Relico.Correctness.WeakBisimulationTrace
 
 import Relico.LF.GeneralKindOrigin
@@ -669,5 +670,6 @@ import Relico.Tests.GeneralPriority
 import Relico.Tests.GeneralActorSelection
 import Relico.Tests.GeneralEvaluation
 import Relico.Tests.GeneralRuntime
+import Relico.Tests.GeneralObservable
 import Relico.Tests.GeneralSemantics
 import Relico.Tests.GeneralInitialization
