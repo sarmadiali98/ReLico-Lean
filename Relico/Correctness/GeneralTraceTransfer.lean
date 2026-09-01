@@ -684,5 +684,408 @@ theorem generalTraceAgreement_of_consumeAnswer
     hRelated
     hSteps
 
+/-!
+## The backward direction
+
+`Correctness.generalTraceAgreement_backward` needs the mirror transfer condition. **It is not the mirror of
+the forward one**, and the asymmetry is measured rather than assumed — the audit that produced this section
+is recorded in the docstring of `generalTraceTransfer_backward` below.
+
+Two of the three cases are in hand and are reused unchanged:
+`Correctness.generalConsume_backward_weakStep_of_takeRepresentative` and
+`Correctness.generalTimeAdvance_backward_weak`. The τ case is a **premise**, for reasons that are structural
+rather than a matter of effort.
+-/
+
+/--
+**The backward trace-agreement transfer condition, assembled.**
+
+Every target weak step of the quotient system is answered by a source weak step, with the relation
+re-established and the two labels observing the same thing. This is
+`Correctness.generalTraceAgreement_backward`'s `hBackward` premise at `Correctness.GeneralTraceRelated`.
+
+**Three cases, two reused, one a premise.**
+
+* **`.consume`** — `hConsumeAnswer`, whose shape is exactly
+  `generalConsume_backward_weakStep_of_takeRepresentative`'s conclusion. A caller discharges it by applying
+  that theorem, supplying its `hName` per-step actor agreement. Unchanged from what landed.
+* **`.timeAdvance`** — `hTimeAnswer`, whose shape is exactly `generalTimeAdvance_backward_weak`'s
+  conclusion. Also a premise rather than an inlined application, and for a reason worth stating: that
+  theorem is proved against `LF.GeneralStep`, while this transfer is handed an `LF.GeneralStepModulo` step.
+  Inverting the modulo step to reach the raw one is precisely what is forbidden here, so the caller — who
+  holds the raw step — applies it and hands the answer in.
+* **τ** — `hTauAnswer`, the premise this milestone introduces.
+
+**Why the τ case cannot be derived, in three independent ways.** All three were measured against the
+definitions, not assumed:
+
+1. **The target's τ set has five constructors, not three.** `LF.GeneralStep.now_eq_of_tau`'s own case list
+   is `assign`, `trace`, `schedule`, `setPort`, `microstepAdvance`. The source has three. So there is no
+   shape-by-shape correspondence to induct along.
+2. **`microstepAdvance` has no source counterpart at all.** It is P24's measured divergence — a zero-delay
+   send costs the target a microstep the source never takes — so a backward τ step there must be answered by
+   *zero* source steps. No forward case ever had to answer a step with nothing.
+3. **The quotient runs the wrong way, and deliberately.** `LF.GeneralStepModulo.tauSteps_of_raw` and
+   `weakStep_of_raw` lift raw to modulo; `weakStep_of_raw`'s docstring records that "the converse is
+   deliberately absent: a modulo weak step may switch representatives between segments, and that is the
+   quotient's semantics, not an accident to be undone." A backward τ closure would have to invert exactly
+   that, which reopens the frozen α′ question.
+
+So the τ answer is carried as a premise, named and visible, exactly as the forward direction carries its
+α-representative package. **No modulo-to-raw lemma is added, no α′ decision is touched, and no backward τ
+closure is attempted.**
+
+**What is still proved here rather than assumed:** that the three premises *compose* into the shape the
+generic trace theorem consumes, that the observation obligation is discharged in every case, and that both
+store-key invariants are threaded. The τ premise's observation obligation closes from
+`ofTargetLabel_eq_none_iff_isTau` and `ofSourceLabel_eq_none_iff_isTau` together — a target τ step must be
+answered by a source label that is *also* internal, which the premise's own `isTau` conclusion supplies.
+
+No theorem shape changed, `hConsumeAnswer` unchanged, `GeneralInstantBlock` untouched, no runtime field, no
+F27 change.
+-/
+theorem generalTraceTransfer_backward
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    (hTauAnswer :
+      ∀ (stepConfig : DTR.GeneralRuntimeConfiguration)
+        (stepState stepState' : LF.GeneralRuntimeState)
+        (label : LF.GeneralLabel),
+        GeneralTraceRelated
+          model
+          stepConfig
+          stepState →
+        LF.GeneralLabel.isTau label →
+        Common.WeakStep
+          (LF.GeneralStepModulo program)
+          LF.GeneralLabel.isTau
+          stepState
+          label
+          stepState' →
+        ∃ (sourceLabel : DTR.GeneralLabel)
+          (stepConfig' : DTR.GeneralRuntimeConfiguration),
+          DTR.GeneralLabel.isTau sourceLabel ∧
+            Common.WeakStep
+              (DTR.GeneralStep model)
+              DTR.GeneralLabel.isTau
+              stepConfig
+              sourceLabel
+              stepConfig' ∧
+            GeneralTraceRelated
+              model
+              stepConfig'
+              stepState')
+    (hConsumeAnswer :
+      ∀ (stepConfig : DTR.GeneralRuntimeConfiguration)
+        (stepState stepState' : LF.GeneralRuntimeState)
+        (target : ActorName)
+        (kind : LF.GeneralEventKind),
+        GeneralTraceRelated
+          model
+          stepConfig
+          stepState →
+        Common.WeakStep
+          (LF.GeneralStepModulo program)
+          LF.GeneralLabel.isTau
+          stepState
+          (LF.GeneralLabel.consume
+            target
+            kind)
+          stepState' →
+        ∃ (message : DTR.GeneralMessage)
+          (stepConfig' : DTR.GeneralRuntimeConfiguration),
+          Common.WeakStep
+              (DTR.GeneralStep model)
+              DTR.GeneralLabel.isTau
+              stepConfig
+              (DTR.GeneralLabel.consume
+                target
+                message)
+              stepConfig' ∧
+            GeneralTraceRelated
+              model
+              stepConfig'
+              stepState')
+    (hTimeAnswer :
+      ∀ (stepConfig : DTR.GeneralRuntimeConfiguration)
+        (stepState stepState' : LF.GeneralRuntimeState)
+        (before after : LogicalTime),
+        GeneralTraceRelated
+          model
+          stepConfig
+          stepState →
+        Common.WeakStep
+          (LF.GeneralStepModulo program)
+          LF.GeneralLabel.isTau
+          stepState
+          (LF.GeneralLabel.timeAdvance
+            before
+            after)
+          stepState' →
+        ∃ stepConfig' : DTR.GeneralRuntimeConfiguration,
+          Common.WeakStep
+              (DTR.GeneralStep model)
+              DTR.GeneralLabel.isTau
+              stepConfig
+              (DTR.GeneralLabel.timeAdvance
+                before
+                after)
+              stepConfig' ∧
+            GeneralTraceRelated
+              model
+              stepConfig'
+              stepState')
+    (config : DTR.GeneralRuntimeConfiguration)
+    (state : LF.GeneralRuntimeState)
+    (label : LF.GeneralLabel)
+    (state' : LF.GeneralRuntimeState)
+    (hRelated :
+      GeneralTraceRelated
+        model
+        config
+        state)
+    (hStep :
+      Common.WeakStep
+        (LF.GeneralStepModulo program)
+        LF.GeneralLabel.isTau
+        state
+        label
+        state') :
+    ∃ (sourceLabel : DTR.GeneralLabel)
+      (config' : DTR.GeneralRuntimeConfiguration),
+      Common.WeakStep
+          (DTR.GeneralStep model)
+          DTR.GeneralLabel.isTau
+          config
+          sourceLabel
+          config' ∧
+        GeneralTraceRelated
+          model
+          config'
+          state' ∧
+        GeneralObservable.ofTargetLabel label =
+          GeneralObservable.ofSourceLabel sourceLabel := by
+
+  -- The label decides which premise answers. Splitting on the LABEL rather than on the step is what keeps
+  -- this independent of the target's τ constructor count: a sixth τ rule would change nothing here.
+  cases label with
+
+  | tau =>
+
+      obtain ⟨sourceLabel, config', hSourceTau, hSourceStep, hSourceRelated⟩ :=
+        hTauAnswer
+          config
+          state
+          state'
+          LF.GeneralLabel.tau
+          hRelated
+          LF.GeneralLabel.isTau_tau
+          hStep
+
+      refine
+        ⟨sourceLabel,
+         config',
+         hSourceStep,
+         hSourceRelated,
+         ?_⟩
+
+      -- Both sides observe nothing. The premise's own `isTau` conclusion is what makes the source side
+      -- internal too — without it a target τ step could be answered by a visible source label, and the
+      -- observation would not agree.
+      rw [
+        (GeneralObservable.ofSourceLabel_eq_none_iff_isTau
+          sourceLabel).mpr
+          hSourceTau
+      ]
+
+      rfl
+
+  | timeAdvance before after =>
+
+      obtain ⟨config', hSourceStep, hSourceRelated⟩ :=
+        hTimeAnswer
+          config
+          state
+          state'
+          before
+          after
+          hRelated
+          hStep
+
+      exact
+        ⟨DTR.GeneralLabel.timeAdvance
+           before
+           after,
+         config',
+         hSourceStep,
+         hSourceRelated,
+         rfl⟩
+
+  | consume target kind =>
+
+      obtain ⟨message, config', hSourceStep, hSourceRelated⟩ :=
+        hConsumeAnswer
+          config
+          state
+          state'
+          target
+          kind
+          hRelated
+          hStep
+
+      exact
+        ⟨DTR.GeneralLabel.consume
+           target
+           message,
+         config',
+         hSourceStep,
+         hSourceRelated,
+         rfl⟩
+
+/--
+**Backward trace agreement for the general family, with the transfer condition assembled.**
+
+The mirror of `generalTraceAgreement_of_consumeAnswer`, and together with it the pair that makes the
+observable-trace story a bisimulation rather than a simulation.
+
+Three residues rather than the forward direction's one, and the count is the honest measurement: the target
+has five τ constructors against the source's three, `microstepAdvance` has no source counterpart, and the
+quotient has no sound inverse. Each residue is per-step and named. Two of the three have existing theorems
+whose conclusions are exactly their shapes — `generalConsume_backward_weakStep_of_takeRepresentative` and
+`generalTimeAdvance_backward_weak` — so a caller holding raw target steps discharges them directly.
+-/
+theorem generalTraceAgreement_backward_of_answers
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    (hTauAnswer :
+      ∀ (stepConfig : DTR.GeneralRuntimeConfiguration)
+        (stepState stepState' : LF.GeneralRuntimeState)
+        (label : LF.GeneralLabel),
+        GeneralTraceRelated
+          model
+          stepConfig
+          stepState →
+        LF.GeneralLabel.isTau label →
+        Common.WeakStep
+          (LF.GeneralStepModulo program)
+          LF.GeneralLabel.isTau
+          stepState
+          label
+          stepState' →
+        ∃ (sourceLabel : DTR.GeneralLabel)
+          (stepConfig' : DTR.GeneralRuntimeConfiguration),
+          DTR.GeneralLabel.isTau sourceLabel ∧
+            Common.WeakStep
+              (DTR.GeneralStep model)
+              DTR.GeneralLabel.isTau
+              stepConfig
+              sourceLabel
+              stepConfig' ∧
+            GeneralTraceRelated
+              model
+              stepConfig'
+              stepState')
+    (hConsumeAnswer :
+      ∀ (stepConfig : DTR.GeneralRuntimeConfiguration)
+        (stepState stepState' : LF.GeneralRuntimeState)
+        (target : ActorName)
+        (kind : LF.GeneralEventKind),
+        GeneralTraceRelated
+          model
+          stepConfig
+          stepState →
+        Common.WeakStep
+          (LF.GeneralStepModulo program)
+          LF.GeneralLabel.isTau
+          stepState
+          (LF.GeneralLabel.consume
+            target
+            kind)
+          stepState' →
+        ∃ (message : DTR.GeneralMessage)
+          (stepConfig' : DTR.GeneralRuntimeConfiguration),
+          Common.WeakStep
+              (DTR.GeneralStep model)
+              DTR.GeneralLabel.isTau
+              stepConfig
+              (DTR.GeneralLabel.consume
+                target
+                message)
+              stepConfig' ∧
+            GeneralTraceRelated
+              model
+              stepConfig'
+              stepState')
+    (hTimeAnswer :
+      ∀ (stepConfig : DTR.GeneralRuntimeConfiguration)
+        (stepState stepState' : LF.GeneralRuntimeState)
+        (before after : LogicalTime),
+        GeneralTraceRelated
+          model
+          stepConfig
+          stepState →
+        Common.WeakStep
+          (LF.GeneralStepModulo program)
+          LF.GeneralLabel.isTau
+          stepState
+          (LF.GeneralLabel.timeAdvance
+            before
+            after)
+          stepState' →
+        ∃ stepConfig' : DTR.GeneralRuntimeConfiguration,
+          Common.WeakStep
+              (DTR.GeneralStep model)
+              DTR.GeneralLabel.isTau
+              stepConfig
+              (DTR.GeneralLabel.timeAdvance
+                before
+                after)
+              stepConfig' ∧
+            GeneralTraceRelated
+              model
+              stepConfig'
+              stepState')
+    {config : DTR.GeneralRuntimeConfiguration}
+    {state state' : LF.GeneralRuntimeState}
+    {labels : List LF.GeneralLabel}
+    (hRelated :
+      GeneralTraceRelated
+        model
+        config
+        state)
+    (hSteps :
+      Common.WeakSteps
+        (LF.GeneralStepModulo program)
+        LF.GeneralLabel.isTau
+        state
+        labels
+        state') :
+    ∃ (sourceLabels : List DTR.GeneralLabel)
+      (config' : DTR.GeneralRuntimeConfiguration),
+      Common.WeakSteps
+          (DTR.GeneralStep model)
+          DTR.GeneralLabel.isTau
+          config
+          sourceLabels
+          config' ∧
+        GeneralTraceRelated
+          model
+          config'
+          state' ∧
+        Common.observableProjection
+            GeneralObservable.ofTargetLabel
+            labels =
+          Common.observableProjection
+            GeneralObservable.ofSourceLabel
+            sourceLabels :=
+  generalTraceAgreement_backward
+    (GeneralTraceRelated model)
+    (generalTraceTransfer_backward
+      hTauAnswer
+      hConsumeAnswer
+      hTimeAnswer)
+    hRelated
+    hSteps
+
 end Correctness
 end Relico
