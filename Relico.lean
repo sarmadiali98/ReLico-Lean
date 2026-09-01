@@ -662,6 +662,7 @@ import Relico.Correctness.GeneralStatementForward
 import Relico.Correctness.GeneralInstantBlockForward
 import Relico.Correctness.GeneralInstantBlockBackward
 import Relico.Correctness.GeneralObservable
+import Relico.Correctness.GeneralTraceTransfer
 import Relico.Correctness.WeakBisimulationTrace
 
 import Relico.LF.GeneralKindOrigin
