@@ -2372,6 +2372,116 @@ theorem generalContinuationCompiles_routedSend_head
 
           exact hEntry⟩⟩
 
+/--
+A source `assign` step is answered by a **weak** target step of the quotient system, preserving the
+correspondence.
+
+The weak form of `generalAssign_forward`, and the second of the statement-level lifts. Premises are the raw
+version's, unchanged.
+
+**Premise-light for the same reason `generalTrace_forward_weak` is**, and it is worth stating because the
+uniformity does not extend to all three τ statements. Assignment evaluates an expression against the actor's
+own valuation and writes one variable; it consults no routing table, no output-port environment and no
+instance list. So this lift needs **none** of `hCompiled`, `hRoutes`, `hEnvNodup`, `hNames`, and is strictly
+lighter than reaching a weak step through `generalTauSteps_forward`.
+
+**The third τ statement is different, and a caller should not expect a matching `generalSend_forward_weak` to
+be free.** `generalSend_forward` needs all four accepted-program premises, because its routed half resolves
+connections through the compiled program. A weak lift of it would therefore be no lighter than the closure
+route, so its value would be presentational rather than practical — see the section header.
+
+Same construction as the trace lift: `Common.WeakStep.tau` over `Common.TauSteps.single` of
+`LF.GeneralStepModulo.of_raw`, with `LF.GeneralLabel.isTau_tau` discharged explicitly rather than through
+`Common.WeakStep.of_step`. The τ padding is empty at both ends, which is stronger than a padded statement —
+one source assignment is matched by exactly one target assignment, and `assign` is not a P24 divergence site.
+
+The target's written value is **not** chosen here and is not mentioned in the statement beyond what the raw
+theorem already fixes: `compileGeneralExpr_preserves_evaluation` forces it to be
+`Translation.compileGeneralValue` of the source's. This lift adds no freedom the raw version did not have.
+-/
+theorem generalAssign_forward_weak
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    {config : DTR.GeneralRuntimeConfiguration}
+    {state : LF.GeneralRuntimeState}
+    {actorName : ActorName}
+    {actor : DTR.GeneralActorRuntime}
+    {target : VarName}
+    {expression : DTR.GeneralExpr}
+    {remaining : DTR.GeneralBody}
+    {value : DTR.GeneralValue}
+    (hCorrespondence :
+      GeneralStateCorrespondence
+        model
+        config
+        state)
+    (hUniqueS :
+      DTR.GeneralStoreKeyUnique config)
+    (hUniqueT :
+      LF.GeneralStoreKeyUnique state)
+    (hActor :
+      Store.lookup config.actors actorName =
+        some actor)
+    (hBody :
+      actor.activeBody =
+        DTR.GeneralStmt.assign target expression :: remaining)
+    (hEvaluate :
+      DTR.GeneralExpr.evaluate
+          actor.state.valuation
+          expression =
+        some value) :
+    ∃ state' : LF.GeneralRuntimeState,
+      Common.WeakStep
+          (LF.GeneralStepModulo program)
+          LF.GeneralLabel.isTau
+          state
+          LF.GeneralLabel.tau
+          state' ∧
+        GeneralStateCorrespondence
+          model
+          {
+            now := config.now
+
+            actors :=
+              Store.update
+                config.actors
+                actorName
+                {
+                  state :=
+                    {
+                      valuation :=
+                        Store.update
+                          actor.state.valuation
+                          target
+                          value
+
+                      bag := actor.state.bag
+                    }
+
+                  activeBody := remaining
+                }
+          }
+          state' := by
+
+  obtain ⟨state', hRawStep, hNextCorrespondence⟩ :=
+    generalAssign_forward
+      hCorrespondence
+      hUniqueS
+      hUniqueT
+      hActor
+      hBody
+      hEvaluate
+
+  exact
+    ⟨state',
+     Common.WeakStep.tau
+       LF.GeneralLabel.isTau_tau
+       (Common.TauSteps.single
+         (LF.GeneralStepModulo.of_raw
+           hRawStep)
+         LF.GeneralLabel.isTau_tau),
+     hNextCorrespondence⟩
+
 /-!
 ## Self-send forward transfer
 
