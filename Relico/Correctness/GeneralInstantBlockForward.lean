@@ -331,6 +331,236 @@ private theorem generalConsumeBlockMatch_cons
     exact hRest actor
 
 /-!
+## Endpoint transport, the forward direction
+
+**This section corrects an earlier claim in this module's own history.** The transfer below concludes a
+`Common.WeakSteps` rather than a `Correctness.GeneralInstantBlockSpine`, and the docstring of
+`generalInstantBlock_forward_of_source` recorded that the obstacle was the *endpoint transport*, with the
+`hFuture` half — "no ready source actor implies every pending target event is strictly future" — named as
+genuine unproved work.
+
+That was wrong, and the reason it was wrong is worth stating. `GeneralPendingAgrees` has accessors in
+**both** directions (`generalPendingAgrees_message_of_event` and `..._event_of_message`), so both
+transports go through; the earlier assessment was made before the backward direction's readiness layer
+made the pairing's symmetry obvious. Both halves are proved below.
+
+**What actually blocks the spine is different, and it is structural.** `GeneralInstantBlockSpine`'s
+`consume` constructor carries `LF.GeneralStep.fire`'s six premises at an α-representative — the alignment,
+the α-exchange, the earliest-event selection, the tag anchor, the queue split, and the reaction lookup.
+The transfer's answer premise returns a `Common.WeakStep`, which is a `Prop` carrying **none** of them:
+a weak step says a transition exists, not which event it fired or at which representative. So a spine
+cannot be recovered from what the answer gives, and the gap is not an unproved lemma but a premise that
+would have to return different data. Whoever closes it should strengthen the answer premise to return the
+spine entry, not attempt an inversion — `GeneralInstantBlockSpine.weakSteps` runs spine to execution and
+has no converse for exactly this reason.
+
+The two transports below are what remains of the earlier "deferred" item, and they are done.
+-/
+
+/--
+A compiled body is empty when its source body is.
+
+The easy direction of the emptiness correspondence, and the one the forward idleness transport needs.
+`Translation.compileGeneralBody` sends `[]` to `.ok []` outright, so a successful compilation of an empty
+source body has an empty target body.
+
+Its converse — an empty compiled body forces an empty source body — is
+`compileGeneralBody_eq_nil` in `Relico/Correctness/GeneralInstantBlockBackward.lean`, which needs a case
+split on the statement compiler because the implication runs against the compiler's direction. That
+asymmetry in cost is why the two live apart rather than as one iff.
+-/
+private theorem compileGeneralBody_nil_eq
+    {env : Translation.GeneralOutputPortEnv}
+    {context : Translation.GeneralBodyContext}
+    {index : Nat}
+    {target : LF.GeneralBody}
+    (hCompiled :
+      Translation.compileGeneralBody
+          env
+          context
+          index
+          [] =
+        .ok target) :
+    target = [] := by
+
+  unfold Translation.compileGeneralBody at hCompiled
+
+  simp at hCompiled
+
+  exact hCompiled
+
+/--
+An idle actor's reactor is idle.
+
+The `hIdle` half of forward endpoint transport, and the mirror of
+`Correctness.generalActorIdle_of_reactorIdle`. Idleness is `activeBody.isEmpty` on both sides and the
+correspondence's `continuation` field compiles one into the other, so `compileGeneralBody_nil_eq` closes
+it.
+
+No well-formedness premise and no appeal to the model: emptiness of a compiled body is a fact about the
+compiler alone.
+-/
+theorem generalReactorIdle_of_actorIdle
+    {env : Translation.GeneralOutputPortEnv}
+    {name : ActorName}
+    {actor : DTR.GeneralActorRuntime}
+    {reactor : LF.GeneralReactorRuntime}
+    {pending : LF.GeneralEventQueue}
+    (hCorresponds :
+      GeneralActorCorresponds
+        env
+        name
+        actor
+        reactor
+        pending)
+    (hIdle :
+      DTR.GeneralActorRuntime.idle actor = true) :
+    LF.GeneralReactorRuntime.idle reactor = true := by
+
+  obtain ⟨context, index, hCompiled, _⟩ :=
+    hCorresponds.continuation
+
+  have hSourceNil :
+      actor.activeBody = [] := by
+    unfold DTR.GeneralActorRuntime.idle at hIdle
+
+    exact
+      List.isEmpty_iff.mp hIdle
+
+  rw [hSourceNil] at hCompiled
+
+  unfold LF.GeneralReactorRuntime.idle
+
+  rw [
+    compileGeneralBody_nil_eq
+      hCompiled
+  ]
+
+  rfl
+
+/--
+**Every pending target event is strictly future when the source has no ready actor.**
+
+The `hFuture` half of forward endpoint transport, and the one this module previously recorded as unproved.
+The chain is the mirror of `Correctness.generalQuiescent_of_pendingFuture`, run through the pairing's other
+accessor: `pendingTargeted` names the event's actor, `reactorOfActor` supplies its pairing,
+`generalPendingAgrees_message_of_event` turns the event into a source message *at the event's own arrival*,
+and a message due at or before the clock would put its actor in the readiness cohort — which
+`hReady` says is empty.
+
+So the two endpoint transports are symmetric after all, and the asymmetry recorded earlier was an artefact
+of which accessor had been used at the time, not of the relation. What remains asymmetric is the *spine
+structure*, for the reason given in this section's header.
+
+Stated over `state.currentTag.time` rather than a separate instant so that it composes directly with
+`GeneralInstantBlockSpine.nil`'s `hFuture` after one rewrite by the block's own time premise.
+-/
+theorem generalPendingFuture_of_quiescent
+    {model : DTR.GeneralModel}
+    {config : DTR.GeneralRuntimeConfiguration}
+    {state : LF.GeneralRuntimeState}
+    (hCorrespondence :
+      GeneralStateCorrespondence
+        model
+        config
+        state)
+    (hReady :
+      DTR.GeneralConfiguration.readyActors config.erase =
+        []) :
+    ∀ event ∈ state.pending,
+      state.currentTag.time < event.tag.time := by
+
+  intro event hEvent
+
+  -- `by_contra` is not available here (no Mathlib in this project), so the excluded middle is taken
+  -- explicitly on the order itself. `Nat.lt_or_ge` is total, so the split is exhaustive.
+  rcases Nat.lt_or_ge
+      state.currentTag.time
+      event.tag.time with
+    hFuture |
+      hDue
+
+  · exact hFuture
+
+  exfalso
+
+  obtain ⟨actor, hActorMember⟩ :=
+    hCorrespondence.pendingTargeted
+      event
+      hEvent
+
+  obtain ⟨_, _, _, _, hPair⟩ :=
+    hCorrespondence.reactorOfActor
+      event.target
+      actor
+      hActorMember
+
+  obtain ⟨message, hMessageMember, hArrival⟩ :=
+    generalPendingAgrees_message_of_event
+      event.target
+      actor.state.bag
+      state.pending
+      hPair.messages
+      event
+      hEvent
+      rfl
+
+  -- The message is due, so its actor belongs to the cohort the premise says is empty.
+  obtain ⟨arrival, hEarliest⟩ :=
+    DTR.earliestDueArrival_complete
+      actor.state.bag
+      config.now
+      message
+      hMessageMember
+      (by
+        -- `logicalTime` reads `state.currentTag.time = config.now`, so the clock is rewritten BACKWARDS
+        -- here: the goal mentions `config.now` and `hDue` is stated at the target's tag.
+        rw [
+          hArrival,
+          ← hCorrespondence.logicalTime
+        ]
+
+        exact hDue)
+
+  have hCohortMember :
+      (
+        {
+          actorName := event.target
+          logicalTime := arrival
+        } :
+          DTR.GlobalMultiStorePayloadActorPriority.ReadyActor
+      ) ∈
+        DTR.GeneralConfiguration.readyActors config.erase :=
+    DTR.readyActors_complete
+      config.erase
+      event.target
+      actor.state
+      arrival
+      (by
+        rw [
+          DTR.GeneralRuntimeConfiguration.erase_actors
+        ]
+
+        exact
+          DTR.mem_eraseContinuations_of_mem
+            config.actors
+            event.target
+            actor
+            hActorMember)
+      (by
+        unfold DTR.GeneralActorState.dueArrival
+
+        rw [
+          DTR.GeneralRuntimeConfiguration.erase_now
+        ]
+
+        exact hEarliest)
+
+  rw [hReady] at hCohortMember
+
+  cases hCohortMember
+
+/-!
 ## The transfer
 
 One induction over `Common.WeakSteps`, with the visible case delegated to the answer premise and the
@@ -637,13 +867,21 @@ is the step sequence and its third is the label-shape fact, so this corollary on
 
 What it forgets is worth naming. The block predicate also carries `config.now = t`, `config'.now = t`,
 and the endpoint quiescence (`readyActors config'.erase = []` and every actor idle); **none of them is
-used**, and none is passed on. That is a real limitation rather than an economy: producing a full
-`generalInstantBlock_target` — a `GeneralInstantBlockSpine`, not merely a `Common.WeakSteps` — would need
-those endpoint facts transported to the spine's `nil` premises, and the `hFuture` half of that ("no ready
-source actor implies every pending target event is strictly future") is an unproved obligation, not a
-projection. `GeneralInstantBlockSpine.weakSteps` runs from spine to execution and there is no converse:
-`Common.WeakSteps` is a `Prop` carrying no event index, so a spine cannot be recovered from one. Closing
-that gap is separate work.
+used**, and none is passed on.
+
+**An earlier version of this docstring said the obstacle was the endpoint transport, and named the
+`hFuture` half as an unproved obligation. That was wrong.** Both halves are proved, above:
+`generalPendingFuture_of_quiescent` and `generalReactorIdle_of_actorIdle`. The pairing has accessors in
+both directions, so the transport is symmetric; the earlier assessment was made before the backward
+direction's readiness layer made that obvious.
+
+**What actually blocks a full `generalInstantBlock_target` is the spine's data, not its endpoint.**
+`GeneralInstantBlockSpine`'s `consume` constructor carries `LF.GeneralStep.fire`'s six premises at an
+α-representative, while this theorem's `hConsumeAnswer` returns a `Common.WeakStep` — a `Prop` that says a
+transition exists and records neither which event fired nor at which representative.
+`GeneralInstantBlockSpine.weakSteps` runs spine to execution and has no converse for exactly that reason.
+Closing the gap means **strengthening the answer premise to return the spine entry**, not proving another
+transport lemma; that is separate work, and the transports it would have needed are now in hand.
 -/
 theorem generalInstantBlock_forward_of_source
     {model : DTR.GeneralModel}
