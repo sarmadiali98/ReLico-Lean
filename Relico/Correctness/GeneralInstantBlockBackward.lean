@@ -37,6 +37,7 @@ Nothing here weakens F27, adds an ordering premise, uses α to repair ordering, 
 `GeneralStateCorrespondence`.
 -/
 import Relico.Correctness.GeneralInstantBlockForward
+import Relico.Correctness.GeneralSameReactorOrder
 
 set_option autoImplicit false
 
@@ -532,6 +533,520 @@ theorem generalSourceReadiness_of_targetEvent
      hSelectedTime⟩
 
 /-!
+## The backward `.consume` core lemma
+
+The derivation above settles the existence half of the per-step actor agreement and demonstrably cannot
+settle the ordering half. So the ordering half becomes a **premise**, exactly as the forward direction's
+α-representative package is a premise of
+`Correctness.generalConsume_forward_weak_of_fireRepresentative`. Both residues are per-step, both are
+named, and neither is faked.
+
+**One observation shapes the statement, and it is worth recording.** The post-state *correspondence* is
+**direction-agnostic**: it relates one source post-configuration to one target post-state, and which
+side was given first is not part of that claim. The forward core lemma already proves it from local
+content. So the backward core lemma's genuinely new content is only the **source step construction**,
+and the correspondence half is the forward core's conclusion reused verbatim rather than reproved. That
+is why this lemma is short, and the shortness is the finding rather than a gap.
+-/
+
+/--
+**Backward, at the `.consume` label, under the light within-tag quotient — the core lemma.**
+
+Given a target fire's local content at a corresponding pair, and given the source scheduler's own answer
+at that configuration together with the per-step agreement that it names the fired reactor, the source
+takes the matched message — and the answered pair still corresponds.
+
+**The residue, stated plainly.** `hName : selected.actorName = actorName` is the per-step actor
+agreement, and it is a **premise** because it is not derivable: `DTR.GeneralActorSelection.selectedActor`
+is a function of the source configuration alone — `readyActors` and `earliestDueArrival` never mention
+the target program, its queue, or its fire order — so nothing over them can conclude that source priority
+selects the reactor the target fired. `DTR.GeneralActorSelection.selectedActor_unique` sharpens this
+rather than relieving it: under the priority guard the source schedule is *forced*. This is F76's
+measured cross-actor divergence and what F86's tail means by "the backward direction needs the DTR side's
+own within-instant modulo".
+
+`hName` mentions **one** actor at **one** configuration. It encodes no list, no global order, and no
+relation between the two sides' interleavings — the block match is per-reactor precisely so that none is
+needed. No scheduler semantics is added, no source quotient is introduced, and F27 is not weakened: the
+choice of *which occurrence* in the bag is still free, and `hDue`'s `earlier ++ message :: later` split
+is that freedom being used.
+
+**The premise package is not vacuous**, and `Correctness.generalSourceReadiness_of_targetEvent` above is
+the soundness companion that shows it: whenever the target has instant work the source's selection does
+answer, and the actor it answers with does have a target event at the same instant. That is supporting
+evidence, **not** a replacement — it cannot produce `hName`, and this lemma does not pretend it can.
+
+**What the two conjuncts are.** The first is `DTR.take_of_split` at the supplied package: the source
+`.consume` step, at `take`'s own post-configuration literal. The second is
+`generalConsume_forward_weak_of_fireRepresentative` unchanged — the target's modulo weak step at the
+fired event's label together with the full post-state correspondence. Nothing is reproved, and the
+target-side premises are passed through in the shape that lemma fixed, including `hUniqueT` **at the
+representative** (not at `state`): transporting store-key uniqueness across α would be unsound, so it is
+not transported.
+
+Both `.consume` labels are the ones each semantics actually emits, and the target's kind is read off the
+fired event as always — never computed from a payload. F78.
+-/
+theorem generalConsume_backward_weak_of_takeRepresentative
+    (program : LF.GeneralProgram)
+    (model : DTR.GeneralModel)
+    (config : DTR.GeneralRuntimeConfiguration)
+    (state : LF.GeneralRuntimeState)
+    (hCorrespondence :
+      GeneralStateCorrespondence
+        model
+        config
+        state)
+    (actorName : ActorName)
+    (actor : DTR.GeneralActorRuntime)
+    (message : DTR.GeneralMessage)
+    (earlier later : DTR.GeneralMessageBag)
+    (hDue :
+      actor.state.bag =
+        earlier ++ message :: later)
+    (server : DTR.GeneralMessageServer)
+    (event : LF.GeneralPendingEvent)
+    (hMatch :
+      GeneralConsumeMatch
+        actorName
+        message
+        event)
+    (hEventTime :
+      event.tag.time =
+        state.currentTag.time)
+    (selected :
+      DTR.GlobalMultiStorePayloadActorPriority.ReadyActor)
+    (hSelected :
+      DTR.GeneralActorSelection.selectedActor
+          model
+          config.erase =
+        some selected)
+    (hName :
+      selected.actorName = actorName)
+    (hActor :
+      Store.lookup config.actors actorName =
+        some actor)
+    (hIdle :
+      actor.idle = true)
+    (hArrival :
+      message.arrival = selected.logicalTime)
+    (hServer :
+      DTR.GeneralModel.messageServerFor?
+          model
+          actorName
+          message.messageName =
+        some server)
+    (aligned : LF.GeneralRuntimeState)
+    (hAlignSteps :
+      Common.TauSteps
+        (LF.GeneralStep program)
+        LF.GeneralLabel.isTau
+        state
+        aligned)
+    (hAlignedReactors :
+      aligned.reactors = state.reactors)
+    (hAlignedPending :
+      aligned.pending = state.pending)
+    (before : LF.GeneralRuntimeState)
+    (hAlpha :
+      LF.generalStateAlphaEquiv
+        before
+        aligned)
+    (hEarliest :
+      LF.GeneralRuntimeState.earliestPendingEvent?
+          before =
+        some event)
+    (hTagAligned :
+      event.tag = before.currentTag)
+    (earlier' later' : LF.GeneralEventQueue)
+    (hQueue :
+      before.pending =
+        earlier' ++ event :: later')
+    (reactorRT : LF.GeneralReactorRuntime)
+    (hUniqueT :
+      before.reactors.filter
+          (fun entry =>
+            decide (entry.1 = event.target)) =
+        [(event.target, reactorRT)])
+    (hReactorBefore :
+      Store.lookup
+          before.reactors
+          event.target =
+        some reactorRT)
+    (hIdleRT :
+      reactorRT.idle = true)
+    (reaction : LF.GeneralReaction)
+    (hReaction :
+      LF.GeneralProgram.reactionFor?
+          program
+          event.target
+          event.kind =
+        some reaction)
+    (hParams :
+      reaction.parameters =
+        server.parameters.map
+          (fun parameter =>
+            parameter.name))
+    (env : Translation.GeneralOutputPortEnv)
+    (hEnv :
+      outputPortEnvOfActorName model actorName =
+        some env)
+    (hBody :
+      GeneralContinuationCompiles
+        env
+        server.body
+        reaction.body)
+    (hUniqueS :
+      config.actors.filter
+          (fun entry =>
+            decide (entry.1 = actorName)) =
+        [(actorName, actor)])
+    (hPaired :
+      GeneralActorCorresponds
+        env
+        actorName
+        actor
+        reactorRT
+        state.pending) :
+    DTR.GeneralStep
+        model
+        config
+        (DTR.GeneralLabel.consume
+          actorName
+          message)
+        {
+          now := config.now
+
+          actors :=
+            Store.update
+              config.actors
+              actorName
+              {
+                state :=
+                  {
+                    valuation :=
+                      DTR.bindParameters
+                        server.parameters
+                        message.payload
+                        actor.state.valuation
+
+                    bag := earlier ++ later
+                  }
+
+                activeBody := server.body
+              }
+        } ∧
+      ∃ state' : LF.GeneralRuntimeState,
+        Common.WeakStep
+            (LF.GeneralStepModulo program)
+            LF.GeneralLabel.isTau
+            state
+            (LF.GeneralLabel.consume
+              event.target
+              event.kind)
+            state' ∧
+          GeneralStateCorrespondence
+            model
+            {
+              now := config.now
+
+              actors :=
+                Store.update
+                  config.actors
+                  actorName
+                  {
+                    state :=
+                      {
+                        valuation :=
+                          DTR.bindParameters
+                            server.parameters
+                            message.payload
+                            actor.state.valuation
+
+                        bag := earlier ++ later
+                      }
+
+                    activeBody := server.body
+                  }
+            }
+            state' := by
+
+  refine
+    ⟨DTR.take_of_split
+       hSelected
+       hName
+       hActor
+       hIdle
+       hDue
+       hArrival
+       hServer,
+     ?_⟩
+
+  exact
+    generalConsume_forward_weak_of_fireRepresentative
+      program
+      model
+      config
+      state
+      hCorrespondence
+      actorName
+      actor
+      message
+      earlier
+      later
+      hDue
+      server
+      event
+      hMatch
+      hEventTime
+      aligned
+      hAlignSteps
+      hAlignedReactors
+      hAlignedPending
+      before
+      hAlpha
+      hEarliest
+      hTagAligned
+      earlier'
+      later'
+      hQueue
+      reactorRT
+      hUniqueT
+      hReactorBefore
+      hIdleRT
+      reaction
+      hReaction
+      hParams
+      env
+      hEnv
+      hBody
+      hUniqueS
+      hPaired
+
+/--
+The core lemma packaged as **weak** steps on both sides, which is the shape a block induction consumes.
+
+`Common.WeakSteps.cons` takes a `Common.WeakStep`, and the source's `.consume` is a bare
+`DTR.GeneralStep` — so the block's per-entry obligation is this, not the lemma above. `Common.WeakStep.of_step`
+supplies the padding, and it is empty at both ends: a source take needs no administrative traffic around
+it, and claiming exactly one step is **stronger** than claiming a padded one. Genuine padding is owed only
+on the *target* side, where P24 measured that a zero-delay send costs a microstep the source does not
+take — and that padding is already inside the target half, carried by `hAlignSteps`.
+
+The existential over the source post-configuration is deliberate: a block induction threads states, and
+naming the literal at every entry would force each caller to re-derive `take`'s output shape.
+
+**`hUniqueS` is the whole-store invariant here, not the filter singleton the core lemma reads.** Two
+reasons, and both are about the caller. The filter form is derived on the spot by
+`DTR.generalStoreKeyUnique_filter_of_lookup`, so nothing is lost; and the invariant is what a block
+induction actually carries between entries, since `DTR.generalStoreKeyUnique_of_step` is what
+re-establishes it — which is also why it is returned as a fourth conjunct rather than left for the caller
+to recover.
+-/
+theorem generalConsume_backward_weakStep_of_takeRepresentative
+    (program : LF.GeneralProgram)
+    (model : DTR.GeneralModel)
+    (config : DTR.GeneralRuntimeConfiguration)
+    (state : LF.GeneralRuntimeState)
+    (hCorrespondence :
+      GeneralStateCorrespondence
+        model
+        config
+        state)
+    (actorName : ActorName)
+    (actor : DTR.GeneralActorRuntime)
+    (message : DTR.GeneralMessage)
+    (earlier later : DTR.GeneralMessageBag)
+    (hDue :
+      actor.state.bag =
+        earlier ++ message :: later)
+    (server : DTR.GeneralMessageServer)
+    (event : LF.GeneralPendingEvent)
+    (hMatch :
+      GeneralConsumeMatch
+        actorName
+        message
+        event)
+    (hEventTime :
+      event.tag.time =
+        state.currentTag.time)
+    (selected :
+      DTR.GlobalMultiStorePayloadActorPriority.ReadyActor)
+    (hSelected :
+      DTR.GeneralActorSelection.selectedActor
+          model
+          config.erase =
+        some selected)
+    (hName :
+      selected.actorName = actorName)
+    (hActor :
+      Store.lookup config.actors actorName =
+        some actor)
+    (hIdle :
+      actor.idle = true)
+    (hArrival :
+      message.arrival = selected.logicalTime)
+    (hServer :
+      DTR.GeneralModel.messageServerFor?
+          model
+          actorName
+          message.messageName =
+        some server)
+    (aligned : LF.GeneralRuntimeState)
+    (hAlignSteps :
+      Common.TauSteps
+        (LF.GeneralStep program)
+        LF.GeneralLabel.isTau
+        state
+        aligned)
+    (hAlignedReactors :
+      aligned.reactors = state.reactors)
+    (hAlignedPending :
+      aligned.pending = state.pending)
+    (before : LF.GeneralRuntimeState)
+    (hAlpha :
+      LF.generalStateAlphaEquiv
+        before
+        aligned)
+    (hEarliest :
+      LF.GeneralRuntimeState.earliestPendingEvent?
+          before =
+        some event)
+    (hTagAligned :
+      event.tag = before.currentTag)
+    (earlier' later' : LF.GeneralEventQueue)
+    (hQueue :
+      before.pending =
+        earlier' ++ event :: later')
+    (reactorRT : LF.GeneralReactorRuntime)
+    (hUniqueT :
+      before.reactors.filter
+          (fun entry =>
+            decide (entry.1 = event.target)) =
+        [(event.target, reactorRT)])
+    (hReactorBefore :
+      Store.lookup
+          before.reactors
+          event.target =
+        some reactorRT)
+    (hIdleRT :
+      reactorRT.idle = true)
+    (reaction : LF.GeneralReaction)
+    (hReaction :
+      LF.GeneralProgram.reactionFor?
+          program
+          event.target
+          event.kind =
+        some reaction)
+    (hParams :
+      reaction.parameters =
+        server.parameters.map
+          (fun parameter =>
+            parameter.name))
+    (env : Translation.GeneralOutputPortEnv)
+    (hEnv :
+      outputPortEnvOfActorName model actorName =
+        some env)
+    (hBody :
+      GeneralContinuationCompiles
+        env
+        server.body
+        reaction.body)
+    (hUniqueS :
+      DTR.GeneralStoreKeyUnique config)
+    (hPaired :
+      GeneralActorCorresponds
+        env
+        actorName
+        actor
+        reactorRT
+        state.pending) :
+    ∃ (config' : DTR.GeneralRuntimeConfiguration)
+      (state' : LF.GeneralRuntimeState),
+      Common.WeakStep
+          (DTR.GeneralStep model)
+          DTR.GeneralLabel.isTau
+          config
+          (DTR.GeneralLabel.consume
+            actorName
+            message)
+          config' ∧
+        Common.WeakStep
+            (LF.GeneralStepModulo program)
+            LF.GeneralLabel.isTau
+            state
+            (LF.GeneralLabel.consume
+              event.target
+              event.kind)
+            state' ∧
+          GeneralStateCorrespondence
+            model
+            config'
+            state' ∧
+          DTR.GeneralStoreKeyUnique config' := by
+
+  obtain ⟨hTake, state', hTargetStep, hPostCorrespondence⟩ :=
+    generalConsume_backward_weak_of_takeRepresentative
+      program
+      model
+      config
+      state
+      hCorrespondence
+      actorName
+      actor
+      message
+      earlier
+      later
+      hDue
+      server
+      event
+      hMatch
+      hEventTime
+      selected
+      hSelected
+      hName
+      hActor
+      hIdle
+      hArrival
+      hServer
+      aligned
+      hAlignSteps
+      hAlignedReactors
+      hAlignedPending
+      before
+      hAlpha
+      hEarliest
+      hTagAligned
+      earlier'
+      later'
+      hQueue
+      reactorRT
+      hUniqueT
+      hReactorBefore
+      hIdleRT
+      reaction
+      hReaction
+      hParams
+      env
+      hEnv
+      hBody
+      (DTR.generalStoreKeyUnique_filter_of_lookup
+        hUniqueS
+        hActor)
+      hPaired
+
+  exact
+    ⟨_,
+     state',
+     Common.WeakStep.of_step
+       hTake,
+     hTargetStep,
+     hPostCorrespondence,
+     DTR.generalStoreKeyUnique_of_step
+       hUniqueS
+       hTake⟩
+
+/-!
 ## What the derivation settles, and what it does not
 
 **Settled.** The source is never stuck while the target has instant work: a pending target event at the
@@ -555,11 +1070,18 @@ because the derived agreement is about *existence*, not about *order*. Concretel
   `readyActors config'.erase = []` and all-idle facts the forward wrapper deliberately discarded, plus
   their target-side counterparts.
 
-So the remaining choice is between supplying the per-step actor agreement as a premise — mirroring
-exactly how `Correctness.generalConsume_forward_weak_of_fireRepresentative` supplies its
-α-representative package, and leaving the residue named and visible — and proving the whole-block
-reordering argument, which is a larger piece of work than this milestone was scoped for and which needs
-the endpoint transport the forward direction also left open.
+**That choice has been taken: the premise.** `generalConsume_backward_weak_of_takeRepresentative` above
+supplies the per-step actor agreement as `hName`, mirroring exactly how
+`Correctness.generalConsume_forward_weak_of_fireRepresentative` supplies its α-representative package,
+and leaving the residue named and visible. The alternative — proving the whole-block reordering argument
+so that `hName` is derived once per occurrence — remains open, and it needs both the per-reactor
+multiset-equality argument and the endpoint transport the forward direction also left open.
+
+**What the block wrapper still owes.** Per occurrence: `hName`, and the target-side representative
+package the forward core already required. Across the block: that the constructed source labels'
+per-reactor extraction equals the target's, which `generalConsumeBlockMatch_cons`-style reasoning gives
+step by step once the per-step agreement is in hand, plus termination at the block endpoint. None of that
+is claimed here.
 
 What is *not* on the table: a DTR-side quotient, an ordering premise that re-specifies cross-reactor
 interleaving, α widening to swap same-target events (decision 0042 forbids it; F80 measured that real
