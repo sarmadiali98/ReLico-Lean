@@ -691,12 +691,14 @@ example :
 /- The compiler/correspondence continuation fact is live on the same one-statement body. -/
 def traceContinuationCompiles :
     Correctness.GeneralContinuationCompiles
+      []
       [DTR.GeneralStmt.trace "audit"]
       [LF.GeneralStmt.trace "audit"] :=
-  ⟨[], default, 0, by rfl⟩
+  ⟨default, 0, by rfl⟩
 
 example :
     Correctness.GeneralContinuationCompiles
+      []
       []
       [] :=
   Correctness.generalContinuationCompiles_trace_tail

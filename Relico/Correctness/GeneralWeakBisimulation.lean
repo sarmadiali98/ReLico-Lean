@@ -63,6 +63,7 @@ move to the same instant. `generalCorrespondence_retag` is the sibling for the c
 target moves and the time is unchanged; neither subsumes the other.
 -/
 theorem generalCorrespondence_advance
+    (model : DTR.GeneralModel)
     (config next : DTR.GeneralRuntimeConfiguration)
     (state target : LF.GeneralRuntimeState)
     (hNow :
@@ -78,8 +79,8 @@ theorem generalCorrespondence_advance
       target.pending =
         state.pending)
     (hCorrespondence :
-      GeneralStateCorrespondence config state) :
-    GeneralStateCorrespondence next target := by
+      GeneralStateCorrespondence model config state) :
+    GeneralStateCorrespondence model next target := by
 
   refine
     {
@@ -95,14 +96,16 @@ theorem generalCorrespondence_advance
       hActors
     ] at hMember
 
-    obtain ⟨reactor, hReactor, hCorresponds⟩ :=
+    obtain ⟨env, reactor, hEnv, hReactor, hCorresponds⟩ :=
       hCorrespondence.reactorOfActor
         name
         actor
         hMember
 
     refine
-      ⟨reactor,
+      ⟨env,
+       reactor,
+       hEnv,
        ?_,
        ?_⟩
 
@@ -124,14 +127,16 @@ theorem generalCorrespondence_advance
       hReactors
     ] at hMember
 
-    obtain ⟨actor, hActor, hCorresponds⟩ :=
+    obtain ⟨env, actor, hEnv, hActor, hCorresponds⟩ :=
       hCorrespondence.actorOfReactor
         name
         reactor
         hMember
 
     refine
-      ⟨actor,
+      ⟨env,
+       actor,
+       hEnv,
        ?_,
        ?_⟩
 
@@ -191,11 +196,12 @@ measured that `omega` does not see through the `LogicalTime` abbreviation — `T
 while `Tag.microstep` is not.
 -/
 theorem generalQuiescent_of_earliestPendingEventFuture
+    (model : DTR.GeneralModel)
     (config : DTR.GeneralRuntimeConfiguration)
     (state : LF.GeneralRuntimeState)
     (event : LF.GeneralPendingEvent)
     (hCorrespondence :
-      GeneralStateCorrespondence config state)
+      GeneralStateCorrespondence model config state)
     (hSelected :
       LF.GeneralRuntimeState.earliestPendingEvent? state =
         some event)
@@ -266,7 +272,7 @@ theorem generalQuiescent_of_earliestPendingEventFuture
 
         exact hBagMember
 
-      obtain ⟨reactor, _, hCorresponds⟩ :=
+      obtain ⟨_env, reactor, _, _, hCorresponds⟩ :=
         hCorrespondence.reactorOfActor
           ready.actorName
           actor
@@ -351,11 +357,12 @@ minimum need not be the event the target *selects*.
 -/
 theorem generalTimeAdvance_forward
     (program : LF.GeneralProgram)
+    (model : DTR.GeneralModel)
     (config : DTR.GeneralRuntimeConfiguration)
     (state : LF.GeneralRuntimeState)
     (future : LogicalTime)
     (hCorrespondence :
-      GeneralStateCorrespondence config state)
+      GeneralStateCorrespondence model config state)
     (hForward :
       config.now < future)
     (hQuiescent :
@@ -378,6 +385,7 @@ theorem generalTimeAdvance_forward
               pending := state.pending
             } ∧
           GeneralStateCorrespondence
+            model
             {
               now := future
               actors := config.actors
@@ -390,6 +398,7 @@ theorem generalTimeAdvance_forward
 
   obtain ⟨event, hEventSelected, hEventTime⟩ :=
     generalTimeEquivalence_forward
+      model
       config
       state
       future
@@ -421,6 +430,7 @@ theorem generalTimeAdvance_forward
 
   · exact
       generalCorrespondence_advance
+        model
         config
         {
           now := future
@@ -458,7 +468,7 @@ theorem generalTimeAdvance_backward
     (state : LF.GeneralRuntimeState)
     (event : LF.GeneralPendingEvent)
     (hCorrespondence :
-      GeneralStateCorrespondence config state)
+      GeneralStateCorrespondence model config state)
     (hSelected :
       LF.GeneralRuntimeState.earliestPendingEvent? state =
         some event)
@@ -476,6 +486,7 @@ theorem generalTimeAdvance_backward
           actors := config.actors
         } ∧
       GeneralStateCorrespondence
+        model
         {
           now := event.tag.time
           actors := config.actors
@@ -490,6 +501,7 @@ theorem generalTimeAdvance_backward
       DTR.GeneralConfiguration.readyActors config.erase =
         [] :=
     generalQuiescent_of_earliestPendingEventFuture
+      model
       config
       state
       event
@@ -501,6 +513,7 @@ theorem generalTimeAdvance_backward
       DTR.GeneralConfiguration.nextArrival config.erase =
         some event.tag.time :=
     generalTimeEquivalence_backward
+      model
       config
       state
       event
@@ -524,6 +537,7 @@ theorem generalTimeAdvance_backward
        hQuiescent
        hNext,
      generalCorrespondence_advance
+       model
        config
        {
          now := event.tag.time
@@ -572,11 +586,12 @@ three, so there is nothing to abstract over without reproducing the whole statem
 -/
 theorem generalTimeAdvance_forward_weak
     (program : LF.GeneralProgram)
+    (model : DTR.GeneralModel)
     (config : DTR.GeneralRuntimeConfiguration)
     (state : LF.GeneralRuntimeState)
     (future : LogicalTime)
     (hCorrespondence :
-      GeneralStateCorrespondence config state)
+      GeneralStateCorrespondence model config state)
     (hForward :
       config.now < future)
     (hQuiescent :
@@ -600,6 +615,7 @@ theorem generalTimeAdvance_forward_weak
               pending := state.pending
             } ∧
           GeneralStateCorrespondence
+            model
             {
               now := future
               actors := config.actors
@@ -613,6 +629,7 @@ theorem generalTimeAdvance_forward_weak
   obtain ⟨event, hEventTime, hStep, hNextCorrespondence⟩ :=
     generalTimeAdvance_forward
       program
+      model
       config
       state
       future
@@ -664,7 +681,7 @@ theorem generalTimeAdvance_backward_weak
     (state : LF.GeneralRuntimeState)
     (event : LF.GeneralPendingEvent)
     (hCorrespondence :
-      GeneralStateCorrespondence config state)
+      GeneralStateCorrespondence model config state)
     (hSelected :
       LF.GeneralRuntimeState.earliestPendingEvent? state =
         some event)
@@ -683,6 +700,7 @@ theorem generalTimeAdvance_backward_weak
           actors := config.actors
         } ∧
       GeneralStateCorrespondence
+        model
         {
           now := event.tag.time
           actors := config.actors
@@ -1485,10 +1503,12 @@ on the pre-state — so the raw `WeakStep` machinery runs unchanged over the lif
 -/
 theorem generalConsume_forward_weak_of_fireRepresentative
     (program : LF.GeneralProgram)
+    (model : DTR.GeneralModel)
     (config : DTR.GeneralRuntimeConfiguration)
     (state : LF.GeneralRuntimeState)
     (hCorrespondence :
       GeneralStateCorrespondence
+        model
         config
         state)
     (actorName : ActorName)
@@ -1559,8 +1579,13 @@ theorem generalConsume_forward_weak_of_fireRepresentative
         server.parameters.map
           (fun parameter =>
             parameter.name))
+    (env : Translation.GeneralOutputPortEnv)
+    (hEnv :
+      outputPortEnvOfActorName model actorName =
+        some env)
     (hBody :
       GeneralContinuationCompiles
+        env
         server.body
         reaction.body)
     (hUniqueS :
@@ -1570,6 +1595,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
         [(actorName, actor)])
     (hPaired :
       GeneralActorCorresponds
+        env
         actorName
         actor
         reactorRT
@@ -1584,6 +1610,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
             event.kind)
           state' ∧
         GeneralStateCorrespondence
+          model
           {
             now := config.now
 
@@ -1693,6 +1720,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
 
   have hPostActorCorresponds :
       GeneralActorCorresponds
+        env
         actorName
         {
           state :=
@@ -2022,7 +2050,8 @@ theorem generalConsume_forward_weak_of_fireRepresentative
           subst hActorEq
 
           refine
-            ⟨{
+            ⟨env,
+              {
                 valuation :=
                   LF.bindReactionParameters
                     reaction.parameters
@@ -2031,6 +2060,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
 
                 activeBody := reaction.body
               },
+              hEnv,
               ?_,
               hPostActorCorresponds⟩
 
@@ -2055,13 +2085,13 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                 hMember with
             hOld | hNew
           · obtain
-                ⟨reactorX, hReactorX, hCorrX⟩ :=
+                ⟨envX, reactorX, hEnvX, hReactorX, hCorrX⟩ :=
               hCorrespondence.reactorOfActor
                 name
                 actor'
                 hOld
 
-            refine ⟨reactorX, ?_, ?_⟩
+            refine ⟨envX, reactorX, hEnvX, ?_, ?_⟩
 
             · have hInBefore :
                   (name, reactorX) ∈
@@ -2200,7 +2230,8 @@ theorem generalConsume_forward_weak_of_fireRepresentative
           subst hReactorEq
 
           refine
-            ⟨{
+            ⟨env,
+              {
                 state :=
                   {
                     valuation :=
@@ -2214,6 +2245,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
 
                 activeBody := server.body
               },
+              hEnv,
               ?_,
               hPostActorCorresponds⟩
 
@@ -2249,13 +2281,13 @@ theorem generalConsume_forward_weak_of_fireRepresentative
             rw [hAlignedReactors] at hInAligned
 
             obtain
-                ⟨actorX, hActorX, hCorrX⟩ :=
+                ⟨envX, actorX, hEnvX, hActorX, hCorrX⟩ :=
               hCorrespondence.actorOfReactor
                 name
                 reactor'
                 hInAligned
 
-            refine ⟨actorX, ?_, ?_⟩
+            refine ⟨envX, actorX, hEnvX, ?_, ?_⟩
 
             · exact
                 store_mem_update_of_ne

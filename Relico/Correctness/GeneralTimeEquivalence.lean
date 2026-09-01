@@ -83,11 +83,12 @@ Note that no quiescence hypothesis appears: this is a fact about the relation al
 configuration. Only the *futureness* of the message it produces needs quiescence, which is the next theorem.
 -/
 theorem generalSourceMessageOfEvent
+    (model : DTR.GeneralModel)
     (config : DTR.GeneralRuntimeConfiguration)
     (state : LF.GeneralRuntimeState)
     (event : LF.GeneralPendingEvent)
     (hCorrespondence :
-      GeneralStateCorrespondence config state)
+      GeneralStateCorrespondence model config state)
     (hEvent :
       event ∈ state.pending) :
     ∃ actorState : DTR.GeneralActorState,
@@ -101,7 +102,7 @@ theorem generalSourceMessageOfEvent
       event
       hEvent
 
-  obtain ⟨reactor, _, hCorresponds⟩ :=
+  obtain ⟨_env, reactor, _, _, hCorresponds⟩ :=
     hCorrespondence.reactorOfActor
       event.target
       actor
@@ -148,19 +149,21 @@ results directly; `R`'s `logicalTime` field converts between the two whenever th
 as the next theorem shows.
 -/
 theorem generalPendingEventFuture
+    (model : DTR.GeneralModel)
     (config : DTR.GeneralRuntimeConfiguration)
     (state : LF.GeneralRuntimeState)
     (event : LF.GeneralPendingEvent)
     (hQuiescent :
       DTR.GeneralConfiguration.readyActors config.erase = [])
     (hCorrespondence :
-      GeneralStateCorrespondence config state)
+      GeneralStateCorrespondence model config state)
     (hEvent :
       event ∈ state.pending) :
     config.now < event.tag.time := by
 
   obtain ⟨actorState, message, hActorState, hMessage, hArrival⟩ :=
     generalSourceMessageOfEvent
+      model
       config
       state
       event
@@ -202,13 +205,14 @@ Proved from `generalPendingEventFuture` and `R`'s `logicalTime` field, with `Nat
 `omega`: **F72** measured that `omega` does not see through the `LogicalTime` abbreviation.
 -/
 theorem generalNoMicrostepAdvance_of_quiescent
+    (model : DTR.GeneralModel)
     (config : DTR.GeneralRuntimeConfiguration)
     (state : LF.GeneralRuntimeState)
     (event : LF.GeneralPendingEvent)
     (hQuiescent :
       DTR.GeneralConfiguration.readyActors config.erase = [])
     (hCorrespondence :
-      GeneralStateCorrespondence config state)
+      GeneralStateCorrespondence model config state)
     (hEvent :
       event ∈ state.pending) :
     event.tag.time ≠ state.currentTag.time := by
@@ -218,6 +222,7 @@ theorem generalNoMicrostepAdvance_of_quiescent
   have hFuture :
       config.now < event.tag.time :=
     generalPendingEventFuture
+      model
       config
       state
       event
@@ -259,13 +264,14 @@ quiescent. Without that premise a message already due would be outside the minim
 would be unavailable — the concrete way F74's defect would resurface.
 -/
 theorem generalTimeEquivalence_forward
+    (model : DTR.GeneralModel)
     (config : DTR.GeneralRuntimeConfiguration)
     (state : LF.GeneralRuntimeState)
     (answer : LogicalTime)
     (hQuiescent :
       DTR.GeneralConfiguration.readyActors config.erase = [])
     (hCorrespondence :
-      GeneralStateCorrespondence config state)
+      GeneralStateCorrespondence model config state)
     (hNext :
       DTR.GeneralConfiguration.nextArrival config.erase =
         some answer) :
@@ -292,7 +298,7 @@ theorem generalTimeEquivalence_forward
       actorState
       hEraseMember
 
-  obtain ⟨reactor, _, hCorresponds⟩ :=
+  obtain ⟨_env, reactor, _, _, hCorresponds⟩ :=
     hCorrespondence.reactorOfActor
       name
       actor
@@ -353,6 +359,7 @@ theorem generalTimeEquivalence_forward
 
     obtain ⟨selectedState, selectedMessage, hSelectedActor, hSelectedBag, hSelectedArrival⟩ :=
       generalSourceMessageOfEvent
+        model
         config
         state
         selected
@@ -410,13 +417,14 @@ are then identified through `Option.some.injEq`, the idiom
 `LF.GeneralRuntimeState.earliestPendingEvent?_mem` uses for the same purpose.
 -/
 theorem generalTimeEquivalence_backward
+    (model : DTR.GeneralModel)
     (config : DTR.GeneralRuntimeConfiguration)
     (state : LF.GeneralRuntimeState)
     (event : LF.GeneralPendingEvent)
     (hQuiescent :
       DTR.GeneralConfiguration.readyActors config.erase = [])
     (hCorrespondence :
-      GeneralStateCorrespondence config state)
+      GeneralStateCorrespondence model config state)
     (hSelected :
       LF.GeneralRuntimeState.earliestPendingEvent? state =
         some event) :
@@ -432,6 +440,7 @@ theorem generalTimeEquivalence_backward
 
   obtain ⟨actorState, message, hActorMember, hBagMember, _⟩ :=
     generalSourceMessageOfEvent
+      model
       config
       state
       event
@@ -461,6 +470,7 @@ theorem generalTimeEquivalence_backward
 
   obtain ⟨matched, hMatched, hMatchedTime⟩ :=
     generalTimeEquivalence_forward
+      model
       config
       state
       answer
@@ -503,12 +513,13 @@ stage F's ordering results cover the second, at G2c, where a consume step has to
 clock.
 -/
 theorem generalTimeEquivalence
+    (model : DTR.GeneralModel)
     (config : DTR.GeneralRuntimeConfiguration)
     (state : LF.GeneralRuntimeState)
     (hQuiescent :
       DTR.GeneralConfiguration.readyActors config.erase = [])
     (hCorrespondence :
-      GeneralStateCorrespondence config state) :
+      GeneralStateCorrespondence model config state) :
     DTR.GeneralConfiguration.nextArrival config.erase =
       Option.map
         (fun event : LF.GeneralPendingEvent => event.tag.time)
@@ -531,6 +542,7 @@ theorem generalTimeEquivalence
       | some answer =>
           obtain ⟨event, hEvent, _⟩ :=
             generalTimeEquivalence_forward
+              model
               config
               state
               answer
@@ -549,6 +561,7 @@ theorem generalTimeEquivalence
 
       exact
         generalTimeEquivalence_backward
+          model
           config
           state
           event

@@ -284,6 +284,7 @@ example :
           pinModel =
         .ok program ∧
       Correctness.GeneralStateCorrespondence
+        pinModel
         (DTR.GeneralModel.initialState
           pinModel)
         (LF.GeneralProgram.initialState

@@ -847,39 +847,39 @@ theorem generalPendingAgrees_of_queue_drop
   exact hQueuePerm
 
 /--
-The target continuation is a compilation of the source continuation.
+The target continuation is a compilation of the source continuation, **under a named environment**.
 
-The paper's `π_x ≡ µ_r`. It is an existential over the compiler's three auxiliary inputs rather than an
-equation against a named target body, because a source continuation alone does not determine them: the
-output-port environment belongs to the sending class, the body context belongs to the message server, and
-the index is the statement's address inside it. None of the three is recoverable from a
-`DTR.GeneralBody`.
+The paper's `π_x ≡ μ_r`. The output-port environment is a *parameter*, not an existential: it belongs
+to the sending class, and which class a runtime reactor belongs to is a fact the correspondence must
+carry if a routed send is ever to be transferred. The body context and the statement index stay
+existential, because both vary along one execution — the context differs between a constructor body
+and a message-server body, and the index advances at every consumed statement — so pinning either
+would oblige every τ rule to re-derive it for no consumer's benefit.
 
-**This is a documented weakening, not a finished statement.** As written, the relation permits a target
-continuation compiled under some *other* class's port environment. Tightening it means pinning the
-environment to the one the program being executed actually built, which in turn means giving `R` the two
-programs as parameters — the paper's `R` is likewise indexed by a fixed pair of systems. Nothing in this
-module needs the tighter form: the two theorems below are about an empty continuation and about a step
-that changes no continuation at all. G2c is where a statement step must be transferred, and G2c is where
-the environment first has a name to be pinned to, so that is where the parameter belongs if it is needed.
-Recording the slack here is the alternative to discovering it there.
+**This replaces a documented weakening.** An earlier revision quantified the environment
+existentially, and its docstring recorded the consequence: the relation permitted a target
+continuation compiled under some *other* class's port environment. That slack blocked
+`Correctness.generalRoutedSend_forward`, whose entry (recovered from a compiled `.setPort` head)
+belonged to an unknown environment while `Translation.generalConnectionFrom?_siteFaithful` needs the
+one the routing table was built from. The old docstring named the repair site correctly — "G2c is
+where the environment first has a name to be pinned to" — and this is that repair.
 
-`Except String LF.GeneralBody` is the compiler's return type, so `.ok` is spelled out as `Except.ok` to
-keep the definition readable without the expected type in view.
+`Except String LF.GeneralBody` is the compiler's return type, so `.ok` is spelled out as `Except.ok`
+to keep the definition readable without the expected type in view.
 -/
 def GeneralContinuationCompiles
+    (env : Translation.GeneralOutputPortEnv)
     (source : DTR.GeneralBody)
     (target : LF.GeneralBody) :
     Prop :=
-  ∃ env : Translation.GeneralOutputPortEnv,
-    ∃ context : Translation.GeneralBodyContext,
-      ∃ index : Nat,
-        Translation.compileGeneralBody
-            env
-            context
-            index
-            source =
-          Except.ok target
+  ∃ context : Translation.GeneralBodyContext,
+    ∃ index : Nat,
+      Translation.compileGeneralBody
+          env
+          context
+          index
+          source =
+        Except.ok target
 
 /--
 The empty continuation compiles to the empty continuation.
@@ -889,15 +889,16 @@ and `Translation.compileGeneralBody_nil` is an `@[simp]` `rfl` lemma, so the thr
 anything at all. The empty port environment and `default` context are chosen because they are the two
 values that need no construction.
 -/
-theorem generalContinuationCompiles_nil :
+theorem generalContinuationCompiles_nil
+    (env : Translation.GeneralOutputPortEnv) :
     GeneralContinuationCompiles
+      env
       []
       [] :=
-  ⟨[],
-   default,
+  ⟨default,
    0,
    Translation.compileGeneralBody_nil
-     []
+     env
      default
      0⟩
 
@@ -909,19 +910,22 @@ the same trace head and advances the statement index by one. This is the continu
 future correspondence transfer case for the internal instrumentation rule.
 -/
 theorem generalContinuationCompiles_trace_tail
+    {env : Translation.GeneralOutputPortEnv}
     {tag : String}
     {sourceRemaining : DTR.GeneralBody}
     {targetRemaining : LF.GeneralBody}
     (hCompiles :
       GeneralContinuationCompiles
+        env
         (.trace tag :: sourceRemaining)
         (.trace tag :: targetRemaining)) :
     GeneralContinuationCompiles
+      env
       sourceRemaining
       targetRemaining := by
 
   rcases hCompiles with
-    ⟨env, context, index, hCompiled⟩
+    ⟨context, index, hCompiled⟩
 
   obtain
     ⟨compiledStatement, compiledRemaining, hStatement, hRemaining, hEqual⟩ :=
@@ -936,8 +940,7 @@ theorem generalContinuationCompiles_trace_tail
   subst targetRemaining
 
   exact
-    ⟨env,
-     context,
+    ⟨context,
      index + 1,
      hRemaining⟩
 
@@ -954,6 +957,7 @@ by `name`. Filtering first would need a `List.filter` and would then owe lemmas 
 filtered queue to membership in the real one, to no benefit: the relation is the only consumer.
 -/
 structure GeneralActorCorresponds
+    (env : Translation.GeneralOutputPortEnv)
     (name : ActorName)
     (actor : DTR.GeneralActorRuntime)
     (reactor : LF.GeneralReactorRuntime)
@@ -973,11 +977,13 @@ structure GeneralActorCorresponds
 
   continuation :
     GeneralContinuationCompiles
+      env
       actor.activeBody
       reactor.activeBody
 
 /-- A paired trace head may be removed from an actor correspondence. -/
 theorem generalActorCorresponds_trace_tail
+    {env : Translation.GeneralOutputPortEnv}
     {name : ActorName}
     {actor : DTR.GeneralActorRuntime}
     {reactor : LF.GeneralReactorRuntime}
@@ -987,6 +993,7 @@ theorem generalActorCorresponds_trace_tail
     {targetRemaining : LF.GeneralBody}
     (hCorresponds :
       GeneralActorCorresponds
+        env
         name
         actor
         reactor
@@ -998,6 +1005,7 @@ theorem generalActorCorresponds_trace_tail
       reactor.activeBody =
         .trace tag :: targetRemaining) :
     GeneralActorCorresponds
+      env
       name
       {
         state := actor.state
@@ -1031,6 +1039,7 @@ own initial case, and the reason the other two conjuncts must still be *stated*:
 trivial initially is not trivial after a step.
 -/
 theorem generalActorCorresponds_idle
+    (env : Translation.GeneralOutputPortEnv)
     (name : ActorName)
     (actor : DTR.GeneralActorRuntime)
     (reactor : LF.GeneralReactorRuntime)
@@ -1045,6 +1054,7 @@ theorem generalActorCorresponds_idle
     (hTarget :
       reactor.activeBody = []) :
     GeneralActorCorresponds
+      env
       name
       actor
       reactor
@@ -1066,7 +1076,63 @@ theorem generalActorCorresponds_idle
       hTarget
     ]
 
-    exact generalContinuationCompiles_nil
+    exact generalContinuationCompiles_nil env
+
+/--
+The output-port environment of whichever class an actor instance belongs to.
+
+The function that lets `GeneralStateCorrespondence` pin each actor's compiled environment without
+carrying a second store beside itself. `DTR.GeneralModel.classOfActor?` resolves the instance and its
+class in one step, and `Translation.outputPortEnvOf` is the environment the routing table was built
+from — so the two agree by construction rather than by hypothesis.
+
+`none` whenever the class or the environment fails to resolve, which for an accepted model means
+never; the relation states the success as an equation rather than assuming it, so a consumer reads
+the environment off the field instead of supplying it.
+-/
+def outputPortEnvOfActorName
+    (model : DTR.GeneralModel)
+    (name : ActorName) :
+    Option Translation.GeneralOutputPortEnv :=
+  match
+      model.classOfActor?
+        name
+  with
+
+  | none =>
+      none
+
+  | some sendingClass =>
+      (Translation.outputPortEnvOf
+        model.classes
+        sendingClass).toOption
+
+/--
+The environment equation, from a resolved class and a resolved environment.
+
+The one-step introduction rule, so that a caller holding the two facts an initializer or a routing
+walk already produces never unfolds the helper.
+-/
+theorem outputPortEnvOfActorName_eq
+    {model : DTR.GeneralModel}
+    {name : ActorName}
+    {sendingClass : DTR.GeneralReactiveClass}
+    {env : Translation.GeneralOutputPortEnv}
+    (hClass :
+      model.classOfActor? name =
+        some sendingClass)
+    (hEnv :
+      Translation.outputPortEnvOf
+          model.classes
+          sendingClass =
+        .ok env) :
+    outputPortEnvOfActorName model name =
+      some env := by
+  unfold outputPortEnvOfActorName
+  rw [hClass]
+  dsimp only
+  rw [hEnv]
+  rfl
 
 /--
 The relation `R` of the paper's Definition 1, on our two runtime states.
@@ -1085,6 +1151,7 @@ bindings beyond the requirement that each one be related: `Store` is an associat
 that relate pointwise need not be equal.
 -/
 structure GeneralStateCorrespondence
+    (model : DTR.GeneralModel)
     (config : DTR.GeneralRuntimeConfiguration)
     (state : LF.GeneralRuntimeState) :
     Prop where
@@ -1095,9 +1162,12 @@ structure GeneralStateCorrespondence
   reactorOfActor :
     ∀ (name : ActorName) (actor : DTR.GeneralActorRuntime),
       (name, actor) ∈ config.actors →
-        ∃ reactor : LF.GeneralReactorRuntime,
-          (name, reactor) ∈ state.reactors ∧
+        ∃ (env : Translation.GeneralOutputPortEnv)
+          (reactor : LF.GeneralReactorRuntime),
+          outputPortEnvOfActorName model name = some env ∧
+            (name, reactor) ∈ state.reactors ∧
             GeneralActorCorresponds
+              env
               name
               actor
               reactor
@@ -1106,9 +1176,12 @@ structure GeneralStateCorrespondence
   actorOfReactor :
     ∀ (name : ActorName) (reactor : LF.GeneralReactorRuntime),
       (name, reactor) ∈ state.reactors →
-        ∃ actor : DTR.GeneralActorRuntime,
-          (name, actor) ∈ config.actors ∧
+        ∃ (env : Translation.GeneralOutputPortEnv)
+          (actor : DTR.GeneralActorRuntime),
+          outputPortEnvOfActorName model name = some env ∧
+            (name, actor) ∈ config.actors ∧
             GeneralActorCorresponds
+              env
               name
               actor
               reactor
@@ -1130,14 +1203,16 @@ general fact, and because it is the fact that would break first if a later oblig
 constraint to the relation — a regression there fails here rather than deep inside a step case.
 -/
 theorem generalCorrespondence_retag
+    (model : DTR.GeneralModel)
     (config : DTR.GeneralRuntimeConfiguration)
     (state : LF.GeneralRuntimeState)
     (tag : LF.Tag)
     (hTime :
       tag.time = state.currentTag.time)
     (hCorrespondence :
-      GeneralStateCorrespondence config state) :
+      GeneralStateCorrespondence model config state) :
     GeneralStateCorrespondence
+      model
       config
       {
         currentTag := tag
@@ -1178,12 +1253,14 @@ filter whose equality `generalQueueAlphaEquiv.filter_target` preserves — so th
 both sides. The valuation and continuation fields are queue-blind and pass through untouched.
 -/
 theorem generalActorCorresponds_of_queueAlphaEquiv
+    (env : Translation.GeneralOutputPortEnv)
     (name : ActorName)
     (actor : DTR.GeneralActorRuntime)
     (reactor : LF.GeneralReactorRuntime)
     {pending pending' : LF.GeneralEventQueue}
     (hCorresponds :
       GeneralActorCorresponds
+        env
         name
         actor
         reactor
@@ -1193,6 +1270,7 @@ theorem generalActorCorresponds_of_queueAlphaEquiv
         pending
         pending') :
     GeneralActorCorresponds
+      env
       name
       actor
       reactor
@@ -1240,10 +1318,12 @@ shadowed-binding discipline the correspondence's own fields follow), and `pendin
 `List.Perm` that every queue α-equivalence carries.
 -/
 theorem generalStateCorrespondence_of_generalStateAlphaEquiv
+    {model : DTR.GeneralModel}
     {config : DTR.GeneralRuntimeConfiguration}
     {state state' : LF.GeneralRuntimeState}
     (hCorresponds :
       GeneralStateCorrespondence
+        model
         config
         state)
     (hAlpha :
@@ -1251,6 +1331,7 @@ theorem generalStateCorrespondence_of_generalStateAlphaEquiv
         state
         state') :
     GeneralStateCorrespondence
+      model
       config
       state' := by
   obtain ⟨hTag, hStore, _, hQueue⟩ :=
@@ -1268,16 +1349,19 @@ theorem generalStateCorrespondence_of_generalStateAlphaEquiv
         intro name actor hActor
 
         obtain
-            ⟨reactor, hMember, hCorrespondsActor⟩ :=
+            ⟨env, reactor, hEnv, hMember, hCorrespondsActor⟩ :=
           hCorresponds.reactorOfActor
             name
             actor
             hActor
 
         exact
-          ⟨reactor,
+          ⟨env,
+           reactor,
+           hEnv,
            (hStore name reactor).mp hMember,
            generalActorCorresponds_of_queueAlphaEquiv
+             env
              name
              actor
              reactor
@@ -1288,16 +1372,19 @@ theorem generalStateCorrespondence_of_generalStateAlphaEquiv
         intro name reactor hMember
 
         obtain
-            ⟨actor, hActor, hCorrespondsActor⟩ :=
+            ⟨env, actor, hEnv, hActor, hCorrespondsActor⟩ :=
           hCorresponds.actorOfReactor
             name
             reactor
             ((hStore name reactor).mpr hMember)
 
         exact
-          ⟨actor,
+          ⟨env,
+           actor,
+           hEnv,
            hActor,
            generalActorCorresponds_of_queueAlphaEquiv
+             env
              name
              actor
              reactor
@@ -1335,6 +1422,7 @@ being an equation, because that is the shape G2c's forward transfer condition co
 -/
 theorem generalCorrespondence_microstepAdvance
     (program : LF.GeneralProgram)
+    (model : DTR.GeneralModel)
     (config : DTR.GeneralRuntimeConfiguration)
     (state : LF.GeneralRuntimeState)
     (event : LF.GeneralPendingEvent)
@@ -1346,14 +1434,14 @@ theorem generalCorrespondence_microstepAdvance
     (hMicrostep :
       state.currentTag.microstep < event.tag.microstep)
     (hCorrespondence :
-      GeneralStateCorrespondence config state) :
+      GeneralStateCorrespondence model config state) :
     ∃ next : LF.GeneralRuntimeState,
       LF.GeneralStep
           program
           state
           LF.GeneralLabel.tau
           next ∧
-        GeneralStateCorrespondence config next := by
+        GeneralStateCorrespondence model config next := by
 
   refine
     ⟨{
@@ -1372,6 +1460,7 @@ theorem generalCorrespondence_microstepAdvance
 
   · exact
       generalCorrespondence_retag
+        model
         config
         state
         event.tag
@@ -1398,8 +1487,14 @@ and `DTR.mem_attachEmptyContinuations` is how that fact is recovered from member
 lookup. The pending queue is the literal `[]` for the same reason.
 -/
 theorem generalCorrespondence_initial_scoped
+    (model : DTR.GeneralModel)
     (config : DTR.GeneralConfiguration)
     (reactors : Store ActorName LF.GeneralReactorRuntime)
+    (hEnvs :
+      ∀ (name : ActorName) (state : DTR.GeneralActorState),
+        (name, state) ∈ config.actors →
+          ∃ env : Translation.GeneralOutputPortEnv,
+            outputPortEnvOfActorName model name = some env)
     (hBags :
       ∀ (name : ActorName) (state : DTR.GeneralActorState),
         (name, state) ∈ config.actors →
@@ -1423,6 +1518,7 @@ theorem generalCorrespondence_initial_scoped
                   reactor.valuation ∧
                 reactor.activeBody = []) :
     GeneralStateCorrespondence
+      model
       (DTR.GeneralRuntimeConfiguration.ofConfiguration config)
       {
         currentTag :=
@@ -1469,10 +1565,19 @@ theorem generalCorrespondence_initial_scoped
         actor.state
         hState
 
+    obtain ⟨env, hEnv⟩ :=
+      hEnvs
+        name
+        actor.state
+        hState
+
     exact
-      ⟨reactor,
+      ⟨env,
+       reactor,
+       hEnv,
        hReactorMember,
        generalActorCorresponds_idle
+         env
          name
          actor
          reactor
@@ -1496,11 +1601,19 @@ theorem generalCorrespondence_initial_scoped
         reactor
         hMember
 
+    obtain ⟨env, hEnv⟩ :=
+      hEnvs
+        name
+        state
+        hStateMember
+
     refine
-      ⟨{
+      ⟨env,
+       {
          state := state
          activeBody := []
        },
+       hEnv,
        ?_,
        ?_⟩
 
@@ -1513,6 +1626,7 @@ theorem generalCorrespondence_initial_scoped
 
     · exact
         generalActorCorresponds_idle
+          env
           name
           {
             state := state
@@ -2192,6 +2306,10 @@ private theorem initialResolution
          (reactor : LF.GeneralReactor),
         model.classOfActor? instanceDecl.name =
           some reactiveClass ∧
+        Translation.outputPortEnvOf
+            model.classes
+            reactiveClass =
+          .ok env ∧
         Translation.compileGeneralReactiveClass
             model.classes
             routes
@@ -2297,7 +2415,7 @@ private theorem initialResolution
        compiledBody,
        hClassMember,
        hClassCompiled,
-       _hEnv,
+       hEnv,
        hBody,
        hStartupBody,
        hStateVariables,
@@ -2336,6 +2454,7 @@ private theorem initialResolution
       compiledBody,
       reactor,
       ?_,
+      hEnv,
       hClassCompiled,
       hReactorMember,
       hBody,
@@ -2390,7 +2509,8 @@ unconditional initial theorem is not an instance of the scoped one: both initial
 side is idle, and the idle lemma's two `activeBody = []` premises are unprovable here. What replaces
 them is the continuation conjunct's real content: the target body is a successful `compileGeneralBody`
 of the source body, witnessed by the environment and self-send list the reactor itself was compiled
-against — which is exactly `GeneralContinuationCompiles`' existential.
+against — which is now `GeneralContinuationCompiles`' `env` parameter together with its two
+remaining existentials.
 
 The parameter correspondence is in the two bind hypotheses: the startup reaction's parameter names are
 the class's (`hStartupParameters`), and the compiled instance's arguments are the source's
@@ -2432,6 +2552,7 @@ theorem generalActorCorresponds_constructorEntry
         sourceInstance.arguments.map
           Translation.compileGeneralValue) :
     GeneralActorCorresponds
+      env
       name
       (DTR.GeneralModel.initialActorRuntime
           reactiveClass
@@ -2488,7 +2609,6 @@ theorem generalActorCorresponds_constructorEntry
 
     exact
       ⟨
-        env,
         {
           bodyKey := .constructor
           selfSends :=
@@ -2530,6 +2650,7 @@ theorem generalCorrespondence_initial
       Translation.compileGeneralModel model =
         .ok program) :
     GeneralStateCorrespondence
+      model
       (DTR.GeneralModel.initialState model)
       (LF.GeneralProgram.initialState program) := by
 
@@ -2575,6 +2696,7 @@ theorem generalCorrespondence_initial
          compiledBody,
          reactor,
          hClassOfActor,
+         hEnvOfClass,
          _hClassCompiled,
          _hReactorMember,
          hBody,
@@ -2654,10 +2776,16 @@ theorem generalCorrespondence_initial
 
     refine
       ⟨
+        env,
         LF.GeneralProgram.initialReactorRuntime
           reactor
           (Translation.compileGeneralActorInstance
             instanceDecl),
+        outputPortEnvOfActorName_eq
+          (by
+            rw [← hName]
+            exact hClassOfActor)
+          hEnvOfClass,
         Store.mem_of_lookup
           _ _ _ hLookup,
         ?_
@@ -2707,6 +2835,7 @@ theorem generalCorrespondence_initial
          compiledBody,
          reactor,
          hClassOfActor,
+         hEnvOfClass,
          _hClassCompiled,
          _hReactorMember,
          hBody,
@@ -2817,9 +2946,15 @@ theorem generalCorrespondence_initial
 
     refine
       ⟨
+        env,
         DTR.GeneralModel.initialActorRuntime
           reactiveClass
           instanceDecl,
+        outputPortEnvOfActorName_eq
+          (by
+            rw [← hSourceName]
+            exact hClassOfActor)
+          hEnvOfClass,
         Store.mem_of_lookup
           _ _ _ hLookup,
         ?_
