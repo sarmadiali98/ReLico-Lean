@@ -1023,6 +1023,117 @@ theorem generalTrace_forward
       }
 
 /-!
+## The weak lift, at the statement level
+
+`generalTrace_forward` concludes a **raw** `LF.GeneralStep`. The architecture the paper states is a *weak*
+bisimulation over the light within-tag quotient, so a consumer working at that level needs the same fact as a
+`Common.WeakStep` of `LF.GeneralStepModulo`. This section supplies it for `trace`.
+
+**What this adds over routing through `generalTauSteps_forward`, which is the question worth answering.**
+The closure theorem already covers all three τ statement forms, so a caller *could* reach a weak step through
+it — but only by supplying four accepted-program premises (`hCompiled`, `hRoutes`, `hEnvNodup`, `hNames`) that
+a `trace` step does not need. `generalTrace_forward` needs **none** of them: tracing consults no routing
+table, no output-port environment and no instance list. So the lift below is strictly premise-lighter than the
+closure route, and that is its whole justification. A caller holding only a correspondence and a body can use
+it; a caller going through the closure cannot.
+
+**The direction of the quotient lift is the permitted one.** `LF.GeneralStepModulo.of_raw` embeds a raw step
+into the quotient by reflexivity on both ends. Nothing here inverts the quotient, and no modulo-to-raw lemma
+is added or needed.
+
+The label is `LF.GeneralLabel.tau` on both sides. On the source side that is forced rather than chosen: the
+source has no `trace` label at all — `DTR.GeneralLabel` has exactly `tau`, `timeAdvance` and `consume` — so a
+`trace` statement step is internal by construction, and the statement itself is pinned by `hBody` rather than
+by the label.
+-/
+
+/--
+A source `trace` step is answered by a **weak** target step of the quotient system, preserving the
+correspondence.
+
+The weak form of `generalTrace_forward`, and the shape a weak-bisimulation consumer reads. Same premises as
+the raw version — in particular **no** accepted-program premises, since tracing consults no routing
+machinery — so this is usable where the τ closure route is not.
+
+The τ padding is **empty at both ends**, and that is the content rather than a shortcut: `TauSteps.refl` on
+each side says the source's trace is matched by *exactly one* target step with no administrative traffic
+around it, which is stronger than a padded statement. Genuine padding is owed only where P24 measured a
+divergence, and `trace` is not such a place — the compiled `LF.GeneralStmt.trace` is one statement for the
+source's one statement.
+
+Built through `Common.WeakStep.tau` and `Common.TauSteps.single` rather than through
+`Common.WeakStep.of_step`, deliberately, for the reason `generalTimeAdvance_forward_weak`'s docstring records
+about its own construction: `of_step` splits on `isTau label` with `classical` `by_cases` and so elaborates
+whatever the τ classification says, which would make the statement invariant under the very classification
+that decides whether a trace is observable. `LF.GeneralLabel.isTau_tau` is discharged explicitly instead, so
+a τ set that stopped containing `tau` would fail here.
+-/
+theorem generalTrace_forward_weak
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    {config : DTR.GeneralRuntimeConfiguration}
+    {state : LF.GeneralRuntimeState}
+    {actorName : ActorName}
+    {actor : DTR.GeneralActorRuntime}
+    {tag : String}
+    {remaining : DTR.GeneralBody}
+    (hCorrespondence :
+      GeneralStateCorrespondence
+        model
+        config
+        state)
+    (hUniqueS :
+      DTR.GeneralStoreKeyUnique config)
+    (hUniqueT :
+      LF.GeneralStoreKeyUnique state)
+    (hActor :
+      Store.lookup config.actors actorName =
+        some actor)
+    (hBody :
+      actor.activeBody =
+        DTR.GeneralStmt.trace tag :: remaining) :
+    ∃ state' : LF.GeneralRuntimeState,
+      Common.WeakStep
+          (LF.GeneralStepModulo program)
+          LF.GeneralLabel.isTau
+          state
+          LF.GeneralLabel.tau
+          state' ∧
+        GeneralStateCorrespondence
+          model
+          {
+            now := config.now
+
+            actors :=
+              Store.update
+                config.actors
+                actorName
+                {
+                  state := actor.state
+                  activeBody := remaining
+                }
+          }
+          state' := by
+
+  obtain ⟨state', hRawStep, hNextCorrespondence⟩ :=
+    generalTrace_forward
+      hCorrespondence
+      hUniqueS
+      hUniqueT
+      hActor
+      hBody
+
+  exact
+    ⟨state',
+     Common.WeakStep.tau
+       LF.GeneralLabel.isTau_tau
+       (Common.TauSteps.single
+         (LF.GeneralStepModulo.of_raw
+           hRawStep)
+         LF.GeneralLabel.isTau_tau),
+     hNextCorrespondence⟩
+
+/-!
 ## Assign
 
 The same pattern, plus the evaluation half. The target's expression is
