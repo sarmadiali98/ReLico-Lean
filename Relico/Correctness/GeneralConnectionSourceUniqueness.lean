@@ -194,6 +194,146 @@ spelling `declaredNames` decides. A `PortName` collision reflects into a `String
 -/
 
 /--
+A resolved actor carries the name it was resolved by.
+
+A local copy of the `private` `findActor?_name` in `Relico/DTR/GeneralActorSelection.lean`; not
+de-privatised, per the house preference for duplicating a short lemma over widening an interface.
+-/
+private theorem findActor?_name_local
+    (instances : List DTR.GeneralActorInstance)
+    (actorName : ActorName) :
+    ∀ actor,
+      DTR.findActor?
+          instances
+          actorName =
+        some actor →
+      actor.name = actorName := by
+
+  induction instances with
+
+  | nil =>
+      intro actor hFound
+
+      simp [
+        DTR.findActor?
+      ] at hFound
+
+  | cons head remaining inductionHypothesis =>
+      intro actor hFound
+
+      by_cases hHead :
+          head.name = actorName
+
+      · rw [
+          DTR.findActor?,
+          if_pos hHead
+        ] at hFound
+
+        obtain rfl :=
+          Option.some.inj hFound
+
+        exact hHead
+
+      · rw [
+          DTR.findActor?,
+          if_neg hHead
+        ] at hFound
+
+        exact
+          inductionHypothesis
+            actor
+            hFound
+
+/--
+A route's receiver instance is what its entry's known rebec is bound to in the sending instance.
+
+The fact routed-send transfer needs and that neither `generalRouteFor_sourceEndpoint` (source
+endpoint) nor `generalRouteFor_receiverProvenance` (declared class and server) supplies: the
+*identity* of the receiver, tied to the binding the source rule resolves through.
+`Correctness.sendTargetActor?_knownRebec_eq_bindings` reduces the source side to exactly this
+`Store.lookup`, so composing the two identifies the two receivers without any uniqueness assumption.
+
+Definitional in the one success branch — `generalRouteFor` sets `receiverInstance := receiver.name`
+where `receiver` is `model.actor?` of the bound instance name, and `DTR.GeneralActorInstance.name` of a
+resolved actor is the name it was resolved by. The three refusal branches close as its own docstring
+says: an unbound known rebec, an unresolvable receiver instance, or a receiver whose class disagrees
+with the entry's.
+-/
+theorem generalRouteFor_receiverInstance
+    {model : DTR.GeneralModel}
+    {actor : DTR.GeneralActorInstance}
+    {entry : GeneralOutputPortEntry}
+    {route : GeneralRoute}
+    (hRoute :
+      generalRouteFor
+          model
+          actor
+          entry =
+        .ok route) :
+    Store.lookup
+        actor.bindings
+        entry.knownRebec =
+      some route.receiverInstance := by
+
+  cases hBinding :
+      Store.lookup
+        actor.bindings
+        entry.knownRebec with
+
+  | none =>
+      simp [
+        generalRouteFor,
+        hBinding
+      ] at hRoute
+
+  | some receiverInstance =>
+
+      cases hActor :
+          model.actor? receiverInstance with
+
+      | none =>
+          simp [
+            generalRouteFor,
+            hBinding,
+            hActor
+          ] at hRoute
+
+      | some receiver =>
+
+          by_cases hClassMatch :
+              receiver.className = entry.receiverClass
+
+          · simp only [
+              generalRouteFor,
+              hBinding,
+              hActor,
+              hClassMatch,
+              if_pos,
+              Except.ok.injEq
+            ] at hRoute
+
+            subst hRoute
+
+            dsimp only
+
+            rw [
+              findActor?_name_local
+                model.instances
+                receiverInstance
+                receiver
+                (by
+                  unfold DTR.GeneralModel.actor? at hActor
+                  exact hActor)
+            ]
+
+          · simp [
+              generalRouteFor,
+              hBinding,
+              hActor,
+              hClassMatch
+            ] at hRoute
+
+/--
 A route's source endpoint is its sending actor's name and its entry's output port.
 
 `generalRouteFor` copies `actor.name` and `entry.outputPort` verbatim into the route it builds, so
@@ -255,6 +395,81 @@ theorem generalRouteFor_sourceEndpoint
             subst hRoute
 
             exact ⟨rfl, rfl⟩
+
+          · simp [
+              generalRouteFor,
+              hBinding,
+              hActor,
+              hClassMatch
+            ] at hRoute
+
+/--
+A route's delay is its entry's delay.
+
+The middle link of the chain that carries a source send's own `after` into the generated event.
+`LF.GeneralStmt.setPort` carries no delay at all — on the LF side a send's delay is a property of the
+connection the value travels along, which is why stage E keys output ports by send site — so a routed
+send's delay reaches the target's tag only by being copied entry to route to connection. This lemma is
+the route step; `generalOutputPortEntryFor_delay` below is the entry step, and
+`generalConnectionFrom?_siteFaithful` already returns the connection step.
+
+Definitional in the one success branch, and the three refusals close exactly as this lemma's two
+companions above close them: an unbound known rebec, an unresolvable receiver instance, or a receiver
+whose class disagrees with the entry's.
+-/
+theorem generalRouteFor_delay
+    {model : DTR.GeneralModel}
+    {actor : DTR.GeneralActorInstance}
+    {entry : GeneralOutputPortEntry}
+    {route : GeneralRoute}
+    (hRoute :
+      generalRouteFor
+          model
+          actor
+          entry =
+        .ok route) :
+    route.delay = entry.delay := by
+
+  cases hBinding :
+      Store.lookup
+        actor.bindings
+        entry.knownRebec with
+
+  | none =>
+      simp [
+        generalRouteFor,
+        hBinding
+      ] at hRoute
+
+  | some receiverInstance =>
+
+      cases hActor :
+          model.actor? receiverInstance with
+
+      | none =>
+          simp [
+            generalRouteFor,
+            hBinding,
+            hActor
+          ] at hRoute
+
+      | some receiver =>
+
+          by_cases hClassMatch :
+              receiver.className = entry.receiverClass
+
+          · simp only [
+              generalRouteFor,
+              hBinding,
+              hActor,
+              hClassMatch,
+              if_pos,
+              Except.ok.injEq
+            ] at hRoute
+
+            subst hRoute
+
+            rfl
 
           · simp [
               generalRouteFor,
@@ -1178,6 +1393,203 @@ theorem externalSendsFromIndex_knownRebec_of_drop
                           (by
                             rw [hSite, hArith])
 
+/--
+The send a walk emits at a statement's own position carries that statement's delay.
+
+The delay companion of `externalSendsFromIndex_knownRebec_of_drop` above, proved by the same induction
+generalising both `index` and `k`: at `k = 0` the head of the drop is the statement and the emitted head
+is the answer, with monotonicity ruling the tail out; at `k + 1` the drop moves into the tail and every
+arm advances `index` in step, so `index + (k + 1) = (index + 1) + k` closes each case.
+
+No uniqueness of routes, ports, or connections is used or implied; this consumes only monotonicity.
+-/
+theorem externalSendsFromIndex_delay_of_drop
+    (bodyKey : GeneralBodyKey) :
+    ∀ (body : DTR.GeneralBody)
+      (index k : Nat)
+      (rebec : KnownRebecName)
+      (message : MsgName)
+      (arguments : List DTR.GeneralExpr)
+      (delay : Delay)
+      (rest : DTR.GeneralBody)
+      (send : GeneralExternalSend),
+      body.drop k =
+        DTR.GeneralStmt.send
+            (.knownRebec rebec)
+            message
+            arguments
+            delay ::
+          rest →
+      send ∈
+        externalSendsFromIndex
+          bodyKey
+          index
+          body →
+      send.site.index = index + k →
+      send.delay = delay := by
+
+  intro body
+  induction body with
+
+  | nil =>
+      intro index k rebec message arguments delay rest send hDrop _ _
+
+      rw [
+        List.drop_nil
+      ] at hDrop
+
+      cases hDrop
+
+  | cons statement remaining inductionHypothesis =>
+      intro index k rebec message arguments delay rest send hDrop hMember hSite
+
+      cases k with
+
+      | zero =>
+          rw [
+            List.drop_zero
+          ] at hDrop
+
+          injection hDrop with hHead _
+
+          subst hHead
+
+          rw [
+            externalSendsFromIndex_send_knownRebec,
+            List.mem_cons
+          ] at hMember
+
+          cases hMember with
+
+          | inl hHere =>
+              subst hHere
+
+              rfl
+
+          | inr hThere =>
+              exfalso
+
+              have hTailGe :
+                  index + 1 ≤ send.site.index :=
+                site_index_ge_of_mem_externalSendsFromIndex
+                  bodyKey
+                  remaining
+                  (index + 1)
+                  send
+                  hThere
+
+              omega
+
+      | succ k' =>
+          rw [
+            List.drop_succ_cons
+          ] at hDrop
+
+          have hArith :
+              index + (k' + 1) =
+                (index + 1) + k' := by
+            omega
+
+          cases statement with
+
+          | assign target value =>
+              rw [
+                externalSendsFromIndex_assign
+              ] at hMember
+
+              exact
+                inductionHypothesis
+                  (index + 1)
+                  k'
+                  rebec
+                  message
+                  arguments
+                  delay
+                  rest
+                  send
+                  hDrop
+                  hMember
+                  (by
+                    rw [hSite, hArith])
+
+          | trace tag =>
+              rw [
+                externalSendsFromIndex_trace
+              ] at hMember
+
+              exact
+                inductionHypothesis
+                  (index + 1)
+                  k'
+                  rebec
+                  message
+                  arguments
+                  delay
+                  rest
+                  send
+                  hDrop
+                  hMember
+                  (by
+                    rw [hSite, hArith])
+
+          | send target headMessage headArguments headDelay =>
+
+              cases target with
+
+              | selfTarget =>
+                  rw [
+                    externalSendsFromIndex_send_selfTarget
+                  ] at hMember
+
+                  exact
+                    inductionHypothesis
+                      (index + 1)
+                      k'
+                      rebec
+                      message
+                      arguments
+                      delay
+                      rest
+                      send
+                      hDrop
+                      hMember
+                      (by
+                        rw [hSite, hArith])
+
+              | knownRebec headRebec =>
+                  rw [
+                    externalSendsFromIndex_send_knownRebec,
+                    List.mem_cons
+                  ] at hMember
+
+                  cases hMember with
+
+                  | inl hHere =>
+                      -- The head sits at `index`, but the sought site is strictly later.
+                      exfalso
+
+                      subst hHere
+
+                      simp only at hSite
+
+                      omega
+
+                  | inr hThere =>
+                      exact
+                        inductionHypothesis
+                          (index + 1)
+                          k'
+                          rebec
+                          message
+                          arguments
+                          delay
+                          rest
+                          send
+                          hDrop
+                          hThere
+                          (by
+                            rw [hSite, hArith])
+
 /-!
 ## The entry-to-send inversion
 
@@ -1222,6 +1634,101 @@ theorem generalOutputPortEntryFor_knownRebec
           ordinal =
         .ok entry) :
     entry.knownRebec = send.knownRebec := by
+
+  cases hKnown :
+      sendingClass.knownRebec?
+        send.knownRebec with
+
+  | none =>
+      simp [
+        generalOutputPortEntryFor,
+        hKnown
+      ] at hResolved
+
+  | some declaration =>
+
+      cases hClass :
+          DTR.findClass?
+            classes
+            declaration.className with
+
+      | none =>
+          simp [
+            generalOutputPortEntryFor,
+            hKnown,
+            hClass
+          ] at hResolved
+
+      | some receivingClass =>
+
+          cases hServer :
+              receivingClass.messageServer?
+                send.message with
+
+          | none =>
+              simp [
+                generalOutputPortEntryFor,
+                hKnown,
+                hClass,
+                hServer
+              ] at hResolved
+
+          | some receivingServer =>
+
+              cases hPayload :
+                  generalPortPayloadFor
+                    receivingClass.name
+                    send.message
+                    receivingServer.parameters with
+
+              | error diagnostic =>
+                  simp [
+                    generalOutputPortEntryFor,
+                    hKnown,
+                    hClass,
+                    hServer,
+                    hPayload
+                  ] at hResolved
+
+              | ok portPayload =>
+                  simp only [
+                    generalOutputPortEntryFor,
+                    hKnown,
+                    hClass,
+                    hServer,
+                    hPayload,
+                    Except.ok.injEq
+                  ] at hResolved
+
+                  subst hResolved
+
+                  rfl
+
+/--
+A resolved entry copies its send's delay.
+
+The entry step of the delay chain, and the companion of `generalOutputPortEntryFor_knownRebec` above in
+the same sense: both fields are copied verbatim in the one success branch, so the content of the lemma
+is the four-way case split that rules the refusals out. Needed because the statement compiler emits a
+`setPort` carrying no delay, so the *only* record of a routed statement's `after` in the generated
+program is the entry this send resolved to, and from there the route and the connection.
+-/
+theorem generalOutputPortEntryFor_delay
+    {classes : List DTR.GeneralReactiveClass}
+    {sendingClass : DTR.GeneralReactiveClass}
+    {allSends : List GeneralExternalSend}
+    {send : GeneralExternalSend}
+    {ordinal : Nat}
+    {entry : GeneralOutputPortEntry}
+    (hResolved :
+      generalOutputPortEntryFor
+          classes
+          sendingClass
+          allSends
+          send
+          ordinal =
+        .ok entry) :
+    entry.delay = send.delay := by
 
   cases hKnown :
       sendingClass.knownRebec?
@@ -1421,16 +1928,20 @@ private theorem exists_send_of_mem_generalOutputPortEntriesOf
 
 /--
 **The entry-to-send inversion, at the environment level.** Every entry of a class's resolved
-output-port environment came from one of that class's external sends, and copies its known rebec and
-its site.
+output-port environment came from one of that class's external sends, and copies its known rebec, its
+site and its delay.
 
-The lemma `Correctness.generalRoutedSend_forward` consumes. `numberExternalSends_sends` is what turns
-membership in the *numbered* list into membership in `externalSendsOfClass`, and it is why the
-ordinal never appears in the conclusion: the numbering exists to disambiguate generated port names,
-and no field this lemma returns depends on it.
+The lemma `Correctness.generalActorCorresponds_constructorEntry` consumes.
+`numberExternalSends_sends` is what turns membership in the *numbered* list into membership in
+`externalSendsOfClass`, and it is why the ordinal never appears in the conclusion: the numbering exists
+to disambiguate generated port names, and no field this lemma returns depends on it.
+
+The delay component is returned for the same reason as the rebec: a compiled `LF.GeneralStmt.setPort`
+carries no delay, so a routed statement's `after` survives into the generated program only through the
+entry, and a caller holding an entry needs both fields tied back to a statement.
 
 Existential in the send, and no uniqueness anywhere. Two sites may produce indistinguishable entries;
-the consumer needs a rebec and a site, not a unique origin.
+the consumer needs field equations against *some* originating send, not a unique origin.
 -/
 theorem exists_send_of_mem_outputPortEnv
     {classes : List DTR.GeneralReactiveClass}
@@ -1448,7 +1959,8 @@ theorem exists_send_of_mem_outputPortEnv
         externalSendsOfClass
           sendingClass,
       entry.knownRebec = send.knownRebec ∧
-        entry.site = send.site := by
+        entry.site = send.site ∧
+          entry.delay = send.delay := by
 
   unfold outputPortEnvOf at hResolved
 
@@ -1471,6 +1983,8 @@ theorem exists_send_of_mem_outputPortEnv
      generalOutputPortEntryFor_knownRebec
        hPair,
      generalOutputPortEntryFor_site
+       hPair,
+     generalOutputPortEntryFor_delay
        hPair⟩
 
   -- The numbering is a `map`-preserving relabelling, so a numbered pair's send is one of the class's.

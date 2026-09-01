@@ -2096,11 +2096,19 @@ theorem generalContinuationCompiles_selfSend_head
 
 /--
 A compiled body whose source head is an external send has the compiled `setPort` as its head, at the
-entry the compiler resolved.
+entry the compiler resolved — and that entry's known rebec and delay are the statement's own.
 
 The entry comes back as a member of its environment, which is exactly the shape
 `generalConnectionFrom?_siteFaithful` takes. The `none` branch is the compiler's own refusal, so a
 successful compilation rules it out.
+
+**The two field equations are read straight off the relation's site conjunct at `k = 0`**, not
+recomputed here. That is the whole reason the conjunct exists: the compiled `setPort` carries neither a
+rebec nor a delay — the rebec became an output-port name and the delay became a property of the
+connection — so a caller inverting a `setPort` head has no way back to the statement except through the
+relation. `Translation.generalRouteFor_receiverInstance` turns the rebec into the route's receiver and
+`Translation.generalRouteFor_delay` turns the delay into the route's delay, so these two equations are
+exactly what a routed-send transfer needs and no more.
 -/
 theorem generalContinuationCompiles_routedSend_head
     {env : Translation.GeneralOutputPortEnv}
@@ -2118,6 +2126,8 @@ theorem generalContinuationCompiles_routedSend_head
     ∃ (entry : Translation.GeneralOutputPortEntry)
       (targetRemaining : LF.GeneralBody),
       entry ∈ env ∧
+        entry.knownRebec = rebec ∧
+        entry.delay = delay ∧
         targetBody =
           LF.GeneralStmt.setPort
               entry.outputPort
@@ -2176,6 +2186,37 @@ theorem generalContinuationCompiles_routedSend_head
 
       subst hStatement
 
+      -- The two field equations, read straight off the relation's own site invariant at `k = 0`: the
+      -- statement being compiled *is* the head of `source.drop 0`, and the entry the compiler looked
+      -- up sits at that statement's own site. This is precisely the fact the relation carries, and the
+      -- reason the routed half was blocked before it carried it.
+      have hFields :
+          entry.knownRebec = rebec ∧
+            entry.delay = delay := by
+        refine
+          hSites
+            0
+            rebec
+            message
+            arguments
+            delay
+            sourceRemaining
+            ?_
+            entry
+            ?_
+
+        · rw [
+            List.drop_zero
+          ]
+
+        · rw [
+            show
+                index + 0 = index from by
+              omega
+          ]
+
+          exact hEntry
+
       exact
         ⟨entry,
          compiledRemaining,
@@ -2184,17 +2225,19 @@ theorem generalContinuationCompiles_routedSend_head
            _
            entry
            hEntry,
+         hFields.1,
+         hFields.2,
          hShape,
          ⟨context,
       index + 1,
       hRemaining,
       by
-        intro k rebec message arguments delay rest hDrop entry hEntry
+        intro k tailRebec message arguments delay rest hDrop entry hEntry
 
         refine
           hSites
             (k + 1)
-            rebec
+            tailRebec
             message
             arguments
             delay
@@ -2599,57 +2642,638 @@ theorem sendTargetActor?_knownRebec_eq_bindings
   ]
 
 /-!
-## What remains: the entry-to-send inversion landed, and the site link is still absent
+## Routed-send forward transfer
 
-Option 3 was implemented. `Translation.exists_send_of_mem_outputPortEnv`
-(`Relico/Correctness/GeneralConnectionSourceUniqueness.lean`) is green and supplies the direction
-`GeneralRouting` never had: from `entry ∈ env`, recover an originating external send together with
-`entry.knownRebec = send.knownRebec` and `entry.site = send.site`. It is existential in the send and
-introduces no uniqueness, which is what makes it sound in the presence of F48.
+The second send half, and the last statement rule. The target answer is `LF.GeneralStep.setPort`, and
+its `hConnection` premise is discharged by `Translation.generalConnectionFrom?_siteFaithful` — the
+site-faithful lookup, not an existential route.
 
-It is necessary and **not sufficient**, and the reason is worth recording exactly, because it is a
-different obstruction from the one this section described before.
+**The link that made this provable** is the migrated relation's site conjunct: instantiated at
+`k = 0` inside `generalContinuationCompiles_routedSend_head`, it yields
+`entry.knownRebec = rebec`, tying the entry the compiler resolved to the statement being executed.
+Composing that with `Translation.generalRouteFor_receiverInstance` and
+`sendTargetActor?_knownRebec_eq_bindings` identifies the source's resolved receiver with the
+connection's target instance. Before the migration this equation was unavailable and the routed half
+was blocked on it for three sessions.
 
-**The chain, and where it now breaks.** Matching the routed rule needs
-`entry.knownRebec = rebec`, since `Translation.generalRouteFor` computes the route's receiver from
-`Store.lookup actor.bindings entry.knownRebec` while the source resolves
-`Store.lookup actor.bindings rebec` (`sendTargetActor?_knownRebec_eq_bindings`). Composing what is now
-available:
+**No distinctness premise, and both coincidence cases are live.** A `.knownRebec` may resolve to the
+sending instance, since `ActorTopology.resolve` can bind a rebec to its own actor. The proof therefore
+splits on `senderName = receiverName`: when they coincide the receiver record the rule reads back is
+the sender's own advanced record and one target reactor serves both roles; when they differ the
+receiver is untouched in both stores. `generalCorrespondence_send` was written to tolerate exactly
+this, which is why its `hSenderPost` hypothesis is conditional.
+-/
 
-- `Translation.compileGeneralStmt_send_knownRebec_ok` → the entry is
-  `generalEntryAtSite? env ⟨context.bodyKey, index⟩`;
-- `Translation.generalEntryAtSite?_site` → `entry.site = ⟨context.bodyKey, index⟩`;
-- `exists_send_of_mem_outputPortEnv` → a send with `send.site = entry.site` and
-  `entry.knownRebec = send.knownRebec`.
+/--
+A source routed send is answered by a target `setPort`, preserving the correspondence.
 
-So the missing step is now precisely `send.knownRebec = rebec`: the send sitting at
-`⟨context.bodyKey, index⟩` in `externalSendsOfClass sendingClass` must be the statement being
-executed. `Translation.externalSendsFromIndex`'s `.knownRebec` arm does put a statement's rebec into
-the send at its own site, so the fact is true of the *declared* body — but the runtime `activeBody` is
-a **suffix** of that declared body, and `context.bodyKey` and `index` are existential in
-`GeneralContinuationCompiles`. Nothing relates the position the compilation restarted from to a
-position in the class's declared bodies.
+The premises beyond the statement rule's own are the ordinary eligibility assumptions that
+`Translation.generalConnectionFrom?_siteFaithful` takes — a successful compilation, its routing table,
+the sending instance and its class, and the two accepted-program `Nodup` facts. **None of them is a
+routed-send-specific assumption**, and in particular nothing here assumes route uniqueness, target
+uniqueness, or injectivity of `outputPortNameFor`.
 
-**That is option 1, and option 1 is excluded.** Pinning `bodyKey` and `index` would supply the link,
-and it is the only thing that would: the equation is about *where in the class* the running statement
-sits, which is information the relation deliberately does not carry. Carrying
-`entry.knownRebec = rebec` as a premise (option 2) is likewise excluded. So `generalRoutedSend_forward`
-is blocked on a standing constraint rather than on missing infrastructure, and every routing lemma it
-could want now exists.
+The `GeneralConsumeMatch` conjuncts are read off the *selected connection*: its target instance is the
+route's receiver, which the bridge identifies with the source's; its input port is the route's; and its
+delay is the route's, which is where the source send's own delay enters the tag through
+`LF.Tag.schedule_time` and the correspondence's `logicalTime`. The event kind is `.inputPort` of the
+connection's target port — whatever the runtime followed, never a function of the message. F78.
+-/
+theorem generalRoutedSend_forward
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    {routes : List Translation.GeneralRoute}
+    {config : DTR.GeneralRuntimeConfiguration}
+    {state : LF.GeneralRuntimeState}
+    {senderInstance : DTR.GeneralActorInstance}
+    {sendingClass : DTR.GeneralReactiveClass}
+    {senderEnv : Translation.GeneralOutputPortEnv}
+    {receiverName : ActorName}
+    {sender receiver : DTR.GeneralActorRuntime}
+    {rebec : KnownRebecName}
+    {message : MsgName}
+    {arguments : List DTR.GeneralExpr}
+    {delay : Delay}
+    {remaining : DTR.GeneralBody}
+    {payload : DTR.GeneralPayload}
+    (hCompiled :
+      Translation.compileGeneralModel model =
+        .ok program)
+    (hRoutes :
+      Translation.routesOf model =
+        .ok routes)
+    (hInstance :
+      senderInstance ∈ model.instances)
+    (hClass :
+      model.class? senderInstance.className =
+        some sendingClass)
+    (hSenderEnv :
+      Translation.outputPortEnvOf
+          model.classes
+          sendingClass =
+        .ok senderEnv)
+    (hEnvNodup :
+      ∀ candidate ∈ model.instances,
+        ∀ candidateEnv : Translation.GeneralOutputPortEnv,
+          (∃ candidateClass : DTR.GeneralReactiveClass,
+            model.class? candidate.className =
+                some candidateClass ∧
+              Translation.outputPortEnvOf
+                  model.classes
+                  candidateClass =
+                .ok candidateEnv) →
+          (List.map
+            (fun candidateEntry =>
+              candidateEntry.outputPort.value)
+            candidateEnv).Nodup)
+    (hNames :
+      (List.map
+        (fun candidate =>
+          candidate.name)
+        model.instances).Nodup)
+    (hCorrespondence :
+      GeneralStateCorrespondence
+        model
+        config
+        state)
+    (hUniqueS :
+      DTR.GeneralStoreKeyUnique config)
+    (hUniqueT :
+      LF.GeneralStoreKeyUnique state)
+    (hSender :
+      Store.lookup config.actors senderInstance.name =
+        some sender)
+    (hBody :
+      sender.activeBody =
+        DTR.GeneralStmt.send
+            (.knownRebec rebec)
+            message
+            arguments
+            delay ::
+          remaining)
+    (hArguments :
+      DTR.GeneralExpr.evaluateArguments
+          sender.state.valuation
+          arguments =
+        some payload)
+    (hTarget :
+      DTR.sendTargetActor?
+          model
+          senderInstance.name
+          (.knownRebec rebec) =
+        some receiverName)
+    (hReceiver :
+      Store.lookup
+          (Store.update
+            config.actors
+            senderInstance.name
+            {
+              state := sender.state
+              activeBody := remaining
+            })
+          receiverName =
+        some receiver) :
+    ∃ state' : LF.GeneralRuntimeState,
+      LF.GeneralStep
+          program
+          state
+          LF.GeneralLabel.tau
+          state' ∧
+        GeneralStateCorrespondence
+          model
+          {
+            now := config.now
 
-**What this leaves.** `generalTrace_forward`, `generalAssign_forward` and `generalSelfSend_forward` are
-green and unaffected — the self-send half never needed the site, because `.selfTarget` resolves to the
-sender without consulting an entry. `generalSend_forward`, `generalTau_forward` and the
-`Common.TauSteps` closure remain behind the routed half; the closure is still where the single
-`LF.GeneralStepModulo.tauSteps_of_raw` lift belongs.
+            actors :=
+              Store.update
+                (Store.update
+                  config.actors
+                  senderInstance.name
+                  {
+                    state := sender.state
+                    activeBody := remaining
+                  })
+                receiverName
+                {
+                  state :=
+                    {
+                      valuation := receiver.state.valuation
 
-The decision that would unblock this is whether the correspondence should record *which body position*
-a reactor is executing. That is a change to the shape of the relation, not its arity, and it is not
-one to make silently.
+                      bag :=
+                        receiver.state.bag ++
+                          [{
+                            sender := senderInstance.name
+                            messageName := message
+                            payload := payload
+                            arrival :=
+                              LogicalTime.after
+                                config.now
+                                delay
+                          }]
+                    }
 
-Nothing here weakens a correspondence conjunct, adds a distinctness premise, introduces a
-message-to-kind map, assumes route or target-endpoint uniqueness, or transports store-key uniqueness
-through α.
+                  activeBody := receiver.activeBody
+                }
+          }
+          state' := by
+
+  -- The sender's own pairing, at the environment the correspondence pins for it.
+  obtain ⟨senderEnvAt, reactor, hEnvSenderAt, hReactorMem, hPair⟩ :=
+    hCorrespondence.reactorOfActor
+      senderInstance.name
+      sender
+      (Store.mem_of_lookup
+        config.actors
+        senderInstance.name
+        sender
+        hSender)
+
+  -- The correspondence's environment for this actor is the class's. Derived, not assumed: the
+  -- instance is declared and instance names are duplicate-free, so `classOfActor?` at its name
+  -- resolves to its own class.
+  have hEnvSenderName :
+      outputPortEnvOfActorName model senderInstance.name =
+        some senderEnv :=
+    outputPortEnvOfActorName_eq_of_mem_instances
+      hInstance
+      hNames
+      hClass
+      hSenderEnv
+
+  obtain rfl :
+      senderEnv = senderEnvAt := by
+    rw [
+      hEnvSenderName
+    ] at hEnvSenderAt
+
+    exact
+      (Option.some.inj hEnvSenderAt)
+
+  -- Step 2: the routed head inversion, which also returns the rebec and delay equations.
+  obtain ⟨entry, targetRemaining, hEntryMem, hEntryRebec, hEntryDelay, hTargetBody, hTailCompiles⟩ :=
+    generalContinuationCompiles_routedSend_head
+      (by
+        rw [← hBody]
+
+        exact hPair.continuation)
+
+  -- Step 3: the compiled payload.
+  have hTargetArguments :
+      LF.GeneralExpr.evaluateArguments
+          reactor.valuation
+          (arguments.map
+            Translation.compileGeneralExpr) =
+        some
+          (payload.map
+            Translation.compileGeneralValue) := by
+    rw [
+      compileGeneralExpr_preserves_evaluateArguments
+        hPair.valuation
+        arguments,
+      hArguments
+    ]
+
+    rfl
+
+  -- Step 4: the site-faithful connection the runtime will follow.
+  obtain
+      ⟨route,
+       hRoute,
+       hRouteMem,
+       hLookup,
+       hSourceInstance,
+       hSourcePort,
+       hTargetInstance,
+       hTargetPort,
+       hDelay⟩ :=
+    Translation.generalConnectionFrom?_siteFaithful
+      hCompiled
+      hRoutes
+      hInstance
+      hClass
+      hSenderEnv
+      hEntryMem
+      hEnvNodup
+      hNames
+
+  -- Step 5: the source's resolved receiver is the route's receiver, hence the connection's target.
+  have hReceiverIsTarget :
+      receiverName =
+        (Translation.generalConnectionOf route).targetInstance := by
+    rw [
+      hTargetInstance
+    ]
+
+    have hBindings :
+        Store.lookup
+            senderInstance.bindings
+            rebec =
+          some route.receiverInstance := by
+      rw [
+        ← hEntryRebec
+      ]
+
+      exact
+        Translation.generalRouteFor_receiverInstance
+          hRoute
+
+    rw [
+      sendTargetActor?_knownRebec_eq_bindings
+        hInstance
+        hNames,
+      hBindings
+    ] at hTarget
+
+    exact
+      (Option.some.inj hTarget).symm
+
+  -- The target step. `hConnection` is the site-faithful lookup, rewritten to the port the compiled
+  -- `.setPort` actually carries.
+  refine
+    ⟨_,
+     LF.GeneralStep.setPort
+       (Store.lookup_of_mem_of_keysUnique
+         state.reactors
+         hUniqueT
+         hReactorMem)
+       hTargetBody
+       hTargetArguments
+       hLookup,
+     ?_⟩
+
+  -- Step 6: the connection's delay *is* the source statement's delay. Three links, none of which the
+  -- routing table could supply on its own: the relation's site conjunct ties the entry to the
+  -- statement, and the two routing lemmas carry it entry → route → connection. This is where a
+  -- routed send's `after` reaches the target's tag, since `setPort` carries no delay at all.
+  have hConnectionDelay :
+      (Translation.generalConnectionOf route).delay =
+        delay := by
+    rw [
+      hDelay,
+      Translation.generalRouteFor_delay
+        hRoute,
+      hEntryDelay
+    ]
+
+  rw [
+    ← hReceiverIsTarget,
+    hConnectionDelay
+  ]
+
+  -- The matched pair. Target by the bridge of step 5; tag time from `LF.Tag.schedule_time` against
+  -- the source's `LogicalTime.after config.now delay` through the correspondence's `logicalTime`,
+  -- now that the connection's delay has been identified with the statement's; payload from step 3.
+  have hMatch :
+      GeneralConsumeMatch
+        receiverName
+        {
+          sender := senderInstance.name
+          messageName := message
+          payload := payload
+          arrival :=
+            LogicalTime.after
+              config.now
+              delay
+        }
+        {
+          target :=
+            receiverName
+
+          kind :=
+            LF.GeneralEventKind.inputPort
+              (Translation.generalConnectionOf route).targetPort
+
+          tag :=
+            LF.Tag.schedule
+              state.currentTag
+              delay
+
+          payload :=
+            payload.map
+              Translation.compileGeneralValue
+        } := by
+    refine
+      ⟨rfl, ?_, rfl⟩
+
+    show
+      (LF.Tag.schedule
+          state.currentTag
+          delay).time =
+        LogicalTime.after
+          config.now
+          delay
+
+    rw [
+      LF.Tag.schedule_time,
+      hCorrespondence.logicalTime
+    ]
+
+  -- The two written source keys may coincide. `ActorTopology.resolve` can bind a known rebec to the
+  -- sending instance, so a *routed* send can be a self-send in every respect except its syntax, and
+  -- excluding that with a distinctness premise would silently narrow the theorem. Both cases are
+  -- handled, and `generalCorrespondence_send`'s conditional `hSenderPost` is what makes one theorem
+  -- serve both.
+  by_cases hSame :
+      receiverName = senderInstance.name
+
+  · subst hSame
+
+    -- The record the rule reads back is the sender's own advanced record.
+    obtain rfl :
+        receiver =
+          {
+            state := sender.state
+            activeBody := remaining
+          } := by
+      rw [
+        Store.lookup_update_eq
+      ] at hReceiver
+
+      exact
+        (Option.some.inj hReceiver).symm
+
+    refine
+      generalCorrespondence_send
+        hCorrespondence
+        hUniqueS
+        hUniqueT
+        senderInstance.name
+        senderInstance.name
+        senderEnv
+        senderEnv
+        hEnvSenderName
+        hEnvSenderName
+        {
+          state := sender.state
+          activeBody := remaining
+        }
+        _
+        {
+          valuation := reactor.valuation
+          activeBody := targetRemaining
+        }
+        {
+          valuation := reactor.valuation
+          activeBody := targetRemaining
+        }
+        _
+        (Store.mem_update_self
+          state.reactors
+          senderInstance.name
+          _)
+        (Store.mem_update_self
+          state.reactors
+          senderInstance.name
+          _)
+        (fun hNe =>
+          absurd rfl hNe)
+        ?_
+        ?_
+        ?_
+
+    · exact
+        {
+          valuation := hPair.valuation
+
+          messages :=
+            generalPendingAgrees_append_matched
+              hPair.messages
+              hMatch
+
+          continuation := hTailCompiles
+        }
+
+    · intro name envOther actor candidateReactor hNotSender _ hCandidatePair
+
+      refine
+        {
+          valuation := hCandidatePair.valuation
+
+          messages :=
+            generalPendingAgrees_append_other
+              hCandidatePair.messages
+              ?_
+
+          continuation := hCandidatePair.continuation
+        }
+
+      show
+        senderInstance.name ≠ name
+
+      exact
+        Ne.symm hNotSender
+
+    · exact
+        ⟨_,
+         Store.mem_update_self
+           _
+           senderInstance.name
+           _⟩
+
+  · -- Distinct keys: the receiver's record is untouched by the sender's update, so its own pairing
+    -- comes from the pre-state correspondence.
+    have hReceiverOriginal :
+        Store.lookup
+            config.actors
+            receiverName =
+          some receiver := by
+      rw [
+        Store.lookup_update_ne
+          config.actors
+          _
+          (Ne.symm hSame)
+      ] at hReceiver
+
+      exact hReceiver
+
+    obtain ⟨envReceiver, targetReceiver, hEnvReceiver, hReceiverMem, hReceiverPair⟩ :=
+      hCorrespondence.reactorOfActor
+        receiverName
+        receiver
+        (Store.mem_of_lookup
+          config.actors
+          receiverName
+          receiver
+          hReceiverOriginal)
+
+    refine
+      generalCorrespondence_send
+        hCorrespondence
+        hUniqueS
+        hUniqueT
+        senderInstance.name
+        receiverName
+        senderEnv
+        envReceiver
+        hEnvSenderName
+        hEnvReceiver
+        {
+          state := sender.state
+          activeBody := remaining
+        }
+        _
+        {
+          valuation := reactor.valuation
+          activeBody := targetRemaining
+        }
+        targetReceiver
+        _
+        (Store.mem_update_self
+          state.reactors
+          senderInstance.name
+          _)
+        (Store.mem_update_of_ne
+          hReceiverMem
+          hSame)
+        ?_
+        ?_
+        ?_
+        ?_
+
+    · intro _
+
+      exact
+        {
+          valuation := hPair.valuation
+
+          messages :=
+            generalPendingAgrees_append_other
+              hPair.messages
+              hSame
+
+          continuation := hTailCompiles
+        }
+
+    · exact
+        {
+          valuation := hReceiverPair.valuation
+
+          messages :=
+            generalPendingAgrees_append_matched
+              hReceiverPair.messages
+              hMatch
+
+          continuation := hReceiverPair.continuation
+        }
+
+    · intro name envOther actor candidateReactor _ hNotReceiver hCandidatePair
+
+      refine
+        {
+          valuation := hCandidatePair.valuation
+
+          messages :=
+            generalPendingAgrees_append_other
+              hCandidatePair.messages
+              ?_
+
+          continuation := hCandidatePair.continuation
+        }
+
+      show
+        receiverName ≠ name
+
+      exact
+        Ne.symm hNotReceiver
+
+    · exact
+        ⟨_,
+         Store.mem_update_self
+           _
+           receiverName
+           _⟩
+
+/-!
+## What the routed half needed, and where each piece came from
+
+`generalRoutedSend_forward` is the last of the four τ statement transfers, and it is the only one that
+had to reach outside this module. Recording the assembled chain, because the same shape will be wanted
+by the backward direction and because two earlier attempts at it failed on the same wall.
+
+**The obstruction, twice.** A compiled `LF.GeneralStmt.setPort` carries a *port name* and nothing else:
+the statement's known rebec became part of the generated port name (non-injectively — F48), and its
+delay became a property of the connection the value travels along. So inverting a `setPort` head
+recovers an entry that, on its own, says nothing about the statement it came from. Both the rebec and
+the delay hit that wall, and neither can be recovered by composing routing lemmas at the transfer site:
+`Translation.externalSendsFromIndex_knownRebec_of_drop` and
+`Translation.externalSendsFromIndex_delay_of_drop` both need the class's *declared* body and the
+statement's position in it, while `activeBody` is a suffix of a declared body whose `bodyKey` and
+`index` are existential in `GeneralContinuationCompiles`.
+
+**The repair, once.** `GeneralContinuationCompiles`' site conjunct concludes
+`entry.knownRebec = rebec ∧ entry.delay = delay`, discharged at the single construction site
+(`generalActorCorresponds_constructorEntry`) where the declared body *is* in hand, and read off here at
+`k = 0` by `generalContinuationCompiles_routedSend_head`. The routing lemmas are what discharge it
+there, so they are load-bearing — just at the other end of the relation.
+
+**The chain, in the order the proof walks it.**
+
+1. `hCorrespondence.reactorOfActor` → the sender's pairing, at the environment the relation pins;
+   `outputPortEnvOfActorName_eq_of_mem_instances` identifies that environment with the class's, so no
+   `hEnvAt` premise is exported.
+2. `generalContinuationCompiles_routedSend_head` → the entry, its membership, and the two field
+   equations.
+3. `compileGeneralExpr_preserves_evaluateArguments` → the compiled payload.
+4. `Translation.generalConnectionFrom?_siteFaithful` → the route, the `connectionFrom?` lookup the rule
+   consumes, and the connection's five field equations.
+5. `Translation.generalRouteFor_receiverInstance` with
+   `sendTargetActor?_knownRebec_eq_bindings` → the source's resolved receiver *is* the connection's
+   target instance. Both sides are one `Store.lookup` on the sending instance's bindings.
+6. `Translation.generalRouteFor_delay` with the entry equation → the connection's delay is the
+   statement's, so the emitted event lands at the tag the source names.
+7. `generalCorrespondence_send`, case-split on whether the two written keys coincide.
+
+**No new premises, and no narrowing.** `hEnvNodup` and `hNames` are accepted-program facts the routing
+side already consumed; nothing here assumes route uniqueness, target-endpoint uniqueness, or
+injectivity of `outputPortNameFor`, and the `receiverName = senderInstance.name` case is *handled*
+rather than excluded — a routed send may resolve to its own sender, and a distinctness premise would
+have silently dropped that. `GeneralConsumeMatch`'s event kind is `.inputPort` of the connection's
+target port, whatever the runtime followed, never a function of the message. F78.
+
+**What remains behind this.** `generalSend_forward` (the case split on `DTR.GeneralSendTarget`, over
+this and `generalSelfSend_forward`), `generalTau_forward` (the three τ constructors) and the
+`Common.TauSteps` closure, where the single `LF.GeneralStepModulo.tauSteps_of_raw` lift belongs. Then
+the forward instant-block transfer this prerequisite was discovered under.
 -/
 
 end Correctness

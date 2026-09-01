@@ -865,6 +865,22 @@ belonged to an unknown environment while `Translation.generalConnectionFrom?_sit
 one the routing table was built from. The old docstring named the repair site correctly — "G2c is
 where the environment first has a name to be pinned to" — and this is that repair.
 
+**The site conjunct carries two field equations, and the second was added after the first proved
+insufficient.** An earlier revision concluded only `entry.knownRebec = rebec`, and its own docstring
+argued that the rebec was the field deciding where a message goes. That is true and was not enough:
+`LF.GeneralStmt.setPort` carries no delay, because on the LF side a send's `after` is a property of the
+connection the value travels along rather than of the statement. So the generated program's *only*
+record of a routed statement's delay is the entry it resolved to, and a transfer proof that cannot tie
+the entry's delay to the statement's cannot show the emitted event lands at the tag the source names.
+The three routing lemmas
+(`Translation.externalSendsFromIndex_delay_of_drop`, `Translation.generalOutputPortEntryFor_delay`,
+`Translation.generalRouteFor_delay`) close statement to send to entry to route, but the first of them
+needs the class's declared body and the running statement's position in it — and `activeBody` is a
+*suffix* of a declared body whose `bodyKey` and `index` are existential here. Composing them at the
+transfer site is therefore impossible, not merely awkward, which is the same obstruction the rebec half
+hit. Both fields are resolved the same way: at the one construction site, where the declared body *is*
+in hand.
+
 `Except String LF.GeneralBody` is the compiler's return type, so `.ok` is spelled out as `Except.ok`
 to keep the definition readable without the expected type in view.
 -/
@@ -905,7 +921,8 @@ def GeneralContinuationCompiles
                     index + k
                 } =
               some entry →
-            entry.knownRebec = rebec
+            entry.knownRebec = rebec ∧
+              entry.delay = delay
 
 /--
 The empty continuation compiles to the empty continuation.
@@ -2566,6 +2583,64 @@ private theorem initialResolution
   ]
 
 /--
+The environment equation at a declared instance, from its class and that class's environment.
+
+The form a statement-transfer proof can actually reach. `outputPortEnvOfActorName_eq` above takes
+`model.classOfActor?` at the actor's *name*, but a caller holding a routed send holds the instance
+itself plus `model.class?` at its class name — and `classOfActor?` is `actor?` followed by `class?`,
+so the bridge is instance-name resolution, which needs the model's instance names to be
+duplicate-free.
+
+Instance-name `Nodup` is the same accepted-program fact `DTR.generalStoreKeyUnique_initial` and
+`Translation.routesOf_sourceEndpoints_nodup` consume, spelled as a `Nodup` over instance names rather
+than as a whole `wellFormed` premise. It is not optional: `findActor?` returns the first match, so a
+model with two instances of one name would resolve the name to the wrong instance's class.
+-/
+theorem outputPortEnvOfActorName_eq_of_mem_instances
+    {model : DTR.GeneralModel}
+    {actor : DTR.GeneralActorInstance}
+    {sendingClass : DTR.GeneralReactiveClass}
+    {env : Translation.GeneralOutputPortEnv}
+    (hActor :
+      actor ∈ model.instances)
+    (hNames :
+      (List.map
+        (fun candidate =>
+          candidate.name)
+        model.instances).Nodup)
+    (hClass :
+      model.class? actor.className =
+        some sendingClass)
+    (hEnv :
+      Translation.outputPortEnvOf
+          model.classes
+          sendingClass =
+        .ok env) :
+    outputPortEnvOfActorName model actor.name =
+      some env := by
+
+  refine
+    outputPortEnvOfActorName_eq
+      ?_
+      hEnv
+
+  unfold DTR.GeneralModel.classOfActor?
+
+  rw [
+    show
+        model.actor? actor.name =
+          some actor from
+      findActor?_of_mem_of_nodup
+        model.instances
+        actor
+        hActor
+        hNames
+  ]
+
+  exact hClass
+
+
+/--
 One actor at constructor entry corresponds to one reactor at startup-entry, given the compilation facts
 that connect the two.
 
@@ -2694,11 +2769,12 @@ theorem generalActorCorresponds_constructorEntry
 
     -- The one place the drop-position invariant is CONSTRUCTED rather than reindexed. The startup
     -- body is the class's whole constructor body at index 0, so a site the compiler resolved is a
-    -- site of that body's own walk, and the two committed routing lemmas identify its rebec with the
-    -- statement's.
+    -- site of that body's own walk, and the committed routing lemmas identify its rebec *and its
+    -- delay* with the statement's. Both halves are discharged here and nowhere else, because this is
+    -- the only place the class's declared body is in hand.
     intro k rebec message arguments delay rest hDrop entry hEntry
 
-    obtain ⟨send, hSendMember, hSendRebec, hSendSite⟩ :=
+    obtain ⟨send, hSendMember, hSendRebec, hSendSite, hSendDelay⟩ :=
       Translation.exists_send_of_mem_outputPortEnv
         hEnv
         (Translation.generalEntryAtSite?_mem
@@ -2727,33 +2803,62 @@ theorem generalActorCorresponds_constructorEntry
           entry
           hEntry
 
-    rw [
-      hSendRebec
-    ]
+    have hBodyMember :
+        send ∈
+          Translation.externalSendsFromIndex
+            .constructor
+            0
+            reactiveClass.constructor.body :=
+      Translation.mem_externalSendsOfBody_constructor_of_mem_externalSendsOfClass
+        hSendMember
+        (by
+          rw [hSiteEq])
 
-    refine
-      Translation.externalSendsFromIndex_knownRebec_of_drop
-        .constructor
-        reactiveClass.constructor.body
-        0
-        k
-        rebec
-        message
-        arguments
-        delay
-        rest
-        send
-        hDrop
-        ?_
-        ?_
+    have hSendIndex :
+        send.site.index = 0 + k := by
+      rw [hSiteEq]
 
-    · exact
-        Translation.mem_externalSendsOfBody_constructor_of_mem_externalSendsOfClass
-          hSendMember
-          (by
-            rw [hSiteEq])
+    refine ⟨?_, ?_⟩
 
-    · rw [hSiteEq]
+    · rw [
+        hSendRebec
+      ]
+
+      exact
+        Translation.externalSendsFromIndex_knownRebec_of_drop
+          .constructor
+          reactiveClass.constructor.body
+          0
+          k
+          rebec
+          message
+          arguments
+          delay
+          rest
+          send
+          hDrop
+          hBodyMember
+          hSendIndex
+
+    · rw [
+        hSendDelay
+      ]
+
+      exact
+        Translation.externalSendsFromIndex_delay_of_drop
+          .constructor
+          reactiveClass.constructor.body
+          0
+          k
+          rebec
+          message
+          arguments
+          delay
+          rest
+          send
+          hDrop
+          hBodyMember
+          hSendIndex
 
 /--
 The relation `R` holds at the initial states of a model and its compiled program. Unconditional.
