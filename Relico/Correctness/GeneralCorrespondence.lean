@@ -5,6 +5,7 @@ import Relico.LF.GeneralAlphaEquivalence
 import Relico.DTR.GeneralInitialization
 import Relico.LF.GeneralInitialization
 import Relico.Correctness.GeneralEvaluation
+import Relico.Correctness.GeneralConnectionSourceUniqueness
 
 set_option autoImplicit false
 
@@ -875,11 +876,36 @@ def GeneralContinuationCompiles
   ∃ context : Translation.GeneralBodyContext,
     ∃ index : Nat,
       Translation.compileGeneralBody
-          env
-          context
-          index
-          source =
-        Except.ok target
+            env
+            context
+            index
+            source =
+          Except.ok target ∧
+        ∀ (k : Nat)
+          (rebec : KnownRebecName)
+          (message : MsgName)
+          (arguments : List DTR.GeneralExpr)
+          (delay : Delay)
+          (rest : DTR.GeneralBody),
+          source.drop k =
+            DTR.GeneralStmt.send
+                (.knownRebec rebec)
+                message
+                arguments
+                delay ::
+              rest →
+          ∀ entry : Translation.GeneralOutputPortEntry,
+            Translation.generalEntryAtSite?
+                env
+                {
+                  body :=
+                    context.bodyKey
+
+                  index :=
+                    index + k
+                } =
+              some entry →
+            entry.knownRebec = rebec
 
 /--
 The empty continuation compiles to the empty continuation.
@@ -900,7 +926,15 @@ theorem generalContinuationCompiles_nil
    Translation.compileGeneralBody_nil
      env
      default
-     0⟩
+     0,
+   by
+     intro k _ _ _ _ _ hDrop
+
+     rw [
+       List.drop_nil
+     ] at hDrop
+
+     cases hDrop⟩
 
 /--
 Consuming a trace head preserves the compilation relation for the remaining continuations.
@@ -925,7 +959,7 @@ theorem generalContinuationCompiles_trace_tail
       targetRemaining := by
 
   rcases hCompiles with
-    ⟨context, index, hCompiled⟩
+    ⟨context, index, hCompiled, hSites⟩
 
   obtain
     ⟨compiledStatement, compiledRemaining, hStatement, hRemaining, hEqual⟩ :=
@@ -939,10 +973,42 @@ theorem generalContinuationCompiles_trace_tail
   injection hEqual with hRemainingTarget
   subst targetRemaining
 
-  exact
+  refine
     ⟨context,
      index + 1,
-     hRemaining⟩
+     hRemaining,
+     ?_⟩
+
+  -- Reindex: the tail's statement at `k` is the body's statement at `k + 1`, and
+  -- `index + 1 + k = index + (k + 1)`, so the incoming obligation answers directly.
+  intro k rebec message arguments delay rest hDrop entry hEntry
+
+  refine
+    hSites
+      (k + 1)
+      rebec
+      message
+      arguments
+      delay
+      rest
+      ?_
+      entry
+      ?_
+
+  · rw [
+      List.drop_succ_cons
+    ]
+
+    exact hDrop
+
+  · rw [
+      show
+          index + (k + 1) =
+            index + 1 + k from by
+        omega
+    ]
+
+    exact hEntry
 
 /--
 One actor against one reactor: the paper's three per-actor conjuncts.
@@ -2525,6 +2591,12 @@ theorem generalActorCorresponds_constructorEntry
     (compiledBody : LF.GeneralBody)
     (reactor : LF.GeneralReactor)
     (compiledInstance : LF.GeneralReactorInstance)
+    (classes : List DTR.GeneralReactiveClass)
+    (hEnv :
+      Translation.outputPortEnvOf
+          classes
+          reactiveClass =
+        .ok env)
     (hBody :
       Translation.compileGeneralBody
           env
@@ -2607,7 +2679,7 @@ theorem generalActorCorresponds_constructorEntry
       hStartupBody
     ]
 
-    exact
+    refine
       ⟨
         {
           bodyKey := .constructor
@@ -2616,8 +2688,72 @@ theorem generalActorCorresponds_constructorEntry
               reactiveClass
         },
         0,
-        hBody
+        hBody,
+        ?_
       ⟩
+
+    -- The one place the drop-position invariant is CONSTRUCTED rather than reindexed. The startup
+    -- body is the class's whole constructor body at index 0, so a site the compiler resolved is a
+    -- site of that body's own walk, and the two committed routing lemmas identify its rebec with the
+    -- statement's.
+    intro k rebec message arguments delay rest hDrop entry hEntry
+
+    obtain ⟨send, hSendMember, hSendRebec, hSendSite⟩ :=
+      Translation.exists_send_of_mem_outputPortEnv
+        hEnv
+        (Translation.generalEntryAtSite?_mem
+          env
+          _
+          entry
+          hEntry)
+
+    have hSiteEq :
+        send.site =
+          {
+            body :=
+              Translation.GeneralBodyKey.constructor
+
+            index :=
+              0 + k
+          } := by
+      rw [
+        ← hSendSite
+      ]
+
+      exact
+        Translation.generalEntryAtSite?_site
+          env
+          _
+          entry
+          hEntry
+
+    rw [
+      hSendRebec
+    ]
+
+    refine
+      Translation.externalSendsFromIndex_knownRebec_of_drop
+        .constructor
+        reactiveClass.constructor.body
+        0
+        k
+        rebec
+        message
+        arguments
+        delay
+        rest
+        send
+        hDrop
+        ?_
+        ?_
+
+    · exact
+        Translation.mem_externalSendsOfBody_constructor_of_mem_externalSendsOfClass
+          hSendMember
+          (by
+            rw [hSiteEq])
+
+    · rw [hSiteEq]
 
 /--
 The relation `R` holds at the initial states of a model and its compiled program. Unconditional.
@@ -2800,6 +2936,8 @@ theorem generalCorrespondence_initial
         compiledBody
         reactor
         _
+        model.classes
+        hEnvOfClass
         hBody
         hStartupBody
         hStateVariables
@@ -2969,6 +3107,8 @@ theorem generalCorrespondence_initial
         compiledBody
         reactor
         compiledInstance
+        model.classes
+        hEnvOfClass
         hBody
         hStartupBody
         hStateVariables

@@ -694,7 +694,22 @@ def traceContinuationCompiles :
       []
       [DTR.GeneralStmt.trace "audit"]
       [LF.GeneralStmt.trace "audit"] :=
-  ⟨default, 0, by rfl⟩
+  ⟨default,
+   0,
+   by rfl,
+   by
+     -- The one statement is a trace, so no `drop` of this body has an external-send head and the
+     -- site obligation is vacuous. This pin is the regression witness that the strengthened relation
+     -- stays inhabited on a real compiled body.
+     intro k _ _ _ _ _ hDrop
+
+     cases k with
+
+     | zero =>
+         simp at hDrop
+
+     | succ k' =>
+         simp at hDrop⟩
 
 example :
     Correctness.GeneralContinuationCompiles

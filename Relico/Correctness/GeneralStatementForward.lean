@@ -768,7 +768,7 @@ theorem generalContinuationCompiles_trace_head
           sourceRemaining
           targetRemaining := by
 
-  obtain ⟨context, index, hCompiled⟩ :=
+  obtain ⟨context, index, hCompiled, hSites⟩ :=
     hCompiles
 
   obtain
@@ -791,7 +791,38 @@ theorem generalContinuationCompiles_trace_head
   exact
     ⟨compiledRemaining,
      hShape,
-     ⟨context, index + 1, hRemaining⟩⟩
+     ⟨context,
+      index + 1,
+      hRemaining,
+      by
+        intro k rebec message arguments delay rest hDrop entry hEntry
+
+        refine
+          hSites
+            (k + 1)
+            rebec
+            message
+            arguments
+            delay
+            rest
+            ?_
+            entry
+            ?_
+
+        · rw [
+            List.drop_succ_cons
+          ]
+
+          exact hDrop
+
+        · rw [
+            show
+                index + (k + 1) =
+                  index + 1 + k from by
+              omega
+          ]
+
+          exact hEntry⟩⟩
 
 /--
 A compiled body whose source head is an assignment has the compiled assignment as its head, and its
@@ -824,7 +855,7 @@ theorem generalContinuationCompiles_assign_head
           sourceRemaining
           targetRemaining := by
 
-  obtain ⟨context, index, hCompiled⟩ :=
+  obtain ⟨context, index, hCompiled, hSites⟩ :=
     hCompiles
 
   obtain
@@ -847,7 +878,38 @@ theorem generalContinuationCompiles_assign_head
   exact
     ⟨compiledRemaining,
      hShape,
-     ⟨context, index + 1, hRemaining⟩⟩
+     ⟨context,
+      index + 1,
+      hRemaining,
+      by
+        intro k rebec message arguments delay rest hDrop entry hEntry
+
+        refine
+          hSites
+            (k + 1)
+            rebec
+            message
+            arguments
+            delay
+            rest
+            ?_
+            entry
+            ?_
+
+        · rw [
+            List.drop_succ_cons
+          ]
+
+          exact hDrop
+
+        · rw [
+            show
+                index + (k + 1) =
+                  index + 1 + k from by
+              omega
+          ]
+
+          exact hEntry⟩⟩
 
 /-!
 ## Trace
@@ -1975,7 +2037,7 @@ theorem generalContinuationCompiles_selfSend_head
           sourceRemaining
           targetRemaining := by
 
-  obtain ⟨context, index, hCompiled⟩ :=
+  obtain ⟨context, index, hCompiled, hSites⟩ :=
     hCompiles
 
   obtain
@@ -1999,7 +2061,38 @@ theorem generalContinuationCompiles_selfSend_head
     ⟨_,
      compiledRemaining,
      hShape,
-     ⟨context, index + 1, hRemaining⟩⟩
+     ⟨context,
+      index + 1,
+      hRemaining,
+      by
+        intro k rebec message arguments delay rest hDrop entry hEntry
+
+        refine
+          hSites
+            (k + 1)
+            rebec
+            message
+            arguments
+            delay
+            rest
+            ?_
+            entry
+            ?_
+
+        · rw [
+            List.drop_succ_cons
+          ]
+
+          exact hDrop
+
+        · rw [
+            show
+                index + (k + 1) =
+                  index + 1 + k from by
+              omega
+          ]
+
+          exact hEntry⟩⟩
 
 /--
 A compiled body whose source head is an external send has the compiled `setPort` as its head, at the
@@ -2036,7 +2129,7 @@ theorem generalContinuationCompiles_routedSend_head
           sourceRemaining
           targetRemaining := by
 
-  obtain ⟨context, index, hCompiled⟩ :=
+  obtain ⟨context, index, hCompiled, hSites⟩ :=
     hCompiles
 
   obtain
@@ -2092,7 +2185,38 @@ theorem generalContinuationCompiles_routedSend_head
            entry
            hEntry,
          hShape,
-         ⟨context, index + 1, hRemaining⟩⟩
+         ⟨context,
+      index + 1,
+      hRemaining,
+      by
+        intro k rebec message arguments delay rest hDrop entry hEntry
+
+        refine
+          hSites
+            (k + 1)
+            rebec
+            message
+            arguments
+            delay
+            rest
+            ?_
+            entry
+            ?_
+
+        · rw [
+            List.drop_succ_cons
+          ]
+
+          exact hDrop
+
+        · rw [
+            show
+                index + (k + 1) =
+                  index + 1 + k from by
+              omega
+          ]
+
+          exact hEntry⟩⟩
 
 /-!
 ## Self-send forward transfer

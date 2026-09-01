@@ -649,6 +649,164 @@ private theorem site_index_ge_of_mem_externalSendsFromIndex
                         hThere)
 
 /--
+Every send a walk emits is tagged with the walk's own body key.
+
+The companion of monotonicity, and what lets a caller holding a site's *body* component decide which
+half of `externalSendsOfClass` a send came from — the constructor's walk tags `.constructor`, a
+message server's walk tags `.messageServer` of its own name, so the two halves are separated by this
+projection alone. Same four arms, same reason for spelling them out.
+-/
+theorem externalSendsFromIndex_site_body
+    (bodyKey : GeneralBodyKey) :
+    ∀ (body : DTR.GeneralBody)
+      (index : Nat)
+      (send : GeneralExternalSend),
+      send ∈
+        externalSendsFromIndex
+          bodyKey
+          index
+          body →
+      send.site.body = bodyKey := by
+
+  intro body
+  induction body with
+
+  | nil =>
+      intro index send hMember
+
+      rw [
+        externalSendsFromIndex_nil
+      ] at hMember
+
+      cases hMember
+
+  | cons statement remaining inductionHypothesis =>
+      intro index send hMember
+
+      cases statement with
+
+      | assign target value =>
+          rw [
+            externalSendsFromIndex_assign
+          ] at hMember
+
+          exact
+            inductionHypothesis
+              (index + 1)
+              send
+              hMember
+
+      | trace tag =>
+          rw [
+            externalSendsFromIndex_trace
+          ] at hMember
+
+          exact
+            inductionHypothesis
+              (index + 1)
+              send
+              hMember
+
+      | send target message arguments delay =>
+
+          cases target with
+
+          | selfTarget =>
+              rw [
+                externalSendsFromIndex_send_selfTarget
+              ] at hMember
+
+              exact
+                inductionHypothesis
+                  (index + 1)
+                  send
+                  hMember
+
+          | knownRebec knownRebec =>
+              rw [
+                externalSendsFromIndex_send_knownRebec,
+                List.mem_cons
+              ] at hMember
+
+              cases hMember with
+
+              | inl hHere =>
+                  subst hHere
+
+                  rfl
+
+              | inr hThere =>
+                  exact
+                    inductionHypothesis
+                      (index + 1)
+                      send
+                      hThere
+
+/--
+A class's external send tagged with the constructor's body key came from the constructor's body.
+
+The half-selection lemma. `externalSendsOfClass` is the constructor's walk appended to the message
+servers'; every send of the second half is tagged `.messageServer` of some name, so a `.constructor`
+tag places the send in the first half. Used by the initializer, which knows only that its site's body
+component is `.constructor`.
+-/
+theorem mem_externalSendsOfBody_constructor_of_mem_externalSendsOfClass
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {send : GeneralExternalSend}
+    (hMember :
+      send ∈
+        externalSendsOfClass
+          reactiveClass)
+    (hBody :
+      send.site.body = .constructor) :
+    send ∈
+      externalSendsOfBody
+        .constructor
+        reactiveClass.constructor.body := by
+
+  unfold externalSendsOfClass at hMember
+
+  rcases List.mem_append.mp hMember with
+    hConstructor | hServers
+
+  · exact hConstructor
+
+  · -- A message server's walk tags `.messageServer`, contradicting the hypothesis.
+    exfalso
+
+    revert hServers
+
+    induction reactiveClass.messageServers with
+
+    | nil =>
+        intro hServers
+
+        simp [
+          externalSendsOfMessageServers
+        ] at hServers
+
+    | cons server rest innerIH =>
+        intro hServers
+
+        unfold externalSendsOfMessageServers at hServers
+
+        rcases List.mem_append.mp hServers with
+          hHere | hThere
+
+        · rw [
+            externalSendsFromIndex_site_body
+              (.messageServer server.name)
+              server.body
+              0
+              send
+              hHere
+          ] at hBody
+
+          cases hBody
+
+        · exact innerIH hThere
+
+/--
 **Site injectivity.** Within one walk, a site identifies its send.
 
 Not a claim about routes, ports, or connections — and in particular not a weakening of **F48**, which
