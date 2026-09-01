@@ -657,6 +657,7 @@ import Relico.Correctness.GeneralWeakBisimulation
 import Relico.Correctness.GeneralInstantBlock
 import Relico.Correctness.GeneralSameReactorOrder
 import Relico.Correctness.GeneralStoreKeyUniqueness
+import Relico.Correctness.GeneralConnectionSourceUniqueness
 import Relico.Correctness.WeakBisimulationTrace
 
 import Relico.LF.GeneralKindOrigin
