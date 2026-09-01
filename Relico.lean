@@ -660,6 +660,7 @@ import Relico.Correctness.GeneralStoreKeyUniqueness
 import Relico.Correctness.GeneralConnectionSourceUniqueness
 import Relico.Correctness.GeneralStatementForward
 import Relico.Correctness.GeneralInstantBlockForward
+import Relico.Correctness.GeneralInstantBlockBackward
 import Relico.Correctness.WeakBisimulationTrace
 
 import Relico.LF.GeneralKindOrigin
