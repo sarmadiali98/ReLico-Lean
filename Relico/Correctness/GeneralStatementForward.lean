@@ -3270,10 +3270,10 @@ rather than excluded — a routed send may resolve to its own sender, and a dist
 have silently dropped that. `GeneralConsumeMatch`'s event kind is `.inputPort` of the connection's
 target port, whatever the runtime followed, never a function of the message. F78.
 
-**What remains behind this.** `generalTau_forward` (the three τ constructors, over the four statement
-transfers) and the `Common.TauSteps` closure, where the single
-`LF.GeneralStepModulo.tauSteps_of_raw` lift belongs. Then the forward instant-block transfer this
-prerequisite was discovered under. The `DTR.GeneralSendTarget` dispatch is `generalSend_forward` below.
+**What comes after this.** The `DTR.GeneralSendTarget` dispatch is `generalSend_forward`, the
+constructor dispatch is `generalTau_forward`, and the closure is `generalTauSteps_forward` — all below,
+in that order. The forward instant-block transfer this whole chain was discovered as a prerequisite of
+consumes the last of them.
 -/
 
 /-!
@@ -3803,6 +3803,244 @@ theorem generalTau_forward
           hArguments
           hTarget
           hReceiver
+
+/-!
+## The τ closure
+
+The theorem the forward instant-block wrapper actually calls. A source instant block is
+`Common.WeakSteps (DTR.GeneralStep model) DTR.GeneralLabel.isTau`, and `Common.WeakStep.visible` pads
+every visible label with a `TauSteps` prefix and suffix, so what the wrapper needs across each padding
+is exactly this: a source τ closure answered by a target τ closure.
+
+**Two theorems, because the raw induction and the α-lift are different obligations.** The induction
+below stays in the *raw* target system, and `generalTauSteps_forward` lifts its result once with
+`LF.GeneralStepModulo.tauSteps_of_raw`. Lifting inside the induction would put one
+`GeneralStepModulo.of_raw` on every step and invite a representative switch at each one; decision 0042's
+quotient is entered at the closure boundary and nowhere else.
+
+**The two store-uniqueness premises are re-established at every step, not assumed along the way.**
+`DTR.generalStoreKeyUnique_of_step` and `LF.generalStoreKeyUnique_of_step` are what carry them, and they
+have to be threaded because `generalTau_forward` consumes both at each step — the source's to rule out a
+stale shadowed binding at the key a step writes, the target's to turn a reactor membership into the
+lookup a target rule wants.
+-/
+
+/--
+A source τ closure is answered by a raw target τ closure, preserving the correspondence.
+
+Induction on `Common.TauSteps`' two constructors. `refl` answers with `refl` and the correspondence
+unchanged; `cons` takes one step with `generalTau_forward`, re-establishes both store invariants at the
+intermediate states, recurses, and prefixes the produced target step.
+
+**The step's label is forced to `.tau` rather than assumed.** `DTR.GeneralLabel.isTau` is `True` only at
+`tau`, so the two visible labels are refuted by `not_isTau_timeAdvance` and `not_isTau_consume`. This is
+where the closure's τ filter and the dispatch's label index meet, and refuting rather than defaulting is
+what keeps a future visible label from silently entering the internal closure.
+
+Stated in the raw target system on purpose; `generalTauSteps_forward` below is the lifted form.
+-/
+theorem generalTauSteps_forward_raw
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    {routes : List Translation.GeneralRoute}
+    {config config' : DTR.GeneralRuntimeConfiguration}
+    {state : LF.GeneralRuntimeState}
+    (hCompiled :
+      Translation.compileGeneralModel model =
+        .ok program)
+    (hRoutes :
+      Translation.routesOf model =
+        .ok routes)
+    (hEnvNodup :
+      ∀ candidate ∈ model.instances,
+        ∀ candidateEnv : Translation.GeneralOutputPortEnv,
+          (∃ candidateClass : DTR.GeneralReactiveClass,
+            model.class? candidate.className =
+                some candidateClass ∧
+              Translation.outputPortEnvOf
+                  model.classes
+                  candidateClass =
+                .ok candidateEnv) →
+          (List.map
+            (fun candidateEntry =>
+              candidateEntry.outputPort.value)
+            candidateEnv).Nodup)
+    (hNames :
+      (List.map
+        (fun candidate =>
+          candidate.name)
+        model.instances).Nodup)
+    (hCorrespondence :
+      GeneralStateCorrespondence
+        model
+        config
+        state)
+    (hUniqueS :
+      DTR.GeneralStoreKeyUnique config)
+    (hUniqueT :
+      LF.GeneralStoreKeyUnique state)
+    (hSteps :
+      Common.TauSteps
+        (DTR.GeneralStep model)
+        DTR.GeneralLabel.isTau
+        config
+        config') :
+    ∃ state' : LF.GeneralRuntimeState,
+      Common.TauSteps
+          (LF.GeneralStep program)
+          LF.GeneralLabel.isTau
+          state
+          state' ∧
+        GeneralStateCorrespondence
+          model
+          config'
+          state' := by
+
+  induction hSteps generalizing state with
+
+  | refl current =>
+      exact
+        ⟨state,
+         Common.TauSteps.refl state,
+         hCorrespondence⟩
+
+  | @cons _ _ _ label headStep headIsTau remainingSteps IH =>
+
+      -- The closure's τ filter forces the step's label. `DTR.GeneralLabel.isTau` is a match returning
+      -- `True` only at `tau`, so the two visible labels are refuted from `headIsTau` rather than
+      -- defaulted away.
+      cases label with
+
+      | timeAdvance before after =>
+          exact
+            absurd
+              headIsTau
+              (DTR.GeneralLabel.not_isTau_timeAdvance
+                before
+                after)
+
+      | consume receiver consumedMessage =>
+          exact
+            absurd
+              headIsTau
+              (DTR.GeneralLabel.not_isTau_consume
+                receiver
+                consumedMessage)
+
+      | tau =>
+
+          -- One step, by the dispatch.
+          obtain ⟨middleState, hMiddleStep, hMiddleCorrespondence⟩ :=
+            generalTau_forward
+              hCompiled
+              hRoutes
+              hEnvNodup
+              hNames
+              hCorrespondence
+              hUniqueS
+              hUniqueT
+              headStep
+
+          -- Both invariants at the intermediate states, so the recursion may consume them again.
+          obtain ⟨tailState, hTailSteps, hTailCorrespondence⟩ :=
+            IH
+              hMiddleCorrespondence
+              (DTR.generalStoreKeyUnique_of_step
+                hUniqueS
+                headStep)
+              (LF.generalStoreKeyUnique_of_step
+                hUniqueT
+                hMiddleStep)
+
+          exact
+            ⟨tailState,
+             Common.TauSteps.cons
+               hMiddleStep
+               LF.GeneralLabel.isTau_tau
+               hTailSteps,
+             hTailCorrespondence⟩
+
+/--
+A source τ closure is answered by a target τ closure in the quotient system.
+
+The closure form the forward instant-block wrapper consumes, and the **one** place
+`LF.GeneralStepModulo.tauSteps_of_raw` is applied in this module. Everything above it is raw, so no
+α-representative is ever switched mid-closure; the quotient of decision 0042 is entered here, at the
+boundary, and the whole internal segment is lifted in a single step.
+-/
+theorem generalTauSteps_forward
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    {routes : List Translation.GeneralRoute}
+    {config config' : DTR.GeneralRuntimeConfiguration}
+    {state : LF.GeneralRuntimeState}
+    (hCompiled :
+      Translation.compileGeneralModel model =
+        .ok program)
+    (hRoutes :
+      Translation.routesOf model =
+        .ok routes)
+    (hEnvNodup :
+      ∀ candidate ∈ model.instances,
+        ∀ candidateEnv : Translation.GeneralOutputPortEnv,
+          (∃ candidateClass : DTR.GeneralReactiveClass,
+            model.class? candidate.className =
+                some candidateClass ∧
+              Translation.outputPortEnvOf
+                  model.classes
+                  candidateClass =
+                .ok candidateEnv) →
+          (List.map
+            (fun candidateEntry =>
+              candidateEntry.outputPort.value)
+            candidateEnv).Nodup)
+    (hNames :
+      (List.map
+        (fun candidate =>
+          candidate.name)
+        model.instances).Nodup)
+    (hCorrespondence :
+      GeneralStateCorrespondence
+        model
+        config
+        state)
+    (hUniqueS :
+      DTR.GeneralStoreKeyUnique config)
+    (hUniqueT :
+      LF.GeneralStoreKeyUnique state)
+    (hSteps :
+      Common.TauSteps
+        (DTR.GeneralStep model)
+        DTR.GeneralLabel.isTau
+        config
+        config') :
+    ∃ state' : LF.GeneralRuntimeState,
+      Common.TauSteps
+          (LF.GeneralStepModulo program)
+          LF.GeneralLabel.isTau
+          state
+          state' ∧
+        GeneralStateCorrespondence
+          model
+          config'
+          state' := by
+
+  obtain ⟨state', hRawSteps, hFinalCorrespondence⟩ :=
+    generalTauSteps_forward_raw
+      hCompiled
+      hRoutes
+      hEnvNodup
+      hNames
+      hCorrespondence
+      hUniqueS
+      hUniqueT
+      hSteps
+
+  exact
+    ⟨state',
+     LF.GeneralStepModulo.tauSteps_of_raw
+       hRawSteps,
+     hFinalCorrespondence⟩
 
 end Correctness
 
