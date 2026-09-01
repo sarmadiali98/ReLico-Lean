@@ -3270,11 +3270,539 @@ rather than excluded — a routed send may resolve to its own sender, and a dist
 have silently dropped that. `GeneralConsumeMatch`'s event kind is `.inputPort` of the connection's
 target port, whatever the runtime followed, never a function of the message. F78.
 
-**What remains behind this.** `generalSend_forward` (the case split on `DTR.GeneralSendTarget`, over
-this and `generalSelfSend_forward`), `generalTau_forward` (the three τ constructors) and the
-`Common.TauSteps` closure, where the single `LF.GeneralStepModulo.tauSteps_of_raw` lift belongs. Then
-the forward instant-block transfer this prerequisite was discovered under.
+**What remains behind this.** `generalTau_forward` (the three τ constructors, over the four statement
+transfers) and the `Common.TauSteps` closure, where the single
+`LF.GeneralStepModulo.tauSteps_of_raw` lift belongs. Then the forward instant-block transfer this
+prerequisite was discovered under. The `DTR.GeneralSendTarget` dispatch is `generalSend_forward` below.
 -/
+
+/-!
+## The send rule, both targets at once
+
+`DTR.GeneralStep.send` is **one** constructor carrying a `DTR.GeneralSendTarget`, so the τ transfer owes
+one theorem at that constructor's shape rather than two theorems a caller has to dispatch between. This
+is that theorem, and its whole content is the case split: `DTR.GeneralSendTarget` has two constructors,
+`generalSelfSend_forward` answers one and `generalRoutedSend_forward` the other.
+
+**The premise set is the routed half's, and the self half ignores it.** The routed branch needs the
+compiled program, the routing table, the sending instance and its class, its port environment, the
+per-instance port `Nodup` and instance-name distinctness; the self branch needs none of those, because
+`.selfTarget` resolves to the sender without consulting an entry, a route or a connection. Taking the
+union is what lets the two halves stay as they are — the alternative, weakening the routed half, is not
+available, and giving the caller two theorems would push the dispatch outwards to every consumer.
+
+The `senderName`/`senderInstance` mismatch resolves in the same direction: `generalSelfSend_forward` is
+stated over a bare `ActorName` while the routed half needs the *instance record* (its `bindings` are what
+a known rebec resolves through). The combined statement follows the routed form and instantiates the
+self branch at `senderInstance.name`.
+-/
+
+/--
+A source `send` step is answered by a target step, preserving the correspondence.
+
+The τ transfer for `DTR.GeneralStep.send`, both send targets. No new premises beyond the union of the
+two halves', no distinctness premise, and no narrowing: neither branch excludes the case where the
+sender and the resolved receiver are the same actor.
+
+The two branches emit *different* target statements, and that asymmetry is the translation's, not this
+proof's. A self-send compiles to `LF.GeneralStmt.schedule` on a site-derived logical action; a routed
+send compiles to `LF.GeneralStmt.setPort`, whose value travels a connection carrying the delay. So the
+existential target state is genuinely branch-dependent, which is why this is a case split rather than a
+shared construction with two instantiations.
+-/
+theorem generalSend_forward
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    {routes : List Translation.GeneralRoute}
+    {config : DTR.GeneralRuntimeConfiguration}
+    {state : LF.GeneralRuntimeState}
+    {senderInstance : DTR.GeneralActorInstance}
+    {sendingClass : DTR.GeneralReactiveClass}
+    {senderEnv : Translation.GeneralOutputPortEnv}
+    {receiverName : ActorName}
+    {sender receiver : DTR.GeneralActorRuntime}
+    {sendTarget : DTR.GeneralSendTarget}
+    {message : MsgName}
+    {arguments : List DTR.GeneralExpr}
+    {delay : Delay}
+    {remaining : DTR.GeneralBody}
+    {payload : DTR.GeneralPayload}
+    (hCompiled :
+      Translation.compileGeneralModel model =
+        .ok program)
+    (hRoutes :
+      Translation.routesOf model =
+        .ok routes)
+    (hInstance :
+      senderInstance ∈ model.instances)
+    (hClass :
+      model.class? senderInstance.className =
+        some sendingClass)
+    (hSenderEnv :
+      Translation.outputPortEnvOf
+          model.classes
+          sendingClass =
+        .ok senderEnv)
+    (hEnvNodup :
+      ∀ candidate ∈ model.instances,
+        ∀ candidateEnv : Translation.GeneralOutputPortEnv,
+          (∃ candidateClass : DTR.GeneralReactiveClass,
+            model.class? candidate.className =
+                some candidateClass ∧
+              Translation.outputPortEnvOf
+                  model.classes
+                  candidateClass =
+                .ok candidateEnv) →
+          (List.map
+            (fun candidateEntry =>
+              candidateEntry.outputPort.value)
+            candidateEnv).Nodup)
+    (hNames :
+      (List.map
+        (fun candidate =>
+          candidate.name)
+        model.instances).Nodup)
+    (hCorrespondence :
+      GeneralStateCorrespondence
+        model
+        config
+        state)
+    (hUniqueS :
+      DTR.GeneralStoreKeyUnique config)
+    (hUniqueT :
+      LF.GeneralStoreKeyUnique state)
+    (hSender :
+      Store.lookup config.actors senderInstance.name =
+        some sender)
+    (hBody :
+      sender.activeBody =
+        DTR.GeneralStmt.send sendTarget message arguments delay ::
+          remaining)
+    (hArguments :
+      DTR.GeneralExpr.evaluateArguments
+          sender.state.valuation
+          arguments =
+        some payload)
+    (hTarget :
+      DTR.sendTargetActor?
+          model
+          senderInstance.name
+          sendTarget =
+        some receiverName)
+    (hReceiver :
+      Store.lookup
+          (Store.update
+            config.actors
+            senderInstance.name
+            {
+              state := sender.state
+              activeBody := remaining
+            })
+          receiverName =
+        some receiver) :
+    ∃ state' : LF.GeneralRuntimeState,
+      LF.GeneralStep
+          program
+          state
+          LF.GeneralLabel.tau
+          state' ∧
+        GeneralStateCorrespondence
+          model
+          {
+            now := config.now
+
+            actors :=
+              Store.update
+                (Store.update
+                  config.actors
+                  senderInstance.name
+                  {
+                    state := sender.state
+                    activeBody := remaining
+                  })
+                receiverName
+                {
+                  state :=
+                    {
+                      valuation := receiver.state.valuation
+
+                      bag :=
+                        receiver.state.bag ++
+                          [{
+                            sender := senderInstance.name
+                            messageName := message
+                            payload := payload
+                            arrival :=
+                              LogicalTime.after
+                                config.now
+                                delay
+                          }]
+                    }
+
+                  activeBody := receiver.activeBody
+                }
+          }
+          state' := by
+
+  -- `DTR.GeneralSendTarget` has exactly two constructors, and each half is already proved. A third
+  -- send target would break this match rather than fall through a default branch, which is why the
+  -- source syntax keeps one `send` statement instead of splitting self-sends off.
+  cases sendTarget with
+
+  | selfTarget =>
+      exact
+        generalSelfSend_forward
+          hCorrespondence
+          hUniqueS
+          hUniqueT
+          hSender
+          hBody
+          hArguments
+          hTarget
+          hReceiver
+
+  | knownRebec rebec =>
+      exact
+        generalRoutedSend_forward
+          hCompiled
+          hRoutes
+          hInstance
+          hClass
+          hSenderEnv
+          hEnvNodup
+          hNames
+          hCorrespondence
+          hUniqueS
+          hUniqueT
+          hSender
+          hBody
+          hArguments
+          hTarget
+          hReceiver
+
+/-!
+## The τ dispatch
+
+`DTR.GeneralStep` has five constructors and the three τ ones are covered above, so what is left is the
+dispatch: one theorem taking a source step *at label `.tau`* and producing a matching target step. This
+is the interface the `Common.TauSteps` closure induces over, and the first statement in this module whose
+premises mention no statement shape at all.
+
+**`take` and `timeProgress` are excluded, and excluded by their labels rather than by their shape.**
+They carry `.consume` and `.timeAdvance`, so fixing the label index to `.tau` makes them unconstructible
+and the eliminator discards them. That is deliberate: a dispatch that matched on statement shape and
+defaulted the rest would silently absorb a sixth constructor, while this one becomes a build error.
+`take` is handled by `generalConsume_forward_weak_of_fireRepresentative` and `timeProgress` by the
+time-equivalence layer; neither is this theorem's business.
+-/
+
+private theorem findActor?_mem_and_name :
+    ∀ (instances : List DTR.GeneralActorInstance)
+      (actorName : ActorName)
+      (actor : DTR.GeneralActorInstance),
+      DTR.findActor? instances actorName = some actor →
+        actor ∈ instances ∧
+          actor.name = actorName := by
+
+  intro instances
+  induction instances with
+
+  | nil =>
+      intro actorName actor hFound
+
+      simp [
+        DTR.findActor?
+      ] at hFound
+
+  | cons head remaining inductionHypothesis =>
+      intro actorName actor hFound
+
+      by_cases hHead :
+          head.name = actorName
+
+      · rw [
+          DTR.findActor?,
+          if_pos hHead
+        ] at hFound
+
+        injection hFound with hFound
+
+        subst hFound
+
+        exact
+          ⟨List.mem_cons_self,
+           hHead⟩
+
+      · rw [
+          DTR.findActor?,
+          if_neg hHead
+        ] at hFound
+
+        obtain ⟨hMember, hName⟩ :=
+          inductionHypothesis
+            actorName
+            actor
+            hFound
+
+        exact
+          ⟨List.mem_cons_of_mem
+             _
+             hMember,
+           hName⟩
+
+/--
+The correspondence's pinned environment names a declared instance and its class.
+
+The converse of `outputPortEnvOfActorName_eq`, and the reason the τ dispatch below needs **no** routing
+premises about the stepping actor. `outputPortEnvOfActorName` is defined through
+`DTR.GeneralModel.classOfActor?`, which resolves the *instance* before it resolves the class, so an
+environment equation already contains everything `generalRoutedSend_forward` asks for about its sender:
+the instance record, its membership, its class, and the environment that class compiles to.
+
+This matters because `DTR.GeneralStep.send` carries only a `senderName : ActorName`, while the routed
+transfer needs the instance *record* — a known rebec resolves through `senderInstance.bindings`. Without
+this inversion the dispatch would have to take a premise tying runtime actor names to declared
+instances, and that premise would be an obligation no caller could discharge from the relation it
+already holds. It turns out not to be needed: the relation carries it.
+
+Both `.toOption` refusal branches and the two `none` branches close by `simp`; the content is that
+`DTR.findActor?` answers with a member carrying the queried name.
+-/
+theorem exists_instance_of_outputPortEnvOfActorName
+    {model : DTR.GeneralModel}
+    {name : ActorName}
+    {env : Translation.GeneralOutputPortEnv}
+    (hEnv :
+      outputPortEnvOfActorName model name =
+        some env) :
+    ∃ (senderInstance : DTR.GeneralActorInstance)
+      (sendingClass : DTR.GeneralReactiveClass),
+      senderInstance ∈ model.instances ∧
+        senderInstance.name = name ∧
+        model.class? senderInstance.className =
+          some sendingClass ∧
+        Translation.outputPortEnvOf
+            model.classes
+            sendingClass =
+          .ok env := by
+
+  unfold outputPortEnvOfActorName at hEnv
+
+  cases hActor :
+      model.actor? name with
+
+  | none =>
+      rw [
+        show
+            model.classOfActor? name =
+              none from by
+          unfold DTR.GeneralModel.classOfActor?
+          rw [hActor]
+      ] at hEnv
+
+      simp at hEnv
+
+  | some senderInstance =>
+
+      obtain ⟨hMember, hName⟩ :=
+        findActor?_mem_and_name
+          model.instances
+          name
+          senderInstance
+          (by
+            unfold DTR.GeneralModel.actor? at hActor
+            exact hActor)
+
+      cases hClass :
+          model.class? senderInstance.className with
+
+      | none =>
+          rw [
+            show
+                model.classOfActor? name =
+                  none from by
+              unfold DTR.GeneralModel.classOfActor?
+              rw [hActor]
+              exact hClass
+          ] at hEnv
+
+          simp at hEnv
+
+      | some sendingClass =>
+
+          rw [
+            show
+                model.classOfActor? name =
+                  some sendingClass from by
+              unfold DTR.GeneralModel.classOfActor?
+              rw [hActor]
+              exact hClass
+          ] at hEnv
+
+          dsimp only at hEnv
+
+          cases hEnvOf :
+              Translation.outputPortEnvOf
+                model.classes
+                sendingClass with
+
+          | error diagnostic =>
+              rw [hEnvOf] at hEnv
+
+              simp [
+                Except.toOption
+              ] at hEnv
+
+          | ok resolved =>
+              rw [hEnvOf] at hEnv
+
+              simp [
+                Except.toOption
+              ] at hEnv
+
+              subst hEnv
+
+              exact
+                ⟨senderInstance,
+                 sendingClass,
+                 hMember,
+                 hName,
+                 hClass,
+                 hEnvOf⟩
+
+/--
+Every source τ step is answered by a target τ step, preserving the correspondence.
+
+The dispatch over `DTR.GeneralStep`'s three τ constructors, onto `generalAssign_forward`,
+`generalTrace_forward` and `generalSend_forward`. This is the theorem the `Common.TauSteps` closure
+inducts over, and its statement mentions no statement shape — the source step is the whole hypothesis.
+
+**Only four premises beyond the step and the correspondence**, and every one of them is an
+accepted-program fact the routing side already consumed: the compilation, the routing table, the
+per-instance output-port `Nodup`, and instance-name distinctness. In particular there is **no** premise
+tying the stepping actor to a declared instance; `exists_instance_of_outputPortEnvOfActorName` derives
+that from the environment the correspondence already pins, so the `send` branch reaches
+`generalSend_forward` without exporting an obligation.
+
+`take` and `timeProgress` do not appear because they cannot: their labels are `.consume` and
+`.timeAdvance`, so at label `.tau` the eliminator discards them.
+-/
+theorem generalTau_forward
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    {routes : List Translation.GeneralRoute}
+    {config config' : DTR.GeneralRuntimeConfiguration}
+    {state : LF.GeneralRuntimeState}
+    (hCompiled :
+      Translation.compileGeneralModel model =
+        .ok program)
+    (hRoutes :
+      Translation.routesOf model =
+        .ok routes)
+    (hEnvNodup :
+      ∀ candidate ∈ model.instances,
+        ∀ candidateEnv : Translation.GeneralOutputPortEnv,
+          (∃ candidateClass : DTR.GeneralReactiveClass,
+            model.class? candidate.className =
+                some candidateClass ∧
+              Translation.outputPortEnvOf
+                  model.classes
+                  candidateClass =
+                .ok candidateEnv) →
+          (List.map
+            (fun candidateEntry =>
+              candidateEntry.outputPort.value)
+            candidateEnv).Nodup)
+    (hNames :
+      (List.map
+        (fun candidate =>
+          candidate.name)
+        model.instances).Nodup)
+    (hCorrespondence :
+      GeneralStateCorrespondence
+        model
+        config
+        state)
+    (hUniqueS :
+      DTR.GeneralStoreKeyUnique config)
+    (hUniqueT :
+      LF.GeneralStoreKeyUnique state)
+    (hStep :
+      DTR.GeneralStep
+        model
+        config
+        DTR.GeneralLabel.tau
+        config') :
+    ∃ state' : LF.GeneralRuntimeState,
+      LF.GeneralStep
+          program
+          state
+          LF.GeneralLabel.tau
+          state' ∧
+        GeneralStateCorrespondence
+          model
+          config'
+          state' := by
+
+  cases hStep with
+
+  | assign hActor hBody hEvaluate =>
+      exact
+        generalAssign_forward
+          hCorrespondence
+          hUniqueS
+          hUniqueT
+          hActor
+          hBody
+          hEvaluate
+
+  | trace hActor hBody =>
+      exact
+        generalTrace_forward
+          hCorrespondence
+          hUniqueS
+          hUniqueT
+          hActor
+          hBody
+
+  | send hSender hBody hArguments hTarget hReceiver =>
+
+      -- The sending actor's own instance record, recovered from the environment the correspondence
+      -- pins for it. This is what lets the routed half be reached from a step that names only an actor.
+      -- The step's own binders stay inaccessible; every position below is inferred from `hSender`.
+      obtain ⟨senderEnv, _, hEnvAt, _, _⟩ :=
+        hCorrespondence.reactorOfActor
+          _
+          _
+          (Store.mem_of_lookup
+            config.actors
+            _
+            _
+            hSender)
+
+      obtain ⟨senderInstance, sendingClass, hInstance, hName, hClass, hSenderEnv⟩ :=
+        exists_instance_of_outputPortEnvOfActorName
+          hEnvAt
+
+      subst hName
+
+      exact
+        generalSend_forward
+          hCompiled
+          hRoutes
+          hInstance
+          hClass
+          hSenderEnv
+          hEnvNodup
+          hNames
+          hCorrespondence
+          hUniqueS
+          hUniqueT
+          hSender
+          hBody
+          hArguments
+          hTarget
+          hReceiver
 
 end Correctness
 
