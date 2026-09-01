@@ -672,5 +672,6 @@ import Relico.Tests.GeneralActorSelection
 import Relico.Tests.GeneralEvaluation
 import Relico.Tests.GeneralRuntime
 import Relico.Tests.GeneralObservable
+import Relico.Tests.GeneralTraceTransfer
 import Relico.Tests.GeneralSemantics
 import Relico.Tests.GeneralInitialization
