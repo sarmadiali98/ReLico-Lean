@@ -3191,3 +3191,81 @@ source's, that the quotient's converse is deliberately absent. Writing those dow
 incompleteness into a boundary a reader can check. The failure mode this replaces is the one F53 records —
 a "by construction" note that outlives the finding refuting it — and its cousin, an asymmetry between two
 directions left unexplained until someone assumes it is an oversight and tries to remove it.
+
+---
+
+## F87 — the `hName` non-derivability argument, which had no number while being cited from three places
+
+**Finding.** The backward instant-block correspondence takes the per-step actor agreement as a **premise**,
+`hName`, and the reason it does is a measurement rather than an unfinished proof. That measurement was argued in
+a Lean docstring, in this file's *C7 contribution* section item 5(b), and in
+`docs/decisions/0044-c8-general-label-weak-bisimulation.md`'s residue table — three places, no `F` number, so
+nothing could cite it. This entry gives it one. It adds no new fact; it makes an existing one referenceable, and
+it records the API conclusion that follows from it.
+
+### Where the premise sits
+
+`Correctness.generalConsume_backward_weak_of_takeRepresentative` and
+`Correctness.generalConsume_backward_weakStep_of_takeRepresentative` both bind
+`hSelected : DTR.GeneralActorSelection.selectedActor model config.erase = some selected` and then
+`hName : selected.actorName = actorName`, where `actorName` is the actor whose bag the answering source `take`
+consumes from. The wrappers `Correctness.generalInstantBlock_backward` and
+`Correctness.generalInstantBlock_backward_of_target` carry it per occurrence, and
+`Correctness.GeneralLabelWeakBisimulation`'s `backwardConsumeMatch` field inherits it. So one equation between
+two actor names is the whole residue — not a missing lemma, one hypothesis.
+
+### Why the source-side data cannot supply it
+
+`DTR.GeneralActorSelection.selectedActor` is a **function**, `Option ReadyActor`, computed as `selectMinimum`
+over `DTR.GeneralConfiguration.readyActors`. Its arguments are the model and the erased configuration, and
+nothing else. `DTR.GeneralConfiguration.readyActors` and `DTR.earliestDueArrival` are likewise functions of the
+source configuration alone: neither mentions the target program, the target's pending queue, or the order in
+which the target fired. There is therefore no way to phrase, in terms of these three definitions, a claim that
+source actor-priority selection picks out the reactor whose event the target just consumed — the target does not
+appear in their domain.
+
+`DTR.take_of_split` marks the exact size of the freedom the source does offer, and it is the wrong
+freedom: it lets the answering step choose **which message within one actor's bag** is consumed, and says
+nothing about which actor steps. `DTR.GeneralActorSelection.selectedActor_unique` sharpens the obstruction
+rather than relieving it, by proving the source schedule is *forced* once priorities are distinct; and
+`selectedActor_minimal` is non-strict, so it cannot see ties either. This is the same cross-actor divergence
+**F76** measured, seen from the backward direction: the two systems agree on *what* happens at a tag and are
+free to disagree on the order across distinct reactors, which is precisely what
+`docs/decisions/0042-within-tag-partial-quotient.md` quotients away on the target side and cannot quotient away
+on the source side, because source selection is deterministic and has no τ in which to hide a choice.
+
+**Stated without overclaiming.** `hName` is not derivable **from the source-side information this framework
+makes available** — the three definitions above and the relation they are used in. That is a statement about
+this development's source semantics, not a general impossibility: a framework whose selection consulted an
+oracle, or whose source semantics admitted a nondeterministic `take` across actors, would face a different
+question. Nothing here shows that no system can derive such an agreement.
+
+### What is proved instead, so the premise is not vacuous
+
+`Correctness.generalSourceReadiness_of_targetEvent` discharges the existence half: whenever the target has
+instant work, the source's selection answers, and the actor it answers with has target work of its own. So the
+package `hName` belongs to is inhabited on every state the theorem is applied at; what is undecided is the
+*identity* of the actor, not whether one exists. A residue that could not be witnessed at all would be a
+different and much worse finding.
+
+### The API conclusion
+
+Because the obstruction is in the data rather than in the argument, the right response is to keep the premise
+visible in the signature. Two alternatives were considered and both fail for the same reason. Threading target
+information into the source selection would change `DTR.GeneralActorSelection.selectedActor`'s arguments, which
+is a change to the **source semantics** to make a correctness proof go through — the inversion this repository
+refuses. And restructuring the backward API around a stronger object that appeared to *derive* the agreement
+would only relocate the hypothesis while making the statement read as unconditional, which is the misreporting
+`docs/decisions/0044` rejects for the interface as a whole. The current shape — premise named in the statement,
+non-derivability recorded, existence half proved — is the strongest honest form, and this entry exists so that
+a later reader who finds `hName` and assumes it is an oversight has a number to consult first.
+
+### The transferable check
+
+**An argument cited from three places and numbered in none of them is unciteable, and unciteable arguments get
+re-litigated.** The cost is not that the reasoning is missing — it was written down three times — but that a
+docstring, a prose section and a decision record are all *local*: nothing outside them can point at the fact,
+so the next person to meet the premise re-derives the obstruction or, worse, tries to remove it. When a
+measurement becomes load-bearing for an API shape, give it a label at that moment, not when the label is
+finally needed. The same structural defect produced two other repairs in this stage: a retirement whose inbound
+pointer was never fixed, and a table that promised to move with the code and did not.
