@@ -663,6 +663,7 @@ import Relico.Correctness.GeneralInstantBlockForward
 import Relico.Correctness.GeneralInstantBlockBackward
 import Relico.Correctness.GeneralObservable
 import Relico.Correctness.GeneralTraceTransfer
+import Relico.Correctness.GeneralLabelWeakBisimulation
 import Relico.Correctness.WeakBisimulationTrace
 
 import Relico.LF.GeneralKindOrigin
@@ -673,5 +674,6 @@ import Relico.Tests.GeneralEvaluation
 import Relico.Tests.GeneralRuntime
 import Relico.Tests.GeneralObservable
 import Relico.Tests.GeneralTraceTransfer
+import Relico.Tests.GeneralLabelWeakBisimulation
 import Relico.Tests.GeneralSemantics
 import Relico.Tests.GeneralInitialization
