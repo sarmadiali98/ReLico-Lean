@@ -2888,3 +2888,200 @@ reachable counterexamples: the α′ cross-microstep policy and the F27 same-tar
 source tie policy. The backward condition is still unwritten and still needs the DTR
 side's own within-instant modulo; `first ∉ earlier` still bounds only the raw fire theorem's
 applicability, not the correspondence, not the quotient, and not this core lemma.
+
+---
+
+## The C7 contribution — the general family's weak behavioural correspondence, and where its boundary is
+
+Not a finding. This section is the paper-facing summary of what C7 delivers, written after the last of its
+proof obligations was decided rather than deferred, and it is the section a referee should be pointed at. It
+supersedes no finding above; the findings are the record of how the boundary was discovered, and this is the
+statement of where the boundary ended up.
+
+**Two design decisions were taken on 2026-09-02 and are load-bearing for everything below.** First, the
+forward instant-block result stays a **weak-step** theorem: internal τ decomposition remains hidden inside
+weak transitions, because the claim being made is a weak behavioural correspondence and that is the right
+abstraction level for it. The backward direction's stronger constructive spine is kept as an *auxiliary*
+result — useful for construction, not the main equivalence statement. Second, **no end-to-end bisimulation
+bundle is built**: the pair of transfer conditions already constitutes the bisimulation argument, a bundle
+would add no theorem content, and combining independent residues into one signature would make the API worse.
+Both decisions are recorded here because a reader who does not know them will misread the asymmetry in item 2
+as an incompleteness.
+
+### 1. The state relation
+
+`Correctness.GeneralStateCorrespondence` relates one source configuration to one target state through four
+fields: `logicalTime` (the source clock equals the target tag's *time* component, never its microstep),
+`reactorOfActor` and `actorOfReactor` (each side's bindings are paired, with the pairing carrying the actor's
+output-port environment), and `pendingTargeted` (every pending target event names a declared actor).
+
+Per actor, `Correctness.GeneralActorCorresponds` carries three conjuncts: valuation agreement, message-queue
+agreement (`GeneralPendingAgrees`), and `GeneralContinuationCompiles`.
+
+Two shapes in this relation are deliberate and are the parts most likely to be misread as omissions.
+
+**`GeneralConsumeMatch` does not constrain the event kind.** It fixes the target, the arrival time and the
+compiled payload, and says nothing about which `LF.GeneralEventKind` the event carries. That is F78: relating a
+`MsgName` to an event kind is a property of the *compiled program* — which reaction of which reactor the
+translation emitted — not of the runtime states. The transfer conditions take the resolved reaction as a
+premise instead, which is strictly more honest than re-deriving a naming convention the runtime never
+consults.
+
+**`GeneralPendingAgrees` is an occurrence pairing, not a lookup agreement.** Two identical messages are two
+pairs and demand two events. This is the β-(i) strengthening F86 commissioned, and it is what refuses the
+two-messages-one-event shape that broke the earlier formulation.
+
+**`GeneralContinuationCompiles` carries a site conjunct** concluding `entry.knownRebec = rebec ∧ entry.delay =
+delay`. Both halves are needed and neither is decorative: a compiled `LF.GeneralStmt.setPort` carries a port
+name and nothing else — the rebec became part of a non-injectively generated port name (F48) and the delay
+became a property of the *connection* — so inverting a `setPort` head recovers an entry that on its own says
+nothing about the statement it came from. The conjunct is discharged at the single construction site where the
+class's declared body is in hand.
+
+### 2. Instant blocks, both directions, with an intentional asymmetry
+
+**Forward** (`Correctness.generalInstantBlock_forward`, `_of_source`): a source instant block's step sequence
+is answered by a target execution of the quotient system, whose observable labels are the projection of the
+events it actually fired, with the relation at both endpoints and a per-reactor match. Target occurrences are
+**existential** and `generalConsumeBlockMatch` is **produced**, not consumed as a premise — because the two
+sides' label lists may legitimately differ in cross-reactor interleaving, so a statement taking both as given
+cannot walk them together.
+
+**Backward** (`Correctness.generalInstantBlock_backward`, `_of_target`): a target instant block is answered by
+a source execution ending at a corresponding, quiescent, all-idle configuration — the **whole**
+`generalInstantBlock_source` predicate, not merely an execution.
+
+**The asymmetry is a decision, not a gap.** Backward concludes more because the endpoint conditions cross
+target-to-source but not source-to-target: a *ready source actor* is backed by a *pending target event at or
+before the instant*, which the pairing's accessor gives directly, whereas the forward direction would need the
+converse. Both transports are in fact proved (`generalPendingFuture_of_quiescent`,
+`generalReactorIdle_of_actorIdle`, `generalQuiescent_of_pendingFuture`, `generalActorIdle_of_reactorIdle`), and
+an earlier generation of this project's own records wrongly named the forward transport as the obstacle. **It
+was not.** What separates the two directions is that `GeneralInstantBlockSpine` is indexed by the events it
+fired while a `Common.WeakStep` is a `Prop` recording neither which event fired nor at which α-representative,
+and `GeneralInstantBlockSpine.weakSteps` has no converse for exactly that reason. Producing a forward spine
+would mean changing the answer premise's *data*, and the decision above is not to.
+
+### 3. Trace agreement over a shared observable alphabet
+
+`Correctness.GeneralObservable` has two constructors: `consume (receiver)` and `timeAdvance (before after)`.
+A consume observes **only receiver identity**; a time advance observes **both endpoints**, unchanged; an
+internal step observes nothing.
+
+Both erasures are forced rather than chosen. **The kind cannot be observed** for the F78 reason above. **The
+payload could technically have been observed** — the match does pin
+`event.payload = message.payload.map Translation.compileGeneralValue` — but only by naming
+`Translation.compileGeneralValue` in the definition of *what is observed*, which would make observation depend
+on the compiler and the trace result hold *because* the translation was applied rather than as an independent
+check on it. Erasing the payload keeps the alphabet a property of the two semantics alone. **Receiver identity
+survives** because the match's first conjunct already pins it, so it is not a new obligation.
+
+Two soundness lemmas are load-bearing rather than decorative:
+`GeneralObservable.ofSourceLabel_eq_none_iff_isTau` and `ofTargetLabel_eq_none_iff_isTau`. An alphabet that
+silently dropped a *visible* label would make trace agreement vacuously easier, and the generic trace theorems
+**cannot detect that** — they never see `isTau`, only the projections.
+
+The rows are `Correctness.generalTraceAgreement_of_consumeAnswer` (forward) and
+`generalTraceAgreement_backward_of_answers` (backward), both over `LF.GeneralStepModulo` at the same relation,
+which together are the bisimulation argument. The traces agree while the *label lists* may differ in length,
+because a pair projecting to `none` on both sides contributes nothing — that gap is what makes this trace
+**agreement** rather than trace equality, and it is what lets the target's extra microstep traffic (P24) be
+invisible.
+
+### 4. The three residues, and why each is non-derivable
+
+These are premises, they are named in their theorems' statements, and a paper claiming this result must
+disclose them. Each is non-derivable for a *measured* reason, not for want of effort.
+
+**(a) Forward `.consume`: the α-representative package.** The target's `fire` premises hold at an
+α-equivalent representative, and which representative is the frozen α′ question. Supplied as a premise by
+`generalConsume_forward_weak_of_fireRepresentative`, whose own docstring classifies it as the undischarged
+residue.
+
+**(b) Backward `.consume`: `hName`, the per-step actor agreement.** `DTR.GeneralStep.take` resolves *which
+actor* steps through `DTR.GeneralActorSelection.selectedActor`, a **function** — a fold over `readyActors`
+ordered by actor priority then arrival. `DTR.take_of_split` frees the choice of *message within a bag*, never
+the actor. And `readyActors` / `earliestDueArrival` are functions of the **source configuration alone**: they
+never mention the target program, its queue, or its fire order. So no theorem over them can conclude that
+source priority selects the reactor the target fired. `selectedActor_unique` sharpens the obstruction rather
+than relieving it, by proving the source schedule is *forced*. This is F76's measured cross-actor divergence.
+What *is* proved is the soundness companion: `generalSourceReadiness_of_targetEvent` shows the premise package
+is not vacuous — whenever the target has instant work the source's selection answers, and the actor it answers
+with has target work of its own.
+
+**(c) Backward τ: `hTauAnswer`.** Three independent reasons. The target's τ set has **five** constructors
+(`assign`, `trace`, `schedule`, `setPort`, `microstepAdvance`) against the source's three, so there is no
+shape-by-shape correspondence to induct along. `microstepAdvance` has **no source counterpart at all** — P24's
+divergence — so a backward τ step there must be answered by *zero* source steps. And the quotient has no sound
+inverse: `LF.GeneralStepModulo.weakStep_of_raw` lifts raw to modulo, and its docstring records that the
+converse is *deliberately* absent, because a modulo weak step may switch representatives between segments.
+The premise's shape reflects two of these: its `DTR.GeneralLabel.isTau sourceLabel` conjunct is what keeps a
+target τ step from being answered by a *visible* source label, and it answers with a `Common.WeakStep` rather
+than a `Common.TauSteps` precisely so that `microstepAdvance` can be answered by `TauSteps.refl`.
+
+### 5. The setting: a partial within-tag quotient
+
+The correspondence is stated over decision 0042's quotient, and the claim is **not** Definition 1 verbatim.
+Among events targeting **distinct** reactors at one logical tag, permutation is free — no target order is
+claimed because none is real. Among events targeting **one** reactor at one tag, order is **preserved** — the
+target genuinely enforces one.
+
+The justification is measurement, in both directions. F76: the source selects by
+`(logicalTime, actor priority)` and the target by `(Tag.time, Tag.microstep)`, a key that cannot express
+priority, so two positive-delay sends landing at one logical time carry byte-identical tags and the two sides
+disagree. F76 also found the target model **over-specified** — real LF leaves same-tag reactions in
+independent reactors logically simultaneous while `earliestPendingEvent?` totally orders them anyway, so part
+of the divergence is our own artefact, which is what makes a quotient repair faithful rather than a retreat.
+F80 then refined it: real `lfc` *does* order same-tag reactions **within** one reactor, by declaration order,
+across six probes in three trigger shapes. So the quotient must be partial, and F27's same-reactor
+classification (C: execution-specific premise) stands.
+
+**Anyone writing "we mechanised Theorem 1" without this qualification is making a claim a referee can
+deflate in one sentence.** The honest form names the quotient.
+
+### 6. The invariant layers the proofs consume
+
+Four, each proved where it belongs and each consumed rather than assumed.
+
+**No-overdue / tag alignment** — the target's pending queue holds nothing in the past.
+**Kind-origin** (`Relico/LF/GeneralKindOrigin.lean`) — every pending event's kind traces to a compiled
+statement, with the route existential because `connectionFrom?` is first-match and F48 makes per-site recovery
+unprovable.
+**Reachable-state store-key uniqueness** — `Store.KeysUnique` is **occurrence**-exact, not lookup uniqueness,
+because `Store.update` replaces only the first binding and a surviving duplicate would leave the relation's
+membership fields owing a pairing no side of the step produced (F74).
+**Source and target τ-closure preservation** — the invariants survive internal segments.
+
+**One constraint here is a soundness requirement, not a convention: store-key uniqueness is NEVER transported
+through α.** `LF.generalStateAlphaEquiv`'s reactor conjuncts are membership-iff plus pointwise lookup
+agreement, and **neither sees occurrence multiplicity** — a store carrying `(k, r)` twice is α-equivalent to
+one carrying it once. So an α-transport theorem would be *false*. Both instant-block directions honour this
+structurally: the forward one crosses τ segments in the **raw** target system and lifts once at the closure
+boundary; the backward one re-establishes the invariant per step inside the answer's own conclusion.
+
+### Status
+
+**The C7 proof surface is complete.** Every obligation is either proved or is one of the three residues above,
+each of which is a decision recorded with its reason rather than an open task. **No further coding is
+planned**; the remaining work on C7 is presentation.
+
+Two corrections this section exists partly to carry, because both were wrong in this project's own earlier
+records and both would mislead a reader who found the old text first:
+
+- The forward spine was recorded as blocked on **endpoint transport**, naming the "no ready source actor ⇒
+  every pending target event strictly future" half as unproved work. **It is proved.** The real difference
+  between the directions is the spine's event index, and the forward result's shape is now a decision.
+- `DTR.GeneralLabel` has **no `trace` label**. It has exactly `tau`, `timeAdvance`, `consume`; `trace` is a
+  *statement* constructor. Any prose describing a "trace label" is wrong, and a source trace or assign step is
+  at `tau` with the statement pinned by a body hypothesis.
+
+### The transferable check
+
+A correspondence result is finished when every remaining obligation is either proved or **named with the
+measurement that makes it non-derivable** — and those two are not the same as "proved or left silent". Each of
+the three residues here survived an attempt to discharge it, and each attempt produced a specific fact about
+why it cannot be: that `readyActors` never mentions the target, that the target's τ set is larger than the
+source's, that the quotient's converse is deliberately absent. Writing those down converts what looks like
+incompleteness into a boundary a reader can check. The failure mode this replaces is the one F53 records —
+a "by construction" note that outlives the finding refuting it — and its cousin, an asymmetry between two
+directions left unexplained until someone assumes it is an oversight and tries to remove it.
