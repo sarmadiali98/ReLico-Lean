@@ -3269,3 +3269,59 @@ so the next person to meet the premise re-derives the obstruction or, worse, tri
 measurement becomes load-bearing for an API shape, give it a label at that moment, not when the label is
 finally needed. The same structural defect produced two other repairs in this stage: a retirement whose inbound
 pointer was never fixed, and a table that promised to move with the code and did not.
+
+---
+
+## F88 — F67 part 4's renumbering-collision cost was measured and is not real: G3 and C11 touch different well-formedness predicates on opposite sides of the translation
+
+**Finding.** F67 part 4 left the divide-by-zero guard's sequencing open, and one of the costs it recorded for
+landing the guard does not exist. Its words: adding the clause *"touches landed stage-E code and collides with
+**G3**, which is already scheduled to add a clause of its own for a populated LF reaction priority. Two clauses
+arriving in either order both renumber the same list, and **F49** is an entry about that exact hazard."*
+
+There is no shared list. Measured:
+
+| predicate | side | conjuncts | the clause in question |
+|---|---|---|---|
+| `LF.GeneralProgram.wellFormed` | **target** | 10 | G3's `reactionPrioritiesAbsent` is the tenth |
+| `DTR.GeneralModel.wellFormed` | **source** | 5 | where a divide-by-zero guard would have gone |
+
+G3 landed on the target program predicate; the guard would have joined the source model predicate. Different
+predicates, different modules, different sides of the translation, and neither appears in the other's
+conjunction. F49's *"ninth clause"* prose is likewise about the **LF program's** list — its subject is
+`targetEndpointsUnique` and its witness is two reactors and a connection topology — so it was never at risk from
+a source-side clause either.
+
+**What was reasonable, and what was not.** F67 part 4's substance is correct and is not disturbed by this: a
+program dividing by a literal zero is well-formed, translated, printed and undefined in the generated C++; the
+decidable/undecidable split is the right split; and flagging the sequencing as a **decision rather than an
+inference** was exactly right — that
+flag is why `docs/decisions/0045-divide-by-zero-restriction-only.md` exists at all. Only this one cost estimate
+was wrong. Its instinct was also sound, because the hazard it names is real *in general*: F49 is a genuine entry
+about positional prose surviving a clause addition, and two clauses on **one** predicate would indeed have
+collided. The error is narrower than the reasoning — an unchecked assumption that "a `wellFormed` clause" names
+one thing in this repository, when there are two `wellFormed` predicates and the family's habit of qualifying
+names exists precisely because of that ambiguity.
+
+**Why it mattered enough to number.** The estimate argued *for* the option that was ultimately rejected, so
+correcting it made the case for a guard **stronger** at the moment of ruling, not weaker. Decision `0045` chose
+the restriction anyway, on the semantic mismatch between a syntactic guard and a semantic restriction. Had the
+collision gone unchecked, the ruling would have rested partly on a cost that does not exist, and a later reader
+who re-measured could reasonably have asked whether the decision survived its removal. It does, and the record
+now says so.
+
+**Not corrected in place.** F67 part 4 keeps its wording. It was a correct statement of what was believed when it
+was written, and `docs/STAGE_E_FINDINGS.md`'s positional claims are left alone for the same reason — this
+repository does not modernise historical records. This entry is the correction; F67 is the measurement it
+corrects.
+
+### The transferable check
+
+**An estimated cost is a claim, and it is checked less often than a measured one — because it argues for work
+rather than about work.** A finding's *measurements* get re-derived by whoever depends on them; its *cost
+estimates* get quoted into a ledger row and then into a plan, and nothing forces anyone to look again. Two
+things make it worse here: the cost pointed at another finding (F49), which reads as corroboration and
+discourages re-checking; and it named "a clause of `wellFormed`" without qualifying **which** `wellFormed`, in a
+repository whose own style rule is to qualify a name wherever the family could be ambiguous. Before a cost
+estimate is allowed to influence a ruling, re-measure it — especially when it argues in the direction the ruling
+is about to go against, because that is when nobody has an incentive to check.

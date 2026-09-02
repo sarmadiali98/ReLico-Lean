@@ -160,14 +160,18 @@ contain them, and no theorem quantifies over stdout.
 parsed; a correctness theorem over it could only ever be a theorem about the translator's own
 output. This is not a milestone exclusion and no later stage discharges it.
 
-**Target-limited, with a guard still owed.** Division and modulo by zero. A literal zero divisor
-(`.binary .div _ (.intLiteral 0)` and its `mod` counterpart) is syntactically visible and **should be
-refused**; that guard is finding **F67** part 4's decidable half and is still open. The undecidable
-residue — a divisor that is zero only on some execution — cannot be refused by any analysis here, so
-it is declared as a restriction on transfer: the correctness result transfers to real target
-behaviour only on executions in which no division or modulo by zero occurs. On the model sides such
-a statement is stuck on both sides consistently; in generated C++ it is undefined behaviour, and the
-theorem does not claim otherwise.
+**Target-limited, by ruling and permanently.** Division and modulo by zero. The correctness result transfers
+to real target behaviour only on executions in which no division or modulo by zero occurs. On the model sides
+such an expression is stuck on both sides consistently — `Correctness.compileGeneralExpr_evaluation_none_iff`
+proves the target evaluator answers `none` **exactly** when the source one does — while in generated C++ it is
+undefined behaviour, and the theorem does not claim otherwise. **No guard is owed.**
+`docs/decisions/0045-divide-by-zero-restriction-only.md` closed audit item **C11** by choosing this restriction
+over a well-formedness clause, so `DTR.GeneralModel.wellFormed` keeps its five clauses and this exclusion is not
+a pending task. Two reasons, both from that record: `wellFormed` is a **name-resolution** predicate and a
+zero-divisor test is a value-domain property of an operand; and a syntactic guard would not match this
+restriction anyway, because refusing a literal `.intLiteral 0` divisor leaves `x / (-0)` (a `.unary` node),
+`x / (1 - 1)` (a `.binary` node) and `x / y` (**F67** part 4's undecidable residue) all accepted. The
+restriction sentence above would survive a guard verbatim, which is why the guard was rejected.
 
 **Refused at the frontend, owed to later stages.** Conditionals, iteration, local declarations —
 stage H's work, each with its refusal reason already in the vocabulary.
@@ -247,7 +251,8 @@ Grouped by module; each row's "hypotheses" column lists everything beyond succes
 
 Two further rows belong to the table, and they are the table's most important content. The first had no
 theorem to name when this section landed on 2026-08-28 and now has the `.consume`, instant-block and
-interface rows above, every one of them conditional; the second still owes a guard.
+interface rows above, every one of them conditional; the second has no theorem and never will, because it
+records a restriction rather than a missing result.
 
 * **The `.consume` transfer halves have landed, and they are conditional.**
   `generalTimeAdvance_forward_weak` and
@@ -328,9 +333,12 @@ interface rows above, every one of them conditional; the second still owes a gua
   unconditionally — `compileGeneralExpr_preserves_evaluation` and
   `compileGeneralExpr_evaluation_none_iff` make both sides stuck together — but generated C++ has
   undefined behaviour there, so the result transfers to real target behaviour only on executions in
-  which no division or modulo by zero occurs (**F67** part 4). The decidable half — refusing a
-  literal zero divisor — is still owed (audit item C11); the undecidable residue is a permanent
-  restriction on transfer, not a pending task.
+  which no division or modulo by zero occurs (**F67** part 4). **The whole restriction is permanent, and
+  nothing about it is owed.** `docs/decisions/0045-divide-by-zero-restriction-only.md` closed audit item C11 by
+  ruling against a well-formedness guard for the decidable half, on the ground that a syntactic guard does not
+  match a semantic restriction: refusing a literal zero divisor still accepts `x / (-0)`, `x / (1 - 1)` and
+  `x / y`, so this sentence would survive the guard verbatim. Eligibility is therefore unaffected in both
+  directions — no model is refused for containing a division, and none becomes eligible for anything new.
 
 ### `trace` eligibility, in one paragraph
 
