@@ -2708,6 +2708,51 @@ does not go stale when a clause is added — it silently narrows to a weaker mea
 keeps its old label. No count-word grep sees it, no build reports it, and the finding it supports quietly
 loses scope. That is the one failure mode in this class that a reader cannot catch by reading prose.
 
+**Discharged 2026-08-28: `#147` landed, and the direction F84 called unproved is now proved.** The heading and
+the body above are left exactly as written — they were correct when written, and this file does not modernise
+its own records — so this note carries the correction rather than an edit. The commit is `0bf807c`,
+*"proof: compose the per-reaction priority equations up to the program clause (147, F84)"*.
+
+The reaction-list ladder F84 said row 10 did not include exists in `Relico/Translation/GeneralBasic.lean`, nine
+rungs from the leaf to the program:
+`assembleGeneralMessageReactionAtSite_priority`, then the four private list rungs
+`assembleGeneralMessageReactions_prioritiesAbsent`, `assembleGeneralPortReactions_prioritiesAbsent`,
+`compileGeneralMessageServerReactionGroup_prioritiesAbsent`,
+`compileGeneralMessageServerReactions_prioritiesAbsent`; then the reactor rung
+`compileGeneralReactiveClass_prioritiesAbsent`, the class-list rung
+`compileGeneralReactiveClasses_prioritiesAbsent`, and finally
+`assembleGeneralProgram_reactionPrioritiesAbsent` and `compileGeneralModel_reactionPrioritiesAbsent`. No
+`sorry`, and `#print axioms` on the top rungs reports only `propext`, `Classical.choice` and `Quot.sound`.
+
+**The proof is the composition, and that is the whole point of the theorem.** A two-line proof of the same
+statement exists — `compileGeneralModel_wellFormed` followed by a conjunct extraction — and is deliberately not
+used, because reading the clause off the guard's verdict establishes only that *if* the translator emitted a
+populated priority *then* the refusal would hide it. Composing the per-reaction equations up the assembly walk
+establishes that the offence is never emitted at all. Same conclusion, strictly different evidence, and the
+docstring of `compileGeneralModel_reactionPrioritiesAbsent` says so, so that a later edit swapping the weaker
+proof in is visible rather than silent. The only guard fact the composition uses is
+`eq_of_guardGeneralProgram_ok` — what the guard accepts it returns unchanged — which is shape transparency, not
+judgment. `assembleGeneralProgram_reactionPrioritiesAbsent` is stated over the *pre-guard* assembly for the
+same reason: it would remain true and remain about the same artefact if a later stage moved the check
+elsewhere.
+
+Two things F84 said remain true and are **not** corrected by this note. The three per-reaction theorems are
+still unconditional and still independent of the clause — the ladder consumes them, it does not derive them —
+so `docs/STAGE_G_DESIGN.md` §8's sentence about them "becoming consequences of the clause" is still backwards.
+And the two statements F84 separated are still separate: *a populated priority is refused* and *our translator
+never emits one* remain different claims, with the second now proved rather than owed.
+
+### The transferable check, second entry
+
+**A finding that records a debt should be re-read when the debt is paid, and the payment recorded where the
+debt was.** The Lean side of this one was updated on the day the ladder landed —
+`assembleGeneralMessageReaction_priority`'s docstring says outright *"that ladder has landed"* and names all
+three program-level rungs — but F84 itself was not, and the two sat inconsistent for five days. A reader
+arriving through the findings file learned the opposite of what the source said. That is this finding's own
+failure mode seen one level up: F84 is about a design sentence that outlived its truth, and F84 then outlived
+its own. The check is cheap — when a task number appears in a commit subject, grep the findings file for that
+number before closing the task.
+
 
 
 
