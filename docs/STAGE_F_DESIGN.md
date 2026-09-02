@@ -15,8 +15,8 @@ corrections to this document made after its own commit-1 gate run.
 
 Stage F makes the **order** of a receiver's reactions realize Rebeca's **priorities**. Stage E built
 the fan-in *topology* and proved what order it emits; it deliberately proved nothing about whether
-that order means anything. Stage G makes priority **observable end to end** and lands the S1
-`switch-pair` benchmark.
+that order means anything. Stage G makes priority **observable end to end** with a runnable witness
+rather than a scored benchmark — `docs/STAGE_G_DESIGN.md` §10, and its §9 for the name this replaced.
 
 That three-way split is not inferred here, it is quoted. `docs/STAGE_E_DESIGN.md:48-49`:
 

@@ -721,9 +721,11 @@ lemmas it needed (`exists_of_compileGeneral*`) already existed for other consume
 
 ## 9. G4 — the `switch-pair` benchmark, which does not exist
 
-`docs/STAGE_F_DESIGN.md:18-19` names a benchmark called `switch-pair` as stage G's, and that name appears
+`docs/STAGE_F_DESIGN.md:18-19` **named** a benchmark called `switch-pair` as stage G's, and that name appeared
 **nowhere else in the repository** — no fixture, no `.rebeca` file, no exporter output, no definition of
-what it would contain. It is a forward reference that was never redeemed.
+what it would contain. It was a forward reference that was never redeemed. (Past tense as of 2026-09-02: the
+pointer has since been corrected, and the note at the end of this section records it. The measurement itself
+stands as taken.)
 
 Two honest dispositions, and this document takes the second.
 
@@ -742,6 +744,20 @@ reference at `docs/STAGE_F_DESIGN.md:18-19` is corrected to point at G5's witnes
 `POSITIVE_COUNT` and no obligation count moves. Anything else would start benchmark work under a
 different label, which the hold forbids in substance as well as name. **Confirmed 2026-08-23**: the name
 is retired and the witness inherits its purpose.
+
+**Note appended 2026-09-02 (C12): the forward reference is now actually corrected.** Between 2026-08-23 and
+this note, §9's retirement was decided and the witness landed, but the sentence at
+`docs/STAGE_F_DESIGN.md:18-19` still said stage G *"lands the S1 `switch-pair` benchmark"* — so the one
+concrete repair this section promised was the last part of G4 left undone, and a reader arriving from stage F
+met the retired name with nothing marking it retired. That sentence now points at §10's runnable witness and
+back at this section for the name it replaced. Of the tracked documents, the name now appears only in this one —
+in this section, which exists to retire it, and in §12 and §15 citing this section. Every other survival is in
+untracked scratch (`tmp/`, and the roadmap audit files), which never reaches `origin/main`.
+
+The lesson worth carrying, since this took ten days to notice: a retirement is not complete when the decision is
+recorded, it is complete when the **inbound pointers** are repaired. This one read as discharged from either end
+because the section announcing the retirement was the same section that owed the edit. Grep for the retired name
+and fix its citations in the same commit; if that is genuinely deferred, write the deferral down.
 
 
 ## 10. G5 — the runnable witness
@@ -858,6 +874,30 @@ every stage since B (`503 → 506 → 507 → 508 → 511`). The baseline is now
 lines (24 frontend, 96 printer), measured after G1 landed at `cc7b0c7` — commit 2 added two modules and
 two Lake jobs and moved no PASS line, because a tests-only module contributes compile-time pins rather
 than gate output.
+
+**Note appended 2026-09-02 (C12): the paragraph above is a historical baseline, and it is left exactly as
+written.** Every figure in it — `513` jobs, `120` PASS lines, the `24 + 96` split — is a *measurement taken
+after G1 landed at `cc7b0c7`*, and the sentence says so. All three have since moved, because stage G's own work
+plan added modules and printer assertions. Substituting today's numbers in place would silently convert a true
+statement about `cc7b0c7` into a false one, which is the failure mode **F49** and **F84** each record from a
+different direction, so the repair is this note and not an edit.
+
+**Where the current figures live, and why they are not repeated here.** The job count is whatever
+`PATH="$HOME/.elan/bin:$PATH" lake build` prints, and the PASS totals are pinned **by the gate against itself**:
+`EXPECTED_PRINTER_ASSERTIONS` in `frontend/check-general-lean.sh` carries the printer figure, and the script
+fails when the run disagrees with it. A figure copied into prose here would be a second source of truth that
+nothing checks — the same reason `docs/claims/general-family-correctness.md` cites the gate rather than
+reprinting what it prints. Read the gate.
+
+One further caution for anyone tempted to update the split rather than the total: the `24 + 96` decomposition
+has been refuted once already as an **addend** claim, so the two addends do not move together and neither can be
+inferred from the total. Re-measure both or cite neither.
+
+The general rule, since this paragraph is not the only anchored count in the document: a count in prose is stale
+only if it was a claim about *now*. Anchored to a commit — *"measured after G1 landed at `cc7b0c7`"* — the anchor
+makes it permanently true, and "fixing" it is the defect. Read the sentence around a number for a tense or an
+anchor before touching it: if one is there, append; if none is there, the number is claiming the present and must
+be re-measured or removed.
 
 **This table was resliced on 2026-08-24.** Row 3 previously read *"**G2a**
 `Relico/Semantics/GeneralLTS.lean` — both LTSs, the action type, the τ classification | 1 | 514"*. One
