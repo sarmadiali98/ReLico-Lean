@@ -27,7 +27,7 @@ genuine conflict with 0043 and is recorded as one rather than being presented as
 What changed is the requirement, not the reasoning. The paper must be able to **state and defend** that the
 general family admits a weak bisimulation structure. A pair of transfer conditions supports that claim but does
 not *name* it: a reader has to assemble them, and a referee has no single declaration to point at. The
-acceptance ledger's C8 row says the same thing in the project's own vocabulary, quoting F83 — C8 *"cannot exist
+acceptance ledger's C8 row says the same thing in the project's own vocabulary, quoting F83; C8 *"cannot exist
 before `#129` closes"* — and adding: **"Without this, Stage G's headline claim is generic-only."** `#129`
 closed with C7, so C8 became reachable for the first time.
 
@@ -35,7 +35,7 @@ The general family was also the **only one of five** without such a structure. T
 
 ## Why the thirteen-field phase shape was rejected
 
-Measured, not assumed. All four sibling structures have exactly thirteen fields with identical names — verified
+Measured, not assumed. All four sibling structures have exactly thirteen fields with identical names, verified
 by extracting the field lists and diffing them pairwise, zero differences. Five forward, eight backward.
 
 Those fields are not forward/backward × *label*. They are forward/backward × **phase**. The siblings' target
@@ -52,7 +52,7 @@ inductive DetailedMultiStoreState (messageReactions) where
 `forwardConsumeReadyMatch` and `backwardMicrostepSameTimeMatch` are cases of that indexing, each carrying a
 dispatch proof *inside the state*.
 
-**`LF.GeneralRuntimeState` has no phases.** It is flat — a tag, a reactor store, a pending queue — and there is
+**`LF.GeneralRuntimeState` has no phases.** It is flat (a tag, a reactor store, a pending queue), and there is
 no general counterpart of the siblings' `*ForwardPhaseCompatible` (grep returns one for each of the other four
 and none for this family). So eight of the thirteen fields would name phases that do not exist. Copying the
 shape would require adding phase-indexed state to the general semantics: a change to the **semantics**, not to
@@ -69,13 +69,13 @@ six, and the structure is exhaustive by construction: a new label on either side
 | `forwardTauMatch` | `generalTauSteps_forward` | none |
 | `forwardConsumeMatch` | `generalConsume_forward_weak_of_fireRepresentative` | α-representative package |
 | `forwardTimeAdvanceMatch` | `generalTimeAdvance_forward_weak` | none |
-| `backwardTauMatch` | — (premise-only) | `hTauAnswer` |
+| `backwardTauMatch` | none (premise-only) | `hTauAnswer` |
 | `backwardConsumeMatch` | `generalConsume_backward_weakStep_of_takeRepresentative` | `hName` |
 | `backwardTimeAdvanceMatch` | `generalTimeAdvance_backward_weak` | none |
 
 Two shape details are load-bearing rather than stylistic. `backwardTauMatch` answers with a
-`Common.WeakStep` and not a `Common.TauSteps`, so a target `microstepAdvance` — which has no source
-counterpart — can be answered by *zero* source steps. And it requires the answering source label to be
+`Common.WeakStep` and not a `Common.TauSteps`, so a target `microstepAdvance`, which has no source
+counterpart, can be answered by *zero* source steps. And it requires the answering source label to be
 internal; without that a target τ step could be answered by a *visible* source label and the observable
 agreement would silently break.
 
@@ -86,20 +86,20 @@ against the source's three are invisible to them.
 
 Three fields carry residues, and each is a **measured non-derivability** rather than an unfinished proof:
 
-- **`forwardConsumeMatch`** — the α-representative package. Which α-equivalent representative the target's
+- **`forwardConsumeMatch`**: the α-representative package. Which α-equivalent representative the target's
   `fire` premises hold at is the frozen α′ question (decision 0042's setting).
-- **`backwardConsumeMatch`** — `hName`, the per-step actor agreement. `DTR.GeneralActorSelection.selectedActor`
+- **`backwardConsumeMatch`**: `hName`, the per-step actor agreement. `DTR.GeneralActorSelection.selectedActor`
   is a *function* of the source configuration alone, and `readyActors` / `earliestDueArrival` never mention the
   target program, its queue or its fire order (F76). `selectedActor_unique` sharpens the obstruction by proving
   the source schedule forced.
-- **`backwardTauMatch`** — `hTauAnswer`. Five target τ constructors against three source ones;
+- **`backwardTauMatch`**: `hTauAnswer`. Five target τ constructors against three source ones;
   `microstepAdvance` has no source counterpart; and `LF.GeneralStepModulo.weakStep_of_raw`'s docstring records
   that the converse is *deliberately* absent, because a modulo weak step may switch representatives between
   segments.
 
 Hiding these inside a definition would make the structure look stronger than the fact it records. The
 docstring therefore states outright that it is **not premise-free**, and an unconditional witness is
-impossible while any field carries a residue — so, like three of the four siblings, the structure is consumed
+impossible while any field carries a residue, so like three of the four siblings, the structure is consumed
 as a hypothesis rather than constructed.
 
 The non-vacuity is nevertheless demonstrated rather than asserted:
@@ -113,7 +113,7 @@ Its six fields are inhabited by theorems that already existed, so as *theorem co
 it adds is:
 
 1. **a single citable name** for the family's weak bisimulation claim;
-2. **trace agreement as a consequence** — `.traceAgreement_forward` and `.traceAgreement_backward` derive both
+2. **trace agreement as a consequence**: `.traceAgreement_forward` and `.traceAgreement_backward` derive both
    observable-trace rows from the interface **with no further premises**, and no residue appears in either
    statement. This is the part that makes the structure worth more than citing the two transfer conditions;
 3. **an exhaustiveness check**, one field per label per direction;
@@ -121,7 +121,7 @@ it adds is:
    generic-only one.
 
 It also avoids a defect the siblings have. Three of the four sibling interfaces are never inhabited *and*
-their `.forwardStep` / `.backwardStep` theorems are never applied anywhere in the tree — the F75 pattern of a
+their `.forwardStep` / `.backwardStep` theorems are never applied anywhere in the tree, the F75 pattern of a
 declaration with no caller. This family's dispatch theorems and both trace consequences are exercised by pins.
 
 ## Scope

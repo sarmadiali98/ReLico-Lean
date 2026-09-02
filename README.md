@@ -12,8 +12,8 @@ and payloads, `int`/`boolean` state, thirteen binary and two unary operators, as
 with nonnegative constant delays, and a `trace` statement used as the runnable-witness instrument.
 Actor priorities and message-server priorities are carried into reaction declaration order.
 
-The accepted fragment — what passes the frontend diagnostics, `DTR.GeneralModel.wellFormed` and the
-translation guard, and what each excludes — is declared in
+The accepted fragment, what passes the frontend diagnostics, `DTR.GeneralModel.wellFormed` and the
+translation guard, and what each excludes, is declared in
 [`docs/supported-fragment-general.md`](docs/supported-fragment-general.md). That declaration, not
 this summary, is the authority.
 
@@ -138,7 +138,7 @@ frontend/check-general-lean.sh
 ```
 
 The second takes no argument and is the one check in this list that needs neither
-Java, Maven, nor the artifact ZIP — only a Lean toolchain. Keeping it independent
+Java, Maven, nor the artifact ZIP, only a Lean toolchain. Keeping it independent
 of the upstream artifact is deliberate, so that the Lean frontend stays checkable
 without it.
 

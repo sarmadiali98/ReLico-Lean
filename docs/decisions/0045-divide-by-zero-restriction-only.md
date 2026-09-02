@@ -16,9 +16,9 @@ Decision: no Lean change. `Relico/DTR/GeneralWellFormed.lean`, `Relico/Frontend/
 ## Context
 
 `docs/STAGE_G_FINDINGS.md`'s **F67 part 4** established the defect: `x / 0` is well-formed, translated, printed,
-and undefined behaviour in the generated C++. It then split the defect in two — a syntactically decidable half
+and undefined behaviour in the generated C++. It then split the defect in two, a syntactically decidable half
 (a literal zero divisor, which it argued *"should be refused"*) and an undecidable residue (a divisor zero only
-on some execution, which it assigned to the fragment declaration) — and explicitly left the sequencing open:
+on some execution, which it assigned to the fragment declaration), and explicitly left the sequencing open:
 *"Whether the divide-by-zero guard lands before G3, after it, or is folded into G6 as restriction-only is left
 open here."* The acceptance ledger's C11 row repeated *"Confirm before implementing."*
 
@@ -28,7 +28,7 @@ This decision answers that question. It is the fold-into-G6 option.
 
 **`wellFormed` is a name-resolution predicate, and all five clauses are of that one kind.** Measured: none of
 `bindingsMatchDeclarations`, `argumentsMatchConstructor`, `sendTargetsDeclared`, `sendsResolveToMessageServers`
-or `namesUniqueAndValid` inspects an expression at all — `statementTargetDeclared` returns `true` outright for
+or `namesUniqueAndValid` inspects an expression at all, `statementTargetDeclared` returns `true` outright for
 `.assign` and `.trace` without looking inside them. The predicate means *every name this model mentions
 resolves, and the names that must be unique are*. A zero-divisor clause is a value-domain property of an
 operand, so it would be the first clause of a different kind, and the predicate's meaning would change rather
@@ -44,12 +44,12 @@ development is unsound, and the restriction is a statement about which execution
 **A syntactic guard would not match the semantic restriction.** This is the decisive reason. A literal-zero
 guard refuses `.binary .div e (.intLiteral 0)` and its `.mod` counterpart. It does **not** refuse:
 
-- `x / (-0)` — a negative literal reaches the AST as a `.unary` negate over `.intLiteral`, as
+- `x / (-0)`; a negative literal reaches the AST as a `.unary` negate over `.intLiteral`, as
   `Relico/Frontend/GeneralElaborator.lean`'s `signedIntegerLiteral` shows, so `-0` is not an `.intLiteral 0`
   node;
-- `x / (1 - 1)` — a `.binary` node, constant-folded by nothing, because the elaborator deliberately does not
+- `x / (1 - 1)`, a `.binary` node, constant-folded by nothing, because the elaborator deliberately does not
   evaluate expressions (*"a folding pass that recursed would be an evaluator"*);
-- `x / y` where `y` holds zero at run time — F67's own undecidable residue.
+- `x / y` where `y` holds zero at run time, F67's own undecidable residue.
 
 So the restriction sentence survives **verbatim** under a guard: the guard covers one of three syntactic shapes
 and none of the semantic ones. Adding it would produce a claim that reads stronger while narrowing nothing, and
@@ -58,10 +58,10 @@ guard that **corresponds to** the restriction it accompanies, and no decidable g
 
 ## What was rejected, and the argument for it
 
-**Option A — a sixth `wellFormed` clause refusing a literal zero divisor.** Rejected. The argument for it is
+**Option A, a sixth `wellFormed` clause refusing a literal zero divisor.** Rejected. The argument for it is
 real and is recorded rather than dismissed: every other target limitation since stage E has been given the
 guard-plus-refusal-test shape; F67 says the decidable half *should* be refused; and refusing `x / 0` at the
-boundary the user sees is better tooling than emitting undefined behaviour. Option A is also **cheap** — each
+boundary the user sees is better tooling than emitting undefined behaviour. Option A is also **cheap**, each
 extraction lemma is a Bool case analysis on its own clause, written that way so an appended conjunct does not
 break it, and `classifyGeneralWellFormedness`'s `modelNotWellFormed` branch exists precisely so that *"adding a
 sixth conjunct without extending this function yields an honest 'not well formed'"*.
@@ -93,7 +93,7 @@ on a renumbering cost that does not exist.
   **permanent and by decision**, and no longer says the guard *"is still owed (audit item C11)"*.
 - The paper must state the restriction: the correctness result transfers to real target behaviour only on
   executions in which no division or modulo by zero occurs. It is a disclosed boundary in the same family as
-  decision `0042`'s partial quotient and C7's three residues — part of the claim, not a caveat on it.
+  decision `0042`'s partial quotient and C7's three residues, part of the claim, not a caveat on it.
 - No `lean-reject` fixture, no new diagnostic reason, no regression pin, and no gate total moves.
 - `docs/claims/general-family-correctness.md` needs no new row: no claim changed. Row 20's fragment instrument
   continues to point at the fragment declaration, which now carries the ruling.

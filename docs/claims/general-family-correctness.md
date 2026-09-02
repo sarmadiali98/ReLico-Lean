@@ -6,7 +6,7 @@ without trusting this document.
 ## How to read this file
 
 Every row cites an **instrument**: a Lean declaration, a gate marker, a shell command, or a commit
-SHA. The instrument is the claim's evidence, and it is checkable now — this file is not a status
+SHA. The instrument is the claim's evidence, and it is checkable now; this file is not a status
 report and carries no status words, no dates and no progress notes. A row whose instrument does not
 exist is a defect in the row, not a task; delete it rather than annotate it.
 
@@ -30,7 +30,7 @@ grouped under the three it owns, quoted there as aims 7, 8 and 9: designer-speci
 preserved; every permitted source execution has a corresponding target execution; every target
 execution corresponds to a permitted source execution.
 
-## Aim 7 — designer-specified priorities are preserved
+## Aim 7: designer-specified priorities are preserved
 
 | # | Claim | Instrument | Kind | Residues / scope |
 |---|---|---|---|---|
@@ -43,18 +43,18 @@ Row 1's proof is deliberately the composition of the per-reaction equations and 
 from the guard's decision; row 2 exists so that substituting the weaker proof stays visible. F84 and
 its appended discharge note record why.
 
-## Aim 8 — every permitted source execution has a corresponding target execution
+## Aim 8: every permitted source execution has a corresponding target execution
 
 | # | Claim | Instrument | Kind | Residues / scope |
 |---|---|---|---|---|
-| 5 | The state relation pairing source configurations with target states | `Relico.Correctness.GeneralStateCorrespondence` · `a7b42c9` | decl · sha | — |
+| 5 | The state relation pairing source configurations with target states | `Relico.Correctness.GeneralStateCorrespondence` · `a7b42c9` | decl · sha | n/a |
 | 6 | Every source internal (τ) segment is answered by a target internal segment | `Relico.Correctness.generalTauSteps_forward` · `f4f1255` | decl · sha | none beyond accepted-program facts |
 | 7 | A source instant block is answered by a target execution of the quotient system, with a per-reactor match | `Relico.Correctness.generalInstantBlock_forward` · `047a5ef` | decl · sha | per-consume α-representative package |
 | 8 | The same, against the source block predicate | `Relico.Correctness.generalInstantBlock_forward_of_source` · `047a5ef` | decl · sha | as row 7; endpoint conditions not carried into the conclusion |
 | 9 | Source quiescence and idleness transport to the target | `Relico.Correctness.generalPendingFuture_of_quiescent`, `Relico.Correctness.generalReactorIdle_of_actorIdle` · `0226689` | decl · sha | none |
 | 10 | Forward observable-trace agreement | `Relico.Correctness.GeneralLabelWeakBisimulation.traceAgreement_forward` · `728cc21` | decl · sha | inherited from the interface (row 15) |
 
-## Aim 9 — every target execution corresponds to a permitted source execution
+## Aim 9: every target execution corresponds to a permitted source execution
 
 | # | Claim | Instrument | Kind | Residues / scope |
 |---|---|---|---|---|
@@ -86,10 +86,10 @@ backward τ answer `hTauAnswer`. Each is a measured non-derivability, not an unf
 
 | # | Claim | Instrument | Kind | Residues / scope |
 |---|---|---|---|---|
-| 17 | Correspondence is stated up to a **partial** within-tag quotient — free permutation among distinct reactors at one tag, order-preserving within one reactor | `Relico.LF.generalStateAlphaEquiv`, `Relico.LF.GeneralStepModulo` · `f026114` · `docs/decisions/0042-within-tag-partial-quotient.md` · `b13af48` | decl · sha | this is **not** the paper's Definition 1 verbatim |
+| 17 | Correspondence is stated up to a **partial** within-tag quotient, free permutation among distinct reactors at one tag, order-preserving within one reactor | `Relico.LF.generalStateAlphaEquiv`, `Relico.LF.GeneralStepModulo` · `f026114` · `docs/decisions/0042-within-tag-partial-quotient.md` · `b13af48` | decl · sha | this is **not** the paper's Definition 1 verbatim |
 | 18 | The observable alphabet: a consume observes the receiver only; a time advance observes both endpoints | `Relico.Correctness.GeneralObservable` · `d84638c` | decl · sha | payload and event kind are erased, by F78 and by compiler-independence |
 | 19 | The alphabet drops exactly the internal labels and no visible one | `Relico.Correctness.GeneralObservable.ofSourceLabel_eq_none_iff_isTau`, `.ofTargetLabel_eq_none_iff_isTau` · `d84638c` | decl · sha | none |
-| 20 | The accepted source fragment | `docs/supported-fragment-general.md` · `7c64932` | doc · sha | — |
+| 20 | The accepted source fragment | `docs/supported-fragment-general.md` · `7c64932` | doc · sha | n/a |
 
 ## Mechanised-artefact integrity
 
@@ -121,10 +121,10 @@ Each of these is a recorded decision, not an omission.
 
 This file maps claims to instruments and nothing else. For why each claim has the shape it does:
 
-- `docs/STAGE_G_FINDINGS.md`, *"The C7 contribution"* — the argument, the three residues with their
+- `docs/STAGE_G_FINDINGS.md`, *"The C7 contribution"*, the argument, the three residues with their
   measurements, the invariant layers.
-- `docs/decisions/0042-within-tag-partial-quotient.md` — why the quotient is partial.
-- `docs/decisions/0043-forward-instant-block-weak-step.md` — why forward is a weak-step theorem.
-- `docs/decisions/0044-c8-general-label-weak-bisimulation.md` — why the structure is label-level.
-- `docs/trusted-boundary.md` — the aims these rows are grouped under.
-- `docs/supported-fragment-general.md` — what the translator accepts and refuses.
+- `docs/decisions/0042-within-tag-partial-quotient.md`, why the quotient is partial.
+- `docs/decisions/0043-forward-instant-block-weak-step.md`, why forward is a weak-step theorem.
+- `docs/decisions/0044-c8-general-label-weak-bisimulation.md`, why the structure is label-level.
+- `docs/trusted-boundary.md`; the aims these rows are grouped under.
+- `docs/supported-fragment-general.md`, what the translator accepts and refuses.

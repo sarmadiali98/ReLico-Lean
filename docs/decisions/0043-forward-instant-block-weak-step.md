@@ -28,8 +28,8 @@ spine → execution; there is no converse, because a `Common.WeakStep` is a
 `Prop` recording neither which event fired nor at which representative.
 
 So producing a forward spine is not a matter of proving another lemma. It
-requires `hConsumeAnswer` to **return different data** — the representative
-package instead of a weak step — which moves a committed theorem's public
+requires `hConsumeAnswer` to **return different data** (the representative
+package instead of a weak step), which moves a committed theorem's public
 premise shape.
 
 An earlier generation of this project's records named the *endpoint transport*
@@ -82,7 +82,7 @@ The decision:
   keep their current statements; nothing is weakened.
 - keeps `hConsumeAnswer` unchanged, so every existing caller and the pins in
   `Relico/Tests/GeneralTraceTransfer.lean` are unaffected.
-- leaves the three named residues exactly as they are — the forward
+- leaves the three named residues exactly as they are, the forward
   α-representative package, the backward `hName`, and the backward
   `hTauAnswer`. This decision does not discharge or widen any of them.
 - closes what the handoffs called *Open decision 2*. It is decided, not
@@ -104,20 +104,20 @@ The decision:
   sake, at the price of discarding a proved and useful construction. Rejected:
   the backward spine costs nothing to keep, and the asymmetry is explicable.
 - **(c) Build an end-to-end bisimulation bundle.** Rejected on three counts. It
-  adds no theorem content — the two rows already exist and already compose in
+  adds no theorem content; the two rows already exist and already compose in
   the only sense a bisimulation requires. `Relico/Correctness/WeakBisimulationTrace.lean`
   records that the four existing `*PhaseWeakBisimulation` declarations are all
   family-specific and that bundling *"would force a caller that holds only the
   forward direction to supply the backward one as well"*. And a general-family
-  bundle would carry **four** independent residues in one signature — one
-  forward, three backward — making it harder to use than either half. If a
+  bundle would carry **four** independent residues in one signature, one
+  forward, three backward, making it harder to use than either half. If a
   single citable name is wanted for the paper, that is a presentational request
   and should be justified as one.
 - **(d) Add `generalSend_forward_weak` for a uniform statement-lift trio.**
   Rejected separately on 2026-09-02 and recorded here because it belongs to the
   same family of "symmetry looks tidier" arguments. `generalSend_forward` needs
   all four accepted-program premises **plus three** sender-resolution premises,
-  while `generalTauSteps_forward` needs a strict subset — so the lift would
+  while `generalTauSteps_forward` needs a strict subset, so the lift would
   carry three *more* premises than the route it replaces. The two lifts that
   did land (`generalTrace_forward_weak`, `generalAssign_forward_weak`) each
   remove four premises, which is their entire justification.
