@@ -241,16 +241,22 @@ Grouped by module; each row's "hypotheses" column lists everything beyond succes
 | τ-advance correspondence (`generalCorrespondence_retag`, `generalCorrespondence_microstepAdvance`, the trace-tail lemmas) | `Relico/Correctness/GeneralCorrespondence.lean` | the state relation | eligible |
 | single-step advance (`generalCorrespondence_advance`) and quiescence (`generalQuiescent_of_earliestPendingEventFuture`) | `Relico/Correctness/GeneralWeakBisimulation.lean` | the state relation | eligible |
 | weak transfer, `.timeAdvance` halves (`generalTimeAdvance_forward_weak`, `_backward_weak`) | `Relico/Correctness/GeneralWeakBisimulation.lean` | the state relation | eligible |
+| weak transfer, `.consume` halves (`generalConsume_forward_weak_of_fireRepresentative`; `generalConsume_backward_weak_of_takeRepresentative` and `generalConsume_backward_weakStep_of_takeRepresentative`) | `Relico/Correctness/GeneralWeakBisimulation.lean`, `Relico/Correctness/GeneralInstantBlockBackward.lean` | the state relation, plus a run-level residue per direction — the forward α-representative package, the backward `hName` | eligible |
+| instant blocks, both directions (`generalInstantBlock_forward`, `_of_source`; `generalInstantBlock_backward`, `_of_target`) | `Relico/Correctness/GeneralInstantBlockForward.lean`, `Relico/Correctness/GeneralInstantBlockBackward.lean` | as the `.consume` row, carried as `hConsumeAnswer` / `hName` | eligible |
+| the weak bisimulation interface and its consequences (`GeneralLabelWeakBisimulation`, `.forwardStep`, `.backwardStep`, `.traceAgreement_forward`, `.traceAgreement_backward`) | `Relico/Correctness/GeneralLabelWeakBisimulation.lean` | the interface itself, three of whose six fields carry residues; the two `traceAgreement_*` consequences add none | eligible |
 
-Two further rows belong to the table but have no theorem to name, and they are the table's most
-important content:
+Two further rows belong to the table, and they are the table's most important content. The first had no
+theorem to name when this section landed on 2026-08-28 and now has the `.consume`, instant-block and
+interface rows above, every one of them conditional; the second still owes a guard.
 
-* **The `.consume` transfer halves do not exist yet.** `generalTimeAdvance_forward_weak` and
-  `_backward_weak` cover one label constructor of two; the `.consume` case is task `#129`,
+* **The `.consume` transfer halves have landed, and they are conditional.**
+  `generalTimeAdvance_forward_weak` and
+  `_backward_weak` cover one label constructor of two; the `.consume` case was task `#129`,
   commissioned by the partial within-tag quotient
   (`docs/decisions/0042-within-tag-partial-quotient.md`: free permutation among distinct reactors at
-  one tag, order-preserving within one). `#129`'s first half is implemented in the working tree
-  (uncommitted): `Store.lookup_update_commute` settles the commutation question F76 left open
+  one tag, order-preserving within one). `#129` closed with the C7 work. Its first half is what the
+  rest of this row was originally written about, and that account still stands:
+  `Store.lookup_update_commute` settles the commutation question F76 left open
   (disjoint updates commute observationally),
   `LF.GeneralStep.fire_execution_commute_of_adjacent_queue_swap` is an execution commutation
   across the adjacent same-tag distinct-target queue swap — both executions' steps constructed
@@ -273,19 +279,51 @@ important content:
   (`Correctness.generalConsume_forward_weak_of_fireRepresentative`) is proved — the
   non-scheduler half: once an α-representative at which the raw `fire` premises hold is
   supplied, the target's modulo weak step at the matched event's `.consume` label and the full
-  post-state correspondence are derived. This is not yet the transfer clause itself: the
-  representative package is assumed, and the full forward **wrapper** is not proved — it needs
-  the no-overdue/tag-alignment invariant, the kind-origin invariant behind the
-  routing/reaction premises, and reachable-state store-key uniqueness, and it stands behind
-  two decision-class blockers with reachable counterexamples (the α′ cross-microstep policy and
-  the F27 same-target same-tag source tie policy). The **backward** condition is also
-  unwritten: it needs the DTR side's own within-instant modulo (the source's actor-priority
-  selection is deterministic and cannot τ-hide its choice). The consequence, per **F83**: the generic finite-trace agreement of row 9
-  (`weakBisimulation_traceAgreement_forward`/`_backward`) quantifies over *both* transfer conditions, so
-  the general family cannot instantiate it until `#129`'s wrapper lands — aims 8 and 9 of
-  `docs/trusted-boundary.md` are proved over an abstract LTS and **not yet for the general family**. No
-  model, tie-carrying or not, is eligible for a theorem that does not exist. The decision refuses
-  nothing: contention models will become theorem-eligible when the quotient correspondence lands.
+  post-state correspondence are derived.
+
+  **What has landed since, and on what premises.** The forward **wrapper** is
+  `Correctness.generalInstantBlock_forward` and its source-predicate form
+  `_of_source`: a source instant block is answered by a target execution of the quotient system with a
+  per-reactor match. It is a **weak-step** theorem by decision
+  (`docs/decisions/0043-forward-instant-block-weak-step.md`) — internal τ decomposition stays inside the
+  weak transitions rather than being exposed as a spine — and it carries the α-representative package as
+  the premise `hConsumeAnswer`, so the representative question decision 0042 froze is answered by the
+  caller, not by the theorem. The **backward** condition is
+  `Correctness.generalInstantBlock_backward_of_target`, which concludes the whole source block predicate,
+  against the per-occurrence actor agreement `hName`; its core is
+  `generalConsume_backward_weak_of_takeRepresentative`. `hName` is a **measured** non-derivability, not an
+  unfinished proof: `DTR.GeneralActorSelection.selectedActor` is a function of the source configuration
+  alone, and `readyActors` / `earliestDueArrival` never mention the target program, its queue or its fire
+  order (F76), which `selectedActor_unique` sharpens by proving the source schedule forced. The backward
+  τ answer is likewise the premise `hTauAnswer`: five target τ constructors against three source ones,
+  `microstepAdvance` has no source counterpart, and `LF.GeneralStepModulo.weakStep_of_raw`'s converse is
+  deliberately absent.
+
+  **Eligibility consequence, which is the only part of this row the table proper is about.** None of these
+  theorems names `ActorPrioritiesDistinct` or `MessageServerPrioritiesDistinct` — verified by grep over
+  every module they live in, zero occurrences — so **no model loses eligibility for them, tie-carrying or
+  not**. Their conditionality is on *run-level* data supplied by a caller, not on a model class. The
+  decision refuses nothing, exactly as this row said before: contention models are eligible for the
+  quotient correspondence now that it has landed.
+
+  **What this does to aims 8 and 9, stated precisely.** The general family has observable-trace agreement
+  in both directions: `Correctness.GeneralLabelWeakBisimulation.traceAgreement_forward` and
+  `.traceAgreement_backward`, each derived from the six-field label-level weak bisimulation interface
+  `Correctness.GeneralLabelWeakBisimulation` **with no further premises**, over the alphabet
+  `Correctness.GeneralObservable` (a consume observes the receiver only; a time advance observes both
+  endpoints). So aims 8 and 9 of `docs/trusted-boundary.md` now hold **for this family** and not only over
+  an abstract LTS — with three qualifications that are part of the claim rather than caveats on it. The
+  interface is **conditional**: three of its six fields carry the residues named above (the forward
+  `.consume` α-representative package, the backward `.consume` `hName`, the backward τ `hTauAnswer`), so
+  an unconditional witness is impossible while any residue stands and the structure is consumed as a
+  hypothesis. The agreement is stated over the **partial** within-tag quotient of decision 0042, not the
+  paper's Definition 1 verbatim. And **F83**'s underlying observation is unchanged: the *generic*
+  finite-trace theorem `weakBisimulation_traceAgreement_forward`/`_backward` still quantifies over both
+  transfer conditions, and this family reaches its own agreement through
+  `Correctness.generalTraceAgreement_forward`/`_backward` instantiated at the interface — the generic row
+  is not discharged unconditionally for this family, and F83's correction of the design's
+  *"outright"* stands as written. `docs/claims/general-family-correctness.md` rows 5–16 are the
+  row-by-row record with instruments.
 * **Division and modulo by zero carry a transfer restriction.** The model-side correspondence holds
   unconditionally — `compileGeneralExpr_preserves_evaluation` and
   `compileGeneralExpr_evaluation_none_iff` make both sides stuck together — but generated C++ has
