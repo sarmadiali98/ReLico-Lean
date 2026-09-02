@@ -2962,7 +2962,66 @@ fired while a `Common.WeakStep` is a `Prop` recording neither which event fired 
 and `GeneralInstantBlockSpine.weakSteps` has no converse for exactly that reason. Producing a forward spine
 would mean changing the answer premise's *data*, and the decision above is not to.
 
-### 3. Trace agreement over a shared observable alphabet
+### 3. The named weak bisimulation object
+
+**`Correctness.GeneralLabelWeakBisimulation` is the object behind the claim** *"the general family admits a
+weak bisimulation structure"*. It is a `Prop` structure over a model and its compiled program, related by
+`Correctness.GeneralTraceRelated` — the state correspondence bundled with both store-key invariants, because
+the τ crossings consume both at every step and a bare correspondence cannot run them.
+
+**It is label-level, not phase-level, and that is a measured choice rather than a simplification.** Each of the
+four sibling families carries a thirteen-field `*PhaseWeakBisimulation` — five forward, eight backward — whose
+field names read `forwardConsumeAfterTimeMatch`, `forwardConsumeReadyMatch`, `backwardMicrostepSameTimeMatch`
+and so on. Those are not forward/backward × *label*; they are forward/backward × **phase**. The siblings'
+target state is an inductive carrying mid-dispatch phases — `LF.DetailedMultiStoreState`'s `stable`,
+`afterTime` and `dispatchReady`, each holding a dispatch proof *inside the state* — and eight of the thirteen
+fields exist to cover them.
+
+**`LF.GeneralRuntimeState` has no phase state.** It is flat: a tag, a reactor store, a pending queue. There is
+no general counterpart of the siblings' `*ForwardPhaseCompatible`. So the thirteen-field shape is not merely
+awkward here, it is **uninstantiable** — eight of its fields would name phases that do not exist, and
+producing them would mean adding phase-indexed state to the general semantics, which is a change to the
+semantics rather than to a correctness interface. That is why the shape was not copied, and it is the first
+thing to check if anyone proposes copying it.
+
+`DTR.GeneralLabel` and `LF.GeneralLabel` each have three constructors, so the honest field set is one per label
+per direction: **six**.
+
+| field | inhabited by | residue |
+|---|---|---|
+| `forwardTauMatch` | `Correctness.generalTauSteps_forward` | none |
+| `forwardConsumeMatch` | `Correctness.generalConsume_forward_weak_of_fireRepresentative` | α-representative package |
+| `forwardTimeAdvanceMatch` | `Correctness.generalTimeAdvance_forward_weak` | none |
+| `backwardTauMatch` | — (premise-only) | `hTauAnswer` |
+| `backwardConsumeMatch` | `Correctness.generalConsume_backward_weakStep_of_takeRepresentative` | `hName` |
+| `backwardTimeAdvanceMatch` | `Correctness.generalTimeAdvance_backward_weak` | none |
+
+Three fields are unconditional and three carry residues. `backwardTauMatch`'s answer is a `Common.WeakStep`
+rather than a `Common.TauSteps` on purpose, so that a target `microstepAdvance` can be answered by *zero*
+source steps; and it requires the answering source label to be internal, without which a target τ step could
+be answered by a visible source label and the observable agreement would break.
+
+**`.forwardStep` and `.backwardStep`** dispatch an arbitrary weak step of either system onto the field that
+answers it. Both dispatch on the **label**, not the step, which is what keeps them independent of either
+system's internal step count — the target has five τ constructors and the source three, and neither theorem
+needs to know.
+
+**Trace agreement follows from the structure.**
+`Correctness.GeneralLabelWeakBisimulation.traceAgreement_forward` and `.traceAgreement_backward` derive both
+observable-trace rows **from the interface alone, with no further premises**, and no residue appears in either
+statement. These are the citations to use; the underlying transfer conditions
+(`generalTraceAgreement_of_consumeAnswer`, `generalTraceAgreement_backward_of_answers`) remain available but
+are the weaker thing to cite, since a reader must assemble them.
+
+**The structure is conditional, not premise-free, and its own docstring says so.** An unconditional witness is
+impossible while any field carries a residue, so — like three of the four sibling structures, whose docstrings
+make the same disclaimer — it is consumed as a **hypothesis** rather than constructed. What differs from those
+three is that this family's dispatch theorems and both trace consequences are *exercised* by pins in
+`Relico/Tests/GeneralLabelWeakBisimulation.lean`, including one that constructs the structure from six
+hypotheses of the field shapes to show the six field types are jointly satisfiable. The three siblings'
+dispatch theorems are never applied anywhere in the tree.
+
+### 4. The observable alphabet the trace agreement is stated over
 
 `Correctness.GeneralObservable` has two constructors: `consume (receiver)` and `timeAdvance (before after)`.
 A consume observes **only receiver identity**; a time advance observes **both endpoints**, unchanged; an
@@ -2981,14 +3040,11 @@ Two soundness lemmas are load-bearing rather than decorative:
 silently dropped a *visible* label would make trace agreement vacuously easier, and the generic trace theorems
 **cannot detect that** — they never see `isTau`, only the projections.
 
-The rows are `Correctness.generalTraceAgreement_of_consumeAnswer` (forward) and
-`generalTraceAgreement_backward_of_answers` (backward), both over `LF.GeneralStepModulo` at the same relation,
-which together are the bisimulation argument. The traces agree while the *label lists* may differ in length,
-because a pair projecting to `none` on both sides contributes nothing — that gap is what makes this trace
-**agreement** rather than trace equality, and it is what lets the target's extra microstep traffic (P24) be
-invisible.
+The traces agree while the *label lists* may differ in length, because a pair projecting to `none` on both
+sides contributes nothing — that gap is what makes this trace **agreement** rather than trace equality, and it
+is what lets the target's extra microstep traffic (P24) be invisible.
 
-### 4. The three residues, and why each is non-derivable
+### 5. The three residues, and why each is non-derivable
 
 These are premises, they are named in their theorems' statements, and a paper claiming this result must
 disclose them. Each is non-derivable for a *measured* reason, not for want of effort.
@@ -3019,7 +3075,7 @@ The premise's shape reflects two of these: its `DTR.GeneralLabel.isTau sourceLab
 target τ step from being answered by a *visible* source label, and it answers with a `Common.WeakStep` rather
 than a `Common.TauSteps` precisely so that `microstepAdvance` can be answered by `TauSteps.refl`.
 
-### 5. The setting: a partial within-tag quotient
+### 6. The setting: a partial within-tag quotient
 
 The correspondence is stated over decision 0042's quotient, and the claim is **not** Definition 1 verbatim.
 Among events targeting **distinct** reactors at one logical tag, permutation is free — no target order is
@@ -3039,7 +3095,7 @@ classification (C: execution-specific premise) stands.
 **Anyone writing "we mechanised Theorem 1" without this qualification is making a claim a referee can
 deflate in one sentence.** The honest form names the quotient.
 
-### 6. The invariant layers the proofs consume
+### 7. The invariant layers the proofs consume
 
 Four, each proved where it belongs and each consumed rather than assumed.
 
@@ -3061,9 +3117,10 @@ boundary; the backward one re-establishes the invariant per step inside the answ
 
 ### Status
 
-**The C7 proof surface is complete.** Every obligation is either proved or is one of the three residues above,
-each of which is a decision recorded with its reason rather than an open task. **No further coding is
-planned**; the remaining work on C7 is presentation.
+**The C7 proof surface is complete**, and **C8 is complete**: the general family has a named weak bisimulation
+object. Every obligation is either proved or is one of the three residues above, each of which is a decision
+recorded with its reason rather than an open task. **No further coding is planned** for either row; the
+remaining work is presentation.
 
 Two corrections this section exists partly to carry, because both were wrong in this project's own earlier
 records and both would mislead a reader who found the old text first:
@@ -3074,6 +3131,10 @@ records and both would mislead a reader who found the old text first:
 - `DTR.GeneralLabel` has **no `trace` label**. It has exactly `tau`, `timeAdvance`, `consume`; `trace` is a
   *statement* constructor. Any prose describing a "trace label" is wrong, and a source trace or assign step is
   at `tau` with the statement pinned by a body hypothesis.
+- An earlier revision of **item 3 of this section** cited the two trace transfer conditions as *the*
+  bisimulation argument. They are still correct and still available, but they are now the **weaker** citation:
+  `Correctness.GeneralLabelWeakBisimulation` is the named object and its two `traceAgreement_*` consequences
+  derive both rows from it with no further premises. Cite the structure.
 
 ### The transferable check
 
