@@ -53,12 +53,16 @@ typing judgement anywhere in this family: the upstream Timed Rebeca typechecker 
 expressions before a document is emitted, so typing is upstream's obligation, not a restriction this
 fragment declares.
 
-**Statements** (`DTR.GeneralStmt`), three constructors:
+**Statements** (`DTR.GeneralStmt`), four constructors:
 
 - `assign`, target state variable, expression;
 - `trace`, a literal tag, the G5 observability instrument (§7);
 - `send`, target (`self` or a declared known rebec), message-server name, payload expressions,
-  delay.
+  delay;
+- `ifThenElse`, condition, then-body, else-body, added by stage H and admitted to the fragment by
+  stage I0. It is the one constructor that makes `DTR.GeneralStmt` a **nested** inductive, which is
+  why several traversals over it are mutual statement-and-body pairs rather than single functions;
+  F89 records what happens when one is not.
 
 **Delays** are `Delay`, a bare `Nat`, nonnegative by construction. Constantness (a literal, not an
 expression) is a frontend refusal (`nonConstantDelay`), not an AST property, because the frontend is
@@ -101,10 +105,13 @@ the fragment*. The refusals that bound the fragment, beyond the name and arity c
 - **Expressions**: `unsupportedExpressionKind`, `missingField`, literal-type checks, and the
   operator-count refusals `unknownBinaryOperator` / `unknownUnaryOperator`, thirteen and two,
   exactly the constructors of §2.
-- **Statements**: `branchingNotSupported` (`if`), `iterationNotSupported` (`for`),
-  `localDeclarationNotSupported` (`declare`), read faithfully by the schema, admitted by no stage
-  before H; `assignmentTargetNotStateVariable`; a write to a formal parameter has no state-semantics
-  home; `nonConstantDelay` and `negativeDelay`.
+- **Statements**: `iterationNotSupported` (`for`) and `localDeclarationNotSupported` (`declare`), both
+  read faithfully by the schema and admitted by no stage so far; `assignmentTargetNotStateVariable`; a
+  write to a formal parameter has no state-semantics home; `nonConstantDelay` and `negativeDelay`.
+  `branchingNotSupported` (`if`) **is no longer raised**: stage I0 gave `elaborateStmt` an `if` arm
+  that elaborates `condition`, `then` and `else`, so a conditional is now inside the fragment. The
+  constructor is retained rather than deleted, because a document whose `if` node is missing its
+  `condition` or `then` is still refused, by `missingField`.
 - **Instances**: `nonLiteralInstanceArgument`.
 
 ## The translation guard: ten clauses on the target
@@ -173,8 +180,13 @@ restriction anyway, because refusing a literal `.intLiteral 0` divisor leaves `x
 `x / (1 - 1)` (a `.binary` node) and `x / y` (**F67** part 4's undecidable residue) all accepted. The
 restriction sentence above would survive a guard verbatim, which is why the guard was rejected.
 
-**Refused at the frontend, owed to later stages.** Conditionals, iteration, local declarations,
-stage H's work, each with its refusal reason already in the vocabulary.
+**Refused at the frontend, owed to later stages.** Iteration and local declarations, each with its
+refusal reason already in the vocabulary. Conditionals stood in this list until stage I0 and no longer
+do: `if` is accepted end to end, from `elaborateStmt` through
+`DTR.GeneralModel.statementResolves`'s recursion into both branch bodies, and
+`frontend/fixtures/general/branching.parser.json` is the positive that pins it. What stage I0 did not
+change is the *reason* `control-flow.parser.json` is refused: it opens with two `for` loops, so its
+expectation is still `iterationNotSupported`.
 
 **Still excluded, no stage owner.** Arrays, inheritance, physical actions, environmental inputs,
 broadcast. None is refused by name (they simply have no constructor in the AST) so they are

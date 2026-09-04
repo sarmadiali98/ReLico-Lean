@@ -1,7 +1,7 @@
 # `general-v1` frontend fixtures
 
 These models are the acceptance surface of the general family's two frontend
-layers. Between them the ten positives exercise every production
+layers. Between them the eleven positives exercise every production
 `frontend/java-bridge/RebecaGeneralJsonExporter.java` admits, and the thirty-four
 negatives pin one rejection each — twenty against the exporter and the Rebeca
 compiler upstream of it, fourteen against the Lean decoder.
@@ -296,7 +296,7 @@ takes those same committed documents as given and checks what Lean makes of them
 Neither re-does the other's work, and the documents in this directory are the
 contract between them.
 
-Note that the glob on the first line matches only the ten positives. The fourteen
+Note that the glob on the first line matches only the eleven positives. The fourteen
 documents in `lean-reject/` are deliberately invalid against `general-v1` — one of
 them is not even JSON — so validating them would fail by design. They are named
 `invalid-*.json` rather than `*.parser.json` partly for that reason.
