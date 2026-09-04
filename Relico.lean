@@ -678,3 +678,4 @@ import Relico.Tests.GeneralLabelWeakBisimulation
 import Relico.Tests.GeneralSemantics
 import Relico.Tests.GeneralInitialization
 import Relico.Tests.GeneralConditional
+import Relico.Tests.GeneralLocalDecl
