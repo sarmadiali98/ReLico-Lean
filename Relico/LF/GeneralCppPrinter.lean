@@ -555,6 +555,17 @@ def renderGeneralStmt
           renderGeneralBraced
             elseRendered)
 
+  | .localDecl name declaredType value =>
+      .ok
+        (renderGeneralType
+            declaredType ++
+          " " ++
+          name.value ++
+          " = " ++
+          renderGeneralExpr
+            value ++
+          ";")
+
 /--
 Render one conditional branch's body as a single inline statement sequence.
 
@@ -696,6 +707,11 @@ def generalEffectNamesFrom :
             names
             thenBody)
           elseBody)
+        remaining
+
+  | names, .localDecl _ _ _ :: remaining =>
+      generalEffectNamesFrom
+        names
         remaining
 
 end

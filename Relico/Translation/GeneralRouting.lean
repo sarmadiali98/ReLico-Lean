@@ -644,6 +644,9 @@ def externalSendsFromStmt
           0
           elseBody
 
+  | _, _, .localDecl _ _ _ =>
+      []
+
 /--
 The external sends of one body, from a given starting index, at a given level.
 
@@ -976,6 +979,9 @@ def selfSendsFromStmt
             [index, 1])
           0
           elseBody
+
+  | _, _, .localDecl _ _ _ =>
+      []
 
 /--
 The self-sends of one body, from a given starting index, at a given level.
@@ -3662,6 +3668,43 @@ theorem externalSendsFromIndex_ifThenElse
             levelPath
             (index + 1)
             remaining := by
+  simp [
+    externalSendsFromIndex,
+    externalSendsFromStmt
+  ]
+
+/--
+A local declaration contributes no send and still advances the index.
+
+Stage I's arm, completing the family. The advance is the load-bearing half: a declaration
+occupies a statement position, so every send after it in the same body sits at a higher
+index, exactly as one after an assignment does. A walk that skipped the advance would
+hand two statements the same address, and nothing downstream would notice.
+-/
+theorem externalSendsFromIndex_localDecl
+    (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
+    (index : Nat)
+    (name : VarName)
+    (declaredType : DTR.GeneralType)
+    (value : DTR.GeneralExpr)
+    (remaining : DTR.GeneralBody) :
+    externalSendsFromIndex
+        bodyKey
+        levelPath
+        index
+        (
+          .localDecl
+              name
+              declaredType
+              value ::
+            remaining
+        ) =
+      externalSendsFromIndex
+        bodyKey
+        levelPath
+        (index + 1)
+        remaining := by
   simp [
     externalSendsFromIndex,
     externalSendsFromStmt

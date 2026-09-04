@@ -246,6 +246,16 @@ sizeOf elseBody`. Writing the list traversal out as a mutual companion makes the
 syntactically visible and keeps the definition **structurally** recursive, which matters beyond
 elaboration: well-founded recursion here would stop `decide` from evaluating `wellFormed` in the
 regression pins.
+
+**Stage I's `localDecl` arm checks the initialiser and nothing else, and the nothing is a
+ruling.** The name is unconstrained because the target side owns no uniqueness machinery, and
+scope — which names are live where — is the source elaborator's concern by the stage I
+decisions, not this predicate's. The declared type is unconstrained because the target's own
+two-constructor `LF.GeneralType` has no ill-formed inhabitants. The initialiser *is* checked,
+against the same parameter scope every other expression is. That the arm does not thread the
+declared name into `parameters` is deliberate and temporary: a later layer widens this walk so
+that an assignment to a live local passes, and that widening is where the name starts to
+matter. Until then, an `.assign` to a local name is refused here exactly as before.
 -/
 def stmtWellFormed
     (reactor : LF.GeneralReactor)
@@ -298,6 +308,11 @@ def stmtWellFormed
           reactor
           parameters
           elseBody
+
+  | .localDecl _ _ value =>
+      reactor.exprWellFormed
+        parameters
+        value
 
 /--
 Every statement of a body resolves.

@@ -255,12 +255,31 @@ that stores an identifier on a statement was accepted. An `if` without an `else`
 is represented with an empty second branch rather than an option, so a branch is
 always a body and every traversal has one fewer case to consider.
 
-**No semantics accompany this constructor yet.** The frontend still refuses
-branching (`Frontend.GeneralDiagnostic`'s `branchingNotSupported`), so no
-well-formed source document can contain one, and the accepted fragment is
-unchanged. Layer 1 of the stage H sequence adds the constructor and enumerates
-its consequences; the source step relation, the target statement, the runtime
-frame stack and the path-based send-site threading are later layers.
+**No semantics accompanied this constructor when stage H added it, and the period
+without them is over.** From stage H until stage I0 the frontend refused
+branching, so no well-formed source document could contain a conditional and the
+accepted fragment was unchanged; stage I0 lifted that, and the constructor now
+has source step rules, target statements, a runtime frame stack and path-based
+send-site threading, all landed with stage H and accepted with stage I0. The
+refusal period is recorded because its shape is reused one paragraph down.
+
+`localDecl` is in that refusal period, partway through it. It carries a name, a declared type
+and a **required** initialiser expression: the frontend applies the declared type's
+`initialValue` when the source omits one, exactly as it already applies the zero default for
+an absent `after`, so by the time a statement exists the initialiser is always present. The
+local-read design decision is one of stage I's approved rulings, to be recorded in a decision
+record by the stage's documentation layer: a local is read through the existing
+`.parameterVar` constructor, which is the accurate model of the emitted target rather than an
+overload, because `renderGeneralParameterRead` already emits a block-scoped C++ binding under
+the source name. **No guard accepts the constructor yet, and the translator compiles it.**
+Stage I's S-I3 layer gave `compileGeneralStmt` its arm, so a local declaration now survives
+translation into `LF.GeneralStmt.localDecl`; what still refuses it are the two
+well-formedness clauses (`statementResolves`, `statementTargetDeclared`) and the frontend,
+which still raises `localDeclarationNotSupported`. So no well-formed source document contains
+one — the accepted fragment is unchanged — but a hand-built model that does contain one now
+compiles rather than erroring, which is the ordering stage H and I0 proved out and the reason
+`exists_compileGeneralBody` stayed true: the guards admit the construct only after the
+translator compiles it.
 -/
 inductive GeneralStmt where
   | assign :
@@ -283,6 +302,12 @@ inductive GeneralStmt where
       DTR.GeneralExpr →
       List GeneralStmt →
       List GeneralStmt →
+      GeneralStmt
+
+  | localDecl :
+      VarName →
+      DTR.GeneralType →
+      DTR.GeneralExpr →
       GeneralStmt
 
 deriving Repr, BEq, Inhabited
@@ -352,6 +377,7 @@ def decEqGeneralStmt :
   | .assign _ _, .trace _ => .isFalse (by simp)
   | .assign _ _, .send _ _ _ _ => .isFalse (by simp)
   | .assign _ _, .ifThenElse _ _ _ => .isFalse (by simp)
+  | .assign _ _, .localDecl _ _ _ => .isFalse (by simp)
 
   | .trace firstTag, .trace secondTag =>
       if hTag : firstTag = secondTag then
@@ -362,6 +388,7 @@ def decEqGeneralStmt :
   | .trace _, .assign _ _ => .isFalse (by simp)
   | .trace _, .send _ _ _ _ => .isFalse (by simp)
   | .trace _, .ifThenElse _ _ _ => .isFalse (by simp)
+  | .trace _, .localDecl _ _ _ => .isFalse (by simp)
 
   | .send firstTarget firstMessage firstArguments firstDelay,
     .send secondTarget secondMessage secondArguments secondDelay =>
@@ -388,6 +415,7 @@ def decEqGeneralStmt :
   | .send _ _ _ _, .assign _ _ => .isFalse (by simp)
   | .send _ _ _ _, .trace _ => .isFalse (by simp)
   | .send _ _ _ _, .ifThenElse _ _ _ => .isFalse (by simp)
+  | .send _ _ _ _, .localDecl _ _ _ => .isFalse (by simp)
 
   | .ifThenElse firstCondition firstThen firstElse,
     .ifThenElse secondCondition secondThen secondElse =>
@@ -409,6 +437,30 @@ def decEqGeneralStmt :
   | .ifThenElse _ _ _, .assign _ _ => .isFalse (by simp)
   | .ifThenElse _ _ _, .trace _ => .isFalse (by simp)
   | .ifThenElse _ _ _, .send _ _ _ _ => .isFalse (by simp)
+  | .ifThenElse _ _ _, .localDecl _ _ _ => .isFalse (by simp)
+
+  | .localDecl firstName firstType firstValue,
+    .localDecl secondName secondType secondValue =>
+      if hName : firstName = secondName then
+        if hType : firstType = secondType then
+          if hValue : firstValue = secondValue then
+            .isTrue
+              (by
+                subst hName
+                subst hType
+                subst hValue
+                rfl)
+          else
+            .isFalse (by simp [hValue])
+        else
+          .isFalse (by simp [hType])
+      else
+        .isFalse (by simp [hName])
+
+  | .localDecl _ _ _, .assign _ _ => .isFalse (by simp)
+  | .localDecl _ _ _, .trace _ => .isFalse (by simp)
+  | .localDecl _ _ _, .send _ _ _ _ => .isFalse (by simp)
+  | .localDecl _ _ _, .ifThenElse _ _ _ => .isFalse (by simp)
 
 /--
 Decide equality of two statement bodies.

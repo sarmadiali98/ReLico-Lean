@@ -479,6 +479,36 @@ theorem selfSendsFromIndex_ifThenElse
     selfSendsFromStmt
   ]
 
+@[simp]
+theorem selfSendsFromIndex_localDecl
+    (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
+    (index : Nat)
+    (name : VarName)
+    (declaredType : DTR.GeneralType)
+    (value : DTR.GeneralExpr)
+    (remaining : DTR.GeneralBody) :
+    selfSendsFromIndex
+        bodyKey
+        levelPath
+        index
+        (
+          .localDecl
+            name
+            declaredType
+            value ::
+          remaining
+        ) =
+      selfSendsFromIndex
+        bodyKey
+        levelPath
+        (index + 1)
+        remaining := by
+  simp [
+    selfSendsFromIndex,
+    selfSendsFromStmt
+  ]
+
 /-!
 ## Site membership, in the introduction direction
 
@@ -2204,14 +2234,22 @@ private theorem compileGeneralStmt_schedule_inversion
                 hElse
               ] at hStatement
 
+  | localDecl _ _ _ =>
+      -- A compiled local declaration is `.ok localDecl`, never `.ok schedule`, so this
+      -- arm is discharged from `hStatement` alone. Stage I's compile arm consults no
+      -- site and no action, so the reduction needs nothing else named.
+      simp [
+        compileGeneralStmt
+      ] at hStatement
+
 /--
 A self-send site of a body's tail is a self-send site of the body.
 
 The site-traversal counterpart of `List.mem_cons_of_mem`, and what lets the recursion below
-return a witness in the *whole* body's site list after obtaining one in the tail's. Five arms
-rather than a wildcard, matching `selfSendsFromIndex`'s own refusal to use one: the three
+return a witness in the *whole* body's site list after obtaining one in the tail's. Every arm
+spelled out rather than a wildcard, matching `selfSendsFromIndex`'s own refusal to use one: the
 non-self-send arms leave the list untouched, the self-send arm prepends, the conditional arm
-appends both branches ahead of the tail, and a sixth statement constructor should break this
+appends both branches ahead of the tail, and a further statement constructor should break this
 proof loudly.
 -/
 theorem mem_selfSendsFromIndex_cons_of_mem
@@ -2281,6 +2319,13 @@ theorem mem_selfSendsFromIndex_cons_of_mem
         List.mem_append.mpr
           (Or.inr
             hMember)
+
+  | localDecl name declaredType value =>
+      rw [
+        selfSendsFromIndex_localDecl
+      ]
+
+      exact hMember
 
 /--
 **A.** Every action a compiled body schedules was named by a self-send site of that body, at or
@@ -2748,6 +2793,9 @@ def GeneralStmtOrigin
           routes
           instanceName
           elseBody
+
+  | .localDecl _ _ _ =>
+      True
 
 /--
 Every statement of a body carries its origin obligation.
@@ -3307,6 +3355,28 @@ theorem exists_messageServer_of_mem_selfSendsFromIndex
                 hTailResolves
                 selfSend
                 hTail
+
+      | localDecl name declaredType initialiser =>
+
+          -- Stage I's refusal arm makes this case unreachable for a resolving body: the
+          -- hypothesis asserts the head resolves, and `statementResolves` answers `false`
+          -- for a local declaration. Closed from `hResolves` alone, the way a refusal-era
+          -- case always is.
+          have hHeadResolves :
+              model.statementResolves
+                  reactiveClass
+                  (.localDecl
+                    name
+                    declaredType
+                    initialiser) =
+                true :=
+            hResolves
+              _
+              List.mem_cons_self
+
+          simp [
+            DTR.GeneralModel.statementResolves
+          ] at hHeadResolves
 
 /--
 Every statement of every body of every declared class resolves, in a well-formed model.
@@ -4214,6 +4284,64 @@ private theorem generalBodyOrigin_of_compileGeneralBody
                  hHeadResolves.right)
                hElseSites
                hCompiledElse⟩
+
+      | localDecl name declaredType initialiser =>
+
+          -- The trace arm's shape with the localDecl equations. The head contributes no
+          -- self-send, so the tail's site hypothesis is the head's restricted by
+          -- `selfSendsFromIndex_localDecl`; the head compiles to a local declaration by
+          -- `compileGeneralStmt_localDecl`, so `injection` names the compiled form; and the
+          -- statement-level obligation for a declaration is `True`, which
+          -- `GeneralStmtOrigin`'s own `.localDecl` arm says. The contradiction shape that
+          -- stood here during the refusal period is gone with the refusal.
+          have hTailSites :
+              ∀ selfSend ∈
+                  Translation.selfSendsFromIndex
+                    context.bodyKey
+                    context.levelPath
+                    (index + 1)
+                    remaining,
+                selfSend ∈
+                  Translation.selfSendsOfClass
+                    reactiveClass := by
+            intro selfSend hMember
+
+            refine
+              hSites
+                selfSend
+                ?_
+
+            rw [
+              Translation.selfSendsFromIndex_localDecl
+            ]
+
+            exact hMember
+
+          rw [
+            Translation.compileGeneralStmt_localDecl
+          ] at hStatement
+
+          injection hStatement with hHead
+
+          subst hHead
+
+          exact
+            ⟨trivial,
+             generalBodyOrigin_of_compileGeneralBody
+               hCompiled
+               hRoutes
+               hRouteOrigin
+               hClass
+               hClassCompiled
+               hReactor
+               remaining
+               context
+               (index + 1)
+               compiledRemaining
+               hSelfSends
+               hTailResolves
+               hTailSites
+               hRemaining⟩
 
 /--
 Every statement of a compiled body has a valid statement origin.

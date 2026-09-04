@@ -13,7 +13,15 @@ namespace Translation
 /-!
 # Stage E: translating the general DTR family into the general LF family
 
-Everything a general DTR model contains, with no statement form left refused. A `.send` to
+Everything a general DTR model contains, with no statement form left refused — a sentence that has
+been **earned three times**, and the earning is the point of recording it. The first crack was
+stage H's `.ifThenElse`, refused by `compileGeneralStmt` from its layer 1 until the branch machinery
+existed; re-earned when that refusal was lifted. The second was stage I's `.localDecl`, refused by
+S-I1 for the same reason and with the same exit, and re-earned by S-I3, which is the state this
+module is in: the arm compiles, the equation lemma `compileGeneralStmt_localDecl` names it, and the
+refusal text is gone. Each period of refusal was deliberate and ordered, because admitting a
+construct in the guards before the translator compiles it is the shape that once made
+`exists_compileGeneralBody` false. A `.send` to
 `self` becomes a `schedule` on a logical action, which is §III-E's own rule for a self-send; a
 `.send` to a *known rebec* becomes a `setPort` on the output port that belongs to that
 individual **send site**, and the arrow that carries it is a row in the routing table
@@ -833,6 +841,15 @@ def compileGeneralStmt
                     condition)
                   compiledThen
                   compiledElse)
+
+  | .localDecl name declaredType value =>
+      .ok
+        (.localDecl
+          name
+          (compileGeneralType
+            declaredType)
+          (compileGeneralExpr
+            value))
 
 /--
 Translate a statement sequence, in order, stopping at the first refusal.
@@ -7480,6 +7497,50 @@ theorem compileGeneralStmt_assign
   ]
 
 /--
+Compiling a local declaration cannot fail.
+
+The third always-succeeding statement form, after `assign` and `trace`: a declaration
+consults no port, no action and no site, because it performs no effect — which is also
+why both send-site walks in `Relico/Translation/GeneralRouting.lean` contribute nothing
+for one, and why `compileGeneralStmt` never had to thread anything through this arm that
+its siblings do not already carry.
+
+The name is unchanged and the type goes through `compileGeneralType`, the same map a
+state variable's declaration and a port payload's fields go through, so a local's type is
+spelled by the one place that spells every other declared type: `renderGeneralType` in the
+printer. The initialiser goes through `compileGeneralExpr` like every other expression,
+and is always present because the DTR constructor requires one — an absent source
+initialiser is the elaborator's to default, the same way an absent `after` is.
+-/
+theorem compileGeneralStmt_localDecl
+    (env : GeneralOutputPortEnv)
+    (context : GeneralBodyContext)
+    (index : Nat)
+    (name : VarName)
+    (declaredType : DTR.GeneralType)
+    (value : DTR.GeneralExpr) :
+    compileGeneralStmt
+        env
+        context
+        index
+        (
+          .localDecl
+            name
+            declaredType
+            value
+        ) =
+      .ok
+        (.localDecl
+          name
+          (compileGeneralType
+            declaredType)
+          (compileGeneralExpr
+            value)) := by
+  simp [
+    compileGeneralStmt
+  ]
+
+/--
 Compiling a self-send cannot fail: it needs no port, only the message's own action.
 -/
 theorem compileGeneralStmt_send_selfTarget
@@ -7597,6 +7658,16 @@ reverting the constructor. What repaired it is the translation compiling conditi
 the ordering `docs/decisions/0046-send-site-identity-under-nested-control-flow.md` §6 sets out.
 So this theorem is not merely restored: it now says that a *branch's* sends being resolvable is
 enough for a branch to compile, which is a stronger sentence than the one stage E proved.
+
+**Stage I falsified this theorem for `.localDecl` for exactly one layer's duration, and S-I3
+repaired it.** S-I1 added the source constructor with a refusal here, which put the theorem back
+in the falsified state stage H's conditional once made famous — the `.localDecl` case's hypothesis
+held vacuously while its conclusion asserted a compilation that returned `.error` — and the case
+was left as a named obligation rather than a weakened statement, exactly as the stage H S2
+precedent directs. S-I3 replaced the refusal with the compile arm and the case closed as the
+`assign` case does. The theorem is once again true unconditionally for every statement form the
+source type carries, and the sentence above about *why* the ordering matters is the record of how
+that was kept honest.
 -/
 theorem exists_compileGeneralBody
     (env : GeneralOutputPortEnv)
@@ -8016,6 +8087,63 @@ theorem exists_compileGeneralBody
                         List.mem_append.mpr
                           (Or.inr
                             hMember)))
+
+          exact
+            ⟨_,
+             compileGeneralBody_cons_ok
+               hStatement
+               hRemaining⟩
+
+      | localDecl name declaredType initialiser =>
+
+          -- The repaired shape the S-I1 comment below promised. `hSends` reduces to the
+          -- tail's hypothesis because this head contributes no external send, and the
+          -- head now compiles, so the arm is the `assign` arm with a different equation
+          -- lemma — no contradiction, no vacuity, nothing unproved.
+          have hStatement :
+              compileGeneralStmt
+                  env
+                  context
+                  index
+                  (
+                    .localDecl
+                      name
+                      declaredType
+                      initialiser
+                  ) =
+                .ok
+                  (.localDecl
+                    name
+                    (compileGeneralType
+                      declaredType)
+                    (compileGeneralExpr
+                      initialiser)) :=
+            compileGeneralStmt_localDecl
+              env
+              context
+              index
+              name
+              declaredType
+              initialiser
+
+          obtain ⟨compiledRemaining, hRemaining⟩ :=
+            exists_compileGeneralBody
+              env
+              context
+              remaining
+              (index + 1)
+              (by
+                intro send hMember
+
+                exact
+                  hSends
+                    send
+                    (by
+                      rw [
+                        externalSendsFromIndex_localDecl
+                      ]
+
+                      exact hMember))
 
           exact
             ⟨_,
@@ -8536,6 +8664,17 @@ private theorem compileGeneralStmt_setPort_inversion
                  rfl,
                  hStatement.left⟩
 
+  | localDecl _ _ _ =>
+      -- A compiled local declaration is `.ok localDecl`, never `.ok setPort`, so this
+      -- arm is discharged from `hStatement` alone: the two constructors differ, and
+      -- the head equation reduces without casing anything, since the compile arm
+      -- consults no site. The `cases` on the declared type that stood here during
+      -- stage I's refusal period existed only to make the refusal message reduce and
+      -- is dead now that the arm compiles.
+      simp [
+        compileGeneralStmt
+      ] at hStatement
+
   | ifThenElse condition thenBody elseBody =>
       -- A compiled conditional is `.ifThenElse`, never `.setPort`, so this arm is
       -- discharged from `hStatement` alone. The two `cases` are needed because
@@ -8859,6 +8998,16 @@ private theorem compileGeneralStmt_ifThenElse_inversion
                 compileGeneralStmt,
                 hEntry
               ] at hStatement
+
+  | localDecl _ _ _ =>
+      -- A compiled local declaration is `.ok localDecl`, never `.ok ifThenElse`, so
+      -- this arm is discharged from `hStatement` alone: the two constructors differ.
+      -- The `cases` on the declared type that stood here during stage I's refusal
+      -- period is dead now that the arm compiles, for the reason recorded on the
+      -- setPort inversion's own localDecl arm above.
+      simp [
+        compileGeneralStmt
+      ] at hStatement
 
   | ifThenElse sourceCondition thenBody elseBody =>
 
@@ -9256,6 +9405,38 @@ private theorem compileGeneralBody_setPortNames_provenance
                  by omega,
                  hEntry,
                  hPortName⟩
+
+      | localDecl name declaredType value =>
+
+          -- A declaration contributes no port, so the body's port list is the tail's
+          -- and the witness is the tail's, exactly as for `assign`. The source-cased
+          -- contradiction block that stood here during stage I's refusal period — the
+          -- one that cost the most to write, because casing the compiled type proves
+          -- nothing about the source arm — collapsed into this when the compile arm
+          -- arrived, and the nodup theorem's own localDecl arm below kept the same
+          -- shape throughout, which is why it needed no change here.
+          simp only [
+            LF.setPortNamesOfBody_localDecl
+          ] at hPort
+
+          obtain ⟨site, rest, entry, hSite, hEntry, hPortName⟩ :=
+            compileGeneralBody_setPortNames_provenance
+              env
+              context
+              remaining
+              (index + 1)
+              compiledRemaining
+              hRemaining
+              port
+              hPort
+
+          exact
+            ⟨site,
+             rest,
+             entry,
+             by omega,
+             hEntry,
+             hPortName⟩
 
 /--
 §10.2's theorem, in the strongest form that is true: **if** the routing table gives distinct
@@ -9840,6 +10021,25 @@ theorem compileGeneralBody_setPortNames_nodup
                 injection hCons with hSiteEqual _
 
                 omega
+
+      | localDecl _ _ _ =>
+          -- A declaration contributes no port, so the body's port list is the tail's and
+          -- its `Nodup` is the recursive call. Written in the post-S-I3 shape rather than
+          -- discharged from `hStatement`'s contradiction, so the arm survives the layer
+          -- that starts compiling local declarations unchanged.
+          simp only [
+            LF.setPortNamesOfBody_localDecl
+          ]
+
+          exact
+            compileGeneralBody_setPortNames_nodup
+              env
+              context
+              hDistinctSites
+              remaining
+              (index + 1)
+              compiledRemaining
+              hRemaining
 
 /-!
 ## §8 revisited: where each refusal lives

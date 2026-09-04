@@ -115,6 +115,9 @@ def statementTargetDeclared
       reactiveClass.bodyTargetsDeclared thenBody &&
         reactiveClass.bodyTargetsDeclared elseBody
 
+  | .localDecl _ _ _ =>
+      false
+
 /--
 Every statement of one body, at any nesting depth, has a declared send target.
 
@@ -345,6 +348,9 @@ def statementResolves
   | .ifThenElse _ thenBody elseBody =>
       model.bodyResolves reactiveClass thenBody &&
         model.bodyResolves reactiveClass elseBody
+
+  | .localDecl _ _ _ =>
+      false
 
 /--
 Every send of one body, at any nesting depth, reaches a declared message server.

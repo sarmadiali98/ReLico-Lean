@@ -760,7 +760,7 @@ state, a correspondence, or an environment. If the position-carrying relation is
 remain correct statements about the translation.
 
 The walk stamps `site := ⟨bodyKey, index⟩` on each external send it emits and advances `index` by one
-per statement whatever the statement is (`Relico/Translation/GeneralRouting.lean`, the five arms at
+per statement whatever the statement is (`Relico/Translation/GeneralRouting.lean`, the arms at
 `externalSendsFromIndex`). So the index is strictly increasing along the emitted list, which is what
 makes a site identify a send.
 -/
@@ -770,8 +770,8 @@ Every send a walk emits sits at this level's own address, at or after the index 
 from.
 
 The monotonicity fact, and the whole content of injectivity below: a walk from `index` cannot emit
-anything addressed earlier than `index`. Six arms rather than a wildcard, matching the definition's
-own refusal to use one — the three non-external arms advance the index without emitting, the
+anything addressed earlier than `index`. Every arm spelled out rather than a wildcard, matching the
+definition's own refusal to use one — each non-external arm advances the index without emitting, the
 external arm emits at exactly `index` before advancing, and the conditional arm walks both branches
 one level down before resuming.
 
@@ -984,13 +984,33 @@ private theorem site_index_ge_of_mem_externalSendsFromIndex
                  by omega,
                  hPath⟩
 
+      | localDecl name declaredType value =>
+          rw [
+            externalSendsFromIndex_localDecl
+          ] at hMember
+
+          obtain ⟨position, rest, hGe, hPath⟩ :=
+            site_index_ge_of_mem_externalSendsFromIndex
+              bodyKey
+              levelPath
+              remaining
+              (index + 1)
+              send
+              hMember
+
+          exact
+            ⟨position,
+             rest,
+             by omega,
+             hPath⟩
+
 /--
 Every send a walk emits is tagged with the walk's own body key.
 
 The companion of monotonicity, and what lets a caller holding a site's *body* component decide which
 half of `externalSendsOfClass` a send came from — the constructor's walk tags `.constructor`, a
 message server's walk tags `.messageServer` of its own name, so the two halves are separated by this
-projection alone. Same six arms, same reason for spelling them out.
+projection alone. The same arms spelled out, for the same reason.
 
 The conditional arm is the reason this is quantified over `levelPath`: a branch is walked at a deeper
 level and carries the *same* body key, which is precisely the fact that keeps this projection a
@@ -1139,6 +1159,20 @@ theorem externalSendsFromIndex_site_body
                   (index + 1)
                   send
                   hThere
+
+      | localDecl name declaredType value =>
+          rw [
+            externalSendsFromIndex_localDecl
+          ] at hMember
+
+          exact
+            externalSendsFromIndex_site_body
+              bodyKey
+              levelPath
+              remaining
+              (index + 1)
+              send
+              hMember
 
 /--
 A class's external send tagged with the constructor's body key came from the constructor's body.
@@ -1690,6 +1724,23 @@ theorem externalSendsFromIndex_site_injective
                       hSecondTail
                       hSite
 
+      | localDecl name declaredType value =>
+          rw [
+            externalSendsFromIndex_localDecl
+          ] at hFirst hSecond
+
+          exact
+            externalSendsFromIndex_site_injective
+              bodyKey
+              levelPath
+              remaining
+              (index + 1)
+              first
+              second
+              hFirst
+              hSecond
+              hSite
+
 /--
 **The chain payload.** The send a walk emits at a position carries the known rebec of the statement
 at that position.
@@ -2038,6 +2089,29 @@ theorem externalSendsFromIndex_knownRebec_of_drop
                       hThere
                       (by
                         rw [hSite, hArith])
+
+          | localDecl name declaredType value =>
+              rw [
+                externalSendsFromIndex_localDecl
+              ] at hMember
+
+              exact
+                externalSendsFromIndex_knownRebec_of_drop
+                  bodyKey
+                  levelPath
+                  remaining
+                  (index + 1)
+                  k'
+                  rebec
+                  message
+                  arguments
+                  delay
+                  rest
+                  send
+                  hDrop
+                  hMember
+                  (by
+                    rw [hSite, hArith])
 
 /--
 A send of a statement's own walk is a send of the body that statement sits in.
@@ -2801,6 +2875,29 @@ theorem externalSendsFromIndex_delay_of_drop
                       hThere
                       (by
                         rw [hSite, hArith])
+
+          | localDecl name declaredType value =>
+              rw [
+                externalSendsFromIndex_localDecl
+              ] at hMember
+
+              exact
+                externalSendsFromIndex_delay_of_drop
+                  bodyKey
+                  levelPath
+                  remaining
+                  (index + 1)
+                  k'
+                  rebec
+                  message
+                  arguments
+                  delay
+                  rest
+                  send
+                  hDrop
+                  hMember
+                  (by
+                    rw [hSite, hArith])
 
 /-!
 ## The entry-to-send inversion

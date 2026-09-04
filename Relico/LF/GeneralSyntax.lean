@@ -346,6 +346,18 @@ would have been a construct nothing can produce, and it is produced now because
 `DTR.GeneralStmt.ifThenElse` exists and `Translation.compileGeneralStmt` compiles into it.
 `for` stays absent; it unlocks no benchmark and is out of scope.
 
+`localDecl` exists as of stage I and, for now, is a construct nothing can produce — which is
+why it is added **before** the translation that will produce it, not after. Stage H's ordering
+lesson was that a constructor whose producer does not exist yet is unambiguous, while a guard
+admitting a construct the translator refuses is the shape that made
+`exists_compileGeneralBody` false once already; so the LF side lands first, the DTR
+constructor is already in place refusing at every guard, and S-I3 is the layer that connects
+them. The declaration carries `LF.GeneralType` rather than the DTR side's type so that
+`renderGeneralType` renders it directly. It is the first statement constructor on either side
+whose meaning includes a **scoping** effect, and the LF side deliberately records none of it:
+scope is the source elaborator's concern, by the stage I rulings, and the compiled artefact
+expresses a local exactly the way C++ does — a block-scoped declaration in a reaction body.
+
 That earlier note also recorded what flatness bought: *"with flat bodies one statement
 performs at most one `set()` per firing, so no reaction can set one port twice at one tag."*
 That is no longer automatic, and the replacement is **static and conservative**: a conditional
@@ -386,6 +398,12 @@ inductive GeneralStmt where
       LF.GeneralExpr →
       List GeneralStmt →
       List GeneralStmt →
+      GeneralStmt
+
+  | localDecl :
+      VarName →
+      LF.GeneralType →
+      LF.GeneralExpr →
       GeneralStmt
 
 deriving Repr, BEq, Inhabited
@@ -438,6 +456,7 @@ def decEqGeneralStmt :
   | .assign _ _, .schedule _ _ _ => .isFalse (by simp)
   | .assign _ _, .setPort _ _ => .isFalse (by simp)
   | .assign _ _, .ifThenElse _ _ _ => .isFalse (by simp)
+  | .assign _ _, .localDecl _ _ _ => .isFalse (by simp)
 
   | .trace firstTag, .trace secondTag =>
       if hTag : firstTag = secondTag then
@@ -449,6 +468,7 @@ def decEqGeneralStmt :
   | .trace _, .schedule _ _ _ => .isFalse (by simp)
   | .trace _, .setPort _ _ => .isFalse (by simp)
   | .trace _, .ifThenElse _ _ _ => .isFalse (by simp)
+  | .trace _, .localDecl _ _ _ => .isFalse (by simp)
 
   | .schedule firstAction firstArguments firstDelay,
     .schedule secondAction secondArguments secondDelay =>
@@ -472,6 +492,7 @@ def decEqGeneralStmt :
   | .schedule _ _ _, .trace _ => .isFalse (by simp)
   | .schedule _ _ _, .setPort _ _ => .isFalse (by simp)
   | .schedule _ _ _, .ifThenElse _ _ _ => .isFalse (by simp)
+  | .schedule _ _ _, .localDecl _ _ _ => .isFalse (by simp)
 
   | .setPort firstPort firstArguments, .setPort secondPort secondArguments =>
       if hPort : firstPort = secondPort then
@@ -486,6 +507,7 @@ def decEqGeneralStmt :
   | .setPort _ _, .trace _ => .isFalse (by simp)
   | .setPort _ _, .schedule _ _ _ => .isFalse (by simp)
   | .setPort _ _, .ifThenElse _ _ _ => .isFalse (by simp)
+  | .setPort _ _, .localDecl _ _ _ => .isFalse (by simp)
 
   | .ifThenElse firstCondition firstThen firstElse,
     .ifThenElse secondCondition secondThen secondElse =>
@@ -508,6 +530,31 @@ def decEqGeneralStmt :
   | .ifThenElse _ _ _, .trace _ => .isFalse (by simp)
   | .ifThenElse _ _ _, .schedule _ _ _ => .isFalse (by simp)
   | .ifThenElse _ _ _, .setPort _ _ => .isFalse (by simp)
+  | .ifThenElse _ _ _, .localDecl _ _ _ => .isFalse (by simp)
+
+  | .localDecl firstName firstType firstValue,
+    .localDecl secondName secondType secondValue =>
+      if hName : firstName = secondName then
+        if hType : firstType = secondType then
+          if hValue : firstValue = secondValue then
+            .isTrue
+              (by
+                subst hName
+                subst hType
+                subst hValue
+                rfl)
+          else
+            .isFalse (by simp [hValue])
+        else
+          .isFalse (by simp [hType])
+      else
+        .isFalse (by simp [hName])
+
+  | .localDecl _ _ _, .assign _ _ => .isFalse (by simp)
+  | .localDecl _ _ _, .trace _ => .isFalse (by simp)
+  | .localDecl _ _ _, .schedule _ _ _ => .isFalse (by simp)
+  | .localDecl _ _ _, .setPort _ _ => .isFalse (by simp)
+  | .localDecl _ _ _, .ifThenElse _ _ _ => .isFalse (by simp)
 
 /--
 Decide equality of two target bodies.
@@ -1078,14 +1125,14 @@ saying *"no reaction of an emitted reactor sets one output port twice"*; that se
 claim about `Nodup` of exactly this list, and it cannot be stated without a list that would
 show the repeat if there were one.
 
-Explicit recursion over all four `LF.GeneralStmt` constructors rather than
+Explicit recursion over every `LF.GeneralStmt` constructor rather than
 `List.filterMap` with a pattern-matching function, for the two reasons
 `Translation.compileGeneralBody` gives for its own shape: every equation below then holds by
 `rfl`, so the induction in `Translation.compileGeneralBody_setPortNames_nodup` rewrites with
 `rfl` lemmas instead of unfolding a combinator; and this development depends on no library
 function whose name has churned across Lean releases, which `List.filterMap`'s neighbours
-`flatMap` and `flatten` both have. Writing the `.assign`, `.trace` and `.schedule` arms out instead of
-using a catch-all is deliberate too: a fourth statement constructor should break this
+`flatMap` and `flatten` both have. Writing the no-port arms out instead of
+using a catch-all is deliberate too: another statement constructor should break this
 function loudly rather than be silently classified as setting nothing.
 
 **No clause of `LF.GeneralWellFormed` looks at this list, and that is the finding rather than
@@ -1134,6 +1181,9 @@ def setPortNamesOfStmt :
   | .ifThenElse _ thenBody elseBody =>
       setPortNamesOfBody thenBody ++
         setPortNamesOfBody elseBody
+
+  | .localDecl _ _ _ =>
+      []
 
 /--
 The output ports a body sets, in order, counting a repeat twice.
@@ -1270,6 +1320,27 @@ theorem setPortNamesOfBody_ifThenElse
     setPortNamesOfBody,
     setPortNamesOfStmt,
     List.append_assoc
+  ]
+
+@[simp]
+theorem setPortNamesOfBody_localDecl
+    (name : VarName)
+    (declaredType : LF.GeneralType)
+    (value : LF.GeneralExpr)
+    (remaining : LF.GeneralBody) :
+    setPortNamesOfBody
+        (
+          .localDecl
+              name
+              declaredType
+              value ::
+            remaining
+        ) =
+      setPortNamesOfBody
+        remaining := by
+  simp [
+    setPortNamesOfBody,
+    setPortNamesOfStmt
   ]
 
 end LF
