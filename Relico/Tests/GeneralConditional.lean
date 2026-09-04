@@ -13,14 +13,15 @@ is proved across ten layers, and every one of those proofs is quantified over *a
 is exactly why they cannot see an addressing mistake: swap the two branch selectors, or drop the
 `levelPath` prefix when a branch is entered, and every theorem in the development still holds — they
 would hold of a translator that addresses branch sends differently from the way `0046` says it does.
-The gates could not see it either when this module was written, and that is now only half true.
-`GENERAL_LEAN_GATE_OK` **does** see the feature as of stage I0: `frontend/fixtures/general/branching.parser.json`
-carries conditionals nested two deep with a send in each branch, and the frontend runner inside that gate
-decodes it as `PASS_ACCEPT_BRANCHING`. `GENERAL_LF_TARGET_OK` is still silent, and precisely: **real `lfc`
-has never compiled a generated conditional.** That gate compiles programs built by the bridge mains, none
-of which contains one, so the emitted `if (…) { … } else {}` text is pinned only by test 8 below and has
-never been consumed by the target compiler. Do not read a green LF target gate as evidence that `lfc`
-accepts what this printer emits for a branch.
+The gates could not see it either when this module was written, and both halves of that have since been
+repaired. `GENERAL_LEAN_GATE_OK` sees the feature as of stage I0:
+`frontend/fixtures/general/branching.parser.json` carries conditionals nested two deep with a send in
+each branch, and the frontend runner inside that gate decodes it as `PASS_ACCEPT_BRANCHING`.
+`GENERAL_LF_TARGET_OK` sees it as of the witness milestone that followed: `emit-conditional` puts a
+generated `if (on) { on = false; } else { on = true; }` through real `lfc 0.11.0`, which accepted it and
+ran the binary cleanly, moving that gate's accepted-program count from five to six. So test 8 below is no
+longer the only thing standing behind the printer's branch output, though it is still the only thing
+pinning its exact bytes.
 
 This module is the instrument that sees it. One model, one conditional, one external send inside its
 then-branch, pinned three ways:

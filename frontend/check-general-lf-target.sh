@@ -119,14 +119,16 @@ PRINTER_TEST_MAIN="$REPO/frontend/lean-bridge/GeneralLfPrinterTestMain.lean"
 # anonymous -- `main reactor {`, with no name of its own. So each name below also
 # names the binary that gets run.
 #
-# Four names, and each program gets its own work directory. Sharing one would let a
+# Six names, and each program gets its own work directory. Sharing one would let a
 # binary left by an earlier run satisfy a later one even if its own compile step had
-# quietly produced nothing.
+# quietly produced nothing. (This comment said "four" while five names stood below it;
+# stage I0 added the sixth and corrected the count.)
 BASE_PROGRAM_NAME="GeneralPrinterProgram"
 WIDENED_PROGRAM_NAME="GeneralTranslatedProgram"
 ROUTED_PROGRAM_NAME="GeneralRoutedProgram"
 REPEATED_PROGRAM_NAME="GeneralRepeatedSelfSendProgram"
 PRIORITY_WITNESS_PROGRAM_NAME="GeneralPriorityWitnessProgram"
+CONDITIONAL_PROGRAM_NAME="GeneralConditionalWitnessProgram"
 
 WORK="${TMPDIR:-/tmp}/relico_general_lf_target"
 
@@ -282,6 +284,17 @@ check_program \
   emit-repeated \
   "$REPEATED_PROGRAM_NAME" \
   "the translated program from the repeated-self-send Rebeca model"
+
+# Fourth, by the same cost-of-reading rule and for the same shape: one reactor, one
+# instance, no ports and no connections. Added by stage I0, and the only program in this
+# gate whose emitted text contains a conditional. Every other one is branch-free, which is
+# why a green gate said nothing about `if (…) { … } else { … }` until this line existed:
+# `docs/STAGE_I_FINDINGS.md` F90 records the gap and the `grep -c 'if ('` measurement that
+# established it. An lfc complaint here can only be about the conditional.
+check_program \
+  emit-conditional \
+  "$CONDITIONAL_PROGRAM_NAME" \
+  "the translated program from the conditional-witness Rebeca model"
 
 # Last, because it is the most expensive failure to read: two reactors, three
 # instances and three connections, so an lfc complaint here has the most places to

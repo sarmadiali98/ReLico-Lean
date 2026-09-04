@@ -80,14 +80,23 @@ conditional model and asserted *in prose* that it was not well-formed; stage I0 
 with `example : conditionalModel.wellFormed = true := by rfl`. One line, and it is now the only thing
 in the development that would notice.
 
-**Two things stage I0 did not establish, recorded so a green pair of gates is not over-read.**
+**Two things stage I0's acceptance did not establish, recorded so a green pair of gates is not
+over-read. The first has since been closed by a follow-on witness; the second is still open.**
 
-1. **Real `lfc` has never compiled a generated conditional.** `frontend/check-general-lf-target.sh`
-   compiles the programs the bridge mains build, and none of them contains an `if`; measured on the
-   stage I0 run, five programs were accepted and not one carried a branch. So the printer's
-   `if (…) { … } else {}` output is pinned by `rfl` in `Relico/Tests/GeneralConditional.lean` and by
-   nothing else. `GENERAL_LEAN_GATE_OK` does now see the feature, through
-   `frontend/fixtures/general/branching.parser.json`; `GENERAL_LF_TARGET_OK` does not.
+1. **Real `lfc` had never compiled a generated conditional. Closed by the witness milestone that
+   followed, and the sequence is the point.** When stage I0's acceptance landed,
+   `frontend/check-general-lf-target.sh` compiled the five programs the bridge mains built and not one
+   of them contained an `if`: **measured**, `grep -c 'if ('` over the gate's whole log returned `0`. So a
+   green `GENERAL_LF_TARGET_OK` said nothing about the construct stage H had taught the printer to emit,
+   and that output was pinned by `rfl` in `Relico/Tests/GeneralConditional.lean` and by nothing else.
+   The follow-on milestone added a sixth witness, `emit-conditional`: one class, one instance, one state
+   variable, no ports and no connections, whose only distinguishing construct is a conditional with two
+   non-empty branches. **Measured against `lfc 0.11.0`:** `LFC_ACCEPTED` moved from 5 to 6, the gate's
+   log now matches `if (` once, and the emitted reaction body
+   `if (on) { on = false; } else { on = true; }` was reported `lfc accepted it` and then
+   `it ran and exited cleanly`. The lesson is not that the text turned out to be fine. It is that
+   **nothing in a ten-layer proof, a green library and two green gates could tell us whether it was**,
+   for as long as no witness carried the construct.
 2. **The new fixture's exporter-equivalence is unverified.** `branching.parser.json` was written by
    hand, in the canonical `sort_keys` form, and it is structurally conformant: **measured**, every key
    set it uses at every level already occurs among the ten pre-existing positives, and **measured**, all

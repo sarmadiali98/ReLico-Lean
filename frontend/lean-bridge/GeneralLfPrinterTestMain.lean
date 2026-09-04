@@ -6077,6 +6077,172 @@ def emitPriorityWitnessProgram :
 
       pure 1
 
+/-!
+### The stage I0 conditional witness: a generated `if` through real `lfc`
+
+Stage H taught the printer to emit a conditional and pinned the text by `rfl` in
+`Relico/Tests/GeneralConditional.lean`. What no gate did was hand that text to the target
+compiler: every program this file emitted before this one is branch-free, so a green
+`GENERAL_LF_TARGET_OK` said nothing about whether `lfc` accepts
+`if (…) { … } else { … }` inside a reaction body. `docs/STAGE_I_FINDINGS.md`'s F90 records
+the gap and the measurement that established it, `grep -c 'if ('` over the gate's own log
+returning zero. This model closes it.
+
+**Minimal on purpose, and the minimality is the argument.** One class, one instance, one
+state variable, no known rebecs, no ports and no connections. The only construct that
+distinguishes it from a program the gate already compiles is the conditional, so an `lfc`
+complaint here can only be about the conditional. Both branches are non-empty, because an
+empty `else` prints `{}` and would leave the interesting half of the emitted text
+unexercised.
+
+It terminates for the same reason the sibling models do: the constructor self-sends `flip`
+once, `flip` assigns to a state variable and sends nothing, so the event queue drains.
+-/
+
+private def toggleClassName :
+    ClassName :=
+  ⟨"Toggle"⟩
+
+private def toggleInstanceName :
+    ActorName :=
+  ⟨"toggle0"⟩
+
+private def flipMessageName :
+    MsgName :=
+  ⟨"flip"⟩
+
+private def onStateName :
+    VarName :=
+  ⟨"on"⟩
+
+private def toggleConstructor :
+    DTR.GeneralConstructor where
+
+  parameters :=
+    []
+
+  body :=
+    [
+      .assign
+        onStateName
+        (.boolLiteral false),
+      .send
+        .selfTarget
+        flipMessageName
+        []
+        { value := 1 }
+    ]
+
+private def flipMessageServer :
+    DTR.GeneralMessageServer where
+
+  name :=
+    flipMessageName
+
+  parameters :=
+    []
+
+  body :=
+    [
+      .ifThenElse
+        (.stateVar onStateName)
+        [
+          .assign
+            onStateName
+            (.boolLiteral false)
+        ]
+        [
+          .assign
+            onStateName
+            (.boolLiteral true)
+        ]
+    ]
+
+private def toggleClass :
+    DTR.GeneralReactiveClass where
+
+  name :=
+    toggleClassName
+
+  knownRebecs :=
+    []
+
+  stateVariables :=
+    [
+      {
+        name :=
+          onStateName
+
+        declaredType :=
+          .boolean
+      }
+    ]
+
+  constructor :=
+    toggleConstructor
+
+  messageServers :=
+    [flipMessageServer]
+
+private def toggleActor :
+    DTR.GeneralActorInstance where
+
+  name :=
+    toggleInstanceName
+
+  className :=
+    toggleClassName
+
+  bindings :=
+    []
+
+  arguments :=
+    []
+
+/--
+One class, one instance, one conditional, nothing else.
+-/
+private def conditionalWitnessModel :
+    DTR.GeneralModel where
+
+  classes :=
+    [toggleClass]
+
+  instances :=
+    [toggleActor]
+
+/--
+Translate the conditional witness and print it, in one `Except`.
+-/
+private def conditionalWitnessProgramText :
+    Except String String := do
+
+  let program ←
+    Translation.compileGeneralModel
+      conditionalWitnessModel
+
+  LF.CppPrinter.renderGeneralProgram
+    program
+
+/--
+Emit the conditional witness for `frontend/check-general-lf-target.sh`.
+-/
+def emitConditionalWitnessProgram :
+    IO UInt32 :=
+  match conditionalWitnessProgramText with
+
+  | .ok programText => do
+      IO.print programText
+
+      pure 0
+
+  | .error reason => do
+      IO.eprintln
+        ("the translation or the printer refused the conditional witness model: " ++
+          reason)
+
+      pure 1
+
 end GeneralLfPrinterTests
 end Relico
 
@@ -6109,8 +6275,11 @@ def main
   | ["emit-priority-witness"] =>
       Relico.GeneralLfPrinterTests.emitPriorityWitnessProgram
 
+  | ["emit-conditional"] =>
+      Relico.GeneralLfPrinterTests.emitConditionalWitnessProgram
+
   | _ => do
       IO.eprintln
-        "usage: GeneralLfPrinterTestMain [emit-program|emit-widened|emit-routed|emit-repeated|emit-priority-witness]"
+        "usage: GeneralLfPrinterTestMain [emit-program|emit-widened|emit-routed|emit-repeated|emit-priority-witness|emit-conditional]"
 
       pure 2
