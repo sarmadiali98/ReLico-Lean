@@ -304,6 +304,7 @@ theorem take_of_split
                   bag := earlier ++ later
                 }
               activeBody := server.body
+              frames := []
             }
       } :=
   GeneralStep.take

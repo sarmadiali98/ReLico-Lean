@@ -208,6 +208,11 @@ def exprWellFormed
         parameters
         operand
 
+/- `stmtWellFormed` and `bodyWellFormed` are mutually recursive because
+`LF.GeneralStmt.ifThenElse` carries two nested bodies. A `mutual` block does not accept a
+docstring, so each definition carries its own. -/
+mutual
+
 /--
 A statement resolves, and a scheduled action or a set port is given the arity it
 declares.
@@ -223,6 +228,24 @@ that helper lives beside the payload type instead of here. The two arms then dif
 nothing but where the declared arity is stored, and that symmetry is the point: a port
 and a typed logical action are the same payload question asked in two places, and
 stage D answered it in only one of them.
+
+**Stage H's `ifThenElse` arm makes this predicate structurally recursive**, for the first time
+in this family. The condition is checked with `exprWellFormed` against the same parameter
+scope, and both branch bodies are checked statement by statement by `bodyWellFormed`. A branch
+introduces no new scope: the parameters in view inside a branch are the parameters in view
+outside it, which is what keeps the recursion a plain traversal rather than a scoping
+computation. Both branches are checked unconditionally, matching the static reading
+`LF.setPortNamesOfBody` takes, since this layer says nothing about which arm executes.
+
+The branch bodies go through `bodyWellFormed` rather than `List.all` with a lambda, and that is
+a termination requirement rather than a preference. `GeneralStmt` is a *nested* inductive, and a
+recursive call hidden inside a function passed to `List.all` is not visible to structural
+recursion: the first attempt at this arm failed with `failed to eliminate recursive
+application`, leaving the goal `sizeOf statement < 1 + sizeOf condition + sizeOf thenBody +
+sizeOf elseBody`. Writing the list traversal out as a mutual companion makes the calls
+syntactically visible and keeps the definition **structurally** recursive, which matters beyond
+elaboration: well-founded recursion here would stop `decide` from evaluating `wellFormed` in the
+regression pins.
 -/
 def stmtWellFormed
     (reactor : LF.GeneralReactor)
@@ -262,6 +285,52 @@ def stmtWellFormed
             reactor.exprWellFormed
               parameters
               argument)
+
+  | .ifThenElse condition thenBody elseBody =>
+      reactor.exprWellFormed
+          parameters
+          condition &&
+        bodyWellFormed
+          reactor
+          parameters
+          thenBody &&
+        bodyWellFormed
+          reactor
+          parameters
+          elseBody
+
+/--
+Every statement of a body resolves.
+
+The conjunction of `stmtWellFormed` over a list, written as an explicit traversal rather than
+as `List.all` with a lambda, because a recursive call inside a lambda passed to `List.all` is
+invisible to structural recursion on a nested inductive. `[]` is well-formed, so an empty
+branch is accepted and `LF.GeneralCppPrinter.renderGeneralBraced` has to spell it.
+
+This is the same conjunction `reactionWellFormed` forms over a reaction's top-level body. That
+one is left as its `List.all` because it is not part of this recursion and rewriting it would
+move a definition no clause of this change touches.
+-/
+def bodyWellFormed
+    (reactor : LF.GeneralReactor)
+    (parameters : List VarName) :
+    LF.GeneralBody →
+    Bool
+
+  | [] =>
+      true
+
+  | statement :: remaining =>
+      stmtWellFormed
+          reactor
+          parameters
+          statement &&
+        bodyWellFormed
+          reactor
+          parameters
+          remaining
+
+end
 
 /--
 A reaction's trigger and body both resolve against its reactor, with its own

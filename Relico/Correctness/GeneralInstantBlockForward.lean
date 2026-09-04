@@ -420,12 +420,34 @@ theorem generalReactorIdle_of_actorIdle
   obtain ⟨context, index, hCompiled, _⟩ :=
     hCorresponds.continuation
 
+  -- Stage H made both idleness predicates a conjunction, `activeBody.isEmpty && frames.isEmpty`,
+  -- and the pairing's fourth conjunct is what carries the second half across: an empty source
+  -- stack forces an empty target stack.
   have hSourceNil :
       actor.activeBody = [] := by
     unfold DTR.GeneralActorRuntime.idle at hIdle
 
     exact
-      List.isEmpty_iff.mp hIdle
+      List.isEmpty_iff.mp
+        (by
+          simp_all)
+
+  have hSourceFramesNil :
+      actor.frames = [] := by
+    unfold DTR.GeneralActorRuntime.idle at hIdle
+
+    exact
+      List.isEmpty_iff.mp
+        (by
+          simp_all)
+
+  have hTargetFramesNil :
+      reactor.frames = [] :=
+    generalFramesCompile_target_nil
+      (by
+        rw [← hSourceFramesNil]
+
+        exact hCorresponds.frames)
 
   rw [hSourceNil] at hCompiled
 
@@ -433,7 +455,8 @@ theorem generalReactorIdle_of_actorIdle
 
   rw [
     compileGeneralBody_nil_eq
-      hCompiled
+      hCompiled,
+    hTargetFramesNil
   ]
 
   rfl

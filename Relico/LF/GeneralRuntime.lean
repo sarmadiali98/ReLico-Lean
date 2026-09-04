@@ -285,6 +285,17 @@ One reactor's runtime state: its state-variable valuation, plus the statements i
 
 The mirror of `DTR.GeneralActorRuntime`, and for the same reason: the continuation is added beside the
 existing content rather than as a new field on a type built code already elaborates against.
+
+**`frames` mirrors `DTR.GeneralActorRuntime.frames`, and the mirroring is forced rather than tidy.**
+Stage H's source runtime gained a stack of enclosing continuations so that stepping into a branch can
+remember what follows it. Adding it on one side only breaks the correspondence in a way that is easy to
+miss and was caught by the compiler: `Correctness.generalActorIdle_of_reactorIdle` transfers idleness
+*from* the target *to* the source, and a source `idle` that also asks for an empty stack cannot be
+concluded from a target that has no stack to ask about. Either both runtimes carry the stack or the
+transfer stops being provable, so both carry it.
+
+Not defaultable, for the reason given on the source field: every step rule rewrites a reactor as a full
+record literal, and a default would let a rule silently discard the stack with no test failing.
 -/
 structure GeneralReactorRuntime where
   valuation :
@@ -292,6 +303,9 @@ structure GeneralReactorRuntime where
 
   activeBody :
     LF.GeneralBody := []
+
+  frames :
+    List LF.GeneralBody
 
 deriving Repr, DecidableEq, BEq, Inhabited
 
@@ -318,12 +332,21 @@ deriving Repr, DecidableEq, BEq, Inhabited
 namespace GeneralReactorRuntime
 
 /--
-Whether this reactor has no statements left to run.
+Whether this reactor has no statements left to run, at any level.
+
+The mirror of `DTR.GeneralActorRuntime.idle`, conjunct for conjunct, and the symmetry is what lets
+idleness transfer in both directions across the correspondence. A reactor whose active body has run out
+but whose frame stack still holds an enclosing continuation owes the statements after the branch it
+stepped into, so it is not finished.
+
+For every program compiled from the currently accepted fragment `frames` is `[]`, so the second conjunct
+is `true` wherever the pre-stage-H development goes.
 -/
 def idle
     (reactor : GeneralReactorRuntime) :
     Bool :=
-  reactor.activeBody.isEmpty
+  reactor.activeBody.isEmpty &&
+    reactor.frames.isEmpty
 
 @[simp]
 theorem idle_of_nil
@@ -333,6 +356,7 @@ theorem idle_of_nil
         {
           valuation := valuation
           activeBody := []
+          frames := []
         } =
       true := by
   rfl
@@ -344,15 +368,46 @@ theorem idle_of_cons
     (statement :
       LF.GeneralStmt)
     (remaining :
-      LF.GeneralBody) :
+      LF.GeneralBody)
+    (frames :
+      List LF.GeneralBody) :
     idle
         {
           valuation := valuation
           activeBody :=
             statement :: remaining
+          frames := frames
         } =
       false := by
   rfl
+
+/--
+A reactor with a pending frame is not idle, whatever its active body.
+
+The mirror of `DTR.GeneralActorRuntime.idle_of_frames_cons`, and needed for the same reason: the two
+ways a reactor is busy are independent, and a proof that knew only the first would treat a reactor that
+has just finished a branch as ready for a new event.
+-/
+@[simp]
+theorem idle_of_frames_cons
+    (valuation :
+      Store VarName LF.GeneralValue)
+    (activeBody :
+      LF.GeneralBody)
+    (frame :
+      LF.GeneralBody)
+    (frames :
+      List LF.GeneralBody) :
+    idle
+        {
+          valuation := valuation
+          activeBody := activeBody
+          frames := frame :: frames
+        } =
+      false := by
+  simp [
+    idle
+  ]
 
 end GeneralReactorRuntime
 

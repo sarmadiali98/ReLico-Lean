@@ -1607,6 +1607,7 @@ inductive GeneralStep
                     target
                     value
                 activeBody := remaining
+                frames := reactor.frames
               }
           pending := state.pending
         }
@@ -1636,6 +1637,7 @@ inductive GeneralStep
               {
                 valuation := reactor.valuation
                 activeBody := remaining
+                frames := reactor.frames
               }
           pending := state.pending
         }
@@ -1694,6 +1696,7 @@ inductive GeneralStep
               {
                 valuation := reactor.valuation
                 activeBody := remaining
+                frames := reactor.frames
               }
           pending :=
             state.pending ++
@@ -1772,6 +1775,7 @@ inductive GeneralStep
               {
                 valuation := reactor.valuation
                 activeBody := remaining
+                frames := reactor.frames
               }
           pending :=
             state.pending ++
@@ -1786,6 +1790,147 @@ inductive GeneralStep
                     connection.delay
                 payload := payload
               }]
+        }
+
+  /--
+  `BRANCH-TRUE`. The condition evaluates to `true`, so the reactor steps **into** the then-branch and
+  remembers the rest of this level on its frame stack.
+
+  The component-for-component mirror of `DTR.GeneralStep.branchTrue`: same two halves, same frame
+  discipline, same refusal to concatenate. `activeBody := thenBody` makes the compiled branch the level
+  being executed and `frames := remaining :: reactor.frames` records what follows it. A
+  `thenBody ++ remaining` here would be worse than merely inelegant: `LF.setPortNamesOfBody` and
+  `LF.GeneralCppPrinter.generalEffectNames` read a conditional as a *nested* structure, so a flattened
+  active body would no longer be the body those functions describe.
+
+  Mirroring is not decoration. G2b answers a source τ step with a target τ step, and a source
+  `branchTrue` can only be answered by a target step that enters the compiled branch and pushes the
+  compiled remainder — `Translation.compileGeneralStmt`'s conditional arm compiles exactly those two
+  bodies, so the two rules have to agree on which of them becomes active and what is stacked.
+
+  **Premised on the condition evaluating to a boolean**, exactly as the source rule is. An `.int` value
+  has no rule and the reactor is stuck, which is the treatment `assign` already gives an expression that
+  fails to evaluate, and which this module's own header calls a divergence from the emitted C++ rather
+  than from the source relation.
+
+  τ, and confined to one reactor's two continuation fields: the tag, the queue and every other reactor
+  are copied.
+  -/
+  | branchTrue
+      {state : GeneralRuntimeState}
+      {instanceName : ActorName}
+      {reactor : GeneralReactorRuntime}
+      {condition : LF.GeneralExpr}
+      {thenBody elseBody remaining : LF.GeneralBody}
+      (hReactor :
+        Store.lookup state.reactors instanceName = some reactor)
+      (hBody :
+        reactor.activeBody =
+          LF.GeneralStmt.ifThenElse condition thenBody elseBody :: remaining)
+      (hCondition :
+        LF.GeneralExpr.evaluate reactor.valuation condition =
+          some (LF.GeneralValue.bool true)) :
+      GeneralStep
+        program
+        state
+        LF.GeneralLabel.tau
+        {
+          currentTag := state.currentTag
+          reactors :=
+            Store.update
+              state.reactors
+              instanceName
+              {
+                valuation := reactor.valuation
+                activeBody := thenBody
+                frames := remaining :: reactor.frames
+              }
+          pending := state.pending
+        }
+
+  /--
+  `BRANCH-FALSE`. The condition evaluates to `false`, so the reactor steps into the else-branch.
+
+  The mirror of `DTR.GeneralStep.branchFalse`, and a separate constructor for the same reason: two rules
+  make both paths visible to every `cases hStep`, where one rule selecting the body with an `if` would
+  hide a path inside a term. An empty else-branch is entered like any other and costs one `resume`;
+  `LF.stmtWellFormed` accepts an empty branch and `LF.GeneralCppPrinter.renderGeneralBraced` prints one,
+  so the case is reachable and must not be special.
+  -/
+  | branchFalse
+      {state : GeneralRuntimeState}
+      {instanceName : ActorName}
+      {reactor : GeneralReactorRuntime}
+      {condition : LF.GeneralExpr}
+      {thenBody elseBody remaining : LF.GeneralBody}
+      (hReactor :
+        Store.lookup state.reactors instanceName = some reactor)
+      (hBody :
+        reactor.activeBody =
+          LF.GeneralStmt.ifThenElse condition thenBody elseBody :: remaining)
+      (hCondition :
+        LF.GeneralExpr.evaluate reactor.valuation condition =
+          some (LF.GeneralValue.bool false)) :
+      GeneralStep
+        program
+        state
+        LF.GeneralLabel.tau
+        {
+          currentTag := state.currentTag
+          reactors :=
+            Store.update
+              state.reactors
+              instanceName
+              {
+                valuation := reactor.valuation
+                activeBody := elseBody
+                frames := remaining :: reactor.frames
+              }
+          pending := state.pending
+        }
+
+  /--
+  `RESUME`. A finished level hands control back to the level that entered it.
+
+  The mirror of `DTR.GeneralStep.resume`. An empty active body over a non-empty frame stack is a finished
+  *branch*, not a finished reaction, and this rule pops the frame the branch left behind. Without it a
+  reactor that entered a branch would be stuck forever: `fire` is premised on `idle`, which as of stage H
+  asks for an empty stack as well.
+
+  A rule of its own rather than a side effect of the last statement of a branch, for the reason the source
+  rule gives: four statement rules each having to notice that they had emptied a level is four chances to
+  lose a continuation, and one rule that fires exactly when a level is empty cannot forget. The extra τ
+  step per branch exit is matched one-for-one by the source's, so no weak-transition padding is needed to
+  relate them.
+  -/
+  | resume
+      {state : GeneralRuntimeState}
+      {instanceName : ActorName}
+      {reactor : GeneralReactorRuntime}
+      {frame : LF.GeneralBody}
+      {frames : List LF.GeneralBody}
+      (hReactor :
+        Store.lookup state.reactors instanceName = some reactor)
+      (hBody :
+        reactor.activeBody = [])
+      (hFrames :
+        reactor.frames = frame :: frames) :
+      GeneralStep
+        program
+        state
+        LF.GeneralLabel.tau
+        {
+          currentTag := state.currentTag
+          reactors :=
+            Store.update
+              state.reactors
+              instanceName
+              {
+                valuation := reactor.valuation
+                activeBody := frame
+                frames := frames
+              }
+          pending := state.pending
         }
 
   /--
@@ -1858,6 +2003,7 @@ inductive GeneralStep
                     event.payload
                     reactor.valuation
                 activeBody := reaction.body
+                frames := []
               }
           pending := earlier ++ later
         }
@@ -1991,6 +2137,17 @@ theorem GeneralStep.now_eq_of_tau
   | setPort _ _ _ _ =>
       rfl
 
+  -- Stage H's three step-into rules copy `state.currentTag`, exactly as the four statement
+  -- rules above do, so the tag's time component is unchanged and the proof is the same `rfl`.
+  | branchTrue _ _ _ =>
+      rfl
+
+  | branchFalse _ _ _ =>
+      rfl
+
+  | resume _ _ _ =>
+      rfl
+
   | microstepAdvance _ hTime _ =>
       exact hTime
 
@@ -2039,6 +2196,20 @@ theorem GeneralStep.tau_pending_not_past
       exact Or.inl hEvent
 
   | trace _ _ =>
+      intro event hEvent
+      exact Or.inl hEvent
+
+  -- The three step-into rules copy `state.pending` untouched, so every event of the successor
+  -- queue is an event of the original one and nothing new can be in the past.
+  | branchTrue _ _ _ =>
+      intro event hEvent
+      exact Or.inl hEvent
+
+  | branchFalse _ _ _ =>
+      intro event hEvent
+      exact Or.inl hEvent
+
+  | resume _ _ _ =>
       intro event hEvent
       exact Or.inl hEvent
 
@@ -2146,6 +2317,17 @@ theorem GeneralStep.tau_enqueue_strictly_future
       exact Or.inl rfl
 
   | trace _ _ =>
+      exact Or.inl rfl
+
+  -- The three step-into rules enqueue nothing: the queue is copied, so the left disjunct holds
+  -- by `rfl` exactly as it does for `assign` and `trace`.
+  | branchTrue _ _ _ =>
+      exact Or.inl rfl
+
+  | branchFalse _ _ _ =>
+      exact Or.inl rfl
+
+  | resume _ _ _ =>
       exact Or.inl rfl
 
   | schedule _ _ _ =>
@@ -2538,6 +2720,29 @@ theorem GeneralStep.congr_of_projections
         GeneralStep.trace
           hReactor
           hBody
+
+  -- The three step-into rules read no program component at all — they inspect one reactor's
+  -- continuation fields and its valuation — so each transfers by rebuilding itself.
+  | branchTrue hReactor hBody hCondition =>
+      exact
+        GeneralStep.branchTrue
+          hReactor
+          hBody
+          hCondition
+
+  | branchFalse hReactor hBody hCondition =>
+      exact
+        GeneralStep.branchFalse
+          hReactor
+          hBody
+          hCondition
+
+  | resume hReactor hBody hFrames =>
+      exact
+        GeneralStep.resume
+          hReactor
+          hBody
+          hFrames
 
   | schedule hReactor hBody hArguments =>
       exact
@@ -3489,6 +3694,7 @@ theorem GeneralStep.fire_execution_commute_of_adjacent_queue_swap
                     first.payload
                     reactorFirst.valuation
                 activeBody := reactionFirst.body
+                frames := []
               })
           second.target =
         some reactorSecond := by
@@ -3513,6 +3719,7 @@ theorem GeneralStep.fire_execution_commute_of_adjacent_queue_swap
                     second.payload
                     reactorSecond.valuation
                 activeBody := reactionSecond.body
+                frames := []
               })
           first.target =
         some reactorFirst := by
@@ -3543,6 +3750,7 @@ theorem GeneralStep.fire_execution_commute_of_adjacent_queue_swap
                       first.payload
                       reactorFirst.valuation
                   activeBody := reactionFirst.body
+                  frames := []
                 }
             pending := earlier ++ second :: rest
           } :=
@@ -3570,6 +3778,7 @@ theorem GeneralStep.fire_execution_commute_of_adjacent_queue_swap
                       first.payload
                       reactorFirst.valuation
                   activeBody := reactionFirst.body
+                  frames := []
                 }
             pending := earlier ++ second :: rest
           }
@@ -3588,6 +3797,7 @@ theorem GeneralStep.fire_execution_commute_of_adjacent_queue_swap
                           first.payload
                           reactorFirst.valuation
                       activeBody := reactionFirst.body
+                      frames := []
                     })
                 second.target
                 {
@@ -3597,6 +3807,7 @@ theorem GeneralStep.fire_execution_commute_of_adjacent_queue_swap
                       second.payload
                       reactorSecond.valuation
                   activeBody := reactionSecond.body
+                  frames := []
                 }
             pending := earlier ++ rest
           } := by
@@ -3624,6 +3835,7 @@ theorem GeneralStep.fire_execution_commute_of_adjacent_queue_swap
                     first.payload
                     reactorFirst.valuation
                 activeBody := reactionFirst.body
+                frames := []
               }
           pending := earlier ++ second :: rest
         }
@@ -3651,6 +3863,7 @@ theorem GeneralStep.fire_execution_commute_of_adjacent_queue_swap
                       second.payload
                       reactorSecond.valuation
                   activeBody := reactionSecond.body
+                  frames := []
                 }
             pending := earlier ++ first :: rest
           } := by
@@ -3688,6 +3901,7 @@ theorem GeneralStep.fire_execution_commute_of_adjacent_queue_swap
                       second.payload
                       reactorSecond.valuation
                   activeBody := reactionSecond.body
+                  frames := []
                 }
             pending := earlier ++ first :: rest
           }
@@ -3706,6 +3920,7 @@ theorem GeneralStep.fire_execution_commute_of_adjacent_queue_swap
                           second.payload
                           reactorSecond.valuation
                       activeBody := reactionSecond.body
+                      frames := []
                     })
                 first.target
                 {
@@ -3715,6 +3930,7 @@ theorem GeneralStep.fire_execution_commute_of_adjacent_queue_swap
                       first.payload
                       reactorFirst.valuation
                   activeBody := reactionFirst.body
+                  frames := []
                 }
             pending := earlier ++ rest
           } := by
@@ -3742,6 +3958,7 @@ theorem GeneralStep.fire_execution_commute_of_adjacent_queue_swap
                     second.payload
                     reactorSecond.valuation
                 activeBody := reactionSecond.body
+                frames := []
               }
           pending := earlier ++ first :: rest
         }

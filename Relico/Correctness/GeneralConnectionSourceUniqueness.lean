@@ -766,30 +766,49 @@ makes a site identify a send.
 -/
 
 /--
-Every send a walk emits sits at or after the index the walk started from.
+Every send a walk emits sits at this level's own address, at or after the index the walk started
+from.
 
 The monotonicity fact, and the whole content of injectivity below: a walk from `index` cannot emit
-anything addressed earlier than `index`. Four arms rather than a wildcard, matching the definition's
-own refusal to use one — the three non-external arms advance the index without emitting, and the
-external arm emits at exactly `index` before advancing.
+anything addressed earlier than `index`. Six arms rather than a wildcard, matching the definition's
+own refusal to use one — the three non-external arms advance the index without emitting, the
+external arm emits at exactly `index` before advancing, and the conditional arm walks both branches
+one level down before resuming.
+
+**Stage H split the conclusion into a position and a residue.** A send's site is
+`levelPath ++ (position :: rest)`: `position` is the statement's index *in this level*, which is
+what `index ≤ position` still compares, and `rest` is empty for a send at this level and carries a
+side plus a deeper position for one inside a branch. The `Nat` comparison survived the move to
+paths because what injectivity needs is that two sends of one level differ in the component that
+level owns, and nesting below that component cannot change it.
+
+The recursion is explicit rather than by `induction`, because the conditional arm applies this
+statement at two deeper levels and a list induction offers a hypothesis for the tail only.
 -/
 private theorem site_index_ge_of_mem_externalSendsFromIndex
-    (bodyKey : GeneralBodyKey) :
-    ∀ (body : DTR.GeneralBody)
-      (index : Nat)
+    (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
+    (body : DTR.GeneralBody) :
+    ∀ (index : Nat)
       (send : GeneralExternalSend),
       send ∈
         externalSendsFromIndex
           bodyKey
+          levelPath
           index
           body →
-      index ≤ send.site.index := by
+      ∃ (position : Nat)
+        (rest : List Nat),
+        index ≤ position ∧
+        send.site.index =
+          levelPath ++
+            (position :: rest) := by
 
-  intro body
-  induction body with
+  intro index send hMember
+
+  cases body with
 
   | nil =>
-      intro index send hMember
 
       rw [
         externalSendsFromIndex_nil
@@ -797,8 +816,7 @@ private theorem site_index_ge_of_mem_externalSendsFromIndex
 
       cases hMember
 
-  | cons statement remaining inductionHypothesis =>
-      intro index send hMember
+  | cons statement remaining =>
 
       cases statement with
 
@@ -807,24 +825,40 @@ private theorem site_index_ge_of_mem_externalSendsFromIndex
             externalSendsFromIndex_assign
           ] at hMember
 
+          obtain ⟨position, rest, hGe, hPath⟩ :=
+            site_index_ge_of_mem_externalSendsFromIndex
+              bodyKey
+              levelPath
+              remaining
+              (index + 1)
+              send
+              hMember
+
           exact
-            Nat.le_of_succ_le
-              (inductionHypothesis
-                (index + 1)
-                send
-                hMember)
+            ⟨position,
+             rest,
+             by omega,
+             hPath⟩
 
       | trace tag =>
           rw [
             externalSendsFromIndex_trace
           ] at hMember
 
+          obtain ⟨position, rest, hGe, hPath⟩ :=
+            site_index_ge_of_mem_externalSendsFromIndex
+              bodyKey
+              levelPath
+              remaining
+              (index + 1)
+              send
+              hMember
+
           exact
-            Nat.le_of_succ_le
-              (inductionHypothesis
-                (index + 1)
-                send
-                hMember)
+            ⟨position,
+             rest,
+             by omega,
+             hPath⟩
 
       | send target message arguments delay =>
 
@@ -835,12 +869,20 @@ private theorem site_index_ge_of_mem_externalSendsFromIndex
                 externalSendsFromIndex_send_selfTarget
               ] at hMember
 
+              obtain ⟨position, rest, hGe, hPath⟩ :=
+                site_index_ge_of_mem_externalSendsFromIndex
+                  bodyKey
+                  levelPath
+                  remaining
+                  (index + 1)
+                  send
+                  hMember
+
               exact
-                Nat.le_of_succ_le
-                  (inductionHypothesis
-                    (index + 1)
-                    send
-                    hMember)
+                ⟨position,
+                 rest,
+                 by omega,
+                 hPath⟩
 
           | knownRebec knownRebec =>
               rw [
@@ -853,15 +895,94 @@ private theorem site_index_ge_of_mem_externalSendsFromIndex
               | inl hHere =>
                   subst hHere
 
-                  exact Nat.le_refl index
+                  exact
+                    ⟨index,
+                     [],
+                     Nat.le_refl index,
+                     rfl⟩
 
               | inr hThere =>
+                  obtain ⟨position, rest, hGe, hPath⟩ :=
+                    site_index_ge_of_mem_externalSendsFromIndex
+                      bodyKey
+                      levelPath
+                      remaining
+                      (index + 1)
+                      send
+                      hThere
+
                   exact
-                    Nat.le_of_succ_le
-                      (inductionHypothesis
-                        (index + 1)
-                        send
-                        hThere)
+                    ⟨position,
+                     rest,
+                     by omega,
+                     hPath⟩
+
+      | ifThenElse condition thenBody elseBody =>
+          rw [
+            externalSendsFromIndex_ifThenElse,
+            List.mem_append,
+            List.mem_append
+          ] at hMember
+
+          cases hMember with
+
+          | inl hBranch =>
+
+              cases hBranch with
+
+              | inl hThen =>
+                  obtain ⟨position, rest, _, hPath⟩ :=
+                    site_index_ge_of_mem_externalSendsFromIndex
+                      bodyKey
+                      (levelPath ++
+                        [index, 0])
+                      thenBody
+                      0
+                      send
+                      hThen
+
+                  refine
+                    ⟨index,
+                     0 :: position :: rest,
+                     Nat.le_refl index,
+                     ?_⟩
+
+                  simpa using hPath
+
+              | inr hElse =>
+                  obtain ⟨position, rest, _, hPath⟩ :=
+                    site_index_ge_of_mem_externalSendsFromIndex
+                      bodyKey
+                      (levelPath ++
+                        [index, 1])
+                      elseBody
+                      0
+                      send
+                      hElse
+
+                  refine
+                    ⟨index,
+                     1 :: position :: rest,
+                     Nat.le_refl index,
+                     ?_⟩
+
+                  simpa using hPath
+
+          | inr hThere =>
+              obtain ⟨position, rest, hGe, hPath⟩ :=
+                site_index_ge_of_mem_externalSendsFromIndex
+                  bodyKey
+                  levelPath
+                  remaining
+                  (index + 1)
+                  send
+                  hThere
+
+              exact
+                ⟨position,
+                 rest,
+                 by omega,
+                 hPath⟩
 
 /--
 Every send a walk emits is tagged with the walk's own body key.
@@ -869,25 +990,31 @@ Every send a walk emits is tagged with the walk's own body key.
 The companion of monotonicity, and what lets a caller holding a site's *body* component decide which
 half of `externalSendsOfClass` a send came from — the constructor's walk tags `.constructor`, a
 message server's walk tags `.messageServer` of its own name, so the two halves are separated by this
-projection alone. Same four arms, same reason for spelling them out.
+projection alone. Same six arms, same reason for spelling them out.
+
+The conditional arm is the reason this is quantified over `levelPath`: a branch is walked at a deeper
+level and carries the *same* body key, which is precisely the fact that keeps this projection a
+whole-body property under nesting. Nothing about the statement moved.
 -/
 theorem externalSendsFromIndex_site_body
-    (bodyKey : GeneralBodyKey) :
-    ∀ (body : DTR.GeneralBody)
-      (index : Nat)
+    (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
+    (body : DTR.GeneralBody) :
+    ∀ (index : Nat)
       (send : GeneralExternalSend),
       send ∈
         externalSendsFromIndex
           bodyKey
+          levelPath
           index
           body →
       send.site.body = bodyKey := by
 
-  intro body
-  induction body with
+  intro index send hMember
+
+  cases body with
 
   | nil =>
-      intro index send hMember
 
       rw [
         externalSendsFromIndex_nil
@@ -895,8 +1022,7 @@ theorem externalSendsFromIndex_site_body
 
       cases hMember
 
-  | cons statement remaining inductionHypothesis =>
-      intro index send hMember
+  | cons statement remaining =>
 
       cases statement with
 
@@ -906,7 +1032,10 @@ theorem externalSendsFromIndex_site_body
           ] at hMember
 
           exact
-            inductionHypothesis
+            externalSendsFromIndex_site_body
+              bodyKey
+              levelPath
+              remaining
               (index + 1)
               send
               hMember
@@ -917,7 +1046,10 @@ theorem externalSendsFromIndex_site_body
           ] at hMember
 
           exact
-            inductionHypothesis
+            externalSendsFromIndex_site_body
+              bodyKey
+              levelPath
+              remaining
               (index + 1)
               send
               hMember
@@ -932,7 +1064,10 @@ theorem externalSendsFromIndex_site_body
               ] at hMember
 
               exact
-                inductionHypothesis
+                externalSendsFromIndex_site_body
+                  bodyKey
+                  levelPath
+                  remaining
                   (index + 1)
                   send
                   hMember
@@ -952,10 +1087,58 @@ theorem externalSendsFromIndex_site_body
 
               | inr hThere =>
                   exact
-                    inductionHypothesis
+                    externalSendsFromIndex_site_body
+                      bodyKey
+                      levelPath
+                      remaining
                       (index + 1)
                       send
                       hThere
+
+      | ifThenElse condition thenBody elseBody =>
+          rw [
+            externalSendsFromIndex_ifThenElse,
+            List.mem_append,
+            List.mem_append
+          ] at hMember
+
+          cases hMember with
+
+          | inl hBranch =>
+
+              cases hBranch with
+
+              | inl hThen =>
+                  exact
+                    externalSendsFromIndex_site_body
+                      bodyKey
+                      (levelPath ++
+                        [index, 0])
+                      thenBody
+                      0
+                      send
+                      hThen
+
+              | inr hElse =>
+                  exact
+                    externalSendsFromIndex_site_body
+                      bodyKey
+                      (levelPath ++
+                        [index, 1])
+                      elseBody
+                      0
+                      send
+                      hElse
+
+          | inr hThere =>
+              exact
+                externalSendsFromIndex_site_body
+                  bodyKey
+                  levelPath
+                  remaining
+                  (index + 1)
+                  send
+                  hThere
 
 /--
 A class's external send tagged with the constructor's body key came from the constructor's body.
@@ -1011,6 +1194,7 @@ theorem mem_externalSendsOfBody_constructor_of_mem_externalSendsOfClass
         · rw [
             externalSendsFromIndex_site_body
               (.messageServer server.name)
+              []
               server.body
               0
               send
@@ -1029,30 +1213,41 @@ refutes injectivity of `outputPortNameFor`. This says only that the *addressing*
 injective, which is true because the index strictly increases: at an external head the head sits at
 `index` while everything the tail emits sits at `index + 1` or later, so the two cases of
 `List.mem_cons` cannot collide.
+
+**Under nesting the same sentence needs two disjointness facts instead of one**, and both are local
+helpers of the proof. A send inside a branch is addressed under this level's `index`, so it cannot
+collide with anything the enclosing level emits at `index + 1` or later; and the two branches of one
+conditional differ in the side component, `0` against `1`, so a then-send cannot collide with an
+else-send. Those are exactly the two properties the alternating encoding was chosen for, and this
+theorem is where they are spent. Nothing about the statement moved except the level it is quantified
+over.
 -/
 theorem externalSendsFromIndex_site_injective
-    (bodyKey : GeneralBodyKey) :
-    ∀ (body : DTR.GeneralBody)
-      (index : Nat)
+    (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
+    (body : DTR.GeneralBody) :
+    ∀ (index : Nat)
       (first second : GeneralExternalSend),
       first ∈
         externalSendsFromIndex
           bodyKey
+          levelPath
           index
           body →
       second ∈
         externalSendsFromIndex
           bodyKey
+          levelPath
           index
           body →
       first.site = second.site →
       first = second := by
 
-  intro body
-  induction body with
+  intro index first second hFirst hSecond hSite
+
+  cases body with
 
   | nil =>
-      intro index first second hFirst _ _
 
       rw [
         externalSendsFromIndex_nil
@@ -1060,8 +1255,7 @@ theorem externalSendsFromIndex_site_injective
 
       cases hFirst
 
-  | cons statement remaining inductionHypothesis =>
-      intro index first second hFirst hSecond hSite
+  | cons statement remaining =>
 
       cases statement with
 
@@ -1071,7 +1265,10 @@ theorem externalSendsFromIndex_site_injective
           ] at hFirst hSecond
 
           exact
-            inductionHypothesis
+            externalSendsFromIndex_site_injective
+              bodyKey
+              levelPath
+              remaining
               (index + 1)
               first
               second
@@ -1085,7 +1282,10 @@ theorem externalSendsFromIndex_site_injective
           ] at hFirst hSecond
 
           exact
-            inductionHypothesis
+            externalSendsFromIndex_site_injective
+              bodyKey
+              levelPath
+              remaining
               (index + 1)
               first
               second
@@ -1103,7 +1303,10 @@ theorem externalSendsFromIndex_site_injective
               ] at hFirst hSecond
 
               exact
-                inductionHypothesis
+                externalSendsFromIndex_site_injective
+                  bodyKey
+                  levelPath
+                  remaining
                   (index + 1)
                   first
                   second
@@ -1130,10 +1333,10 @@ theorem externalSendsFromIndex_site_injective
                       -- The head is at `index`; the tail starts at `index + 1`.
                       exfalso
 
-                      have hTailGe :
-                          index + 1 ≤ second.site.index :=
+                      obtain ⟨position, rest, hGe, hPath⟩ :=
                         site_index_ge_of_mem_externalSendsFromIndex
                           bodyKey
+                          levelPath
                           remaining
                           (index + 1)
                           second
@@ -1145,9 +1348,17 @@ theorem externalSendsFromIndex_site_injective
 
                       rw [
                         ← hSite
-                      ] at hTailGe
+                      ] at hPath
 
-                      simp only at hTailGe
+                      simp only at hPath
+
+                      have hCons :
+                          [index] =
+                            position :: rest :=
+                        List.append_cancel_left
+                          hPath
+
+                      injection hCons with hPosition _
 
                       omega
 
@@ -1158,10 +1369,10 @@ theorem externalSendsFromIndex_site_injective
                   | inl hSecondHead =>
                       exfalso
 
-                      have hTailGe :
-                          index + 1 ≤ first.site.index :=
+                      obtain ⟨position, rest, hGe, hPath⟩ :=
                         site_index_ge_of_mem_externalSendsFromIndex
                           bodyKey
+                          levelPath
                           remaining
                           (index + 1)
                           first
@@ -1173,21 +1384,311 @@ theorem externalSendsFromIndex_site_injective
 
                       rw [
                         hSite
-                      ] at hTailGe
+                      ] at hPath
 
-                      simp only at hTailGe
+                      simp only at hPath
+
+                      have hCons :
+                          [index] =
+                            position :: rest :=
+                        List.append_cancel_left
+                          hPath
+
+                      injection hCons with hPosition _
 
                       omega
 
                   | inr hSecondTail =>
                       exact
-                        inductionHypothesis
+                        externalSendsFromIndex_site_injective
+                          bodyKey
+                          levelPath
+                          remaining
                           (index + 1)
                           first
                           second
                           hFirstTail
                           hSecondTail
                           hSite
+
+      | ifThenElse condition thenBody elseBody =>
+
+          -- A branch's sends against the enclosing level's: the branch sits under this
+          -- level's `index` and the tail sits at `index + 1` or later.
+          have hBranchVsTail :
+              ∀ (side : Nat)
+                (branchBody : DTR.GeneralBody)
+                (branchSend tailSend : GeneralExternalSend),
+                branchSend ∈
+                  externalSendsFromIndex
+                    bodyKey
+                    (levelPath ++
+                      [index, side])
+                    0
+                    branchBody →
+                tailSend ∈
+                  externalSendsFromIndex
+                    bodyKey
+                    levelPath
+                    (index + 1)
+                    remaining →
+                branchSend.site ≠ tailSend.site := by
+
+            intro side branchBody branchSend tailSend hBranch hTail hEqual
+
+            obtain ⟨branchPosition, branchRest, _, hBranchPath⟩ :=
+              site_index_ge_of_mem_externalSendsFromIndex
+                bodyKey
+                (levelPath ++
+                  [index, side])
+                branchBody
+                0
+                branchSend
+                hBranch
+
+            obtain ⟨tailPosition, tailRest, hTailGe, hTailPath⟩ :=
+              site_index_ge_of_mem_externalSendsFromIndex
+                bodyKey
+                levelPath
+                remaining
+                (index + 1)
+                tailSend
+                hTail
+
+            rw [
+              hEqual,
+              hTailPath
+            ] at hBranchPath
+
+            simp only [
+              List.append_assoc,
+              List.cons_append,
+              List.nil_append
+            ] at hBranchPath
+
+            have hCons :
+                tailPosition :: tailRest =
+                  index ::
+                    side ::
+                      branchPosition ::
+                        branchRest :=
+              List.append_cancel_left
+                hBranchPath
+
+            injection hCons with hPosition _
+
+            omega
+
+          -- The two branches against each other: same position, different side.
+          have hThenVsElse :
+              ∀ (thenSend elseSend : GeneralExternalSend),
+                thenSend ∈
+                  externalSendsFromIndex
+                    bodyKey
+                    (levelPath ++
+                      [index, 0])
+                    0
+                    thenBody →
+                elseSend ∈
+                  externalSendsFromIndex
+                    bodyKey
+                    (levelPath ++
+                      [index, 1])
+                    0
+                    elseBody →
+                thenSend.site ≠ elseSend.site := by
+
+            intro thenSend elseSend hThen hElse hEqual
+
+            obtain ⟨thenPosition, thenRest, _, hThenPath⟩ :=
+              site_index_ge_of_mem_externalSendsFromIndex
+                bodyKey
+                (levelPath ++
+                  [index, 0])
+                thenBody
+                0
+                thenSend
+                hThen
+
+            obtain ⟨elsePosition, elseRest, _, hElsePath⟩ :=
+              site_index_ge_of_mem_externalSendsFromIndex
+                bodyKey
+                (levelPath ++
+                  [index, 1])
+                elseBody
+                0
+                elseSend
+                hElse
+
+            rw [
+              hEqual,
+              hElsePath
+            ] at hThenPath
+
+            simp only [
+              List.append_assoc,
+              List.cons_append,
+              List.nil_append
+            ] at hThenPath
+
+            have hCons :
+                index ::
+                    1 ::
+                      elsePosition ::
+                        elseRest =
+                  index ::
+                    0 ::
+                      thenPosition ::
+                        thenRest :=
+              List.append_cancel_left
+                hThenPath
+
+            simp at hCons
+
+          rw [
+            externalSendsFromIndex_ifThenElse,
+            List.mem_append,
+            List.mem_append
+          ] at hFirst hSecond
+
+          cases hFirst with
+
+          | inl hFirstBranch =>
+
+              cases hFirstBranch with
+
+              | inl hFirstThen =>
+
+                  cases hSecond with
+
+                  | inl hSecondBranch =>
+
+                      cases hSecondBranch with
+
+                      | inl hSecondThen =>
+                          exact
+                            externalSendsFromIndex_site_injective
+                              bodyKey
+                              (levelPath ++
+                                [index, 0])
+                              thenBody
+                              0
+                              first
+                              second
+                              hFirstThen
+                              hSecondThen
+                              hSite
+
+                      | inr hSecondElse =>
+                          exact
+                            absurd
+                              hSite
+                              (hThenVsElse
+                                first
+                                second
+                                hFirstThen
+                                hSecondElse)
+
+                  | inr hSecondTail =>
+                      exact
+                        absurd
+                          hSite
+                          (hBranchVsTail
+                            0
+                            thenBody
+                            first
+                            second
+                            hFirstThen
+                            hSecondTail)
+
+              | inr hFirstElse =>
+
+                  cases hSecond with
+
+                  | inl hSecondBranch =>
+
+                      cases hSecondBranch with
+
+                      | inl hSecondThen =>
+                          exact
+                            absurd
+                              hSite.symm
+                              (hThenVsElse
+                                second
+                                first
+                                hSecondThen
+                                hFirstElse)
+
+                      | inr hSecondElse =>
+                          exact
+                            externalSendsFromIndex_site_injective
+                              bodyKey
+                              (levelPath ++
+                                [index, 1])
+                              elseBody
+                              0
+                              first
+                              second
+                              hFirstElse
+                              hSecondElse
+                              hSite
+
+                  | inr hSecondTail =>
+                      exact
+                        absurd
+                          hSite
+                          (hBranchVsTail
+                            1
+                            elseBody
+                            first
+                            second
+                            hFirstElse
+                            hSecondTail)
+
+          | inr hFirstTail =>
+
+              cases hSecond with
+
+              | inl hSecondBranch =>
+
+                  cases hSecondBranch with
+
+                  | inl hSecondThen =>
+                      exact
+                        absurd
+                          hSite.symm
+                          (hBranchVsTail
+                            0
+                            thenBody
+                            second
+                            first
+                            hSecondThen
+                            hFirstTail)
+
+                  | inr hSecondElse =>
+                      exact
+                        absurd
+                          hSite.symm
+                          (hBranchVsTail
+                            1
+                            elseBody
+                            second
+                            first
+                            hSecondElse
+                            hFirstTail)
+
+              | inr hSecondTail =>
+                  exact
+                    externalSendsFromIndex_site_injective
+                      bodyKey
+                      levelPath
+                      remaining
+                      (index + 1)
+                      first
+                      second
+                      hFirstTail
+                      hSecondTail
+                      hSite
 
 /--
 **The chain payload.** The send a walk emits at a position carries the known rebec of the statement
@@ -1205,11 +1706,20 @@ tail and every arm advances `index` in step, which is why the arithmetic `index 
 
 No uniqueness of routes, ports, or connections is used or implied. Site injectivity above is about
 the walk's own addressing, and this lemma consumes only monotonicity.
+
+**Stage H reads the sought address as `levelPath ++ [index + k]`**, a position in *this* level rather
+than a bare number, and that is what keeps the `drop` in the statement honest: `body.drop k` is a
+suffix of this level's statement list, so the send it names is addressed at this level too. The
+conditional arm is discharged rather than recursed into, and deliberately: a send inside a branch has
+a longer path than any single-component address, so it cannot be the send the caller asked about. The
+branch's own sends are reached by applying this lemma to the branch body, which is what a caller
+holding a nested running suffix will do.
 -/
 theorem externalSendsFromIndex_knownRebec_of_drop
-    (bodyKey : GeneralBodyKey) :
-    ∀ (body : DTR.GeneralBody)
-      (index k : Nat)
+    (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
+    (body : DTR.GeneralBody) :
+    ∀ (index k : Nat)
       (rebec : KnownRebecName)
       (message : MsgName)
       (arguments : List DTR.GeneralExpr)
@@ -1226,16 +1736,19 @@ theorem externalSendsFromIndex_knownRebec_of_drop
       send ∈
         externalSendsFromIndex
           bodyKey
+          levelPath
           index
           body →
-      send.site.index = index + k →
+      send.site.index =
+        levelPath ++
+          [index + k] →
       send.knownRebec = rebec := by
 
-  intro body
-  induction body with
+  intro index k rebec message arguments delay rest send hDrop hMember hSite
+
+  cases body with
 
   | nil =>
-      intro index k rebec message arguments delay rest send hDrop _ _
 
       rw [
         List.drop_nil
@@ -1243,8 +1756,7 @@ theorem externalSendsFromIndex_knownRebec_of_drop
 
       cases hDrop
 
-  | cons statement remaining inductionHypothesis =>
-      intro index k rebec message arguments delay rest send hDrop hMember hSite
+  | cons statement remaining =>
 
       cases k with
 
@@ -1272,14 +1784,26 @@ theorem externalSendsFromIndex_knownRebec_of_drop
           | inr hThere =>
               exfalso
 
-              have hTailGe :
-                  index + 1 ≤ send.site.index :=
+              obtain ⟨position, tailRest, hGe, hPath⟩ :=
                 site_index_ge_of_mem_externalSendsFromIndex
                   bodyKey
+                  levelPath
                   remaining
                   (index + 1)
                   send
                   hThere
+
+              rw [
+                hSite
+              ] at hPath
+
+              have hCons :
+                  [index + 0] =
+                    position :: tailRest :=
+                List.append_cancel_left
+                  hPath
+
+              injection hCons with hPosition _
 
               omega
 
@@ -1301,7 +1825,10 @@ theorem externalSendsFromIndex_knownRebec_of_drop
               ] at hMember
 
               exact
-                inductionHypothesis
+                externalSendsFromIndex_knownRebec_of_drop
+                  bodyKey
+                  levelPath
+                  remaining
                   (index + 1)
                   k'
                   rebec
@@ -1321,7 +1848,10 @@ theorem externalSendsFromIndex_knownRebec_of_drop
               ] at hMember
 
               exact
-                inductionHypothesis
+                externalSendsFromIndex_knownRebec_of_drop
+                  bodyKey
+                  levelPath
+                  remaining
                   (index + 1)
                   k'
                   rebec
@@ -1345,7 +1875,10 @@ theorem externalSendsFromIndex_knownRebec_of_drop
                   ] at hMember
 
                   exact
-                    inductionHypothesis
+                    externalSendsFromIndex_knownRebec_of_drop
+                      bodyKey
+                      levelPath
+                      remaining
                       (index + 1)
                       k'
                       rebec
@@ -1375,11 +1908,25 @@ theorem externalSendsFromIndex_knownRebec_of_drop
 
                       simp only at hSite
 
+                      have hCons :
+                          levelPath ++
+                              [index] =
+                            levelPath ++
+                              [index + (k' + 1)] :=
+                        hSite
+
+                      injection
+                        List.append_cancel_left
+                          hCons with hPosition _
+
                       omega
 
                   | inr hThere =>
                       exact
-                        inductionHypothesis
+                        externalSendsFromIndex_knownRebec_of_drop
+                          bodyKey
+                          levelPath
+                          remaining
                           (index + 1)
                           k'
                           rebec
@@ -1393,20 +1940,549 @@ theorem externalSendsFromIndex_knownRebec_of_drop
                           (by
                             rw [hSite, hArith])
 
+          | ifThenElse condition thenBody elseBody =>
+              rw [
+                externalSendsFromIndex_ifThenElse,
+                List.mem_append,
+                List.mem_append
+              ] at hMember
+
+              cases hMember with
+
+              | inl hBranch =>
+                  -- A send inside a branch is addressed with a longer path than any
+                  -- single position of this level, so it is not the send asked about.
+                  exfalso
+
+                  cases hBranch with
+
+                  | inl hThen =>
+                      obtain ⟨position, branchRest, _, hPath⟩ :=
+                        site_index_ge_of_mem_externalSendsFromIndex
+                          bodyKey
+                          (levelPath ++
+                            [index, 0])
+                          thenBody
+                          0
+                          send
+                          hThen
+
+                      rw [
+                        hSite
+                      ] at hPath
+
+                      simp only [
+                        List.append_assoc,
+                        List.cons_append,
+                        List.nil_append
+                      ] at hPath
+
+                      have hCons :
+                          [index + (k' + 1)] =
+                            index ::
+                              0 ::
+                                position ::
+                                  branchRest :=
+                        List.append_cancel_left
+                          hPath
+
+                      simp at hCons
+
+                  | inr hElse =>
+                      obtain ⟨position, branchRest, _, hPath⟩ :=
+                        site_index_ge_of_mem_externalSendsFromIndex
+                          bodyKey
+                          (levelPath ++
+                            [index, 1])
+                          elseBody
+                          0
+                          send
+                          hElse
+
+                      rw [
+                        hSite
+                      ] at hPath
+
+                      simp only [
+                        List.append_assoc,
+                        List.cons_append,
+                        List.nil_append
+                      ] at hPath
+
+                      have hCons :
+                          [index + (k' + 1)] =
+                            index ::
+                              1 ::
+                                position ::
+                                  branchRest :=
+                        List.append_cancel_left
+                          hPath
+
+                      simp at hCons
+
+              | inr hThere =>
+                  exact
+                    externalSendsFromIndex_knownRebec_of_drop
+                      bodyKey
+                      levelPath
+                      remaining
+                      (index + 1)
+                      k'
+                      rebec
+                      message
+                      arguments
+                      delay
+                      rest
+                      send
+                      hDrop
+                      hThere
+                      (by
+                        rw [hSite, hArith])
+
+/--
+A send of a statement's own walk is a send of the body that statement sits in.
+
+The structural bridge stage H's nested addressing needs, and the only new induction it needs.
+`externalSendsFromIndex_cons` holds whatever the head statement is, so walking down to
+`body.drop position` costs one `List.mem_append` step per statement and no case analysis. The index
+arithmetic is the flat lemmas' `index + (position + 1) = (index + 1) + position` in the other
+direction.
+
+Both nested consumers below run on this. For a `here` path the statement is an external send and its
+own walk is a one-element list; for a branch path it is a conditional and its own walk is the two
+branch walks appended, so a send found inside a branch injects into the enclosing body's walk without
+anything being said about the *rest* of the enclosing body. That is what makes the nested case cheap:
+no site-shape contradiction, no `Nodup`, no ordering.
+-/
+theorem mem_externalSendsFromIndex_of_mem_externalSendsFromStmt
+    (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
+    (body : DTR.GeneralBody) :
+    ∀ (index position : Nat)
+      (statement : DTR.GeneralStmt)
+      (rest : DTR.GeneralBody)
+      (send : GeneralExternalSend),
+      body.drop position =
+        statement :: rest →
+      send ∈
+        externalSendsFromStmt
+          bodyKey
+          levelPath
+          (index + position)
+          statement →
+      send ∈
+        externalSendsFromIndex
+          bodyKey
+          levelPath
+          index
+          body := by
+
+  induction body with
+
+  | nil =>
+      intro index position statement rest send hDrop _
+
+      rw [
+        List.drop_nil
+      ] at hDrop
+
+      cases hDrop
+
+  | cons head remaining inductionHypothesis =>
+      intro index position statement rest send hDrop hMember
+
+      cases position with
+
+      | zero =>
+          rw [
+            List.drop_zero
+          ] at hDrop
+
+          injection hDrop with hHead _
+
+          subst hHead
+
+          rw [
+            externalSendsFromIndex_cons
+          ]
+
+          refine
+            List.mem_append.mpr
+              (Or.inl ?_)
+
+          simpa using hMember
+
+      | succ position =>
+          rw [
+            List.drop_succ_cons
+          ] at hDrop
+
+          rw [
+            externalSendsFromIndex_cons
+          ]
+
+          refine
+            List.mem_append.mpr
+              (Or.inr ?_)
+
+          refine
+            inductionHypothesis
+              (index + 1)
+              position
+              statement
+              rest
+              send
+              hDrop
+              ?_
+
+          rw [
+            show
+                index + 1 + position =
+                  index + (position + 1) from by
+              omega
+          ]
+
+          exact hMember
+
+/--
+A send witnessed at a path of a body is emitted by that body's walk, at that path's address.
+
+The **positive** half of stage H's nested addressing: `GeneralSendAtPath` says a source
+body has an external send at a path, and this says the routing walk emits a send there, carrying that
+send's rebec and delay. It is what the two uniqueness lemmas below run on, and it is proved in the
+easy direction — every case *constructs* a membership rather than refuting one.
+
+Recursion on the derivation, one case per constructor:
+
+* `here` reaches the statement with the bridge above and reads the emitted record off
+  `externalSendsFromStmt`'s external-send arm.
+* `thenBranch` and `elseBranch` apply this statement to the branch body at the branch's own level,
+  `levelPath ++ [index + position, side]` from index `0`, and inject the result through the
+  conditional arm and then through the bridge. The address arithmetic is
+  `shiftHeadPath_zero` plus one `List.append_assoc`, because a branch counts its positions from zero.
+
+No site-shape reasoning appears, which is the point: an earlier plan for this lemma went through
+`site_index_ge_of_mem_externalSendsFromIndex` to *locate* a given send, and constructing the witness
+instead makes the branch cases three lines each. Uniqueness is then a separate step and is already
+committed as `externalSendsFromIndex_site_injective`.
+-/
+theorem exists_mem_externalSendsFromIndex_of_path
+    (bodyKey : GeneralBodyKey)
+    {body : DTR.GeneralBody}
+    {path : List Nat}
+    {rebec : KnownRebecName}
+    {message : MsgName}
+    {delay : Delay}
+    (hPath :
+      GeneralSendAtPath
+        body
+        path
+        rebec
+        message
+        delay) :
+    ∀ (levelPath : List Nat)
+      (index : Nat),
+      ∃ send ∈
+          externalSendsFromIndex
+            bodyKey
+            levelPath
+            index
+            body,
+        send.site.index =
+            levelPath ++
+              shiftHeadPath
+                index
+                path ∧
+          send.knownRebec = rebec ∧
+            send.delay = delay := by
+
+  induction hPath with
+
+  | @here body position rebec message arguments delay rest hDrop =>
+      intro levelPath index
+
+      refine
+        ⟨{
+           site :=
+             {
+               body :=
+                 bodyKey
+
+               index :=
+                 levelPath ++
+                   [index + position]
+             }
+
+           knownRebec :=
+             rebec
+
+           message :=
+             message
+
+           delay :=
+             delay
+         },
+         ?_,
+         rfl,
+         rfl,
+         rfl⟩
+
+      refine
+        mem_externalSendsFromIndex_of_mem_externalSendsFromStmt
+          bodyKey
+          levelPath
+          body
+          index
+          position
+          _
+          rest
+          _
+          hDrop
+          ?_
+
+      simp [
+        externalSendsFromStmt
+      ]
+
+  | @thenBranch body position condition thenBody elseBody rest path rebec message delay hDrop _ inductionHypothesis =>
+      intro levelPath index
+
+      obtain ⟨send, hMember, hSite, hRebec, hDelay⟩ :=
+        inductionHypothesis
+          (levelPath ++
+            [index + position, 0])
+          0
+
+      refine
+        ⟨send,
+         ?_,
+         ?_,
+         hRebec,
+         hDelay⟩
+
+      · refine
+          mem_externalSendsFromIndex_of_mem_externalSendsFromStmt
+            bodyKey
+            levelPath
+            body
+            index
+            position
+            _
+            rest
+            send
+            hDrop
+            ?_
+
+        simp only [
+          externalSendsFromStmt
+        ]
+
+        exact
+          List.mem_append.mpr
+            (Or.inl hMember)
+
+      · -- The branch was walked from index `0`, so its own shift is the identity; only the
+        -- enclosing level's head component moves.
+        simp only [
+          shiftHeadPath_zero
+        ] at hSite
+
+        simpa [
+          shiftHeadPath
+        ] using hSite
+
+  | @elseBranch body position condition thenBody elseBody rest path rebec message delay hDrop _ inductionHypothesis =>
+      intro levelPath index
+
+      obtain ⟨send, hMember, hSite, hRebec, hDelay⟩ :=
+        inductionHypothesis
+          (levelPath ++
+            [index + position, 1])
+          0
+
+      refine
+        ⟨send,
+         ?_,
+         ?_,
+         hRebec,
+         hDelay⟩
+
+      · refine
+          mem_externalSendsFromIndex_of_mem_externalSendsFromStmt
+            bodyKey
+            levelPath
+            body
+            index
+            position
+            _
+            rest
+            send
+            hDrop
+            ?_
+
+        simp only [
+          externalSendsFromStmt
+        ]
+
+        exact
+          List.mem_append.mpr
+            (Or.inr hMember)
+
+      · -- The branch was walked from index `0`, so its own shift is the identity; only the
+        -- enclosing level's head component moves.
+        simp only [
+          shiftHeadPath_zero
+        ] at hSite
+
+        simpa [
+          shiftHeadPath
+        ] using hSite
+
+/--
+The send a walk emits at a nested path carries that path's known rebec.
+
+The nested analogue of `externalSendsFromIndex_knownRebec_of_drop`, and the fact stage H's
+correspondence establisher needs: a routing entry at a nested site describes the source send that
+*is* at that path, branch or no branch.
+
+Proved by uniqueness rather than by a second traversal. `exists_mem_externalSendsFromIndex_of_path`
+emits a witness at the same address with the right rebec, `externalSendsFromIndex_site_body` puts both
+sends' sites on the same body key, and `externalSendsFromIndex_site_injective` — the committed §4.3
+claim — then forces the two sends equal. So this lemma spends injectivity instead of re-deriving it,
+which is why it is short and why no site-shape reasoning appears.
+
+Restricted to a one-component path this is the flat lemma: `shiftHeadPath index [k]` is
+`[index + k]`.
+-/
+theorem externalSendsFromIndex_knownRebec_of_path
+    (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
+    {body : DTR.GeneralBody}
+    {path : List Nat}
+    {rebec : KnownRebecName}
+    {message : MsgName}
+    {delay : Delay}
+    (index : Nat)
+    {send : GeneralExternalSend}
+    (hPath :
+      GeneralSendAtPath
+        body
+        path
+        rebec
+        message
+        delay)
+    (hMember :
+      send ∈
+        externalSendsFromIndex
+          bodyKey
+          levelPath
+          index
+          body)
+    (hSite :
+      send.site.index =
+        levelPath ++
+          shiftHeadPath
+            index
+            path) :
+    send.knownRebec = rebec ∧
+      send.delay = delay := by
+
+  obtain ⟨witness, hWitnessMember, hWitnessSite, hWitnessRebec, hWitnessDelay⟩ :=
+    exists_mem_externalSendsFromIndex_of_path
+      bodyKey
+      hPath
+      levelPath
+      index
+
+  have hSameSite :
+      send.site = witness.site := by
+    have hSendBody :
+        send.site.body = bodyKey :=
+      externalSendsFromIndex_site_body
+        bodyKey
+        levelPath
+        body
+        index
+        send
+        hMember
+
+    have hWitnessBody :
+        witness.site.body = bodyKey :=
+      externalSendsFromIndex_site_body
+        bodyKey
+        levelPath
+        body
+        index
+        witness
+        hWitnessMember
+
+    have hIndex :
+        send.site.index =
+          witness.site.index := by
+      rw [
+        hSite,
+        hWitnessSite
+      ]
+
+    have hBody :
+        send.site.body =
+          witness.site.body := by
+      rw [
+        hSendBody,
+        hWitnessBody
+      ]
+
+    cases hSendSite : send.site with
+    | mk sendBody sendIndex =>
+        cases hWitnessSite' : witness.site with
+        | mk witnessBody witnessIndex =>
+            rw [
+              hSendSite,
+              hWitnessSite'
+            ] at hIndex hBody
+
+            simp_all
+
+  have hEqual :
+      send = witness :=
+    externalSendsFromIndex_site_injective
+      bodyKey
+      levelPath
+      body
+      index
+      send
+      witness
+      hMember
+      hWitnessMember
+      hSameSite
+
+  subst hEqual
+
+  exact
+    ⟨hWitnessRebec,
+     hWitnessDelay⟩
+
 /--
 The send a walk emits at a statement's own position carries that statement's delay.
 
-The delay companion of `externalSendsFromIndex_knownRebec_of_drop` above, proved by the same induction
+The delay companion of `externalSendsFromIndex_knownRebec_of_drop` above, proved by the same recursion
 generalising both `index` and `k`: at `k = 0` the head of the drop is the statement and the emitted head
 is the answer, with monotonicity ruling the tail out; at `k + 1` the drop moves into the tail and every
 arm advances `index` in step, so `index + (k + 1) = (index + 1) + k` closes each case.
 
 No uniqueness of routes, ports, or connections is used or implied; this consumes only monotonicity.
+
+Stage H reads the address as `levelPath ++ [index + k]` here for the same reason it does above, and the
+conditional arm is discharged the same way, by path length rather than by recursion. The two proofs
+were near-copies before this change and remain near-copies after it, which is the shape this
+development already chose: the sentences are different claims about the same walk and each is cited on
+its own.
 -/
 theorem externalSendsFromIndex_delay_of_drop
-    (bodyKey : GeneralBodyKey) :
-    ∀ (body : DTR.GeneralBody)
-      (index k : Nat)
+    (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
+    (body : DTR.GeneralBody) :
+    ∀ (index k : Nat)
       (rebec : KnownRebecName)
       (message : MsgName)
       (arguments : List DTR.GeneralExpr)
@@ -1423,16 +2499,19 @@ theorem externalSendsFromIndex_delay_of_drop
       send ∈
         externalSendsFromIndex
           bodyKey
+          levelPath
           index
           body →
-      send.site.index = index + k →
+      send.site.index =
+        levelPath ++
+          [index + k] →
       send.delay = delay := by
 
-  intro body
-  induction body with
+  intro index k rebec message arguments delay rest send hDrop hMember hSite
+
+  cases body with
 
   | nil =>
-      intro index k rebec message arguments delay rest send hDrop _ _
 
       rw [
         List.drop_nil
@@ -1440,8 +2519,7 @@ theorem externalSendsFromIndex_delay_of_drop
 
       cases hDrop
 
-  | cons statement remaining inductionHypothesis =>
-      intro index k rebec message arguments delay rest send hDrop hMember hSite
+  | cons statement remaining =>
 
       cases k with
 
@@ -1469,14 +2547,26 @@ theorem externalSendsFromIndex_delay_of_drop
           | inr hThere =>
               exfalso
 
-              have hTailGe :
-                  index + 1 ≤ send.site.index :=
+              obtain ⟨position, tailRest, hGe, hPath⟩ :=
                 site_index_ge_of_mem_externalSendsFromIndex
                   bodyKey
+                  levelPath
                   remaining
                   (index + 1)
                   send
                   hThere
+
+              rw [
+                hSite
+              ] at hPath
+
+              have hCons :
+                  [index + 0] =
+                    position :: tailRest :=
+                List.append_cancel_left
+                  hPath
+
+              injection hCons with hPosition _
 
               omega
 
@@ -1498,7 +2588,10 @@ theorem externalSendsFromIndex_delay_of_drop
               ] at hMember
 
               exact
-                inductionHypothesis
+                externalSendsFromIndex_delay_of_drop
+                  bodyKey
+                  levelPath
+                  remaining
                   (index + 1)
                   k'
                   rebec
@@ -1518,7 +2611,10 @@ theorem externalSendsFromIndex_delay_of_drop
               ] at hMember
 
               exact
-                inductionHypothesis
+                externalSendsFromIndex_delay_of_drop
+                  bodyKey
+                  levelPath
+                  remaining
                   (index + 1)
                   k'
                   rebec
@@ -1542,7 +2638,10 @@ theorem externalSendsFromIndex_delay_of_drop
                   ] at hMember
 
                   exact
-                    inductionHypothesis
+                    externalSendsFromIndex_delay_of_drop
+                      bodyKey
+                      levelPath
+                      remaining
                       (index + 1)
                       k'
                       rebec
@@ -1572,11 +2671,25 @@ theorem externalSendsFromIndex_delay_of_drop
 
                       simp only at hSite
 
+                      have hCons :
+                          levelPath ++
+                              [index] =
+                            levelPath ++
+                              [index + (k' + 1)] :=
+                        hSite
+
+                      injection
+                        List.append_cancel_left
+                          hCons with hPosition _
+
                       omega
 
                   | inr hThere =>
                       exact
-                        inductionHypothesis
+                        externalSendsFromIndex_delay_of_drop
+                          bodyKey
+                          levelPath
+                          remaining
                           (index + 1)
                           k'
                           rebec
@@ -1589,6 +2702,105 @@ theorem externalSendsFromIndex_delay_of_drop
                           hThere
                           (by
                             rw [hSite, hArith])
+
+          | ifThenElse condition thenBody elseBody =>
+              rw [
+                externalSendsFromIndex_ifThenElse,
+                List.mem_append,
+                List.mem_append
+              ] at hMember
+
+              cases hMember with
+
+              | inl hBranch =>
+                  -- A send inside a branch is addressed with a longer path than any
+                  -- single position of this level, so it is not the send asked about.
+                  exfalso
+
+                  cases hBranch with
+
+                  | inl hThen =>
+                      obtain ⟨position, branchRest, _, hPath⟩ :=
+                        site_index_ge_of_mem_externalSendsFromIndex
+                          bodyKey
+                          (levelPath ++
+                            [index, 0])
+                          thenBody
+                          0
+                          send
+                          hThen
+
+                      rw [
+                        hSite
+                      ] at hPath
+
+                      simp only [
+                        List.append_assoc,
+                        List.cons_append,
+                        List.nil_append
+                      ] at hPath
+
+                      have hCons :
+                          [index + (k' + 1)] =
+                            index ::
+                              0 ::
+                                position ::
+                                  branchRest :=
+                        List.append_cancel_left
+                          hPath
+
+                      simp at hCons
+
+                  | inr hElse =>
+                      obtain ⟨position, branchRest, _, hPath⟩ :=
+                        site_index_ge_of_mem_externalSendsFromIndex
+                          bodyKey
+                          (levelPath ++
+                            [index, 1])
+                          elseBody
+                          0
+                          send
+                          hElse
+
+                      rw [
+                        hSite
+                      ] at hPath
+
+                      simp only [
+                        List.append_assoc,
+                        List.cons_append,
+                        List.nil_append
+                      ] at hPath
+
+                      have hCons :
+                          [index + (k' + 1)] =
+                            index ::
+                              1 ::
+                                position ::
+                                  branchRest :=
+                        List.append_cancel_left
+                          hPath
+
+                      simp at hCons
+
+              | inr hThere =>
+                  exact
+                    externalSendsFromIndex_delay_of_drop
+                      bodyKey
+                      levelPath
+                      remaining
+                      (index + 1)
+                      k'
+                      rebec
+                      message
+                      arguments
+                      delay
+                      rest
+                      send
+                      hDrop
+                      hThere
+                      (by
+                        rw [hSite, hArith])
 
 /-!
 ## The entry-to-send inversion

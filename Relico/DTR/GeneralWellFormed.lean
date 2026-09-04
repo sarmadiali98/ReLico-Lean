@@ -69,6 +69,20 @@ A statement's send target, if it has one, is a known rebec this class declares.
 
 A self-send needs nothing declared, which is why the two targets are not treated
 uniformly here even though they share one statement constructor.
+
+**`ifThenElse` is refused rather than recursed into**, and that is a layer-1
+choice with a reason. Stage H added the constructor to `DTR.GeneralStmt` before
+any of the machinery that would make a branch meaningful, and the frontend still
+refuses branching (`Frontend.GeneralDiagnostic`'s `branchingNotSupported`).
+Refusing here keeps the accepted fragment **exactly** what it was: a `false` arm
+for a constructor that did not previously exist cannot change the verdict on any
+model that could be written before, and it cannot let a branch through
+un-checked. Returning `true` would have been the permissive alternative and would
+have admitted a branch whose sends nothing checks.
+
+When the later layer recurses into branch bodies, this arm becomes the recursive
+one. Until then a well-formed model provably contains no branch, which is what
+the traversals in `Translation.GeneralRouting` rely on.
 -/
 def statementTargetDeclared
     (reactiveClass : DTR.GeneralReactiveClass)
@@ -90,6 +104,9 @@ def statementTargetDeclared
 
       | .knownRebec knownRebec =>
           (reactiveClass.knownRebec? knownRebec).isSome
+
+  | .ifThenElse _ _ _ =>
+      false
 
 /--
 One class satisfies D6: every external send it contains names a known rebec it
@@ -258,6 +275,10 @@ def receivingClass?
 /--
 One statement's send, if it has one, names a message server the receiving class
 declares, with a payload of the declared arity.
+
+`ifThenElse` is refused, for the reason recorded on `statementTargetDeclared`:
+layer 1 of stage H adds the constructor without any branch machinery, so refusing
+is what leaves the accepted fragment unchanged.
 -/
 def statementResolves
     (model : DTR.GeneralModel)
@@ -287,6 +308,9 @@ def statementResolves
           | some messageServer =>
               payload.length ==
                 messageServer.parameters.length
+
+  | .ifThenElse _ _ _ =>
+      false
 
 /--
 Every send in the model reaches a declared message server.

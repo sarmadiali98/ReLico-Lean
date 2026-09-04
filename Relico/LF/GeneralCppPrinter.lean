@@ -313,6 +313,32 @@ def generalPayloadStructName
     "_Args"
 
 /--
+Wrap a rendered inline statement sequence in braces.
+
+Two callers, the two arms of a rendered conditional, and it exists so that the spelling of an
+**empty** branch is decided in one place. `LF.stmtWellFormed`'s `ifThenElse` arm checks each
+branch with `List.all`, which holds of the empty list, so an empty branch is well-formed, a
+bridge main can construct one directly, and this printer is total and therefore has to spell it.
+`{}` rather than `{  }`, because two spaces around nothing is a rendering artefact and not a
+style.
+-/
+def renderGeneralBraced
+    (statements : String) :
+    String :=
+  if statements == "" then
+    "{}"
+  else
+    "{ " ++
+      statements ++
+      " }"
+
+/- The two statement renderers below are mutually recursive, because
+`LF.GeneralStmt.ifThenElse` carries two nested bodies: rendering a statement needs the body
+renderer, and the body renderer needs the statement renderer. A `mutual` block does not accept
+a docstring, so each definition carries its own. -/
+mutual
+
+/--
 Render one general statement.
 
 `setPort` becomes reactor-cpp's `p.set(v);`, which is what Fig. 1b's body writes.
@@ -353,6 +379,22 @@ never built, since the translation emits `scalar` at arity 1 and refuses arity 0
 The output-only `.trace` arm emits one `std::printf` line for its literal tag. It
 does not contribute an effect name; `generalProgramPreambleEntries` derives the
 corresponding `<cstdio>` preamble entry from the bodies that contain such a line.
+
+**Stage H's `ifThenElse` arm emits the whole conditional on one line**,
+`if (<c>) { <then> } else { <else> }`, with both branch bodies rendered inline by
+`renderGeneralBranchBody`. That is a formatting decision with a reason, and the reason is not
+taste. Every arm of this function returns a string containing **no newline**, and
+`renderGeneralBody` relies on it: it prefixes exactly one four-space indent to each rendered
+statement, and to that statement's first line only. A conditional broken across lines would
+therefore emit its interior flush left. Keeping the single-line invariant is what lets the
+conditional be added without changing this function's signature, without threading a nesting
+depth, and without disturbing any pinned printer expectation. Threading a depth is the better
+long-term rendering and is deliberately deferred to a formatting pass that can be measured
+against the gate rather than assumed.
+
+The `else` branch is always emitted, even when empty, because `LF.GeneralStmt.ifThenElse`
+always carries two bodies and this printer renders the structure it is given rather than
+guessing which halves were meant.
 -/
 def renderGeneralStmt
     (reactorName : ReactorName)
@@ -488,6 +530,88 @@ def renderGeneralStmt
                       renderGeneralExpr) ++
                   "});")
 
+  | .ifThenElse condition thenBody elseBody => do
+
+      let thenRendered ←
+        renderGeneralBranchBody
+          reactorName
+          outputPorts
+          thenBody
+
+      let elseRendered ←
+        renderGeneralBranchBody
+          reactorName
+          outputPorts
+          elseBody
+
+      pure
+        ("if (" ++
+          renderGeneralExpr
+            condition ++
+          ") " ++
+          renderGeneralBraced
+            thenRendered ++
+          " else " ++
+          renderGeneralBraced
+            elseRendered)
+
+/--
+Render one conditional branch's body as a single inline statement sequence.
+
+Statements are separated by one space rather than by a newline, which is the whole reason this
+function is not `renderGeneralBody`: that one indents each statement and joins with newlines,
+and it also renders a reaction's trigger-payload preamble, which a branch does not have. The
+two are different jobs that happen to walk the same list.
+
+Recursion is written out over the list rather than expressed with `mapM`, so that the recursive
+calls are syntactically visible to the termination checker on a nested inductive.
+
+An empty body renders as the empty string, and `renderGeneralBraced` turns that into `{}`.
+A refusal from any statement propagates, so a branch containing a set of an undeclared output
+port refuses exactly as the same statement outside a branch would.
+-/
+def renderGeneralBranchBody
+    (reactorName : ReactorName)
+    (outputPorts :
+      List LF.GeneralPortDecl) :
+    LF.GeneralBody →
+    Except String String
+
+  | [] =>
+      .ok ""
+
+  | [statement] =>
+      renderGeneralStmt
+        reactorName
+        outputPorts
+        statement
+
+  | statement :: remaining => do
+
+      let rendered ←
+        renderGeneralStmt
+          reactorName
+          outputPorts
+          statement
+
+      let renderedRemaining ←
+        renderGeneralBranchBody
+          reactorName
+          outputPorts
+          remaining
+
+      pure
+        (rendered ++
+          " " ++
+          renderedRemaining)
+
+end
+
+/- `generalEffectNames` and `generalEffectNamesFrom` are mutually recursive because
+`LF.GeneralStmt.ifThenElse` carries two nested bodies. A `mutual` block does not accept a
+docstring, so each definition carries its own. -/
+mutual
+
 /--
 Collect the names a body has effects on, in first-occurrence order.
 
@@ -499,34 +623,82 @@ consistent with it.
 
 Deriving the list from the body — instead of storing an `effects` field — is what makes it
 impossible to print an effect the body does not produce, or to omit one it does.
+
+**Stage H's `ifThenElse` arm unions both branches, and that union is what makes the emitted
+program compile.** A `setPort` or `schedule` inside a branch is an effect the reaction may
+perform, and reactor-cpp requires a reaction to declare every port it may write, so omitting a
+branch's effects would emit LF that `lfc` rejects. The consequence is stated rather than
+hidden: a reaction now declares the effects of **both** arms even though one firing performs at
+most one arm's worth. That is the same conservative static reading `LF.setPortNamesOfBody`
+takes, and it is deliberately not path-dependent, because an effect clause is a property of the
+emitted artefact and cannot depend on a run.
+
+Deduplication and ordering are unchanged. The accumulator threads through the nested folds, so
+a name is still added only when `names.contains` says it is absent, a port set in both arms
+appears once, and first appearance still fixes position. The then-branch is folded before the
+else-branch, so a name first set in the then-branch orders before one first set only in the
+else-branch, and both order before names first set after the conditional.
+
+Written as a `mutual` accumulator pair rather than a `foldl` with an inner `match`, because the
+`ifThenElse` arm has to traverse two nested bodies and therefore has to call the body-level
+function; a recursive call inside a function passed to `foldl` is invisible to structural
+recursion on a nested inductive.
 -/
-def generalEffectNames
-    (body : LF.GeneralBody) :
-    List String :=
-  body.foldl
-    (fun names statement =>
-      match statement with
+def generalEffectNames :
+    LF.GeneralBody →
+    List String
+  | body =>
+      generalEffectNamesFrom
+        []
+        body
 
-      | .assign _ _ =>
+/-- The effect names of a body, accumulated onto the names already found. -/
+def generalEffectNamesFrom :
+    List String →
+    LF.GeneralBody →
+    List String
+
+  | names, [] =>
+      names
+
+  | names, .assign _ _ :: remaining =>
+      generalEffectNamesFrom
+        names
+        remaining
+
+  | names, .trace _ :: remaining =>
+      generalEffectNamesFrom
+        names
+        remaining
+
+  | names, .schedule action _ _ :: remaining =>
+      generalEffectNamesFrom
+        (if names.contains action.value then
           names
+        else
+          names ++
+            [action.value])
+        remaining
 
-      | .trace _ =>
+  | names, .setPort port _ :: remaining =>
+      generalEffectNamesFrom
+        (if names.contains port.value then
           names
+        else
+          names ++
+            [port.value])
+        remaining
 
-      | .schedule action _ _ =>
-          if names.contains action.value then
+  | names, .ifThenElse _ thenBody elseBody :: remaining =>
+      generalEffectNamesFrom
+        (generalEffectNamesFrom
+          (generalEffectNamesFrom
             names
-          else
-            names ++
-              [action.value]
+            thenBody)
+          elseBody)
+        remaining
 
-      | .setPort port _ =>
-          if names.contains port.value then
-            names
-          else
-            names ++
-              [port.value])
-    []
+end
 
 /--
 Render the LF effect clause, or nothing at all when there are no effects.

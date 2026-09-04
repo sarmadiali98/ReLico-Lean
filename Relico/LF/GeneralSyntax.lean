@@ -340,11 +340,22 @@ property of the connection the value travels along. Stage E keys ports by send s
 precisely so that each statement's delay has its own connection to sit on, which is
 where the delay of a `setPort` is recorded — see `docs/STAGE_E_DESIGN.md` §6.
 
-There is no `if` and no `for`. Fig. 5's `LFStmt` has both. Control flow is a later
-stage on both sides at once, and adding the LF half alone would create a construct
-nothing can produce. It is also what keeps stage E's central invariant true: with
-flat bodies one statement performs at most one `set()` per firing, so no reaction can
-set one port twice at one tag.
+There is `if` but no `for`. Fig. 5's `LFStmt` has both. Stage H adds the conditional on
+**both sides at once**, which is what the earlier note here required: an LF conditional alone
+would have been a construct nothing can produce, and it is produced now because
+`DTR.GeneralStmt.ifThenElse` exists and `Translation.compileGeneralStmt` compiles into it.
+`for` stays absent; it unlocks no benchmark and is out of scope.
+
+That earlier note also recorded what flatness bought: *"with flat bodies one statement
+performs at most one `set()` per firing, so no reaction can set one port twice at one tag."*
+That is no longer automatic, and the replacement is **static and conservative**: a conditional
+contributes the ports of *both* branches to the compiled body, so a port set in each arm counts
+as appearing twice even though only one arm runs. `LF.setPortNamesOfBody` recurses into both
+branches accordingly. Port uniqueness stays a property of the compiled **artifact** rather than
+of an execution trace, which keeps `Nodup` decidable from the body alone and keeps F50's
+guard-relative theorem meaningful. A path-dependent reading was considered and rejected: it
+would make the property a statement about runs, which `setPortNamesOfBody` cannot express and
+no guard could check.
 
 `trace` carries the literal tag that the C++ printer writes as target output.
 It has no effect-list entry and no runtime label in this milestone: the output
@@ -371,17 +382,159 @@ inductive GeneralStmt where
       List LF.GeneralExpr →
       GeneralStmt
 
-deriving Repr, DecidableEq, BEq, Inhabited
+  | ifThenElse :
+      LF.GeneralExpr →
+      List GeneralStmt →
+      List GeneralStmt →
+      GeneralStmt
+
+deriving Repr, BEq, Inhabited
 
 /--
 A statement sequence.
 
-Flat on purpose, exactly as on the DTR side: the stage that admits branching has
-to change this type, and that change is a build error at every function that walks
-a body rather than a silent default branch.
+The *container* stays `List`, exactly as on the DTR side; what stage H changed is the
+element type, which is now recursive through `GeneralStmt.ifThenElse`. The earlier note
+here predicted that the stage admitting branching *"has to change this type, and that
+change is a build error at every function that walks a body rather than a silent default
+branch"*, and that is what happened: every traversal of a body broke loudly.
 -/
 abbrev GeneralBody :=
   List LF.GeneralStmt
+
+/-
+Decidable equality for a target statement and for a target body is written by hand below.
+The docstrings sit on the two definitions rather than on the `mutual` block, because a
+`mutual` block does not accept one.
+-/
+mutual
+
+/--
+Decide equality of two target statements.
+
+Hand-written for the same toolchain reason as `DTR.decEqGeneralStmt`:
+`GeneralStmt.ifThenElse` carries `List GeneralStmt`, which makes the type a *nested*
+inductive, and Lean 4.32's `DecidableEq` deriving handler does not apply to one. `Repr`,
+`BEq` and `Inhabited` still derive, so only this instance is manual.
+
+Mutually recursive with `decEqGeneralBody` because the type is, and exhaustive over both
+arguments with no wildcard on the pair, so a later statement form breaks here loudly rather
+than being decided `false`.
+-/
+def decEqGeneralStmt :
+    (first second : LF.GeneralStmt) →
+    Decidable (first = second)
+
+  | .assign firstName firstValue, .assign secondName secondValue =>
+      if hName : firstName = secondName then
+        if hValue : firstValue = secondValue then
+          .isTrue (by subst hName; subst hValue; rfl)
+        else
+          .isFalse (by simp [hValue])
+      else
+        .isFalse (by simp [hName])
+
+  | .assign _ _, .trace _ => .isFalse (by simp)
+  | .assign _ _, .schedule _ _ _ => .isFalse (by simp)
+  | .assign _ _, .setPort _ _ => .isFalse (by simp)
+  | .assign _ _, .ifThenElse _ _ _ => .isFalse (by simp)
+
+  | .trace firstTag, .trace secondTag =>
+      if hTag : firstTag = secondTag then
+        .isTrue (by subst hTag; rfl)
+      else
+        .isFalse (by simp [hTag])
+
+  | .trace _, .assign _ _ => .isFalse (by simp)
+  | .trace _, .schedule _ _ _ => .isFalse (by simp)
+  | .trace _, .setPort _ _ => .isFalse (by simp)
+  | .trace _, .ifThenElse _ _ _ => .isFalse (by simp)
+
+  | .schedule firstAction firstArguments firstDelay,
+    .schedule secondAction secondArguments secondDelay =>
+      if hAction : firstAction = secondAction then
+        if hArguments : firstArguments = secondArguments then
+          if hDelay : firstDelay = secondDelay then
+            .isTrue
+              (by
+                subst hAction
+                subst hArguments
+                subst hDelay
+                rfl)
+          else
+            .isFalse (by simp [hDelay])
+        else
+          .isFalse (by simp [hArguments])
+      else
+        .isFalse (by simp [hAction])
+
+  | .schedule _ _ _, .assign _ _ => .isFalse (by simp)
+  | .schedule _ _ _, .trace _ => .isFalse (by simp)
+  | .schedule _ _ _, .setPort _ _ => .isFalse (by simp)
+  | .schedule _ _ _, .ifThenElse _ _ _ => .isFalse (by simp)
+
+  | .setPort firstPort firstArguments, .setPort secondPort secondArguments =>
+      if hPort : firstPort = secondPort then
+        if hArguments : firstArguments = secondArguments then
+          .isTrue (by subst hPort; subst hArguments; rfl)
+        else
+          .isFalse (by simp [hArguments])
+      else
+        .isFalse (by simp [hPort])
+
+  | .setPort _ _, .assign _ _ => .isFalse (by simp)
+  | .setPort _ _, .trace _ => .isFalse (by simp)
+  | .setPort _ _, .schedule _ _ _ => .isFalse (by simp)
+  | .setPort _ _, .ifThenElse _ _ _ => .isFalse (by simp)
+
+  | .ifThenElse firstCondition firstThen firstElse,
+    .ifThenElse secondCondition secondThen secondElse =>
+      if hCondition : firstCondition = secondCondition then
+        match decEqGeneralBody firstThen secondThen,
+              decEqGeneralBody firstElse secondElse with
+        | .isTrue hThen, .isTrue hElse =>
+            .isTrue
+              (by
+                subst hCondition
+                subst hThen
+                subst hElse
+                rfl)
+        | .isFalse hThen, _ => .isFalse (by simp [hThen])
+        | _, .isFalse hElse => .isFalse (by simp [hElse])
+      else
+        .isFalse (by simp [hCondition])
+
+  | .ifThenElse _ _ _, .assign _ _ => .isFalse (by simp)
+  | .ifThenElse _ _ _, .trace _ => .isFalse (by simp)
+  | .ifThenElse _ _ _, .schedule _ _ _ => .isFalse (by simp)
+  | .ifThenElse _ _ _, .setPort _ _ => .isFalse (by simp)
+
+/--
+Decide equality of two target bodies.
+
+A `List` decision procedure specialised to this element type rather than an appeal to the
+generic `List` instance, because the generic one needs `DecidableEq LF.GeneralStmt` as an
+instance argument, which is exactly what `decEqGeneralStmt` is defining.
+-/
+def decEqGeneralBody :
+    (first second : LF.GeneralBody) →
+    Decidable (first = second)
+
+  | [], [] => .isTrue rfl
+  | [], _ :: _ => .isFalse (by simp)
+  | _ :: _, [] => .isFalse (by simp)
+
+  | firstHead :: firstTail, secondHead :: secondTail =>
+      match decEqGeneralStmt firstHead secondHead,
+            decEqGeneralBody firstTail secondTail with
+      | .isTrue hHead, .isTrue hTail =>
+          .isTrue (by subst hHead; subst hTail; rfl)
+      | .isFalse hHead, _ => .isFalse (by simp [hHead])
+      | _, .isFalse hTail => .isFalse (by simp [hTail])
+
+end
+
+instance : DecidableEq LF.GeneralStmt := decEqGeneralStmt
 
 /--
 A typed parameter, used for both message-server payloads and reactor parameters.
@@ -911,6 +1064,11 @@ def reactorOfInstance?
 
 end GeneralProgram
 
+/- `setPortNamesOfStmt` and `setPortNamesOfBody` are mutually recursive because
+`LF.GeneralStmt.ifThenElse` carries two nested bodies. A `mutual` block does not accept a
+docstring, so each definition carries its own. -/
+mutual
+
 /--
 The output ports one reaction body sets, in source order, **with repeats preserved**.
 
@@ -936,6 +1094,54 @@ an oversight.** `LF.GeneralReactor.stmtWellFormed`'s `.setPort` arm asks that th
 the same shape as `connectionsWellFormed` asking that an endpoint be declared rather than
 declared once (F48). So `Nodup` of this list is a property the stage E guard does not check,
 and finding F50 records that it is also not true in general.
+
+**Stage H's `ifThenElse` arm concatenates both branches, and that is a semantic decision.**
+A conditional contributes the ports of the then-branch followed by those of the else-branch,
+so a port set in each arm appears twice in this list even though only one arm executes. The
+alternative, counting along one execution path, was rejected: it would make the property a
+statement about *runs* rather than about the compiled body, which this function cannot express
+and no guard could check. Keeping it static keeps `Nodup` decidable from the body alone and
+keeps F50's guard-relative theorem meaningful under branching. The cost is stated rather than
+hidden: a program that sets one port in each arm is now reported as a repeat, which is
+conservative and may name a program that would be safe at run time.
+
+The `rfl` property the three arms above were written for is preserved, and preserving it took a
+shape change. Stage H's first attempt recursed from the body-level function straight into the two
+branch bodies, which Lean compiles by **well-founded** recursion, and a well-founded definition
+does not reduce: `setPortNamesOfBody [] = []` stopped holding by `rfl`, and with it every pin that
+evaluates a compilation, because the program guard calls this function. Splitting the traversal into
+a statement-level function and a body-level one — the standard shape for a nested inductive — makes
+it structurally recursive again, so the equations reduce and `decide` still evaluates the guard. The
+measurement is in `Relico/Tests/GeneralInitialization.lean`, whose two compilation pins failed
+against the single-function version while the library still built.
+-/
+def setPortNamesOfStmt :
+    LF.GeneralStmt →
+    List PortName
+
+  | .assign _ _ =>
+      []
+
+  | .trace _ =>
+      []
+
+  | .schedule _ _ _ =>
+      []
+
+  | .setPort port _ =>
+      [port]
+
+  | .ifThenElse _ thenBody elseBody =>
+      setPortNamesOfBody thenBody ++
+        setPortNamesOfBody elseBody
+
+/--
+The output ports a body sets, in order, counting a repeat twice.
+
+The body-level half of the pair. Every head statement is handed to `setPortNamesOfStmt`, which is
+what keeps the recursion structural; the values are unchanged from the single-function version
+because a statement that sets nothing contributes `[]` and a `setPort` contributes a one-element
+list.
 -/
 def setPortNamesOfBody :
     LF.GeneralBody →
@@ -944,18 +1150,127 @@ def setPortNamesOfBody :
   | [] =>
       []
 
-  | .assign _ _ :: remaining =>
-      setPortNamesOfBody remaining
-
-  | .trace _ :: remaining =>
-      setPortNamesOfBody remaining
-
-  | .schedule _ _ _ :: remaining =>
-      setPortNamesOfBody remaining
-
-  | .setPort port _ :: remaining =>
-      port ::
+  | statement :: remaining =>
+      setPortNamesOfStmt statement ++
         setPortNamesOfBody remaining
+
+end
+
+/-!
+### Set-port traversal equations
+
+One directed equation per head constructor, `@[simp]`, so that a proof about a compiled body
+rewrites into the arm it cares about instead of unfolding the pair. They exist because the pair
+form is what keeps the traversal structurally recursive and therefore reducible, while the
+*shape* every proof in `Relico/Translation/GeneralBasic.lean` wants is the one the
+single-function version had: a `setPort` head contributing `port :: …` rather than
+`[port] ++ …`, and a conditional head contributing the two branches ahead of the tail.
+
+Stating them is not a convenience. Without them each proof would carry the append normalisation
+of the pair, and the two site lemmas would read as facts about `setPortNamesOfStmt` rather than
+about the body.
+-/
+
+@[simp]
+theorem setPortNamesOfBody_assign
+    (target : VarName)
+    (value : LF.GeneralExpr)
+    (remaining : LF.GeneralBody) :
+    setPortNamesOfBody
+        (
+          .assign
+              target
+              value ::
+            remaining
+        ) =
+      setPortNamesOfBody
+        remaining := by
+  simp [
+    setPortNamesOfBody,
+    setPortNamesOfStmt
+  ]
+
+@[simp]
+theorem setPortNamesOfBody_trace
+    (tag : String)
+    (remaining : LF.GeneralBody) :
+    setPortNamesOfBody
+        (
+          .trace
+              tag ::
+            remaining
+        ) =
+      setPortNamesOfBody
+        remaining := by
+  simp [
+    setPortNamesOfBody,
+    setPortNamesOfStmt
+  ]
+
+@[simp]
+theorem setPortNamesOfBody_schedule
+    (actionName : ActionName)
+    (arguments : List LF.GeneralExpr)
+    (delay : Delay)
+    (remaining : LF.GeneralBody) :
+    setPortNamesOfBody
+        (
+          .schedule
+              actionName
+              arguments
+              delay ::
+            remaining
+        ) =
+      setPortNamesOfBody
+        remaining := by
+  simp [
+    setPortNamesOfBody,
+    setPortNamesOfStmt
+  ]
+
+@[simp]
+theorem setPortNamesOfBody_setPort
+    (port : PortName)
+    (arguments : List LF.GeneralExpr)
+    (remaining : LF.GeneralBody) :
+    setPortNamesOfBody
+        (
+          .setPort
+              port
+              arguments ::
+            remaining
+        ) =
+      port ::
+        setPortNamesOfBody
+          remaining := by
+  simp [
+    setPortNamesOfBody,
+    setPortNamesOfStmt
+  ]
+
+@[simp]
+theorem setPortNamesOfBody_ifThenElse
+    (condition : LF.GeneralExpr)
+    (thenBody elseBody remaining : LF.GeneralBody) :
+    setPortNamesOfBody
+        (
+          .ifThenElse
+              condition
+              thenBody
+              elseBody ::
+            remaining
+        ) =
+      setPortNamesOfBody
+          thenBody ++
+        setPortNamesOfBody
+            elseBody ++
+          setPortNamesOfBody
+            remaining := by
+  simp [
+    setPortNamesOfBody,
+    setPortNamesOfStmt,
+    List.append_assoc
+  ]
 
 end LF
 end Relico

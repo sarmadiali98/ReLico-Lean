@@ -734,6 +734,7 @@ theorem generalConsume_backward_weak_of_takeRepresentative
                   }
 
                 activeBody := server.body
+                frames := []
               }
         } ∧
       Common.WeakStep
@@ -758,6 +759,7 @@ theorem generalConsume_backward_weak_of_takeRepresentative
                     reactorRT.valuation
 
                 activeBody := reaction.body
+                frames := []
               }
 
           pending := earlier' ++ later'
@@ -784,6 +786,7 @@ theorem generalConsume_backward_weak_of_takeRepresentative
                   }
 
                 activeBody := server.body
+                frames := []
               }
         }
           {
@@ -801,6 +804,7 @@ theorem generalConsume_backward_weak_of_takeRepresentative
                     reactorRT.valuation
 
                 activeBody := reaction.body
+                frames := []
               }
 
           pending := earlier' ++ later'
@@ -1025,6 +1029,7 @@ theorem generalConsume_backward_weakStep_of_takeRepresentative
                   }
 
                 activeBody := server.body
+                frames := []
               }
         } ∧
       Common.WeakStep
@@ -1049,6 +1054,7 @@ theorem generalConsume_backward_weakStep_of_takeRepresentative
                     reactorRT.valuation
 
                 activeBody := reaction.body
+                frames := []
               }
 
           pending := earlier' ++ later'
@@ -1075,6 +1081,7 @@ theorem generalConsume_backward_weakStep_of_takeRepresentative
                   }
 
                 activeBody := server.body
+                frames := []
               }
         }
           {
@@ -1092,6 +1099,7 @@ theorem generalConsume_backward_weakStep_of_takeRepresentative
                     reactorRT.valuation
 
                 activeBody := reaction.body
+                frames := []
               }
 
           pending := earlier' ++ later'
@@ -1117,6 +1125,7 @@ theorem generalConsume_backward_weakStep_of_takeRepresentative
                   }
 
                 activeBody := server.body
+                frames := []
               }
         } := by
 
@@ -1298,12 +1307,34 @@ theorem generalActorIdle_of_reactorIdle
   obtain ⟨context, index, hCompiled, _⟩ :=
     hCorresponds.continuation
 
+  -- The mirror of `Correctness.generalReactorIdle_of_actorIdle`: stage H made both idleness
+  -- predicates a conjunction, and the pairing's fourth conjunct carries the stack half in this
+  -- direction too, an empty target stack forcing an empty source one.
   have hTargetNil :
       reactor.activeBody = [] := by
     unfold LF.GeneralReactorRuntime.idle at hIdle
 
     exact
-      List.isEmpty_iff.mp hIdle
+      List.isEmpty_iff.mp
+        (by
+          simp_all)
+
+  have hTargetFramesNil :
+      reactor.frames = [] := by
+    unfold LF.GeneralReactorRuntime.idle at hIdle
+
+    exact
+      List.isEmpty_iff.mp
+        (by
+          simp_all)
+
+  have hSourceFramesNil :
+      actor.frames = [] :=
+    generalFramesCompile_source_nil
+      (by
+        rw [← hTargetFramesNil]
+
+        exact hCorresponds.frames)
 
   rw [hTargetNil] at hCompiled
 
@@ -1311,7 +1342,8 @@ theorem generalActorIdle_of_reactorIdle
 
   rw [
     compileGeneralBody_eq_nil
-      hCompiled
+      hCompiled,
+    hSourceFramesNil
   ]
 
   rfl

@@ -103,6 +103,16 @@ theorem generalNoPastPending_of_step
   | trace hReactor hBody =>
       exact hNoPast
 
+  -- The three step-into rules copy the queue, so the invariant transfers unchanged.
+  | branchTrue hReactor hBody hCondition =>
+      exact hNoPast
+
+  | branchFalse hReactor hBody hCondition =>
+      exact hNoPast
+
+  | resume hReactor hBody hFrames =>
+      exact hNoPast
+
   | schedule hReactor hBody hArguments =>
       intro event hMem
 

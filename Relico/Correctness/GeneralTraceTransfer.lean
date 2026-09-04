@@ -412,6 +412,26 @@ theorem generalTraceTransfer_forward
               True.intro
               hVisible
 
+      -- Stage H's three step-into rules are τ, so they are refuted by the visibility premise
+      -- exactly as the three τ rules above are.
+      | branchTrue hActor hBody hCondition =>
+          exact
+            absurd
+              True.intro
+              hVisible
+
+      | branchFalse hActor hBody hCondition =>
+          exact
+            absurd
+              True.intro
+              hVisible
+
+      | resume hActor hBody hFrames =>
+          exact
+            absurd
+              True.intro
+              hVisible
+
       | take hSelected hName hActor hIdle hDue hArrival hServer =>
 
           -- The consume case: delegated to the premise, which is the α′ residue.

@@ -29,6 +29,14 @@ side over every statement of every active reactor body. Both are membership-shap
 what makes them transport through α-equivalence's queue permutation and reactor-membership
 equivalence for free.
 
+**Stage H added a third conjunct, and it is the same body side over the frame stack.** The
+step-into rules make a reactor's *pending* levels part of its state, and `LF.GeneralStep.resume`
+promotes a frame to the active body; without a clause about frames that promotion would install
+statements the invariant had never said anything about, and preservation would be false. The new
+clause is the price of step-into and it is paid where the cost belongs: `fire` and the
+initializer install an empty stack, so both discharge it trivially, and every statement rule
+copies the stack, so it transfers.
+
 The body side is a predicate on **one statement**, quantified over membership in the body. That
 is the trick that makes preservation cheap: every body-consuming τ rule replaces
 `statement :: remaining` by `remaining`, and a membership-quantified predicate over a list is
@@ -264,31 +272,41 @@ namespace Translation
 `selfSendsFromIndex` is declared with the index in the matched position and no equation lemmas,
 because until now every consumer unfolded it once. The schedule-origin induction below rewrites
 with it four times per step, so the four arms are stated as the directed equations that
-induction wants. Each is `rfl`; they exist so that the induction never unfolds the recursion the
-equation compiler generated, following `compileGeneralBody_cons_ok_inversion`'s reason for
-preferring the three body equations over the `match` behind them.
+induction wants. They exist so that the induction never unfolds the recursion the equation
+compiler generated, following `compileGeneralBody_cons_ok_inversion`'s reason for preferring the
+three body equations over the `match` behind them.
+
+Each was `rfl` until stage H. The conditional arm made `selfSendsFromIndex` recurse into two
+nested bodies, so the equation compiler stopped producing definitional equations for it and each
+of these is now `simp [selfSendsFromIndex]`. No value moved; only the proof that names it.
 -/
 
 @[simp]
 theorem selfSendsFromIndex_nil
     (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
     (index : Nat) :
     selfSendsFromIndex
         bodyKey
+        levelPath
         index
         [] =
       [] := by
-  rfl
+  simp [
+    selfSendsFromIndex
+  ]
 
 @[simp]
 theorem selfSendsFromIndex_assign
     (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
     (index : Nat)
     (target : VarName)
     (value : DTR.GeneralExpr)
     (remaining : DTR.GeneralBody) :
     selfSendsFromIndex
         bodyKey
+        levelPath
         index
         (
           .assign
@@ -298,18 +316,24 @@ theorem selfSendsFromIndex_assign
         ) =
       selfSendsFromIndex
         bodyKey
+        levelPath
         (index + 1)
         remaining := by
-  rfl
+  simp [
+    selfSendsFromIndex,
+    selfSendsFromStmt
+  ]
 
 @[simp]
 theorem selfSendsFromIndex_trace
     (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
     (index : Nat)
     (tag : String)
     (remaining : DTR.GeneralBody) :
     selfSendsFromIndex
         bodyKey
+        levelPath
         index
         (
           .trace
@@ -318,13 +342,18 @@ theorem selfSendsFromIndex_trace
         ) =
       selfSendsFromIndex
         bodyKey
+        levelPath
         (index + 1)
         remaining := by
-  rfl
+  simp [
+    selfSendsFromIndex,
+    selfSendsFromStmt
+  ]
 
 @[simp]
 theorem selfSendsFromIndex_send_knownRebec
     (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
     (index : Nat)
     (rebec : KnownRebecName)
     (message : MsgName)
@@ -333,6 +362,7 @@ theorem selfSendsFromIndex_send_knownRebec
     (remaining : DTR.GeneralBody) :
     selfSendsFromIndex
         bodyKey
+        levelPath
         index
         (
           .send
@@ -345,13 +375,18 @@ theorem selfSendsFromIndex_send_knownRebec
         ) =
       selfSendsFromIndex
         bodyKey
+        levelPath
         (index + 1)
         remaining := by
-  rfl
+  simp [
+    selfSendsFromIndex,
+    selfSendsFromStmt
+  ]
 
 @[simp]
 theorem selfSendsFromIndex_send_selfTarget
     (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
     (index : Nat)
     (message : MsgName)
     (arguments : List DTR.GeneralExpr)
@@ -359,6 +394,7 @@ theorem selfSendsFromIndex_send_selfTarget
     (remaining : DTR.GeneralBody) :
     selfSendsFromIndex
         bodyKey
+        levelPath
         index
         (
           .send
@@ -375,7 +411,8 @@ theorem selfSendsFromIndex_send_selfTarget
               bodyKey
 
             index :=
-              index
+              levelPath ++
+                [index]
           }
 
         message :=
@@ -386,9 +423,61 @@ theorem selfSendsFromIndex_send_selfTarget
       } ::
         selfSendsFromIndex
           bodyKey
+          levelPath
           (index + 1)
           remaining := by
-  rfl
+  simp [
+    selfSendsFromIndex,
+    selfSendsFromStmt
+  ]
+
+/--
+A conditional contributes both branches' self-sends, then the enclosing level's.
+
+The mirror of `externalSendsFromIndex_ifThenElse`, component for component, and the equation the
+schedule-origin recursion below rewrites with in its branch cases. Both branches contribute
+unconditionally: an action is declared for a self-send inside a branch whether or not the branch
+runs, because the action set is part of the emitted reactor and not of a run.
+-/
+@[simp]
+theorem selfSendsFromIndex_ifThenElse
+    (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
+    (index : Nat)
+    (condition : DTR.GeneralExpr)
+    (thenBody elseBody remaining : DTR.GeneralBody) :
+    selfSendsFromIndex
+        bodyKey
+        levelPath
+        index
+        (
+          .ifThenElse
+            condition
+            thenBody
+            elseBody ::
+          remaining
+        ) =
+      selfSendsFromIndex
+          bodyKey
+          (levelPath ++
+            [index, 0])
+          0
+          thenBody ++
+        selfSendsFromIndex
+            bodyKey
+            (levelPath ++
+              [index, 1])
+            0
+            elseBody ++
+          selfSendsFromIndex
+            bodyKey
+            levelPath
+            (index + 1)
+            remaining := by
+  simp [
+    selfSendsFromIndex,
+    selfSendsFromStmt
+  ]
 
 /-!
 ## Site membership, in the introduction direction
@@ -1994,7 +2083,8 @@ private theorem compileGeneralStmt_schedule_inversion
               context.bodyKey
 
             index :=
-              index
+              context.levelPath ++
+                [index]
           }
           message := by
 
@@ -2038,7 +2128,8 @@ private theorem compileGeneralStmt_schedule_inversion
                     context.bodyKey
 
                   index :=
-                    index
+                    context.levelPath ++
+                      [index]
                 } with
 
           | none =>
@@ -2053,17 +2144,79 @@ private theorem compileGeneralStmt_schedule_inversion
                 hEntry
               ] at hStatement
 
+  | ifThenElse condition thenBody elseBody =>
+      -- A compiled conditional is `.ifThenElse`, never `.schedule`. Both branch
+      -- compilations have to be named before the hypothesis can be simplified,
+      -- because the translation matches on each in turn before it returns.
+      cases hThen :
+          compileGeneralBody
+            env
+            {
+              bodyKey :=
+                context.bodyKey
+
+              selfSends :=
+                context.selfSends
+
+              levelPath :=
+                context.levelPath ++
+                  [index, 0]
+            }
+            0
+            thenBody with
+
+      | error message =>
+          simp [
+            compileGeneralStmt,
+            hThen
+          ] at hStatement
+
+      | ok compiledThen =>
+
+          cases hElse :
+              compileGeneralBody
+                env
+                {
+                  bodyKey :=
+                    context.bodyKey
+
+                  selfSends :=
+                    context.selfSends
+
+                  levelPath :=
+                    context.levelPath ++
+                      [index, 1]
+                }
+                0
+                elseBody with
+
+          | error message =>
+              simp [
+                compileGeneralStmt,
+                hThen,
+                hElse
+              ] at hStatement
+
+          | ok compiledElse =>
+              simp [
+                compileGeneralStmt,
+                hThen,
+                hElse
+              ] at hStatement
+
 /--
 A self-send site of a body's tail is a self-send site of the body.
 
-The site-traversal counterpart of `List.mem_cons_of_mem`, and what lets the induction below
-return a witness in the *whole* body's site list after obtaining one in the tail's. Four arms
+The site-traversal counterpart of `List.mem_cons_of_mem`, and what lets the recursion below
+return a witness in the *whole* body's site list after obtaining one in the tail's. Five arms
 rather than a wildcard, matching `selfSendsFromIndex`'s own refusal to use one: the three
-non-self-send arms leave the list untouched, the self-send arm prepends, and a fifth statement
-constructor should break this proof loudly.
+non-self-send arms leave the list untouched, the self-send arm prepends, the conditional arm
+appends both branches ahead of the tail, and a sixth statement constructor should break this
+proof loudly.
 -/
 theorem mem_selfSendsFromIndex_cons_of_mem
     (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
     (index : Nat)
     (statement : DTR.GeneralStmt)
     (remaining : DTR.GeneralBody)
@@ -2072,11 +2225,13 @@ theorem mem_selfSendsFromIndex_cons_of_mem
       selfSend ∈
         selfSendsFromIndex
           bodyKey
+          levelPath
           (index + 1)
           remaining) :
     selfSend ∈
       selfSendsFromIndex
         bodyKey
+        levelPath
         index
         (statement :: remaining) := by
 
@@ -2117,6 +2272,16 @@ theorem mem_selfSendsFromIndex_cons_of_mem
 
           exact hMember
 
+  | ifThenElse condition thenBody elseBody =>
+      rw [
+        selfSendsFromIndex_ifThenElse
+      ]
+
+      exact
+        List.mem_append.mpr
+          (Or.inr
+            hMember)
+
 /--
 **A.** Every action a compiled body schedules was named by a self-send site of that body, at or
 after the index the compilation started from.
@@ -2131,6 +2296,18 @@ The `index ≤ selfSend.site.index` conjunct is carried for the same reason the 
 it — it is what a positional argument would need — and is proved by the same `omega` step off the
 recursion. Nothing in this milestone consumes it; it is cheaper to state than to add later, and
 dropping it would make the two halves of the provenance pair differ in shape for no reason.
+
+**Stage H split that conjunct into a position and a residue**, exactly as
+`compileGeneralBody_setPortNames_provenance` did: the site is
+`context.levelPath ++ (position :: rest)` and `index ≤ position` compares the component this level
+owns.
+
+**Membership in `compiled` is shallow, and that bounds what this theorem says.** A `.schedule`
+nested inside a compiled conditional is not an element of `compiled`, so this statement is about
+the compiled body's own statements and no more. That is not a gap that stage H introduced by
+accident, and it is not repaired by recursing into branches here: the invariant this feeds reads a
+statement out of a reactor's *active body*, and a nested version becomes owed exactly when the
+target semantics starts stepping into a branch. Until then the sentence is as strong as it was.
 
 Quantified over the three `.schedule` components rather than over a name-extracting function,
 unlike `compileGeneralBody_setPortNames_provenance`'s `LF.setPortNamesOfBody`. That function
@@ -2158,13 +2335,19 @@ theorem compileGeneralBody_schedule_provenance
             arguments
             delay ∈
           compiled →
-        ∃ (selfSend : GeneralSelfSend),
+        ∃ (selfSend : GeneralSelfSend)
+          (position : Nat)
+          (rest : List Nat),
           selfSend ∈
             selfSendsFromIndex
               context.bodyKey
+              context.levelPath
               index
               statements ∧
-          index ≤ selfSend.site.index ∧
+          index ≤ position ∧
+          selfSend.site.index =
+            context.levelPath ++
+              (position :: rest) ∧
           actionName =
             generalActionNameAtSite
               context.selfSends
@@ -2232,7 +2415,8 @@ theorem compileGeneralBody_schedule_provenance
                      context.bodyKey
 
                    index :=
-                     index
+                     context.levelPath ++
+                       [index]
                  }
 
                message :=
@@ -2241,13 +2425,16 @@ theorem compileGeneralBody_schedule_provenance
                delay :=
                  sourceDelay
              },
+             index,
+             [],
              List.mem_cons_self,
              Nat.le_refl index,
+             rfl,
              hName⟩
 
       | inr hThere =>
 
-          obtain ⟨selfSend, hSite, hIndex, hName⟩ :=
+          obtain ⟨selfSend, position, rest, hSite, hIndex, hPath, hName⟩ :=
             inductionHypothesis
               (index + 1)
               compiledRemaining
@@ -2259,13 +2446,17 @@ theorem compileGeneralBody_schedule_provenance
 
           exact
             ⟨selfSend,
+             position,
+             rest,
              mem_selfSendsFromIndex_cons_of_mem
                context.bodyKey
+               context.levelPath
                index
                statement
                remaining
                hSite,
              by omega,
+             hPath,
              hName⟩
 
 end Translation
@@ -2471,6 +2662,11 @@ def GeneralPendingOrigin
     event.target
     event.kind
 
+/- `GeneralStmtOrigin` and `GeneralBodyOrigin` are mutually recursive because
+`LF.GeneralStmt.ifThenElse` carries two nested bodies. A `mutual` block does not accept a
+docstring, so each definition carries its own. -/
+mutual
+
 /--
 The event one statement of a running reactor would produce has a valid origin.
 
@@ -2491,6 +2687,15 @@ stating it as an implication is what lets the `setPort` rule discharge it by han
 Nothing is stored on `LF.GeneralReactorRuntime` to support this. The predicate is a statement
 *about* the body the runtime already carries, so no provenance field is added and the runtime
 state of this family is unchanged by the whole milestone.
+
+**Stage H's conditional arm asks for both branches, and that is the only choice that survives a
+step-into rule.** A conditional produces no event itself; every event it can lead to comes from a
+statement of one of its branches, and when the target semantics starts stepping into a branch those
+statements enter an active body directly. An arm returning `True` would type-check, would be
+provable everywhere, and would make the invariant fail to be preserved by that step the day it
+lands. So both branches carry their obligations, unconditionally and without reference to the
+condition, which is the same conservative static reading `LF.setPortNamesOfBody` and
+`LF.GeneralCppPrinter.generalEffectNames` take.
 -/
 def GeneralStmtOrigin
     (model : DTR.GeneralModel)
@@ -2529,6 +2734,114 @@ def GeneralStmtOrigin
           connection.targetInstance
           (.inputPort
             connection.targetPort)
+
+  | .ifThenElse _ thenBody elseBody =>
+      GeneralBodyOrigin
+          model
+          program
+          routes
+          instanceName
+          thenBody ∧
+        GeneralBodyOrigin
+          model
+          program
+          routes
+          instanceName
+          elseBody
+
+/--
+Every statement of a body carries its origin obligation.
+
+Written as an explicit traversal rather than as `∀ statement ∈ body, GeneralStmtOrigin …`, because
+a recursive occurrence under a binder inside `List.Forall`-style membership is not visible to
+structural recursion on a nested inductive. `LF.GeneralWellFormed.bodyWellFormed` is written the
+same way for the same reason.
+-/
+def GeneralBodyOrigin
+    (model : DTR.GeneralModel)
+    (program : LF.GeneralProgram)
+    (routes : List Translation.GeneralRoute)
+    (instanceName : ActorName) :
+    LF.GeneralBody →
+    Prop
+
+  | [] =>
+      True
+
+  | statement :: remaining =>
+      GeneralStmtOrigin
+          model
+          program
+          routes
+          instanceName
+          statement ∧
+        GeneralBodyOrigin
+          model
+          program
+          routes
+          instanceName
+          remaining
+
+end
+
+/--
+A body-level origin obligation yields the obligation of every statement in the body.
+
+The bridge between the two shapes the invariant uses. `GeneralBodyOrigin` is a right-nested
+conjunction, because that is what a nested inductive can be structurally recursive over;
+`GeneralKindOrigin`'s clauses are membership-quantified, because that is what transports through
+α-equivalence. Stage H's branch rules need to go from the first to the second: a conditional's
+`GeneralStmtOrigin` is a pair of `GeneralBodyOrigin`s, and the rule that enters a branch owes the
+membership form over the branch it made active.
+
+Proved by recursion on the list, which is also why it is not stated as an `iff`: the converse holds
+too and no caller wants it.
+-/
+theorem generalStmtOrigin_of_mem_of_bodyOrigin
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    {routes : List Translation.GeneralRoute}
+    {instanceName : ActorName} :
+    ∀ (body : LF.GeneralBody)
+      (statement : LF.GeneralStmt),
+      GeneralBodyOrigin
+        model
+        program
+        routes
+        instanceName
+        body →
+      statement ∈ body →
+      GeneralStmtOrigin
+        model
+        program
+        routes
+        instanceName
+        statement := by
+
+  intro body statement hBody hMember
+
+  induction body with
+
+  | nil =>
+      cases hMember
+
+  | cons head remaining inductionHypothesis =>
+
+      obtain ⟨hHead, hRemaining⟩ :=
+        hBody
+
+      rcases List.mem_cons.mp hMember with
+        hHere |
+          hThere
+
+      · subst hHere
+
+        exact hHead
+
+      · exact
+          inductionHypothesis
+            hRemaining
+            hThere
 
 /-!
 ### Arm equations
@@ -2708,7 +3021,16 @@ def GeneralKindOrigin
         program
         routes
         entry.1
-        statement)
+        statement) ∧
+  (∀ entry ∈ state.reactors,
+    ∀ frame ∈ entry.2.frames,
+      ∀ statement ∈ frame,
+        GeneralStmtOrigin
+          model
+          program
+          routes
+          entry.1
+          statement)
 
 end LF
 
@@ -2731,12 +3053,20 @@ one message server's — and `sendsResolveToMessageServers` is a traversal of
 `DTR.GeneralReactiveClass.bodies` that each of them projects out of differently. Taking the
 per-body hypothesis is what lets one induction serve both.
 
-Four arms and no wildcard, matching `selfSendsFromIndex`'s own shape.
+Five arms and no wildcard, matching `selfSendsFromIndex`'s own shape.
+
+**The conditional arm is discharged by the source refusal, not by recursion.**
+`DTR.GeneralModel.statementResolves` returns `false` for `DTR.GeneralStmt.ifThenElse` as of stage
+H's source layer, so a body whose every statement resolves contains no conditional and the arm is
+unreachable. That is the honest proof while the accepted fragment excludes conditionals, and it is
+the line that must become a real recursion into both branches on the day the refusal is lifted:
+this arm failing to compile is the intended alarm.
 -/
 theorem exists_messageServer_of_mem_selfSendsFromIndex
     (model : DTR.GeneralModel)
     (reactiveClass : DTR.GeneralReactiveClass)
-    (bodyKey : Translation.GeneralBodyKey) :
+    (bodyKey : Translation.GeneralBodyKey)
+    (levelPath : List Nat) :
     ∀ (body : DTR.GeneralBody)
       (index : Nat),
       (∀ statement ∈ body,
@@ -2747,6 +3077,7 @@ theorem exists_messageServer_of_mem_selfSendsFromIndex
       ∀ selfSend ∈
           Translation.selfSendsFromIndex
             bodyKey
+            levelPath
             index
             body,
         ∃ server ∈ reactiveClass.messageServers,
@@ -2880,6 +3211,24 @@ theorem exists_messageServer_of_mem_selfSendsFromIndex
                         ⟨server,
                          hMemberServer,
                          hName⟩
+
+      | ifThenElse condition thenBody elseBody =>
+
+          have hHeadResolves :
+              model.statementResolves
+                  reactiveClass
+                  (.ifThenElse
+                    condition
+                    thenBody
+                    elseBody) =
+                true :=
+            hResolves
+              _
+              List.mem_cons_self
+
+          simp [
+            DTR.GeneralModel.statementResolves
+          ] at hHeadResolves
 
 /--
 Every statement of every body of every declared class resolves, in a well-formed model.
@@ -3092,6 +3441,182 @@ theorem generalKindOriginAt_inputPort_of_routeOrigin
     ]
 
 /--
+A compiled body of a resolving source body contains no conditional.
+
+The arm that keeps the origin theorem below honest about stage H. `LF.GeneralStmt.ifThenElse` is a
+constructor a compiled body can carry, so the `cases` in that theorem now has a fifth arm; but
+`DTR.GeneralModel.statementResolves` refuses `DTR.GeneralStmt.ifThenElse`, so a body whose every
+statement resolves has none to compile, and `compileGeneralStmt` emits a conditional from nothing
+else. That is what this lemma says, and it says it by walking the *source* body rather than by
+inverting the compiled statement, which keeps
+`Relico/Translation/GeneralBasic.lean`'s conditional inversion private where it belongs.
+
+**It is the alarm, not the answer.** When the accepted fragment admits conditionals this lemma
+becomes false, and the theorem below then owes a real branch case: the compiled branches carry
+`GeneralBodyOrigin`, which needs this whole theorem applied at each branch's own level with that
+branch's resolution and site hypotheses. Deleting the lemma is the first step of that work.
+-/
+private theorem not_mem_ifThenElse_of_compiled_of_resolves
+    {model : DTR.GeneralModel}
+    {reactiveClass : DTR.GeneralReactiveClass}
+    {env : Translation.GeneralOutputPortEnv}
+    {context : Translation.GeneralBodyContext} :
+    ∀ (body : DTR.GeneralBody)
+      (index : Nat)
+      (compiled : LF.GeneralBody),
+      (∀ statement ∈ body,
+        model.statementResolves
+            reactiveClass
+            statement =
+          true) →
+      Translation.compileGeneralBody
+          env
+          context
+          index
+          body =
+        .ok compiled →
+      ∀ (condition : LF.GeneralExpr)
+        (thenBody elseBody : LF.GeneralBody),
+        LF.GeneralStmt.ifThenElse
+            condition
+            thenBody
+            elseBody ∉
+          compiled := by
+
+  intro body
+  induction body with
+
+  | nil =>
+      intro index compiled _ hCompiled condition thenBody elseBody hMember
+
+      rw [
+        Translation.compileGeneralBody_nil
+      ] at hCompiled
+
+      injection hCompiled with hEqual
+
+      subst hEqual
+
+      cases hMember
+
+  | cons statement remaining inductionHypothesis =>
+      intro index compiled hResolves hCompiled condition thenBody elseBody hMember
+
+      obtain
+          ⟨compiledStatement,
+           compiledRemaining,
+           hStatement,
+           hRemaining,
+           hShape⟩ :=
+        Translation.compileGeneralBody_cons_ok_inversion
+          hCompiled
+
+      subst hShape
+
+      have hTailResolves :
+          ∀ candidate ∈ remaining,
+            model.statementResolves
+                reactiveClass
+                candidate =
+              true := by
+        intro candidate hCandidate
+
+        exact
+          hResolves
+            candidate
+            (List.mem_cons_of_mem
+              statement
+              hCandidate)
+
+      cases List.mem_cons.mp hMember with
+
+      | inr hThere =>
+          exact
+            inductionHypothesis
+              (index + 1)
+              compiledRemaining
+              hTailResolves
+              hRemaining
+              condition
+              thenBody
+              elseBody
+              hThere
+
+      | inl hHere =>
+
+          rw [
+            ← hHere
+          ] at hStatement
+
+          cases statement with
+
+          | assign target value =>
+              simp [
+                Translation.compileGeneralStmt
+              ] at hStatement
+
+          | trace tag =>
+              simp [
+                Translation.compileGeneralStmt
+              ] at hStatement
+
+          | send target message arguments delay =>
+
+              cases target with
+
+              | selfTarget =>
+                  simp [
+                    Translation.compileGeneralStmt
+                  ] at hStatement
+
+                  -- The head compiled to a `schedule`, so it is not the conditional
+                  -- this membership names.
+
+              | knownRebec rebec =>
+
+                  cases hEntry :
+                      Translation.generalEntryAtSite?
+                        env
+                        {
+                          body :=
+                            context.bodyKey
+
+                          index :=
+                            context.levelPath ++
+                              [index]
+                        } with
+
+                  | none =>
+                      simp [
+                        Translation.compileGeneralStmt,
+                        hEntry
+                      ] at hStatement
+
+                  | some entry =>
+                      simp [
+                        Translation.compileGeneralStmt,
+                        hEntry
+                      ] at hStatement
+
+          | ifThenElse sourceCondition sourceThen sourceElse =>
+
+              have hHeadResolves :
+                  model.statementResolves
+                      reactiveClass
+                      (.ifThenElse
+                        sourceCondition
+                        sourceThen
+                        sourceElse) =
+                    true :=
+                hResolves
+                  _
+                  List.mem_cons_self
+
+              simp [
+                DTR.GeneralModel.statementResolves
+              ] at hHeadResolves
+
+/--
 Every statement of a compiled body has a valid statement origin.
 
 **A and B, in the form the runtime consumes.** Read the `.schedule` case in the direction the
@@ -3160,6 +3685,7 @@ theorem generalStmtOrigin_of_mem_compiledBody
       ∀ selfSend ∈
           Translation.selfSendsFromIndex
             bodyKey
+            []
             0
             body,
         selfSend ∈
@@ -3229,7 +3755,7 @@ theorem generalStmtOrigin_of_mem_compiledBody
         generalStmtOrigin_schedule_iff
       ]
 
-      obtain ⟨selfSend, hSite, _hIndex, hName⟩ :=
+      obtain ⟨selfSend, _position, _rest, hSite, _hIndex, _hPath, hName⟩ :=
         Translation.compileGeneralBody_schedule_provenance
           env
           {
@@ -3254,6 +3780,7 @@ theorem generalStmtOrigin_of_mem_compiledBody
           model
           reactiveClass
           bodyKey
+          []
           body
           0
           hResolves
@@ -3288,6 +3815,23 @@ theorem generalStmtOrigin_of_mem_compiledBody
           hName,
           hServerName
         ]
+
+  | ifThenElse condition thenBody elseBody =>
+      -- Unreachable while the accepted fragment excludes conditionals. See
+      -- `not_mem_ifThenElse_of_compiled_of_resolves` above for what has to change
+      -- when it stops being unreachable.
+      exact
+        absurd
+          hStatement
+          (not_mem_ifThenElse_of_compiled_of_resolves
+            body
+            0
+            compiled
+            hResolves
+            hBody
+            condition
+            thenBody
+            elseBody)
 
 /-!
 ## Reactor membership from instance resolution
@@ -4209,7 +4753,7 @@ theorem generalKindOrigin_initial
       (LF.GeneralProgram.initialState
         program) := by
 
-  refine ⟨?_, ?_⟩
+  refine ⟨?_, ?_, ?_⟩
 
   · intro event hEvent
 
@@ -4219,6 +4763,46 @@ theorem generalKindOrigin_initial
     ] at hEvent
 
     cases hEvent
+
+  case refine_3 =>
+    -- Both initial shapes carry an empty frame stack — `initialReactorRuntime` for a resolved
+    -- instance and `idleDefault` for one that does not resolve — so the third clause has no
+    -- frame to be about.
+    intro entry hEntry frame hFrame candidate hCandidate
+
+    unfold LF.GeneralProgram.initialState at hEntry
+
+    obtain ⟨reactorInstance, _hInstanceMember, hPair⟩ :=
+      List.mem_map.mp hEntry
+
+    cases hResolution :
+        program.reactorOfInstance? reactorInstance.name with
+
+    | none =>
+        rw [
+          hResolution
+        ] at hPair
+
+        rw [
+          ← hPair
+        ] at hFrame
+
+        simp [
+          LF.GeneralReactorRuntime.idleDefault
+        ] at hFrame
+
+    | some reactor =>
+        rw [
+          hResolution
+        ] at hPair
+
+        rw [
+          ← hPair
+        ] at hFrame
+
+        simp [
+          LF.GeneralProgram.initialReactorRuntime
+        ] at hFrame
 
   · intro entry hEntry statement hStatement
 
@@ -4421,7 +5005,9 @@ private theorem generalStmtOrigin_update_tail
       reactor.activeBody =
         statement :: remaining)
     (valuation :
-      Store VarName LF.GeneralValue) :
+      Store VarName LF.GeneralValue)
+    (frames :
+      List LF.GeneralBody) :
     ∀ entry ∈
         Store.update
           state.reactors
@@ -4432,6 +5018,7 @@ private theorem generalStmtOrigin_update_tail
 
             activeBody :=
               remaining
+            frames := frames
           },
       ∀ candidate ∈ entry.2.activeBody,
         GeneralStmtOrigin
@@ -4452,6 +5039,7 @@ private theorem generalStmtOrigin_update_tail
 
           activeBody :=
             remaining
+          frames := frames
         }
         state.reactors
         entry
@@ -4489,6 +5077,244 @@ private theorem generalStmtOrigin_update_tail
           hOld
           candidate
           hCandidate
+
+/--
+The frames clause, read at one reactor the runtime just looked up.
+
+A projection, so that a rule which keeps a reactor's stack can hand the clause straight back. It
+exists because `Store.mem_of_lookup` plus four explicit arguments at seven call sites is the kind of
+repetition that hides a mistake.
+-/
+private theorem framesOrigin_of_lookup
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    {routes : List Translation.GeneralRoute}
+    {state : GeneralRuntimeState}
+    {instanceName : ActorName}
+    {reactor : GeneralReactorRuntime}
+    (hFramesSide :
+      ∀ entry ∈ state.reactors,
+        ∀ frame ∈ entry.2.frames,
+          ∀ candidate ∈ frame,
+            GeneralStmtOrigin
+              model
+              program
+              routes
+              entry.1
+              candidate)
+    (hReactor :
+      Store.lookup
+          state.reactors
+          instanceName =
+        some reactor) :
+    ∀ frame ∈ reactor.frames,
+      ∀ candidate ∈ frame,
+        GeneralStmtOrigin
+          model
+          program
+          routes
+          instanceName
+          candidate :=
+  hFramesSide
+    (instanceName, reactor)
+    (Store.mem_of_lookup
+      state.reactors
+      instanceName
+      reactor
+      hReactor)
+
+
+/--
+A body origin clause survives a reactor update whose new body is itself covered.
+
+The general form of `generalStmtOrigin_update_tail`: that one knows the new body is the tail of the
+old one and derives the obligation itself, which is all four statement rules need. Stage H's branch
+rules install a body that is *not* a tail — it is one of the conditional's branches — so they need to
+supply the obligation instead of having it derived. Same two-case shape, same `Store.mem_update`
+split.
+-/
+private theorem generalBodyOrigin_update
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    {routes : List Translation.GeneralRoute}
+    {state : GeneralRuntimeState}
+    {instanceName : ActorName}
+    (hBodySide :
+      ∀ entry ∈ state.reactors,
+        ∀ candidate ∈ entry.2.activeBody,
+          GeneralStmtOrigin
+            model
+            program
+            routes
+            entry.1
+            candidate)
+    (valuation :
+      Store VarName LF.GeneralValue)
+    (newBody : LF.GeneralBody)
+    (newFrames : List LF.GeneralBody)
+    (hNew :
+      ∀ candidate ∈ newBody,
+        GeneralStmtOrigin
+          model
+          program
+          routes
+          instanceName
+          candidate) :
+    ∀ entry ∈
+        Store.update
+          state.reactors
+          instanceName
+          {
+            valuation :=
+              valuation
+
+            activeBody :=
+              newBody
+            frames := newFrames
+          },
+      ∀ candidate ∈ entry.2.activeBody,
+        GeneralStmtOrigin
+          model
+          program
+          routes
+          entry.1
+          candidate := by
+
+  intro entry hEntry candidate hCandidate
+
+  cases
+      Store.mem_update
+        instanceName
+        {
+          valuation :=
+            valuation
+
+          activeBody :=
+            newBody
+          frames := newFrames
+        }
+        state.reactors
+        entry
+        hEntry with
+
+  | inl hNewEntry =>
+      subst hNewEntry
+
+      dsimp only at hCandidate ⊢
+
+      exact
+        hNew
+          candidate
+          hCandidate
+
+  | inr hOld =>
+      exact
+        hBodySide
+          entry
+          hOld
+          candidate
+          hCandidate
+
+
+/--
+A frame-stack origin clause survives a reactor update whose new stack is itself covered.
+
+The frames-side counterpart of `generalStmtOrigin_update_tail`, and the shape is the same: the
+updated key is discharged from a hypothesis about the *new* stack, and every other key is
+discharged from the old clause unchanged. Quantifying over an arbitrary `newFrames` plus a proof
+about it is what lets one helper serve all seven rules — the four statement rules pass the
+reactor's own stack, `fire` passes `[]`, the two branch rules pass one level more, and `resume`
+passes one level less.
+-/
+private theorem generalFramesOrigin_update
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    {routes : List Translation.GeneralRoute}
+    {state : GeneralRuntimeState}
+    {instanceName : ActorName}
+    (hFramesSide :
+      ∀ entry ∈ state.reactors,
+        ∀ frame ∈ entry.2.frames,
+          ∀ candidate ∈ frame,
+            GeneralStmtOrigin
+              model
+              program
+              routes
+              entry.1
+              candidate)
+    (valuation :
+      Store VarName LF.GeneralValue)
+    (activeBody : LF.GeneralBody)
+    (newFrames : List LF.GeneralBody)
+    (hNew :
+      ∀ frame ∈ newFrames,
+        ∀ candidate ∈ frame,
+          GeneralStmtOrigin
+            model
+            program
+            routes
+            instanceName
+            candidate) :
+    ∀ entry ∈
+        Store.update
+          state.reactors
+          instanceName
+          {
+            valuation :=
+              valuation
+
+            activeBody :=
+              activeBody
+            frames := newFrames
+          },
+      ∀ frame ∈ entry.2.frames,
+        ∀ candidate ∈ frame,
+          GeneralStmtOrigin
+            model
+            program
+            routes
+            entry.1
+            candidate := by
+
+  intro entry hEntry frame hFrame candidate hCandidate
+
+  cases
+      Store.mem_update
+        instanceName
+        {
+          valuation :=
+            valuation
+
+          activeBody :=
+            activeBody
+          frames := newFrames
+        }
+        state.reactors
+        entry
+        hEntry with
+
+  | inl hNewEntry =>
+      subst hNewEntry
+
+      dsimp only at hFrame ⊢
+
+      exact
+        hNew
+          frame
+          hFrame
+          candidate
+          hCandidate
+
+  | inr hOld =>
+      exact
+        hFramesSide
+          entry
+          hOld
+          frame
+          hFrame
+          candidate
+          hCandidate
+
 
 /--
 The kind-origin invariant survives every target step.
@@ -4540,7 +5366,7 @@ theorem generalKindOrigin_of_step
       routes
       state' := by
 
-  obtain ⟨hEventSide, hBodySide⟩ :=
+  obtain ⟨hEventSide, hBodySide, hFramesSide⟩ :=
     hOrigin
 
   cases hStep with
@@ -4552,7 +5378,16 @@ theorem generalKindOrigin_of_step
            hBodySide
            hReactor
            hBody
-           _⟩
+           _
+           _,
+         generalFramesOrigin_update
+           hFramesSide
+           _
+           _
+           _
+           (framesOrigin_of_lookup
+             hFramesSide
+             hReactor)⟩
 
   | trace hReactor hBody =>
       exact
@@ -4561,7 +5396,16 @@ theorem generalKindOrigin_of_step
            hBodySide
            hReactor
            hBody
-           _⟩
+           _
+           _,
+         generalFramesOrigin_update
+           hFramesSide
+           _
+           _
+           _
+           (framesOrigin_of_lookup
+             hFramesSide
+             hReactor)⟩
 
   | schedule hReactor hBody hArguments =>
       refine
@@ -4570,7 +5414,16 @@ theorem generalKindOrigin_of_step
            hBodySide
            hReactor
            hBody
-           _⟩
+           _
+           _,
+         generalFramesOrigin_update
+           hFramesSide
+           _
+           _
+           _
+           (framesOrigin_of_lookup
+             hFramesSide
+             hReactor)⟩
 
       intro event hEvent
 
@@ -4601,7 +5454,16 @@ theorem generalKindOrigin_of_step
            hBodySide
            hReactor
            hBody
-           _⟩
+           _
+           _,
+         generalFramesOrigin_update
+           hFramesSide
+           _
+           _
+           _
+           (framesOrigin_of_lookup
+             hFramesSide
+             hReactor)⟩
 
       intro event hEvent
 
@@ -4629,7 +5491,7 @@ theorem generalKindOrigin_of_step
 
   | fire hSelected hTag hQueue hReactor hIdle hReaction =>
 
-      refine ⟨?_, ?_⟩
+      refine ⟨?_, ?_, ?_⟩
 
       · intro event hEvent
 
@@ -4669,6 +5531,7 @@ theorem generalKindOrigin_of_step
 
                 activeBody :=
                   _
+                frames := []
               }
               state.reactors
               entry
@@ -4687,7 +5550,7 @@ theorem generalKindOrigin_of_step
                 hModelWellFormed
                 hCompiled
                 hRoutes
-                ⟨hEventSide, hBodySide⟩
+                ⟨hEventSide, hBodySide, hFramesSide⟩
                 (by
                   rw [hQueue]
 
@@ -4707,11 +5570,245 @@ theorem generalKindOrigin_of_step
                 candidate
                 hCandidate
 
+      · -- `fire` installs `frames := []`, so the updated reactor has no frame for the clause to be
+        -- about, and every other key keeps its own. That is the same argument the idleness premise
+        -- makes available: a reactor eligible to fire owed nothing at any level.
+        exact
+          generalFramesOrigin_update
+            hFramesSide
+            _
+            _
+            []
+            (by
+              intro frame hFrame
+              cases hFrame)
+
+
+  -- Stage H's step-into rules. The head of the old body is the conditional itself, so
+  -- `hBodySide` hands over its `GeneralStmtOrigin`, which by the conditional arm of that predicate
+  -- *is* the pair of `GeneralBodyOrigin`s for the two branches. The entered branch's obligation is
+  -- read off it with `generalStmtOrigin_of_mem_of_bodyOrigin`; the pushed frame's is the tail of the
+  -- old body, which is where `generalStmtOrigin_update_tail` would have looked.
+  | branchTrue hReactor hBody hCondition =>
+
+      have hHead :
+          GeneralStmtOrigin
+            model
+            program
+            routes
+            _
+            (LF.GeneralStmt.ifThenElse _ _ _) :=
+        hBodySide
+          (_, _)
+          (Store.mem_of_lookup
+            state.reactors
+            _
+            _
+            hReactor)
+          _
+          (by
+            rw [hBody]
+
+            exact List.mem_cons_self)
+
+      obtain ⟨hThenOrigin, _hElseOrigin⟩ :=
+        hHead
+
+      refine
+        ⟨hEventSide,
+         generalBodyOrigin_update
+           hBodySide
+           _
+           _
+           _
+           (by
+             intro candidate hCandidate
+
+             exact
+               generalStmtOrigin_of_mem_of_bodyOrigin
+                 _
+                 candidate
+                 hThenOrigin
+                 hCandidate),
+         generalFramesOrigin_update
+           hFramesSide
+           _
+           _
+           _
+           ?_⟩
+
+      intro frame hFrame candidate hCandidate
+
+      rcases List.mem_cons.mp hFrame with
+        hHere |
+          hThere
+
+      · subst hHere
+
+        exact
+          hBodySide
+            (_, _)
+            (Store.mem_of_lookup
+              state.reactors
+              _
+              _
+              hReactor)
+            candidate
+            (by
+              rw [hBody]
+
+              exact
+                List.mem_cons_of_mem
+                  _
+                  hCandidate)
+
+      · exact
+          framesOrigin_of_lookup
+            hFramesSide
+            hReactor
+            frame
+            hThere
+            candidate
+            hCandidate
+
+  | branchFalse hReactor hBody hCondition =>
+
+      have hHead :
+          GeneralStmtOrigin
+            model
+            program
+            routes
+            _
+            (LF.GeneralStmt.ifThenElse _ _ _) :=
+        hBodySide
+          (_, _)
+          (Store.mem_of_lookup
+            state.reactors
+            _
+            _
+            hReactor)
+          _
+          (by
+            rw [hBody]
+
+            exact List.mem_cons_self)
+
+      obtain ⟨_hThenOrigin, hElseOrigin⟩ :=
+        hHead
+
+      refine
+        ⟨hEventSide,
+         generalBodyOrigin_update
+           hBodySide
+           _
+           _
+           _
+           (by
+             intro candidate hCandidate
+
+             exact
+               generalStmtOrigin_of_mem_of_bodyOrigin
+                 _
+                 candidate
+                 hElseOrigin
+                 hCandidate),
+         generalFramesOrigin_update
+           hFramesSide
+           _
+           _
+           _
+           ?_⟩
+
+      intro frame hFrame candidate hCandidate
+
+      rcases List.mem_cons.mp hFrame with
+        hHere |
+          hThere
+
+      · subst hHere
+
+        exact
+          hBodySide
+            (_, _)
+            (Store.mem_of_lookup
+              state.reactors
+              _
+              _
+              hReactor)
+            candidate
+            (by
+              rw [hBody]
+
+              exact
+                List.mem_cons_of_mem
+                  _
+                  hCandidate)
+
+      · exact
+          framesOrigin_of_lookup
+            hFramesSide
+            hReactor
+            frame
+            hThere
+            candidate
+            hCandidate
+
+
+  | resume hReactor hBody hFrames =>
+      -- The promoted frame is a member of the old stack, so the *frames* clause supplies the new
+      -- body's obligation, and the popped tail is covered by the same clause. This is the case the
+      -- third conjunct of `GeneralKindOrigin` exists for: without it nothing would be known about
+      -- the body this rule installs.
+      refine
+        ⟨hEventSide,
+         generalBodyOrigin_update
+           hBodySide
+           _
+           _
+           _
+           (by
+             intro candidate hCandidate
+
+             exact
+               framesOrigin_of_lookup
+                 hFramesSide
+                 hReactor
+                 _
+                 (by
+                   rw [hFrames]
+
+                   exact List.mem_cons_self)
+                 candidate
+                 hCandidate),
+         generalFramesOrigin_update
+           hFramesSide
+           _
+           _
+           _
+           ?_⟩
+
+      intro frame hFrame candidate hCandidate
+
+      exact
+        framesOrigin_of_lookup
+          hFramesSide
+          hReactor
+          frame
+          (by
+            rw [hFrames]
+
+            exact
+              List.mem_cons_of_mem
+                _
+                hFrame)
+          candidate
+          hCandidate
+
   | microstepAdvance hSelected hTime hMicrostep =>
-      exact ⟨hEventSide, hBodySide⟩
+      exact ⟨hEventSide, hBodySide, hFramesSide⟩
 
   | timeAdvance hSelected hForward =>
-      exact ⟨hEventSide, hBodySide⟩
+      exact ⟨hEventSide, hBodySide, hFramesSide⟩
 
 /--
 The kind-origin invariant survives a τ closure.
@@ -4808,10 +5905,10 @@ theorem generalKindOrigin_of_generalStateAlphaEquiv
   obtain ⟨_hTag, hReactors, _hLookup, hQueue⟩ :=
     hAlpha
 
-  obtain ⟨hEventSide, hBodySide⟩ :=
+  obtain ⟨hEventSide, hBodySide, hFramesSide⟩ :=
     hOrigin
 
-  refine ⟨?_, ?_⟩
+  refine ⟨?_, ?_, ?_⟩
 
   · intro event hEvent
 
@@ -4830,6 +5927,23 @@ theorem generalKindOrigin_of_generalStateAlphaEquiv
           entry.1
           entry.2).mpr
           hEntry)
+        candidate
+        hCandidate
+
+  · -- The frames clause transports along the same reactor-membership equivalence the body clause
+    -- uses. α-equivalence renames actions and ports, and a frame is a body, so the clause reads
+    -- through the membership iff without inspecting anything the relation renames.
+    intro entry hEntry frame hFrame candidate hCandidate
+
+    exact
+      hFramesSide
+        entry
+        ((hReactors
+          entry.1
+          entry.2).mpr
+          hEntry)
+        frame
+        hFrame
         candidate
         hCandidate
 

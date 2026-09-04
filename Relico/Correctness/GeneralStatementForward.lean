@@ -795,34 +795,28 @@ theorem generalContinuationCompiles_trace_head
       index + 1,
       hRemaining,
       by
-        intro k rebec message arguments delay rest hDrop entry hEntry
+        -- Stage H reindexing: a send at path `p` of the tail is a send at `bumpHeadPath p` of
+        -- the body, and `shiftHeadPath (index + 1) p = shiftHeadPath index (bumpHeadPath p)`.
+        -- The singleton-path case is stage E's `k + 1` arithmetic unchanged.
+        intro path rebec message delay hPath entry hEntry
 
         refine
           hSites
-            (k + 1)
+            (Translation.bumpHeadPath
+              path)
             rebec
             message
-            arguments
             delay
-            rest
-            ?_
+            (Translation.generalSendAtPath_cons
+              hPath)
             entry
             ?_
 
-        · rw [
-            List.drop_succ_cons
-          ]
+        rw [
+          ← Translation.shiftHeadPath_bumpHeadPath
+        ]
 
-          exact hDrop
-
-        · rw [
-            show
-                index + (k + 1) =
-                  index + 1 + k from by
-              omega
-          ]
-
-          exact hEntry⟩⟩
+        exact hEntry⟩⟩
 
 /--
 A compiled body whose source head is an assignment has the compiled assignment as its head, and its
@@ -882,34 +876,28 @@ theorem generalContinuationCompiles_assign_head
       index + 1,
       hRemaining,
       by
-        intro k rebec message arguments delay rest hDrop entry hEntry
+        -- Stage H reindexing: a send at path `p` of the tail is a send at `bumpHeadPath p` of
+        -- the body, and `shiftHeadPath (index + 1) p = shiftHeadPath index (bumpHeadPath p)`.
+        -- The singleton-path case is stage E's `k + 1` arithmetic unchanged.
+        intro path rebec message delay hPath entry hEntry
 
         refine
           hSites
-            (k + 1)
+            (Translation.bumpHeadPath
+              path)
             rebec
             message
-            arguments
             delay
-            rest
-            ?_
+            (Translation.generalSendAtPath_cons
+              hPath)
             entry
             ?_
 
-        · rw [
-            List.drop_succ_cons
-          ]
+        rw [
+          ← Translation.shiftHeadPath_bumpHeadPath
+        ]
 
-          exact hDrop
-
-        · rw [
-            show
-                index + (k + 1) =
-                  index + 1 + k from by
-              omega
-          ]
-
-          exact hEntry⟩⟩
+        exact hEntry⟩⟩
 
 /-!
 ## Trace
@@ -969,6 +957,7 @@ theorem generalTrace_forward
                 {
                   state := actor.state
                   activeBody := remaining
+                  frames := actor.frames
                 }
           }
           state' := by
@@ -1011,15 +1000,621 @@ theorem generalTrace_forward
       {
         state := actor.state
         activeBody := remaining
+        frames := actor.frames
       }
       {
         valuation := reactor.valuation
         activeBody := targetRemaining
+        frames := reactor.frames
       }
       {
         valuation := hPair.valuation
         messages := hPair.messages
         continuation := hTailCompiles
+        frames := hPair.frames
+      }
+
+/--
+A compiled body whose source head is a conditional has the compiled conditional as its head, and both
+branches and the tail compile.
+
+The inversion the two branch transfers run on, and the first place the path-based chain conjunct pays
+for itself. Three relations come out where stage E's head lemmas produced one, and each carries its own
+address: the then-branch at `context.levelPath ++ [index, 0]` from index `0`, the else-branch at
+`… [index, 1]`, and the enclosing level at `index + 1`.
+
+`Translation.compileGeneralStmt_ifThenElse_ok_inversion` supplies the two branch compilations; the three
+chain obligations are the enclosing one instantiated one `GeneralSendAtPath` constructor deeper. The
+branch cases need no arithmetic beyond `shiftHeadPath_zero`, because a branch counts its own positions
+from zero; the tail case is the `bumpHeadPath` transport the other head lemmas use.
+-/
+theorem generalContinuationCompiles_ifThenElse_head
+    {env : Translation.GeneralOutputPortEnv}
+    {condition : DTR.GeneralExpr}
+    {thenBody elseBody sourceRemaining : DTR.GeneralBody}
+    {targetBody : LF.GeneralBody}
+    (hCompiles :
+      GeneralContinuationCompiles
+        env
+        (
+          .ifThenElse
+              condition
+              thenBody
+              elseBody ::
+            sourceRemaining
+        )
+        targetBody) :
+    ∃ (compiledThen compiledElse targetRemaining : LF.GeneralBody),
+      targetBody =
+          LF.GeneralStmt.ifThenElse
+              (Translation.compileGeneralExpr
+                condition)
+              compiledThen
+              compiledElse ::
+            targetRemaining ∧
+        GeneralContinuationCompiles
+          env
+          thenBody
+          compiledThen ∧
+        GeneralContinuationCompiles
+          env
+          elseBody
+          compiledElse ∧
+        GeneralContinuationCompiles
+          env
+          sourceRemaining
+          targetRemaining := by
+
+  obtain ⟨context, index, hCompiled, hSites⟩ :=
+    hCompiles
+
+  obtain
+      ⟨compiledStatement,
+       compiledRemaining,
+       hStatement,
+       hRemaining,
+       hShape⟩ :=
+    Translation.compileGeneralBody_cons_ok_inversion
+      hCompiled
+
+  obtain ⟨compiledThen, compiledElse, hStatementShape, hThen, hElse⟩ :=
+    Translation.compileGeneralStmt_ifThenElse_ok_inversion
+      hStatement
+
+  subst hStatementShape
+
+  refine
+    ⟨compiledThen,
+     compiledElse,
+     compiledRemaining,
+     hShape,
+     ⟨       {
+         bodyKey :=
+           context.bodyKey
+
+         selfSends :=
+           context.selfSends
+
+         levelPath :=
+           context.levelPath ++
+             [index, 0]
+       },
+      0,
+      hThen,
+      ?_⟩,
+     ⟨       {
+         bodyKey :=
+           context.bodyKey
+
+         selfSends :=
+           context.selfSends
+
+         levelPath :=
+           context.levelPath ++
+             [index, 1]
+       },
+      0,
+      hElse,
+      ?_⟩,
+     ⟨context,
+      index + 1,
+      hRemaining,
+      ?_⟩⟩
+
+  case refine_1 =>
+      intro path rebec message delay hPath entry hEntry
+
+      -- The address identity that makes the migration work: the branch's own obligation at
+      -- `levelPath ++ [index, 0]` from index `0` asks about
+      -- `levelPath ++ index :: 0 :: path`, and the enclosing obligation at path
+      -- `0 :: 0 :: path` asks about `levelPath ++ shiftHeadPath index (0 :: 0 :: path)`,
+      -- which is the same list. So the child obligation is the parent's one constructor deeper.
+      simp only [
+        Translation.shiftHeadPath_zero
+      ] at hEntry
+
+      refine
+        hSites
+          (0 :: 0 :: path)
+          rebec
+          message
+          delay
+          (Translation.GeneralSendAtPath.thenBranch
+            (by
+              rw [
+                List.drop_zero
+              ])
+            hPath)
+          entry
+          ?_
+
+      simpa [
+        Translation.shiftHeadPath
+      ] using hEntry
+
+  case refine_2 =>
+      intro path rebec message delay hPath entry hEntry
+
+      -- The address identity that makes the migration work: the branch's own obligation at
+      -- `levelPath ++ [index, 1]` from index `0` asks about
+      -- `levelPath ++ index :: 1 :: path`, and the enclosing obligation at path
+      -- `0 :: 1 :: path` asks about `levelPath ++ shiftHeadPath index (0 :: 1 :: path)`,
+      -- which is the same list. So the child obligation is the parent's one constructor deeper.
+      simp only [
+        Translation.shiftHeadPath_zero
+      ] at hEntry
+
+      refine
+        hSites
+          (0 :: 1 :: path)
+          rebec
+          message
+          delay
+          (Translation.GeneralSendAtPath.elseBranch
+            (by
+              rw [
+                List.drop_zero
+              ])
+            hPath)
+          entry
+          ?_
+
+      simpa [
+        Translation.shiftHeadPath
+      ] using hEntry
+
+  case refine_3 =>
+      intro path rebec message delay hPath entry hEntry
+
+      refine
+        hSites
+          (Translation.bumpHeadPath
+            path)
+          rebec
+          message
+          delay
+          (Translation.generalSendAtPath_cons
+            hPath)
+          entry
+          ?_
+
+      rw [
+        ← Translation.shiftHeadPath_bumpHeadPath
+      ]
+
+      exact hEntry
+
+/--
+**A source `branchTrue` is answered by a target `branchTrue`.**
+
+The transfer that spends stage H's whole addressing apparatus at once. The head inversion above pins
+the target's head to the compiled conditional and hands over the entered branch's relation, the other
+branch's, and the enclosing level's; `Correctness.compileGeneralExpr_preserves_bool` moves the
+condition's value across an agreeing pair of valuations; and the post-step pairing's fourth conjunct is
+the enclosing level's relation pushed onto the two stacks, which is exactly what both `branchTrue` rules do.
+
+**No accepted-program premise appears**, and that is the point of having migrated the relation rather
+than adding hypotheses: entering a branch consults no routing table and no instance list, so this lemma
+is as premise-light as `generalTrace_forward`. The nested send facts it needs are carried by the
+relation itself, at `context.levelPath ++ [index, 0]`.
+-/
+theorem generalBranchTrue_forward
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    {config : DTR.GeneralRuntimeConfiguration}
+    {state : LF.GeneralRuntimeState}
+    {actorName : ActorName}
+    {actor : DTR.GeneralActorRuntime}
+    {condition : DTR.GeneralExpr}
+    {thenBody elseBody remaining : DTR.GeneralBody}
+    (hCorrespondence :
+      GeneralStateCorrespondence
+        model
+        config
+        state)
+    (hUniqueS :
+      DTR.GeneralStoreKeyUnique config)
+    (hUniqueT :
+      LF.GeneralStoreKeyUnique state)
+    (hActor :
+      Store.lookup config.actors actorName =
+        some actor)
+    (hBody :
+      actor.activeBody =
+        DTR.GeneralStmt.ifThenElse
+            condition
+            thenBody
+            elseBody ::
+          remaining)
+    (hCondition :
+      DTR.GeneralExpr.evaluate
+          actor.state.valuation
+          condition =
+        some
+          (DTR.GeneralValue.bool
+            true)) :
+    ∃ state' : LF.GeneralRuntimeState,
+      LF.GeneralStep
+          program
+          state
+          LF.GeneralLabel.tau
+          state' ∧
+        GeneralStateCorrespondence
+          model
+          {
+            now := config.now
+
+            actors :=
+              Store.update
+                config.actors
+                actorName
+                {
+                  state := actor.state
+                  activeBody := thenBody
+                  frames :=
+                    remaining :: actor.frames
+                }
+          }
+          state' := by
+
+  obtain ⟨env, reactor, hEnv, hReactorMem, hPair⟩ :=
+    hCorrespondence.reactorOfActor
+      actorName
+      actor
+      (Store.mem_of_lookup
+        config.actors
+        actorName
+        actor
+        hActor)
+
+  obtain
+      ⟨compiledThen,
+       compiledElse,
+       targetRemaining,
+       hTargetBody,
+       hThenCompiles,
+       hElseCompiles,
+       hTailCompiles⟩ :=
+    generalContinuationCompiles_ifThenElse_head
+      (by
+        rw [← hBody]
+
+        exact hPair.continuation)
+
+  refine
+    ⟨_,
+     LF.GeneralStep.branchTrue
+       (Store.lookup_of_mem_of_keysUnique
+         state.reactors
+         hUniqueT
+         hReactorMem)
+       hTargetBody
+       (compileGeneralExpr_preserves_bool
+         hPair.valuation
+         hCondition),
+     ?_⟩
+
+  exact
+    generalCorrespondence_updatePair
+      hCorrespondence
+      hUniqueS
+      hUniqueT
+      actorName
+      env
+      hEnv
+      {
+        state := actor.state
+        activeBody := thenBody
+        frames :=
+          remaining :: actor.frames
+      }
+      {
+        valuation := reactor.valuation
+        activeBody := compiledThen
+        frames :=
+          targetRemaining :: reactor.frames
+      }
+      {
+        valuation := hPair.valuation
+        messages := hPair.messages
+        continuation := hThenCompiles
+        frames :=
+          ⟨hTailCompiles,
+           hPair.frames⟩
+      }
+
+/--
+**A source `branchFalse` is answered by a target `branchFalse`.**
+
+The transfer that spends stage H's whole addressing apparatus at once. The head inversion above pins
+the target's head to the compiled conditional and hands over the entered branch's relation, the other
+branch's, and the enclosing level's; `Correctness.compileGeneralExpr_preserves_bool` moves the
+condition's value across an agreeing pair of valuations; and the post-step pairing's fourth conjunct is
+the enclosing level's relation pushed onto the two stacks, which is exactly what both `branchFalse` rules do.
+
+**No accepted-program premise appears**, and that is the point of having migrated the relation rather
+than adding hypotheses: entering a branch consults no routing table and no instance list, so this lemma
+is as premise-light as `generalTrace_forward`. The nested send facts it needs are carried by the
+relation itself, at `context.levelPath ++ [index, 1]`.
+-/
+theorem generalBranchFalse_forward
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    {config : DTR.GeneralRuntimeConfiguration}
+    {state : LF.GeneralRuntimeState}
+    {actorName : ActorName}
+    {actor : DTR.GeneralActorRuntime}
+    {condition : DTR.GeneralExpr}
+    {thenBody elseBody remaining : DTR.GeneralBody}
+    (hCorrespondence :
+      GeneralStateCorrespondence
+        model
+        config
+        state)
+    (hUniqueS :
+      DTR.GeneralStoreKeyUnique config)
+    (hUniqueT :
+      LF.GeneralStoreKeyUnique state)
+    (hActor :
+      Store.lookup config.actors actorName =
+        some actor)
+    (hBody :
+      actor.activeBody =
+        DTR.GeneralStmt.ifThenElse
+            condition
+            thenBody
+            elseBody ::
+          remaining)
+    (hCondition :
+      DTR.GeneralExpr.evaluate
+          actor.state.valuation
+          condition =
+        some
+          (DTR.GeneralValue.bool
+            false)) :
+    ∃ state' : LF.GeneralRuntimeState,
+      LF.GeneralStep
+          program
+          state
+          LF.GeneralLabel.tau
+          state' ∧
+        GeneralStateCorrespondence
+          model
+          {
+            now := config.now
+
+            actors :=
+              Store.update
+                config.actors
+                actorName
+                {
+                  state := actor.state
+                  activeBody := elseBody
+                  frames :=
+                    remaining :: actor.frames
+                }
+          }
+          state' := by
+
+  obtain ⟨env, reactor, hEnv, hReactorMem, hPair⟩ :=
+    hCorrespondence.reactorOfActor
+      actorName
+      actor
+      (Store.mem_of_lookup
+        config.actors
+        actorName
+        actor
+        hActor)
+
+  obtain
+      ⟨compiledThen,
+       compiledElse,
+       targetRemaining,
+       hTargetBody,
+       hThenCompiles,
+       hElseCompiles,
+       hTailCompiles⟩ :=
+    generalContinuationCompiles_ifThenElse_head
+      (by
+        rw [← hBody]
+
+        exact hPair.continuation)
+
+  refine
+    ⟨_,
+     LF.GeneralStep.branchFalse
+       (Store.lookup_of_mem_of_keysUnique
+         state.reactors
+         hUniqueT
+         hReactorMem)
+       hTargetBody
+       (compileGeneralExpr_preserves_bool
+         hPair.valuation
+         hCondition),
+     ?_⟩
+
+  exact
+    generalCorrespondence_updatePair
+      hCorrespondence
+      hUniqueS
+      hUniqueT
+      actorName
+      env
+      hEnv
+      {
+        state := actor.state
+        activeBody := elseBody
+        frames :=
+          remaining :: actor.frames
+      }
+      {
+        valuation := reactor.valuation
+        activeBody := compiledElse
+        frames :=
+          targetRemaining :: reactor.frames
+      }
+      {
+        valuation := hPair.valuation
+        messages := hPair.messages
+        continuation := hElseCompiles
+        frames :=
+          ⟨hTailCompiles,
+           hPair.frames⟩
+      }
+
+/--
+**A source `resume` is answered by a target `resume`.**
+
+Stage H's simplest transfer, and the one that spends the pairing's fourth conjunct rather than its
+third. The source rule promotes the head of the frame stack to the active body; `GeneralFramesCompile`
+says the two stacks compile level for level, so its cons inversion hands over three things at once —
+the target's head frame, the fact that the source's head compiles to it, and the relation on the two
+tails. Those are exactly the `continuation` and `frames` fields of the post-step pairing.
+
+**No routing premise, no accepted-program premise, and no site reasoning.** `resume` consults no
+expression, no output-port environment and no routing table: it moves a body that was already related.
+That is why this lemma is premise-lighter than `generalSend_forward` and why it needs nothing from
+`Translation.compileGeneralStmt` — the relation it consumes was established when the frame was pushed.
+
+The target's empty active body comes from the `continuation` conjunct at the source's empty one: the
+compilation of `[]` is `[]`, so `hBody` on the source side forces the target side's without a lemma of
+its own.
+-/
+theorem generalResume_forward
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    {config : DTR.GeneralRuntimeConfiguration}
+    {state : LF.GeneralRuntimeState}
+    {actorName : ActorName}
+    {actor : DTR.GeneralActorRuntime}
+    {frame : DTR.GeneralBody}
+    {frames : List DTR.GeneralBody}
+    (hCorrespondence :
+      GeneralStateCorrespondence
+        model
+        config
+        state)
+    (hUniqueS :
+      DTR.GeneralStoreKeyUnique config)
+    (hUniqueT :
+      LF.GeneralStoreKeyUnique state)
+    (hActor :
+      Store.lookup config.actors actorName =
+        some actor)
+    (hBody :
+      actor.activeBody = [])
+    (hFrames :
+      actor.frames =
+        frame :: frames) :
+    ∃ state' : LF.GeneralRuntimeState,
+      LF.GeneralStep
+          program
+          state
+          LF.GeneralLabel.tau
+          state' ∧
+        GeneralStateCorrespondence
+          model
+          {
+            now := config.now
+
+            actors :=
+              Store.update
+                config.actors
+                actorName
+                {
+                  state := actor.state
+                  activeBody := frame
+                  frames := frames
+                }
+          }
+          state' := by
+
+  obtain ⟨env, reactor, hEnv, hReactorMem, hPair⟩ :=
+    hCorrespondence.reactorOfActor
+      actorName
+      actor
+      (Store.mem_of_lookup
+        config.actors
+        actorName
+        actor
+        hActor)
+
+  obtain ⟨targetFrame, targetRest, hTargetFrames, hFrameCompiles, hRestCompiles⟩ :=
+    generalFramesCompile_cons_source
+      (by
+        rw [← hFrames]
+
+        exact hPair.frames)
+
+  have hTargetBody :
+      reactor.activeBody = [] := by
+    obtain ⟨context, index, hCompiled, _⟩ :=
+      hPair.continuation
+
+    rw [
+      hBody
+    ] at hCompiled
+
+    simp [
+      Translation.compileGeneralBody
+    ] at hCompiled
+
+    exact hCompiled
+
+  refine
+    ⟨_,
+     LF.GeneralStep.resume
+       (Store.lookup_of_mem_of_keysUnique
+         state.reactors
+         hUniqueT
+         hReactorMem)
+       hTargetBody
+       hTargetFrames,
+     ?_⟩
+
+  exact
+    generalCorrespondence_updatePair
+      hCorrespondence
+      hUniqueS
+      hUniqueT
+      actorName
+      env
+      hEnv
+      {
+        state := actor.state
+        activeBody := frame
+        frames := frames
+      }
+      {
+        valuation := reactor.valuation
+        activeBody := targetFrame
+        frames := targetRest
+      }
+      {
+        valuation := hPair.valuation
+        messages := hPair.messages
+        continuation := hFrameCompiles
+        frames := hRestCompiles
       }
 
 /-!
@@ -1111,6 +1706,7 @@ theorem generalTrace_forward_weak
                 {
                   state := actor.state
                   activeBody := remaining
+                  frames := actor.frames
                 }
           }
           state' := by
@@ -1214,6 +1810,7 @@ theorem generalAssign_forward
                     }
 
                   activeBody := remaining
+                  frames := actor.frames
                 }
           }
           state' := by
@@ -1284,6 +1881,7 @@ theorem generalAssign_forward
           }
 
         activeBody := remaining
+        frames := actor.frames
       }
       {
         valuation :=
@@ -1294,6 +1892,7 @@ theorem generalAssign_forward
               value)
 
         activeBody := targetRemaining
+        frames := reactor.frames
       }
       {
         valuation :=
@@ -1306,6 +1905,7 @@ theorem generalAssign_forward
 
         messages := hPair.messages
         continuation := hTailCompiles
+        frames := hPair.frames
       }
 
 /-!
@@ -1560,6 +2160,7 @@ theorem generalCorrespondence_deliver
                 }
 
               activeBody := receiver.activeBody
+              frames := receiver.frames
             }
       }
       {
@@ -1608,6 +2209,7 @@ theorem generalCorrespondence_deliver
                hMatch
 
            continuation := hReceiverPair.continuation
+           frames := hReceiverPair.frames
          }⟩
 
     · obtain ⟨envReactor, reactor, hEnvReactor, hReactorMem, hPair⟩ :=
@@ -1630,6 +2232,7 @@ theorem generalCorrespondence_deliver
                ?_
 
            continuation := hPair.continuation
+           frames := hPair.frames
          }⟩
 
       rw [hEventTarget]
@@ -1671,6 +2274,7 @@ theorem generalCorrespondence_deliver
              }
 
            activeBody := receiver.activeBody
+           frames := receiver.frames
          },
          hEnv,
          Store.mem_update_self
@@ -1686,6 +2290,7 @@ theorem generalCorrespondence_deliver
                hMatch
 
            continuation := hReceiverPair.continuation
+           frames := hReceiverPair.frames
          }⟩
 
     · refine
@@ -1704,6 +2309,7 @@ theorem generalCorrespondence_deliver
                ?_
 
            continuation := hPair.continuation
+           frames := hPair.frames
          }⟩
 
       rw [hEventTarget]
@@ -2176,34 +2782,28 @@ theorem generalContinuationCompiles_selfSend_head
       index + 1,
       hRemaining,
       by
-        intro k rebec message arguments delay rest hDrop entry hEntry
+        -- Stage H reindexing: a send at path `p` of the tail is a send at `bumpHeadPath p` of
+        -- the body, and `shiftHeadPath (index + 1) p = shiftHeadPath index (bumpHeadPath p)`.
+        -- The singleton-path case is stage E's `k + 1` arithmetic unchanged.
+        intro path rebec message delay hPath entry hEntry
 
         refine
           hSites
-            (k + 1)
+            (Translation.bumpHeadPath
+              path)
             rebec
             message
-            arguments
             delay
-            rest
-            ?_
+            (Translation.generalSendAtPath_cons
+              hPath)
             entry
             ?_
 
-        · rw [
-            List.drop_succ_cons
-          ]
+        rw [
+          ← Translation.shiftHeadPath_bumpHeadPath
+        ]
 
-          exact hDrop
-
-        · rw [
-            show
-                index + (k + 1) =
-                  index + 1 + k from by
-              omega
-          ]
-
-          exact hEntry⟩⟩
+        exact hEntry⟩⟩
 
 /--
 A compiled body whose source head is an external send has the compiled `setPort` as its head, at the
@@ -2270,7 +2870,8 @@ theorem generalContinuationCompiles_routedSend_head
             context.bodyKey
 
           index :=
-            index
+            context.levelPath ++
+              [index]
         } with
 
   | none =>
@@ -2306,27 +2907,33 @@ theorem generalContinuationCompiles_routedSend_head
             entry.delay = delay := by
         refine
           hSites
-            0
+            [0]
             rebec
             message
-            arguments
             delay
-            sourceRemaining
-            ?_
+            (Translation.GeneralSendAtPath.here
+              (by
+                rw [
+                  List.drop_zero
+                ]))
             entry
             ?_
 
-        · rw [
-            List.drop_zero
-          ]
+        -- Stage H: the path is the singleton `[0]`, whose address `shiftHeadPath index [0]`
+        -- is stage E's `[index + 0]`, so this is the same instantiation the flat conjunct
+        -- received — the head of `source.drop 0` at its own site.
+        rw [
+          show
+              Translation.shiftHeadPath
+                  index
+                  [0] =
+                [index] from by
+            simp [
+              Translation.shiftHeadPath
+            ]
+        ]
 
-        · rw [
-            show
-                index + 0 = index from by
-              omega
-          ]
-
-          exact hEntry
+        exact hEntry
 
       exact
         ⟨entry,
@@ -2343,34 +2950,28 @@ theorem generalContinuationCompiles_routedSend_head
       index + 1,
       hRemaining,
       by
-        intro k tailRebec message arguments delay rest hDrop entry hEntry
+        -- Stage H reindexing: a send at path `p` of the tail is a send at `bumpHeadPath p` of
+        -- the body, and `shiftHeadPath (index + 1) p = shiftHeadPath index (bumpHeadPath p)`.
+        -- The singleton-path case is stage E's `k + 1` arithmetic unchanged.
+        intro path tailRebec message delay hPath entry hEntry
 
         refine
           hSites
-            (k + 1)
+            (Translation.bumpHeadPath
+              path)
             tailRebec
             message
-            arguments
             delay
-            rest
-            ?_
+            (Translation.generalSendAtPath_cons
+              hPath)
             entry
             ?_
 
-        · rw [
-            List.drop_succ_cons
-          ]
+        rw [
+          ← Translation.shiftHeadPath_bumpHeadPath
+        ]
 
-          exact hDrop
-
-        · rw [
-            show
-                index + (k + 1) =
-                  index + 1 + k from by
-              omega
-          ]
-
-          exact hEntry⟩⟩
+        exact hEntry⟩⟩
 
 /--
 A source `assign` step is answered by a **weak** target step of the quotient system, preserving the
@@ -2459,6 +3060,7 @@ theorem generalAssign_forward_weak
                     }
 
                   activeBody := remaining
+                  frames := actor.frames
                 }
           }
           state' := by
@@ -2554,6 +3156,7 @@ theorem generalSelfSend_forward
             {
               state := sender.state
               activeBody := remaining
+              frames := sender.frames
             })
           receiverName =
         some receiver) :
@@ -2576,6 +3179,7 @@ theorem generalSelfSend_forward
                   {
                     state := sender.state
                     activeBody := remaining
+                    frames := sender.frames
                   })
                 receiverName
                 {
@@ -2597,6 +3201,7 @@ theorem generalSelfSend_forward
                     }
 
                   activeBody := receiver.activeBody
+                  frames := receiver.frames
                 }
           }
           state' := by
@@ -2617,6 +3222,7 @@ theorem generalSelfSend_forward
         {
           state := sender.state
           activeBody := remaining
+          frames := sender.frames
         } := by
     rw [
       Store.lookup_update_eq
@@ -2684,15 +3290,18 @@ theorem generalSelfSend_forward
       {
         state := sender.state
         activeBody := remaining
+        frames := sender.frames
       }
       _
       {
         valuation := reactor.valuation
         activeBody := targetRemaining
+        frames := reactor.frames
       }
       {
         valuation := reactor.valuation
         activeBody := targetRemaining
+        frames := reactor.frames
       }
       _
       (Store.mem_update_self
@@ -2719,6 +3328,7 @@ theorem generalSelfSend_forward
             ?_
 
         continuation := hTailCompiles
+        frames := hPair.frames
       }
 
     refine
@@ -2751,6 +3361,7 @@ theorem generalSelfSend_forward
             ?_
 
         continuation := hCandidatePair.continuation
+        frames := hCandidatePair.frames
       }
 
     show
@@ -2991,6 +3602,7 @@ theorem generalRoutedSend_forward
             {
               state := sender.state
               activeBody := remaining
+              frames := sender.frames
             })
           receiverName =
         some receiver) :
@@ -3013,6 +3625,7 @@ theorem generalRoutedSend_forward
                   {
                     state := sender.state
                     activeBody := remaining
+                    frames := sender.frames
                   })
                 receiverName
                 {
@@ -3034,6 +3647,7 @@ theorem generalRoutedSend_forward
                     }
 
                   activeBody := receiver.activeBody
+                  frames := receiver.frames
                 }
           }
           state' := by
@@ -3245,6 +3859,7 @@ theorem generalRoutedSend_forward
           {
             state := sender.state
             activeBody := remaining
+            frames := sender.frames
           } := by
       rw [
         Store.lookup_update_eq
@@ -3267,15 +3882,18 @@ theorem generalRoutedSend_forward
         {
           state := sender.state
           activeBody := remaining
+          frames := sender.frames
         }
         _
         {
           valuation := reactor.valuation
           activeBody := targetRemaining
+          frames := reactor.frames
         }
         {
           valuation := reactor.valuation
           activeBody := targetRemaining
+          frames := reactor.frames
         }
         _
         (Store.mem_update_self
@@ -3302,6 +3920,7 @@ theorem generalRoutedSend_forward
               hMatch
 
           continuation := hTailCompiles
+          frames := hPair.frames
         }
 
     · intro name envOther actor candidateReactor hNotSender _ hCandidatePair
@@ -3316,6 +3935,7 @@ theorem generalRoutedSend_forward
               ?_
 
           continuation := hCandidatePair.continuation
+          frames := hCandidatePair.frames
         }
 
       show
@@ -3371,11 +3991,13 @@ theorem generalRoutedSend_forward
         {
           state := sender.state
           activeBody := remaining
+          frames := sender.frames
         }
         _
         {
           valuation := reactor.valuation
           activeBody := targetRemaining
+          frames := reactor.frames
         }
         targetReceiver
         _
@@ -3403,6 +4025,7 @@ theorem generalRoutedSend_forward
               hSame
 
           continuation := hTailCompiles
+          frames := hPair.frames
         }
 
     · exact
@@ -3415,6 +4038,7 @@ theorem generalRoutedSend_forward
               hMatch
 
           continuation := hReceiverPair.continuation
+          frames := hReceiverPair.frames
         }
 
     · intro name envOther actor candidateReactor _ hNotReceiver hCandidatePair
@@ -3429,6 +4053,7 @@ theorem generalRoutedSend_forward
               ?_
 
           continuation := hCandidatePair.continuation
+          frames := hCandidatePair.frames
         }
 
       show
@@ -3618,6 +4243,7 @@ theorem generalSend_forward
             {
               state := sender.state
               activeBody := remaining
+              frames := sender.frames
             })
           receiverName =
         some receiver) :
@@ -3640,6 +4266,7 @@ theorem generalSend_forward
                   {
                     state := sender.state
                     activeBody := remaining
+                    frames := sender.frames
                   })
                 receiverName
                 {
@@ -3661,6 +4288,7 @@ theorem generalSend_forward
                     }
 
                   activeBody := receiver.activeBody
+                  frames := receiver.frames
                 }
           }
           state' := by
@@ -4024,6 +4652,56 @@ theorem generalTau_forward
           hArguments
           hTarget
           hReceiver
+
+  -- OWED, milestone S2b. These three alternatives arrived with stage H's step-into rules and
+  -- **cannot be discharged until `LF.GeneralStep` has answering rules**, because the conclusion
+  -- asks for a target τ step and no target rule consumes a compiled conditional or pops a target
+  -- frame. The three lemmas named below do not exist yet; naming them is deliberate, so that the
+  -- build error states the obligation instead of hiding it.
+  --
+  -- Two repairs were available and both were declined. A premise restricting the step to the
+  -- three older rules would narrow this theorem, which is the one thing the milestone forbids;
+  -- and `sorry` would make the failure invisible to `lake build`. Neither the statement nor the
+  -- source relation is at fault: the target semantics is simply one layer behind, exactly as the
+  -- translator's conditional arm was one layer ahead of the source refusal.
+  --
+  -- What each owes, precisely:
+  --   * `generalBranchTrue_forward` and `generalBranchFalse_forward` need `LF.GeneralStep`
+  --     branch rules that step into the compiled branch and push the compiled remainder, and a
+  --     proof that `GeneralContinuationCompiles` holds of the entered branch against the compiled
+  --     branch — which is what `compileGeneralStmt_ifThenElse_inversion` supplies — while
+  --     `GeneralFramesCompile` gains one level on both sides.
+  --   * `generalResume_forward` needs an `LF.GeneralStep` pop rule, and reads the head of the
+  --     pairing's fourth conjunct: the popped source frame compiles to the popped target frame.
+  | branchTrue hActor hBody hCondition =>
+      exact
+        generalBranchTrue_forward
+          hCorrespondence
+          hUniqueS
+          hUniqueT
+          hActor
+          hBody
+          hCondition
+
+  | branchFalse hActor hBody hCondition =>
+      exact
+        generalBranchFalse_forward
+          hCorrespondence
+          hUniqueS
+          hUniqueT
+          hActor
+          hBody
+          hCondition
+
+  | resume hActor hBody hFrames =>
+      exact
+        generalResume_forward
+          hCorrespondence
+          hUniqueS
+          hUniqueT
+          hActor
+          hBody
+          hFrames
 
 /-!
 ## The τ closure

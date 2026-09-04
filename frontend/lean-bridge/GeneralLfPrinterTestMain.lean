@@ -2682,6 +2682,14 @@ model has one.
 
 The consequence is that `SendSite.index` is sparse — no site here has index 0 — and any
 future code that treats it as a dense counter over sends will disagree with this string.
+
+**Rendered by `Translation.renderGeneralSitePath`, not by `toString`, as of stage H.** The
+index became `List Nat` under decision `0046`, and `toString ([1] : List Nat)` is `"[1]"`, so
+`toString` here would have silently moved this assertion's value to `"[1]|[2]|[3]"`. Every send
+in this model is at the top level of its body, so each path has one component and the expected
+string is unchanged. That is the point of routing both this digest and every diagnostic through
+one path renderer: the level-0 spelling survives the type change, and a nested send would show
+its path here as `1.0` rather than as an unreadable list.
 -/
 private def routedSendSiteIndices :
     String :=
@@ -2690,7 +2698,7 @@ private def routedSendSiteIndices :
     ((Translation.externalSendsOfClass
       sensorClass).map
       (fun send =>
-        toString
+        Translation.renderGeneralSitePath
           send.site.index))
 
 /--

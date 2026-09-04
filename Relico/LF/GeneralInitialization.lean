@@ -70,6 +70,7 @@ def GeneralReactorRuntime.idleDefault :
   {
     valuation := []
     activeBody := []
+    frames := []
   }
 
 namespace GeneralProgram
@@ -104,6 +105,7 @@ def initialReactorRuntime
             )))
     activeBody :=
       reactor.startupReaction.body
+    frames := []
   }
 
 /--

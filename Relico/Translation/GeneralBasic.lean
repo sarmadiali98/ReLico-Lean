@@ -650,6 +650,12 @@ to accommodate that swap, and that is the payoff of stage D having stated propag
 separately from the thing being propagated.
 -/
 
+/- `compileGeneralStmt` and `compileGeneralBody` are mutually recursive as of stage H, because
+a conditional statement carries two bodies and compiling it means compiling them. Ruling 3 of
+the stage H design predicted this pair and predicted it here. A `mutual` block does not accept a
+docstring, so each definition carries its own. -/
+mutual
+
 /--
 Translate a statement, at the address it occupies in its body.
 
@@ -687,6 +693,22 @@ An earlier draft had the private one, and it rendered the same address as *"mess
 `settle` at statement 0"* where routing renders it *"message server `settle`, statement at
 index 0 counting from zero"*. Both are accurate; a reader comparing two diagnostics about one
 send would have had to work out that they were about one send.
+
+**The conditional arm compiles both branches and refuses only if one of them refuses.** It is
+the arm that makes this function mutually recursive with `compileGeneralBody`, and the two
+contexts it builds are the whole content of stage H's addressing rule: the then-branch is
+compiled at `context.levelPath ++ [index, 0]` and the else-branch at
+`context.levelPath ++ [index, 1]`, each from index `0`. Both are written as full record
+literals rather than with `{ context with … }`, matching every other record construction in this
+development, and both must stay component-identical to `externalSendsFromIndex`'s and
+`selfSendsFromIndex`'s conditional arms.
+
+Nothing in this arm is conditional on the *condition*. A branch's sends own their ports whether
+or not that branch runs, which is the conservative static reading `LF.setPortNamesOfBody` and
+`LF.GeneralCppPrinter.generalEffectNames` also take, and it is what keeps a port a property of
+the emitted program rather than of a run. The condition itself crosses through
+`compileGeneralExpr` unchanged, so a divide-by-zero inside it is governed by
+`docs/decisions/0045-divide-by-zero-restriction-only.md` exactly as one anywhere else is.
 -/
 def compileGeneralStmt
     (env : GeneralOutputPortEnv)
@@ -715,7 +737,8 @@ def compileGeneralStmt
                 context.bodyKey
 
               index :=
-                index
+                context.levelPath ++
+                  [index]
             }
             message)
           (arguments.map
@@ -731,7 +754,8 @@ def compileGeneralStmt
                 context.bodyKey
 
               index :=
-                index
+                context.levelPath ++
+                  [index]
             } with
 
       | some entry =>
@@ -754,21 +778,61 @@ def compileGeneralStmt
                     context.bodyKey
 
                   index :=
-                    index
+                    context.levelPath ++
+                      [index]
                 } ++
               "; every external send site is resolved by outputPortEnvOf, " ++
               "so this is a defect in the translator and not in the model")
 
-/-- Trace instrumentation is compiled literally and never refused. -/
-theorem compileGeneralStmt_trace
-    (env : GeneralOutputPortEnv)
-    (context : GeneralBodyContext)
-    (index : Nat)
-    (tag : String) :
-    compileGeneralStmt env context index (.trace tag) =
-      .ok (.trace tag) := by
+  | .ifThenElse condition thenBody elseBody =>
+      match
+          compileGeneralBody
+            env
+            {
+              bodyKey :=
+                context.bodyKey
 
-  rfl
+              selfSends :=
+                context.selfSends
+
+              levelPath :=
+                context.levelPath ++
+                  [index, 0]
+            }
+            0
+            thenBody with
+
+      | .error message =>
+          .error message
+
+      | .ok compiledThen =>
+          match
+              compileGeneralBody
+                env
+                {
+                  bodyKey :=
+                    context.bodyKey
+
+                  selfSends :=
+                    context.selfSends
+
+                  levelPath :=
+                    context.levelPath ++
+                      [index, 1]
+                }
+                0
+                elseBody with
+
+          | .error message =>
+              .error message
+
+          | .ok compiledElse =>
+              .ok
+                (.ifThenElse
+                  (compileGeneralExpr
+                    condition)
+                  compiledThen
+                  compiledElse)
 
 /--
 Translate a statement sequence, in order, stopping at the first refusal.
@@ -787,9 +851,20 @@ here and its position there are the same number. If one of them ever skips, port
 to the wrong sends and every downstream check still passes, so the alignment is worth stating
 even though no theorem in this commit needs it.
 
+**Stage H made the lockstep a statement about two paths rather than two numbers, and both sides
+moved together.** `context.levelPath` names the body being compiled, a statement's site is
+`levelPath ++ [index]`, and `compileGeneralStmt`'s conditional arm compiles the then-branch at
+`levelPath ++ [index, 0]` and the else-branch at `levelPath ++ [index, 1]`, each from index `0`,
+which is component for component what `externalSendsFromIndex` and `selfSendsFromIndex` do. The
+hazard above is unchanged and is now worth more, not less: three traversals have to agree, and a
+disagreement inside a branch is invisible to every downstream check exactly as a disagreement at
+the top level was.
+
 First refusal wins, and the diagnostic that survives is the earliest one in source order.
 That is a deliberate property of a translator whose refusals name a future stage: the
 message a user sees is about the first construct they wrote that this stage cannot carry.
+**Inside a conditional the earliest refusal is the then-branch's**, because that arm compiles
+the then-branch first, so source order still decides.
 -/
 def compileGeneralBody
     (env : GeneralOutputPortEnv)
@@ -827,6 +902,21 @@ def compileGeneralBody
               .ok
                 (compiledStatement ::
                   compiledRemaining)
+
+end
+
+/-- Trace instrumentation is compiled literally and never refused. -/
+theorem compileGeneralStmt_trace
+    (env : GeneralOutputPortEnv)
+    (context : GeneralBodyContext)
+    (index : Nat)
+    (tag : String) :
+    compileGeneralStmt env context index (.trace tag) =
+      .ok (.trace tag) := by
+
+  simp [
+    compileGeneralStmt
+  ]
 
 @[simp]
 theorem compileGeneralBody_nil
@@ -7419,7 +7509,8 @@ theorem compileGeneralStmt_send_selfTarget
                 context.bodyKey
 
               index :=
-                index
+                context.levelPath ++
+                  [index]
             }
             message)
           (arguments.map
@@ -7453,7 +7544,8 @@ theorem compileGeneralStmt_send_knownRebec_ok
               context.bodyKey
 
             index :=
-              index
+              context.levelPath ++
+                [index]
           } =
         some entry) :
     compileGeneralStmt
@@ -7481,13 +7573,30 @@ theorem compileGeneralStmt_send_knownRebec_ok
 /--
 A body whose every external send has an entry compiles.
 
-The hypothesis is quantified over `externalSendsFromIndex bodyKey index body` — the sends of
-*this* body from *this* index — and not over the class's whole send list, which is what makes
-the induction go through: the tail's hypothesis is the head's hypothesis with one statement
-removed, and that is exactly what the three arm equations in `Relico/Translation/GeneralRouting.lean`
-say. The index advances in step with `externalSendsFromIndex` because both functions advance it
-once per statement, which is the alignment the note on `compileGeneralBody` flags as worth
-stating even though no earlier theorem needed it. This theorem needs it.
+The hypothesis is quantified over `externalSendsFromIndex bodyKey levelPath index body` — the
+sends of *this* body from *this* index at *this* level — and not over the class's whole send
+list, which is what makes the recursion go through: the tail's hypothesis is the head's
+hypothesis with one statement removed, and that is exactly what the six arm equations in
+`Relico/Translation/GeneralRouting.lean` say. The index advances in step with
+`externalSendsFromIndex` because both functions advance it once per statement, which is the
+alignment the note on `compileGeneralBody` flags as worth stating even though no earlier theorem
+needed it. This theorem needs it.
+
+**Written as a recursive theorem rather than with `induction`, and that is stage H's doing.** The
+conditional case has to apply this statement to the two *branch* bodies, and `induction` over a
+list offers an induction hypothesis for the tail only. Recursing explicitly gives all three, and
+Lean accepts it structurally for the same reason it accepts `externalSendsFromIndex`, whose
+conditional arm walks the same three bodies.
+
+**The conditional case is the reason this theorem was false for one build.** While
+`compileGeneralStmt` refused conditionals, a body containing one made the hypothesis hold
+vacuously — `externalSendsFromIndex` skipped branches, so it reported no sends to resolve — while
+the conclusion asserted a compilation that returned `.error`. Two escapes were available and both
+were declined: adding a branch-free hypothesis, which would have narrowed the statement, and
+reverting the constructor. What repaired it is the translation compiling conditionals, which is
+the ordering `docs/decisions/0046-send-site-identity-under-nested-control-flow.md` §6 sets out.
+So this theorem is not merely restored: it now says that a *branch's* sends being resolvable is
+enough for a branch to compile, which is a stronger sentence than the one stage E proved.
 -/
 theorem exists_compileGeneralBody
     (env : GeneralOutputPortEnv)
@@ -7497,6 +7606,7 @@ theorem exists_compileGeneralBody
       (∀ send ∈
           externalSendsFromIndex
             context.bodyKey
+            context.levelPath
             index
             body,
         ∃ entry,
@@ -7512,10 +7622,11 @@ theorem exists_compileGeneralBody
             body =
           .ok compiled := by
 
-  induction body with
+  intro index hSends
+
+  cases body with
 
   | nil =>
-      intro index _
 
       exact
         ⟨[],
@@ -7524,8 +7635,7 @@ theorem exists_compileGeneralBody
            context
            index⟩
 
-  | cons statement remaining inductionHypothesis =>
-      intro index hSends
+  | cons statement remaining =>
 
       cases statement with
 
@@ -7554,7 +7664,10 @@ theorem exists_compileGeneralBody
               value
 
           obtain ⟨compiledRemaining, hRemaining⟩ :=
-            inductionHypothesis
+            exists_compileGeneralBody
+              env
+              context
+              remaining
               (index + 1)
               (by
                 intro send hMember
@@ -7594,7 +7707,10 @@ theorem exists_compileGeneralBody
             ]
 
           obtain ⟨compiledRemaining, hRemaining⟩ :=
-            inductionHypothesis
+            exists_compileGeneralBody
+              env
+              context
+              remaining
               (index + 1)
               (by
                 intro send hMember
@@ -7637,7 +7753,14 @@ theorem exists_compileGeneralBody
                       (.schedule
                         (generalActionNameAtSite
                           context.selfSends
-                          { body := context.bodyKey, index := index }
+                          {
+                            body :=
+                              context.bodyKey
+
+                            index :=
+                              context.levelPath ++
+                                [index]
+                          }
                           message)
                         (arguments.map
                           compileGeneralExpr)
@@ -7651,7 +7774,10 @@ theorem exists_compileGeneralBody
                   delay
 
               obtain ⟨compiledRemaining, hRemaining⟩ :=
-                inductionHypothesis
+                exists_compileGeneralBody
+                  env
+                  context
+                  remaining
                   (index + 1)
                   (by
                     intro send hMember
@@ -7683,7 +7809,8 @@ theorem exists_compileGeneralBody
                           context.bodyKey
 
                         index :=
-                          index
+                          context.levelPath ++
+                            [index]
                       }
 
                     knownRebec :=
@@ -7713,7 +7840,8 @@ theorem exists_compileGeneralBody
                           context.bodyKey
 
                         index :=
-                          index
+                          context.levelPath ++
+                            [index]
                       } =
                     some entry :=
                 hEntry
@@ -7747,7 +7875,10 @@ theorem exists_compileGeneralBody
                   hLookup
 
               obtain ⟨compiledRemaining, hRemaining⟩ :=
-                inductionHypothesis
+                exists_compileGeneralBody
+                  env
+                  context
+                  remaining
                   (index + 1)
                   (by
                     intro send hMember
@@ -7770,6 +7901,127 @@ theorem exists_compileGeneralBody
                  compileGeneralBody_cons_ok
                    hStatement
                    hRemaining⟩
+
+      | ifThenElse condition thenBody elseBody =>
+
+          obtain ⟨compiledThen, hThen⟩ :=
+            exists_compileGeneralBody
+              env
+              {
+                bodyKey :=
+                  context.bodyKey
+
+                selfSends :=
+                  context.selfSends
+
+                levelPath :=
+                  context.levelPath ++
+                    [index, 0]
+              }
+              thenBody
+              0
+              (by
+                intro send hMember
+
+                exact
+                  hSends
+                    send
+                    (by
+                      rw [
+                        externalSendsFromIndex_ifThenElse
+                      ]
+
+                      exact
+                        List.mem_append.mpr
+                          (Or.inl
+                            (List.mem_append.mpr
+                              (Or.inl
+                                hMember)))))
+
+          obtain ⟨compiledElse, hElse⟩ :=
+            exists_compileGeneralBody
+              env
+              {
+                bodyKey :=
+                  context.bodyKey
+
+                selfSends :=
+                  context.selfSends
+
+                levelPath :=
+                  context.levelPath ++
+                    [index, 1]
+              }
+              elseBody
+              0
+              (by
+                intro send hMember
+
+                exact
+                  hSends
+                    send
+                    (by
+                      rw [
+                        externalSendsFromIndex_ifThenElse
+                      ]
+
+                      exact
+                        List.mem_append.mpr
+                          (Or.inl
+                            (List.mem_append.mpr
+                              (Or.inr
+                                hMember)))))
+
+          have hStatement :
+              compileGeneralStmt
+                  env
+                  context
+                  index
+                  (
+                    .ifThenElse
+                      condition
+                      thenBody
+                      elseBody
+                  ) =
+                .ok
+                  (.ifThenElse
+                    (compileGeneralExpr
+                      condition)
+                    compiledThen
+                    compiledElse) := by
+            simp [
+              compileGeneralStmt,
+              hThen,
+              hElse
+            ]
+
+          obtain ⟨compiledRemaining, hRemaining⟩ :=
+            exists_compileGeneralBody
+              env
+              context
+              remaining
+              (index + 1)
+              (by
+                intro send hMember
+
+                exact
+                  hSends
+                    send
+                    (by
+                      rw [
+                        externalSendsFromIndex_ifThenElse
+                      ]
+
+                      exact
+                        List.mem_append.mpr
+                          (Or.inr
+                            hMember)))
+
+          exact
+            ⟨_,
+             compileGeneralBody_cons_ok
+               hStatement
+               hRemaining⟩
 
 /--
 A constructor whose every external send has an entry compiles.
@@ -8221,7 +8473,8 @@ private theorem compileGeneralStmt_setPort_inversion
               context.bodyKey
 
             index :=
-              index
+              context.levelPath ++
+                [index]
           } =
         some entry ∧
       entry.outputPort = port := by
@@ -8257,7 +8510,8 @@ private theorem compileGeneralStmt_setPort_inversion
                     context.bodyKey
 
                   index :=
-                    index
+                    context.levelPath ++
+                      [index]
                 } with
 
           | none =>
@@ -8282,6 +8536,403 @@ private theorem compileGeneralStmt_setPort_inversion
                  rfl,
                  hStatement.left⟩
 
+  | ifThenElse condition thenBody elseBody =>
+      -- A compiled conditional is `.ifThenElse`, never `.setPort`, so this arm is
+      -- discharged from `hStatement` alone. The two `cases` are needed because
+      -- `compileGeneralStmt`'s conditional arm matches on two compilations before it
+      -- returns, and a hypothesis about the whole match cannot be simplified until
+      -- both scrutinees are known.
+      cases hThen :
+          compileGeneralBody
+            env
+            {
+              bodyKey :=
+                context.bodyKey
+
+              selfSends :=
+                context.selfSends
+
+              levelPath :=
+                context.levelPath ++
+                  [index, 0]
+            }
+            0
+            thenBody with
+
+      | error message =>
+          simp [
+            compileGeneralStmt,
+            hThen
+          ] at hStatement
+
+      | ok compiledThen =>
+
+          cases hElse :
+              compileGeneralBody
+                env
+                {
+                  bodyKey :=
+                    context.bodyKey
+
+                  selfSends :=
+                    context.selfSends
+
+                  levelPath :=
+                    context.levelPath ++
+                      [index, 1]
+                }
+                0
+                elseBody with
+
+          | error message =>
+              simp [
+                compileGeneralStmt,
+                hThen,
+                hElse
+              ] at hStatement
+
+          | ok compiledElse =>
+              simp [
+                compileGeneralStmt,
+                hThen,
+                hElse
+              ] at hStatement
+
+/--
+Compiling a source conditional succeeds exactly when both its branches do, and then the compiled
+statement is the LF conditional over the compiled condition.
+
+The **public** inversion, in the direction a correspondence proof needs: the source statement is known
+to be a conditional and the target's shape is what has to be discovered. `compileGeneralStmt_ifThenElse_inversion`
+below runs the other way — from a known compiled shape back to the source — and stays `private`, because
+its two callers are the site lemmas in this module and `CONTRIBUTING.md` prefers a second small lemma to
+a de-privatised one.
+
+Both branch equations name the exact context the translation used, `context.levelPath ++ [index, 0]` and
+`… ++ [index, 1]` from index `0`, so a consumer cannot accidentally relate a branch compiled at some
+other address. That is the whole content of
+`docs/decisions/0046-send-site-identity-under-nested-control-flow.md` as a proof obligation.
+-/
+theorem compileGeneralStmt_ifThenElse_ok_inversion
+    {env : GeneralOutputPortEnv}
+    {context : GeneralBodyContext}
+    {index : Nat}
+    {condition : DTR.GeneralExpr}
+    {thenBody elseBody : DTR.GeneralBody}
+    {compiledStatement : LF.GeneralStmt}
+    (hStatement :
+      compileGeneralStmt
+          env
+          context
+          index
+          (
+            .ifThenElse
+              condition
+              thenBody
+              elseBody
+          ) =
+        .ok compiledStatement) :
+    ∃ (compiledThen compiledElse : LF.GeneralBody),
+      compiledStatement =
+          .ifThenElse
+            (compileGeneralExpr
+              condition)
+            compiledThen
+            compiledElse ∧
+        compileGeneralBody
+            env
+          {
+            bodyKey :=
+              context.bodyKey
+
+            selfSends :=
+              context.selfSends
+
+            levelPath :=
+              context.levelPath ++
+                [index, 0]
+          }
+            0
+            thenBody =
+          .ok compiledThen ∧
+        compileGeneralBody
+            env
+          {
+            bodyKey :=
+              context.bodyKey
+
+            selfSends :=
+              context.selfSends
+
+            levelPath :=
+              context.levelPath ++
+                [index, 1]
+          }
+            0
+            elseBody =
+          .ok compiledElse := by
+
+  cases hThen :
+      compileGeneralBody
+        env
+          {
+            bodyKey :=
+              context.bodyKey
+
+            selfSends :=
+              context.selfSends
+
+            levelPath :=
+              context.levelPath ++
+                [index, 0]
+          }
+        0
+        thenBody with
+
+  | error message =>
+      simp [
+        compileGeneralStmt,
+        hThen
+      ] at hStatement
+
+  | ok compiledThen =>
+
+      cases hElse :
+          compileGeneralBody
+            env
+          {
+            bodyKey :=
+              context.bodyKey
+
+            selfSends :=
+              context.selfSends
+
+            levelPath :=
+              context.levelPath ++
+                [index, 1]
+          }
+            0
+            elseBody with
+
+      | error message =>
+          simp [
+            compileGeneralStmt,
+            hThen,
+            hElse
+          ] at hStatement
+
+      | ok compiledElse =>
+
+          simp only [
+            compileGeneralStmt,
+            hThen,
+            hElse,
+            Except.ok.injEq
+          ] at hStatement
+
+          -- `rfl` rather than `hThen`/`hElse`: the two `cases` above generalized both branch
+          -- compilations in the goal, so the equations they name are already the goal's own.
+          exact
+            ⟨compiledThen,
+             compiledElse,
+             hStatement.symm,
+             rfl,
+             rfl⟩
+
+/--
+A compiled conditional came from a source conditional, and its two branches are the
+compilations of the source branches at the two addresses stage H assigns them.
+
+The mirror of `compileGeneralStmt_setPort_inversion` for the constructor stage H added, and it
+exists for the same reason: an induction over a *compiled* body meets a compiled statement and
+needs to know what source statement produced it before it can say anything about the sites
+inside it. Both branch equations name the exact context the translation used, so a proof that
+consumes this lemma cannot accidentally reason about a branch compiled at some other address.
+
+**It replaces `compileGeneralStmt_ne_ifThenElse`, which was true for exactly one build and is
+now false.** That lemma said the translator never emits a conditional, which held only while
+`compileGeneralStmt` refused one; its docstring said it must be deleted rather than adapted the
+day the translation compiles conditionals, and this is that deletion. The two inductions below
+now owe real branch cases, and they discharge them with this.
+-/
+private theorem compileGeneralStmt_ifThenElse_inversion
+    {env : GeneralOutputPortEnv}
+    {context : GeneralBodyContext}
+    {index : Nat}
+    {statement : DTR.GeneralStmt}
+    {condition : LF.GeneralExpr}
+    {compiledThen compiledElse : LF.GeneralBody}
+    (hStatement :
+      compileGeneralStmt
+          env
+          context
+          index
+          statement =
+        .ok
+          (.ifThenElse
+            condition
+            compiledThen
+            compiledElse)) :
+    ∃ (sourceCondition : DTR.GeneralExpr)
+      (thenBody elseBody : DTR.GeneralBody),
+      statement =
+        .ifThenElse
+          sourceCondition
+          thenBody
+          elseBody ∧
+      compileGeneralBody
+          env
+          {
+            bodyKey :=
+              context.bodyKey
+
+            selfSends :=
+              context.selfSends
+
+            levelPath :=
+              context.levelPath ++
+                [index, 0]
+          }
+          0
+          thenBody =
+        .ok compiledThen ∧
+      compileGeneralBody
+          env
+          {
+            bodyKey :=
+              context.bodyKey
+
+            selfSends :=
+              context.selfSends
+
+            levelPath :=
+              context.levelPath ++
+                [index, 1]
+          }
+          0
+          elseBody =
+        .ok compiledElse := by
+
+  cases statement with
+
+  | assign target value =>
+      simp [
+        compileGeneralStmt
+      ] at hStatement
+
+  | trace tag =>
+      simp [
+        compileGeneralStmt
+      ] at hStatement
+
+  | send target message sendArguments delay =>
+
+      cases target with
+
+      | selfTarget =>
+          simp [
+            compileGeneralStmt
+          ] at hStatement
+
+      | knownRebec rebec =>
+
+          cases hEntry :
+              generalEntryAtSite?
+                env
+                {
+                  body :=
+                    context.bodyKey
+
+                  index :=
+                    context.levelPath ++
+                      [index]
+                } with
+
+          | none =>
+              simp [
+                compileGeneralStmt,
+                hEntry
+              ] at hStatement
+
+          | some entry =>
+              simp [
+                compileGeneralStmt,
+                hEntry
+              ] at hStatement
+
+  | ifThenElse sourceCondition thenBody elseBody =>
+
+      cases hThen :
+          compileGeneralBody
+            env
+            {
+              bodyKey :=
+                context.bodyKey
+
+              selfSends :=
+                context.selfSends
+
+              levelPath :=
+                context.levelPath ++
+                  [index, 0]
+            }
+            0
+            thenBody with
+
+      | error message =>
+          simp [
+            compileGeneralStmt,
+            hThen
+          ] at hStatement
+
+      | ok compiledThenBody =>
+
+          cases hElse :
+              compileGeneralBody
+                env
+                {
+                  bodyKey :=
+                    context.bodyKey
+
+                  selfSends :=
+                    context.selfSends
+
+                  levelPath :=
+                    context.levelPath ++
+                      [index, 1]
+                }
+                0
+                elseBody with
+
+          | error message =>
+              simp [
+                compileGeneralStmt,
+                hThen,
+                hElse
+              ] at hStatement
+
+          | ok compiledElseBody =>
+
+              simp only [
+                compileGeneralStmt,
+                hThen,
+                hElse,
+                Except.ok.injEq,
+                LF.GeneralStmt.ifThenElse.injEq
+              ] at hStatement
+
+              exact
+                ⟨sourceCondition,
+                 thenBody,
+                 elseBody,
+                 rfl,
+                 hThen.trans
+                   (by
+                     rw [hStatement.right.left]),
+                 hElse.trans
+                   (by
+                     rw [hStatement.right.right])⟩
+
 /--
 Every port a compiled body sets was put there by a routing entry at some site of this body,
 at or after the index the compilation started from.
@@ -8292,6 +8943,18 @@ recursion, the head statement is at `index` and everything the tail contributes 
 `index + 1` or later; so a port set by the head cannot also be set by the tail unless two
 distinct sites carry one port name. That is exactly the hypothesis the theorem below takes,
 and exactly what F48's model denies.
+
+**Stage H split the address into `site` and `rest`, and kept `index ≤ site` on a `Nat`.** A port
+set inside a conditional lives at `context.levelPath ++ (site :: rest)` where `site` is the
+*conditional's* position in this level and `rest` records the branch and the position inside it.
+For a branch-free body `rest` is `[]` and this statement is stage E's, character for character in
+its arithmetic: the ordering fact stayed a `Nat` comparison rather than becoming a prefix
+relation, because what the `Nodup` argument below needs is that the head and the tail differ in
+the component at *this* level, and nesting below that component cannot change it.
+
+**The recursion is explicit rather than by `induction`**, for the same reason as
+`exists_compileGeneralBody`: the conditional case applies this statement to the two branch
+bodies, each at its own level, and a list induction offers no hypothesis for either.
 -/
 private theorem compileGeneralBody_setPortNames_provenance
     (env : GeneralOutputPortEnv)
@@ -8310,6 +8973,7 @@ private theorem compileGeneralBody_setPortNames_provenance
           LF.setPortNamesOfBody
             compiled →
         ∃ (site : Nat)
+          (rest : List Nat)
           (entry : GeneralOutputPortEntry),
           index ≤ site ∧
           generalEntryAtSite?
@@ -8319,13 +8983,15 @@ private theorem compileGeneralBody_setPortNames_provenance
                   context.bodyKey
 
                 index :=
-                  site
+                  context.levelPath ++
+                    (site :: rest)
               } =
             some entry ∧
           entry.outputPort = port := by
 
   intro statements
-  induction statements with
+
+  cases statements with
 
   | nil =>
       intro index compiled hCompiled port hPort
@@ -8342,7 +9008,7 @@ private theorem compileGeneralBody_setPortNames_provenance
         LF.setPortNamesOfBody
       ] at hPort
 
-  | cons statement remaining inductionHypothesis =>
+  | cons statement remaining =>
       intro index compiled hCompiled port hPort
 
       obtain
@@ -8361,11 +9027,14 @@ private theorem compileGeneralBody_setPortNames_provenance
       | assign _ _ =>
 
           simp only [
-            LF.setPortNamesOfBody
+            LF.setPortNamesOfBody_assign
           ] at hPort
 
-          obtain ⟨site, entry, hSite, hEntry, hPortName⟩ :=
-            inductionHypothesis
+          obtain ⟨site, rest, entry, hSite, hEntry, hPortName⟩ :=
+            compileGeneralBody_setPortNames_provenance
+              env
+              context
+              remaining
               (index + 1)
               compiledRemaining
               hRemaining
@@ -8374,6 +9043,7 @@ private theorem compileGeneralBody_setPortNames_provenance
 
           exact
             ⟨site,
+             rest,
              entry,
              by omega,
              hEntry,
@@ -8382,11 +9052,14 @@ private theorem compileGeneralBody_setPortNames_provenance
       | trace _ =>
 
           simp only [
-            LF.setPortNamesOfBody
+            LF.setPortNamesOfBody_trace
           ] at hPort
 
-          obtain ⟨site, entry, hSite, hEntry, hPortName⟩ :=
-            inductionHypothesis
+          obtain ⟨site, rest, entry, hSite, hEntry, hPortName⟩ :=
+            compileGeneralBody_setPortNames_provenance
+              env
+              context
+              remaining
               (index + 1)
               compiledRemaining
               hRemaining
@@ -8395,6 +9068,7 @@ private theorem compileGeneralBody_setPortNames_provenance
 
           exact
             ⟨site,
+             rest,
              entry,
              by omega,
              hEntry,
@@ -8403,11 +9077,14 @@ private theorem compileGeneralBody_setPortNames_provenance
       | schedule _ _ _ =>
 
           simp only [
-            LF.setPortNamesOfBody
+            LF.setPortNamesOfBody_schedule
           ] at hPort
 
-          obtain ⟨site, entry, hSite, hEntry, hPortName⟩ :=
-            inductionHypothesis
+          obtain ⟨site, rest, entry, hSite, hEntry, hPortName⟩ :=
+            compileGeneralBody_setPortNames_provenance
+              env
+              context
+              remaining
               (index + 1)
               compiledRemaining
               hRemaining
@@ -8416,6 +9093,7 @@ private theorem compileGeneralBody_setPortNames_provenance
 
           exact
             ⟨site,
+             rest,
              entry,
              by omega,
              hEntry,
@@ -8424,7 +9102,7 @@ private theorem compileGeneralBody_setPortNames_provenance
       | setPort statementPort _ =>
 
           simp only [
-            LF.setPortNamesOfBody,
+            LF.setPortNamesOfBody_setPort,
             List.mem_cons
           ] at hPort
 
@@ -8438,6 +9116,7 @@ private theorem compileGeneralBody_setPortNames_provenance
 
               exact
                 ⟨index,
+                 [],
                  entry,
                  by omega,
                  hEntry,
@@ -8446,8 +9125,11 @@ private theorem compileGeneralBody_setPortNames_provenance
 
           | inr hThere =>
 
-              obtain ⟨site, entry, hSite, hEntry, hPortName⟩ :=
-                inductionHypothesis
+              obtain ⟨site, rest, entry, hSite, hEntry, hPortName⟩ :=
+                compileGeneralBody_setPortNames_provenance
+                  env
+                  context
+                  remaining
                   (index + 1)
                   compiledRemaining
                   hRemaining
@@ -8456,6 +9138,120 @@ private theorem compileGeneralBody_setPortNames_provenance
 
               exact
                 ⟨site,
+                 rest,
+                 entry,
+                 by omega,
+                 hEntry,
+                 hPortName⟩
+
+      | ifThenElse _ compiledThen compiledElse =>
+
+          obtain
+              ⟨sourceCondition,
+               thenBody,
+               elseBody,
+               hSource,
+               hThen,
+               hElse⟩ :=
+            compileGeneralStmt_ifThenElse_inversion
+              hStatement
+
+          simp only [
+            LF.setPortNamesOfBody_ifThenElse,
+            List.mem_append
+          ] at hPort
+
+          -- `++` is left-associative, so the three lists nest as
+          -- `(then ++ else) ++ remaining` and the outer split separates the
+          -- conditional's own ports from the enclosing level's.
+          cases hPort with
+
+          | inl hBranchPort =>
+
+              cases hBranchPort with
+
+              | inl hThenPort =>
+
+                  obtain ⟨site, rest, entry, _, hEntry, hPortName⟩ :=
+                    compileGeneralBody_setPortNames_provenance
+                      env
+                      {
+                        bodyKey :=
+                          context.bodyKey
+
+                        selfSends :=
+                          context.selfSends
+
+                        levelPath :=
+                          context.levelPath ++
+                            [index, 0]
+                      }
+                      thenBody
+                      0
+                      compiledThen
+                      hThen
+                      port
+                      hThenPort
+
+                  refine
+                    ⟨index,
+                     0 :: site :: rest,
+                     entry,
+                     by omega,
+                     ?_,
+                     hPortName⟩
+
+                  simpa using hEntry
+
+              | inr hElsePort =>
+
+                  obtain ⟨site, rest, entry, _, hEntry, hPortName⟩ :=
+                    compileGeneralBody_setPortNames_provenance
+                      env
+                      {
+                        bodyKey :=
+                          context.bodyKey
+
+                        selfSends :=
+                          context.selfSends
+
+                        levelPath :=
+                          context.levelPath ++
+                            [index, 1]
+                      }
+                      elseBody
+                      0
+                      compiledElse
+                      hElse
+                      port
+                      hElsePort
+
+                  refine
+                    ⟨index,
+                     1 :: site :: rest,
+                     entry,
+                     by omega,
+                     ?_,
+                     hPortName⟩
+
+                  simpa using hEntry
+
+          | inr hThere =>
+
+              obtain ⟨site, rest, entry, hSite, hEntry, hPortName⟩ :=
+                compileGeneralBody_setPortNames_provenance
+                  env
+                  context
+                  remaining
+                  (index + 1)
+                  compiledRemaining
+                  hRemaining
+                  port
+                  hThere
+
+              exact
+                ⟨site,
+                 rest,
                  entry,
                  by omega,
                  hEntry,
@@ -8487,12 +9283,30 @@ So the property is *guard-relative*, in the same way and for the same reason as
 never the naming rule. The hypothesis is stated over sites of one `bodyKey` rather than as
 `Nodup` of the whole environment's port names, because that is all the induction consumes and
 it is the form a caller holding a per-class guard can actually supply.
+
+**Stage H moved the hypothesis from index pairs to path pairs, and that is a generalisation
+rather than a weakening.** Sites are `List Nat` now, and a conditional puts ports at paths of
+every depth, so a premise quantified over `Nat` pairs would say nothing about them. Restricted to
+paths of the form `[n]` the premise is exactly the one stage E stated, and the conclusion now
+covers bodies with branches, which stage E's could not. Nothing about the guard-relativity
+changes: what earns the property is still a check on generated names.
+
+**The two ways one emitted reaction can now set one port twice are worth separating.** The first
+is F50's: two *distinct* sites handed distinct arguments that concatenate to one name, which this
+hypothesis rules out and no naming rule does. The second is stage H's own, and it is not a defect
+in the naming: a port set in the then-branch and again in the else-branch appears twice in
+`LF.setPortNamesOfBody` even though at most one arm runs, because
+`docs/decisions/0046-send-site-identity-under-nested-control-flow.md` and the port ruling of
+2026-09-03 keep that list a property of the compiled artefact rather than of a run. Those two
+sites are distinct paths, so this theorem's conclusion still holds of them: the two branch ports
+are *different* ports with different names, and it is a source that sets one known rebec's message
+from both arms that is refused a single shared port, not this theorem that bends.
 -/
 theorem compileGeneralBody_setPortNames_nodup
     (env : GeneralOutputPortEnv)
     (context : GeneralBodyContext)
     (hDistinctSites :
-      ∀ (siteLeft siteRight : Nat)
+      ∀ (pathLeft pathRight : List Nat)
         (entryLeft entryRight : GeneralOutputPortEntry),
         generalEntryAtSite?
             env
@@ -8501,7 +9315,7 @@ theorem compileGeneralBody_setPortNames_nodup
                 context.bodyKey
 
               index :=
-                siteLeft
+                pathLeft
             } =
           some entryLeft →
         generalEntryAtSite?
@@ -8511,11 +9325,11 @@ theorem compileGeneralBody_setPortNames_nodup
                 context.bodyKey
 
               index :=
-                siteRight
+                pathRight
             } =
           some entryRight →
         entryLeft.outputPort = entryRight.outputPort →
-          siteLeft = siteRight) :
+          pathLeft = pathRight) :
     ∀ (statements : DTR.GeneralBody)
       (index : Nat)
       (compiled : LF.GeneralBody),
@@ -8529,7 +9343,8 @@ theorem compileGeneralBody_setPortNames_nodup
         compiled).Nodup := by
 
   intro statements
-  induction statements with
+
+  cases statements with
 
   | nil =>
       intro index compiled hCompiled
@@ -8546,7 +9361,7 @@ theorem compileGeneralBody_setPortNames_nodup
         LF.setPortNamesOfBody
       ]
 
-  | cons statement remaining inductionHypothesis =>
+  | cons statement remaining =>
       intro index compiled hCompiled
 
       obtain
@@ -8564,40 +9379,52 @@ theorem compileGeneralBody_setPortNames_nodup
 
       | assign _ _ =>
           simp only [
-            LF.setPortNamesOfBody
+            LF.setPortNamesOfBody_assign
           ]
 
           exact
-            inductionHypothesis
+            compileGeneralBody_setPortNames_nodup
+              env
+              context
+              hDistinctSites
+              remaining
               (index + 1)
               compiledRemaining
               hRemaining
 
       | trace _ =>
           simp only [
-            LF.setPortNamesOfBody
+            LF.setPortNamesOfBody_trace
           ]
 
           exact
-            inductionHypothesis
+            compileGeneralBody_setPortNames_nodup
+              env
+              context
+              hDistinctSites
+              remaining
               (index + 1)
               compiledRemaining
               hRemaining
 
       | schedule _ _ _ =>
           simp only [
-            LF.setPortNamesOfBody
+            LF.setPortNamesOfBody_schedule
           ]
 
           exact
-            inductionHypothesis
+            compileGeneralBody_setPortNames_nodup
+              env
+              context
+              hDistinctSites
+              remaining
               (index + 1)
               compiledRemaining
               hRemaining
 
       | setPort statementPort _ =>
           simp only [
-            LF.setPortNamesOfBody
+            LF.setPortNamesOfBody_setPort
           ]
 
           constructor
@@ -8613,6 +9440,7 @@ theorem compileGeneralBody_setPortNames_nodup
 
             obtain
                 ⟨site,
+                 rest,
                  entry,
                  hSite,
                  hEntry,
@@ -8635,10 +9463,15 @@ theorem compileGeneralBody_setPortNames_nodup
                 hStatement
 
             have hSame :
-                site = index :=
+                context.levelPath ++
+                    (site :: rest) =
+                  context.levelPath ++
+                    [index] :=
               hDistinctSites
-                site
-                index
+                (context.levelPath ++
+                  (site :: rest))
+                (context.levelPath ++
+                  [index])
                 entry
                 headEntry
                 hEntry
@@ -8646,13 +9479,367 @@ theorem compileGeneralBody_setPortNames_nodup
                 (hPortName.trans
                   hHeadPortName.symm)
 
+            have hCons :
+                site :: rest =
+                  [index] :=
+              List.append_cancel_left
+                hSame
+
+            injection hCons with hSiteEqual _
+
             omega
 
           · exact
-              inductionHypothesis
+              compileGeneralBody_setPortNames_nodup
+                env
+                context
+                hDistinctSites
+                remaining
                 (index + 1)
                 compiledRemaining
                 hRemaining
+
+      | ifThenElse _ compiledThen compiledElse =>
+
+          obtain
+              ⟨sourceCondition,
+               thenBody,
+               elseBody,
+               hSource,
+               hThen,
+               hElse⟩ :=
+            compileGeneralStmt_ifThenElse_inversion
+              hStatement
+
+          simp only [
+            LF.setPortNamesOfBody_ifThenElse,
+            List.nodup_append
+          ]
+
+          -- `++` is left-associative, so `List.nodup_append` splits
+          -- `(then ++ else) ++ remaining` into the conditional's two branches, the
+          -- enclosing level, and two disjointness obligations: between the branches,
+          -- and between the conditional and everything after it.
+          refine
+            ⟨⟨compileGeneralBody_setPortNames_nodup
+                env
+                {
+                  bodyKey :=
+                    context.bodyKey
+
+                  selfSends :=
+                    context.selfSends
+
+                  levelPath :=
+                    context.levelPath ++
+                      [index, 0]
+                }
+                hDistinctSites
+                thenBody
+                0
+                compiledThen
+                hThen,
+              compileGeneralBody_setPortNames_nodup
+                env
+                {
+                  bodyKey :=
+                    context.bodyKey
+
+                  selfSends :=
+                    context.selfSends
+
+                  levelPath :=
+                    context.levelPath ++
+                      [index, 1]
+                }
+                hDistinctSites
+                elseBody
+                0
+                compiledElse
+                hElse,
+              ?_⟩,
+             compileGeneralBody_setPortNames_nodup
+               env
+               context
+               hDistinctSites
+               remaining
+               (index + 1)
+               compiledRemaining
+               hRemaining,
+             ?_⟩
+
+          -- The then-branch's ports against the else-branch's. Their paths agree down to
+          -- this level's position and differ in the side component, `0` against `1`,
+          -- which is exactly what the alternating encoding buys.
+          · intro thenPort hThenPort elsePort hElsePort hEqualPorts
+
+            obtain
+                ⟨thenSite,
+                 thenRest,
+                 thenEntry,
+                 _,
+                 hThenEntry,
+                 hThenPortName⟩ :=
+              compileGeneralBody_setPortNames_provenance
+                env
+                {
+                  bodyKey :=
+                    context.bodyKey
+
+                  selfSends :=
+                    context.selfSends
+
+                  levelPath :=
+                    context.levelPath ++
+                      [index, 0]
+                }
+                thenBody
+                0
+                compiledThen
+                hThen
+                thenPort
+                hThenPort
+
+            obtain
+                ⟨elseSite,
+                 elseRest,
+                 elseEntry,
+                 _,
+                 hElseEntry,
+                 hElsePortName⟩ :=
+              compileGeneralBody_setPortNames_provenance
+                env
+                {
+                  bodyKey :=
+                    context.bodyKey
+
+                  selfSends :=
+                    context.selfSends
+
+                  levelPath :=
+                    context.levelPath ++
+                      [index, 1]
+                }
+                elseBody
+                0
+                compiledElse
+                hElse
+                elsePort
+                hElsePort
+
+            have hSame :
+                context.levelPath ++
+                    (index ::
+                      0 ::
+                        thenSite ::
+                          thenRest) =
+                  context.levelPath ++
+                    (index ::
+                      1 ::
+                        elseSite ::
+                          elseRest) :=
+              hDistinctSites
+                (context.levelPath ++
+                  (index ::
+                    0 ::
+                      thenSite ::
+                        thenRest))
+                (context.levelPath ++
+                  (index ::
+                    1 ::
+                      elseSite ::
+                        elseRest))
+                thenEntry
+                elseEntry
+                (by
+                  simpa using hThenEntry)
+                (by
+                  simpa using hElseEntry)
+                (hThenPortName.trans
+                  (hEqualPorts.trans
+                    hElsePortName.symm))
+
+            have hCons :
+                index ::
+                    0 ::
+                      thenSite ::
+                        thenRest =
+                  index ::
+                    1 ::
+                      elseSite ::
+                        elseRest :=
+              List.append_cancel_left
+                hSame
+
+            simp at hCons
+
+          -- The conditional's ports, from either branch, against the enclosing level's.
+          -- Both branch paths carry `index` at this level's position and every later
+          -- statement's carries `index + 1` or more.
+          · intro branchPort hBranchPort tailPort hTailPort hEqualPorts
+
+            obtain
+                ⟨tailSite,
+                 tailRest,
+                 tailEntry,
+                 hTailSite,
+                 hTailEntry,
+                 hTailPortName⟩ :=
+              compileGeneralBody_setPortNames_provenance
+                env
+                context
+                remaining
+                (index + 1)
+                compiledRemaining
+                hRemaining
+                tailPort
+                hTailPort
+
+            rw [
+              List.mem_append
+            ] at hBranchPort
+
+            cases hBranchPort with
+
+            | inl hThenPort =>
+
+                obtain
+                    ⟨thenSite,
+                     thenRest,
+                     thenEntry,
+                     _,
+                     hThenEntry,
+                     hThenPortName⟩ :=
+                  compileGeneralBody_setPortNames_provenance
+                    env
+                    {
+                      bodyKey :=
+                        context.bodyKey
+
+                      selfSends :=
+                        context.selfSends
+
+                      levelPath :=
+                        context.levelPath ++
+                          [index, 0]
+                    }
+                    thenBody
+                    0
+                    compiledThen
+                    hThen
+                    branchPort
+                    hThenPort
+
+                have hSame :
+                    context.levelPath ++
+                        (index ::
+                          0 ::
+                            thenSite ::
+                              thenRest) =
+                      context.levelPath ++
+                        (tailSite ::
+                          tailRest) :=
+                  hDistinctSites
+                    (context.levelPath ++
+                      (index ::
+                        0 ::
+                          thenSite ::
+                            thenRest))
+                    (context.levelPath ++
+                      (tailSite ::
+                        tailRest))
+                    thenEntry
+                    tailEntry
+                    (by
+                      simpa using hThenEntry)
+                    hTailEntry
+                    (hThenPortName.trans
+                      (hEqualPorts.trans
+                        hTailPortName.symm))
+
+                have hCons :
+                    index ::
+                        0 ::
+                          thenSite ::
+                            thenRest =
+                      tailSite ::
+                        tailRest :=
+                  List.append_cancel_left
+                    hSame
+
+                injection hCons with hSiteEqual _
+
+                omega
+
+            | inr hElsePort =>
+
+                obtain
+                    ⟨elseSite,
+                     elseRest,
+                     elseEntry,
+                     _,
+                     hElseEntry,
+                     hElsePortName⟩ :=
+                  compileGeneralBody_setPortNames_provenance
+                    env
+                    {
+                      bodyKey :=
+                        context.bodyKey
+
+                      selfSends :=
+                        context.selfSends
+
+                      levelPath :=
+                        context.levelPath ++
+                          [index, 1]
+                    }
+                    elseBody
+                    0
+                    compiledElse
+                    hElse
+                    branchPort
+                    hElsePort
+
+                have hSame :
+                    context.levelPath ++
+                        (index ::
+                          1 ::
+                            elseSite ::
+                              elseRest) =
+                      context.levelPath ++
+                        (tailSite ::
+                          tailRest) :=
+                  hDistinctSites
+                    (context.levelPath ++
+                      (index ::
+                        1 ::
+                          elseSite ::
+                            elseRest))
+                    (context.levelPath ++
+                      (tailSite ::
+                        tailRest))
+                    elseEntry
+                    tailEntry
+                    (by
+                      simpa using hElseEntry)
+                    hTailEntry
+                    (hElsePortName.trans
+                      (hEqualPorts.trans
+                        hTailPortName.symm))
+
+                have hCons :
+                    index ::
+                        1 ::
+                          elseSite ::
+                            elseRest =
+                      tailSite ::
+                        tailRest :=
+                  List.append_cancel_left
+                    hSame
+
+                injection hCons with hSiteEqual _
+
+                omega
 
 /-!
 ## §8 revisited: where each refusal lives

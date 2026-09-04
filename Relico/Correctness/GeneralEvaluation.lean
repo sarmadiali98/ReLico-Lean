@@ -492,6 +492,54 @@ theorem compileGeneralExpr_preserves_evaluation
               operator
               operandValue
 
+
+/--
+**A compiled condition evaluates to the same boolean.**
+
+The specialisation stage H's branch rules consume. `LF.GeneralStep.branchTrue` and `branchFalse` are
+premised on the target condition evaluating to `LF.GeneralValue.bool true` and `bool false`, and the
+source rules on the corresponding `DTR.GeneralValue.bool`, so the forward transfer needs the agreement
+at exactly one value shape rather than up to `Translation.compileGeneralValue`.
+
+It is a corollary rather than a second induction: `compileGeneralValue` sends `.bool value` to
+`.bool value`, so mapping the source's `some (.bool value)` through it lands on the target's. Stated
+because a caller that had to do this rewrite inline would be doing it three times, and because it
+records which value shape the branch rules actually agree on — a divide over a non-boolean condition is
+`docs/decisions/0045-divide-by-zero-restriction-only.md`'s business, not this lemma's.
+-/
+theorem compileGeneralExpr_preserves_bool
+    {sourceValuation : DTR.GeneralValuation}
+    {targetValuation : LF.GeneralValuation}
+    {expression : DTR.GeneralExpr}
+    {value : Bool}
+    (hAgrees :
+      GeneralValuationAgrees
+        sourceValuation
+        targetValuation)
+    (hEvaluate :
+      DTR.GeneralExpr.evaluate
+          sourceValuation
+          expression =
+        some
+          (DTR.GeneralValue.bool
+            value)) :
+    LF.GeneralExpr.evaluate
+        targetValuation
+        (Translation.compileGeneralExpr
+          expression) =
+      some
+        (LF.GeneralValue.bool
+          value) := by
+
+  rw [
+    compileGeneralExpr_preserves_evaluation
+      hAgrees
+      expression,
+    hEvaluate
+  ]
+
+  rfl
+
 /--
 The two evaluators fail in exactly the same cases.
 

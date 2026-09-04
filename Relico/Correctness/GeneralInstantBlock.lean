@@ -579,6 +579,7 @@ def fireResult
               reactorRT.valuation
 
           activeBody := reaction.body
+          frames := []
         }
 
     pending := earlier' ++ later'
@@ -1459,6 +1460,73 @@ private theorem generalInstantBlock_source_nil_maximal
         Bool.noConfusion
           hIdleEntry
 
+  -- Stage H's step-into rules are unreachable here for the same reason the three above are, and
+  -- the two branch rules by the same conjunct: a conditional head makes `activeBody.isEmpty`
+  -- false. `resume` is refuted by the *other* conjunct, which is what the stage H redesign of
+  -- `idle` bought: an empty active body over a non-empty frame stack is not idle.
+  | branchTrue hActor hBody hCondition =>
+      exfalso
+
+      have hMem :=
+        Store.mem_of_lookup
+          config.actors
+          _
+          _
+          hActor
+
+      have hIdleEntry := hIdle _ hMem
+
+      unfold DTR.GeneralActorRuntime.idle at hIdleEntry
+
+      rw [hBody] at hIdleEntry
+
+      exact
+        Bool.noConfusion
+          hIdleEntry
+
+  | branchFalse hActor hBody hCondition =>
+      exfalso
+
+      have hMem :=
+        Store.mem_of_lookup
+          config.actors
+          _
+          _
+          hActor
+
+      have hIdleEntry := hIdle _ hMem
+
+      unfold DTR.GeneralActorRuntime.idle at hIdleEntry
+
+      rw [hBody] at hIdleEntry
+
+      exact
+        Bool.noConfusion
+          hIdleEntry
+
+  | resume hActor hBody hFrames =>
+      exfalso
+
+      have hMem :=
+        Store.mem_of_lookup
+          config.actors
+          _
+          _
+          hActor
+
+      have hIdleEntry := hIdle _ hMem
+
+      unfold DTR.GeneralActorRuntime.idle at hIdleEntry
+
+      rw [
+        hBody,
+        hFrames
+      ] at hIdleEntry
+
+      exact
+        Bool.noConfusion
+          hIdleEntry
+
   | take hSelected hName hActor hIdleActor hDue hArrival hServer =>
       exfalso
 
@@ -1640,6 +1708,73 @@ private theorem generalInstantBlock_target_nil_maximal
       unfold LF.GeneralReactorRuntime.idle at hIdleEntry
 
       rw [hBody] at hIdleEntry
+
+      exact
+        Bool.noConfusion
+          hIdleEntry
+
+  -- The target step-into rules are unreachable here for the same reasons their source mirrors
+  -- are: a conditional head refutes `activeBody.isEmpty`, and `resume` is refuted by the frame
+  -- conjunct of the stage H `idle`.
+
+  | branchTrue hReactor hBody hCondition =>
+      exfalso
+
+      have hMem :=
+        Store.mem_of_lookup
+          state.reactors
+          _
+          _
+          hReactor
+
+      have hIdleEntry := hIdle _ hMem
+
+      unfold LF.GeneralReactorRuntime.idle at hIdleEntry
+
+      rw [hBody] at hIdleEntry
+
+      exact
+        Bool.noConfusion
+          hIdleEntry
+
+  | branchFalse hReactor hBody hCondition =>
+      exfalso
+
+      have hMem :=
+        Store.mem_of_lookup
+          state.reactors
+          _
+          _
+          hReactor
+
+      have hIdleEntry := hIdle _ hMem
+
+      unfold LF.GeneralReactorRuntime.idle at hIdleEntry
+
+      rw [hBody] at hIdleEntry
+
+      exact
+        Bool.noConfusion
+          hIdleEntry
+
+  | resume hReactor hBody hFrames =>
+      exfalso
+
+      have hMem :=
+        Store.mem_of_lookup
+          state.reactors
+          _
+          _
+          hReactor
+
+      have hIdleEntry := hIdle _ hMem
+
+      unfold LF.GeneralReactorRuntime.idle at hIdleEntry
+
+      rw [
+        hBody,
+        hFrames
+      ] at hIdleEntry
 
       exact
         Bool.noConfusion

@@ -1622,6 +1622,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                     reactorRT.valuation
 
                 activeBody := reaction.body
+                frames := []
               }
 
           pending := earlier' ++ later'
@@ -1648,6 +1649,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                   }
 
                 activeBody := server.body
+                frames := []
               }
         }
         {
@@ -1665,6 +1667,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                     reactorRT.valuation
 
                 activeBody := reaction.body
+                frames := []
               }
 
           pending := earlier' ++ later'
@@ -1770,6 +1773,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
             }
 
           activeBody := server.body
+          frames := []
         }
         {
           valuation :=
@@ -1779,6 +1783,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
               reactorRT.valuation
 
           activeBody := reaction.body
+          frames := []
         }
         (earlier' ++ later') :=
     {
@@ -1787,6 +1792,11 @@ theorem generalConsume_forward_weak_of_fireRepresentative
       messages := hPostMessages
 
       continuation := hBody
+
+      -- Both sides start their new body at the top level, so both stacks are empty and the
+      -- fourth conjunct is `True`. `take` and `fire` are the two rules that install a body,
+      -- and each is premised on its side being idle, which is now emptiness at every level.
+      frames := trivial
     }
 
   have hFire :
@@ -1811,6 +1821,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                       reactorRT.valuation
 
                   activeBody := reaction.body
+                  frames := []
                 }
 
             pending := earlier' ++ later'
@@ -1846,6 +1857,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                       reactorRT.valuation
 
                   activeBody := reaction.body
+                  frames := []
                 }
 
             pending := earlier' ++ later'
@@ -1867,6 +1879,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                         reactorRT.valuation
 
                     activeBody := reaction.body
+                    frames := []
                   }
 
               pending := earlier' ++ later'
@@ -1888,6 +1901,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                       reactorRT.valuation
 
                   activeBody := reaction.body
+                  frames := []
                 }
 
             pending := earlier' ++ later'
@@ -1912,6 +1926,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                 }
 
               activeBody := server.body
+              frames := []
             }).filter
           (fun entry =>
             decide (entry.1 = actorName)) =
@@ -1929,6 +1944,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
               }
 
             activeBody := server.body
+            frames := []
           })] :=
     store_filter_update_unique
       config.actors
@@ -1947,6 +1963,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
           }
 
         activeBody := server.body
+        frames := []
       }
       hUniqueS
 
@@ -1962,6 +1979,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                   reactorRT.valuation
 
               activeBody := reaction.body
+              frames := []
             }).filter
           (fun entry =>
             decide (entry.1 = event.target)) =
@@ -1974,6 +1992,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                 reactorRT.valuation
 
             activeBody := reaction.body
+            frames := []
           })] :=
     store_filter_update_unique
       before.reactors
@@ -1987,6 +2006,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
             reactorRT.valuation
 
         activeBody := reaction.body
+        frames := []
       }
       hUniqueT
 
@@ -2025,6 +2045,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                     }
 
                   activeBody := server.body
+                  frames := []
                 } :=
             store_mem_of_filter_unique
               (Store.update
@@ -2043,6 +2064,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                       }
 
                     activeBody := server.body
+                    frames := []
                   })
               actorName
               {
@@ -2058,6 +2080,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                   }
 
                 activeBody := server.body
+                frames := []
               }
               actor'
               hPostActorsFilter
@@ -2075,6 +2098,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                     reactorRT.valuation
 
                 activeBody := reaction.body
+                frames := []
               },
               hEnv,
               ?_,
@@ -2094,6 +2118,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                     reactorRT.valuation
 
                 activeBody := reaction.body
+                frames := []
               }
 
         · rcases
@@ -2132,6 +2157,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                         reactorRT.valuation
 
                     activeBody := reaction.body
+                    frames := []
                   }
                   hInBefore
                   (fun hEqual =>
@@ -2174,6 +2200,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
 
                   continuation :=
                     hCorrX.continuation
+                  frames := hCorrX.frames
                 }
 
           · obtain ⟨hNameEq, _⟩ :=
@@ -2203,6 +2230,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                         reactorRT.valuation
 
                     activeBody := reaction.body
+                    frames := []
                   } := hMember
 
           have hReactorEq :
@@ -2215,6 +2243,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                       reactorRT.valuation
 
                   activeBody := reaction.body
+                  frames := []
                 } :=
             store_mem_of_filter_unique
               (Store.update
@@ -2228,6 +2257,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                         reactorRT.valuation
 
                     activeBody := reaction.body
+                    frames := []
                   })
               event.target
               {
@@ -2238,6 +2268,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                     reactorRT.valuation
 
                 activeBody := reaction.body
+                frames := []
               }
               reactor'
               hAfterReactorsFilter
@@ -2260,6 +2291,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                   }
 
                 activeBody := server.body
+                frames := []
               },
               hEnv,
               ?_,
@@ -2282,6 +2314,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                   }
 
                 activeBody := server.body
+                frames := []
               }
 
         · rcases
@@ -2324,6 +2357,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                       }
 
                     activeBody := server.body
+                    frames := []
                   }
                   hActorX
                   hName
@@ -2363,6 +2397,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
 
                   continuation :=
                     hCorrX.continuation
+                  frames := hCorrX.frames
                 }
 
           · obtain ⟨hNameEq, _⟩ :=
@@ -2420,6 +2455,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                   }
 
                 activeBody := server.body
+                frames := []
               },
               ?_⟩
 
@@ -2442,6 +2478,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                   }
 
                 activeBody := server.body
+                frames := []
               }
 
         · refine ⟨actorX, ?_⟩
@@ -2465,6 +2502,7 @@ theorem generalConsume_forward_weak_of_fireRepresentative
                   }
 
                 activeBody := server.body
+                frames := []
               }
               hActorX
               hTarget

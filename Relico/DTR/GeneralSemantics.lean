@@ -280,6 +280,7 @@ inductive GeneralStep
                     bag := actor.state.bag
                   }
                 activeBody := remaining
+                frames := actor.frames
               }
         }
 
@@ -308,6 +309,7 @@ inductive GeneralStep
               {
                 state := actor.state
                 activeBody := remaining
+                frames := actor.frames
               }
         }
 
@@ -362,6 +364,7 @@ inductive GeneralStep
               {
                 state := sender.state
                 activeBody := remaining
+                frames := sender.frames
               })
             receiverName =
           some receiver) :
@@ -379,6 +382,7 @@ inductive GeneralStep
                 {
                   state := sender.state
                   activeBody := remaining
+                  frames := sender.frames
                 })
               receiverName
               {
@@ -398,6 +402,144 @@ inductive GeneralStep
                         }]
                   }
                 activeBody := receiver.activeBody
+                frames := receiver.frames
+              }
+        }
+
+  /--
+  `BRANCH-TRUE`. The condition evaluates to `true`, so the actor steps **into** the then-branch and
+  remembers the rest of this level on its frame stack.
+
+  The two halves of step-into, and neither is optional. `activeBody := thenBody` makes the branch the
+  level being executed, and `frames := remaining :: actor.frames` records what to run when it finishes.
+  Nothing is concatenated: `thenBody ++ remaining` would put the branch's statements at *this* level's
+  positions, while the routing table addresses them at `levelPath ++ [index, 0, …]`, so every port and
+  action inside the branch would be looked up at a site that does not exist. One level per frame is what
+  keeps `Translation.SendSite` an address, which is the content of
+  `docs/decisions/0046-send-site-identity-under-nested-control-flow.md`.
+
+  **Premised on the condition evaluating to a boolean.** An `.int` value has no rule, so the actor is
+  stuck rather than taking a branch on an arithmetic value — the same treatment `assign` gives an
+  expression that fails to evaluate, and for the same reason: making it a *rule* would prove a different
+  language correct. Stage H's source well-formedness refuses `ifThenElse` outright, so for accepted
+  models this rule is unreachable, exactly as the translator's conditional arm is; the layers are being
+  built in order and each is honest about which fragment it serves.
+
+  τ, because entering a branch is not observable in Table I. The clock and every other actor are
+  untouched.
+  -/
+  | branchTrue
+      {config : GeneralRuntimeConfiguration}
+      {actorName : ActorName}
+      {actor : GeneralActorRuntime}
+      {condition : DTR.GeneralExpr}
+      {thenBody elseBody remaining : DTR.GeneralBody}
+      (hActor :
+        Store.lookup config.actors actorName = some actor)
+      (hBody :
+        actor.activeBody =
+          DTR.GeneralStmt.ifThenElse condition thenBody elseBody :: remaining)
+      (hCondition :
+        DTR.GeneralExpr.evaluate actor.state.valuation condition =
+          some (DTR.GeneralValue.bool true)) :
+      GeneralStep
+        model
+        config
+        DTR.GeneralLabel.tau
+        {
+          now := config.now
+          actors :=
+            Store.update
+              config.actors
+              actorName
+              {
+                state := actor.state
+                activeBody := thenBody
+                frames := remaining :: actor.frames
+              }
+        }
+
+  /--
+  `BRANCH-FALSE`. The condition evaluates to `false`, so the actor steps into the else-branch.
+
+  The mirror of `branchTrue`, and a separate rule rather than one rule carrying the chosen body: two
+  constructors make both paths visible to every `cases hStep`, where a single rule selecting with an
+  `if` would hide one of them inside a term. The else-branch is entered even when it is empty, which
+  costs one `resume` step and keeps the rule uniform; `LF.stmtWellFormed` accepts an empty branch, so
+  the case is reachable and must not be special.
+  -/
+  | branchFalse
+      {config : GeneralRuntimeConfiguration}
+      {actorName : ActorName}
+      {actor : GeneralActorRuntime}
+      {condition : DTR.GeneralExpr}
+      {thenBody elseBody remaining : DTR.GeneralBody}
+      (hActor :
+        Store.lookup config.actors actorName = some actor)
+      (hBody :
+        actor.activeBody =
+          DTR.GeneralStmt.ifThenElse condition thenBody elseBody :: remaining)
+      (hCondition :
+        DTR.GeneralExpr.evaluate actor.state.valuation condition =
+          some (DTR.GeneralValue.bool false)) :
+      GeneralStep
+        model
+        config
+        DTR.GeneralLabel.tau
+        {
+          now := config.now
+          actors :=
+            Store.update
+              config.actors
+              actorName
+              {
+                state := actor.state
+                activeBody := elseBody
+                frames := remaining :: actor.frames
+              }
+        }
+
+  /--
+  `RESUME`. A finished level hands control back to the level that entered it.
+
+  The other half of step-into: an empty active body with a non-empty frame stack is not a finished
+  message server, it is a finished *branch*, and this rule pops the frame it left behind. Without it an
+  actor that entered a branch could never leave it — `take` is premised on `idle`, which as of stage H
+  asks for an empty stack as well, so the actor would be permanently ineligible for everything.
+
+  It is a step of its own rather than a side effect of the last statement of a branch. Folding it into
+  the statement rules would mean five rules each having to know whether they had just emptied a level,
+  and a rule that forgets is a lost continuation; one rule that fires exactly when a level is empty
+  cannot forget. The cost is one τ step per branch exit, which a weak bisimulation absorbs.
+
+  τ, and it changes nothing but one actor's two continuation fields.
+  -/
+  | resume
+      {config : GeneralRuntimeConfiguration}
+      {actorName : ActorName}
+      {actor : GeneralActorRuntime}
+      {frame : DTR.GeneralBody}
+      {frames : List DTR.GeneralBody}
+      (hActor :
+        Store.lookup config.actors actorName = some actor)
+      (hBody :
+        actor.activeBody = [])
+      (hFrames :
+        actor.frames = frame :: frames) :
+      GeneralStep
+        model
+        config
+        DTR.GeneralLabel.tau
+        {
+          now := config.now
+          actors :=
+            Store.update
+              config.actors
+              actorName
+              {
+                state := actor.state
+                activeBody := frame
+                frames := frames
               }
         }
 
@@ -423,6 +565,12 @@ inductive GeneralStep
   **Premised on the actor being idle.** Table I's `TAKE` requires the continuation to be `ε`. This is what
   makes `R`'s third component do work in G2b: without it an actor could accept a second message mid-body
   and the two sides' continuations would diverge with nothing to notice.
+
+  **The installed frame stack is `[]`, and that is a consequence of the premise rather than a choice.**
+  As of stage H `idle` means an empty active body *and* an empty stack, so an actor eligible for this rule
+  has no enclosing continuation to lose; writing `frames := []` states the post-state that the premise
+  already forces. Writing `actor.frames` would compute the same value and would read as though the rule
+  were carrying something over, which it is not: `TAKE` starts a message server at the top level.
 
   **The cohort is read through `erase`.** `selectedActor` takes the continuation-free
   `DTR.GeneralConfiguration` because G1 was built before continuations existed, and
@@ -483,6 +631,7 @@ inductive GeneralStep
                     bag := earlier ++ later
                   }
                 activeBody := server.body
+                frames := []
               }
         }
 
@@ -577,11 +726,14 @@ Names are dotted at the top level rather than wrapped in a `namespace GeneralSte
 /--
 A τ step leaves the clock alone.
 
-All three τ rules rebuild the configuration with `now := config.now`, so this is `rfl` in each case; the content is in
-the *absence* of a fourth case. `take` and `timeProgress` are eliminated by index unification — their labels
+All six τ rules rebuild the configuration with `now := config.now`, so this is `rfl` in each case; the content is in
+the *absence* of a seventh case. `take` and `timeProgress` are eliminated by index unification — their labels
 are `.consume` and `.timeAdvance`, neither of which unifies with `.tau` — so this theorem says that no
 internal source step can move logical time. G2b needs exactly that to keep a τ step's target tag at the
 same time component.
+
+Stage H's three step-into rules join the list and change nothing about the argument: entering a branch and
+resuming a level rewrite one actor's continuation fields and copy `config.now` like the other three.
 -/
 theorem GeneralStep.now_eq_of_tau
     {model : DTR.GeneralModel}
@@ -603,6 +755,15 @@ theorem GeneralStep.now_eq_of_tau
       rfl
 
   | send _ _ _ _ _ =>
+      rfl
+
+  | branchTrue _ _ _ =>
+      rfl
+
+  | branchFalse _ _ _ =>
+      rfl
+
+  | resume _ _ _ =>
       rfl
 
 /--

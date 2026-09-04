@@ -686,6 +686,24 @@ theorem generalStoreKeyUnique_of_step
         Store.keysUnique_update
           (Store.keysUnique_update hUnique)
 
+  -- Stage H's three step-into rules each `Store.update` one existing key, so the key set is the
+  -- one uniqueness was proved for. Nothing about the argument depends on which fields the update
+  -- rewrites, which is why these three read exactly like `assign`.
+  | branchTrue _ _ _ =>
+      dsimp only
+
+      exact Store.keysUnique_update hUnique
+
+  | branchFalse _ _ _ =>
+      dsimp only
+
+      exact Store.keysUnique_update hUnique
+
+  | resume _ _ _ =>
+      dsimp only
+
+      exact Store.keysUnique_update hUnique
+
   | take _ _ _ _ _ _ _ =>
       dsimp only
 
@@ -942,6 +960,23 @@ theorem generalStoreKeyUnique_of_step
       exact Store.keysUnique_update hUnique
 
   | setPort _ _ _ _ =>
+      dsimp only
+
+      exact Store.keysUnique_update hUnique
+
+  -- The three target step-into rules update one existing reactor key, exactly as the four
+  -- statement rules above do.
+  | branchTrue _ _ _ =>
+      dsimp only
+
+      exact Store.keysUnique_update hUnique
+
+  | branchFalse _ _ _ =>
+      dsimp only
+
+      exact Store.keysUnique_update hUnique
+
+  | resume _ _ _ =>
       dsimp only
 
       exact Store.keysUnique_update hUnique

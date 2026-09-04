@@ -61,6 +61,7 @@ def GeneralActorRuntime.idleDefault :
         bag := []
       }
     activeBody := []
+    frames := []
   }
 
 namespace GeneralModel
@@ -92,6 +93,10 @@ def initialValuation
 /--
 One actor's initial runtime state: the initial valuation, an empty bag, and the constructor body as the
 continuation.
+
+The frame stack starts empty. The constructor body is a top-level body, so nothing encloses it, and an
+initial state in which an actor already owed a pending continuation would be describing a run that had
+already begun.
 -/
 def initialActorRuntime
     (reactiveClass : DTR.GeneralReactiveClass)
@@ -108,6 +113,7 @@ def initialActorRuntime
       }
     activeBody :=
       reactiveClass.constructor.body
+    frames := []
   }
 
 /--

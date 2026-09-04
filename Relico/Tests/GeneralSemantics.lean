@@ -553,6 +553,7 @@ def sourceTraceActor : DTR.GeneralActorRuntime :=
         bag := []
       }
     activeBody := [DTR.GeneralStmt.trace "audit"]
+    frames := []
   }
 
 def sourceTraceConfig : DTR.GeneralRuntimeConfiguration :=
@@ -570,6 +571,7 @@ def sourceTraceNext : DTR.GeneralRuntimeConfiguration :=
           {
             state := sourceTraceActor.state
             activeBody := []
+            frames := []
           })
       ]
   }
@@ -599,6 +601,7 @@ example :
         {
           state := sourceTraceActor.state
           activeBody := []
+          frames := []
         } := by
   rfl
 
@@ -606,6 +609,7 @@ def targetTraceReactor : LF.GeneralReactorRuntime :=
   {
     valuation := []
     activeBody := [LF.GeneralStmt.trace "audit"]
+    frames := []
   }
 
 def targetTraceState : LF.GeneralRuntimeState :=
@@ -628,6 +632,7 @@ def targetTraceNext : LF.GeneralRuntimeState :=
           {
             valuation := targetTraceReactor.valuation
             activeBody := []
+            frames := []
           })
       ]
     pending := []
@@ -685,6 +690,7 @@ example :
         {
           valuation := targetTraceReactor.valuation
           activeBody := []
+          frames := []
         } := by
   rfl
 
@@ -698,18 +704,22 @@ def traceContinuationCompiles :
    0,
    by rfl,
    by
-     -- The one statement is a trace, so no `drop` of this body has an external-send head and the
-     -- site obligation is vacuous. This pin is the regression witness that the strengthened relation
-     -- stays inhabited on a real compiled body.
-     intro k _ _ _ _ _ hDrop
+     -- The one statement is a trace, so no path of this body reaches an external send and the site
+     -- obligation is vacuous. This pin is the regression witness that the strengthened relation stays
+     -- inhabited on a real compiled body; stage H made the obligation a path derivation, so the
+     -- refutation is now one `cases` per constructor rather than one per index.
+     intro _ _ _ _ hPath
 
-     cases k with
+     cases hPath with
 
-     | zero =>
-         simp at hDrop
+     | @here _ position _ _ _ _ _ hDrop =>
+         cases position <;> simp at hDrop
 
-     | succ k' =>
-         simp at hDrop⟩
+     | @thenBranch _ position _ _ _ _ _ _ _ _ hDrop _ =>
+         cases position <;> simp at hDrop
+
+     | @elseBranch _ position _ _ _ _ _ _ _ _ hDrop _ =>
+         cases position <;> simp at hDrop⟩
 
 example :
     Correctness.GeneralContinuationCompiles
@@ -767,6 +777,7 @@ def sourceConfig : DTR.GeneralRuntimeConfiguration :=
                 bag := [futureMessage]
               }
             activeBody := []
+            frames := []
           })
       ]
   }

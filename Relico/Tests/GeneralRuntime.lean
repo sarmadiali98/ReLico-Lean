@@ -164,17 +164,20 @@ def busyBody : DTR.GeneralBody :=
 def idleSensor : DTR.GeneralActorRuntime :=
   {
     state := sensorState
+    frames := []
   }
 
 def busySensor : DTR.GeneralActorRuntime :=
   {
     state := sensorState
     activeBody := busyBody
+    frames := []
   }
 
 def idleHub : DTR.GeneralActorRuntime :=
   {
     state := hubState
+    frames := []
   }
 
 def idleRuntime : DTR.GeneralRuntimeConfiguration :=
@@ -271,6 +274,7 @@ example :
 def quietReactor : LF.GeneralReactorRuntime :=
   {
     valuation := []
+    frames := []
   }
 
 def stateAtMicrostepZero : LF.GeneralRuntimeState :=

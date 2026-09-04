@@ -244,6 +244,23 @@ does it, so by the time a statement exists the delay is always present.
 part of the syntax before any executable trace semantics: this milestone wires
 the tag through translation and printing, while the target printer remains the
 owner of the observable output.
+
+`ifThenElse` carries a condition and two branch bodies, spelled `List GeneralStmt`
+rather than `GeneralBody` because the abbreviation is declared after this
+inductive; the two are the same type, since `GeneralBody` is reducible. The
+constructor makes the type recursive, so a body is no longer flat, and
+`docs/decisions/0046-send-site-identity-under-nested-control-flow.md` records
+why that is the approved shape: a send site is a *position*, and no alternative
+that stores an identifier on a statement was accepted. An `if` without an `else`
+is represented with an empty second branch rather than an option, so a branch is
+always a body and every traversal has one fewer case to consider.
+
+**No semantics accompany this constructor yet.** The frontend still refuses
+branching (`Frontend.GeneralDiagnostic`'s `branchingNotSupported`), so no
+well-formed source document can contain one, and the accepted fragment is
+unchanged. Layer 1 of the stage H sequence adds the constructor and enumerates
+its consequences; the source step relation, the target statement, the runtime
+frame stack and the path-based send-site threading are later layers.
 -/
 inductive GeneralStmt where
   | assign :
@@ -262,16 +279,164 @@ inductive GeneralStmt where
       Delay →
       GeneralStmt
 
-deriving Repr, DecidableEq, BEq, Inhabited
+  | ifThenElse :
+      DTR.GeneralExpr →
+      List GeneralStmt →
+      List GeneralStmt →
+      GeneralStmt
+
+deriving Repr, BEq, Inhabited
 
 /--
 A statement sequence.
 
-This is a flat list on purpose. The stage that admits branching and iteration
-has to change this type, and that change is a build error at every function
-that walks a body rather than a silent default branch.
+This was a flat list until stage H added `GeneralStmt.ifThenElse`. The
+*container* is still `List`, and that is deliberate: the element type became
+recursive instead, so `compileGeneralBody`'s `nil` and `cons` equations and every
+list operation on a body survive at each nesting level. What changed is that a
+body is now a tree when read through its statements, and a statement's position
+within one body no longer identifies it across a whole message server. The
+replacement notion of identity is a path, per
+`docs/decisions/0046-send-site-identity-under-nested-control-flow.md`.
+
+The original note here recorded that the stage admitting branching *"has to
+change this type, and that change is a build error at every function that walks
+a body rather than a silent default branch"*. That prediction held: adding the
+constructor produced build errors at the traversals rather than silent
+misbehaviour, which is why the type was left this shape.
 -/
 abbrev GeneralBody := List DTR.GeneralStmt
+
+/-
+Decidable equality for a general statement and for a body is written by hand
+below. The docstrings sit on the two definitions rather than on the `mutual`
+block, because a `mutual` block does not accept one.
+-/
+mutual
+
+/--
+Decide equality of two general statements.
+
+**Not derived, and the reason is a toolchain limitation rather than a preference.**
+`GeneralStmt.ifThenElse` carries `List GeneralStmt`, which makes the type a
+*nested* inductive, and Lean 4.32's `DecidableEq` deriving handler does not apply
+to one: it reports *"None of the deriving handlers for class `DecidableEq` applied
+to `GeneralStmt`"*. Confirmed against this toolchain rather than assumed, including
+that the standalone `deriving instance DecidableEq for ...` command fails the same
+way. `Repr`, `BEq` and `Inhabited` all still derive, so those stay on the
+`deriving` clause of the inductive and only this one instance is manual.
+
+This is mutually recursive with `decEqGeneralBody` because the type is: deciding
+equality of two `ifThenElse` statements requires deciding equality of their branch
+bodies, and deciding equality of two bodies requires deciding equality of their
+head statements.
+
+Every arm is exhaustive over both arguments with no wildcard on the pair, for the
+same reason the traversals in `Translation.GeneralRouting` avoid one: a later stage
+that adds a statement should get a build error here rather than a `false` that
+looks like a decision.
+-/
+def decEqGeneralStmt :
+    (first second : DTR.GeneralStmt) →
+    Decidable (first = second)
+
+  | .assign firstName firstValue, .assign secondName secondValue =>
+      if hName : firstName = secondName then
+        if hValue : firstValue = secondValue then
+          .isTrue (by subst hName; subst hValue; rfl)
+        else
+          .isFalse (by simp [hValue])
+      else
+        .isFalse (by simp [hName])
+
+  | .assign _ _, .trace _ => .isFalse (by simp)
+  | .assign _ _, .send _ _ _ _ => .isFalse (by simp)
+  | .assign _ _, .ifThenElse _ _ _ => .isFalse (by simp)
+
+  | .trace firstTag, .trace secondTag =>
+      if hTag : firstTag = secondTag then
+        .isTrue (by subst hTag; rfl)
+      else
+        .isFalse (by simp [hTag])
+
+  | .trace _, .assign _ _ => .isFalse (by simp)
+  | .trace _, .send _ _ _ _ => .isFalse (by simp)
+  | .trace _, .ifThenElse _ _ _ => .isFalse (by simp)
+
+  | .send firstTarget firstMessage firstArguments firstDelay,
+    .send secondTarget secondMessage secondArguments secondDelay =>
+      if hTarget : firstTarget = secondTarget then
+        if hMessage : firstMessage = secondMessage then
+          if hArguments : firstArguments = secondArguments then
+            if hDelay : firstDelay = secondDelay then
+              .isTrue
+                (by
+                  subst hTarget
+                  subst hMessage
+                  subst hArguments
+                  subst hDelay
+                  rfl)
+            else
+              .isFalse (by simp [hDelay])
+          else
+            .isFalse (by simp [hArguments])
+        else
+          .isFalse (by simp [hMessage])
+      else
+        .isFalse (by simp [hTarget])
+
+  | .send _ _ _ _, .assign _ _ => .isFalse (by simp)
+  | .send _ _ _ _, .trace _ => .isFalse (by simp)
+  | .send _ _ _ _, .ifThenElse _ _ _ => .isFalse (by simp)
+
+  | .ifThenElse firstCondition firstThen firstElse,
+    .ifThenElse secondCondition secondThen secondElse =>
+      if hCondition : firstCondition = secondCondition then
+        match decEqGeneralBody firstThen secondThen,
+              decEqGeneralBody firstElse secondElse with
+        | .isTrue hThen, .isTrue hElse =>
+            .isTrue
+              (by
+                subst hCondition
+                subst hThen
+                subst hElse
+                rfl)
+        | .isFalse hThen, _ => .isFalse (by simp [hThen])
+        | _, .isFalse hElse => .isFalse (by simp [hElse])
+      else
+        .isFalse (by simp [hCondition])
+
+  | .ifThenElse _ _ _, .assign _ _ => .isFalse (by simp)
+  | .ifThenElse _ _ _, .trace _ => .isFalse (by simp)
+  | .ifThenElse _ _ _, .send _ _ _ _ => .isFalse (by simp)
+
+/--
+Decide equality of two statement bodies.
+
+A `List` decision procedure specialised to this element type rather than an appeal
+to the generic `List` instance, because the generic one needs
+`DecidableEq GeneralStmt` as an instance argument, which is exactly what
+`decEqGeneralStmt` is defining.
+-/
+def decEqGeneralBody :
+    (first second : DTR.GeneralBody) →
+    Decidable (first = second)
+
+  | [], [] => .isTrue rfl
+  | [], _ :: _ => .isFalse (by simp)
+  | _ :: _, [] => .isFalse (by simp)
+
+  | firstHead :: firstTail, secondHead :: secondTail =>
+      match decEqGeneralStmt firstHead secondHead,
+            decEqGeneralBody firstTail secondTail with
+      | .isTrue hHead, .isTrue hTail =>
+          .isTrue (by subst hHead; subst hTail; rfl)
+      | .isFalse hHead, _ => .isFalse (by simp [hHead])
+      | _, .isFalse hTail => .isFalse (by simp [hTail])
+
+end
+
+instance : DecidableEq DTR.GeneralStmt := decEqGeneralStmt
 
 
 /--

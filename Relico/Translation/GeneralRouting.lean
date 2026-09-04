@@ -192,7 +192,7 @@ structure SendSite where
     GeneralBodyKey
 
   index :
-    Nat
+    List Nat
 
 deriving Repr, DecidableEq, BEq, Inhabited
 
@@ -229,7 +229,321 @@ structure GeneralExternalSend where
 deriving Repr, DecidableEq, BEq, Inhabited
 
 /--
-The external sends of one body, from a given starting index.
+Shift a continuation path's first component by the index a walk started from.
+
+The address arithmetic of the chain conjunct, in one place. A walk of a body from `index` puts the
+statement at position `p` of that body at site component `index + p`; nesting below that component is
+untouched, because a branch's own positions are counted from `0` inside the branch. So only the head
+moves.
+
+At a one-component path this is stage E's `[index + k]` exactly, which is what makes the migration to
+paths conservative: every fact the flat conjunct provided is the new conjunct at a singleton path.
+-/
+def shiftHeadPath
+    (index : Nat) :
+    List Nat →
+    List Nat
+
+  | [] =>
+      []
+
+  | head :: rest =>
+      (index + head) :: rest
+
+/--
+Shifting by zero is the identity.
+
+A walk that starts at index `0` addresses a body's own positions unchanged, which is what every
+branch does: `externalSendsFromStmt`'s conditional arm walks each branch from `0`.
+-/
+@[simp]
+theorem shiftHeadPath_zero
+    (path : List Nat) :
+    shiftHeadPath
+        0
+        path =
+      path := by
+
+  cases path with
+
+  | nil =>
+      rfl
+
+  | cons head rest =>
+      simp [
+        shiftHeadPath
+      ]
+
+/--
+Advance a continuation path past one consumed statement.
+
+The reindexing every tail transport performs: what was position `p` of a body is position `p + 1` of
+that body with one statement in front, and nothing below the head changes.
+-/
+def bumpHeadPath :
+    List Nat →
+    List Nat
+
+  | [] =>
+      []
+
+  | head :: rest =>
+      (head + 1) :: rest
+
+/--
+Shifting past a consumed statement and bumping the path name the same address.
+
+The one arithmetic fact the tail transports need, and the path-level form of stage E's
+`index + (k + 1) = (index + 1) + k`.
+-/
+theorem shiftHeadPath_bumpHeadPath
+    (index : Nat)
+    (path : List Nat) :
+    shiftHeadPath
+        (index + 1)
+        path =
+      shiftHeadPath
+        index
+        (bumpHeadPath
+          path) := by
+
+  cases path with
+
+  | nil =>
+      rfl
+
+  | cons head rest =>
+      simp [
+        shiftHeadPath,
+        bumpHeadPath
+      ]
+
+      omega
+
+/--
+An external send sits at a path of a source body, possibly inside a branch.
+
+The addressing predicate stage H's chain conjunct quantifies over, and the reason it is an inductive
+rather than a lookup function: a path descends through `DTR.GeneralStmt.ifThenElse`, whose branch
+bodies are *nested* occurrences, and a function recursing into them is compiled by well-founded
+recursion and stops reducing. An inductive has no termination question and gives every consumer a
+`cases` for free.
+
+Three constructors, matching `Translation.externalSendsFromStmt` component for component: a send at a
+position of this level, a send inside the then-branch of a conditional at a position of this level, and
+the same for the else-branch. The `0` and `1` are the branch selectors of
+`docs/decisions/0046-send-site-identity-under-nested-control-flow.md`, so a derivation *is* the site
+path, read one constructor per two components.
+
+`body.drop position` rather than an indexed lookup, following the flat conjunct this replaces: the
+`drop` idiom is what `Translation.externalSendsFromIndex_knownRebec_of_drop` consumes, so the
+`here` case of any consumer can hand its hypothesis straight to that lemma.
+
+Arguments are not recorded. The chain conjunct concludes about `entry.knownRebec` and `entry.delay`
+only, and a predicate that carried more would have to be instantiated with more at every use.
+-/
+inductive GeneralSendAtPath :
+    DTR.GeneralBody →
+    List Nat →
+    KnownRebecName →
+    MsgName →
+    Delay →
+    Prop where
+
+  | here
+      {body : DTR.GeneralBody}
+      {position : Nat}
+      {rebec : KnownRebecName}
+      {message : MsgName}
+      {arguments : List DTR.GeneralExpr}
+      {delay : Delay}
+      {rest : DTR.GeneralBody}
+      (hDrop :
+        body.drop position =
+          DTR.GeneralStmt.send
+              (.knownRebec rebec)
+              message
+              arguments
+              delay ::
+            rest) :
+      GeneralSendAtPath
+        body
+        [position]
+        rebec
+        message
+        delay
+
+  | thenBranch
+      {body : DTR.GeneralBody}
+      {position : Nat}
+      {condition : DTR.GeneralExpr}
+      {thenBody elseBody rest : DTR.GeneralBody}
+      {path : List Nat}
+      {rebec : KnownRebecName}
+      {message : MsgName}
+      {delay : Delay}
+      (hDrop :
+        body.drop position =
+          DTR.GeneralStmt.ifThenElse
+              condition
+              thenBody
+              elseBody ::
+            rest)
+      (hInner :
+        GeneralSendAtPath
+          thenBody
+          path
+          rebec
+          message
+          delay) :
+      GeneralSendAtPath
+        body
+        (position :: 0 :: path)
+        rebec
+        message
+        delay
+
+  | elseBranch
+      {body : DTR.GeneralBody}
+      {position : Nat}
+      {condition : DTR.GeneralExpr}
+      {thenBody elseBody rest : DTR.GeneralBody}
+      {path : List Nat}
+      {rebec : KnownRebecName}
+      {message : MsgName}
+      {delay : Delay}
+      (hDrop :
+        body.drop position =
+          DTR.GeneralStmt.ifThenElse
+              condition
+              thenBody
+              elseBody ::
+            rest)
+      (hInner :
+        GeneralSendAtPath
+          elseBody
+          path
+          rebec
+          message
+          delay) :
+      GeneralSendAtPath
+        body
+        (position :: 1 :: path)
+        rebec
+        message
+        delay
+
+/--
+The empty body has no send at any path.
+
+Every constructor needs `body.drop position` to be a cons, and `[].drop position` is `[]`.
+-/
+theorem generalSendAtPath_nil
+    {path : List Nat}
+    {rebec : KnownRebecName}
+    {message : MsgName}
+    {delay : Delay}
+    (hPath :
+      GeneralSendAtPath
+        []
+        path
+        rebec
+        message
+        delay) :
+    False := by
+
+  cases hPath with
+
+  | here hDrop =>
+      rw [
+        List.drop_nil
+      ] at hDrop
+
+      cases hDrop
+
+  | thenBranch hDrop _ =>
+      rw [
+        List.drop_nil
+      ] at hDrop
+
+      cases hDrop
+
+  | elseBranch hDrop _ =>
+      rw [
+        List.drop_nil
+      ] at hDrop
+
+      cases hDrop
+
+/--
+A send at a path of a body is a send at the bumped path of that body with one statement in front.
+
+The transport every tail lemma runs on. `List.drop_succ_cons` is the whole content at each of the three
+constructors: dropping one more from a longer list reaches the same statement.
+-/
+theorem generalSendAtPath_cons
+    {body : DTR.GeneralBody}
+    {statement : DTR.GeneralStmt}
+    {path : List Nat}
+    {rebec : KnownRebecName}
+    {message : MsgName}
+    {delay : Delay}
+    (hPath :
+      GeneralSendAtPath
+        body
+        path
+        rebec
+        message
+        delay) :
+    GeneralSendAtPath
+      (statement :: body)
+      (bumpHeadPath
+        path)
+      rebec
+      message
+      delay := by
+
+  cases hPath with
+
+  | here hDrop =>
+      exact
+        GeneralSendAtPath.here
+          (by
+            rw [
+              List.drop_succ_cons
+            ]
+
+            exact hDrop)
+
+  | thenBranch hDrop hInner =>
+      exact
+        GeneralSendAtPath.thenBranch
+          (by
+            rw [
+              List.drop_succ_cons
+            ]
+
+            exact hDrop)
+          hInner
+
+  | elseBranch hDrop hInner =>
+      exact
+        GeneralSendAtPath.elseBranch
+          (by
+            rw [
+              List.drop_succ_cons
+            ]
+
+            exact hDrop)
+          hInner
+
+/- `externalSendsFromStmt` and `externalSendsFromIndex` are mutually recursive because
+`DTR.GeneralStmt.ifThenElse` carries two nested bodies. A `mutual` block does not accept a
+docstring, so each definition carries its own. -/
+mutual
+
+/--
+The external sends of one statement, at the address it occupies.
 
 Explicit recursion with the index in the *matched* position rather than as a leading
 parameter, which is the shape `DTR.findKnownRebec?` and its three siblings use. Self-sends,
@@ -244,58 +558,122 @@ depends on no library function whose name has churned across Lean releases, and 
 There is no wildcard on the send arm's target: `.selfTarget` is matched explicitly, so the
 stage that adds a third send target gets a build error here rather than a silently dropped
 send.
+
+**`levelPath` is the address of the body being walked, and a site is `levelPath ++ [index]`.**
+Stage H's `ifThenElse` arm recurses into both branch bodies, so `index` alone no longer
+addresses a statement: it addresses a statement *within its level*, and the level is named by
+everything above it. The top level is `[]`, which is what `externalSendsOfBody` passes, so every
+unnested site is `[index]` and reads exactly as stage E's `index` did.
+
+**The two components a branch adds are a statement position and a side**, in that order:
+`levelPath ++ [index, 0]` for the then-branch and `levelPath ++ [index, 1]` for the else-branch.
+A path therefore alternates position, side, position, side, and its length is odd for a site and
+even for a level. Reading `1.0.2` left to right gives *"statement 1, then-branch, statement 2"*,
+which is what keeps a site checkable against source text by counting statements, the principle
+`docs/decisions/0046-send-site-identity-under-nested-control-flow.md` chose Design I to preserve.
+The alternation is the user's ruling of 2026-09-03; the two rejected encodings were a
+branch-tagged component, which moves `SendSite.index` off `List Nat`, and offsetting else-branch
+positions past the then-branch's length, which makes an address unreadable without counting the
+other branch.
+
+**The traversal is a statement-level function paired with a body-level one, and that shape is
+load-bearing.** A single function recursing from the body straight into the two branch bodies is
+compiled by **well-founded** recursion, which does not reduce: with that shape
+`externalSendsFromIndex bodyKey [] 0 [] = []` stopped holding by `rfl`, and every regression pin that
+evaluates a compilation failed while the library still built. The measurement is in
+`Relico/Tests/GeneralInitialization.lean`. Splitting the walk in two restores structural recursion
+and with it `rfl` and `decide`.
+
+**The `ifThenElse` arm must stay in lockstep with `compileGeneralStmt`'s.** Both recurse into the
+then-branch and then the else-branch, both start each branch at index `0`, and both continue the
+enclosing level at `index + 1`. That is the invariant the warning on `compileGeneralBody` names: if
+one of the two ever recurses where the other does not, ports are assigned to the wrong sends and
+every downstream check still passes.
+-/
+def externalSendsFromStmt
+    (bodyKey : GeneralBodyKey) :
+    List Nat →
+    Nat →
+    DTR.GeneralStmt →
+    List GeneralExternalSend
+
+  | _, _, .assign _ _ =>
+      []
+
+  | _, _, .trace _ =>
+      []
+
+  | _, _, .send .selfTarget _ _ _ =>
+      []
+
+  | levelPath, index, .send (.knownRebec knownRebec) message _ delay =>
+      [
+        {
+          site :=
+            {
+              body :=
+                bodyKey
+
+              index :=
+                levelPath ++
+                  [index]
+            }
+
+          knownRebec :=
+            knownRebec
+
+          message :=
+            message
+
+          delay :=
+            delay
+        }
+      ]
+
+  | levelPath, index, .ifThenElse _ thenBody elseBody =>
+      externalSendsFromIndex
+          bodyKey
+          (levelPath ++
+            [index, 0])
+          0
+          thenBody ++
+        externalSendsFromIndex
+          bodyKey
+          (levelPath ++
+            [index, 1])
+          0
+          elseBody
+
+/--
+The external sends of one body, from a given starting index, at a given level.
+
+The body-level half of the pair. Every statement is handed to `externalSendsFromStmt` and the index
+advances once per statement whatever the statement is, which is what makes the index a statement
+position rather than a send count.
 -/
 def externalSendsFromIndex
     (bodyKey : GeneralBodyKey) :
+    List Nat →
     Nat →
     DTR.GeneralBody →
     List GeneralExternalSend
 
-  | _, [] =>
+  | _, _, [] =>
       []
 
-  | index, .assign _ _ :: remaining =>
-      externalSendsFromIndex
-        bodyKey
-        (index + 1)
-        remaining
-
-  | index, .trace _ :: remaining =>
-      externalSendsFromIndex
-        bodyKey
-        (index + 1)
-        remaining
-
-  | index, .send .selfTarget _ _ _ :: remaining =>
-      externalSendsFromIndex
-        bodyKey
-        (index + 1)
-        remaining
-
-  | index, .send (.knownRebec knownRebec) message _ delay :: remaining =>
-      {
-        site :=
-          {
-            body :=
-              bodyKey
-
-            index :=
-              index
-          }
-
-        knownRebec :=
-          knownRebec
-
-        message :=
-          message
-
-        delay :=
-          delay
-      } ::
+  | levelPath, index, statement :: remaining =>
+      externalSendsFromStmt
+          bodyKey
+          levelPath
+          index
+          statement ++
         externalSendsFromIndex
           bodyKey
+          levelPath
           (index + 1)
           remaining
+
+end
 
 /--
 The external sends of one body.
@@ -306,6 +684,7 @@ def externalSendsOfBody
     List GeneralExternalSend :=
   externalSendsFromIndex
     bodyKey
+    []
     0
     body
 
@@ -522,63 +901,111 @@ structure GeneralSelfSend where
 
 deriving Repr, DecidableEq, BEq, Inhabited
 
-/--
-The self-sends of one body, from a given starting index.
+/- `selfSendsFromStmt` and `selfSendsFromIndex` are mutually recursive because
+`DTR.GeneralStmt.ifThenElse` carries two nested bodies. A `mutual` block does not accept a
+docstring, so each definition carries its own. -/
+mutual
 
-The mirror of `externalSendsFromIndex`, and the indices agree with it by construction because
-both advance on **every** statement rather than only on the ones they collect. That is what
-lets one site identify one statement whichever list it was drawn from, and it is why the
+/--
+The self-sends of one statement, at the address it occupies.
+
+The mirror of `externalSendsFromStmt`, and the indices agree with it by construction because
+both walks advance on **every** statement rather than only on the ones they collect. That is what
+lets one site identify one statement whichever list it was drawn from.
+
 The `.assign` and `.trace` arms are not wildcards here either: a stage that adds a statement
 form gets a build error rather than a site numbering that has silently shifted.
+
+The `ifThenElse` arm mirrors the one in `externalSendsFromStmt` exactly, `levelPath ++ [index, 0]`
+for the then-branch and `levelPath ++ [index, 1]` for the else-branch, both starting at index `0`.
+Mirroring it is not a stylistic choice: the two functions address one statement, and a self-send and
+an external send in one branch have to sit at sibling positions of one level or the action names and
+the port names stop describing the same body.
+
+The split into a statement-level and a body-level function is the shape that keeps this structurally
+recursive, for the reason recorded on `externalSendsFromStmt`: the single-function form is compiled
+by well-founded recursion and stops reducing, which kills the `decide` pins.
+-/
+def selfSendsFromStmt
+    (bodyKey : GeneralBodyKey) :
+    List Nat →
+    Nat →
+    DTR.GeneralStmt →
+    List GeneralSelfSend
+
+  | _, _, .assign _ _ =>
+      []
+
+  | _, _, .trace _ =>
+      []
+
+  | _, _, .send (.knownRebec _) _ _ _ =>
+      []
+
+  | levelPath, index, .send .selfTarget message _ delay =>
+      [
+        {
+          site :=
+            {
+              body :=
+                bodyKey
+
+              index :=
+                levelPath ++
+                  [index]
+            }
+
+          message :=
+            message
+
+          delay :=
+            delay
+        }
+      ]
+
+  | levelPath, index, .ifThenElse _ thenBody elseBody =>
+      selfSendsFromIndex
+          bodyKey
+          (levelPath ++
+            [index, 0])
+          0
+          thenBody ++
+        selfSendsFromIndex
+          bodyKey
+          (levelPath ++
+            [index, 1])
+          0
+          elseBody
+
+/--
+The self-sends of one body, from a given starting index, at a given level.
+
+The body-level half of the pair, handing every statement to `selfSendsFromStmt` and advancing the
+index once per statement.
 -/
 def selfSendsFromIndex
     (bodyKey : GeneralBodyKey) :
+    List Nat →
     Nat →
     DTR.GeneralBody →
     List GeneralSelfSend
 
-  | _, [] =>
+  | _, _, [] =>
       []
 
-  | index, .assign _ _ :: remaining =>
-      selfSendsFromIndex
-        bodyKey
-        (index + 1)
-        remaining
-
-  | index, .trace _ :: remaining =>
-      selfSendsFromIndex
-        bodyKey
-        (index + 1)
-        remaining
-
-  | index, .send (.knownRebec _) _ _ _ :: remaining =>
-      selfSendsFromIndex
-        bodyKey
-        (index + 1)
-        remaining
-
-  | index, .send .selfTarget message _ delay :: remaining =>
-      {
-        site :=
-          {
-            body :=
-              bodyKey
-
-            index :=
-              index
-          }
-
-        message :=
-          message
-
-        delay :=
-          delay
-      } ::
+  | levelPath, index, statement :: remaining =>
+      selfSendsFromStmt
+          bodyKey
+          levelPath
+          index
+          statement ++
         selfSendsFromIndex
           bodyKey
+          levelPath
           (index + 1)
           remaining
+
+end
 
 /--
 The self-sends of one body.
@@ -589,6 +1016,7 @@ def selfSendsOfBody
     List GeneralSelfSend :=
   selfSendsFromIndex
     bodyKey
+    []
     0
     body
 
@@ -831,8 +1259,23 @@ nothing at the three dozen call sites that merely pass this argument along, and 
 need to add one, because a loop body is a body whose statement index is no longer a position
 in a flat list.
 
+**Stage H added that field, and it is `levelPath`.** The prediction above was right about the
+shape and wrong only about which construct arrived first: it is a conditional, not a loop, and a
+branch body is likewise a body whose statement index is a position in *it* rather than in the
+reaction's flat list. `levelPath` is the address of the body being compiled and a statement's
+site is `levelPath ++ [index]`, so `compileGeneralStmt` and `compileGeneralBody` did keep their
+arity across the change, exactly as this paragraph claimed they would.
+
 * `bodyKey` is the body the statement occurs in. With the statement's index it makes the
   `SendSite` that both the output-port environment and the action names are keyed by.
+* `levelPath` is `[]` for a reaction's own body and gains two components per level of nesting, a
+  statement position and a branch side, matching `externalSendsFromIndex` and `selfSendsFromIndex`
+  component for component. It **defaults to `[]`**, which is not laziness: every construction of
+  this record that predates stage H describes a top-level body, so the default is the correct
+  value at every one of them, and the only constructions that need another value are the two in
+  `compileGeneralStmt`'s conditional arm. A construction meaning a nested level and omitting the
+  field would be compiling one body while addressing another, so read the field before copying a
+  literal from a proof.
 * `selfSends` is every self-send of the **enclosing class**, not of this body, because the
   action-name suffix is the site's ordinal among that class's sends of the same message.
   Per-body numbering would be a weaker repair that looks like this one: two bodies of one
@@ -858,6 +1301,10 @@ structure GeneralBodyContext where
 
   selfSends :
     List GeneralSelfSend
+
+  levelPath :
+    List Nat :=
+      []
 
 deriving Repr, DecidableEq, BEq, Inhabited
 
@@ -1029,11 +1476,40 @@ def renderGeneralBodyKey :
         "`"
 
 /--
+Render a send site's path for a diagnostic.
+
+**One dot-separated component per level of nesting**, so a top-level statement renders as `0`
+and a statement inside the then-branch of the body's second statement renders as `1.0`.
+
+`toString` on the list is **not** what this does, and the difference is the reason the function
+exists. `SendSite.index` became `List Nat` under
+`docs/decisions/0046-send-site-identity-under-nested-control-flow.md`, and `toString ([0] : List
+Nat)` is `"[0]"`, which would have turned every diagnostic reading *"statement at index 0"* into
+*"statement at index [0]"*. Three values asserted by `frontend/lean-bridge/GeneralLfPrinterTestMain.lean`
+are those strings, two of them refusal texts and one a site-index digest, and all three appear in
+committed transcripts. This spelling leaves every level-0 site **byte-identical** to what stage E
+emitted, so the type change costs no record its reproducibility.
+
+The empty path is spelled `""` rather than guarded, because no traversal produces one: a site is
+built at a statement, and a statement is at some position of some level.
+-/
+def renderGeneralSitePath
+    (path : List Nat) :
+    String :=
+  String.intercalate
+    "."
+    (path.map toString)
+
+/--
 Render a send site for a diagnostic.
 
 The index is the statement's position in its body, counted from zero, and the diagnostic
 says so, because a reader who has to count statements to find the offending send should not
 also have to guess where counting starts.
+
+Under nesting the position is a path and reads as one, `1.0` for the first statement of a branch
+of the body's second statement, rendered by `renderGeneralSitePath`. The *"counting from zero"*
+clause then applies per level, which is what it already meant.
 -/
 def renderGeneralSendSite
     (site : SendSite) :
@@ -1041,7 +1517,8 @@ def renderGeneralSendSite
   renderGeneralBodyKey
       site.body ++
     ", statement at index " ++
-    toString site.index ++
+    renderGeneralSitePath
+      site.index ++
     " counting from zero"
 
 /--
@@ -1848,7 +2325,14 @@ theorem externalSendsOfBody_nil
         bodyKey
         [] =
       [] := by
-  rfl
+  -- `simp` rather than `rfl`, and the difference records a real change: stage H's
+  -- `ifThenElse` arm recurses into two nested bodies, so `externalSendsFromIndex`
+  -- is compiled by the equation compiler rather than reduced by `whnf`, and its
+  -- `nil` equation stopped being definitional. Nothing about the value moved.
+  simp [
+    externalSendsOfBody,
+    externalSendsFromIndex
+  ]
 
 @[simp]
 theorem generalOutputPortEntriesOf_nil
@@ -2940,12 +3424,47 @@ The empty body sends nothing.
 -/
 theorem externalSendsFromIndex_nil
     (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
     (index : Nat) :
     externalSendsFromIndex
         bodyKey
+        levelPath
         index
         [] =
       [] := by
+  simp [
+    externalSendsFromIndex
+  ]
+
+/--
+A body's walk is its head statement's walk followed by its tail's, from the next index.
+
+The one equation that holds whatever the head statement is, and the reason the walk was split into a
+statement half and a body half in the first place. Every proof that has to move a send between a body
+and one of its statements rewrites with this instead of case-splitting on five constructors.
+-/
+@[simp]
+theorem externalSendsFromIndex_cons
+    (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
+    (index : Nat)
+    (statement : DTR.GeneralStmt)
+    (remaining : DTR.GeneralBody) :
+    externalSendsFromIndex
+        bodyKey
+        levelPath
+        index
+        (statement :: remaining) =
+      externalSendsFromStmt
+          bodyKey
+          levelPath
+          index
+          statement ++
+        externalSendsFromIndex
+          bodyKey
+          levelPath
+          (index + 1)
+          remaining := by
   simp [
     externalSendsFromIndex
   ]
@@ -2955,12 +3474,14 @@ An assignment contributes nothing and advances the index.
 -/
 theorem externalSendsFromIndex_assign
     (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
     (index : Nat)
     (variableName : VarName)
     (expression : DTR.GeneralExpr)
     (remaining : DTR.GeneralBody) :
     externalSendsFromIndex
         bodyKey
+        levelPath
         index
         (
           .assign
@@ -2970,10 +3491,12 @@ theorem externalSendsFromIndex_assign
         ) =
       externalSendsFromIndex
         bodyKey
+        levelPath
         (index + 1)
         remaining := by
   simp [
-    externalSendsFromIndex
+    externalSendsFromIndex,
+    externalSendsFromStmt
   ]
 
 /-
@@ -2981,11 +3504,13 @@ An output-only trace contributes no send and still advances the statement index.
 -/
 theorem externalSendsFromIndex_trace
     (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
     (index : Nat)
     (tag : String)
     (remaining : DTR.GeneralBody) :
     externalSendsFromIndex
         bodyKey
+        levelPath
         index
         (
           .trace
@@ -2994,10 +3519,12 @@ theorem externalSendsFromIndex_trace
         ) =
       externalSendsFromIndex
         bodyKey
+        levelPath
         (index + 1)
         remaining := by
   simp [
-    externalSendsFromIndex
+    externalSendsFromIndex,
+    externalSendsFromStmt
   ]
 
 /--
@@ -3005,6 +3532,7 @@ A self-send contributes nothing and advances the index.
 -/
 theorem externalSendsFromIndex_send_selfTarget
     (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
     (index : Nat)
     (message : MsgName)
     (arguments : List DTR.GeneralExpr)
@@ -3012,6 +3540,7 @@ theorem externalSendsFromIndex_send_selfTarget
     (remaining : DTR.GeneralBody) :
     externalSendsFromIndex
         bodyKey
+        levelPath
         index
         (
           .send
@@ -3023,10 +3552,12 @@ theorem externalSendsFromIndex_send_selfTarget
         ) =
       externalSendsFromIndex
         bodyKey
+        levelPath
         (index + 1)
         remaining := by
   simp [
-    externalSendsFromIndex
+    externalSendsFromIndex,
+    externalSendsFromStmt
   ]
 
 /--
@@ -3034,6 +3565,7 @@ An external send contributes one send, at this statement's address.
 -/
 theorem externalSendsFromIndex_send_knownRebec
     (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
     (index : Nat)
     (knownRebec : KnownRebecName)
     (message : MsgName)
@@ -3042,6 +3574,7 @@ theorem externalSendsFromIndex_send_knownRebec
     (remaining : DTR.GeneralBody) :
     externalSendsFromIndex
         bodyKey
+        levelPath
         index
         (
           .send
@@ -3059,7 +3592,8 @@ theorem externalSendsFromIndex_send_knownRebec
               bodyKey
 
             index :=
-              index
+              levelPath ++
+                [index]
           }
 
         knownRebec :=
@@ -3073,10 +3607,64 @@ theorem externalSendsFromIndex_send_knownRebec
       } ::
         externalSendsFromIndex
           bodyKey
+          levelPath
           (index + 1)
           remaining := by
   simp [
+    externalSendsFromIndex,
+    externalSendsFromStmt
+  ]
+
+/--
+A conditional contributes both branches' sends, then the enclosing level's.
+
+The equation the branch cases of every later induction rewrite with, and the one place the
+alternating path encoding is stated as a rewriting rule rather than as a definition: the
+then-branch is walked at `levelPath ++ [index, 0]` from index `0`, the else-branch at
+`levelPath ++ [index, 1]` from index `0`, and the enclosing level resumes at `index + 1`.
+
+Both branches contribute unconditionally, which is the same conservative static reading
+`LF.setPortNamesOfBody` and `LF.GeneralCppPrinter.generalEffectNames` take: a send inside a
+branch owns a port whether or not that branch runs, because a port is part of the emitted
+structure and cannot depend on a run.
+-/
+theorem externalSendsFromIndex_ifThenElse
+    (bodyKey : GeneralBodyKey)
+    (levelPath : List Nat)
+    (index : Nat)
+    (condition : DTR.GeneralExpr)
+    (thenBody elseBody remaining : DTR.GeneralBody) :
     externalSendsFromIndex
+        bodyKey
+        levelPath
+        index
+        (
+          .ifThenElse
+              condition
+              thenBody
+              elseBody ::
+            remaining
+        ) =
+      externalSendsFromIndex
+          bodyKey
+          (levelPath ++
+            [index, 0])
+          0
+          thenBody ++
+        externalSendsFromIndex
+            bodyKey
+            (levelPath ++
+              [index, 1])
+            0
+            elseBody ++
+          externalSendsFromIndex
+            bodyKey
+            levelPath
+            (index + 1)
+            remaining := by
+  simp [
+    externalSendsFromIndex,
+    externalSendsFromStmt
   ]
 
 /--

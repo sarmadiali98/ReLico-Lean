@@ -329,6 +329,106 @@ theorem generalNoOverdue_of_step
             message
             hMessage
 
+  -- Stage H's three step-into rules rewrite one actor's continuation fields and copy its
+  -- `state` unchanged, so its bag is the bag this invariant was already proved for. The proof
+  -- is the `trace` proof, and it is repeated rather than abstracted for the reason the `assign`
+  -- and `trace` cases are not shared either: each case names its own rule's premises.
+  | branchTrue hActor hBody hCondition =>
+      intro entry hMem message hMessage
+
+      obtain ⟨name, runtime⟩ := entry
+
+      rcases
+          mem_update_cases
+            hMem with
+        hNew | hOld
+      · obtain ⟨_, runtimeEq⟩ :=
+          Prod.mk.inj hNew
+
+        subst runtimeEq
+
+        exact
+          hNoOverdue
+            _
+            (Store.mem_of_lookup
+              config.actors
+              _
+              _
+              hActor)
+            message
+            hMessage
+
+      · exact
+          hNoOverdue
+            _
+            hOld
+            message
+            hMessage
+
+  | branchFalse hActor hBody hCondition =>
+      intro entry hMem message hMessage
+
+      obtain ⟨name, runtime⟩ := entry
+
+      rcases
+          mem_update_cases
+            hMem with
+        hNew | hOld
+      · obtain ⟨_, runtimeEq⟩ :=
+          Prod.mk.inj hNew
+
+        subst runtimeEq
+
+        exact
+          hNoOverdue
+            _
+            (Store.mem_of_lookup
+              config.actors
+              _
+              _
+              hActor)
+            message
+            hMessage
+
+      · exact
+          hNoOverdue
+            _
+            hOld
+            message
+            hMessage
+
+  | resume hActor hBody hFrames =>
+      intro entry hMem message hMessage
+
+      obtain ⟨name, runtime⟩ := entry
+
+      rcases
+          mem_update_cases
+            hMem with
+        hNew | hOld
+      · obtain ⟨_, runtimeEq⟩ :=
+          Prod.mk.inj hNew
+
+        subst runtimeEq
+
+        exact
+          hNoOverdue
+            _
+            (Store.mem_of_lookup
+              config.actors
+              _
+              _
+              hActor)
+            message
+            hMessage
+
+      · exact
+          hNoOverdue
+            _
+            hOld
+            message
+            hMessage
+
   | send hSender hBody hArguments hTarget hReceiver =>
       intro entry hMem message hMessage
 

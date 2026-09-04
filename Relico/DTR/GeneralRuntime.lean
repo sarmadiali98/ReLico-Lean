@@ -73,10 +73,30 @@ duplicating it.
 /--
 One actor's runtime state: its `GeneralActorState`, plus the statements it has left to run.
 
-`activeBody` is the continuation. An empty continuation is the idle actor — the one eligible to accept
-a dispatch — and a non-empty one is an actor part-way through a message-server body. There is no
-separate "executing" flag, because a flag and a list can disagree about whether work remains and the
-list alone cannot.
+`activeBody` is the continuation of the level the actor is executing *now*. An actor with nothing left
+to run at any level is the idle actor — the one eligible to accept a dispatch — and one part-way
+through a body is not. There is no separate "executing" flag, because a flag and a list can disagree
+about whether work remains and the list alone cannot.
+
+**`frames` is the stack of enclosing continuations, innermost first, and it is not defaultable.** Stage
+H's step-into semantics needs somewhere to remember *"what to run after this branch finishes"*, and a
+`List DTR.GeneralBody` read as a stack is that place: entering the then-branch of
+`ifThenElse c t e :: remaining` pushes `remaining` and makes `t` the active body, and an active body
+that runs out pops the stack instead of ending the message server.
+
+The field is deliberately declared **without** a default, unlike `activeBody`, and that is a decision
+about failure modes rather than about style. Every existing rule of `DTR.GeneralStep` rewrites an
+actor as a full record literal; with a default, each of those literals would silently write
+`frames := []` and *discard* the pending stack, which is a lost-continuation bug of exactly the shape
+F56 found for a lost message, and no test in this repository would fail. Without a default, the
+compiler names every construction site and each one has to say what happens to the stack.
+
+Splicing the branch into the active body instead — `activeBody := t ++ remaining`, no new field —
+was rejected and must not be reintroduced: the spliced statements would then sit at top-level
+positions of a flat list, while the routing table addresses them at `levelPath ++ [i, 0, …]`, so the
+ports and actions of a branch would be resolved at addresses that do not exist. Keeping one level per
+frame is what keeps `Translation.SendSite` meaningful under nesting, which is the whole content of
+`docs/decisions/0046-send-site-identity-under-nested-control-flow.md`.
 
 The class is not recorded here for the same reason `GeneralActorState` does not record it.
 -/
@@ -86,6 +106,9 @@ structure GeneralActorRuntime where
 
   activeBody :
     DTR.GeneralBody := []
+
+  frames :
+    List DTR.GeneralBody
 
 deriving Repr, DecidableEq, BEq, Inhabited
 
@@ -108,29 +131,72 @@ deriving Repr, DecidableEq, BEq, Inhabited
 namespace GeneralActorRuntime
 
 /--
-Whether this actor has no statements left to run.
+Whether this actor has no statements left to run, at any level.
 
 The eligibility test for accepting a dispatch. Stated as a `Bool` because the step relation guards on
-it and `GeneralBody` is a `List`, whose emptiness is already decidable.
+it and both fields are `List`s, whose emptiness is already decidable.
+
+**Both conjuncts are load-bearing as of stage H.** An actor whose active body has run out but whose
+frame stack still holds an enclosing continuation is *not* finished: it owes the statements after the
+branch it stepped into. Testing `activeBody` alone would let `TAKE` install a second message-server
+body on top of a half-executed one, which is precisely the divergence Table I's *"continuation is ε"*
+premise exists to prevent, and the third component of `R` would then relate two states whose
+continuations disagree with nothing to notice.
+
+For every model of the currently accepted fragment `frames` is `[]`, so the second conjunct is `true`
+wherever the pre-stage-H development goes and no existing behaviour moved.
 -/
 def idle
     (actor : GeneralActorRuntime) :
     Bool :=
-  actor.activeBody.isEmpty
+  actor.activeBody.isEmpty &&
+    actor.frames.isEmpty
 
 @[simp]
 theorem idle_of_nil
     (state : DTR.GeneralActorState) :
-    idle { state := state, activeBody := [] } = true := by
+    idle { state := state, activeBody := [], frames := [] } = true := by
   rfl
 
 @[simp]
 theorem idle_of_cons
     (state : DTR.GeneralActorState)
     (statement : DTR.GeneralStmt)
-    (remaining : DTR.GeneralBody) :
-    idle { state := state, activeBody := statement :: remaining } = false := by
+    (remaining : DTR.GeneralBody)
+    (frames : List DTR.GeneralBody) :
+    idle
+        {
+          state := state
+          activeBody := statement :: remaining
+          frames := frames
+        } =
+      false := by
   rfl
+
+/--
+An actor with a pending frame is not idle, whatever its active body.
+
+The other half of the guard, stated separately because the two reasons an actor is busy are
+independent: `idle_of_cons` covers *"this level has statements left"* and this covers *"an enclosing
+level does"*. A proof that only knew the first would accept an actor that has just run the last
+statement of a branch as ready for a new message.
+-/
+@[simp]
+theorem idle_of_frames_cons
+    (state : DTR.GeneralActorState)
+    (activeBody : DTR.GeneralBody)
+    (frame : DTR.GeneralBody)
+    (frames : List DTR.GeneralBody) :
+    idle
+        {
+          state := state
+          activeBody := activeBody
+          frames := frame :: frames
+        } =
+      false := by
+  simp [
+    idle
+  ]
 
 end GeneralActorRuntime
 
@@ -162,6 +228,10 @@ Attach an empty continuation to every actor of a store.
 
 The inverse direction, used to build the initial runtime configuration from a configuration the
 existing development already constructs.
+
+"Empty" means empty at every level as of stage H: an empty active body **and** an empty frame stack.
+The name is left alone because that is still exactly what it does, and because it appears in committed
+proofs.
 -/
 def attachEmptyContinuations :
     Store ActorName DTR.GeneralActorState →
@@ -171,7 +241,12 @@ def attachEmptyContinuations :
       []
 
   | (name, state) :: remaining =>
-      (name, { state := state, activeBody := [] }) ::
+      (name,
+        {
+          state := state
+          activeBody := []
+          frames := []
+        }) ::
         attachEmptyContinuations remaining
 
 @[simp]
@@ -273,6 +348,10 @@ that, and `Store.mem_of_lookup` converts a lookup into the membership fact when 
 Every binding of an attached store is an attached binding, continuation and all.
 
 The inversion direction: what a member of `attachEmptyContinuations actors` tells you about `actors`.
+
+Stage H added the third conjunct. The function sets both continuation fields, so an inversion that
+reported only the active body would leave a caller unable to see the frame stack it had just been
+handed, and every consumer of this lemma feeds a pairing whose idleness now reads both.
 -/
 theorem mem_attachEmptyContinuations
     (actors : Store ActorName DTR.GeneralActorState)
@@ -282,7 +361,8 @@ theorem mem_attachEmptyContinuations
       (name, actor) ∈
         attachEmptyContinuations actors) :
     (name, actor.state) ∈ actors ∧
-      actor.activeBody = [] := by
+      actor.activeBody = [] ∧
+      actor.frames = [] := by
 
   induction actors with
 
@@ -317,17 +397,19 @@ theorem mem_attachEmptyContinuations
 
         exact
           ⟨List.mem_cons.mpr (Or.inl rfl),
+           rfl,
            rfl⟩
 
       · rcases
             inductionHypothesis
               hRemaining
           with
-            ⟨hState, hBody⟩
+            ⟨hState, hBody, hFrames⟩
 
         exact
           ⟨List.mem_cons.mpr (Or.inr hState),
-           hBody⟩
+           hBody,
+           hFrames⟩
 
 /--
 Every binding of the underlying store is a binding of the attached one.
@@ -346,6 +428,7 @@ theorem mem_attachEmptyContinuations_of_mem
       ({
         state := state
         activeBody := []
+        frames := []
       } : DTR.GeneralActorRuntime)) ∈
       attachEmptyContinuations actors := by
 

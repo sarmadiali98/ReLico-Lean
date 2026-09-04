@@ -897,19 +897,16 @@ def GeneralContinuationCompiles
             index
             source =
           Except.ok target ∧
-        ∀ (k : Nat)
+        ∀ (path : List Nat)
           (rebec : KnownRebecName)
           (message : MsgName)
-          (arguments : List DTR.GeneralExpr)
-          (delay : Delay)
-          (rest : DTR.GeneralBody),
-          source.drop k =
-            DTR.GeneralStmt.send
-                (.knownRebec rebec)
-                message
-                arguments
-                delay ::
-              rest →
+          (delay : Delay),
+          Translation.GeneralSendAtPath
+            source
+            path
+            rebec
+            message
+            delay →
           ∀ entry : Translation.GeneralOutputPortEntry,
             Translation.generalEntryAtSite?
                 env
@@ -918,7 +915,10 @@ def GeneralContinuationCompiles
                     context.bodyKey
 
                   index :=
-                    index + k
+                    context.levelPath ++
+                      Translation.shiftHeadPath
+                        index
+                        path
                 } =
               some entry →
             entry.knownRebec = rebec ∧
@@ -945,13 +945,14 @@ theorem generalContinuationCompiles_nil
      default
      0,
    by
-     intro k _ _ _ _ _ hDrop
+     intro _ _ _ _ hPath
 
-     rw [
-       List.drop_nil
-     ] at hDrop
-
-     cases hDrop⟩
+     exact
+       absurd
+         hPath
+         (fun hDerivation =>
+           Translation.generalSendAtPath_nil
+             hDerivation)⟩
 
 /--
 Consuming a trace head preserves the compilation relation for the remaining continuations.
@@ -996,36 +997,186 @@ theorem generalContinuationCompiles_trace_tail
      hRemaining,
      ?_⟩
 
-  -- Reindex: the tail's statement at `k` is the body's statement at `k + 1`, and
-  -- `index + 1 + k = index + (k + 1)`, so the incoming obligation answers directly.
-  intro k rebec message arguments delay rest hDrop entry hEntry
+  -- Reindex: a send at path `p` of the tail is a send at `Translation.bumpHeadPath p` of the body, and
+  -- `Translation.shiftHeadPath (index + 1) p = Translation.shiftHeadPath index (Translation.bumpHeadPath p)`, so the incoming
+  -- obligation answers directly. Stage H replaced the flat `k`/`k + 1` pair by these two, and the
+  -- singleton-path case is the old arithmetic unchanged.
+  intro path rebec message delay hPath entry hEntry
 
   refine
     hSites
-      (k + 1)
+      (Translation.bumpHeadPath
+        path)
       rebec
       message
-      arguments
       delay
-      rest
-      ?_
+      (Translation.generalSendAtPath_cons
+        hPath)
       entry
       ?_
 
-  · rw [
-      List.drop_succ_cons
-    ]
+  rw [
+    ← Translation.shiftHeadPath_bumpHeadPath
+  ]
 
-    exact hDrop
+  exact hEntry
 
-  · rw [
-      show
-          index + (k + 1) =
-            index + 1 + k from by
-        omega
-    ]
+/--
+The two frame stacks compile, level for level.
 
-    exact hEntry
+Stage H's fourth conjunct of the actor pairing, and the reason it is a definition of its own rather
+than an inline `List.Forall₂`: the pointwise relation is `GeneralContinuationCompiles`, this
+development depends on no library function whose name has churned across Lean releases, and an
+explicit recursion generates the equation lemmas the two idleness transfers rewrite with.
+
+Equal length is part of the statement, by construction: mismatched lengths fall into the `False` arm.
+That is what makes *"the source has nothing pending at any level"* and *"the target has nothing
+pending at any level"* the same claim, which is what `Correctness.generalReactorIdle_of_actorIdle` and
+`Correctness.generalActorIdle_of_reactorIdle` need in opposite directions. Before this conjunct
+existed the two `idle` predicates had a conjunct each that the relation said nothing about, and the
+transfers stopped being provable in exactly one direction each; the compiler found both.
+
+For every state reachable in the currently accepted fragment both stacks are `[]`, so this conjunct is
+`True` wherever the pre-stage-H development goes.
+-/
+def GeneralFramesCompile
+    (env : Translation.GeneralOutputPortEnv) :
+    List DTR.GeneralBody →
+    List LF.GeneralBody →
+    Prop
+
+  | [], [] =>
+      True
+
+  | sourceFrame :: sourceRest, targetFrame :: targetRest =>
+      GeneralContinuationCompiles
+          env
+          sourceFrame
+          targetFrame ∧
+        GeneralFramesCompile
+          env
+          sourceRest
+          targetRest
+
+  | _, _ =>
+      False
+
+/--
+An empty source stack forces an empty target stack.
+
+The forward half of the idleness transfer, read off the relation's own shape: a non-empty target stack
+against an empty source one is the `False` arm.
+-/
+theorem generalFramesCompile_target_nil
+    {env : Translation.GeneralOutputPortEnv}
+    {targetFrames : List LF.GeneralBody}
+    (hFrames :
+      GeneralFramesCompile
+        env
+        []
+        targetFrames) :
+    targetFrames = [] := by
+
+  cases targetFrames with
+
+  | nil =>
+      rfl
+
+  | cons targetFrame targetRest =>
+      exact
+        absurd
+          hFrames
+          (by
+            simp [
+              GeneralFramesCompile
+            ])
+
+/--
+An empty target stack forces an empty source stack.
+
+The backward half, and the mirror of the lemma above.
+-/
+theorem generalFramesCompile_source_nil
+    {env : Translation.GeneralOutputPortEnv}
+    {sourceFrames : List DTR.GeneralBody}
+    (hFrames :
+      GeneralFramesCompile
+        env
+        sourceFrames
+        []) :
+    sourceFrames = [] := by
+
+  cases sourceFrames with
+
+  | nil =>
+      rfl
+
+  | cons sourceFrame sourceRest =>
+      exact
+        absurd
+          hFrames
+          (by
+            simp [
+              GeneralFramesCompile
+            ])
+
+/--
+A non-empty source stack forces a non-empty target stack, level by level.
+
+The cons inversion, and what `Correctness.generalResume_forward` runs on: stage H's `resume` promotes
+the head frame to the active body, so the transfer needs the target's head frame, the fact that the
+source's compiles to it, and the relation on the two tails. All three are the `cons`/`cons` arm of the
+relation read backwards; a target `nil` against a source `cons` is the `False` arm.
+
+Stated as an existential over the target's shape rather than as a pair of projections, because the
+caller does not have the target stack decomposed — the runtime hands it a `reactor.frames` and this
+lemma is what splits it.
+-/
+theorem generalFramesCompile_cons_source
+    {env : Translation.GeneralOutputPortEnv}
+    {sourceFrame : DTR.GeneralBody}
+    {sourceRest : List DTR.GeneralBody}
+    {targetFrames : List LF.GeneralBody}
+    (hFrames :
+      GeneralFramesCompile
+        env
+        (sourceFrame :: sourceRest)
+        targetFrames) :
+    ∃ (targetFrame : LF.GeneralBody)
+      (targetRest : List LF.GeneralBody),
+      targetFrames =
+          targetFrame :: targetRest ∧
+        GeneralContinuationCompiles
+          env
+          sourceFrame
+          targetFrame ∧
+        GeneralFramesCompile
+          env
+          sourceRest
+          targetRest := by
+
+  cases targetFrames with
+
+  | nil =>
+      exact
+        absurd
+          hFrames
+          (by
+            simp [
+              GeneralFramesCompile
+            ])
+
+  | cons targetFrame targetRest =>
+
+      obtain ⟨hHead, hTail⟩ :=
+        hFrames
+
+      exact
+        ⟨targetFrame,
+         targetRest,
+         rfl,
+         hHead,
+         hTail⟩
 
 /--
 One actor against one reactor: the paper's three per-actor conjuncts.
@@ -1064,6 +1215,12 @@ structure GeneralActorCorresponds
       actor.activeBody
       reactor.activeBody
 
+  frames :
+    GeneralFramesCompile
+      env
+      actor.frames
+      reactor.frames
+
 /-- A paired trace head may be removed from an actor correspondence. -/
 theorem generalActorCorresponds_trace_tail
     {env : Translation.GeneralOutputPortEnv}
@@ -1093,10 +1250,12 @@ theorem generalActorCorresponds_trace_tail
       {
         state := actor.state
         activeBody := sourceRemaining
+        frames := actor.frames
       }
       {
         valuation := reactor.valuation
         activeBody := targetRemaining
+        frames := reactor.frames
       }
       pending := by
 
@@ -1105,6 +1264,7 @@ theorem generalActorCorresponds_trace_tail
       valuation := hCorresponds.valuation
       messages := hCorresponds.messages
       continuation := ?_
+      frames := hCorresponds.frames
     }
 
   apply generalContinuationCompiles_trace_tail
@@ -1120,6 +1280,12 @@ built by hand. Stating it once means the emptiness hypotheses are discharged onc
 Only the valuation carries information here, which is exactly F66 part 5's observation about the paper's
 own initial case, and the reason the other two conjuncts must still be *stated*: a conjunct that is
 trivial initially is not trivial after a step.
+
+**The two frame-stack premises arrived with stage H and are what make the name accurate.** Idleness is
+now emptiness at every level, so an actor with an empty active body and a pending enclosing
+continuation is not idle; a version of this lemma without those premises would be claiming the pairing
+for states neither `idle` predicate accepts. Both are `rfl` at every call site, because every
+initializer starts an actor and a reactor at the top level.
 -/
 theorem generalActorCorresponds_idle
     (env : Translation.GeneralOutputPortEnv)
@@ -1135,7 +1301,11 @@ theorem generalActorCorresponds_idle
     (hSource :
       actor.activeBody = [])
     (hTarget :
-      reactor.activeBody = []) :
+      reactor.activeBody = [])
+    (hSourceFrames :
+      actor.frames = [])
+    (hTargetFrames :
+      reactor.frames = []) :
     GeneralActorCorresponds
       env
       name
@@ -1148,6 +1318,7 @@ theorem generalActorCorresponds_idle
       valuation := hValuation
       messages := ?_
       continuation := ?_
+      frames := ?_
     }
 
   · rw [hBag]
@@ -1160,6 +1331,14 @@ theorem generalActorCorresponds_idle
     ]
 
     exact generalContinuationCompiles_nil env
+
+  · rw [
+      hSourceFrames,
+      hTargetFrames
+    ]
+
+    exact
+      trivial
 
 /--
 The output-port environment of whichever class an actor instance belongs to.
@@ -1359,7 +1538,7 @@ theorem generalActorCorresponds_of_queueAlphaEquiv
       reactor
       pending' := by
   obtain
-      ⟨hValuation, ⟨pairs, hPairsMatch, hBagPerm, hQueuePerm⟩, hContinuation⟩ :=
+      ⟨hValuation, ⟨pairs, hPairsMatch, hBagPerm, hQueuePerm⟩, hContinuation, hFrames⟩ :=
     hCorresponds
 
   have hFilter :
@@ -1387,6 +1566,7 @@ theorem generalActorCorresponds_of_queueAlphaEquiv
            exact hQueuePerm⟩
 
       continuation := hContinuation
+      frames := hFrames
     }
 
 /--
@@ -1590,7 +1770,8 @@ theorem generalCorrespondence_initial_scoped
               GeneralValuationAgrees
                   state.valuation
                   reactor.valuation ∧
-                reactor.activeBody = [])
+                reactor.activeBody = [] ∧
+                  reactor.frames = [])
     (hActors :
       ∀ (name : ActorName) (reactor : LF.GeneralReactorRuntime),
         (name, reactor) ∈ reactors →
@@ -1599,7 +1780,8 @@ theorem generalCorrespondence_initial_scoped
               GeneralValuationAgrees
                   state.valuation
                   reactor.valuation ∧
-                reactor.activeBody = []) :
+                reactor.activeBody = [] ∧
+                  reactor.frames = []) :
     GeneralStateCorrespondence
       model
       (DTR.GeneralRuntimeConfiguration.ofConfiguration config)
@@ -1631,7 +1813,7 @@ theorem generalCorrespondence_initial_scoped
             config.actors :=
       hMember
 
-    obtain ⟨hState, hBody⟩ :=
+    obtain ⟨hState, hBody, hFrames⟩ :=
       DTR.mem_attachEmptyContinuations
         config.actors
         name
@@ -1642,7 +1824,8 @@ theorem generalCorrespondence_initial_scoped
         ⟨reactor,
          hReactorMember,
          hValuation,
-         hReactorBody⟩ :=
+         hReactorBody,
+         hReactorFrames⟩ :=
       hReactors
         name
         actor.state
@@ -1670,7 +1853,9 @@ theorem generalCorrespondence_initial_scoped
            actor.state
            hState)
          hBody
-         hReactorBody⟩
+         hReactorBody
+         hFrames
+         hReactorFrames⟩
 
   · intro name reactor hMember
 
@@ -1678,7 +1863,8 @@ theorem generalCorrespondence_initial_scoped
         ⟨state,
          hStateMember,
          hValuation,
-         hReactorBody⟩ :=
+         hReactorBody,
+         hReactorFrames⟩ :=
       hActors
         name
         reactor
@@ -1695,6 +1881,7 @@ theorem generalCorrespondence_initial_scoped
        {
          state := state
          activeBody := []
+         frames := []
        },
        hEnv,
        ?_,
@@ -1714,6 +1901,7 @@ theorem generalCorrespondence_initial_scoped
           {
             state := state
             activeBody := []
+            frames := []
           }
           reactor
           hValuation
@@ -1723,6 +1911,8 @@ theorem generalCorrespondence_initial_scoped
             hStateMember)
           rfl
           hReactorBody
+          rfl
+          hReactorFrames
 
   · intro event hEvent
 
@@ -2714,6 +2904,7 @@ theorem generalActorCorresponds_constructorEntry
       valuation := ?_
       messages := ?_
       continuation := ?_
+      frames := ?_
     }
 
   · simp only [
@@ -2772,8 +2963,16 @@ theorem generalActorCorresponds_constructorEntry
     -- site of that body's own walk, and the committed routing lemmas identify its rebec *and its
     -- delay* with the statement's. Both halves are discharged here and nowhere else, because this is
     -- the only place the class's declared body is in hand.
-    intro k rebec message arguments delay rest hDrop entry hEntry
+    intro path rebec message delay hPath entry hEntry
 
+    -- Stage H: the obligation is over a path, and it is discharged **positively** for every
+    -- path, branch or not. `Translation.externalSendsFromIndex_knownRebec_of_path` says the walk's
+    -- send at that address carries that path's rebec and delay; the entry the runtime resolved is
+    -- that send's, because `exists_send_of_mem_outputPortEnv` produced it from this very
+    -- environment. No refutation and no well-formedness premise: an earlier draft asked the caller
+    -- for "the constructor body has no conditional", which `generalCorrespondence_initial` cannot
+    -- supply — `compileGeneralModel` never checks `DTR.GeneralModel.wellFormed` — and which this
+    -- theorem does not need.
     obtain ⟨send, hSendMember, hSendRebec, hSendSite, hSendDelay⟩ :=
       Translation.exists_send_of_mem_outputPortEnv
         hEnv
@@ -2790,7 +2989,9 @@ theorem generalActorCorresponds_constructorEntry
               Translation.GeneralBodyKey.constructor
 
             index :=
-              0 + k
+              Translation.shiftHeadPath
+                0
+                path
           } := by
       rw [
         ← hSendSite
@@ -2807,6 +3008,7 @@ theorem generalActorCorresponds_constructorEntry
         send ∈
           Translation.externalSendsFromIndex
             .constructor
+            []
             0
             reactiveClass.constructor.body :=
       Translation.mem_externalSendsOfBody_constructor_of_mem_externalSendsOfClass
@@ -2815,8 +3017,23 @@ theorem generalActorCorresponds_constructorEntry
           rw [hSiteEq])
 
     have hSendIndex :
-        send.site.index = 0 + k := by
+        send.site.index =
+          [] ++
+            Translation.shiftHeadPath
+              0
+              path := by
       rw [hSiteEq]
+
+      simp
+
+    obtain ⟨hRebec, hDelay⟩ :=
+      Translation.externalSendsFromIndex_knownRebec_of_path
+        .constructor
+        []
+        0
+        hPath
+        hBodyMember
+        hSendIndex
 
     refine ⟨?_, ?_⟩
 
@@ -2824,41 +3041,22 @@ theorem generalActorCorresponds_constructorEntry
         hSendRebec
       ]
 
-      exact
-        Translation.externalSendsFromIndex_knownRebec_of_drop
-          .constructor
-          reactiveClass.constructor.body
-          0
-          k
-          rebec
-          message
-          arguments
-          delay
-          rest
-          send
-          hDrop
-          hBodyMember
-          hSendIndex
+      exact hRebec
 
     · rw [
         hSendDelay
       ]
 
-      exact
-        Translation.externalSendsFromIndex_delay_of_drop
-          .constructor
-          reactiveClass.constructor.body
-          0
-          k
-          rebec
-          message
-          arguments
-          delay
-          rest
-          send
-          hDrop
-          hBodyMember
-          hSendIndex
+      exact hDelay
+
+  · -- Both initializers start at the top level, so both stacks are empty and the fourth
+    -- conjunct is `True`. It is stated rather than skipped for the reason the other trivial
+    -- conjuncts are: what is trivial initially is not trivial after a step.
+    simp [
+      DTR.GeneralModel.initialActorRuntime,
+      LF.GeneralProgram.initialReactorRuntime,
+      GeneralFramesCompile
+    ]
 
 /--
 The relation `R` holds at the initial states of a model and its compiled program. Unconditional.
