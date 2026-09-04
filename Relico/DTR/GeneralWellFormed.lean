@@ -64,31 +64,37 @@ def bodies
       (fun messageServer =>
         messageServer.body)
 
+/- `statementTargetDeclared` and `bodyTargetsDeclared` are a mutual pair as of stage I0, because a
+conditional's branches are bodies. A `mutual` block cannot carry a docstring, so each definition
+carries its own. -/
+mutual
+
 /--
 A statement's send target, if it has one, is a known rebec this class declares.
 
 A self-send needs nothing declared, which is why the two targets are not treated
 uniformly here even though they share one statement constructor.
 
-**`ifThenElse` is refused rather than recursed into**, and that is a layer-1
-choice with a reason. Stage H added the constructor to `DTR.GeneralStmt` before
-any of the machinery that would make a branch meaningful, and the frontend still
-refuses branching (`Frontend.GeneralDiagnostic`'s `branchingNotSupported`).
-Refusing here keeps the accepted fragment **exactly** what it was: a `false` arm
-for a constructor that did not previously exist cannot change the verdict on any
-model that could be written before, and it cannot let a branch through
-un-checked. Returning `true` would have been the permissive alternative and would
-have admitted a branch whose sends nothing checks.
+**`ifThenElse` is the recursive arm as of stage I0.** It was a `false` arm from stage H until then,
+and the reason it was right to refuse is worth keeping, because it is the reason this arm is a
+recursion and not a `true`. Stage H added the constructor to `DTR.GeneralStmt` before any of the
+machinery that would make a branch meaningful, so refusing kept the accepted fragment exactly what it
+had been: a `false` arm for a constructor that did not previously exist cannot change the verdict on
+any model that could be written before, and it cannot let a branch through un-checked. **Returning
+`true` was the permissive alternative and would have admitted a branch whose sends nothing checks**,
+which is exactly what recursing avoids: `targetsDeclared` walks a list of bodies, so without this arm
+descending, a send nested in a branch would never be visited by any clause.
 
-When the later layer recurses into branch bodies, this arm becomes the recursive
-one. Until then a well-formed model provably contains no branch, which is what
-the traversals in `Translation.GeneralRouting` rely on.
+The pair form is not a stylistic choice. `DTR.GeneralStmt` is a nested inductive, and a single
+function that recursed from a statement into its branch bodies with `List.all` would hide the
+recursive call inside a lambda and fall to well-founded recursion, which does not reduce; F89 records
+that failure and its cost. `wellFormed` is a `Bool` that the frontend evaluates and that
+`Relico/Tests/*` can `decide`, so reducibility here is load bearing.
 -/
 def statementTargetDeclared
-    (reactiveClass : DTR.GeneralReactiveClass)
-    (statement : DTR.GeneralStmt) :
-    Bool :=
-  match statement with
+    (reactiveClass : DTR.GeneralReactiveClass) :
+    DTR.GeneralStmt →
+    Bool
 
   | .assign _ _ =>
       true
@@ -105,22 +111,44 @@ def statementTargetDeclared
       | .knownRebec knownRebec =>
           (reactiveClass.knownRebec? knownRebec).isSome
 
-  | .ifThenElse _ _ _ =>
-      false
+  | .ifThenElse _ thenBody elseBody =>
+      reactiveClass.bodyTargetsDeclared thenBody &&
+        reactiveClass.bodyTargetsDeclared elseBody
+
+/--
+Every statement of one body, at any nesting depth, has a declared send target.
+
+An explicit traversal rather than `body.all`, for the reducibility reason on the statement-level
+definition above.
+-/
+def bodyTargetsDeclared
+    (reactiveClass : DTR.GeneralReactiveClass) :
+    DTR.GeneralBody →
+    Bool
+
+  | [] =>
+      true
+
+  | statement :: remaining =>
+      reactiveClass.statementTargetDeclared statement &&
+        reactiveClass.bodyTargetsDeclared remaining
+
+end
 
 /--
 One class satisfies D6: every external send it contains names a known rebec it
 declares.
+
+`bodies.all` stays at the outer level because a class's bodies are a list of bodies rather than a
+nested structure; the descent into a body, including into any branch it contains, is
+`bodyTargetsDeclared`'s.
 -/
 def targetsDeclared
     (reactiveClass : DTR.GeneralReactiveClass) :
     Bool :=
   reactiveClass.bodies.all
     (fun body =>
-      body.all
-        (fun statement =>
-          reactiveClass.statementTargetDeclared
-            statement))
+      reactiveClass.bodyTargetsDeclared body)
 
 end GeneralReactiveClass
 
@@ -272,20 +300,25 @@ def receivingClass?
       | some declaration =>
           model.class? declaration.className
 
+/- `statementResolves` and `bodyResolves` are a mutual pair as of stage I0, for the reason recorded on
+`GeneralReactiveClass.statementTargetDeclared`. A `mutual` block cannot carry a docstring, so each
+definition carries its own. -/
+mutual
+
 /--
 One statement's send, if it has one, names a message server the receiving class
 declares, with a payload of the declared arity.
 
-`ifThenElse` is refused, for the reason recorded on `statementTargetDeclared`:
-layer 1 of stage H adds the constructor without any branch machinery, so refusing
-is what leaves the accepted fragment unchanged.
+**`ifThenElse` recurses as of stage I0.** It was `false` from stage H until then, and
+`GeneralReactiveClass.statementTargetDeclared` records why that was right and why the replacement is a
+recursion rather than a `true`: `sendsResolveToMessageServers` walks a list of bodies, so an arm that
+answered `true` would let a send nested in a branch reach a message server nothing had checked.
 -/
 def statementResolves
     (model : DTR.GeneralModel)
-    (reactiveClass : DTR.GeneralReactiveClass)
-    (statement : DTR.GeneralStmt) :
-    Bool :=
-  match statement with
+    (reactiveClass : DTR.GeneralReactiveClass) :
+    DTR.GeneralStmt →
+    Bool
 
   | .assign _ _ =>
       true
@@ -309,8 +342,30 @@ def statementResolves
               payload.length ==
                 messageServer.parameters.length
 
-  | .ifThenElse _ _ _ =>
-      false
+  | .ifThenElse _ thenBody elseBody =>
+      model.bodyResolves reactiveClass thenBody &&
+        model.bodyResolves reactiveClass elseBody
+
+/--
+Every send of one body, at any nesting depth, reaches a declared message server.
+
+An explicit traversal rather than `body.all`, for the reducibility reason on the statement-level
+definition above.
+-/
+def bodyResolves
+    (model : DTR.GeneralModel)
+    (reactiveClass : DTR.GeneralReactiveClass) :
+    DTR.GeneralBody →
+    Bool
+
+  | [] =>
+      true
+
+  | statement :: remaining =>
+      model.statementResolves reactiveClass statement &&
+        model.bodyResolves reactiveClass remaining
+
+end
 
 /--
 Every send in the model reaches a declared message server.
@@ -318,6 +373,9 @@ Every send in the model reaches a declared message server.
 This is the one clause that cannot be checked class-locally, and it is possible
 only because instance bindings are decoded: with the empty binding stores of the
 earlier families there is no receiving class to look at.
+
+The two outer `all`s stay: a model's classes are a list and a class's bodies are a list of bodies.
+Only the descent *into* a body is a recursion, and it is `bodyResolves`'s.
 -/
 def sendsResolveToMessageServers
     (model : DTR.GeneralModel) :
@@ -326,11 +384,64 @@ def sendsResolveToMessageServers
     (fun reactiveClass =>
       reactiveClass.bodies.all
         (fun body =>
-          body.all
-            (fun statement =>
-              model.statementResolves
-                reactiveClass
-                statement)))
+          model.bodyResolves
+            reactiveClass
+            body))
+
+/--
+A body's resolution yields the resolution of each statement the body lists.
+
+The bridge between the two shapes callers want, and it is only a *shape* change: `bodyResolves` is
+exactly the fold of `statementResolves` over the list, so the two directions are equivalent and
+nothing is strengthened or weakened by moving between them. It exists because
+`sendsResolveToMessageServers` now ends in a recursion rather than in `List.all`, and every consumer
+that used to finish with `List.all_eq_true.mp` needs one step in its place.
+
+Stated one way only. The converse holds by the same induction and no caller wants it, which is the
+same judgement `generalStmtOrigin_of_mem_of_bodyOrigin` records.
+-/
+theorem statementResolves_of_mem_of_bodyResolves
+    (model : DTR.GeneralModel)
+    (reactiveClass : DTR.GeneralReactiveClass) :
+    ∀ (body : DTR.GeneralBody),
+      model.bodyResolves
+          reactiveClass
+          body =
+        true →
+      ∀ statement ∈ body,
+        model.statementResolves
+            reactiveClass
+            statement =
+          true := by
+
+  intro body
+
+  induction body with
+
+  | nil =>
+      intro _ statement hStatement
+      cases hStatement
+
+  | cons head remaining inductionHypothesis =>
+      intro hBody statement hStatement
+
+      simp only [
+        DTR.GeneralModel.bodyResolves,
+        Bool.and_eq_true
+      ] at hBody
+
+      rcases List.mem_cons.mp hStatement with
+        hHere |
+          hThere
+
+      · rw [hHere]
+        exact hBody.left
+
+      · exact
+          inductionHypothesis
+            hBody.right
+            statement
+            hThere
 
 
 /--

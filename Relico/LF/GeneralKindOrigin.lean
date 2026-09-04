@@ -3055,19 +3055,22 @@ per-body hypothesis is what lets one induction serve both.
 
 Five arms and no wildcard, matching `selfSendsFromIndex`'s own shape.
 
-**The conditional arm is discharged by the source refusal, not by recursion.**
-`DTR.GeneralModel.statementResolves` returns `false` for `DTR.GeneralStmt.ifThenElse` as of stage
-H's source layer, so a body whose every statement resolves contains no conditional and the arm is
-unreachable. That is the honest proof while the accepted fragment excludes conditionals, and it is
-the line that must become a real recursion into both branches on the day the refusal is lifted:
-this arm failing to compile is the intended alarm.
+**The conditional arm is a real recursion as of stage I0.** It was discharged by the source refusal
+until then: `DTR.GeneralModel.statementResolves` answered `false` for `DTR.GeneralStmt.ifThenElse`, so
+a body whose every statement resolves contained no conditional and the arm was unreachable. The
+previous docstring called that arm "the intended alarm", and it fired. What it needed was not a tactic
+but two structural changes. `levelPath` moved from a fixed parameter into the quantifier, because a
+branch is enumerated at `levelPath ++ [index, side]` and not at its parent's path. And the `induction`
+became a `cases` with a self-recursive call, because a branch body is not a sublist of the body that
+holds it. The recursion is accepted **structurally**, as `Translation.exists_compileGeneralBody`'s
+is, so no `termination_by` is owed.
 -/
 theorem exists_messageServer_of_mem_selfSendsFromIndex
     (model : DTR.GeneralModel)
     (reactiveClass : DTR.GeneralReactiveClass)
     (bodyKey : Translation.GeneralBodyKey)
-    (levelPath : List Nat) :
-    ∀ (body : DTR.GeneralBody)
+    (body : DTR.GeneralBody) :
+    ∀ (levelPath : List Nat)
       (index : Nat),
       (∀ statement ∈ body,
         model.statementResolves
@@ -3083,20 +3086,18 @@ theorem exists_messageServer_of_mem_selfSendsFromIndex
         ∃ server ∈ reactiveClass.messageServers,
           server.name = selfSend.message := by
 
-  intro body
-  induction body with
+  intro levelPath index hResolves selfSend hMember
+
+  cases body with
 
   | nil =>
-      intro index _ selfSend hMember
-
       rw [
         Translation.selfSendsFromIndex_nil
       ] at hMember
 
       cases hMember
 
-  | cons statement remaining inductionHypothesis =>
-      intro index hResolves selfSend hMember
+  | cons statement remaining =>
 
       have hTailResolves :
           ∀ candidate ∈ remaining,
@@ -3121,7 +3122,12 @@ theorem exists_messageServer_of_mem_selfSendsFromIndex
           ] at hMember
 
           exact
-            inductionHypothesis
+            exists_messageServer_of_mem_selfSendsFromIndex
+              model
+              reactiveClass
+              bodyKey
+              remaining
+              levelPath
               (index + 1)
               hTailResolves
               selfSend
@@ -3133,7 +3139,12 @@ theorem exists_messageServer_of_mem_selfSendsFromIndex
           ] at hMember
 
           exact
-            inductionHypothesis
+            exists_messageServer_of_mem_selfSendsFromIndex
+              model
+              reactiveClass
+              bodyKey
+              remaining
+              levelPath
               (index + 1)
               hTailResolves
               selfSend
@@ -3149,7 +3160,12 @@ theorem exists_messageServer_of_mem_selfSendsFromIndex
               ] at hMember
 
               exact
-                inductionHypothesis
+                exists_messageServer_of_mem_selfSendsFromIndex
+                  model
+                  reactiveClass
+                  bodyKey
+                  remaining
+                  levelPath
                   (index + 1)
                   hTailResolves
                   selfSend
@@ -3165,7 +3181,12 @@ theorem exists_messageServer_of_mem_selfSendsFromIndex
 
               | inr hThere =>
                   exact
-                    inductionHypothesis
+                    exists_messageServer_of_mem_selfSendsFromIndex
+                      model
+                      reactiveClass
+                      bodyKey
+                      remaining
+                      levelPath
                       (index + 1)
                       hTailResolves
                       selfSend
@@ -3230,6 +3251,63 @@ theorem exists_messageServer_of_mem_selfSendsFromIndex
             DTR.GeneralModel.statementResolves
           ] at hHeadResolves
 
+          rw [
+            Translation.selfSendsFromIndex_ifThenElse,
+            List.mem_append,
+            List.mem_append
+          ] at hMember
+
+          rcases hMember with
+            (hThen |
+              hElse) |
+              hTail
+
+          · exact
+              exists_messageServer_of_mem_selfSendsFromIndex
+                model
+                reactiveClass
+                bodyKey
+                thenBody
+                (levelPath ++
+                  [index, 0])
+                0
+                (DTR.GeneralModel.statementResolves_of_mem_of_bodyResolves
+                  model
+                  reactiveClass
+                  thenBody
+                  hHeadResolves.left)
+                selfSend
+                hThen
+
+          · exact
+              exists_messageServer_of_mem_selfSendsFromIndex
+                model
+                reactiveClass
+                bodyKey
+                elseBody
+                (levelPath ++
+                  [index, 1])
+                0
+                (DTR.GeneralModel.statementResolves_of_mem_of_bodyResolves
+                  model
+                  reactiveClass
+                  elseBody
+                  hHeadResolves.right)
+                selfSend
+                hElse
+
+          · exact
+              exists_messageServer_of_mem_selfSendsFromIndex
+                model
+                reactiveClass
+                bodyKey
+                remaining
+                levelPath
+                (index + 1)
+                hTailResolves
+                selfSend
+                hTail
+
 /--
 Every statement of every body of every declared class resolves, in a well-formed model.
 
@@ -3268,7 +3346,10 @@ theorem statementResolves_of_wellFormed
   unfold DTR.GeneralModel.sendsResolveToMessageServers at hClause
 
   exact
-    List.all_eq_true.mp
+    DTR.GeneralModel.statementResolves_of_mem_of_bodyResolves
+      model
+      reactiveClass
+      body
       (List.all_eq_true.mp
         (List.all_eq_true.mp
           hClause
@@ -3441,66 +3522,112 @@ theorem generalKindOriginAt_inputPort_of_routeOrigin
     ]
 
 /--
-A compiled body of a resolving source body contains no conditional.
+Every statement of a compiled body carries its origin, at any nesting level.
 
-The arm that keeps the origin theorem below honest about stage H. `LF.GeneralStmt.ifThenElse` is a
-constructor a compiled body can carry, so the `cases` in that theorem now has a fifth arm; but
-`DTR.GeneralModel.statementResolves` refuses `DTR.GeneralStmt.ifThenElse`, so a body whose every
-statement resolves has none to compile, and `compileGeneralStmt` emits a conditional from nothing
-else. That is what this lemma says, and it says it by walking the *source* body rather than by
-inverting the compiled statement, which keeps
-`Relico/Translation/GeneralBasic.lean`'s conditional inversion private where it belongs.
+**The positive replacement for stage H's alarm.** What stood here was
+`not_mem_ifThenElse_of_compiled_of_resolves`, which said a compiled body of a resolving source body
+contains no conditional. That was true only while `DTR.GeneralModel.statementResolves` refused
+`DTR.GeneralStmt.ifThenElse`, and its own docstring called it "the alarm, not the answer" and said
+that "deleting the lemma is the first step" of the work stage I0 now does. This theorem is the rest of
+that work: it proves the branch case rather than excluding it.
 
-**It is the alarm, not the answer.** When the accepted fragment admits conditionals this lemma
-becomes false, and the theorem below then owes a real branch case: the compiled branches carry
-`GeneralBodyOrigin`, which needs this whole theorem applied at each branch's own level with that
-branch's resolution and site hypotheses. Deleting the lemma is the first step of that work.
+**Three differences from the public theorem below, and each one is what the recursion needs.** The
+compilation `context` and the starting `index` are quantified rather than fixed at the top level,
+because `Translation.compileGeneralStmt_ifThenElse_ok_inversion` compiles a branch at
+`context.levelPath ++ [index, side]` from index `0`; the conclusion is `GeneralBodyOrigin` rather than
+the membership form, because that is the shape a conditional's `GeneralStmtOrigin` is *built from*;
+and `context.selfSends` is tied to the class by hypothesis rather than by construction, since a
+branch inherits its parent's self-send list unchanged.
+
+The recursion is on the source body and is accepted **structurally**: a branch body is a subterm of
+the statement that holds it, exactly as in
+`DTR.GeneralModel.exists_messageServer_of_mem_selfSendsFromIndex` and
+`Translation.exists_compileGeneralBody`. No `termination_by` is owed and no `partial` is used.
+
+The four non-conditional arms are the public theorem's own arms, moved here and re-indexed from the
+top level to `context` and `index`. The `.setPort` arm consumes nothing from the body, which is why
+it needs no site hypothesis; only `.schedule` reads `hSites`, and only `.ifThenElse` recurses.
 -/
-private theorem not_mem_ifThenElse_of_compiled_of_resolves
+private theorem generalBodyOrigin_of_compileGeneralBody
     {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    {routes : List Translation.GeneralRoute}
     {reactiveClass : DTR.GeneralReactiveClass}
+    {reactor : LF.GeneralReactor}
+    {instanceName : ActorName}
     {env : Translation.GeneralOutputPortEnv}
-    {context : Translation.GeneralBodyContext} :
-    ∀ (body : DTR.GeneralBody)
+    (hCompiled :
+      Translation.compileGeneralModel model =
+        .ok program)
+    (hRoutes :
+      Translation.routesOf model =
+        .ok routes)
+    (hRouteOrigin :
+      GeneralRouteOrigin
+        model
+        program
+        routes)
+    (hClass :
+      reactiveClass ∈ model.classes)
+    (hClassCompiled :
+      Translation.compileGeneralReactiveClass
+          model.classes
+          routes
+          reactiveClass =
+        .ok reactor)
+    (hReactor :
+      program.reactorOfInstance? instanceName =
+        some reactor)
+    (body : DTR.GeneralBody) :
+    ∀ (context : Translation.GeneralBodyContext)
       (index : Nat)
       (compiled : LF.GeneralBody),
+      context.selfSends =
+        Translation.selfSendsOfClass
+          reactiveClass →
       (∀ statement ∈ body,
         model.statementResolves
             reactiveClass
             statement =
           true) →
+      (∀ selfSend ∈
+          Translation.selfSendsFromIndex
+            context.bodyKey
+            context.levelPath
+            index
+            body,
+        selfSend ∈
+          Translation.selfSendsOfClass
+            reactiveClass) →
       Translation.compileGeneralBody
           env
           context
           index
           body =
         .ok compiled →
-      ∀ (condition : LF.GeneralExpr)
-        (thenBody elseBody : LF.GeneralBody),
-        LF.GeneralStmt.ifThenElse
-            condition
-            thenBody
-            elseBody ∉
-          compiled := by
+      GeneralBodyOrigin
+        model
+        program
+        routes
+        instanceName
+        compiled := by
 
-  intro body
-  induction body with
+  intro context index compiled hSelfSends hResolves hSites hBody
+
+  cases body with
 
   | nil =>
-      intro index compiled _ hCompiled condition thenBody elseBody hMember
-
       rw [
         Translation.compileGeneralBody_nil
-      ] at hCompiled
+      ] at hBody
 
-      injection hCompiled with hEqual
+      injection hBody with hShape
 
-      subst hEqual
+      subst hShape
 
-      cases hMember
+      trivial
 
-  | cons statement remaining inductionHypothesis =>
-      intro index compiled hResolves hCompiled condition thenBody elseBody hMember
+  | cons statement remaining =>
 
       obtain
           ⟨compiledStatement,
@@ -3509,7 +3636,7 @@ private theorem not_mem_ifThenElse_of_compiled_of_resolves
            hRemaining,
            hShape⟩ :=
         Translation.compileGeneralBody_cons_ok_inversion
-          hCompiled
+          hBody
 
       subst hShape
 
@@ -3528,55 +3655,250 @@ private theorem not_mem_ifThenElse_of_compiled_of_resolves
               statement
               hCandidate)
 
-      cases List.mem_cons.mp hMember with
+      cases statement with
 
-      | inr hThere =>
-          exact
-            inductionHypothesis
-              (index + 1)
-              compiledRemaining
-              hTailResolves
-              hRemaining
-              condition
-              thenBody
-              elseBody
-              hThere
+      | assign target value =>
 
-      | inl hHere =>
+          have hTailSites :
+              ∀ selfSend ∈
+                  Translation.selfSendsFromIndex
+                    context.bodyKey
+                    context.levelPath
+                    (index + 1)
+                    remaining,
+                selfSend ∈
+                  Translation.selfSendsOfClass
+                    reactiveClass := by
+            intro selfSend hMember
+
+            refine
+              hSites
+                selfSend
+                ?_
+
+            rw [
+              Translation.selfSendsFromIndex_assign
+            ]
+
+            exact hMember
 
           rw [
-            ← hHere
+            Translation.compileGeneralStmt_assign
           ] at hStatement
 
-          cases statement with
+          injection hStatement with hHead
 
-          | assign target value =>
-              simp [
-                Translation.compileGeneralStmt
+          subst hHead
+
+          exact
+            ⟨generalStmtOrigin_assign
+               model
+               program
+               routes
+               instanceName
+               target
+               (Translation.compileGeneralExpr
+                 value),
+             generalBodyOrigin_of_compileGeneralBody
+               hCompiled
+               hRoutes
+               hRouteOrigin
+               hClass
+               hClassCompiled
+               hReactor
+               remaining
+               context
+               (index + 1)
+               compiledRemaining
+               hSelfSends
+               hTailResolves
+               hTailSites
+               hRemaining⟩
+
+      | trace tag =>
+
+          have hTailSites :
+              ∀ selfSend ∈
+                  Translation.selfSendsFromIndex
+                    context.bodyKey
+                    context.levelPath
+                    (index + 1)
+                    remaining,
+                selfSend ∈
+                  Translation.selfSendsOfClass
+                    reactiveClass := by
+            intro selfSend hMember
+
+            refine
+              hSites
+                selfSend
+                ?_
+
+            rw [
+              Translation.selfSendsFromIndex_trace
+            ]
+
+            exact hMember
+
+          rw [
+            Translation.compileGeneralStmt_trace
+          ] at hStatement
+
+          injection hStatement with hHead
+
+          subst hHead
+
+          exact
+            ⟨generalStmtOrigin_trace
+               model
+               program
+               routes
+               instanceName
+               tag,
+             generalBodyOrigin_of_compileGeneralBody
+               hCompiled
+               hRoutes
+               hRouteOrigin
+               hClass
+               hClassCompiled
+               hReactor
+               remaining
+               context
+               (index + 1)
+               compiledRemaining
+               hSelfSends
+               hTailResolves
+               hTailSites
+               hRemaining⟩
+
+      | send target message arguments delay =>
+
+          cases target with
+
+          | selfTarget =>
+
+              have hHeadSite :
+                  ({
+                    site :=
+                      {
+                        body :=
+                          context.bodyKey
+
+                        index :=
+                          context.levelPath ++
+                            [index]
+                      }
+
+                    message :=
+                      message
+
+                    delay :=
+                      delay
+                  } : Translation.GeneralSelfSend) ∈
+                    Translation.selfSendsFromIndex
+                      context.bodyKey
+                      context.levelPath
+                      index
+                      (
+                        DTR.GeneralStmt.send
+                          .selfTarget
+                          message
+                          arguments
+                          delay ::
+                        remaining
+                      ) := by
+                rw [
+                  Translation.selfSendsFromIndex_send_selfTarget
+                ]
+
+                exact List.mem_cons_self
+
+              have hTailSites :
+                  ∀ selfSend ∈
+                      Translation.selfSendsFromIndex
+                        context.bodyKey
+                        context.levelPath
+                        (index + 1)
+                        remaining,
+                    selfSend ∈
+                      Translation.selfSendsOfClass
+                        reactiveClass := by
+                intro selfSend hMember
+
+                refine
+                  hSites
+                    selfSend
+                    ?_
+
+                rw [
+                  Translation.selfSendsFromIndex_send_selfTarget
+                ]
+
+                exact
+                  List.mem_cons_of_mem
+                    _
+                    hMember
+
+              obtain ⟨server, hServer, hServerName⟩ :=
+                DTR.GeneralModel.exists_messageServer_of_mem_selfSendsFromIndex
+                  model
+                  reactiveClass
+                  context.bodyKey
+                  (
+                    DTR.GeneralStmt.send
+                      .selfTarget
+                      message
+                      arguments
+                      delay ::
+                    remaining
+                  )
+                  context.levelPath
+                  index
+                  hResolves
+                  _
+                  hHeadSite
+
+              rw [
+                Translation.compileGeneralStmt_send_selfTarget
               ] at hStatement
 
-          | trace tag =>
-              simp [
-                Translation.compileGeneralStmt
-              ] at hStatement
+              injection hStatement with hHead
 
-          | send target message arguments delay =>
+              subst hHead
 
-              cases target with
+              refine
+                ⟨?_,
+                 generalBodyOrigin_of_compileGeneralBody
+                   hCompiled
+                   hRoutes
+                   hRouteOrigin
+                   hClass
+                   hClassCompiled
+                   hReactor
+                   remaining
+                   context
+                   (index + 1)
+                   compiledRemaining
+                   hSelfSends
+                   hTailResolves
+                   hTailSites
+                   hRemaining⟩
 
-              | selfTarget =>
-                  simp [
-                    Translation.compileGeneralStmt
-                  ] at hStatement
+              rw [
+                generalStmtOrigin_schedule_iff
+              ]
 
-                  -- The head compiled to a `schedule`, so it is not the conditional
-                  -- this membership names.
-
-              | knownRebec rebec =>
-
-                  cases hEntry :
-                      Translation.generalEntryAtSite?
-                        env
+              refine
+                ⟨reactiveClass,
+                 server,
+                 reactor,
+                 hClass,
+                 hServer,
+                 hReactor,
+                 hClassCompiled,
+                 Or.inl
+                   ⟨{
+                      site :=
                         {
                           body :=
                             context.bodyKey
@@ -3584,37 +3906,314 @@ private theorem not_mem_ifThenElse_of_compiled_of_resolves
                           index :=
                             context.levelPath ++
                               [index]
-                        } with
+                        }
 
-                  | none =>
-                      simp [
-                        Translation.compileGeneralStmt,
-                        hEntry
-                      ] at hStatement
+                      message :=
+                        message
 
-                  | some entry =>
-                      simp [
-                        Translation.compileGeneralStmt,
-                        hEntry
-                      ] at hStatement
+                      delay :=
+                        delay
+                    },
+                    ?_,
+                    ?_⟩⟩
 
-          | ifThenElse sourceCondition sourceThen sourceElse =>
+              · exact
+                  Translation.mem_generalSelfSendSitesOf_of_mem
+                    server.name
+                    _
+                    (Translation.selfSendsOfClass
+                      reactiveClass)
+                    (hSites
+                      _
+                      hHeadSite)
+                    hServerName.symm
 
-              have hHeadResolves :
-                  model.statementResolves
-                      reactiveClass
-                      (.ifThenElse
-                        sourceCondition
-                        sourceThen
-                        sourceElse) =
-                    true :=
-                hResolves
+              · rw [
+                  hSelfSends,
+                  hServerName
+                ]
+
+          | knownRebec rebec =>
+
+              have hTailSites :
+                  ∀ selfSend ∈
+                      Translation.selfSendsFromIndex
+                        context.bodyKey
+                        context.levelPath
+                        (index + 1)
+                        remaining,
+                    selfSend ∈
+                      Translation.selfSendsOfClass
+                        reactiveClass := by
+                intro selfSend hMember
+
+                refine
+                  hSites
+                    selfSend
+                    ?_
+
+                rw [
+                  Translation.selfSendsFromIndex_send_knownRebec
+                ]
+
+                exact hMember
+
+              cases hEntry :
+                  Translation.generalEntryAtSite?
+                    env
+                    {
+                      body :=
+                        context.bodyKey
+
+                      index :=
+                        context.levelPath ++
+                          [index]
+                    } with
+
+              | none =>
+                  simp [
+                    Translation.compileGeneralStmt,
+                    hEntry
+                  ] at hStatement
+
+              | some entry =>
+                  rw [
+                    Translation.compileGeneralStmt_send_knownRebec_ok
+                      env
+                      context
+                      index
+                      rebec
+                      message
+                      arguments
+                      delay
+                      hEntry
+                  ] at hStatement
+
+                  injection hStatement with hHead
+
+                  subst hHead
+
+                  refine
+                    ⟨?_,
+                     generalBodyOrigin_of_compileGeneralBody
+                       hCompiled
+                       hRoutes
+                       hRouteOrigin
+                       hClass
+                       hClassCompiled
+                       hReactor
+                       remaining
+                       context
+                       (index + 1)
+                       compiledRemaining
+                       hSelfSends
+                       hTailResolves
+                       hTailSites
+                       hRemaining⟩
+
+                  rw [
+                    generalStmtOrigin_setPort_iff
+                  ]
+
+                  intro connection hConnection
+
+                  exact
+                    generalKindOriginAt_inputPort_of_routeOrigin
+                      hCompiled
+                      hRoutes
+                      hRouteOrigin
+                      hConnection
+
+      | ifThenElse condition thenBody elseBody =>
+
+          have hHeadResolves :
+              model.statementResolves
+                  reactiveClass
+                  (.ifThenElse
+                    condition
+                    thenBody
+                    elseBody) =
+                true :=
+            hResolves
+              _
+              List.mem_cons_self
+
+          simp [
+            DTR.GeneralModel.statementResolves
+          ] at hHeadResolves
+
+          have hTailSites :
+              ∀ selfSend ∈
+                  Translation.selfSendsFromIndex
+                    context.bodyKey
+                    context.levelPath
+                    (index + 1)
+                    remaining,
+                selfSend ∈
+                  Translation.selfSendsOfClass
+                    reactiveClass := by
+            intro selfSend hMember
+
+            refine
+              hSites
+                selfSend
+                ?_
+
+            rw [
+              Translation.selfSendsFromIndex_ifThenElse
+            ]
+
+            exact
+              List.mem_append_right
+                _
+                hMember
+
+          have hThenSites :
+              ∀ selfSend ∈
+                  Translation.selfSendsFromIndex
+                    context.bodyKey
+                    (context.levelPath ++
+                      [index, 0])
+                    0
+                    thenBody,
+                selfSend ∈
+                  Translation.selfSendsOfClass
+                    reactiveClass := by
+            intro selfSend hMember
+
+            refine
+              hSites
+                selfSend
+                ?_
+
+            rw [
+              Translation.selfSendsFromIndex_ifThenElse
+            ]
+
+            exact
+              List.mem_append_left
+                _
+                (List.mem_append_left
                   _
-                  List.mem_cons_self
+                  hMember)
 
-              simp [
-                DTR.GeneralModel.statementResolves
-              ] at hHeadResolves
+          have hElseSites :
+              ∀ selfSend ∈
+                  Translation.selfSendsFromIndex
+                    context.bodyKey
+                    (context.levelPath ++
+                      [index, 1])
+                    0
+                    elseBody,
+                selfSend ∈
+                  Translation.selfSendsOfClass
+                    reactiveClass := by
+            intro selfSend hMember
+
+            refine
+              hSites
+                selfSend
+                ?_
+
+            rw [
+              Translation.selfSendsFromIndex_ifThenElse
+            ]
+
+            exact
+              List.mem_append_left
+                _
+                (List.mem_append_right
+                  _
+                  hMember)
+
+          obtain
+              ⟨compiledThen,
+               compiledElse,
+               hCompiledShape,
+               hCompiledThen,
+               hCompiledElse⟩ :=
+            Translation.compileGeneralStmt_ifThenElse_ok_inversion
+              hStatement
+
+          subst hCompiledShape
+
+          refine
+            ⟨?_,
+             generalBodyOrigin_of_compileGeneralBody
+               hCompiled
+               hRoutes
+               hRouteOrigin
+               hClass
+               hClassCompiled
+               hReactor
+               remaining
+               context
+               (index + 1)
+               compiledRemaining
+               hSelfSends
+               hTailResolves
+               hTailSites
+               hRemaining⟩
+
+          exact
+            ⟨generalBodyOrigin_of_compileGeneralBody
+               hCompiled
+               hRoutes
+               hRouteOrigin
+               hClass
+               hClassCompiled
+               hReactor
+               thenBody
+               {
+                 bodyKey :=
+                   context.bodyKey
+
+                 selfSends :=
+                   context.selfSends
+
+                 levelPath :=
+                   context.levelPath ++
+                     [index, 0]
+               }
+               0
+               compiledThen
+               hSelfSends
+               (DTR.GeneralModel.statementResolves_of_mem_of_bodyResolves
+                 model
+                 reactiveClass
+                 thenBody
+                 hHeadResolves.left)
+               hThenSites
+               hCompiledThen,
+             generalBodyOrigin_of_compileGeneralBody
+               hCompiled
+               hRoutes
+               hRouteOrigin
+               hClass
+               hClassCompiled
+               hReactor
+               elseBody
+               {
+                 bodyKey :=
+                   context.bodyKey
+
+                 selfSends :=
+                   context.selfSends
+
+                 levelPath :=
+                   context.levelPath ++
+                     [index, 1]
+               }
+               0
+               compiledElse
+               hSelfSends
+               (DTR.GeneralModel.statementResolves_of_mem_of_bodyResolves
+                 model
+                 reactiveClass
+                 elseBody
+                 hHeadResolves.right)
+               hElseSites
+               hCompiledElse⟩
 
 /--
 Every statement of a compiled body has a valid statement origin.
@@ -3715,123 +4314,33 @@ theorem generalStmtOrigin_of_mem_compiledBody
 
   intro statement hStatement
 
-  cases statement with
+  exact
+    generalStmtOrigin_of_mem_of_bodyOrigin
+      compiled
+      statement
+      (generalBodyOrigin_of_compileGeneralBody
+        hCompiled
+        hRoutes
+        hRouteOrigin
+        hClass
+        hClassCompiled
+        hReactor
+        body
+        {
+          bodyKey :=
+            bodyKey
 
-  | assign target expression =>
-      exact
-        generalStmtOrigin_assign
-          model
-          program
-          routes
-          instanceName
-          target
-          expression
-
-  | trace tag =>
-      exact
-        generalStmtOrigin_trace
-          model
-          program
-          routes
-          instanceName
-          tag
-
-  | setPort portName arguments =>
-      rw [
-        generalStmtOrigin_setPort_iff
-      ]
-
-      intro connection hConnection
-
-      exact
-        generalKindOriginAt_inputPort_of_routeOrigin
-          hCompiled
-          hRoutes
-          hRouteOrigin
-          hConnection
-
-  | schedule actionName arguments delay =>
-      rw [
-        generalStmtOrigin_schedule_iff
-      ]
-
-      obtain ⟨selfSend, _position, _rest, hSite, _hIndex, _hPath, hName⟩ :=
-        Translation.compileGeneralBody_schedule_provenance
-          env
-          {
-            bodyKey :=
-              bodyKey
-
-            selfSends :=
-              Translation.selfSendsOfClass
-                reactiveClass
-          }
-          body
-          0
-          compiled
-          hBody
-          actionName
-          arguments
-          delay
-          hStatement
-
-      obtain ⟨server, hServer, hServerName⟩ :=
-        DTR.GeneralModel.exists_messageServer_of_mem_selfSendsFromIndex
-          model
-          reactiveClass
-          bodyKey
-          []
-          body
-          0
-          hResolves
-          selfSend
-          hSite
-
-      refine
-        ⟨reactiveClass,
-         server,
-         reactor,
-         hClass,
-         hServer,
-         hReactor,
-         hClassCompiled,
-         Or.inl
-           ⟨selfSend,
-            ?_,
-            ?_⟩⟩
-
-      · exact
-          Translation.mem_generalSelfSendSitesOf_of_mem
-            server.name
-            selfSend
-            (Translation.selfSendsOfClass
-              reactiveClass)
-            (hSites
-              selfSend
-              hSite)
-            hServerName.symm
-
-      · rw [
-          hName,
-          hServerName
-        ]
-
-  | ifThenElse condition thenBody elseBody =>
-      -- Unreachable while the accepted fragment excludes conditionals. See
-      -- `not_mem_ifThenElse_of_compiled_of_resolves` above for what has to change
-      -- when it stops being unreachable.
-      exact
-        absurd
-          hStatement
-          (not_mem_ifThenElse_of_compiled_of_resolves
-            body
-            0
-            compiled
-            hResolves
-            hBody
-            condition
-            thenBody
-            elseBody)
+          selfSends :=
+            Translation.selfSendsOfClass
+              reactiveClass
+        }
+        0
+        compiled
+        rfl
+        hResolves
+        hSites
+        hBody)
+      hStatement
 
 /-!
 ## Reactor membership from instance resolution

@@ -1,0 +1,303 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 10,
+            "target": "level",
+            "value": {
+              "kind": "intLiteral",
+              "line": 10,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 11,
+            "target": "alarmed",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 11,
+              "value": false
+            }
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 1
+            },
+            "arguments": [],
+            "kind": "send",
+            "line": 12,
+            "messageServer": "sample",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Gauge"
+          }
+        ],
+        "line": 9,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Logger",
+          "line": 3,
+          "name": "sink"
+        }
+      ],
+      "line": 1,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 15,
+                  "name": "level"
+                },
+                "line": 15,
+                "operator": ">",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 15,
+                  "value": 2
+                }
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 23,
+                  "target": "alarmed",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 23,
+                    "value": false
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 24,
+                  "target": "level",
+                  "value": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 24,
+                      "name": "level"
+                    },
+                    "line": 24,
+                    "operator": "+",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 24,
+                      "value": 1
+                    }
+                  }
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 2
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 25,
+                  "messageServer": "sample",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Gauge"
+                }
+              ],
+              "kind": "if",
+              "line": 15,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 16,
+                  "target": "alarmed",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 16,
+                    "value": true
+                  }
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 17,
+                      "name": "level"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 17,
+                  "messageServer": "record",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "sink"
+                  },
+                  "targetClassName": "Logger"
+                },
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 18,
+                      "name": "level"
+                    },
+                    "line": 18,
+                    "operator": ">",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 18,
+                      "value": 4
+                    }
+                  },
+                  "else": [],
+                  "kind": "if",
+                  "line": 18,
+                  "then": [
+                    {
+                      "after": {
+                        "kind": "intLiteral",
+                        "value": 3
+                      },
+                      "arguments": [],
+                      "kind": "send",
+                      "line": 19,
+                      "messageServer": "sample",
+                      "target": {
+                        "kind": "self"
+                      },
+                      "targetClassName": "Gauge"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "line": 14,
+          "name": "sample",
+          "parameters": [],
+          "priority": null
+        }
+      ],
+      "name": "Gauge",
+      "queueBound": 4,
+      "stateVariables": [
+        {
+          "line": 6,
+          "name": "level",
+          "type": "int"
+        },
+        {
+          "line": 7,
+          "name": "alarmed",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 35,
+            "target": "entries",
+            "value": {
+              "kind": "intLiteral",
+              "line": 35,
+              "value": 0
+            }
+          }
+        ],
+        "line": 34,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 30,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 38,
+              "target": "entries",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 38,
+                  "name": "entries"
+                },
+                "line": 38,
+                "operator": "+",
+                "right": {
+                  "kind": "variable",
+                  "line": 38,
+                  "name": "value"
+                }
+              }
+            }
+          ],
+          "line": 37,
+          "name": "record",
+          "parameters": [
+            {
+              "line": 37,
+              "name": "value",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Logger",
+      "queueBound": 6,
+      "stateVariables": [
+        {
+          "line": 32,
+          "name": "entries",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Logger",
+          "instance": "logger0",
+          "knownRebec": "sink"
+        }
+      ],
+      "className": "Gauge",
+      "line": 43,
+      "name": "gauge0",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Logger",
+      "line": 44,
+      "name": "logger0",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

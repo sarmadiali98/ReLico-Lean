@@ -1,6 +1,7 @@
 import Relico.LF.GeneralCppPrinter
 import Relico.Translation.GeneralBasic
 import Relico.DTR.GeneralSemantics
+import Relico.DTR.GeneralWellFormed
 
 set_option autoImplicit false
 
@@ -12,8 +13,14 @@ is proved across ten layers, and every one of those proofs is quantified over *a
 is exactly why they cannot see an addressing mistake: swap the two branch selectors, or drop the
 `levelPath` prefix when a branch is entered, and every theorem in the development still holds — they
 would hold of a translator that addresses branch sends differently from the way `0046` says it does.
-The gates cannot see it either: no model in any bridge main or any other pin contains a conditional, so
-`GENERAL_LEAN_GATE_OK` and `GENERAL_LF_TARGET_OK` are both silent about the whole feature.
+The gates could not see it either when this module was written, and that is now only half true.
+`GENERAL_LEAN_GATE_OK` **does** see the feature as of stage I0: `frontend/fixtures/general/branching.parser.json`
+carries conditionals nested two deep with a send in each branch, and the frontend runner inside that gate
+decodes it as `PASS_ACCEPT_BRANCHING`. `GENERAL_LF_TARGET_OK` is still silent, and precisely: **real `lfc`
+has never compiled a generated conditional.** That gate compiles programs built by the bridge mains, none
+of which contains one, so the emitted `if (…) { … } else {}` text is pinned only by test 8 below and has
+never been consumed by the target compiler. Do not read a green LF target gate as evidence that `lfc`
+accepts what this printer emits for a branch.
 
 This module is the instrument that sees it. One model, one conditional, one external send inside its
 then-branch, pinned three ways:
@@ -37,12 +44,18 @@ groups are about the *artefact* the translator emits; the fourth is about the *r
 source configuration, and a translator and a semantics can disagree while each is internally
 consistent.
 
-The model is deliberately **not** claimed to be well-formed. `DTR.GeneralModel.statementResolves`
-refuses `DTR.GeneralStmt.ifThenElse`, so the accepted fragment excludes this model and stage H's
-declared fragment is unchanged by this file. `Translation.compileGeneralModel` never consults
-`DTR.GeneralModel.wellFormed`, so the routing and compilation pins below are about the translator's own
-behaviour on the construct it now carries — which is precisely what needs pinning while the fragment
-refusal stands.
+The model **is** claimed to be well-formed, and pin 0 below is that claim. Until stage I0 this
+paragraph said the opposite, and it was right at the time: `DTR.GeneralModel.statementResolves`
+answered `false` for `DTR.GeneralStmt.ifThenElse`, so the accepted fragment excluded this model and
+stage H's declared fragment was unchanged by this file. Stage I0 made that arm a recursion into both
+branch bodies, so a conditional whose nested sends resolve is now accepted, and this model's nested
+send does resolve.
+
+Pin 0 earns its place twice. It is the acceptance claim, and it is the **only** reducibility
+instrument the recursion has: `DTR.GeneralModel.wellFormed` is a `Bool` that no other
+`Relico/Tests/*` module evaluates, so if `statementResolves` ever falls from structural to
+well-founded recursion, nothing else in the development notices and this `rfl` is what fails. That is
+F89 part 1's failure mode, aimed at the definition stage I0 changed.
 -/
 
 namespace Relico
@@ -208,6 +221,16 @@ def conditionalModel : DTR.GeneralModel where
       conditionalSensor,
       conditionalHub
     ]
+
+/-! ## Pin 0: the fragment accepts the model -/
+
+/- Test 0: the model is well-formed. Stage I0's whole subject, and the reducibility instrument for the
+   recursion it added: `rfl` here evaluates `sendsResolveToMessageServers`, which evaluates
+   `bodyResolves`, which descends into the then-branch and reaches the nested send. -/
+example :
+    conditionalModel.wellFormed =
+      true := by
+  rfl
 
 /-! ## Pin 1: the nested address -/
 

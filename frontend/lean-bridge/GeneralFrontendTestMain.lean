@@ -242,9 +242,27 @@ def runGeneralFrontendTests
       2
       2
 
+    -- The first positive whose bodies contain a conditional, added by stage I0
+    -- when `elaborateStmt` stopped refusing `if`. It is deliberately not the
+    -- smallest such document: it carries an external send inside a then-branch,
+    -- a self-send inside an else-branch, and a nested conditional whose own
+    -- then-branch self-sends, so the recursion that `statementResolves` and
+    -- `generalBodyOrigin_of_compileGeneralBody` gained is exercised at depth two
+    -- and on both branch selectors rather than only on an empty branch.
+    expectAccept
+      "BRANCHING"
+      (fixtureDirectory ++ "/branching.parser.json")
+      2
+      2
+
     -- A document the exporter emits and this layer refuses. The only negative
     -- of that kind, and the reason the expectations here cannot be derived from
     -- which directory a fixture sits in.
+    --
+    -- Its reason is `iterationNotSupported` and stays that way through stage I0:
+    -- `msgsrv scan` opens with two `for` loops, which are reached before the
+    -- conditionals in `msgsrv decide`, so accepting `if` does not move this
+    -- expectation.
     expectReject
       "CONTROL_FLOW"
       (fixtureDirectory ++ "/control-flow.parser.json")

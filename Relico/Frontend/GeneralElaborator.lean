@@ -46,14 +46,23 @@ measured one-line repair is `termination_by scope context raw => sizeOf raw`,
 naming all three parameters in order; the default `decreasing_tactic` closes the
 resulting goals without a `decreasing_by` block.
 
-## `elaborateStmt` does not recurse
+## `elaborateStmt` recurses, into a conditional's branches only
 
-`if`, `for` and `declare` are rejected by `kind` before anything descends into
-`then`, `else`, `body`, `init` or `update`. So the statement elaborator is flat,
-a statement body is `List.mapM`, and the only recursion in this module is over
-the three optional child slots of an expression. Stage H, which admits control
-flow, is the stage that makes `elaborateStmt` recursive, and it will have to
-destructure for the same measured reason.
+`for` and `declare` are rejected by `kind` before anything descends into `body`, `init`
+or `update`, so nothing in this module ever visits those three slots. `if` is not: as
+of stage I0 `elaborateStmt` reads `condition`, `then` and `else` and elaborates them,
+so it and `elaborateBody` are a `mutual` pair and a statement body is a hand-written
+recursion rather than `List.mapM` — a lambda would hide the recursive call from the
+equation compiler, which is F89's shape on the Lean side of the translation.
+
+The prediction this paragraph replaced was right about the trap and wrong about the
+stage. It said stage H would make `elaborateStmt` recursive and that it "will have to
+destructure for the same measured reason". Stage H did not touch this module; stage I0
+did, and it did have to destructure: the projection form was tried first and left
+`sizeOf thenRaw < sizeOf raw` unprovable, exactly as the paragraph above records for
+`elaborateExpr`. The one thing the prediction missed is that structural recursion is
+*not* inferred for the statement pair, so unlike `elaborateExpr` it carries explicit
+`termination_by` measures. No `partial` is used anywhere in this module.
 
 ## Two restrictions this fragment inherits from the exporter
 
@@ -514,14 +523,31 @@ def elaborateDelay
         else
           pure { value := literal.toNat }
 
+/- `elaborateStmt` and `elaborateBody` are mutually recursive as of stage I0, because a
+conditional's branches are bodies. A `mutual` block cannot carry a docstring, so each
+definition carries its own. -/
+mutual
+
 /--
 Narrow a statement node.
 
-This function does not recurse, and that is why it may read its fields by
-projection where `elaborateExpr` may not: `if`, `for` and `declare` are rejected
-by `kind` before anything descends into `then`, `else`, `body`, `init` or
-`update`, so no child statement is ever visited. Stage H is where that changes,
-and it will have to destructure.
+**This function recurses as of stage I0, into a conditional's branch bodies and nowhere else.**
+The paragraph replaced here said it did not recurse, and that `if`, `for` and `declare` were all
+rejected by `kind` before anything descended into `then`, `else`, `body`, `init` or `update`. `for`
+and `declare` are still rejected in exactly that way, so nothing descends into `body`, `init` or
+`update`. `if` is no longer rejected: its `condition`, `then` and `else` are read and elaborated.
+
+**Two things about the recursion are measured rather than chosen.** Structural recursion is not
+inferred for this pair: Lean reports that it is "skipping arguments of type `List RawGeneralStmt`, as
+`elaborateStmt` has no compatible argument", so the pair is well founded on `sizeOf` and both
+measures are written out. And the `if` arm destructures `raw` with a **structure pattern** rather than
+reading `raw.condition`, `raw.«then»` and `raw.«else»` by projection, because the projection form was
+tried first and left `sizeOf thenRaw < sizeOf raw` unprovable: a projection carries no subterm
+relation back to the record, while a pattern does. `partial` was not used and is not needed.
+
+An absent `else` elaborates to the empty body rather than being refused. That is the same defaulting
+decision the elaborator already makes for an absent `after`, and `LF.stmtWellFormed` accepts an empty
+branch, so the empty case is represented rather than avoided.
 
 The assignment-target check is the one thing here that no other layer performs,
 and it is a divergence from the exporter rather than a restatement of it. The
@@ -585,7 +611,34 @@ def elaborateStmt
           pure (.send target { value := serverName } arguments delay)
 
   | "if" =>
-      .error (generalDiagnostic .branchingNotSupported "if" context raw.line)
+      match raw with
+
+      | { condition := none, .. } =>
+          .error (generalDiagnostic .missingField "condition" context raw.line)
+
+      | { «then» := none, .. } =>
+          .error (generalDiagnostic .missingField "then" context raw.line)
+
+      | { condition := some conditionRaw,
+          «then» := some thenRaw,
+          «else» := elseOption,
+          .. } => do
+          let condition ←
+            elaborateExpr scope context conditionRaw
+
+          let thenBody ←
+            elaborateBody scope context thenRaw
+
+          let elseBody ←
+            match elseOption with
+
+            | none =>
+                pure []
+
+            | some elseRaw =>
+                elaborateBody scope context elseRaw
+
+          pure (.ifThenElse condition thenBody elseBody)
 
   | "for" =>
       .error (generalDiagnostic .iterationNotSupported "for" context raw.line)
@@ -598,20 +651,42 @@ def elaborateStmt
   | unsupported =>
       .error (generalDiagnostic .unsupportedStatementKind unsupported context raw.line)
 
+termination_by
+  sizeOf raw
+
 /--
 Narrow a statement body.
 
-`List.mapM` rather than a hand-written recursion, which is what
-`decodeMultiStorePayloadBody` does too. The element function is independent of the
-list, so nothing here is recursive and the destructuring constraint does not
-apply.
+**A hand-written recursion as of stage I0, not `List.mapM`.** The paragraph replaced here said the
+element function was independent of the list, so nothing was recursive and the destructuring
+constraint did not apply. Both halves of that stopped being true when `elaborateStmt` began
+descending into a conditional's branches: this function is now one half of a `mutual` pair, and a
+`List.mapM` would hide the recursive call inside a lambda, where the equation compiler cannot see it.
+That is the same shape F89 records on the Lean side of the translation, and the repair is the same
+one: an explicit `match` on the list.
 -/
 def elaborateBody
     (scope : GeneralScope)
-    (context : String)
-    (raw : List RawGeneralStmt) :
-    GeneralElab DTR.GeneralBody :=
-  raw.mapM (elaborateStmt scope context)
+    (context : String) :
+    List RawGeneralStmt →
+    GeneralElab DTR.GeneralBody
+
+  | [] =>
+      pure []
+
+  | raw :: rest => do
+      let statement ←
+        elaborateStmt scope context raw
+
+      let remaining ←
+        elaborateBody scope context rest
+
+      pure (statement :: remaining)
+
+termination_by
+  raws => sizeOf raws
+
+end
 
 
 /--

@@ -1,0 +1,45 @@
+reactiveclass Gauge(4) {
+    knownrebecs {
+        Logger sink;
+    }
+    statevars {
+        int level;
+        boolean alarmed;
+    }
+    Gauge() {
+        level = 0;
+        alarmed = false;
+        self.sample() after(1);
+    }
+    msgsrv sample() {
+        if (level > 2) {
+            alarmed = true;
+            sink.record(level) after(1);
+            if (level > 4) {
+                self.sample() after(3);
+            } else {
+            }
+        } else {
+            alarmed = false;
+            level = level + 1;
+            self.sample() after(2);
+        }
+    }
+}
+
+reactiveclass Logger(6) {
+    statevars {
+        int entries;
+    }
+    Logger() {
+        entries = 0;
+    }
+    msgsrv record(int value) {
+        entries = entries + value;
+    }
+}
+
+main {
+    Gauge gauge0(logger0):();
+    Logger logger0():();
+}
