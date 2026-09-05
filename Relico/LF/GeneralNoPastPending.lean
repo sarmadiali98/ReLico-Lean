@@ -103,6 +103,11 @@ theorem generalNoPastPending_of_step
   | trace hReactor hBody =>
       exact hNoPast
 
+  -- Stage I's local declaration copies the queue, like `assign` and `trace`, so the
+  -- invariant transfers unchanged.
+  | localDecl hReactor hBody hEvaluate =>
+      exact hNoPast
+
   -- The three step-into rules copy the queue, so the invariant transfers unchanged.
   | branchTrue hReactor hBody hCondition =>
       exact hNoPast

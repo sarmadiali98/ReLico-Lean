@@ -1673,6 +1673,29 @@ private theorem generalInstantBlock_target_nil_maximal
         Bool.noConfusion
           hIdleEntry
 
+  -- Stage I's local declaration is killed by idleness exactly as `assign` and `trace`
+  -- are: a reactor with a declaration as its active-body head is not idle, and the
+  -- hypothesis says every reactor is.
+  | localDecl hReactor hBody hEvaluate =>
+      exfalso
+
+      have hMem :=
+        Store.mem_of_lookup
+          state.reactors
+          _
+          _
+          hReactor
+
+      have hIdleEntry := hIdle _ hMem
+
+      unfold LF.GeneralReactorRuntime.idle at hIdleEntry
+
+      rw [hBody] at hIdleEntry
+
+      exact
+        Bool.noConfusion
+          hIdleEntry
+
   | schedule hReactor hBody hArguments =>
       exfalso
 

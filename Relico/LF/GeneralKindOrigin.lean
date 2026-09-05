@@ -6126,6 +6126,29 @@ theorem generalKindOrigin_of_step
             _
             hConnection
 
+  -- Stage I's local declaration steps exactly as `assign` does — bind the name, drop the
+  -- head, copy the frames and the queue — so the invariant's three sides are the trace
+  -- arm's three sides: the event side is untouched, the body side loses only a head whose
+  -- own origin obligation is `True` by `GeneralStmtOrigin`'s `.localDecl` arm, and the
+  -- frames side is the same update.
+  | localDecl hReactor hBody hEvaluate =>
+      exact
+        ⟨hEventSide,
+         generalStmtOrigin_update_tail
+           hBodySide
+           hReactor
+           hBody
+           _
+           _,
+         generalFramesOrigin_update
+           hFramesSide
+           _
+           _
+           _
+           (framesOrigin_of_lookup
+             hFramesSide
+             hReactor)⟩
+
   | fire hSelected hTag hQueue hReactor hIdle hReaction =>
 
       refine ⟨?_, ?_, ?_⟩

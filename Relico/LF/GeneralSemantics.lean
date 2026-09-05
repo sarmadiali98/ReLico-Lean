@@ -16,25 +16,17 @@ and the trigger matching that decides which reaction a fired event runs. The spl
 `Relico/LF/DetailedMultiStorePayloadRuntime.lean` and its `…Semantics.lean` companion, and mirrors
 `Relico/DTR/GeneralSemantics.lean` on the source side.
 
-## Seven rules where the source has five
+## The rule count has moved twice, and each move is recorded
 
-The source's five rules are `assign`, `trace`, `send`, `take` and `timeProgress`. Two of them split here.
-
-`SEND` splits because the target has two send mechanisms and §III-E chooses between them by what the
-statement *is*: a self-send becomes a `schedule` of a logical action, an external send becomes a `setPort`
-that travels a connection. Both are τ, so the split is invisible in the label alphabet and visible only in
-the rules.
-
-`TIME PROGRESS` splits because a target tag has a microstep. **This is P24.** An advance that increases the
-microstep and leaves the time alone is τ — it has no source counterpart, because `LogicalTime` has no
-microstep to advance — while an advance that increases the time is observable and carries `.timeAdvance`.
-The paper's Theorem 1 is false for a zero-delay send precisely because it reads a single observable
-`TIME PROGRESS` off Table II; splitting the rule here is the repair, and `Relico/Tests/GeneralSemantics.lean`
-pins the zero-delay case as a regression so the two halves cannot be silently re-merged.
-
-Conditionals are absent on both sides: `LF.GeneralStmt` has no conditional and `LF.GeneralBody` is a flat
-list, so stage G proves the conditional-free sub-fragment. `docs/STAGE_G_DESIGN.md` §7 states the
-restriction and G6 owes its declaration.
+Stage G opened with seven rules against the source's five: `SEND` split because the target has two
+send mechanisms, and `TIME PROGRESS` split because a target tag has a microstep — **P24**, the repair
+for the zero-delay send. Stage H added three step-into rules (`branchTrue`, `branchFalse`, `resume`)
+on both sides at once, making ten here against eight there. Stage I's S-I4a adds `localDecl` here
+first — **eleven against eight**, and deliberately asymmetric for one layer: the source rule and its
+transfer are S-I4b, and the asymmetry is safe because a target rule with no source counterpart can
+be added without breaking any direction of the correspondence — the forward direction quantifies over
+source steps, the backward over observable target steps, and a target-only τ rule is invisible to
+both until a source rule exists to be answered. The count will be even again at S-I4b.
 
 ## Why the scheduler lives here and not with the runtime state
 
@@ -1793,6 +1785,71 @@ inductive GeneralStep
         }
 
   /--
+  `LOCAL-DECL`. Evaluate the initialiser in the reactor's own valuation and bind the declared name to
+  the result, dropping the statement from the continuation.
+
+  The component-for-component analogue of `assign` — same `hReactor`/`hBody`/`hEvaluate` premises, same
+  `Store.update` on the valuation, same `activeBody := remaining`, same untouched `frames` — with one
+  difference that is the whole of stage I's local-variable design: the bound name is *not* required to
+  be a declared state variable. Nothing checks it because nothing has to. The target's valuation is one
+  flat `Store VarName LF.GeneralValue` that already holds state variables and message parameters
+  indistinguishably — `LF.GeneralExpr.evaluate` resolves `.stateVar` and `.parameterVar` through the
+  same lookup — so a local is exactly a third kind of name in a store that was never segmented by
+  kind. That flatness is also why the DTR mirror will need no new runtime field when S-I4b adds it:
+  the source store has the same shape.
+
+  The declared type is not consulted. It exists for the printer and for the C++ declaration the
+  reaction emits, not for the step: an `int x = 1;` line in a C++ block does not re-check that `1` is
+  an `int` at run time, and neither does this rule. A type-mismatched initialiser is therefore
+  steppable here, which matches the emitted program and is prevented upstream — by the elaborator and
+  the source's typing conventions — rather than here.
+
+  **This rule does not enable assignment to a local.** It consumes a `localDecl` statement. The
+  `assign` rule above is unchanged and still binds any name it is handed, as it always has; what
+  refuses a local *target* is the guards layer, and stage I leaves those refusing.
+
+  τ, and confined to one reactor: the tag, the queue and every other reactor are copied, like
+  `assign`.
+  -/
+  | localDecl
+      {state : GeneralRuntimeState}
+      {instanceName : ActorName}
+      {reactor : GeneralReactorRuntime}
+      {name : VarName}
+      {declaredType : LF.GeneralType}
+      {expression : LF.GeneralExpr}
+      {remaining : LF.GeneralBody}
+      {value : LF.GeneralValue}
+      (hReactor :
+        Store.lookup state.reactors instanceName = some reactor)
+      (hBody :
+        reactor.activeBody =
+          LF.GeneralStmt.localDecl name declaredType expression :: remaining)
+      (hEvaluate :
+        LF.GeneralExpr.evaluate reactor.valuation expression = some value) :
+      GeneralStep
+        program
+        state
+        LF.GeneralLabel.tau
+        {
+          currentTag := state.currentTag
+          reactors :=
+            Store.update
+              state.reactors
+              instanceName
+              {
+                valuation :=
+                  Store.update
+                    reactor.valuation
+                    name
+                    value
+                activeBody := remaining
+                frames := reactor.frames
+              }
+          pending := state.pending
+        }
+
+  /--
   `BRANCH-TRUE`. The condition evaluates to `true`, so the reactor steps **into** the then-branch and
   remembers the rest of this level on its frame stack.
 
@@ -2131,6 +2188,11 @@ theorem GeneralStep.now_eq_of_tau
   | trace _ _ =>
       rfl
 
+  -- Stage I's local declaration copies `state.currentTag` exactly as `assign` does,
+  -- so the proof is the same `rfl`.
+  | localDecl _ _ _ =>
+      rfl
+
   | schedule _ _ _ =>
       rfl
 
@@ -2196,6 +2258,12 @@ theorem GeneralStep.tau_pending_not_past
       exact Or.inl hEvent
 
   | trace _ _ =>
+      intro event hEvent
+      exact Or.inl hEvent
+
+  -- Stage I's local declaration copies `state.pending` untouched, like `assign` and
+  -- `trace`, so the `Or.inl` discharge is the same.
+  | localDecl _ _ _ =>
       intro event hEvent
       exact Or.inl hEvent
 
@@ -2317,6 +2385,11 @@ theorem GeneralStep.tau_enqueue_strictly_future
       exact Or.inl rfl
 
   | trace _ _ =>
+      exact Or.inl rfl
+
+  -- Stage I's local declaration enqueues nothing: the queue is copied, so the left
+  -- disjunct holds by `rfl` exactly as it does for `assign` and `trace`.
+  | localDecl _ _ _ =>
       exact Or.inl rfl
 
   -- The three step-into rules enqueue nothing: the queue is copied, so the left disjunct holds
@@ -2720,6 +2793,16 @@ theorem GeneralStep.congr_of_projections
         GeneralStep.trace
           hReactor
           hBody
+
+  -- Stage I's local declaration reads no program component — it inspects one reactor's
+  -- continuation and valuation — so it transfers by rebuilding itself, exactly as the
+  -- step-into rules do.
+  | localDecl hReactor hBody hEvaluate =>
+      exact
+        GeneralStep.localDecl
+          hReactor
+          hBody
+          hEvaluate
 
   -- The three step-into rules read no program component at all — they inspect one reactor's
   -- continuation fields and its valuation — so each transfers by rebuilding itself.

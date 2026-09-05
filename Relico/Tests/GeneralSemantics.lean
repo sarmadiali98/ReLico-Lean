@@ -694,6 +694,104 @@ example :
         } := by
   rfl
 
+/-! ## Stage I: the target local declaration step -/
+
+/--
+The reactor under test: one `int temporary = 1;` declaration as its whole active body, an otherwise empty
+valuation, no frames. The initialiser is a literal so the `hEvaluate` premise is `rfl` — the pin is about
+the rule's plumbing, not about evaluation, which `assign`'s own tests already cover.
+-/
+def targetLocalDeclReactor : LF.GeneralReactorRuntime :=
+  {
+    valuation := []
+    activeBody :=
+      [
+        LF.GeneralStmt.localDecl
+          (VarName.mk "temporary")
+          .int
+          (LF.GeneralExpr.intLiteral 1)
+      ]
+    frames := []
+  }
+
+def targetLocalDeclState : LF.GeneralRuntimeState :=
+  {
+    currentTag :=
+      {
+        time := 3
+        microstep := 0
+      }
+    reactors := [(probeName, targetLocalDeclReactor)]
+    pending := []
+  }
+
+/--
+The state after, hand-written rather than derived: the binding is in the valuation at the declared name,
+the body is spent, the frames and the queue are untouched. A rule that forgot the binding, bound the wrong
+name, kept the statement, or touched the queue each fails here by typechecking against the wrong literal.
+-/
+def targetLocalDeclNext : LF.GeneralRuntimeState :=
+  {
+    currentTag := targetLocalDeclState.currentTag
+    reactors :=
+      [
+        (probeName,
+          {
+            valuation :=
+              [
+                (VarName.mk "temporary",
+                  LF.GeneralValue.int 1)
+              ]
+            activeBody := []
+            frames := []
+          })
+      ]
+    pending := []
+  }
+
+/- The step itself: τ-labelled, `assign`-shaped, one rule application with `rfl` premises. -/
+theorem targetLocalDeclStep :
+    LF.GeneralStep
+      emptyProgram
+      targetLocalDeclState
+      LF.GeneralLabel.tau
+      targetLocalDeclNext :=
+  LF.GeneralStep.localDecl
+    (instanceName := probeName)
+    (reactor := targetLocalDeclReactor)
+    (name := VarName.mk "temporary")
+    (declaredType := .int)
+    (expression := LF.GeneralExpr.intLiteral 1)
+    (remaining := [])
+    (value := LF.GeneralValue.int 1)
+    rfl
+    rfl
+    rfl
+
+/- Test: logical time does not move, tying the new rule to the τ inversion lemma the same way the trace
+   and conditional pins tie theirs. -/
+example :
+    LF.GeneralRuntimeState.now targetLocalDeclNext =
+      LF.GeneralRuntimeState.now targetLocalDeclState :=
+  LF.GeneralStep.now_eq_of_tau targetLocalDeclStep
+
+/- Test: the binding really landed, at the declared name and nowhere else — the whole point of the rule,
+   and the property a `trace`-shaped mis-implementation (drop the head, copy everything) would silently
+   satisfy. -/
+example :
+    Store.lookup targetLocalDeclNext.reactors probeName =
+      some
+        {
+          valuation :=
+            [
+              (VarName.mk "temporary",
+                LF.GeneralValue.int 1)
+            ]
+          activeBody := []
+          frames := []
+        } := by
+  rfl
+
 /- The compiler/correspondence continuation fact is live on the same one-statement body. -/
 def traceContinuationCompiles :
     Correctness.GeneralContinuationCompiles

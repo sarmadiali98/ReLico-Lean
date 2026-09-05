@@ -954,6 +954,12 @@ theorem generalStoreKeyUnique_of_step
 
       exact Store.keysUnique_update hUnique
 
+  -- Stage I's local declaration updates one existing reactor key, exactly as `assign` does.
+  | localDecl _ _ _ =>
+      dsimp only
+
+      exact Store.keysUnique_update hUnique
+
   | schedule _ _ _ =>
       dsimp only
 
