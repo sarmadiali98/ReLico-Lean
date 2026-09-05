@@ -679,6 +679,12 @@ theorem generalStoreKeyUnique_of_step
 
       exact Store.keysUnique_update hUnique
 
+  -- Stage I's local declaration updates one existing actor key, exactly as `assign` does.
+  | localDecl _ _ _ =>
+      dsimp only
+
+      exact Store.keysUnique_update hUnique
+
   | send _ _ _ _ _ =>
       dsimp only
 

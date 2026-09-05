@@ -605,6 +605,109 @@ example :
         } := by
   rfl
 
+/-! ### Stage I: the source local declaration step
+
+The source-side mirror of `targetLocalDeclStep` below: one `int temporary = 1;` declaration as the whole
+active body, an empty valuation, no frames, and a hand-written post-state whose valuation holds exactly
+the binding. The initialiser is a literal so `hEvaluate` is `rfl` — the pin is about the rule's
+plumbing, which is what a mis-shapen mirror of the target rule would break.
+-/
+
+def sourceLocalDeclActor : DTR.GeneralActorRuntime :=
+  {
+    state :=
+      {
+        valuation := []
+        bag := []
+      }
+    activeBody :=
+      [
+        DTR.GeneralStmt.localDecl
+          (VarName.mk "temporary")
+          .int
+          (DTR.GeneralExpr.intLiteral 1)
+      ]
+    frames := []
+  }
+
+def sourceLocalDeclConfig : DTR.GeneralRuntimeConfiguration :=
+  {
+    now := 3
+    actors := [(probeName, sourceLocalDeclActor)]
+  }
+
+/--
+Hand-written: the binding is in the valuation at the declared name, the body is spent, the bag and the
+frames are untouched, and the clock does not move. A rule that bound the wrong name, kept the statement,
+touched the bag, or advanced `now` each fails here.
+-/
+def sourceLocalDeclNext : DTR.GeneralRuntimeConfiguration :=
+  {
+    now := 3
+    actors :=
+      [
+        (probeName,
+          {
+            state :=
+              {
+                valuation :=
+                  [
+                    (VarName.mk "temporary",
+                      DTR.GeneralValue.int 1)
+                  ]
+                bag := []
+              }
+            activeBody := []
+            frames := []
+          })
+      ]
+  }
+
+/- The step itself: τ-labelled, `assign`-shaped, one rule application with `rfl` premises. -/
+theorem sourceLocalDeclStep :
+    DTR.GeneralStep
+      emptyModel
+      sourceLocalDeclConfig
+      DTR.GeneralLabel.tau
+      sourceLocalDeclNext :=
+  DTR.GeneralStep.localDecl
+    (actorName := probeName)
+    (actor := sourceLocalDeclActor)
+    (name := VarName.mk "temporary")
+    (declaredType := .int)
+    (expression := DTR.GeneralExpr.intLiteral 1)
+    (remaining := [])
+    (value := DTR.GeneralValue.int 1)
+    rfl
+    rfl
+    rfl
+
+/- Test: logical time does not move, tying the source rule to the τ inversion lemma the same way every
+   other source pin ties its own. -/
+example :
+    sourceLocalDeclNext.now = sourceLocalDeclConfig.now :=
+  DTR.GeneralStep.now_eq_of_tau sourceLocalDeclStep
+
+/- Test: the binding really landed, at the declared name and nowhere else — the property a
+   `trace`-shaped mis-implementation (drop the head, copy everything) would silently satisfy. -/
+example :
+    Store.lookup sourceLocalDeclNext.actors probeName =
+      some
+        {
+          state :=
+            {
+              valuation :=
+                [
+                  (VarName.mk "temporary",
+                    DTR.GeneralValue.int 1)
+                ]
+              bag := []
+            }
+          activeBody := []
+          frames := []
+        } := by
+  rfl
+
 def targetTraceReactor : LF.GeneralReactorRuntime :=
   {
     valuation := []

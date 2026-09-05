@@ -406,6 +406,14 @@ theorem generalTraceTransfer_forward
               True.intro
               hVisible
 
+      -- Stage I's local declaration is τ, so it is refuted by the visibility premise
+      -- exactly as the τ rules above are.
+      | localDecl hActor hBody hEvaluate =>
+          exact
+            absurd
+              True.intro
+              hVisible
+
       | send hSender hBody hArguments hTarget hReceiver =>
           exact
             absurd

@@ -1440,6 +1440,29 @@ private theorem generalInstantBlock_source_nil_maximal
         Bool.noConfusion
           hIdleEntry
 
+  -- Stage I's local declaration is killed by idleness exactly as `assign` and `trace`
+  -- are: a declaration head makes `activeBody.isEmpty` false, and the hypothesis says
+  -- every actor is idle.
+  | localDecl hActor hBody hEvaluate =>
+      exfalso
+
+      have hMem :=
+        Store.mem_of_lookup
+          config.actors
+          _
+          _
+          hActor
+
+      have hIdleEntry := hIdle _ hMem
+
+      unfold DTR.GeneralActorRuntime.idle at hIdleEntry
+
+      rw [hBody] at hIdleEntry
+
+      exact
+        Bool.noConfusion
+          hIdleEntry
+
   | send hSender hBody hArguments hTarget hReceiver =>
       exfalso
 

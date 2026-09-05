@@ -899,6 +899,91 @@ theorem generalContinuationCompiles_assign_head
 
         exact hEntry⟩⟩
 
+/--
+A compiled body whose source head is a local declaration has the compiled declaration as its head, and
+its tail compiles.
+
+The `assign` head lemma's shape with `compileGeneralStmt_localDecl` in place of the `_assign` equation:
+the compiled head's initialiser is pinned to `Translation.compileGeneralExpr` of the source's, which is
+what the transfer below needs in order to evaluate the target side by
+`compileGeneralExpr_preserves_evaluation`. The site transport is the assign lemma's verbatim, because a
+declaration contributes no send and occupies a statement position exactly as an assignment does.
+-/
+theorem generalContinuationCompiles_localDecl_head
+    {env : Translation.GeneralOutputPortEnv}
+    {name : VarName}
+    {declaredType : DTR.GeneralType}
+    {expression : DTR.GeneralExpr}
+    {sourceRemaining : DTR.GeneralBody}
+    {targetBody : LF.GeneralBody}
+    (hCompiles :
+      GeneralContinuationCompiles
+        env
+        (.localDecl name declaredType expression :: sourceRemaining)
+        targetBody) :
+    ∃ targetRemaining : LF.GeneralBody,
+      targetBody =
+          LF.GeneralStmt.localDecl
+              name
+              (Translation.compileGeneralType
+                declaredType)
+              (Translation.compileGeneralExpr
+                expression) ::
+            targetRemaining ∧
+        GeneralContinuationCompiles
+          env
+          sourceRemaining
+          targetRemaining := by
+
+  obtain ⟨context, index, hCompiled, hSites⟩ :=
+    hCompiles
+
+  obtain
+      ⟨compiledStatement,
+       compiledRemaining,
+       hStatement,
+       hRemaining,
+       hShape⟩ :=
+    Translation.compileGeneralBody_cons_ok_inversion
+      hCompiled
+
+  rw [
+    Translation.compileGeneralStmt_localDecl
+  ] at hStatement
+
+  injection hStatement with hStatement
+
+  subst hStatement
+
+  exact
+    ⟨compiledRemaining,
+     hShape,
+     ⟨context,
+      index + 1,
+      hRemaining,
+      by
+        -- The assign lemma's site transport verbatim: a declaration contributes no send, so
+        -- a tail send's path relation to the body's is unchanged from the assignment case.
+        intro path rebec message delay hPath entry hEntry
+
+        refine
+          hSites
+            (Translation.bumpHeadPath
+              path)
+            rebec
+            message
+            delay
+            (Translation.generalSendAtPath_cons
+              hPath)
+            entry
+            ?_
+
+        rw [
+          ← Translation.shiftHeadPath_bumpHeadPath
+        ]
+
+        exact hEntry⟩⟩
+
 /-!
 ## Trace
 
@@ -1900,6 +1985,178 @@ theorem generalAssign_forward
             actor.state.valuation
             reactor.valuation
             target
+            value
+            hPair.valuation
+
+        messages := hPair.messages
+        continuation := hTailCompiles
+        frames := hPair.frames
+      }
+
+/--
+A source local declaration step is answered by a target local declaration step, preserving the
+correspondence.
+
+`generalAssign_forward`'s proof with a different head: the target's initialiser is
+`Translation.compileGeneralExpr` of the source's, pinned by the head inversion, and
+`compileGeneralExpr_preserves_evaluation` turns the source's successful evaluation into the target's
+with the compiled value — which is what makes `generalValuationAgrees_update` applicable at exactly
+the shape it was written for. The `messages` field transfers unchanged (bag and queue are both
+untouched), the continuation advances by the head inversion's tail, and the frames field is copied
+whole. **The bound name is not checked against any declaration**, on either side: the target rule's
+own docstring records why that is sound rather than merely permitted — both stores are flat and
+name-kind-blind, and the guards layer is what refuses a local *target* for assignment.
+-/
+theorem generalLocalDecl_forward
+    {model : DTR.GeneralModel}
+    {program : LF.GeneralProgram}
+    {config : DTR.GeneralRuntimeConfiguration}
+    {state : LF.GeneralRuntimeState}
+    {actorName : ActorName}
+    {actor : DTR.GeneralActorRuntime}
+    {name : VarName}
+    {declaredType : DTR.GeneralType}
+    {expression : DTR.GeneralExpr}
+    {remaining : DTR.GeneralBody}
+    {value : DTR.GeneralValue}
+    (hCorrespondence :
+      GeneralStateCorrespondence
+        model
+        config
+        state)
+    (hUniqueS :
+      DTR.GeneralStoreKeyUnique config)
+    (hUniqueT :
+      LF.GeneralStoreKeyUnique state)
+    (hActor :
+      Store.lookup config.actors actorName =
+        some actor)
+    (hBody :
+      actor.activeBody =
+        DTR.GeneralStmt.localDecl name declaredType expression :: remaining)
+    (hEvaluate :
+      DTR.GeneralExpr.evaluate
+          actor.state.valuation
+          expression =
+        some value) :
+    ∃ state' : LF.GeneralRuntimeState,
+      LF.GeneralStep
+          program
+          state
+          LF.GeneralLabel.tau
+          state' ∧
+        GeneralStateCorrespondence
+          model
+          {
+            now := config.now
+
+            actors :=
+              Store.update
+                config.actors
+                actorName
+                {
+                  state :=
+                    {
+                      valuation :=
+                        Store.update
+                          actor.state.valuation
+                          name
+                          value
+
+                      bag := actor.state.bag
+                    }
+
+                  activeBody := remaining
+                  frames := actor.frames
+                }
+          }
+          state' := by
+
+  obtain ⟨env, reactor, hEnv, hReactorMem, hPair⟩ :=
+    hCorrespondence.reactorOfActor
+      actorName
+      actor
+      (Store.mem_of_lookup
+        config.actors
+        actorName
+        actor
+        hActor)
+
+  obtain ⟨targetRemaining, hTargetBody, hTailCompiles⟩ :=
+    generalContinuationCompiles_localDecl_head
+      (by
+        rw [← hBody]
+
+        exact hPair.continuation)
+
+  have hTargetEvaluate :
+      LF.GeneralExpr.evaluate
+          reactor.valuation
+          (Translation.compileGeneralExpr
+            expression) =
+        some
+          (Translation.compileGeneralValue
+            value) := by
+    rw [
+      compileGeneralExpr_preserves_evaluation
+        hPair.valuation
+        expression,
+      hEvaluate
+    ]
+
+    rfl
+
+  refine
+    ⟨_,
+     LF.GeneralStep.localDecl
+       (Store.lookup_of_mem_of_keysUnique
+         state.reactors
+         hUniqueT
+         hReactorMem)
+       hTargetBody
+       hTargetEvaluate,
+     ?_⟩
+
+  exact
+    generalCorrespondence_updatePair
+      hCorrespondence
+      hUniqueS
+      hUniqueT
+      actorName
+      env
+      hEnv
+      {
+        state :=
+          {
+            valuation :=
+              Store.update
+                actor.state.valuation
+                name
+                value
+
+            bag := actor.state.bag
+          }
+
+        activeBody := remaining
+        frames := actor.frames
+      }
+      {
+        valuation :=
+          Store.update
+            reactor.valuation
+            name
+            (Translation.compileGeneralValue
+              value)
+
+        activeBody := targetRemaining
+        frames := reactor.frames
+      }
+      {
+        valuation :=
+          generalValuationAgrees_update
+            actor.state.valuation
+            reactor.valuation
+            name
             value
             hPair.valuation
 
@@ -4613,6 +4870,16 @@ theorem generalTau_forward
           hUniqueT
           hActor
           hBody
+
+  | localDecl hActor hBody hEvaluate =>
+      exact
+        generalLocalDecl_forward
+          hCorrespondence
+          hUniqueS
+          hUniqueT
+          hActor
+          hBody
+          hEvaluate
 
   | send hSender hBody hArguments hTarget hReceiver =>
 

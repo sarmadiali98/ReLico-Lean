@@ -544,6 +544,72 @@ inductive GeneralStep
         }
 
   /--
+  `LOCAL-DECL`. Evaluate the initialiser in the actor's own valuation and bind the declared name to the
+  result, dropping the statement from the continuation.
+
+  The component-for-component mirror of `assign`, and of `LF.GeneralReactorStep.localDecl` on the target
+  side: same `hActor`/`hBody`/`hEvaluate` premises, same `Store.update` on the valuation at the declared
+  name, same `activeBody := remaining`, same `frames` and `bag` copied, τ. The one difference from
+  `assign` is the whole of stage I's local-variable design, and it is the absence of a check: the bound
+  name is not required to be a declared state variable. Nothing checks it because nothing has to — the
+  actor's valuation is one flat store that already holds state variables and bound message parameters
+  indistinguishably, so a local is a third kind of name in a store never segmented by kind. That flatness
+  is why this rule needed no new runtime field: the state it touches existed before the constructor did.
+
+  The declared type is not consulted, mirroring the target rule's own record of why: it exists for
+  compilation and printing, not for the step. An `int x = 1;` line in the emitted C++ does not re-check
+  that `1` is an `int` at run time, and neither does this rule; a type-mismatched initialiser is steppable
+  here, prevented upstream by the elaborator and the source's typing conventions rather than here.
+
+  **This rule does not enable assignment to a local.** It consumes a `localDecl` statement. The `assign`
+  rule above still binds any name it is handed, as it always has; what refuses a local *target* is the
+  guards layer, and stage I leaves those refusing.
+
+  Premised on evaluation succeeding, like `assign`: an initialiser that fails to evaluate has no rule, so
+  the actor is stuck rather than silently binding a default.
+  -/
+  | localDecl
+      {config : GeneralRuntimeConfiguration}
+      {actorName : ActorName}
+      {actor : GeneralActorRuntime}
+      {name : VarName}
+      {declaredType : DTR.GeneralType}
+      {expression : DTR.GeneralExpr}
+      {remaining : DTR.GeneralBody}
+      {value : DTR.GeneralValue}
+      (hActor :
+        Store.lookup config.actors actorName = some actor)
+      (hBody :
+        actor.activeBody =
+          DTR.GeneralStmt.localDecl name declaredType expression :: remaining)
+      (hEvaluate :
+        DTR.GeneralExpr.evaluate actor.state.valuation expression = some value) :
+      GeneralStep
+        model
+        config
+        DTR.GeneralLabel.tau
+        {
+          now := config.now
+          actors :=
+            Store.update
+              config.actors
+              actorName
+              {
+                state :=
+                  {
+                    valuation :=
+                      Store.update
+                        actor.state.valuation
+                        name
+                        value
+                    bag := actor.state.bag
+                  }
+                activeBody := remaining
+                frames := actor.frames
+              }
+        }
+
+  /--
   `TAKE`. The selected actor removes a due message from its bag, binds the server's parameters into its
   valuation, and installs the server body as its continuation.
 
@@ -764,6 +830,11 @@ theorem GeneralStep.now_eq_of_tau
       rfl
 
   | resume _ _ _ =>
+      rfl
+
+  -- Stage I's local declaration copies `config.now` exactly as `assign` does,
+  -- so the proof is the same `rfl`.
+  | localDecl _ _ _ =>
       rfl
 
 /--

@@ -329,6 +329,41 @@ theorem generalNoOverdue_of_step
             message
             hMessage
 
+  -- Stage I's local declaration rewrites one actor's valuation and copies its bag unchanged,
+  -- so the `assign` proof is this arm's proof: the membership cases do not look at the
+  -- valuation.
+  | localDecl hActor hBody hEvaluate =>
+      intro entry hMem message hMessage
+
+      obtain ⟨name, runtime⟩ := entry
+
+      rcases
+          mem_update_cases
+            hMem with
+        hNew | hOld
+      · obtain ⟨_, runtimeEq⟩ :=
+          Prod.mk.inj hNew
+
+        subst runtimeEq
+
+        exact
+          hNoOverdue
+            _
+            (Store.mem_of_lookup
+              config.actors
+              _
+              _
+              hActor)
+            message
+            hMessage
+
+      · exact
+          hNoOverdue
+            _
+            hOld
+            message
+            hMessage
+
   -- Stage H's three step-into rules rewrite one actor's continuation fields and copy its
   -- `state` unchanged, so its bag is the bag this invariant was already proved for. The proof
   -- is the `trace` proof, and it is repeated rather than abstracted for the reason the `assign`
