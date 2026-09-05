@@ -257,6 +257,8 @@ def lean_export_stage(options: argparse.Namespace) -> None:
     artifact_family = getattr(options, "family", "v0")
     if artifact_family == "multi-store-payload":
         exporter = repo / "Relico/Benchmark/MultiStorePayloadArtifactExporter.lean"
+    elif artifact_family == "general":
+        exporter = repo / "Relico/Benchmark/GeneralArtifactExporter.lean"
     elif artifact_family != "v0":
         raise RuntimeError(
             f"unsupported lean-export family: {artifact_family!r}"
@@ -890,6 +892,7 @@ def build_parser() -> argparse.ArgumentParser:
         choices=[
             "v0",
             "multi-store-payload",
+            "general",
         ],
         default="v0",
     )
