@@ -171,6 +171,16 @@ parameter distinction to be recovered from the enclosing scope. That resolution
 happens in the elaborator, not here, so this syntax keeps the two-constructor
 split every earlier family was proved against.
 
+**As of stage I, `.parameterVar` no longer means only a parameter.** It means
+**a name that is not a state variable**, and it covers message-server
+parameters and local variables alike. That is one of stage I's approved rulings
+(`docs/decisions/0047-local-declarations-in-the-fragment.md`), and the argument
+is about the target rather than about cost: the emitted C++ binds a parameter
+and a local to a bare identifier in the same reaction block, so a read that
+could not tell the two apart could not compile to the text this development
+actually emits. The split that remains load-bearing is `.stateVar` versus
+everything else, because only a state variable survives the reaction boundary.
+
 There is no constructor mentioning `KnownRebecName`. That is what makes "a known
 rebec used as a value" unrepresentable rather than merely checked: a known rebec
 can appear only as a send target.

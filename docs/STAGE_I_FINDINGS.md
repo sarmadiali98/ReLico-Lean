@@ -81,7 +81,8 @@ with `example : conditionalModel.wellFormed = true := by rfl`. One line, and it 
 in the development that would notice.
 
 **Two things stage I0's acceptance did not establish, recorded so a green pair of gates is not
-over-read. The first has since been closed by a follow-on witness; the second is still open.**
+over-read. Both have since been closed by measurement, and each closure is recorded where the gap
+stood.**
 
 1. **Real `lfc` had never compiled a generated conditional. Closed by the witness milestone that
    followed, and the sequence is the point.** When stage I0's acceptance landed,
@@ -97,14 +98,22 @@ over-read. The first has since been closed by a follow-on witness; the second is
    `it ran and exited cleanly`. The lesson is not that the text turned out to be fine. It is that
    **nothing in a ten-layer proof, a green library and two green gates could tell us whether it was**,
    for as long as no witness carried the construct.
-2. **The new fixture's exporter-equivalence is unverified.** `branching.parser.json` was written by
+2. **The new fixture's exporter-equivalence was unverified. Closed at stage I's S-I6, by a measurement
+   this gap's own prediction got wrong.** `branching.parser.json` was written by
    hand, in the canonical `sort_keys` form, and it is structurally conformant: **measured**, every key
    set it uses at every level already occurs among the ten pre-existing positives, and **measured**, all
-   26 of its `line` fields point at the construct they name in `branching.rebeca`. What is *not*
-   measured is that `RebecaGeneralJsonExporter.java` would emit it byte-identically. A JDK 21 and Maven
-   are present on this host, so the obstacle is not the toolchain: `frontend/java-bridge/check-general.sh`
-   needs the FMCAD Rebeca-compiler artifact zip, which is not on this machine. One command settles it
-   the day that artifact is available.
+   26 of its `line` fields point at the construct they name in `branching.rebeca`. What was *not*
+   measured was that `RebecaGeneralJsonExporter.java` would emit it byte-identically. This gap then
+   predicted the obstacle precisely and **predicted it wrongly**: it said the FMCAD
+   Rebeca-compiler artifact zip was "not on this machine", and stage I's S-I6 census found that
+   `~/.m2/repository` has held `rebecalang/compiler` 2.25 and 2.28, the Spring family and ANTLR all
+   along — enough for the exporter to compile and run directly under `java -cp`, without the artifact
+   and without the java-bridge gate's maven scaffold. The run measured: **the real exporter emits
+   `branching.parser.json` byte-identically**, and it emits `locals.parser.json` byte-identically too,
+   confirming the hand-written prediction of the very next stage. The lesson is the one F89 part 2
+   already taught about pinned text, now aimed at a claim about the *machine*: a stated environmental
+   blocker is a measurement with a date on it, not a fact, and the cheapest way to keep it honest is to
+   re-run the search that produced it before repeating it.
 
 ### The transferable check
 
@@ -125,3 +134,97 @@ Three specifics worth carrying forward:
 3. **After changing a definition that a `Bool` guard reaches, check that some `rfl` or `decide` pin
    evaluates that guard.** If none does, add one in the same edit. The check costs one line and it is
    the only defence against F89 part 1, which no theorem and no type can see.
+
+---
+
+## F91: the guard that duplicated its own check, and the witness that found it
+
+**Grade: measured**, every sub-claim, each by a named run or a named census.
+
+Stage I added local variable declarations to the general fragment across six milestones, S-I1
+through S-I6: the constructor on both sides, the translation, both step rules and the forward
+transfer, elaborator and guard acceptance, the exporter widening with its fixture move, and two gate
+witnesses. The design held: no runtime environment was added, no store was extended, no
+correspondence conjunct was added, and `DTR.GeneralModel.wellFormed` kept its five clauses
+throughout. A local is a third kind of name in a store that was never segmented by kind, which is
+why the whole stage cost one constructor per side, one rule per side, one transfer lemma, and
+threading — not new state.
+
+That headline understates the stage, because the interesting events were all failures of
+instruments, each caught by a different one. They are recorded here as one finding because they
+share a shape: **the thing that found the defect was never the thing the defect lived in.**
+
+### The headline: `reactionWellFormed` duplicated `bodyWellFormed` without the threading
+
+The S-I6 bridge witness — a one-class model that declares a local, reads it, and assigns to it —
+was refused by the translation's own LF guard on its first gate run, with `LFC_ACCEPTED` stuck at 4.
+The cause was not the witness and not the exporter: `LF.reactionWellFormed` walked a reaction's body
+with `List.all` over `stmtWellFormed reaction.parameters`, forming the same conjunction
+`bodyWellFormed` forms — **but without the locals threading S-I5 had added to `bodyWellFormed`.** A
+local declared in a reaction body was therefore invisible to every statement after it, and the
+widened assignment check the S-I5 layer was written to admit refused the one model that used it.
+
+Three properties of this defect are the finding. First, it **stood through two reviews**: the S-I5
+implementation and the S-I5 landing both passed, because every other instrument evaluates either the
+elaborator or `stmtWellFormed` directly, and `reactionWellFormed`'s `List.all` path is reached only
+by `compileGeneralModel` running the guard over its own output. Second, the old docstring had
+already named the duplication and dismissed it — "left as its `List.all` because it is not part of
+this recursion and rewriting it would move a definition no clause of this change touches" — which is
+the exact shape of a comment that is true on the day it is written and load-bearing wrong the day
+someone changes what it shadows. Third, the repair was to **route through the traversal rather than
+patch the path**: `reactionWellFormed` now calls `bodyWellFormed`, removing the duplication, and both
+docstrings record the finding. **Measured after the repair:** `LFC_ACCEPTED 7`, the witness's
+`int entry = 1;` in the gate log, lfc accepting and running it.
+
+### The supporting failures, one per instrument
+
+- **The red-by-design obligation worked as designed.** S-I1 landed with
+  `exists_compileGeneralBody`'s `.localDecl` case unprovable while the translator refused — the
+  stage H situation verbatim — and the arm was written in its repaired shape so the build error
+  *named* the owed equation `compileGeneralStmt_localDecl`. S-I3 provided it and the tree went
+  green. No statement was weakened, no `sorry` was written, and the refusal period lasted exactly
+  one layer.
+- **The full build is the only census, three times over.** S-I3's plan named one downstream
+  candidate; the first green chain surfaced seven arms. S-I4a's module-target verification passed
+  while two modules downstream needed arms. S-I4b's full build found three watch-list sites the
+  grep census had only listed. Grep undercounts because proof bodies case on bare constructor
+  patterns (`| assign target value =>`), not on annotated scrutinees; module builds undercount
+  because everything downstream of an edited module is skipped when the edited module is red.
+- **The Python suite found three pre-existing defects no Lean instrument could see.** Run directly
+  (`python3 frontend/test_validate_general_v1.py` — unittest-based, so runnable where pytest is
+  not), it failed 2 of 15 on the untouched committed tree: `branching.rebeca` used `record`, a
+  Rebeca reserved word, as a message-server name, and sat in no provenance list; fixing those
+  surfaced a third, that the fixtures README never named it. All three were stage I0 debts from the
+  hand-written fixture, invisible to the Lean gate that happily accepted the document.
+- **Two self-caught bugs, both recorded in the code that trapped them.** The first
+  `locals.parser.json` had an off-by-one line drift its own line-checker caught before anything
+  consumed it. The first replacement mutation in the Python suite was silently a no-op because
+  `list.insert` returns `None` and an `and` chain short-circuits on it — a standalone reproduction
+  proved the validator right and the test wrong, and the trap is now a comment in the test.
+- **The maven cache closed F90's second gap by contradicting it.** F90 said the exporter could not
+  run on this machine because the FMCAD artifact zip was absent. The S-I6 census found
+  `~/.m2/repository` holding the rebecalang compiler jars, Spring and ANTLR all along; the exporter
+  compiles and runs under `java -cp`, and the run confirmed `branching.parser.json` and
+  `locals.parser.json` byte-identically. F90's closure note records the wrong prediction where it
+  stood.
+
+### The transferable check
+
+**When a predicate is defined as "the same conjunction as" another traversal, and the two are kept
+apart only by a comment that says the duplication is harmless, route one through the other at the
+first change that touches either.** The comment is a claim about a world in which neither
+definition changes; the first change to one of them converts the claim into a guard difference, and
+guard differences are found only by the input that exercises the differing path — which for a
+translation's output guard means a compiled model, i.e. a gate witness, i.e. the one instrument
+whose whole purpose is to be the input nothing else provides.
+
+Two specifics worth carrying forward:
+
+1. **Every stage that widens a guard should end with a witness that runs the widened path through
+   the whole pipeline**, not only through the layer that was edited. The S-I6 witness was scoped as
+   "put `int x = 1;` through lfc" and found a defect in the Lean guard instead — instruments find
+   defects where they are, not where the plan pointed.
+2. **A stated environmental blocker is a measurement with a date, not a fact.** Re-run the search
+   that produced it before repeating it in a finding; F90's one wrong sentence cost a stage of
+   deferred verification that was never actually blocked.
+

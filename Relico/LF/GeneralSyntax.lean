@@ -259,6 +259,17 @@ so a widened expression would be a construct nothing could print. Stage D remove
 that objection by teaching the printer operators in the same change, which is why
 the two halves land together and neither is dead code. `docs/STAGE_D_DESIGN.md` §3
 records the evidence that decided it, and §5.3 the shape.
+
+**As of stage I, `.parameterVar` no longer means only a parameter — here as on
+the source side.** It means **a name that is not a reactor state variable**,
+covering a reaction's formal parameters and the locals its body declares, which
+`LF.bodyWellFormed` threads into one list for exactly this reason: the compiled
+target cannot distinguish the two kinds on a read, because the emitted C++ binds
+both to a bare identifier in the reaction block, so it cannot distinguish them on
+an assignment target either. The ruling and its consequences are recorded in
+`docs/decisions/0047-local-declarations-in-the-fragment.md`, and the widened
+`.assign` check that follows from it is `LF.stmtWellFormed`'s own docstring's
+subject.
 -/
 inductive GeneralExpr where
   | intLiteral :
