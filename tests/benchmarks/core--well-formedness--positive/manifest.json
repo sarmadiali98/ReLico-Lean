@@ -5,7 +5,7 @@
     {
       "path": "source/result.json",
       "required": true,
-      "sha256": "4eb004b27a9787997decb4af921ded7da1ea78430fac81bde1c9d9683f34fb8d"
+      "sha256": "afe1d0e7d7d7f2906ddbd4f3120c699a9c9dfd4b089e344fd4cd4f87aa8ad8f3"
     },
     {
       "path": "rmc/verdict.json",
@@ -15,27 +15,27 @@
     {
       "path": "parser-json/model.json",
       "required": true,
-      "sha256": "c9dc1c25ced481c347393d4f6cba8030e81cde284d190c58f12586836b53e74e"
+      "sha256": "ff6c34aed1c16fce53ab39074db75b90ea1837dcaea9f93ab9210af6e441cf6a"
     },
     {
       "path": "decoded-dtr-ast/model.txt",
       "required": true,
-      "sha256": "5b910375e43f897d6be39dbd82e0d897d804fe6d0967f49ce23b81162a4bc6e3"
+      "sha256": "454502d0c0008f6cad5e218de51b2bf940f02dbd48f9c27910f804fa853c81df"
     },
     {
       "path": "formal-witness/result.json",
       "required": true,
-      "sha256": "aa9f284f272dc8ade7ed95a75ed245cb6f382c055daeb2d917f3b6829a4948c5"
+      "sha256": "8596d4b6440525a3df04b73aa46070659f3c5e965b5df43ecfd99b477edfb696"
     },
     {
       "path": "translated-lf-ast/program.txt",
       "required": true,
-      "sha256": "43c04cf789a26527c8464c12ad17905c9c7c52d106863670295e2f2f243ae9af"
+      "sha256": "d341f884a3e9773c116375a554f65d3bf2638ba28cbf97ca58f62546d898c155"
     },
     {
       "path": "lf-source/V0Controller.lf",
       "required": true,
-      "sha256": "a6ec64706860cad3090d21101df493f1e8d057a1a313f345c7d380806b985640"
+      "sha256": "1669f1cbc489c304411ae304dee638d5d87691a8b88cc82bdde188b107d5282f"
     },
     {
       "path": "lfc/result.json",
@@ -91,7 +91,7 @@
         "{repo}/tools/relico_bench_stage.py",
         "parser-json",
         "--family",
-        "multi-store-payload",
+        "v0",
         "--repo",
         "{repo}",
         "--source",
@@ -114,7 +114,7 @@
         "{repo}/tools/relico_bench_stage.py",
         "lean-export",
         "--family",
-        "multi-store-payload",
+        "v0",
         "--mode",
         "decoded-dtr-ast",
         "--repo",
@@ -152,7 +152,7 @@
         "{repo}/tools/relico_bench_stage.py",
         "lean-export",
         "--family",
-        "multi-store-payload",
+        "v0",
         "--mode",
         "translated-lf-ast",
         "--repo",
@@ -173,7 +173,7 @@
         "{repo}/tools/relico_bench_stage.py",
         "lean-export",
         "--family",
-        "multi-store-payload",
+        "v0",
         "--mode",
         "lf-source",
         "--repo",

@@ -5,7 +5,7 @@
     {
       "path": "source/result.json",
       "required": true,
-      "sha256": "30d388e53481e593d82d785c5e9a08414dd68f5a403176999068a3b7fcaa7734"
+      "sha256": "e9e5ca99a9185566c398489866bae9deedd6adc23919fbf42c4f79b8e896577f"
     },
     {
       "path": "rmc/verdict.json",
@@ -15,22 +15,22 @@
     {
       "path": "parser-json/model.json",
       "required": true,
-      "sha256": "548c4792935b8b37272ed05a30bbddd16b57bd99bc6707298771cadf59ea0e70"
+      "sha256": "05d2d01abe417b9d565c9e64ccc2916ec824a4caf70701b019cb257c3964e108"
     },
     {
       "path": "decoded-dtr-ast/model.txt",
       "required": true,
-      "sha256": "3cc4abed95f4c3495fede162d3156d235a709742d6fbe86baba6a435a50366f5"
+      "sha256": "b6bd78a99393b5985bf28fa86abf8853483d3611cf1cfeac0dee2033b7caba69"
     },
     {
       "path": "formal-witness/result.json",
       "required": true,
-      "sha256": "304c2c26046e1dcc61057456f1fe6b5b876feb989596314869b7f4545e780df2"
+      "sha256": "53ab4d952ddaef13a4bb118b55542bd072b5db6b80f8522c0ab14821628b5073"
     },
     {
       "path": "translated-lf-ast/program.txt",
       "required": true,
-      "sha256": "84ebdaea7ff3e6662a794fda2b5bb318b1e50dd21daccf182bbd20ab8808e70b"
+      "sha256": "d8acf7a66b303fab07e61cc5cb7a6756016f0390049a2d9ace7f999a4131aa93"
     },
     {
       "path": "lf-source/V0Controller.lf",

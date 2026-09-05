@@ -5,7 +5,7 @@
     {
       "path": "source/result.json",
       "required": true,
-      "sha256": "30d388e53481e593d82d785c5e9a08414dd68f5a403176999068a3b7fcaa7734"
+      "sha256": "20e49f2ef1f98d7357b3454471cdc342bee9f5063f63b3db35c4413750355823"
     },
     {
       "path": "rmc/verdict.json",
@@ -25,7 +25,7 @@
     {
       "path": "formal-witness/result.json",
       "required": true,
-      "sha256": "304c2c26046e1dcc61057456f1fe6b5b876feb989596314869b7f4545e780df2"
+      "sha256": "490a59d0d4d5cb5019e28b10bc0d724d961e7d4076a98cee1fea07076a478c6d"
     },
     {
       "path": "translated-lf-ast/program.txt",
