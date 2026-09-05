@@ -8,13 +8,63 @@ against benchmarks.tsv and obligations.tsv on every run.
 
 The registry currently contains:
 
-- 172 accepted Lean test modules
-- 2,129 mapped test obligations
-- 58 planned source benchmarks
-- 43 positive benchmarks
+- 183 accepted Lean test modules
+- 2,468 mapped test obligations
+- 68 planned source benchmarks
+- 53 positive benchmarks
 - 15 negative benchmarks
 - zero unresolved modules
 - zero unmapped obligations
+
+## The general family, and the obligation-extraction convention
+
+The general family's ten rows and 339 obligations were added after the freeze,
+from the eleven `Relico/Tests/General*.lean` modules that the frozen scan had
+never covered. `tools/relico_bench_registry.py --validate` enforces their counts
+with every other row's.
+
+The scanner that produced the original 2,129 rows was never committed, so its
+convention had to be recovered from the frozen rows and falsified against them
+before anything was appended. It reproduces 171 of the 172 frozen modules
+byte-identically on `obligation_id`, `line_number`, `kind`,
+`name_or_expression` and `classification`. The single residual is eight rows in
+`Relico/Tests/GlobalMultiStorePayloadActorSelectionCorrespondence.lean`, where
+the frozen data itself records `#print axioms` as
+`executable_or_computation_check` against `trust_or_declaration_check` on the
+other fifty-five such rows.
+
+Two properties of that convention are defects, reproduced deliberately so the
+columns keep one meaning across every row rather than two meanings with nothing
+marking the boundary:
+
+- **`line_number` is the 1-based line minus the run of blank lines directly above
+  it.** So a declaration with one blank line above it is recorded one line early,
+  and with two blank lines above it, two lines early.
+- **The declaration patterns match an identifier prefix, and comments are not
+  stripped.** `className :=` is counted as a `class` declaration, `exampleIsTau`
+  inside a theorem statement as an `example`, and a documentation line opening
+  with the word `theorem` as a `theorem`. Of the 339 general rows, 23 are
+  `class`-prefix artifacts and one is a documentation line; measured, and no real
+  `class` declaration exists anywhere under `Relico/Tests`, which makes all 23
+  `class` rows in the frozen half the same artifact.
+
+Repairing either would have to move all 2,468 rows in one pass, which is a
+separate task from adding a family.
+
+## Candidate source models
+
+`general-corpus-selection.tsv` records the measured construct profile of every
+candidate general-family source model, so that benchmark selection is derived
+from measurement instead of a hard-coded next benchmark. It keeps two
+populations apart because their verdicts have different standing: the 32 in-repo
+fixtures under `frontend/fixtures/general/`, whose directory *is* the gate's
+verdict, and the 49 upstream corpus models in `examples.zip`, which have never
+been through the frontend and therefore carry a static screen against the
+exclusion list in `docs/supported-fragment-general.md` rather than a verdict.
+The screen clears 28 of the 49 where the project's recorded I0 census put 31 of
+49 inside the fragment; the two are different instruments, the disagreement is
+left standing rather than tuned away, and it belongs to the wave that runs the
+real frontend over the corpus.
 
 Registry inclusion does not mean that a benchmark is implemented,
 executable, or passing.

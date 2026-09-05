@@ -13,12 +13,13 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_ROOT = REPOSITORY_ROOT / "tests" / "benchmarks" / "registry"
 BENCHMARK_ROOT = REPOSITORY_ROOT / "tests" / "benchmarks"
 
-EXPECTED_BENCHMARKS = 58
-EXPECTED_POSITIVE = 43
+EXPECTED_BENCHMARKS = 68
+EXPECTED_POSITIVE = 53
 EXPECTED_NEGATIVE = 15
-EXPECTED_OBLIGATIONS = 2129
+EXPECTED_OBLIGATIONS = 2468
 EXPECTED_SHARED_FORMAL = 2
 EXPECTED_LEGACY = 6
+EXPECTED_CORPUS_CANDIDATES = 81
 
 
 class RegistryError(RuntimeError):
@@ -41,6 +42,7 @@ def load_registry() -> dict[str, list[dict[str, str]]]:
         "obligations": read_tsv("obligations.tsv"),
         "shared": read_tsv("shared-formal-evidence.tsv"),
         "legacy": read_tsv("legacy-script-migration.tsv"),
+        "corpus": read_tsv("general-corpus-selection.tsv"),
     }
 
 
@@ -139,6 +141,8 @@ NARRATIVE_COUNTER_CHECKS = (
      r"^POSITIVE_BENCHMARK_COUNT=(\d+)$", "positive"),
     ("tests/benchmarks/registry/coverage-audit.txt",
      r"^NEGATIVE_BENCHMARK_COUNT=(\d+)$", "negative"),
+    ("tests/benchmarks/registry/coverage-audit.txt",
+     r"^CORPUS_CANDIDATE_COUNT=(\d+)$", "corpus"),
     ("tests/benchmarks/registry/final-b1-summary.txt",
      r"^INPUT_TEST_FILE_COUNT=(\d+)$", "modules"),
     ("tests/benchmarks/registry/final-b1-summary.txt",
@@ -162,6 +166,7 @@ def validate_narrative_counters(
         "benchmarks": len(benchmarks),
         "obligations": len(obligations),
         "modules": len({row["test_file"] for row in obligations}),
+        "corpus": len(registry["corpus"]),
         "positive": sum(
             row["polarity"] == "positive" for row in benchmarks
         ),
@@ -206,6 +211,127 @@ def validate_narrative_counters(
     return [
         f"NARRATIVE_COUNTERS_CHECKED={checked}",
         "NARRATIVE_COUNTERS_CONSISTENT=yes",
+    ]
+
+
+def validate_corpus_candidates(
+    registry: dict[str, list[dict[str, str]]],
+) -> list[str]:
+    """
+    Check general-corpus-selection.tsv, which records the measured construct
+    profile of every candidate general-family source model so that benchmark
+    selection is derived from measurement rather than from a hard-coded next
+    benchmark.
+
+    The file mixes two populations whose verdicts have different standing, and
+    the checks below keep that distinction enforceable: a 'gate-verdict' row is
+    an in-repo fixture whose directory is the gate's answer, and its path must
+    exist; a 'static-screen' row is an upstream corpus model that has never been
+    through the frontend, so its status is a screen against the documented
+    exclusion list and its path names an archive entry rather than a file.
+    """
+    corpus = registry["corpus"]
+    benchmarks = registry["benchmarks"]
+
+    require_columns(
+        corpus,
+        {
+            "model_id",
+            "origin",
+            "path",
+            "fragment_status",
+            "status_basis",
+            "construct_profile",
+            "blocking_constructs",
+            "candidate_capabilities",
+            "candidate_polarity",
+        },
+        "corpus candidate",
+    )
+
+    if len(corpus) != EXPECTED_CORPUS_CANDIDATES:
+        raise RegistryError(
+            f"corpus candidate count is {len(corpus)}, "
+            f"expected {EXPECTED_CORPUS_CANDIDATES}"
+        )
+
+    model_ids = [row["model_id"] for row in corpus]
+
+    if len(set(model_ids)) != len(model_ids):
+        raise RegistryError("duplicate corpus model identifiers exist")
+
+    known_capabilities = {
+        row["primary_capability"] for row in benchmarks
+    }
+
+    gate_verdicts = {
+        "accepted",
+        "refused-by-fragment",
+        "refused-upstream",
+    }
+
+    screen_verdicts = {"screen-clear", "screen-blocked"}
+
+    fixture_count = 0
+    upstream_count = 0
+
+    for row in corpus:
+        model_id = row["model_id"]
+
+        if row["candidate_polarity"] not in {"positive", "negative"}:
+            raise RegistryError(
+                f"{model_id}: invalid candidate polarity"
+            )
+
+        for capability in row["candidate_capabilities"].split(";"):
+            if capability not in known_capabilities:
+                raise RegistryError(
+                    f"{model_id}: candidate capability "
+                    f"{capability!r} is not a benchmark capability"
+                )
+
+        if row["status_basis"] == "gate-verdict":
+            fixture_count += 1
+
+            if row["fragment_status"] not in gate_verdicts:
+                raise RegistryError(
+                    f"{model_id}: gate verdict "
+                    f"{row['fragment_status']!r} is not a gate outcome"
+                )
+
+            if not (REPOSITORY_ROOT / row["path"]).is_file():
+                raise RegistryError(
+                    f"{model_id}: fixture path is absent: {row['path']}"
+                )
+
+        elif row["status_basis"] == "static-screen":
+            upstream_count += 1
+
+            if row["fragment_status"] not in screen_verdicts:
+                raise RegistryError(
+                    f"{model_id}: screen result "
+                    f"{row['fragment_status']!r} is not a screen outcome"
+                )
+
+            blocked = row["blocking_constructs"] != "none"
+
+            if blocked != (row["fragment_status"] == "screen-blocked"):
+                raise RegistryError(
+                    f"{model_id}: screen result disagrees with its own "
+                    "blocking constructs"
+                )
+
+        else:
+            raise RegistryError(
+                f"{model_id}: unknown status basis "
+                f"{row['status_basis']!r}"
+            )
+
+    return [
+        f"CORPUS_CANDIDATE_COUNT={len(corpus)}",
+        f"CORPUS_FIXTURE_COUNT={fixture_count}",
+        f"CORPUS_UPSTREAM_COUNT={upstream_count}",
+        "CORPUS_CANDIDATES_CONSISTENT=yes",
     ]
 
 
@@ -424,6 +550,7 @@ def validate(registry: dict[str, list[dict[str, str]]]) -> list[str]:
     )
 
     narrative = validate_narrative_counters(registry)
+    corpus = validate_corpus_candidates(registry)
 
     return [
         f"BENCHMARK_COUNT={len(benchmarks)}",
@@ -437,6 +564,7 @@ def validate(registry: dict[str, list[dict[str, str]]]) -> list[str]:
         f"SHARED_FORMAL_EVIDENCE_COUNT={len(shared)}",
         f"LEGACY_MIGRATION_COUNT={len(legacy)}",
         *narrative,
+        *corpus,
         "REGISTRY_VALID=yes",
     ]
 
