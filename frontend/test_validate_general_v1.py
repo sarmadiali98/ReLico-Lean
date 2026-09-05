@@ -42,16 +42,21 @@ ANCHORS = (
     "control-flow",
     "keep-alive",
     "constructor-arguments",
+    "branching",
 )
 
 # Recorded from a real exporter run and then reviewed, rather than predicted.
 # Kept as a named list because the provenance of an expected document is worth
-# knowing even after the distinction stops mattering: these four anchors are
+# knowing even after the distinction stops mattering: the anchors are
 # evidence that the exporter is right, and these six are not. Five of the six
 # were recorded by the first `--record` run; `send-sites` was recorded by the
 # later run that added it, which is why this comment says "a real run" rather
 # than "the first" — a provenance note that names one event goes stale the first
-# time a second event of the same kind happens.
+# time a second event of the same kind happens. `branching` is an anchor rather
+# than a recording by necessity, not choice: it was written by hand in stage I0
+# because no exporter run is possible on this machine (F90 records the gap), so
+# its expected document is a prediction the Lean layer confirmed, not evidence
+# about the exporter.
 RECORDED = (
     "expressions",
     "fan-in",
@@ -782,7 +787,7 @@ class PositiveFixturesAreAccountedFor(unittest.TestCase):
                 )
 
     def test_provenance_covers_exactly_the_positives(self) -> None:
-        # ANCHORS and RECORDED partition the positives. If a tenth model is
+        # ANCHORS and RECORDED partition the positives. If a model is
         # added and assigned to neither, its provenance is undocumented and the
         # anti-circularity argument in the README no longer describes the
         # corpus.

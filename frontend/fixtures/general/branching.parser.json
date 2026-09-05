@@ -141,7 +141,7 @@
                   ],
                   "kind": "send",
                   "line": 17,
-                  "messageServer": "record",
+                  "messageServer": "note",
                   "target": {
                     "kind": "knownRebec",
                     "name": "sink"
@@ -252,7 +252,7 @@
             }
           ],
           "line": 37,
-          "name": "record",
+          "name": "note",
           "parameters": [
             {
               "line": 37,

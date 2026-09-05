@@ -51,11 +51,21 @@ Four are, and they are the anchors that make the others trustworthy:
 written by hand, from the source models, before the exporter had ever run — so
 when the exporter agrees with them, that agreement is evidence.
 
+A fifth is hand-authored for a different reason and is listed with the anchors
+rather than the recordings because the distinction that matters is the same one:
+`branching`, added by stage I0, was written by hand because the machine it was
+written on has no exporter run available to it at all (`docs/STAGE_I_FINDINGS.md`
+F90 records the gap). Its document is a prediction the Lean layer confirmed; it
+is not yet evidence about the exporter, and becomes evidence the first time a
+real run agrees with it.
+
 Between them the anchors cover every statement kind (`assign`, `send`, `if`
 with and without `else`, `for` in both initializer forms, `declare`), a self
 send and a known-rebec send, an `after` delay, priorities in both positions,
 constructor parameters of both value types, boolean and integer instance
-arguments, and the deliberate line-number asymmetry described below.
+arguments, and the deliberate line-number asymmetry described below. `branching`
+contributes the nesting: conditionals two deep, a send inside each branch kind,
+on both selectors.
 
 The one node shape no anchor covers is `unary`. It is exercised, by
 `expressions`, but that is a recorded fixture rather than a predicted one, which

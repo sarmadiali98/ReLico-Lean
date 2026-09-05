@@ -14,7 +14,7 @@ reactiveclass Gauge(4) {
     msgsrv sample() {
         if (level > 2) {
             alarmed = true;
-            sink.record(level) after(1);
+            sink.note(level) after(1);
             if (level > 4) {
                 self.sample() after(3);
             } else {
@@ -34,7 +34,7 @@ reactiveclass Logger(6) {
     Logger() {
         entries = 0;
     }
-    msgsrv record(int value) {
+    msgsrv note(int value) {
         entries = entries + value;
     }
 }
