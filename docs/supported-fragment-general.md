@@ -53,9 +53,9 @@ typing judgement anywhere in this family: the upstream Timed Rebeca typechecker 
 expressions before a document is emitted, so typing is upstream's obligation, not a restriction this
 fragment declares.
 
-**Statements** (`DTR.GeneralStmt`), four constructors:
+**Statements** (`DTR.GeneralStmt`), five constructors:
 
-- `assign`, target state variable, expression;
+- `assign`, target state variable **or a live local** (stage I), expression;
 - `trace`, a literal tag, the G5 observability instrument (§7);
 - `send`, target (`self` or a declared known rebec), message-server name, payload expressions,
   delay;
@@ -63,6 +63,14 @@ fragment declares.
   stage I0. It is the one constructor that makes `DTR.GeneralStmt` a **nested** inductive, which is
   why several traversals over it are mutual statement-and-body pairs rather than single functions;
   F89 records what happens when one is not.
+- `localDecl`, name, declared type, initialiser expression, added and admitted by stage I. A local
+  is **read as `.parameterVar`** and **assigned through the widened `assign`** — both stage I
+  rulings, both mirroring what the emitted C++ does, where a local and a parameter are the same
+  thing in a reaction block. The initialiser is required by the constructor: the elaborator applies
+  the declared type's `initialValue` when the source omits one, exactly as it applies the zero
+  default for an absent `after`. Scoping is the elaborator's: a declaration is live for the rest of
+  its body, a branch-local dies with its branch, and shadowing any state variable, parameter or
+  live local is refused (`localShadowsDeclaredName`).
 
 **Delays** are `Delay`, a bare `Nat`, nonnegative by construction. Constantness (a literal, not an
 expression) is a frontend refusal (`nonConstantDelay`), not an AST property, because the frontend is
@@ -180,13 +188,18 @@ restriction anyway, because refusing a literal `.intLiteral 0` divisor leaves `x
 `x / (1 - 1)` (a `.binary` node) and `x / y` (**F67** part 4's undecidable residue) all accepted. The
 restriction sentence above would survive a guard verbatim, which is why the guard was rejected.
 
-**Refused at the frontend, owed to later stages.** Iteration and local declarations, each with its
-refusal reason already in the vocabulary. Conditionals stood in this list until stage I0 and no longer
-do: `if` is accepted end to end, from `elaborateStmt` through
-`DTR.GeneralModel.statementResolves`'s recursion into both branch bodies, and
-`frontend/fixtures/general/branching.parser.json` is the positive that pins it. What stage I0 did not
-change is the *reason* `control-flow.parser.json` is refused: it opens with two `for` loops, so its
-expectation is still `iterationNotSupported`.
+**Refused at the frontend, owed to later stages.** Iteration, with its refusal reason already in the
+vocabulary. Conditionals stood in this list until stage I0 and no longer do: `if` is accepted end to
+end, from `elaborateStmt` through `DTR.GeneralModel.statementResolves`'s recursion into both branch
+bodies, and `frontend/fixtures/general/branching.parser.json` is the positive that pins it. Local
+declarations stood in it until stage I and no longer do either: the elaborator's `"declare"` arm
+elaborates them, both DTR well-formedness clauses accept them, and
+`frontend/fixtures/general/locals.parser.json` is the positive that pins it. What stage I did not
+change is the *reason* `control-flow.parser.json` is refused — it opens with two `for` loops, so its
+expectation is still `iterationNotSupported` — and one layer outside this repository's Lean still
+refuses body locals: the Java exporter's R15 refusal, owed to widen in S-I6, which is also why
+`local-declaration.rebeca` in the reject corpus remains *correctly* refused, by that layer, for that
+reason.
 
 **Still excluded, no stage owner.** Arrays, inheritance, physical actions, environmental inputs,
 broadcast. None is refused by name (they simply have no constructor in the AST) so they are

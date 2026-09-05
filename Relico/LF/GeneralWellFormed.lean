@@ -252,10 +252,15 @@ ruling.** The name is unconstrained because the target side owns no uniqueness m
 scope — which names are live where — is the source elaborator's concern by the stage I
 decisions, not this predicate's. The declared type is unconstrained because the target's own
 two-constructor `LF.GeneralType` has no ill-formed inhabitants. The initialiser *is* checked,
-against the same parameter scope every other expression is. That the arm does not thread the
-declared name into `parameters` is deliberate and temporary: a later layer widens this walk so
-that an assignment to a live local passes, and that widening is where the name starts to
-matter. Until then, an `.assign` to a local name is refused here exactly as before.
+against the same parameter scope every other expression is. **The widening this arm promised
+has now landed**: `bodyWellFormed` below threads a declaration's name into the `parameters`
+list it passes to the tail, and the `.assign` arm above admits a target in that list, so an
+assignment to a live local passes. The consequence of sharing one list, forced by the approved
+`.parameterVar` ruling — the target cannot distinguish the two kinds on reads, so it cannot on
+targets either — is that a hand-built program assigning to a *formal parameter* also passes
+this predicate now. Unreachable from source: the elaborator refuses a parameter target, so no
+compiled program contains one, which is the same discipline `statementResolves` keeps on the
+DTR side when it delegates name questions to the elaborator.
 -/
 def stmtWellFormed
     (reactor : LF.GeneralReactor)
@@ -264,9 +269,10 @@ def stmtWellFormed
     Bool
 
   | .assign name value =>
-      reactor.stateVariables.any
+      (reactor.stateVariables.any
           (fun declaration =>
-            declaration.name == name) &&
+            declaration.name == name) ||
+          parameters.contains name) &&
         reactor.exprWellFormed
           parameters
           value
@@ -342,7 +348,14 @@ def bodyWellFormed
           statement &&
         bodyWellFormed
           reactor
-          parameters
+          (parameters ++
+            (match statement with
+
+             | .localDecl name _ _ =>
+                 [name]
+
+             | _ =>
+                 []))
           remaining
 
 end

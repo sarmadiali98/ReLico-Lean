@@ -66,6 +66,16 @@ RECORDED = (
     "two-instances",
 )
 
+# Hand-authored like an anchor but for a construct the exporter does not yet
+# emit: `locals` was written in stage I against the exporter's *document shape*
+# (`declare` as a for counter) while the exporter's own body-declaration
+# refusal is still in place. It is a prediction of what the widened exporter
+# will emit, pending the S-I6 host run; until then its evidence value is the
+# Lean and Python layers, not the exporter.
+HAND_AUTHORED_PENDING_EXPORTER = (
+    "locals",
+)
+
 # The two negative corpora, and the layer each one holds responsible. A fixture
 # in the wrong directory is a test that passes for the wrong reason, so the
 # split is checked here as well as at the gate.
@@ -321,16 +331,54 @@ MUTATIONS = (
         "unknown statement kind 'while'",
     ),
     (
-        "a local declaration outside a for header",
+        "a read of a local after its branch ends",
         "two-classes",
-        lambda d: tick_body(d).append(
-            {
-                "kind": "declare", "name": "temporary", "type": "int",
-                "value": {"kind": "intLiteral", "value": 0, "line": 13},
-                "line": 13,
-            }
+        # One lambda, because `list.insert` returns `None` and an `and` chain
+        # short-circuits on it — the first draft of this mutation silently
+        # applied only its first edit and the document was accepted for no
+        # reason the reader could see.
+        lambda d: (
+            tick_body(d).insert(
+                0,
+                {
+                    "kind": "declare", "name": "temporary", "type": "int",
+                    "value": {"kind": "intLiteral", "value": 0, "line": 13},
+                    "line": 13,
+                }
+            ),
+            tick_body(d).insert(
+                1,
+                {
+                    "kind": "if",
+                    "condition": {
+                        "kind": "boolLiteral", "value": True, "line": 14
+                    },
+                    "then": [
+                        {
+                            "kind": "declare", "name": "branchLocal",
+                            "type": "int",
+                            "value": {
+                                "kind": "intLiteral", "value": 1, "line": 15
+                            },
+                            "line": 15,
+                        }
+                    ],
+                    "else": [],
+                    "line": 14,
+                }
+            ),
+            tick_body(d).append(
+                {
+                    "kind": "assign", "target": "sent",
+                    "value": {
+                        "kind": "variable", "name": "branchLocal",
+                        "line": 16
+                    },
+                    "line": 16,
+                }
+            ),
         ),
-        "a declare outside a for initializer (R15, D7)",
+        "a read of undeclared name branchLocal",
     ),
     (
         "assignment to a known rebec",
@@ -787,16 +835,21 @@ class PositiveFixturesAreAccountedFor(unittest.TestCase):
                 )
 
     def test_provenance_covers_exactly_the_positives(self) -> None:
-        # ANCHORS and RECORDED partition the positives. If a model is
-        # added and assigned to neither, its provenance is undocumented and the
-        # anti-circularity argument in the README no longer describes the
-        # corpus.
-        declared = set(ANCHORS) | set(RECORDED)
+        # ANCHORS, RECORDED and HAND_AUTHORED_PENDING_EXPORTER partition the
+        # positives. If a model is added and assigned to none of them, its
+        # provenance is undocumented and the anti-circularity argument in the
+        # README no longer describes the corpus.
+        declared = (
+            set(ANCHORS)
+            | set(RECORDED)
+            | set(HAND_AUTHORED_PENDING_EXPORTER)
+        )
 
         self.assertEqual(
             len(declared),
-            len(ANCHORS) + len(RECORDED),
-            "a fixture is listed as both an anchor and a recording",
+            len(ANCHORS) + len(RECORDED)
+            + len(HAND_AUTHORED_PENDING_EXPORTER),
+            "a fixture is listed in two provenance lists",
         )
 
         present = {model.stem for model in FIXTURES.glob("*.rebeca")}
@@ -814,7 +867,11 @@ class PositiveFixturesAreAccountedFor(unittest.TestCase):
 
         text = readme.read_text(encoding="utf-8")
 
-        for name in sorted(set(ANCHORS) | set(RECORDED)):
+        for name in sorted(
+            set(ANCHORS)
+            | set(RECORDED)
+            | set(HAND_AUTHORED_PENDING_EXPORTER)
+        ):
             with self.subTest(fixture=name):
                 self.assertIn(
                     name,

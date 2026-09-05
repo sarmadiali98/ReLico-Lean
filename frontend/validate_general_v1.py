@@ -466,14 +466,22 @@ def walk_statements(
 
         return
 
+    # D7 for bodies. A local declared inside a body leaves scope with the
+    # body, so the depth is recorded on entry and restored on exit — the same
+    # discipline the `for` rule below has always applied to its counter,
+    # lifted to every body now that stage I admits declarations in them.
+    depth = len(context.locals)
+
     for index, statement in enumerate(statements):
         walk_statement(
             statement,
             context,
             report,
             inside + "[" + str(index) + "]",
-            declare_allowed=False,
+            declare_allowed=True,
         )
+
+    del context.locals[depth:]
 
 
 def walk_statement(
@@ -502,9 +510,10 @@ def walk_statement(
         return
 
     if kind == "declare" and not declare_allowed:
-        # R15 and D7. A declaration is admitted in the initializer slot of a
-        # for header and nowhere else.
-        report.fail(where, "a declare outside a for initializer (R15, D7)")
+        # R15 and D7. What remains refused is a declaration in a `for`
+        # header's update slot — the one call site that still passes
+        # `declare_allowed=False`, since an update is an expression slot.
+        report.fail(where, "a declare in a for update (R15, D7)")
 
     if not report.keys(statement, STATEMENT_KEYS[kind], where):
         return
@@ -549,6 +558,9 @@ def walk_statement(
             statement["condition"], context, report, suffix + ".condition"
         )
 
+        # Branch bodies are separate bodies: each gets its own depth snapshot
+        # inside walk_statements, so a local declared in one branch is gone
+        # before the other branch or the enclosing body is walked.
         walk_statements(statement["then"], context, report, suffix + ".then")
         walk_statements(statement["else"], context, report, suffix + ".else")
 

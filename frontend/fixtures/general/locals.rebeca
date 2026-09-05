@@ -1,0 +1,43 @@
+reactiveclass Tally(3) {
+    knownrebecs {
+        Display screen;
+    }
+    statevars {
+        int total;
+        boolean fresh;
+    }
+    Tally() {
+        total = 0;
+        fresh = true;
+        self.refresh() after(1);
+    }
+    msgsrv refresh() {
+        int step = total + 1;
+        if (step > 2) {
+            int peak = step * 10;
+            total = peak;
+            screen.show(peak) after(1);
+        } else {
+            total = step;
+            fresh = true;
+        }
+        fresh = false;
+    }
+}
+
+reactiveclass Display(4) {
+    statevars {
+        int seen;
+    }
+    Display() {
+        seen = 0;
+    }
+    msgsrv show(int value) {
+        seen = value;
+    }
+}
+
+main {
+    Tally tally0(display0):();
+    Display display0():();
+}

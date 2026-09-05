@@ -3358,25 +3358,56 @@ theorem exists_messageServer_of_mem_selfSendsFromIndex
 
       | localDecl name declaredType initialiser =>
 
-          -- Stage I's refusal arm makes this case unreachable for a resolving body: the
-          -- hypothesis asserts the head resolves, and `statementResolves` answers `false`
-          -- for a local declaration. Closed from `hResolves` alone, the way a refusal-era
-          -- case always is.
-          have hHeadResolves :
-              model.statementResolves
-                  reactiveClass
-                  (.localDecl
-                    name
-                    declaredType
-                    initialiser) =
-                true :=
-            hResolves
-              _
-              List.mem_cons_self
+          -- Stage I's acceptance arm: the head resolves by `true`, and a local
+          -- declaration contributes no self-send, so the site membership reduces to the
+          -- tail's by `selfSendsFromIndex_localDecl` and the arm is the `assign` arm's
+          -- shape. The contradiction that stood here during the refusal period — closed
+          -- from `hResolves` because `statementResolves` answered `false` — is exactly
+          -- what F90's alarm pattern predicts: a refusal-era arm is scaffolding for the
+          -- layer that lifts the refusal.
+          have hTailSites :
+              ∀ selfSend ∈
+                  Translation.selfSendsFromIndex
+                    bodyKey
+                    levelPath
+                    (index + 1)
+                    remaining,
+                selfSend ∈
+                  Translation.selfSendsFromIndex
+                    bodyKey
+                    levelPath
+                    index
+                    (
+                      .localDecl
+                        name
+                        declaredType
+                        initialiser ::
+                      remaining
+                    ) := by
+            intro selfSend hMember
 
-          simp [
-            DTR.GeneralModel.statementResolves
-          ] at hHeadResolves
+            rw [
+              Translation.selfSendsFromIndex_localDecl
+            ]
+
+            exact hMember
+
+          obtain ⟨server, hServer, hServerName⟩ :=
+            exists_messageServer_of_mem_selfSendsFromIndex
+              model
+              reactiveClass
+              bodyKey
+              remaining
+              levelPath
+              (index + 1)
+              hTailResolves
+              selfSend
+              (hTailSites selfSend hMember)
+
+          exact
+            ⟨server,
+             hServer,
+             hServerName⟩
 
 /--
 Every statement of every body of every declared class resolves, in a well-formed model.

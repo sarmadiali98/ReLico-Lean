@@ -115,8 +115,11 @@ def statementTargetDeclared
       reactiveClass.bodyTargetsDeclared thenBody &&
         reactiveClass.bodyTargetsDeclared elseBody
 
+  -- Stage I's acceptance. A local declaration holds no send, so this arm is
+  -- `assign`'s and `trace`'s: `true`. The refusal period this arm replaced is
+  -- recorded in `Relico/DTR/GeneralSyntax.lean`'s `localDecl` paragraph.
   | .localDecl _ _ _ =>
-      false
+      true
 
 /--
 Every statement of one body, at any nesting depth, has a declared send target.
@@ -349,8 +352,10 @@ def statementResolves
       model.bodyResolves reactiveClass thenBody &&
         model.bodyResolves reactiveClass elseBody
 
+  -- Stage I's acceptance. A local declaration holds no send, so this arm is
+  -- `assign`'s and `trace`'s: `true`.
   | .localDecl _ _ _ =>
-      false
+      true
 
 /--
 Every send of one body, at any nesting depth, reaches a declared message server.

@@ -255,6 +255,20 @@ def runGeneralFrontendTests
       2
       2
 
+    -- The first positive with local variable declarations, added by stage I when
+    -- the elaborator stopped refusing `declare`. One declaration at the top level
+    -- of `msgsrv refresh`, one inside its then-branch, a read of the top-level
+    -- local inside both the condition and the else-branch, an assignment to the
+    -- branch local inside its own branch, and an assignment to a state variable
+    -- after the conditional — so the scope-threading walk is exercised in both
+    -- directions: a name live after its branch (the top-level local) and a name
+    -- dead after its branch (the branch local, whose assignment stays inside).
+    expectAccept
+      "LOCALS"
+      (fixtureDirectory ++ "/locals.parser.json")
+      2
+      2
+
     -- A document the exporter emits and this layer refuses. The only negative
     -- of that kind, and the reason the expectations here cannot be derived from
     -- which directory a fixture sits in.

@@ -108,6 +108,17 @@ structure GeneralScope where
   parameters :
     List String
 
+  /-- The local variables declared by the enclosing body, in declaration order.
+
+  Stage I. A live local's name is here and nowhere else: the state-variable and
+  parameter lists are fixed when a body starts, while this one grows as
+  declarations are elaborated and shrinks when a branch body ends. The list is
+  ordered, though nothing depends on the order — every question asked of it is
+  membership, and the elaborator refuses a duplicate before it can matter.
+  -/
+  locals :
+    List String
+
 /--
 Resolve a `variable` node against a scope.
 
@@ -117,15 +128,27 @@ and it is the reason a scope has to exist at all.
 
 State variables are consulted first. That order is deliberately unobservable: a
 parameter sharing a name with a state variable is rejected as
-`parameterShadowsStateVariable` before any body is elaborated, so no name is ever
-in both lists and the two orders agree on every input this function is reached
-with. Stating that here is what keeps the choice from quietly becoming a shadowing
-rule that nothing else in the development knows about.
+`parameterShadowsStateVariable` before any body is elaborated, and a local
+sharing a name with either is rejected by the `"declare"` arm's own shadowing
+check before the next statement is elaborated, so no name is ever in two of the
+three lists and any two orders agree on every input this function is reached
+with. Stating that here is what keeps the choice from quietly becoming a
+shadowing rule that nothing else in the development knows about.
 
-A name in neither list is `undeclaredVariable`. That is also the reason a read of
-the implicit `sender` receives, and a read of `now`, and a read of a for-loop
-counter — none of which this fragment admits, and all of which the exporter
-reports the same way, since its own scope holds exactly the declared names too.
+A name in no list is `undeclaredVariable`. That is also the reason a read of
+the implicit `sender` receives, and a read of `now` — none of which this
+fragment admits, and all of which the exporter reports the same way, since its
+own scope holds exactly the declared names too. A read of a for-loop counter
+received it as well before stage I; with locals admitted, a counter declared by
+a future `for` support would be a local like any other, read through
+`.parameterVar`.
+
+**A local reads as `.parameterVar`**, which is one of stage I's approved
+rulings. It is the accurate model of the emitted target rather than an
+overload: `renderGeneralParameterRead` in `Relico/LF/GeneralCppPrinter.lean`
+already emits a block-scoped C++ binding under the source name, so in the
+generated reaction body a local and a parameter are the same thing — a
+declaration and a read of a bare identifier.
 -/
 def resolveVariable
     (scope : GeneralScope)
@@ -136,6 +159,8 @@ def resolveVariable
   if scope.stateVariables.contains name then
     .ok (.stateVar { value := name })
   else if scope.parameters.contains name then
+    .ok (.parameterVar { value := name })
+  else if scope.locals.contains name then
     .ok (.parameterVar { value := name })
   else
     .error (generalDiagnostic .undeclaredVariable name context line)
@@ -549,14 +574,17 @@ An absent `else` elaborates to the empty body rather than being refused. That is
 decision the elaborator already makes for an absent `after`, and `LF.stmtWellFormed` accepts an empty
 branch, so the empty case is represented rather than avoided.
 
-The assignment-target check is the one thing here that no other layer performs,
-and it is a divergence from the exporter rather than a restatement of it. The
-exporter admits any target its scope calls a value, and its scope includes formal
-parameters, so a message server that writes to its own parameter exports
-successfully. `DTR.GeneralActorState.valuation` is keyed by state-variable names,
-so such a write has nowhere to land, and no `wellFormed` clause constrains an
-assignment target either. Accepting it would yield a statement whose effect the
-semantics silently discards, so it is rejected here.
+The assignment-target check is the one thing here that no other layer performs.
+**Stage I ended its divergence from the exporter.** Until locals were admitted,
+this layer accepted only state-variable targets while the exporter's scope
+called a value anything in `locals ∪ stateVariables` — so a message server
+writing to its own parameter exported successfully and was refused here, the
+one disagreement between the layers. With the check widened to exactly the
+exporter's `isValue` — state variables or a **live local**, parameters still
+refused on both sides — the two layers agree on every document, and a write to
+a formal parameter remains refused here for the reason it always was:
+`DTR.GeneralActorState.valuation` binds parameters when a message is taken, so
+an assignment to one before that binding has nowhere to land that survives.
 -/
 def elaborateStmt
     (scope : GeneralScope)
@@ -578,7 +606,9 @@ def elaborateStmt
           let targetName ←
             narrowAssignTargetName targetPayload context raw.line
 
-          if scope.stateVariables.contains targetName then
+          if
+            scope.stateVariables.contains targetName ||
+              scope.locals.contains targetName then
             do
               let valueExpr ←
                 elaborateExpr scope context valueRaw
@@ -644,9 +674,32 @@ def elaborateStmt
       .error (generalDiagnostic .iterationNotSupported "for" context raw.line)
 
   | "declare" =>
-      .error
-        (generalDiagnostic
-          .localDeclarationNotSupported (raw.name.getD "") context raw.line)
+      match raw.name, raw.type, raw.value with
+
+      | none, _, _ =>
+          .error (generalDiagnostic .missingField "name" context raw.line)
+
+      | _, none, _ =>
+          .error (generalDiagnostic .missingField "type" context raw.line)
+
+      | _, _, none =>
+          .error (generalDiagnostic .missingField "value" context raw.line)
+
+      | some name, some declaredType, some valueRaw => do
+          if
+            scope.stateVariables.contains name ||
+              scope.parameters.contains name ||
+              scope.locals.contains name then
+            .error
+              (generalDiagnostic .localShadowsDeclaredName name context raw.line)
+          else
+            let declaredType ←
+              elaborateDeclaredType declaredType context raw.line
+
+            let valueExpr ←
+              elaborateExpr scope context valueRaw
+
+            pure (.localDecl { value := name } declaredType valueExpr)
 
   | unsupported =>
       .error (generalDiagnostic .unsupportedStatementKind unsupported context raw.line)
@@ -664,6 +717,18 @@ descending into a conditional's branches: this function is now one half of a `mu
 `List.mapM` would hide the recursive call inside a lambda, where the equation compiler cannot see it.
 That is the same shape F89 records on the Lean side of the translation, and the repair is the same
 one: an explicit `match` on the list.
+
+**Stage I makes the walk scope-threading.** A declaration elaborated at one
+position extends the scope for every statement after it in the same body, so the
+recursion's second argument is no longer the scope the body started with: after
+a `declare` head, the tail is elaborated under `{ scope with locals :=
+scope.locals ++ [name] }`. The extension is *not* threaded out — this function
+returns a body, not a scope — which is exactly the branch-scope rule: a name
+declared inside a `then` or `else` body dies with that body, because the
+conditional's parent elaboration continues with its own unextended scope. The
+rule costs nothing here and needs no mechanism, because `elaborateStmt`'s `if`
+arm already passes `scope` into `elaborateBody` for each branch and discards
+what comes back.
 -/
 def elaborateBody
     (scope : GeneralScope)
@@ -678,8 +743,20 @@ def elaborateBody
       let statement ←
         elaborateStmt scope context raw
 
+      let extendedScope :=
+        match statement with
+
+        | .localDecl name _ _ =>
+            {
+              scope with
+                locals := scope.locals ++ [name.value]
+            }
+
+        | _ =>
+            scope
+
       let remaining ←
-        elaborateBody scope context rest
+        elaborateBody extendedScope context rest
 
       pure (statement :: remaining)
 
@@ -832,7 +909,8 @@ def elaborateMessageServer
               elaborateBody
                 {
                   stateVariables := stateVariableNames,
-                  parameters := parameterNames
+                  parameters := parameterNames,
+                  locals := []
                 }
                 context
                 raw.body
@@ -879,7 +957,8 @@ def elaborateConstructor
             elaborateBody
               {
                 stateVariables := stateVariableNames,
-                parameters := parameterNames
+                parameters := parameterNames,
+                locals := []
               }
               context
               raw.body

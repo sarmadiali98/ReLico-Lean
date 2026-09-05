@@ -1,0 +1,285 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 10,
+            "target": "total",
+            "value": {
+              "kind": "intLiteral",
+              "line": 10,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 11,
+            "target": "fresh",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 11,
+              "value": true
+            }
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 1
+            },
+            "arguments": [],
+            "kind": "send",
+            "line": 12,
+            "messageServer": "refresh",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Tally"
+          }
+        ],
+        "line": 9,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Display",
+          "line": 3,
+          "name": "screen"
+        }
+      ],
+      "line": 1,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "declare",
+              "line": 15,
+              "name": "step",
+              "type": "int",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 15,
+                  "name": "total"
+                },
+                "line": 15,
+                "operator": "+",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 15,
+                  "value": 1
+                }
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 16,
+                  "name": "step"
+                },
+                "line": 16,
+                "operator": ">",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 16,
+                  "value": 2
+                }
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 21,
+                  "target": "total",
+                  "value": {
+                    "kind": "variable",
+                    "line": 21,
+                    "name": "step"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 22,
+                  "target": "fresh",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 22,
+                    "value": true
+                  }
+                }
+              ],
+              "kind": "if",
+              "line": 16,
+              "then": [
+                {
+                  "kind": "declare",
+                  "line": 17,
+                  "name": "peak",
+                  "type": "int",
+                  "value": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 17,
+                      "name": "step"
+                    },
+                    "line": 17,
+                    "operator": "*",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 17,
+                      "value": 10
+                    }
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 18,
+                  "target": "total",
+                  "value": {
+                    "kind": "variable",
+                    "line": 18,
+                    "name": "peak"
+                  }
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 19,
+                      "name": "peak"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 19,
+                  "messageServer": "show",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "screen"
+                  },
+                  "targetClassName": "Display"
+                }
+              ]
+            },
+            {
+              "kind": "assign",
+              "line": 24,
+              "target": "fresh",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 24,
+                "value": false
+              }
+            }
+          ],
+          "line": 14,
+          "name": "refresh",
+          "parameters": [],
+          "priority": null
+        }
+      ],
+      "name": "Tally",
+      "queueBound": 3,
+      "stateVariables": [
+        {
+          "line": 6,
+          "name": "total",
+          "type": "int"
+        },
+        {
+          "line": 7,
+          "name": "fresh",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 33,
+            "target": "seen",
+            "value": {
+              "kind": "intLiteral",
+              "line": 33,
+              "value": 0
+            }
+          }
+        ],
+        "line": 32,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 28,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 36,
+              "target": "seen",
+              "value": {
+                "kind": "variable",
+                "line": 36,
+                "name": "value"
+              }
+            }
+          ],
+          "line": 35,
+          "name": "show",
+          "parameters": [
+            {
+              "line": 35,
+              "name": "value",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Display",
+      "queueBound": 4,
+      "stateVariables": [
+        {
+          "line": 30,
+          "name": "seen",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Display",
+          "instance": "display0",
+          "knownRebec": "screen"
+        }
+      ],
+      "className": "Tally",
+      "line": 41,
+      "name": "tally0",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Display",
+      "line": 42,
+      "name": "display0",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

@@ -1,7 +1,7 @@
 # `general-v1` frontend fixtures
 
 These models are the acceptance surface of the general family's two frontend
-layers. Between them the eleven positives exercise every production
+layers. Between them the twelve positives exercise every production
 `frontend/java-bridge/RebecaGeneralJsonExporter.java` admits, and the thirty-four
 negatives pin one rejection each — twenty against the exporter and the Rebeca
 compiler upstream of it, fourteen against the Lean decoder.
@@ -58,6 +58,15 @@ written on has no exporter run available to it at all (`docs/STAGE_I_FINDINGS.md
 F90 records the gap). Its document is a prediction the Lean layer confirmed; it
 is not yet evidence about the exporter, and becomes evidence the first time a
 real run agrees with it.
+
+A twelfth model, `locals`, added by stage I, is hand-authored under a third
+provenance: the exporter's own body-declaration refusal is still in place (S-I6
+widens it), so there is no exporter output to match even in principle yet. Its
+document is written against the shape the exporter already emits for a `for`
+counter — the `declare` node — and is a prediction of the widened exporter. Its
+evidence today is the Python validator, which accepts it, and the Lean layer,
+which elaborates it; the anti-circularity argument does not cover it and says
+so by listing it separately in `test_validate_general_v1.py`.
 
 Between them the anchors cover every statement kind (`assign`, `send`, `if`
 with and without `else`, `for` in both initializer forms, `declare`), a self
@@ -306,7 +315,7 @@ takes those same committed documents as given and checks what Lean makes of them
 Neither re-does the other's work, and the documents in this directory are the
 contract between them.
 
-Note that the glob on the first line matches only the eleven positives. The fourteen
+Note that the glob on the first line matches only the twelve positives. The fourteen
 documents in `lean-reject/` are deliberately invalid against `general-v1` — one of
 them is not even JSON — so validating them would fail by design. They are named
 `invalid-*.json` rather than `*.parser.json` partly for that reason.

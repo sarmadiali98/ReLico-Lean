@@ -152,8 +152,29 @@ inductive GeneralDiagnosticReason where
   /-- A `for`. Read faithfully by the schema, admitted by no stage before H. -/
   | iterationNotSupported
 
-  /-- A `declare`. Emitted by the exporter only as a `for` counter. -/
+  /--
+  A `declare`. Admitted by stage I as a local variable declaration; **unreachable
+  for every document the exporter emits**, because the exporter emits a `declare`
+  node only as a `for` counter and refuses a body declaration of its own
+  (`RebecaGeneralJsonExporter.java`'s R15 refusal), and a `for` is refused here
+  with `iterationNotSupported` before its counter can be reached. Retained rather
+  than deleted for the same reason `branchingNotSupported` above was: a future
+  document shape — most plausibly a `for` counter reaching this layer when
+  iteration support lands — needs the reason to already exist, and a deleted
+  constructor takes its render text with it.
+  -/
   | localDeclarationNotSupported
+
+  /--
+  A `declare` whose name is already in scope, as a state variable, a formal
+  parameter, or a live local of the same body.
+
+  Stage I. The refusal is what keeps the three scope lists disjoint, which is
+  what `resolveVariable`'s order-independence argument above leans on, and it is
+  the Lean-side mirror of the exporter's own three shadowing checks on a loop
+  counter: reserved name, state variable, known rebec, duplicate.
+  -/
+  | localShadowsDeclaredName
 
   /-- An `assign` whose `target` is not a JSON string. -/
   | expectedAssignTargetName
@@ -282,6 +303,9 @@ def message :
 
   | localDeclarationNotSupported =>
       "a local variable declaration, which this stage does not admit"
+
+  | localShadowsDeclaredName =>
+      "a local variable declaration of a name already in scope"
 
   | expectedAssignTargetName =>
       "an assignment whose target is not a name"

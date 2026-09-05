@@ -12,24 +12,22 @@ set_option autoImplicit false
 `LF.GeneralStmt.localDecl` landed in S-I2, the target half of stage I's local-declaration support,
 and this module is the instrument that pins what the milestones so far actually established. The
 design is deliberately split across steps: the DTR constructor `DTR.GeneralStmt.localDecl` exists
-since S-I1 and is refused by every guard; the LF constructor exists as of S-I2; and as of S-I3 the
-translator compiles the source constructor into it, so the LF form *is* producible — from a
-hand-built source model, because no well-formed one can contain a declaration yet. The guards'
-refusal is the load-bearing property this module pins, now from the one direction that still
-holds it.
+since S-I1; the LF constructor since S-I2; the translator compiles the source constructor into it
+since S-I3; both sides step it since S-I4; and as of S-I5 the elaborator elaborates a `"declare"`
+node into it and every guard accepts it. **The construct is inside the accepted fragment end to
+end**, and `frontend/fixtures/general/locals.parser.json` is the positive that exercises the
+elaboration through the gate.
 
 **What the stage so far did not do, and this module says so rather than implying it.** No runtime
-support: an actor whose head statement is an `LF.GeneralStmt.localDecl` has no step rule, so
-nothing steps it, and no pin below claims any transition. No store or environment change: the
-declaration is a statement, not a binding form the valuation knows about. No expression
-constructor: a local *read* is a `.parameterVar` by the stage I rulings, and no pin below involves
-reading a local back, which is a later layer's concern. No guard widening:
-`stmtWellFormed`'s `.assign` arm still demands a declared **state variable**, and the pin below
-proves an assignment to a local name is still refused. The remaining refusals are pinned on the
-DTR side, executable against `statementResolves` and `statementTargetDeclared` directly. This
-module still imports no `Translation.*`: not because the translation module is red — S-I3 closed
-that — but because the translation's own behaviour is the next layer's pin, and this module's
-subject is the boundary, not the compilation.
+scoping: an actor whose head statement is a declaration binds the initialiser's value and moves on;
+there is no read-back of a *stale* local after its branch ends, because no well-elaborated document
+can contain one — the elaborator's scope discard forbids the source text and no other layer needs to
+re-check it. No store or environment change: the declaration is a statement, not a binding form the
+valuation knows about. No expression constructor: a local *read* is a `.parameterVar` by the stage I
+rulings. No assignment widening beyond the ruling: `stmtWellFormed`'s `.assign` arm admits a target
+in the reactor's state variables **or the threaded local list** — the widening S-I2's docstring
+promised — and test 10 below still refuses an assignment to a local-only name at the top level,
+where no declaration precedes it.
 
 Every pin is `rfl` or `decide`, because the whole point is reducibility: these evaluate the
 constructor through `decEqGeneralStmt`, the guard, the port census and the printer, and a
@@ -328,12 +326,9 @@ example :
     LF.CppPrinter.generalEffectNamesFrom
   ]
 
-/-! ## Pin 6: the DTR side still refuses -/
+/-! ## Pin 6: the DTR side accepts -/
 
-/- Test 12: the S-I1 refusal arms, pinned executably. `statementResolves` and
-   `statementTargetDeclared` answer `false` for a local declaration, so no well-formed source
-   model contains one and the accepted fragment is unchanged. Nothing else in the development
-   measures these two arms; this is their instrument. -/
+/-- The empty model the acceptance pins below evaluate against. -/
 def localDeclSourceModel :
     DTR.GeneralModel where
 
@@ -343,6 +338,10 @@ def localDeclSourceModel :
   instances :=
     []
 
+/- Test 12: the S-I5 acceptance, pinned executably. `statementResolves` and
+   `statementTargetDeclared` answer `true` for a local declaration, so a well-formed source model
+   may contain one. These two arms were the S-I1 refusal period's only executable instrument; they
+   now pin its end. -/
 example :
     DTR.GeneralModel.statementResolves
         localDeclSourceModel
@@ -372,7 +371,7 @@ example :
           localDeclVarName
           .int
           (DTR.GeneralExpr.intLiteral 1)) =
-    false := by
+    true := by
   rfl
 
 example :
@@ -403,7 +402,116 @@ example :
           localDeclVarName
           .int
           (DTR.GeneralExpr.intLiteral 1)) =
-    false := by
+    true := by
+  rfl
+
+/- Test 12b: a two-class model whose message server declares a local, reads it in a conditional's
+   condition, and assigns to a state variable inside the branch — the `locals` fixture's shape in
+   miniature. `wellFormed` evaluates to `true`, which makes this the executable `wellFormed`
+   evaluator for the stage I recursion over a model that actually contains the construct. -/
+def localDeclAcceptingModel :
+    DTR.GeneralModel where
+
+  classes :=
+    [
+      {
+        name :=
+          ⟨"Tally"⟩
+
+        knownRebecs :=
+          [
+            {
+              name :=
+                ⟨"screen"⟩
+
+              className :=
+                ⟨"Display"⟩
+            }
+          ]
+
+        stateVariables :=
+          [
+            {
+              name :=
+                ⟨"total"⟩
+
+              declaredType :=
+                .int
+            }
+          ]
+
+        constructor :=
+          {
+            parameters :=
+              []
+
+            body :=
+              []
+          }
+
+        messageServers :=
+          [
+            {
+              name :=
+                ⟨"refresh"⟩
+
+              parameters :=
+                []
+
+              body :=
+                [
+                  DTR.GeneralStmt.localDecl
+                    (VarName.mk "step")
+                    .int
+                    (DTR.GeneralExpr.intLiteral 1),
+                  DTR.GeneralStmt.ifThenElse
+                    (DTR.GeneralExpr.binary
+                      .gt
+                      (DTR.GeneralExpr.parameterVar
+                        (VarName.mk "step"))
+                      (DTR.GeneralExpr.intLiteral
+                        2))
+                    [
+                      DTR.GeneralStmt.assign
+                        (VarName.mk "total")
+                        (DTR.GeneralExpr.parameterVar
+                          (VarName.mk "step"))
+                    ]
+                    []
+                ]
+            }
+          ]
+      },
+      {
+        name :=
+          ⟨"Display"⟩
+
+        knownRebecs :=
+          []
+
+        stateVariables :=
+          []
+
+        constructor :=
+          {
+            parameters :=
+              []
+
+            body :=
+              []
+          }
+
+        messageServers :=
+          []
+      }
+    ]
+
+  instances :=
+    []
+
+example :
+    localDeclAcceptingModel.wellFormed =
+      true := by
   rfl
 
 end Tests
