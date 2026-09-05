@@ -1,0 +1,18 @@
+// Benchmark: general--local-declaration--positive
+// Exercises a message-server body local declaration with an
+// initialiser, read as a parameter and combined with a state
+// variable. The class declares no constructor, so the elaborator
+// applies the declared type's initialValue to the state variable.
+reactiveclass Counter(2) {
+    statevars {
+        int total;
+    }
+    msgsrv step() {
+        int temporary = 1;
+        total = total + temporary;
+    }
+}
+
+main {
+    Counter counter0():();
+}

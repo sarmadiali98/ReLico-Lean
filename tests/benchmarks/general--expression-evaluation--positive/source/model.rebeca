@@ -1,0 +1,42 @@
+// Benchmark: general--expression-evaluation--positive
+// Exercises the general fragment's expression surface: five
+// arithmetic operators, unary negation, six comparisons and three
+// boolean operators, over state variables of both admitted types.
+// Runtime evidence is not required by this benchmark's row.
+reactiveclass Calculator(4) {
+    statevars {
+        int accumulator;
+        boolean flag;
+    }
+    Calculator() {
+        accumulator = 0;
+        flag = false;
+    }
+    msgsrv arithmetic(int left, int right) {
+        accumulator = left + right;
+        accumulator = left - right;
+        accumulator = left * right;
+        accumulator = left / right;
+        accumulator = left % right;
+        accumulator = -left;
+        accumulator = left + right * 2 - 1;
+    }
+    msgsrv comparisons(int left, int right) {
+        flag = left == right;
+        flag = left != right;
+        flag = left < right;
+        flag = left <= right;
+        flag = left > right;
+        flag = left >= right;
+    }
+    msgsrv logic(boolean first, boolean second) {
+        flag = first && second;
+        flag = first || second;
+        flag = !first;
+        flag = !(first && second) || true;
+    }
+}
+
+main {
+    Calculator calculator0():();
+}

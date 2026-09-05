@@ -1,0 +1,187 @@
+{
+  "benchmark_id": "general--local-declaration--positive",
+  "description": "General-family benchmark for a message-server body local: the stage I construct, through source, RMC, the general parser bridge, the Lean decoder, translation, LF source generation and LF/C++ compilation.",
+  "expected_artifacts": [
+    {
+      "path": "source/result.json",
+      "required": true,
+      "sha256": "b537ce16412353aa580d0012cd6f079569d3b3021ff833dfee93115dc73b7c59"
+    },
+    {
+      "path": "rmc/verdict.json",
+      "required": true,
+      "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
+    },
+    {
+      "path": "parser-json/model.json",
+      "required": true,
+      "sha256": "6c15a5c91389ec58b5211cd31174eb93ca67713d3720af8bbdccf5f3a1636bdc"
+    },
+    {
+      "path": "decoded-dtr-ast/model.txt",
+      "required": true,
+      "sha256": "82154602b96842175fee699b30686a058d5b9e1bedef60e0b052d1ee890f0a60"
+    },
+    {
+      "path": "translated-lf-ast/program.txt",
+      "required": true,
+      "sha256": "f525d60c90e6fc71e378d58aa2185d33a995fc3f9dd6507cc6c7a885a186cead"
+    },
+    {
+      "path": "lf-source/V0Controller.lf",
+      "required": true,
+      "sha256": "9ada03f625f978320c822cb118c716a1adcce2b69668086d67a6928d64d70eae"
+    },
+    {
+      "path": "lfc/result.json",
+      "required": true,
+      "sha256": "2ee3d75e82d1daa3311d9c5f4f50fd35fb0ca8ce2ee5f542ce2d79451adcc059"
+    }
+  ],
+  "expected_terminal_stage": "lfc",
+  "polarity": "positive",
+  "schema_version": 1,
+  "source_files": [
+    "source/model.rebeca"
+  ],
+  "stages": [
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "source",
+        "--benchmark-id",
+        "general--local-declaration--positive",
+        "--source",
+        "{source}",
+        "--output",
+        "{actual}/source/result.json"
+      ],
+      "name": "source"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc/verdict.json"
+      ],
+      "name": "rmc",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "parser-json",
+        "--family",
+        "general",
+        "--repo",
+        "{repo}",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--artifact-zip",
+        "/Users/ali/Desktop/LFStructuringNonDeterminism/ReLico-fmcad-2026-artifact-v1.zip",
+        "--maven",
+        "/opt/homebrew/Cellar/maven/3.9.16/bin/mvn",
+        "--output",
+        "{actual}/parser-json/model.json"
+      ],
+      "name": "parser-json",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lean-export",
+        "--family",
+        "general",
+        "--mode",
+        "decoded-dtr-ast",
+        "--repo",
+        "{repo}",
+        "--lake",
+        "/Users/ali/.elan/bin/lake",
+        "--input",
+        "{actual}/parser-json/model.json",
+        "--output",
+        "{actual}/decoded-dtr-ast/model.txt"
+      ],
+      "name": "decoded-dtr-ast",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lean-export",
+        "--family",
+        "general",
+        "--mode",
+        "translated-lf-ast",
+        "--repo",
+        "{repo}",
+        "--lake",
+        "/Users/ali/.elan/bin/lake",
+        "--input",
+        "{actual}/parser-json/model.json",
+        "--output",
+        "{actual}/translated-lf-ast/program.txt"
+      ],
+      "name": "translated-lf-ast",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lean-export",
+        "--family",
+        "general",
+        "--mode",
+        "lf-source",
+        "--repo",
+        "{repo}",
+        "--lake",
+        "/Users/ali/.elan/bin/lake",
+        "--input",
+        "{actual}/parser-json/model.json",
+        "--output",
+        "{actual}/lf-source/V0Controller.lf"
+      ],
+      "name": "lf-source",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lfc",
+        "--lf-source",
+        "{actual}/lf-source/V0Controller.lf",
+        "--work-directory",
+        "{actual}/work/lfc",
+        "--lfc",
+        "/Users/ali/.local/share/lingua-franca/cli/bin/lfc",
+        "--output",
+        "{actual}/lfc/result.json"
+      ],
+      "name": "lfc",
+      "timeout_seconds": 1200
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+{ classes := [{ name := { value := "Calculator" },
+                knownRebecs := [],
+                stateVariables := [{ name := { value := "accumulator" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "flag" }, declaredType := Relico.DTR.GeneralType.boolean }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "accumulator" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "flag" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false)] },
+                messageServers := [{ name := { value := "arithmetic" },
+                                     parameters := [{ name := { value := "left" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "right" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "accumulator" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.add)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "left" })
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "right" })),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "accumulator" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.sub)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "left" })
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "right" })),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "accumulator" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.mul)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "left" })
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "right" })),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "accumulator" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.div)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "left" })
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "right" })),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "accumulator" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.mod)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "left" })
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "right" })),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "accumulator" }
+                                                (Relico.DTR.GeneralExpr.unary
+                                                  (Relico.DTR.GeneralUnaryOp.negate)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "left" })),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "accumulator" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.sub)
+                                                  (Relico.DTR.GeneralExpr.binary
+                                                    (Relico.DTR.GeneralBinaryOp.add)
+                                                    (Relico.DTR.GeneralExpr.parameterVar { value := "left" })
+                                                    (Relico.DTR.GeneralExpr.binary
+                                                      (Relico.DTR.GeneralBinaryOp.mul)
+                                                      (Relico.DTR.GeneralExpr.parameterVar { value := "right" })
+                                                      (Relico.DTR.GeneralExpr.intLiteral 2)))
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1))],
+                                     priority := none },
+                                   { name := { value := "comparisons" },
+                                     parameters := [{ name := { value := "left" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "right" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "flag" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "left" })
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "right" })),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "flag" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.ne)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "left" })
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "right" })),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "flag" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.lt)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "left" })
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "right" })),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "flag" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.le)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "left" })
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "right" })),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "flag" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.gt)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "left" })
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "right" })),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "flag" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.ge)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "left" })
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "right" }))],
+                                     priority := none },
+                                   { name := { value := "logic" },
+                                     parameters := [{ name := { value := "first" },
+                                                      declaredType := Relico.DTR.GeneralType.boolean },
+                                                    { name := { value := "second" },
+                                                      declaredType := Relico.DTR.GeneralType.boolean }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "flag" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "first" })
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "second" })),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "flag" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.logicalOr)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "first" })
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "second" })),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "flag" }
+                                                (Relico.DTR.GeneralExpr.unary
+                                                  (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "first" })),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "flag" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.logicalOr)
+                                                  (Relico.DTR.GeneralExpr.unary
+                                                    (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                    (Relico.DTR.GeneralExpr.binary
+                                                      (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                      (Relico.DTR.GeneralExpr.parameterVar { value := "first" })
+                                                      (Relico.DTR.GeneralExpr.parameterVar { value := "second" })))
+                                                  (Relico.DTR.GeneralExpr.boolLiteral true))],
+                                     priority := none }] }],
+  instances := [{ name := { value := "calculator0" },
+                  className := { value := "Calculator" },
+                  bindings := [],
+                  arguments := [],
+                  priority := none }] }

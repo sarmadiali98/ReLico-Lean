@@ -1,0 +1,484 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 12,
+            "target": "accumulator",
+            "value": {
+              "kind": "intLiteral",
+              "line": 12,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 13,
+            "target": "flag",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 13,
+              "value": false
+            }
+          }
+        ],
+        "line": 11,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 6,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 16,
+              "target": "accumulator",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 16,
+                  "name": "left"
+                },
+                "line": 16,
+                "operator": "+",
+                "right": {
+                  "kind": "variable",
+                  "line": 16,
+                  "name": "right"
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 17,
+              "target": "accumulator",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 17,
+                  "name": "left"
+                },
+                "line": 17,
+                "operator": "-",
+                "right": {
+                  "kind": "variable",
+                  "line": 17,
+                  "name": "right"
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 18,
+              "target": "accumulator",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 18,
+                  "name": "left"
+                },
+                "line": 18,
+                "operator": "*",
+                "right": {
+                  "kind": "variable",
+                  "line": 18,
+                  "name": "right"
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 19,
+              "target": "accumulator",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 19,
+                  "name": "left"
+                },
+                "line": 19,
+                "operator": "/",
+                "right": {
+                  "kind": "variable",
+                  "line": 19,
+                  "name": "right"
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 20,
+              "target": "accumulator",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 20,
+                  "name": "left"
+                },
+                "line": 20,
+                "operator": "%",
+                "right": {
+                  "kind": "variable",
+                  "line": 20,
+                  "name": "right"
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 21,
+              "target": "accumulator",
+              "value": {
+                "kind": "unary",
+                "line": 21,
+                "operand": {
+                  "kind": "variable",
+                  "line": 21,
+                  "name": "left"
+                },
+                "operator": "-"
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 22,
+              "target": "accumulator",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "variable",
+                    "line": 22,
+                    "name": "left"
+                  },
+                  "line": 22,
+                  "operator": "+",
+                  "right": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 22,
+                      "name": "right"
+                    },
+                    "line": 22,
+                    "operator": "*",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 22,
+                      "value": 2
+                    }
+                  }
+                },
+                "line": 22,
+                "operator": "-",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 22,
+                  "value": 1
+                }
+              }
+            }
+          ],
+          "line": 15,
+          "name": "arithmetic",
+          "parameters": [
+            {
+              "line": 15,
+              "name": "left",
+              "type": "int"
+            },
+            {
+              "line": 15,
+              "name": "right",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 25,
+              "target": "flag",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 25,
+                  "name": "left"
+                },
+                "line": 25,
+                "operator": "==",
+                "right": {
+                  "kind": "variable",
+                  "line": 25,
+                  "name": "right"
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 26,
+              "target": "flag",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 26,
+                  "name": "left"
+                },
+                "line": 26,
+                "operator": "!=",
+                "right": {
+                  "kind": "variable",
+                  "line": 26,
+                  "name": "right"
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 27,
+              "target": "flag",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 27,
+                  "name": "left"
+                },
+                "line": 27,
+                "operator": "<",
+                "right": {
+                  "kind": "variable",
+                  "line": 27,
+                  "name": "right"
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 28,
+              "target": "flag",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 28,
+                  "name": "left"
+                },
+                "line": 28,
+                "operator": "<=",
+                "right": {
+                  "kind": "variable",
+                  "line": 28,
+                  "name": "right"
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 29,
+              "target": "flag",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 29,
+                  "name": "left"
+                },
+                "line": 29,
+                "operator": ">",
+                "right": {
+                  "kind": "variable",
+                  "line": 29,
+                  "name": "right"
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 30,
+              "target": "flag",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 30,
+                  "name": "left"
+                },
+                "line": 30,
+                "operator": ">=",
+                "right": {
+                  "kind": "variable",
+                  "line": 30,
+                  "name": "right"
+                }
+              }
+            }
+          ],
+          "line": 24,
+          "name": "comparisons",
+          "parameters": [
+            {
+              "line": 24,
+              "name": "left",
+              "type": "int"
+            },
+            {
+              "line": 24,
+              "name": "right",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 33,
+              "target": "flag",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 33,
+                  "name": "first"
+                },
+                "line": 33,
+                "operator": "&&",
+                "right": {
+                  "kind": "variable",
+                  "line": 33,
+                  "name": "second"
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 34,
+              "target": "flag",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 34,
+                  "name": "first"
+                },
+                "line": 34,
+                "operator": "||",
+                "right": {
+                  "kind": "variable",
+                  "line": 34,
+                  "name": "second"
+                }
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 35,
+              "target": "flag",
+              "value": {
+                "kind": "unary",
+                "line": 35,
+                "operand": {
+                  "kind": "variable",
+                  "line": 35,
+                  "name": "first"
+                },
+                "operator": "!"
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 36,
+              "target": "flag",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "unary",
+                  "line": 36,
+                  "operand": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 36,
+                      "name": "first"
+                    },
+                    "line": 36,
+                    "operator": "&&",
+                    "right": {
+                      "kind": "variable",
+                      "line": 36,
+                      "name": "second"
+                    }
+                  },
+                  "operator": "!"
+                },
+                "line": 36,
+                "operator": "||",
+                "right": {
+                  "kind": "boolLiteral",
+                  "line": 36,
+                  "value": true
+                }
+              }
+            }
+          ],
+          "line": 32,
+          "name": "logic",
+          "parameters": [
+            {
+              "line": 32,
+              "name": "first",
+              "type": "boolean"
+            },
+            {
+              "line": 32,
+              "name": "second",
+              "type": "boolean"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Calculator",
+      "queueBound": 4,
+      "stateVariables": [
+        {
+          "line": 8,
+          "name": "accumulator",
+          "type": "int"
+        },
+        {
+          "line": 9,
+          "name": "flag",
+          "type": "boolean"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Calculator",
+      "line": 41,
+      "name": "calculator0",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

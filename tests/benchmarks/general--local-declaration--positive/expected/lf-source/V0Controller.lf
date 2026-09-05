@@ -1,0 +1,15 @@
+target Cpp
+
+reactor Counter {
+  state total: int = 0
+  logical action step_action: void
+
+  reaction(step_action) {=
+    int temporary = 1;
+    total = (total + temporary);
+  =}
+}
+
+main reactor {
+  counter0 = new Counter()
+}

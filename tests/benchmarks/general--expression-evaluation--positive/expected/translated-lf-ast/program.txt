@@ -1,0 +1,158 @@
+{ reactors := [{ name := { value := "Calculator" },
+                 parameters := [],
+                 inputPorts := [],
+                 outputPorts := [],
+                 stateVariables := [{ name := { value := "accumulator" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "flag" }, declaredType := Relico.LF.GeneralType.boolean }],
+                 logicalActions := [{ name := { value := "arithmetic_action" },
+                                      parameters := [{ name := { value := "left" },
+                                                       declaredType := Relico.LF.GeneralType.int },
+                                                     { name := { value := "right" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "comparisons_action" },
+                                      parameters := [{ name := { value := "left" },
+                                                       declaredType := Relico.LF.GeneralType.int },
+                                                     { name := { value := "right" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "logic_action" },
+                                      parameters := [{ name := { value := "first" },
+                                                       declaredType := Relico.LF.GeneralType.boolean },
+                                                     { name := { value := "second" },
+                                                       declaredType := Relico.LF.GeneralType.boolean }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "accumulator" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "flag" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "arithmetic_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "arithmetic_action" },
+                                        parameters := [{ value := "left" }, { value := "right" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "accumulator" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "left" })
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "right" })),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "accumulator" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.sub)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "left" })
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "right" })),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "accumulator" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.mul)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "left" })
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "right" })),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "accumulator" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.div)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "left" })
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "right" })),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "accumulator" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.mod)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "left" })
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "right" })),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "accumulator" }
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.negate)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "left" })),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "accumulator" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.sub)
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.add)
+                                                       (Relico.LF.GeneralExpr.parameterVar { value := "left" })
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.mul)
+                                                         (Relico.LF.GeneralExpr.parameterVar { value := "right" })
+                                                         (Relico.LF.GeneralExpr.intLiteral 2)))
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))],
+                                        priority := none },
+                                      { name := { value := "comparisons_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "comparisons_action" },
+                                        parameters := [{ value := "left" }, { value := "right" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "flag" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "left" })
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "right" })),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "flag" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.ne)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "left" })
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "right" })),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "flag" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.lt)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "left" })
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "right" })),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "flag" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.le)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "left" })
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "right" })),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "flag" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "left" })
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "right" })),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "flag" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.ge)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "left" })
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "right" }))],
+                                        priority := none },
+                                      { name := { value := "logic_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "logic_action" },
+                                        parameters := [{ value := "first" }, { value := "second" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "flag" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "first" })
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "second" })),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "flag" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalOr)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "first" })
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "second" })),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "flag" }
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "first" })),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "flag" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalOr)
+                                                     (Relico.LF.GeneralExpr.unary
+                                                       (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                         (Relico.LF.GeneralExpr.parameterVar { value := "first" })
+                                                         (Relico.LF.GeneralExpr.parameterVar { value := "second" })))
+                                                     (Relico.LF.GeneralExpr.boolLiteral true))],
+                                        priority := none }] }],
+  instances := [{ name := { value := "calculator0" }, reactorName := { value := "Calculator" }, arguments := [] }],
+  connections := [] }

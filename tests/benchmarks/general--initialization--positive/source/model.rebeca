@@ -1,0 +1,13 @@
+// Benchmark: general--initialization--positive
+// The minimum general model: one reactive class with an empty
+// statevars block, no known rebecs and no message servers, with a
+// single instance. It isolates instantiation and startup from
+// every other construct in the fragment.
+reactiveclass Inert(1) {
+    statevars {
+    }
+}
+
+main {
+    Inert inert0():();
+}

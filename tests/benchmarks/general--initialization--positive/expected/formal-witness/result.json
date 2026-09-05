@@ -1,0 +1,29 @@
+{
+  "benchmark_id": "general--initialization--positive",
+  "elaborated_modules": [
+    "Relico/Tests/GeneralInitialization.lean"
+  ],
+  "obligation_count": 18,
+  "obligation_ids": [
+    "GeneralInitialization:0001",
+    "GeneralInitialization:0002",
+    "GeneralInitialization:0003",
+    "GeneralInitialization:0004",
+    "GeneralInitialization:0005",
+    "GeneralInitialization:0006",
+    "GeneralInitialization:0007",
+    "GeneralInitialization:0008",
+    "GeneralInitialization:0009",
+    "GeneralInitialization:0010",
+    "GeneralInitialization:0011",
+    "GeneralInitialization:0012",
+    "GeneralInitialization:0013",
+    "GeneralInitialization:0014",
+    "GeneralInitialization:0015",
+    "GeneralInitialization:0016",
+    "GeneralInitialization:0017",
+    "GeneralInitialization:0018"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

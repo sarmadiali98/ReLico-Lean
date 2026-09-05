@@ -1,0 +1,22 @@
+{ classes := [{ name := { value := "Counter" },
+                knownRebecs := [],
+                stateVariables := [{ name := { value := "total" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [], body := [] },
+                messageServers := [{ name := { value := "step" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.localDecl
+                                                { value := "temporary" }
+                                                (Relico.DTR.GeneralType.int)
+                                                (Relico.DTR.GeneralExpr.intLiteral 1),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "total" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.add)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "total" })
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "temporary" }))],
+                                     priority := none }] }],
+  instances := [{ name := { value := "counter0" },
+                  className := { value := "Counter" },
+                  bindings := [],
+                  arguments := [],
+                  priority := none }] }

@@ -1,0 +1,75 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [],
+        "line": null,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 6,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "declare",
+              "line": 11,
+              "name": "temporary",
+              "type": "int",
+              "value": {
+                "kind": "intLiteral",
+                "line": 11,
+                "value": 1
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 12,
+              "target": "total",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 12,
+                  "name": "total"
+                },
+                "line": 12,
+                "operator": "+",
+                "right": {
+                  "kind": "variable",
+                  "line": 12,
+                  "name": "temporary"
+                }
+              }
+            }
+          ],
+          "line": 10,
+          "name": "step",
+          "parameters": [],
+          "priority": null
+        }
+      ],
+      "name": "Counter",
+      "queueBound": 2,
+      "stateVariables": [
+        {
+          "line": 8,
+          "name": "total",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Counter",
+      "line": 17,
+      "name": "counter0",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

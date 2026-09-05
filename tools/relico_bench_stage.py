@@ -200,6 +200,8 @@ def parser_json_stage(options: argparse.Namespace) -> None:
     artifact_family = getattr(options, "family", "v0")
     if artifact_family == "multi-store-payload":
         script = repo / "frontend/java-bridge/run-multistore-payload-from-zip.sh"
+    elif artifact_family == "general":
+        script = repo / "frontend/java-bridge/run-general-from-zip.sh"
     elif artifact_family != "v0":
         raise RuntimeError(
             f"unsupported parser-json family: {artifact_family!r}"
@@ -875,6 +877,7 @@ def build_parser() -> argparse.ArgumentParser:
         choices=[
             "v0",
             "multi-store-payload",
+            "general",
         ],
         default="v0",
     )

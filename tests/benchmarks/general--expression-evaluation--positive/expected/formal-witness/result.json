@@ -1,0 +1,32 @@
+{
+  "benchmark_id": "general--expression-evaluation--positive",
+  "elaborated_modules": [
+    "Relico/Tests/GeneralEvaluation.lean"
+  ],
+  "obligation_count": 21,
+  "obligation_ids": [
+    "GeneralEvaluation:0001",
+    "GeneralEvaluation:0002",
+    "GeneralEvaluation:0003",
+    "GeneralEvaluation:0004",
+    "GeneralEvaluation:0005",
+    "GeneralEvaluation:0006",
+    "GeneralEvaluation:0007",
+    "GeneralEvaluation:0008",
+    "GeneralEvaluation:0009",
+    "GeneralEvaluation:0010",
+    "GeneralEvaluation:0011",
+    "GeneralEvaluation:0012",
+    "GeneralEvaluation:0013",
+    "GeneralEvaluation:0014",
+    "GeneralEvaluation:0015",
+    "GeneralEvaluation:0016",
+    "GeneralEvaluation:0017",
+    "GeneralEvaluation:0018",
+    "GeneralEvaluation:0019",
+    "GeneralEvaluation:0020",
+    "GeneralEvaluation:0021"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

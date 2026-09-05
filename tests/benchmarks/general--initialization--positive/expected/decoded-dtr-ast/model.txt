@@ -1,0 +1,10 @@
+{ classes := [{ name := { value := "Inert" },
+                knownRebecs := [],
+                stateVariables := [],
+                constructor := { parameters := [], body := [] },
+                messageServers := [] }],
+  instances := [{ name := { value := "inert0" },
+                  className := { value := "Inert" },
+                  bindings := [],
+                  arguments := [],
+                  priority := none }] }

@@ -1,0 +1,9 @@
+target Cpp
+
+reactor Inert {
+
+}
+
+main reactor {
+  inert0 = new Inert()
+}

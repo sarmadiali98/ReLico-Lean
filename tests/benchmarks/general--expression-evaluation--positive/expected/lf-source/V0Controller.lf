@@ -1,0 +1,59 @@
+target Cpp
+
+public preamble {=
+  struct Calculator_arithmetic_action_Args { int left; int right; };
+  struct Calculator_comparisons_action_Args { int left; int right; };
+  struct Calculator_logic_action_Args { bool first; bool second; };
+=}
+
+reactor Calculator {
+  state accumulator: int = 0
+  state flag: bool = false
+  logical action arithmetic_action: Calculator_arithmetic_action_Args
+  logical action comparisons_action: Calculator_comparisons_action_Args
+  logical action logic_action: Calculator_logic_action_Args
+
+  reaction(startup) {=
+    accumulator = 0;
+    flag = false;
+  =}
+
+  reaction(arithmetic_action) {=
+    auto arithmetic_action_payload = *arithmetic_action.get();
+    auto left = arithmetic_action_payload.left;
+    auto right = arithmetic_action_payload.right;
+    accumulator = (left + right);
+    accumulator = (left - right);
+    accumulator = (left * right);
+    accumulator = (left / right);
+    accumulator = (left % right);
+    accumulator = (-left);
+    accumulator = ((left + (right * 2)) - 1);
+  =}
+
+  reaction(comparisons_action) {=
+    auto comparisons_action_payload = *comparisons_action.get();
+    auto left = comparisons_action_payload.left;
+    auto right = comparisons_action_payload.right;
+    flag = (left == right);
+    flag = (left != right);
+    flag = (left < right);
+    flag = (left <= right);
+    flag = (left > right);
+    flag = (left >= right);
+  =}
+
+  reaction(logic_action) {=
+    auto logic_action_payload = *logic_action.get();
+    auto first = logic_action_payload.first;
+    auto second = logic_action_payload.second;
+    flag = (first && second);
+    flag = (first || second);
+    flag = (!first);
+    flag = ((!(first && second)) || true);
+  =}
+}
+
+main reactor {
+  calculator0 = new Calculator()
+}
