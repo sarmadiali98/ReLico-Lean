@@ -269,6 +269,18 @@ def runGeneralFrontendTests
       2
       2
 
+    -- The fixture that was this corpus's local-declaration rejection, moved to
+    -- the positives by stage I's S-I6 when the exporter stopped refusing body
+    -- declarations. Its document was **recorded from the real exporter** on
+    -- this machine — the widening run itself — so unlike `locals` and
+    -- `branching` it is exporter evidence from birth, not a prediction
+    -- confirmed.
+    expectAccept
+      "LOCAL_DECLARATION"
+      (fixtureDirectory ++ "/local-declaration.parser.json")
+      1
+      1
+
     -- A document the exporter emits and this layer refuses. The only negative
     -- of that kind, and the reason the expectations here cannot be derived from
     -- which directory a fixture sits in.

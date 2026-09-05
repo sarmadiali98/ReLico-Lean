@@ -119,16 +119,17 @@ PRINTER_TEST_MAIN="$REPO/frontend/lean-bridge/GeneralLfPrinterTestMain.lean"
 # anonymous -- `main reactor {`, with no name of its own. So each name below also
 # names the binary that gets run.
 #
-# Six names, and each program gets its own work directory. Sharing one would let a
+# Seven names, and each program gets its own work directory. Sharing one would let a
 # binary left by an earlier run satisfy a later one even if its own compile step had
 # quietly produced nothing. (This comment said "four" while five names stood below it;
-# stage I0 added the sixth and corrected the count.)
+# stage I0 added the sixth and corrected the count; stage I's S-I6 added the seventh.)
 BASE_PROGRAM_NAME="GeneralPrinterProgram"
 WIDENED_PROGRAM_NAME="GeneralTranslatedProgram"
 ROUTED_PROGRAM_NAME="GeneralRoutedProgram"
 REPEATED_PROGRAM_NAME="GeneralRepeatedSelfSendProgram"
 PRIORITY_WITNESS_PROGRAM_NAME="GeneralPriorityWitnessProgram"
 CONDITIONAL_PROGRAM_NAME="GeneralConditionalWitnessProgram"
+LOCAL_DECL_PROGRAM_NAME="GeneralLocalDeclWitnessProgram"
 
 WORK="${TMPDIR:-/tmp}/relico_general_lf_target"
 
@@ -295,6 +296,18 @@ check_program \
   emit-conditional \
   "$CONDITIONAL_PROGRAM_NAME" \
   "the translated program from the conditional-witness Rebeca model"
+
+# Fifth, the same single-actor shape once more. Added by stage I's S-I6, and the
+# only program in this gate whose emitted text contains a C++ local declaration.
+# Every other one is declaration-free, which is why a green gate said nothing
+# about `int entry = 1;` inside a reaction body until this line existed — the
+# LF-side analogue of the I0 conditional gap F90 records. The witness also reads
+# the local and assigns to it, so the bare-name read and the widened assignment
+# go through lfc too. An lfc complaint here can only be about the local.
+check_program \
+  emit-local-decl \
+  "$LOCAL_DECL_PROGRAM_NAME" \
+  "the translated program from the local-declaration-witness Rebeca model"
 
 # Last, because it is the most expensive failure to read: two reactors, three
 # instances and three connections, so an lfc complaint here has the most places to

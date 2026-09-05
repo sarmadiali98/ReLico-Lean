@@ -48,32 +48,22 @@ ANCHORS = (
 # Recorded from a real exporter run and then reviewed, rather than predicted.
 # Kept as a named list because the provenance of an expected document is worth
 # knowing even after the distinction stops mattering: the anchors are
-# evidence that the exporter is right, and these six are not. Five of the six
-# were recorded by the first `--record` run; `send-sites` was recorded by the
-# later run that added it, which is why this comment says "a real run" rather
-# than "the first" — a provenance note that names one event goes stale the first
-# time a second event of the same kind happens. `branching` is an anchor rather
-# than a recording by necessity, not choice: it was written by hand in stage I0
-# because no exporter run is possible on this machine (F90 records the gap), so
-# its expected document is a prediction the Lean layer confirmed, not evidence
-# about the exporter.
+# evidence that the exporter is right, and these are not. `send-sites`,
+# `locals` and `local-declaration` were recorded by the stage I S-I6 widening
+# run itself — `locals` had been hand-authored first and the run confirmed it
+# byte-identically, `local-declaration` was recorded at its move from the
+# reject corpus — which is why this comment says "a real run" rather than "the
+# first": a provenance note that names one event goes stale the first time a
+# second event of the same kind happens.
 RECORDED = (
     "expressions",
     "fan-in",
+    "local-declaration",
+    "locals",
     "minimal-class",
     "priorities",
     "send-sites",
     "two-instances",
-)
-
-# Hand-authored like an anchor but for a construct the exporter does not yet
-# emit: `locals` was written in stage I against the exporter's *document shape*
-# (`declare` as a for counter) while the exporter's own body-declaration
-# refusal is still in place. It is a prediction of what the widened exporter
-# will emit, pending the S-I6 host run; until then its evidence value is the
-# Lean and Python layers, not the exporter.
-HAND_AUTHORED_PENDING_EXPORTER = (
-    "locals",
 )
 
 # The two negative corpora, and the layer each one holds responsible. A fixture
@@ -835,21 +825,16 @@ class PositiveFixturesAreAccountedFor(unittest.TestCase):
                 )
 
     def test_provenance_covers_exactly_the_positives(self) -> None:
-        # ANCHORS, RECORDED and HAND_AUTHORED_PENDING_EXPORTER partition the
-        # positives. If a model is added and assigned to none of them, its
-        # provenance is undocumented and the anti-circularity argument in the
-        # README no longer describes the corpus.
-        declared = (
-            set(ANCHORS)
-            | set(RECORDED)
-            | set(HAND_AUTHORED_PENDING_EXPORTER)
-        )
+        # ANCHORS and RECORDED partition the positives. If a model is
+        # added and assigned to neither, its provenance is undocumented and the
+        # anti-circularity argument in the README no longer describes the
+        # corpus.
+        declared = set(ANCHORS) | set(RECORDED)
 
         self.assertEqual(
             len(declared),
-            len(ANCHORS) + len(RECORDED)
-            + len(HAND_AUTHORED_PENDING_EXPORTER),
-            "a fixture is listed in two provenance lists",
+            len(ANCHORS) + len(RECORDED),
+            "a fixture is listed as both an anchor and a recording",
         )
 
         present = {model.stem for model in FIXTURES.glob("*.rebeca")}
@@ -867,11 +852,7 @@ class PositiveFixturesAreAccountedFor(unittest.TestCase):
 
         text = readme.read_text(encoding="utf-8")
 
-        for name in sorted(
-            set(ANCHORS)
-            | set(RECORDED)
-            | set(HAND_AUTHORED_PENDING_EXPORTER)
-        ):
+        for name in sorted(set(ANCHORS) | set(RECORDED)):
             with self.subTest(fixture=name):
                 self.assertIn(
                     name,

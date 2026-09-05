@@ -439,6 +439,23 @@ public final class RebecaGeneralJsonExporter {
                 locals.remove(name);
             }
 
+            /**
+             * Stage I: restore the locals set to a snapshot depth, the
+             * branch-scope discipline {@code renderBranch} applies. The
+             * {@code for} rule uses per-name {@code undeclare} because its
+             * counter is tracked in a caller-owned list; a branch can hold
+             * any number of declarations, so the depth is the cheaper
+             * bookkeeping.
+             */
+            private void truncateLocals(int depth) {
+                locals.removeAll(
+                    new ArrayList<>(locals).subList(
+                        depth,
+                        locals.size()
+                    )
+                );
+            }
+
             private boolean isValue(String name) {
                 return locals.contains(name) ||
                     owner.hasStateVariable(name);
@@ -1485,8 +1502,9 @@ public final class RebecaGeneralJsonExporter {
         }
 
         /**
-         * R14. Four alternatives: assignment, send, {@code if},
-         * {@code for}. Read through a wildcard and dispatched by
+         * R14. Five alternatives: assignment, send, {@code if},
+         * {@code for}, and — as of stage I — a local variable
+         * declaration. Read through a wildcard and dispatched by
          * pattern so that one diagnostic covers every shape the parser
          * can hand back, including expressions used as statements.
          */
@@ -1543,11 +1561,10 @@ public final class RebecaGeneralJsonExporter {
             }
 
             if (candidate instanceof FieldDeclaration declaration) {
-                throw unsupported(
-                    "a local variable declaration in " + description +
-                    " (R15: declare it in statevars, or use the " +
-                    "initializer slot of a for header)" +
-                    at(declaration.getLineNumber())
+                return renderLocalDeclaration(
+                    declaration,
+                    scope,
+                    description
                 );
             }
 
@@ -1719,6 +1736,15 @@ public final class RebecaGeneralJsonExporter {
          * braceless branch is strictly not derivable, but the parser
          * yields a single statement for one and normalizing it to a
          * one-element list changes no semantics.
+         *
+         * <p>Stage I: a branch is a scope. A local declared inside it
+         * leaves scope with it, so the locals set is snapshotted on entry
+         * and restored on exit — the same save/restore {@code renderFor}
+         * has always applied to its counter, and the same discipline the
+         * Lean elaborator's scope threading and the Python validator's
+         * depth discard enforce. Without this, a name declared in a
+         * {@code then} would leak into the {@code else} and into the
+         * statements after the conditional.
          */
         private Json renderBranch(
             Statement branch,
@@ -1729,17 +1755,25 @@ public final class RebecaGeneralJsonExporter {
                 return Json.array().build();
             }
 
+            int depth = scope.locals.size();
+
+            Json rendered;
+
             if (branch instanceof BlockStatement block) {
-                return renderStatements(
+                rendered = renderStatements(
                     block.getStatements(),
                     scope,
                     description
                 );
+            } else {
+                rendered = Json.array()
+                    .add(renderStatement(branch, scope, description))
+                    .build();
             }
 
-            return Json.array()
-                .add(renderStatement(branch, scope, description))
-                .build();
+            scope.truncateLocals(depth);
+
+            return rendered;
         }
 
         /**
@@ -1935,6 +1969,89 @@ public final class RebecaGeneralJsonExporter {
             }
 
             return candidate;
+        }
+
+        /**
+         * Stage I. A local variable declaration in a statement body,
+         * where R15 refused it until now. The node emitted is exactly
+         * the one {@code renderForInitializer} emits for a loop
+         * counter — {@code declare} with name, type, value and line —
+         * because there is one document shape for a declaration
+         * wherever it appears, and the for-counter emitter defined it
+         * first. The same four shadowing checks run through
+         * {@code Scope.declare}, and the same one-declarator rule
+         * applies: {@code int a, b;} is refused rather than split,
+         * because the counter emitter's {@code requireOne} reason
+         * already covers the shape and a multi-declarator emission
+         * would be new behaviour smuggled into a widening.
+         *
+         * <p>Scope is body-scoped: the name is live from its
+         * declaration to the end of the enclosing body, and a
+         * declaration inside a branch dies with the branch by
+         * {@code renderBranch}'s snapshot. There is no {@code
+         * undeclare} call here — the body's own end is the body
+         * renderer's caller boundary, and the for rule's per-name
+         * {@code undeclare} exists only because the counter is tracked
+         * in a caller-owned list.
+         */
+        private Json renderLocalDeclaration(
+            FieldDeclaration declaration,
+            Scope scope,
+            String description
+        ) {
+            Integer line = declaration.getLineNumber();
+
+            String type =
+                typeName(declaration.getType(), description, line);
+
+            if (!VALUE_TYPES.contains(type)) {
+                throw unsupported(
+                    "a local variable of type " + type +
+                    " in " + description + at(line)
+                );
+            }
+
+            VariableDeclarator declarator =
+                requireOne(
+                    declaration.getVariableDeclarators(),
+                    "local variable declaration in " + description
+                );
+
+            String name =
+                requireName(
+                    declarator.getVariableName(),
+                    "local variable declaration in " + description
+                );
+
+            VariableInitializer value =
+                declarator.getVariableInitializer();
+
+            if (
+                !(value instanceof OrdinaryVariableInitializer ordinary)
+            ) {
+                throw unsupported(
+                    "a local variable " + name +
+                    " without a simple initial value in " +
+                    description + at(line)
+                );
+            }
+
+            scope.declare(name, line);
+
+            return Json.object()
+                .put("kind", Json.text("declare"))
+                .put("name", Json.text(name))
+                .put("type", Json.text(type))
+                .put(
+                    "value",
+                    renderExpression(
+                        ordinary.getValue(),
+                        scope,
+                        description
+                    )
+                )
+                .put("line", renderLine(line))
+                .build();
         }
 
         /**

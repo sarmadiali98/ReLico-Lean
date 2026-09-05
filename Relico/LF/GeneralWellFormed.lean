@@ -329,8 +329,9 @@ invisible to structural recursion on a nested inductive. `[]` is well-formed, so
 branch is accepted and `LF.GeneralCppPrinter.renderGeneralBraced` has to spell it.
 
 This is the same conjunction `reactionWellFormed` forms over a reaction's top-level body. That
-one is left as its `List.all` because it is not part of this recursion and rewriting it would
-move a definition no clause of this change touches.
+one **routes through this traversal** as of stage I's S-I6: it stood as its own `List.all` until
+the local-declaration witness found the duplication mattered — the `List.all` form saw none of
+the locals this walk threads — and its docstring records the finding.
 -/
 def bodyWellFormed
     (reactor : LF.GeneralReactor)
@@ -363,6 +364,17 @@ end
 /--
 A reaction's trigger and body both resolve against its reactor, with its own
 parameters in scope.
+
+**Stage I's S-I6 witness found this duplicating `bodyWellFormed` in a way that
+mattered.** Until the local-declaration witness went through the LF target
+gate, this predicate walked the body with `List.all` over
+`stmtWellFormed reaction.parameters` — the same conjunction `bodyWellFormed`
+forms, but without the threading. A local declared in a reaction body was
+therefore invisible to the statements after it: the guard refused the widened
+assignment the S-I5 layer was written to admit, and only a model that actually
+declared, read and assigned a local through `compileGeneralModel` could notice.
+The witness is that model. Routing through `bodyWellFormed` removes the
+duplication rather than patching it.
 -/
 def reactionWellFormed
     (reactor : LF.GeneralReactor)
@@ -370,11 +382,10 @@ def reactionWellFormed
     Bool :=
   reactor.triggerWellFormed
       reaction.trigger &&
-    reaction.body.all
-      (fun statement =>
-        reactor.stmtWellFormed
-          reaction.parameters
-          statement)
+    bodyWellFormed
+      reactor
+      reaction.parameters
+      reaction.body
 
 /--
 A well-formed reactor.

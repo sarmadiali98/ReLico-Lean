@@ -6243,6 +6243,176 @@ def emitConditionalWitnessProgram :
 
       pure 1
 
+/-!
+### The stage I local-declaration witness: `int x = 1;` through real `lfc`
+
+Stage I taught the printer to emit `int temporary = 1;` and pinned the text by `rfl` in
+`Relico/Tests/GeneralLocalDecl.lean`. As with the conditional before the I0 witness, no gate had
+handed that text to the target compiler: every program this file emitted was declaration-free, so a
+green `GENERAL_LF_TARGET_OK` said nothing about whether `lfc` accepts a C++ local declaration
+inside a reaction body. This model closes the LF-side analogue of that gap by the same instrument
+that found it.
+
+Minimal on purpose, and the minimality is the argument: one class, one instance, one state variable,
+one declaration, no known rebecs, no ports, no connections. The only construct distinguishing this
+program from ones the gate already compiles is the declaration — followed by a read of the local and
+an assignment to it, so the emitted block exercises the declaration, the read (a bare name, exactly
+as a parameter reads) and the widened assignment the S-I5 guard admitted. An `lfc` complaint here
+can only be about the local.
+
+It terminates the way its siblings do: one self-send from the constructor, `flip` declares, reads
+and assigns, sends nothing, and the queue drains.
+-/
+
+private def ledgerClassName :
+    ClassName :=
+  ⟨"Ledger"⟩
+
+private def ledgerInstanceName :
+    ActorName :=
+  ⟨"ledger0"⟩
+
+private def ledgerFlipMessageName :
+    MsgName :=
+  ⟨"flip"⟩
+
+private def ledgerEntryName :
+    VarName :=
+  ⟨"entry"⟩
+
+private def ledgerValueName :
+    VarName :=
+  ⟨"value"⟩
+
+private def ledgerConstructor :
+    DTR.GeneralConstructor where
+
+  parameters :=
+    []
+
+  body :=
+    [
+      .assign
+        ledgerValueName
+        (.intLiteral 0),
+      .send
+        .selfTarget
+        ledgerFlipMessageName
+        []
+        { value := 1 }
+    ]
+
+private def ledgerFlipMessageServer :
+    DTR.GeneralMessageServer where
+
+  name :=
+    ledgerFlipMessageName
+
+  parameters :=
+    []
+
+  body :=
+    [
+      .localDecl
+        ledgerEntryName
+        .int
+        (.intLiteral 1),
+      .assign
+        ledgerEntryName
+        (.binary
+          .add
+          (.parameterVar ledgerEntryName)
+          (.intLiteral 2)),
+      .assign
+        ledgerValueName
+        (.parameterVar ledgerEntryName)
+    ]
+
+private def ledgerClass :
+    DTR.GeneralReactiveClass where
+
+  name :=
+    ledgerClassName
+
+  knownRebecs :=
+    []
+
+  stateVariables :=
+    [
+      {
+        name :=
+          ledgerValueName
+
+        declaredType :=
+          .int
+      }
+    ]
+
+  constructor :=
+    ledgerConstructor
+
+  messageServers :=
+    [ledgerFlipMessageServer]
+
+private def ledgerActor :
+    DTR.GeneralActorInstance where
+
+  name :=
+    ledgerInstanceName
+
+  className :=
+    ledgerClassName
+
+  bindings :=
+    []
+
+  arguments :=
+    []
+
+/--
+One class, one instance, one declaration, one read, one assignment — nothing else.
+-/
+private def localDeclWitnessModel :
+    DTR.GeneralModel where
+
+  classes :=
+    [ledgerClass]
+
+  instances :=
+    [ledgerActor]
+
+/--
+Translate the local-declaration witness and print it, in one `Except`.
+-/
+private def localDeclWitnessProgramText :
+    Except String String := do
+
+  let program ←
+    Translation.compileGeneralModel
+      localDeclWitnessModel
+
+  LF.CppPrinter.renderGeneralProgram
+    program
+
+/--
+Emit the local-declaration witness for `frontend/check-general-lf-target.sh`.
+-/
+def emitLocalDeclWitnessProgram :
+    IO UInt32 :=
+  match localDeclWitnessProgramText with
+
+  | .ok programText => do
+      IO.print programText
+
+      pure 0
+
+  | .error reason => do
+      IO.eprintln
+        ("the translation or the printer refused the local-declaration witness model: " ++
+          reason)
+
+      pure 1
+
 end GeneralLfPrinterTests
 end Relico
 
@@ -6278,8 +6448,11 @@ def main
   | ["emit-conditional"] =>
       Relico.GeneralLfPrinterTests.emitConditionalWitnessProgram
 
+  | ["emit-local-decl"] =>
+      Relico.GeneralLfPrinterTests.emitLocalDeclWitnessProgram
+
   | _ => do
       IO.eprintln
-        "usage: GeneralLfPrinterTestMain [emit-program|emit-widened|emit-routed|emit-repeated|emit-priority-witness|emit-conditional]"
+        "usage: GeneralLfPrinterTestMain [emit-program|emit-widened|emit-routed|emit-repeated|emit-priority-witness|emit-conditional|emit-local-decl]"
 
       pure 2

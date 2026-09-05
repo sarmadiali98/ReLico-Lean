@@ -1,10 +1,10 @@
 # `general-v1` frontend fixtures
 
 These models are the acceptance surface of the general family's two frontend
-layers. Between them the twelve positives exercise every production
-`frontend/java-bridge/RebecaGeneralJsonExporter.java` admits, and the thirty-four
-negatives pin one rejection each — twenty against the exporter and the Rebeca
-compiler upstream of it, fourteen against the Lean decoder.
+layers. Between them the thirteen positives exercise every production
+`frontend/java-bridge/RebecaGeneralJsonExporter.java` admits, and the
+thirty-three negatives pin one rejection each — nineteen against the exporter
+and the Rebeca compiler upstream of it, fourteen against the Lean decoder.
 
 Two gates read this directory, and they read different parts of it.
 `frontend/java-bridge/check-general.sh` owns the Rebeca-to-JSON boundary: it runs
@@ -59,14 +59,15 @@ F90 records the gap). Its document is a prediction the Lean layer confirmed; it
 is not yet evidence about the exporter, and becomes evidence the first time a
 real run agrees with it.
 
-A twelfth model, `locals`, added by stage I, is hand-authored under a third
-provenance: the exporter's own body-declaration refusal is still in place (S-I6
-widens it), so there is no exporter output to match even in principle yet. Its
-document is written against the shape the exporter already emits for a `for`
-counter — the `declare` node — and is a prediction of the widened exporter. Its
-evidence today is the Python validator, which accepts it, and the Lean layer,
-which elaborates it; the anti-circularity argument does not cover it and says
-so by listing it separately in `test_validate_general_v1.py`.
+A twelfth model, `locals`, added by stage I, was hand-authored under a third
+provenance — a prediction of the widened exporter, written against the `declare`
+shape the exporter already emitted for `for` counters — **and stage I's S-I6
+run then confirmed it byte-identically**, so it is recorded now, listed in
+`test_validate_general_v1.py` with the other recordings, and the third
+provenance is closed. A thirteenth, `local-declaration`, is the reject fixture
+that refused the construct; it moved to the positives at the same widening and
+its document was **recorded from the widening run itself**, making it the
+corpus's first mover between the corpora.
 
 Between them the anchors cover every statement kind (`assign`, `send`, `if`
 with and without `else`, `for` in both initializer forms, `declare`), a self
@@ -315,7 +316,7 @@ takes those same committed documents as given and checks what Lean makes of them
 Neither re-does the other's work, and the documents in this directory are the
 contract between them.
 
-Note that the glob on the first line matches only the twelve positives. The fourteen
+Note that the glob on the first line matches only the thirteen positives. The fourteen
 documents in `lean-reject/` are deliberately invalid against `general-v1` — one of
 them is not even JSON — so validating them would fail by design. They are named
 `invalid-*.json` rather than `*.parser.json` partly for that reason.
