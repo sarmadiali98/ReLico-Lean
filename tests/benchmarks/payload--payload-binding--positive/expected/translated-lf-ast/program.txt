@@ -1,0 +1,24 @@
+{ reactor := { name := { value := "Exchange" },
+               stateVariables := [{ name := { value := "left" }, initialValue := 0 },
+                                  { name := { value := "right" }, initialValue := 0 },
+                                  { name := { value := "held" }, initialValue := 0 }],
+               logicalAction := { value := "bind_action" },
+               startupReaction := { name := { value := "startup" },
+                                    trigger := Relico.LF.Trigger.startup,
+                                    body := [Relico.LF.Stmt.assign { value := "left" } (Relico.LF.Expr.intLiteral 4),
+                                             Relico.LF.Stmt.assign { value := "right" } (Relico.LF.Expr.intLiteral 9),
+                                             Relico.LF.Stmt.assign { value := "held" } (Relico.LF.Expr.intLiteral 0),
+                                             Relico.LF.Stmt.schedule { value := "bind_action" } { value := 1 }] },
+               messageReaction := { name := { value := "bind_reaction" },
+                                    trigger := Relico.LF.Trigger.logicalAction { value := "bind_action" },
+                                    body := [Relico.LF.Stmt.assign
+                                               { value := "held" }
+                                               (Relico.LF.Expr.stateVar { value := "left" }),
+                                             Relico.LF.Stmt.assign
+                                               { value := "left" }
+                                               (Relico.LF.Expr.stateVar { value := "right" }),
+                                             Relico.LF.Stmt.assign
+                                               { value := "right" }
+                                               (Relico.LF.Expr.stateVar { value := "held" }),
+                                             Relico.LF.Stmt.schedule { value := "bind_action" } { value := 1 }] } },
+  reactorInstance := { name := { value := "exchange" }, reactorName := { value := "Exchange" } } }

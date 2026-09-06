@@ -1,0 +1,29 @@
+// Benchmark: payload--payload-binding--positive
+// A true two-way exchange: each execution binds the right payload
+// into the left slot and the left payload into the right slot, held
+// through the temp store, so both bindings are observable.
+reactiveclass Exchange(10) {
+    statevars {
+        int left;
+        int right;
+        int held;
+    }
+
+    Exchange() {
+        left = 4;
+        right = 9;
+        held = 0;
+        self.bind() after(1);
+    }
+
+    msgsrv bind() {
+        held = left;
+        left = right;
+        right = held;
+        self.bind() after(1);
+    }
+}
+
+main {
+    Exchange exchange():();
+}

@@ -1,0 +1,83 @@
+{
+  "actorClass": "Exchange",
+  "actorName": "exchange",
+  "className": "Exchange",
+  "constructorBody": [
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 4
+      },
+      "kind": "assign",
+      "target": "left"
+    },
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 9
+      },
+      "kind": "assign",
+      "target": "right"
+    },
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 0
+      },
+      "kind": "assign",
+      "target": "held"
+    },
+    {
+      "delay": 1,
+      "kind": "selfSend",
+      "message": "bind"
+    }
+  ],
+  "messageServer": "bind",
+  "messageServerBody": [
+    {
+      "expression": {
+        "kind": "stateVar",
+        "name": "left"
+      },
+      "kind": "assign",
+      "target": "held"
+    },
+    {
+      "expression": {
+        "kind": "stateVar",
+        "name": "right"
+      },
+      "kind": "assign",
+      "target": "left"
+    },
+    {
+      "expression": {
+        "kind": "stateVar",
+        "name": "held"
+      },
+      "kind": "assign",
+      "target": "right"
+    },
+    {
+      "delay": 1,
+      "kind": "selfSend",
+      "message": "bind"
+    }
+  ],
+  "schemaVersion": 2,
+  "stateVariables": [
+    {
+      "initialValue": 0,
+      "name": "left"
+    },
+    {
+      "initialValue": 0,
+      "name": "right"
+    },
+    {
+      "initialValue": 0,
+      "name": "held"
+    }
+  ]
+}

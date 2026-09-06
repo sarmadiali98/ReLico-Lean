@@ -1,0 +1,26 @@
+target Cpp
+
+reactor Exchange {
+  state left: int = 0
+  state right: int = 0
+  state held: int = 0
+  logical action bind_action: void
+
+  reaction(startup) -> bind_action {=
+    left = 4;
+    right = 9;
+    held = 0;
+    bind_action.schedule(1ms);
+  =}
+
+  reaction(bind_action) -> bind_action {=
+    held = left;
+    left = right;
+    right = held;
+    bind_action.schedule(1ms);
+  =}
+}
+
+main reactor {
+  exchange = new Exchange()
+}

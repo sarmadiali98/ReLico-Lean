@@ -1,0 +1,27 @@
+{ reactiveClass := { name := { value := "Exchange" },
+                     stateVariables := [{ name := { value := "left" }, initialValue := 0 },
+                                        { name := { value := "right" }, initialValue := 0 },
+                                        { name := { value := "held" }, initialValue := 0 }],
+                     constructor := { body := [Relico.DTR.Stmt.assign
+                                                 { value := "left" }
+                                                 (Relico.DTR.Expr.intLiteral 4),
+                                               Relico.DTR.Stmt.assign
+                                                 { value := "right" }
+                                                 (Relico.DTR.Expr.intLiteral 9),
+                                               Relico.DTR.Stmt.assign
+                                                 { value := "held" }
+                                                 (Relico.DTR.Expr.intLiteral 0),
+                                               Relico.DTR.Stmt.selfSend { value := "bind" } { value := 1 }] },
+                     messageServer := { name := { value := "bind" },
+                                        body := [Relico.DTR.Stmt.assign
+                                                   { value := "held" }
+                                                   (Relico.DTR.Expr.stateVar { value := "left" }),
+                                                 Relico.DTR.Stmt.assign
+                                                   { value := "left" }
+                                                   (Relico.DTR.Expr.stateVar { value := "right" }),
+                                                 Relico.DTR.Stmt.assign
+                                                   { value := "right" }
+                                                   (Relico.DTR.Expr.stateVar { value := "held" }),
+                                                 Relico.DTR.Stmt.selfSend { value := "bind" } { value := 1 }],
+                                        priority := none } },
+  actor := { name := { value := "exchange" }, className := { value := "Exchange" } } }
