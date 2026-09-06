@@ -1,0 +1,339 @@
+// Node Modes
+
+// for testing
+
+
+
+
+
+reactiveclass Node (4){
+
+    knownrebecs {
+    	Switch out1, out2;
+    }
+   
+    statevars {
+           int mode;
+           int id;
+           int NRPCandidates0;
+           int NRPCandidates1;
+           int heartbeats_missed_1;
+           int heartbeats_missed_2;
+           int NRP_network;
+           int attacker;
+           int which;
+           boolean prevWhich;
+           int NRP_switch_id;
+           boolean NRP_pending;
+           boolean become_primary_on_ping_response;  
+           int primary;
+           boolean ping_pending;
+           boolean init;
+    }
+    Node (int Myid, int Myprimary, int NRPCan1_id, int NRPCan2_id, int myFailTime) {
+           id = Myid;
+           attacker = 0;
+           which=0;
+           prevWhich=true;
+		   NRPCandidates0 =NRPCan1_id;
+		   NRPCandidates1 =NRPCan2_id;	
+           heartbeats_missed_1 = 0;
+           heartbeats_missed_2 = 0;
+           NRP_network = -1;
+           NRP_switch_id = -1;
+           NRP_pending = true;
+           become_primary_on_ping_response = false;
+           primary = Myprimary;
+           ping_pending = false;
+           init=true;
+           
+           mode = 0;
+           if(myFailTime!=0) nodeFail() after(myFailTime);
+           self.runMe();
+    }
+	
+    msgsrv new_NRP_request_timed_out() {
+//      if(?(true,false)) nodeFail();
+	  	if (mode == 2) {
+           if (NRP_pending) {
+	          NRP_pending = false;
+	          if (become_primary_on_ping_response) 
+	             become_primary_on_ping_response = false;
+    	   }
+        }
+	}
+	  
+	  // logical action ping_timed_out(ping_timeout)
+    msgsrv ping_timed_out() {
+//      if(?(true,false)) nodeFail();
+	  	if (mode == 2) {
+           if (ping_pending) ping_pending = false;
+	       else{
+	            if(which>1){
+	        	   mode = 1;
+        	       heartbeats_missed_1 = 0; 
+	               heartbeats_missed_2 = 0;
+	               primary=id;
+				   if(NRP_network==0) out1.new_NRPBack(id, id,NRP_network, NRP_switch_id);
+				   else out2.new_NRPBack(id,id, NRP_network, NRP_switch_id);
+	        	   mode = 1;
+        	       heartbeats_missed_1 = 0; 
+	               heartbeats_missed_2 = 0;
+	               primary=id;
+	               NRP_pending = true;
+	            }else NRP_pending = true;
+	        }
+	     }else if (mode == 1){
+                  if (ping_pending) {
+	                 NRP_network++;
+				     if(NRP_network<2){
+				        if (NRP_network == 0) NRP_switch_id = NRPCandidates0; else NRP_switch_id = NRPCandidates1;
+				        if(NRP_network==0) out1.new_NRP(id, id,NRP_network, NRP_switch_id);
+				        else out2.new_NRP(id,id, NRP_network, NRP_switch_id);
+				     } else {
+				         NRP_network=2;
+				         mode=  0;
+				     }  
+	                 NRP_pending = true;
+	              } else{
+	                   if(attacker<1){
+			     	   out1.heartBeat(0, id) after(1);
+                       out2.heartBeat(1, id) after(1);
+                  }
+	      }
+	        
+       }
+    }
+	  	  
+	  
+    msgsrv pingNRP_response(int mid, boolean w, boolean pw){
+//      if(?(true,false)) nodeFail();
+       if (mode==0); 
+       else if (mode == 2){
+        	   if(!w && !pw) which++;
+        	   else which=0;
+               if(which>1)
+               ping_pending = false;
+        	 }
+             else if (mode == 1) 
+                     ping_pending = false;
+                  else if (mode==3);
+    }
+	  
+    msgsrv new_NRP(int mid,int prim, int mNRP_network, int mNRP_switch_id) {
+//      if(?(true,false)) nodeFail();
+        if(mode!= 3){
+    	    NRP_network = mNRP_network;
+	        NRP_switch_id = mNRP_switch_id;
+        }
+    }
+    msgsrv new_NRPBack(int mid,int prim, int mNRP_network, int mNRP_switch_id) {
+//      if(?(true,false)) nodeFail();
+        if(mode!= 3){
+	       NRP_network = mNRP_network;
+	       NRP_switch_id = mNRP_switch_id;
+	    }
+    }
+    
+      msgsrv runMe(){ 
+        switch(mode){
+            case 0: //WAITING : 
+                      if(init){
+				         if (id == primary){
+				             mode = 1;
+				             NRP_network++;
+				             if(NRP_network<2){
+				                if (NRP_network == 0) NRP_switch_id = NRPCandidates0; else NRP_switch_id = NRPCandidates1;
+				                if(NRP_network==0)out1.new_NRP(id,id, NRP_network, NRP_switch_id);
+				                else out2.new_NRP(id,id, NRP_network, NRP_switch_id);
+				             } else NRP_network=2;
+				         } else mode =2;
+           			     init=false;
+           			  }	 
+                      break;
+          case 1: //PRIMARY : 
+                      attacker++;
+                      if(attacker>1) attacker=1;
+            		  if(NRP_network==0){	
+    	               	 ping_pending = true;
+            			 out1.pingNRP(id,id, NRP_switch_id) after(5);
+            			 self.ping_timed_out() after(100);
+            		   }else{
+        	               ping_pending = true;
+                 		   out2.pingNRP(id,id, NRP_switch_id) after(5);
+                 		   self.ping_timed_out() after(100);
+            		   }
+	                   NRP_pending = true;
+                       break;
+          case 2: //BACKUP : 
+            			heartbeats_missed_1++;
+	        			heartbeats_missed_2++;
+            			if (heartbeats_missed_1 > 2	&& heartbeats_missed_2 > 2){
+                            heartbeats_missed_1 = (heartbeats_missed_1>2+2)?2+2:heartbeats_missed_1;
+                            heartbeats_missed_2 = (heartbeats_missed_2>2+2)?2+2:heartbeats_missed_2;
+//								   if(heartbeats_missed_1==heartbeats_missed_2 && heartbeats_missed_2==max_missed_heartbeats+1){
+//		          				
+//		          				   mode = PRIMARY;
+//        	      				   heartbeats_missed_1 = 0; // Prevent detecting again immediately.
+//	              				   heartbeats_missed_2 = 0;
+//	              				   primary=id;
+//	                               NRP_pending = true;
+//	              				}else{
+							if(NRP_network==0){	
+    	            		   ping_pending = true;
+	            			  //NRP_network=-1;
+            				   out1.pingNRP(id,id, NRP_switch_id) after(15);
+            				   self.ping_timed_out() after(100);
+            				}else{
+        	            	   ping_pending = true;
+							   //NRP_network=-1;	                 				      
+                 			   out2.pingNRP(id,id, NRP_switch_id) after(15);
+                 			   self.ping_timed_out() after(100);
+            				 }
+	                         NRP_pending = true;
+//	              				}
+	              		}else if(heartbeats_missed_1 > 2|| heartbeats_missed_2 > 2){
+                    			 if(NRP_network==0 && heartbeats_missed_1 > 2) {
+            				        ping_pending = true;
+            				        out1.pingNRP(id,id, NRP_switch_id) after(5);
+            				        self.ping_timed_out() after(100);
+            				     }else if(NRP_network==1 && heartbeats_missed_2 > 2){
+            				              ping_pending = true;
+            				              out2.pingNRP(id,id, NRP_switch_id) after(5);
+            				              self.ping_timed_out() after(100);
+            				            }
+                                  heartbeats_missed_1 = (heartbeats_missed_1>2+2)?2+2:heartbeats_missed_1;
+                                  heartbeats_missed_2 = (heartbeats_missed_2>2+2)?2+2:heartbeats_missed_2;
+            			}
+	              		break;
+          case 3: //FAILED : 
+                        break;
+        } 
+        self.runMe() after(1000);
+     }
+     
+     msgsrv heartBeat(int networkId, int senderid) {
+//      if(?(true,false)) nodeFail();
+     	if (mode==2){
+            if (networkId == 0) heartbeats_missed_1 = 0;
+            else heartbeats_missed_2 = 0;
+        } 
+     }
+     msgsrv nodeFail(){
+        primary=-1;
+        mode = 3;
+        NRP_network=-1;
+        NRP_switch_id=-1;
+        heartbeats_missed_1 = 0;
+        heartbeats_missed_2 = 0;
+        NRP_pending = true;
+        become_primary_on_ping_response = false;
+        ping_pending = false;
+     }
+   
+}
+    
+
+reactiveclass Switch(10){
+    knownrebecs {
+       Node nodeTarget1;
+    }
+    statevars {
+    	int mynetworkId;
+    	int id;
+    	boolean which;
+    	boolean prevWhich;
+    	boolean failed;
+    	boolean amINRP;
+    	boolean primaryPinged;
+    	boolean terminal;
+    	Switch switchTarget1;
+    	Switch switchTarget2;
+    	int primary;
+    }
+    Switch (int myid, int networkId, boolean endSwitch , Switch sw1, Switch sw2, int myFailTime) {
+       mynetworkId = networkId;
+       primary=0;
+       id = myid;
+       primaryPinged=false;
+       terminal=endSwitch;
+       amINRP = false;
+       failed = false;
+       switchTarget1 = sw1;
+       switchTarget2 = sw2;
+       which=true;
+       if (myFailTime!=0) 
+       	  self.switchFail() after(myFailTime);
+    }
+    
+    msgsrv switchFail(){
+       failed = true;
+       amINRP=false;
+    }
+   
+    msgsrv pingNRP_response(int senderNode,boolean w,boolean pw){
+//      if(?(true,false)) switchFail();
+      if(!failed)
+          if(terminal && senderNode <= 99) nodeTarget1.pingNRP_response(id, w,pw); //Pass back
+          else if(senderNode >id) switchTarget1.pingNRP_response(id, w,pw);
+               else switchTarget2.pingNRP_response(id, w,pw);
+    }
+    
+    msgsrv pingNRP(int switchNode, int senderNode, int NRP) {
+//      if(?(true,false)) switchFail();
+      if(!failed)
+        if(terminal && NRP==id){
+           prevWhich = which;
+           which= (senderNode==primary);
+           if(switchNode <= 99) switchTarget1.pingNRP_response(id,which, prevWhich); //Response
+           else nodeTarget1.pingNRP_response(id,which, prevWhich);
+        }else if(switchNode >id) switchTarget1.pingNRP(id,senderNode,NRP); 
+              else switchTarget2.pingNRP(id,senderNode, NRP);
+    }
+    
+    msgsrv new_NRP(int senderNode,int prim, int mNRP_network, int mNRP_switch_id) {
+//      if(?(true,false)) switchFail();
+      if(!failed){
+         if(id==mNRP_switch_id) {
+            amINRP=true;
+            primary=prim;
+         } else amINRP=false;
+         if(terminal && senderNode <= 99)nodeTarget1.new_NRP(id,prim, mNRP_network, mNRP_switch_id);
+         else if(senderNode >id) switchTarget1.new_NRP(id,prim, mNRP_network, mNRP_switch_id); //Pass back
+               else switchTarget2.new_NRP(id,prim, mNRP_network, mNRP_switch_id);
+       }
+    }
+    
+    msgsrv new_NRPBack(int senderNode,int prim, int mNRP_network, int mNRP_switch_id) {
+//      if(?(true,false)) switchFail();
+      if(!failed){
+         if(id==mNRP_switch_id) {
+            amINRP=true;
+            primary=prim;
+         } else amINRP=false;
+         if(terminal && senderNode <= 99)nodeTarget1.new_NRPBack(id,prim, mNRP_network, mNRP_switch_id);
+         else if(senderNode >id) switchTarget1.new_NRPBack(id,prim, mNRP_network, mNRP_switch_id); //Pass back
+              else switchTarget2.new_NRPBack(id,prim, mNRP_network, mNRP_switch_id);
+       }
+    }
+    
+    msgsrv heartBeat(int networkId, int senderNode) {
+//      if(?(true,false)) switchFail();
+      if(!failed)
+         if(terminal && senderNode <= 99) nodeTarget1.heartBeat(networkId,id) after(1);
+         else if(senderNode > id) switchTarget1.heartBeat(networkId,id) after(1);
+              else switchTarget2.heartBeat(networkId,id) after(1);
+    }
+}
+
+main {
+    @Priority(1) Switch switchA1(DCN1):(1, 0, true , switchA2 , switchA2 , 2500);
+    @Priority(1) Switch switchA2(DCN1):(2 ,0, false , switchA1 , switchA3 , 2500);
+    @Priority(1) Switch switchA3(DCN2):(3, 0, true , switchA2 , switchA2 , 0);
+    @Priority(1) Switch switchB1(DCN1):(4, 1, true , switchB2 , switchB2 , 2500);
+    @Priority(1) Switch switchB2(DCN1):(5, 1, false , switchB1 , switchB3 , 2500);
+    @Priority(1) Switch switchB3(DCN2):(6, 1, true , switchB2 , switchB2 , 0);
+
+	@Priority(2) Node DCN1(switchA1, switchB1):(100, 100, 1, 4, 0);
+	@Priority(2) Node DCN2(switchA3, switchB3):(101, 100, 3, 6, 0);
+}
