@@ -109,9 +109,12 @@ patterns from the paper's own themes, each ordering case supplied at both the
 rebec and the message-server level. All 17 clear the exporter, the Lean
 decoder, the verified translation and `lfc` with zero adaptation; nine also
 report `satisfied` under the model checker and are implemented now. The other
-eight overflow the model checker's queue and stay planned until redesigned
-under the stage K policy: the overflow is an uncoupled periodic producer, not
-a defect in the pattern under test. These rows own no Lean obligations -- they
-are source-evidence rows, so they carry no formal-witness stage. Two corpus
-entries are byte-identical; only one is implemented, and its twin stays
-planned pending a differentiating source.
+eight overflow the model checker's queue. Seven have since been redesigned
+under the stage K policy -- the overflow is an uncoupled periodic producer,
+not a defect in the pattern under test, so each redesign couples every
+producer to the consumption of what it produced while keeping the actors,
+the communication pattern and the observable purpose -- and all seven pass
+the full pipeline with the model checker satisfied. The eighth is
+byte-identical to one of the seven and stays planned pending a
+differentiating source. These rows own no Lean obligations -- they are
+source-evidence rows, so they carry no formal-witness stage.

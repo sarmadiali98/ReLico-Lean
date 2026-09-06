@@ -1,0 +1,293 @@
+{ reactors := [{ name := { value := "Sender" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "oneToOriginFromMedium3" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "oneToOriginFromMedium4" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "rcvMsgToMedium3" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "rcvMsgToMedium4" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "resolved" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "sendMsg_action1" },
+                                      parameters := [{ name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "sendMsg_action2" },
+                                      parameters := [{ name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "one_action" },
+                                      parameters := [{ name := { value := "chain" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "resolved" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.schedule
+                                                 { value := "sendMsg_action1" }
+                                                 [Relico.LF.GeneralExpr.intLiteral 1]
+                                                 { value := 0 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "sendMsg_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sendMsg_action1" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToMedium3" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToMedium4" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none },
+                                      { name := { value := "sendMsg_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sendMsg_action2" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToMedium3" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToMedium4" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none },
+                                      { name := { value := "one_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "one_action" },
+                                        parameters := [{ value := "chain" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 2))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resolved" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "sendMsg_action2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "oneToOriginFromMedium3_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "oneToOriginFromMedium3" },
+                                        parameters := [{ value := "chain" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 2))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resolved" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "sendMsg_action2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "oneToOriginFromMedium4_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "oneToOriginFromMedium4" },
+                                        parameters := [{ value := "chain" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 2))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resolved" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "sendMsg_action2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none }] },
+               { name := { value := "Medium" },
+                 parameters := [{ name := { value := "_id" }, declaredType := Relico.LF.GeneralType.int }],
+                 inputPorts := [{ name := { value := "doneToMedium_FromReceiver1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "doneToMedium_FromReceiver2" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "rcvMsgToMedium3FromSender1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "rcvMsgToMedium4FromSender1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "rcvMsgToReceiver_" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "oneToOrigin" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "id" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "rcvMsg_action" },
+                                      parameters := [{ name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "done_action" },
+                                      parameters := [{ name := { value := "chain" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [{ value := "_id" }],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "id" }
+                                                 (Relico.LF.GeneralExpr.parameterVar { value := "_id" })],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "rcvMsg_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "rcvMsg_action" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToReceiver_" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none },
+                                      { name := { value := "rcvMsgToMedium3FromSender1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "rcvMsgToMedium3FromSender1" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToReceiver_" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none },
+                                      { name := { value := "rcvMsgToMedium4FromSender1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "rcvMsgToMedium4FromSender1" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToReceiver_" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none },
+                                      { name := { value := "done_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "done_action" },
+                                        parameters := [{ value := "chain" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "oneToOrigin" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none },
+                                      { name := { value := "doneToMedium_FromReceiver1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "doneToMedium_FromReceiver1" },
+                                        parameters := [{ value := "chain" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "oneToOrigin" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none },
+                                      { name := { value := "doneToMedium_FromReceiver2_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "doneToMedium_FromReceiver2" },
+                                        parameters := [{ value := "chain" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "oneToOrigin" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none }] },
+               { name := { value := "receiver" },
+                 parameters := [{ name := { value := "_id" }, declaredType := Relico.LF.GeneralType.int }],
+                 inputPorts := [{ name := { value := "rcvMsgToReceiver_FromMedium3" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "rcvMsgToReceiver_FromMedium4" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "doneToMedium_" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "id" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "rcvMsg_action" },
+                                      parameters := [{ name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [{ value := "_id" }],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "id" }
+                                                 (Relico.LF.GeneralExpr.parameterVar { value := "_id" })],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "rcvMsg_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "rcvMsg_action" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "doneToMedium_" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none },
+                                      { name := { value := "rcvMsgToReceiver_FromMedium3_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "rcvMsgToReceiver_FromMedium3" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "doneToMedium_" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none },
+                                      { name := { value := "rcvMsgToReceiver_FromMedium4_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "rcvMsgToReceiver_FromMedium4" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "doneToMedium_" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none }] }],
+  instances := [{ name := { value := "receiver1" },
+                  reactorName := { value := "receiver" },
+                  arguments := [Relico.LF.GeneralValue.int 1] },
+                { name := { value := "receiver2" },
+                  reactorName := { value := "receiver" },
+                  arguments := [Relico.LF.GeneralValue.int 2] },
+                { name := { value := "medium3" },
+                  reactorName := { value := "Medium" },
+                  arguments := [Relico.LF.GeneralValue.int 3] },
+                { name := { value := "medium4" },
+                  reactorName := { value := "Medium" },
+                  arguments := [Relico.LF.GeneralValue.int 4] },
+                { name := { value := "sender1" }, reactorName := { value := "Sender" }, arguments := [] }],
+  connections := [{ sourceInstance := { value := "receiver1" },
+                    sourcePort := { value := "doneToMedium_" },
+                    targetInstance := { value := "medium3" },
+                    targetPort := { value := "doneToMedium_FromReceiver1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "receiver2" },
+                    sourcePort := { value := "doneToMedium_" },
+                    targetInstance := { value := "medium4" },
+                    targetPort := { value := "doneToMedium_FromReceiver2" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "medium3" },
+                    sourcePort := { value := "rcvMsgToReceiver_" },
+                    targetInstance := { value := "receiver1" },
+                    targetPort := { value := "rcvMsgToReceiver_FromMedium3" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "medium3" },
+                    sourcePort := { value := "oneToOrigin" },
+                    targetInstance := { value := "sender1" },
+                    targetPort := { value := "oneToOriginFromMedium3" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "medium4" },
+                    sourcePort := { value := "rcvMsgToReceiver_" },
+                    targetInstance := { value := "receiver2" },
+                    targetPort := { value := "rcvMsgToReceiver_FromMedium4" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "medium4" },
+                    sourcePort := { value := "oneToOrigin" },
+                    targetInstance := { value := "sender1" },
+                    targetPort := { value := "oneToOriginFromMedium4" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "sender1" },
+                    sourcePort := { value := "rcvMsgToMedium3" },
+                    targetInstance := { value := "medium3" },
+                    targetPort := { value := "rcvMsgToMedium3FromSender1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "sender1" },
+                    sourcePort := { value := "rcvMsgToMedium4" },
+                    targetInstance := { value := "medium4" },
+                    targetPort := { value := "rcvMsgToMedium4FromSender1" },
+                    delay := { value := 0 } }] }

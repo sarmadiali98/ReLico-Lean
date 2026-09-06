@@ -1,0 +1,45 @@
+// Benchmark: general--periodic-join-composition--positive
+// A DTR-fragment redesign of examples2 Periodic_Join_Composition, whose original
+// form overflows the model checker's queue; see README for the redesign.
+reactiveclass receiver(4) {
+    knownrebecs {
+        Sender sender0;
+        Sender sender1;
+        Sender sender2;
+    }
+    msgsrv rcvMsg(int from) {
+        if (from == 0) {
+            sender0.go(0);
+        } else {
+            if (from == 1) {
+                sender1.go(1);
+            } else {
+                sender2.go(2);
+            }
+        }
+    }
+}
+reactiveclass Sender(4) {
+    knownrebecs {
+        receiver receiver1;
+    }
+    statevars{
+        int id;
+    }
+    Sender(int _id){
+        id = _id;
+        self.sendMsg(id);
+    }
+    msgsrv sendMsg(int msg) {
+        receiver1.rcvMsg(id);
+    }
+    msgsrv go(int from) {
+        self.sendMsg(id) after(1);
+    }
+}
+main {
+  receiver receiver1(sender0, sender1, sender2):();
+  Sender sender0(receiver1):(0);
+  Sender sender1(receiver1):(1);
+  Sender sender2(receiver1):(2);
+}

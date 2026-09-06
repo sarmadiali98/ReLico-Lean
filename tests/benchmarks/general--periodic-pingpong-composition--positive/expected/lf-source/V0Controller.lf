@@ -1,0 +1,57 @@
+target Cpp
+
+reactor Node(_id: int = 0) {
+  input rcvMsgToNextFromNode0: int
+  input sendMsgToNextFromNode0: int
+  input rcvMsgToNextFromNode1: int
+  input sendMsgToNextFromNode1: int
+  output rcvMsgToNext: int
+  output sendMsgToNext: int
+  state id: int = 0
+  logical action sendMsg_action: int
+  logical action rcvMsg_action: int
+
+  reaction(startup) -> sendMsg_action {=
+    id = _id;
+    sendMsg_action.schedule(1, 0ms);
+  =}
+
+  reaction(sendMsg_action) -> rcvMsgToNext {=
+    auto msg = *sendMsg_action.get();
+    rcvMsgToNext.set(msg);
+  =}
+
+  reaction(sendMsgToNextFromNode0) -> rcvMsgToNext {=
+    auto msg = *sendMsgToNextFromNode0.get();
+    rcvMsgToNext.set(msg);
+  =}
+
+  reaction(sendMsgToNextFromNode1) -> rcvMsgToNext {=
+    auto msg = *sendMsgToNextFromNode1.get();
+    rcvMsgToNext.set(msg);
+  =}
+
+  reaction(rcvMsg_action) -> sendMsgToNext {=
+    auto msg = *rcvMsg_action.get();
+    sendMsgToNext.set(msg);
+  =}
+
+  reaction(rcvMsgToNextFromNode0) -> sendMsgToNext {=
+    auto msg = *rcvMsgToNextFromNode0.get();
+    sendMsgToNext.set(msg);
+  =}
+
+  reaction(rcvMsgToNextFromNode1) -> sendMsgToNext {=
+    auto msg = *rcvMsgToNextFromNode1.get();
+    sendMsgToNext.set(msg);
+  =}
+}
+
+main reactor {
+  node0 = new Node(_id=0)
+  node1 = new Node(_id=1)
+  node0.rcvMsgToNext -> node1.rcvMsgToNextFromNode0 after 0 msec
+  node0.sendMsgToNext -> node1.sendMsgToNextFromNode0 after 1 msec
+  node1.rcvMsgToNext -> node0.rcvMsgToNextFromNode1 after 0 msec
+  node1.sendMsgToNext -> node0.sendMsgToNextFromNode1 after 1 msec
+}

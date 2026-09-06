@@ -1,0 +1,90 @@
+target Cpp
+
+reactor receiver {
+  input rcvMsgToReceiver1FromSender0: int
+  input rcvMsgToReceiver1FromSender1: int
+  input rcvMsgToReceiver1FromSender2: int
+  output goToSender0: int
+  output goToSender1: int
+  output goToSender2: int
+  logical action rcvMsg_action: int
+
+  reaction(rcvMsg_action) -> goToSender0, goToSender1, goToSender2 {=
+    auto from = *rcvMsg_action.get();
+    if ((from == 0)) { goToSender0.set(0); } else { if ((from == 1)) { goToSender1.set(1); } else { goToSender2.set(2); } }
+  =}
+
+  reaction(rcvMsgToReceiver1FromSender0) -> goToSender0, goToSender1, goToSender2 {=
+    auto from = *rcvMsgToReceiver1FromSender0.get();
+    if ((from == 0)) { goToSender0.set(0); } else { if ((from == 1)) { goToSender1.set(1); } else { goToSender2.set(2); } }
+  =}
+
+  reaction(rcvMsgToReceiver1FromSender1) -> goToSender0, goToSender1, goToSender2 {=
+    auto from = *rcvMsgToReceiver1FromSender1.get();
+    if ((from == 0)) { goToSender0.set(0); } else { if ((from == 1)) { goToSender1.set(1); } else { goToSender2.set(2); } }
+  =}
+
+  reaction(rcvMsgToReceiver1FromSender2) -> goToSender0, goToSender1, goToSender2 {=
+    auto from = *rcvMsgToReceiver1FromSender2.get();
+    if ((from == 0)) { goToSender0.set(0); } else { if ((from == 1)) { goToSender1.set(1); } else { goToSender2.set(2); } }
+  =}
+}
+
+reactor Sender(_id: int = 0) {
+  input goToSender0FromReceiver1: int
+  input goToSender1FromReceiver1: int
+  input goToSender2FromReceiver1: int
+  output rcvMsgToReceiver1: int
+  state id: int = 0
+  logical action sendMsg_action1: int
+  logical action sendMsg_action2: int
+  logical action go_action: int
+
+  reaction(startup) -> sendMsg_action1 {=
+    id = _id;
+    sendMsg_action1.schedule(id, 0ms);
+  =}
+
+  reaction(sendMsg_action1) -> rcvMsgToReceiver1 {=
+    auto msg = *sendMsg_action1.get();
+    rcvMsgToReceiver1.set(id);
+  =}
+
+  reaction(sendMsg_action2) -> rcvMsgToReceiver1 {=
+    auto msg = *sendMsg_action2.get();
+    rcvMsgToReceiver1.set(id);
+  =}
+
+  reaction(go_action) -> sendMsg_action2 {=
+    auto from = *go_action.get();
+    sendMsg_action2.schedule(id, 1ms);
+  =}
+
+  reaction(goToSender0FromReceiver1) -> sendMsg_action2 {=
+    auto from = *goToSender0FromReceiver1.get();
+    sendMsg_action2.schedule(id, 1ms);
+  =}
+
+  reaction(goToSender1FromReceiver1) -> sendMsg_action2 {=
+    auto from = *goToSender1FromReceiver1.get();
+    sendMsg_action2.schedule(id, 1ms);
+  =}
+
+  reaction(goToSender2FromReceiver1) -> sendMsg_action2 {=
+    auto from = *goToSender2FromReceiver1.get();
+    sendMsg_action2.schedule(id, 1ms);
+  =}
+}
+
+main reactor {
+  receiver1 = new receiver()
+  sender0 = new Sender(_id=0)
+  sender1 = new Sender(_id=1)
+  sender2 = new Sender(_id=2)
+  receiver1.goToSender0 -> sender0.goToSender0FromReceiver1 after 0 msec
+  receiver1.goToSender1 -> sender1.goToSender1FromReceiver1 after 0 msec
+  receiver1.goToSender2 -> sender2.goToSender2FromReceiver1 after 0 msec
+  sender0.rcvMsgToReceiver1 -> receiver1.rcvMsgToReceiver1FromSender0 after 0 msec
+  sender1.rcvMsgToReceiver1 -> receiver1.rcvMsgToReceiver1FromSender1 after 0 msec
+  sender2.rcvMsgToReceiver1 -> receiver1.rcvMsgToReceiver1FromSender2 after 0 msec
+}

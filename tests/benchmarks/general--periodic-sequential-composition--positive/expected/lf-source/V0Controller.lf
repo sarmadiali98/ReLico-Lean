@@ -1,0 +1,95 @@
+target Cpp
+
+reactor Node(_islast: bool = false, _id: int = 0) {
+  input rcvMsgToNextFromNode0: int
+  input sendMsgToNextFromNode0: int
+  input rcvMsgToNextFromNode1: int
+  input sendMsgToNextFromNode1: int
+  input rcvMsgToNextFromNode2: int
+  input sendMsgToNextFromNode2: int
+  input rcvMsgToNextFromNode3: int
+  input sendMsgToNextFromNode3: int
+  output rcvMsgToNext: int
+  output sendMsgToNext: int
+  state islast: bool = false
+  state id: int = 0
+  logical action sendMsg_action1: int
+  logical action sendMsg_action2: int
+  logical action rcvMsg_action: int
+
+  reaction(startup) -> sendMsg_action1 {=
+    id = _id;
+    islast = _islast;
+    if ((!islast)) { sendMsg_action1.schedule(1, 0ms); } else {}
+  =}
+
+  reaction(sendMsg_action1) -> rcvMsgToNext {=
+    auto msg = *sendMsg_action1.get();
+    rcvMsgToNext.set(msg);
+  =}
+
+  reaction(sendMsg_action2) -> rcvMsgToNext {=
+    auto msg = *sendMsg_action2.get();
+    rcvMsgToNext.set(msg);
+  =}
+
+  reaction(sendMsgToNextFromNode0) -> rcvMsgToNext {=
+    auto msg = *sendMsgToNextFromNode0.get();
+    rcvMsgToNext.set(msg);
+  =}
+
+  reaction(sendMsgToNextFromNode1) -> rcvMsgToNext {=
+    auto msg = *sendMsgToNextFromNode1.get();
+    rcvMsgToNext.set(msg);
+  =}
+
+  reaction(sendMsgToNextFromNode2) -> rcvMsgToNext {=
+    auto msg = *sendMsgToNextFromNode2.get();
+    rcvMsgToNext.set(msg);
+  =}
+
+  reaction(sendMsgToNextFromNode3) -> rcvMsgToNext {=
+    auto msg = *sendMsgToNextFromNode3.get();
+    rcvMsgToNext.set(msg);
+  =}
+
+  reaction(rcvMsg_action) -> sendMsg_action2, sendMsgToNext {=
+    auto msg = *rcvMsg_action.get();
+    if (islast) { sendMsg_action2.schedule(1, 1ms); } else { sendMsgToNext.set(msg); }
+  =}
+
+  reaction(rcvMsgToNextFromNode0) -> sendMsg_action2, sendMsgToNext {=
+    auto msg = *rcvMsgToNextFromNode0.get();
+    if (islast) { sendMsg_action2.schedule(1, 1ms); } else { sendMsgToNext.set(msg); }
+  =}
+
+  reaction(rcvMsgToNextFromNode1) -> sendMsg_action2, sendMsgToNext {=
+    auto msg = *rcvMsgToNextFromNode1.get();
+    if (islast) { sendMsg_action2.schedule(1, 1ms); } else { sendMsgToNext.set(msg); }
+  =}
+
+  reaction(rcvMsgToNextFromNode2) -> sendMsg_action2, sendMsgToNext {=
+    auto msg = *rcvMsgToNextFromNode2.get();
+    if (islast) { sendMsg_action2.schedule(1, 1ms); } else { sendMsgToNext.set(msg); }
+  =}
+
+  reaction(rcvMsgToNextFromNode3) -> sendMsg_action2, sendMsgToNext {=
+    auto msg = *rcvMsgToNextFromNode3.get();
+    if (islast) { sendMsg_action2.schedule(1, 1ms); } else { sendMsgToNext.set(msg); }
+  =}
+}
+
+main reactor {
+  node0 = new Node(_islast=false, _id=0)
+  node1 = new Node(_islast=false, _id=1)
+  node2 = new Node(_islast=false, _id=2)
+  node3 = new Node(_islast=true, _id=3)
+  node0.rcvMsgToNext -> node1.rcvMsgToNextFromNode0 after 0 msec
+  node0.sendMsgToNext -> node1.sendMsgToNextFromNode0 after 1 msec
+  node1.rcvMsgToNext -> node2.rcvMsgToNextFromNode1 after 0 msec
+  node1.sendMsgToNext -> node2.sendMsgToNextFromNode1 after 1 msec
+  node2.rcvMsgToNext -> node3.rcvMsgToNextFromNode2 after 0 msec
+  node2.sendMsgToNext -> node3.sendMsgToNextFromNode2 after 1 msec
+  node3.rcvMsgToNext -> node3.rcvMsgToNextFromNode3 after 0 msec
+  node3.sendMsgToNext -> node3.sendMsgToNextFromNode3 after 1 msec
+}

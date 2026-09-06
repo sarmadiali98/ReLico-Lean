@@ -1,0 +1,88 @@
+{ classes := [{ name := { value := "receiver" },
+                knownRebecs := [{ name := { value := "sender0" }, className := { value := "Sender" } },
+                                { name := { value := "sender1" }, className := { value := "Sender" } },
+                                { name := { value := "sender2" }, className := { value := "Sender" } }],
+                stateVariables := [],
+                constructor := { parameters := [], body := [] },
+                messageServers := [{ name := { value := "rcvMsg" },
+                                     parameters := [{ name := { value := "from" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "from" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "sender0" })
+                                                   { value := "go" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                   { value := 0 }]
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.parameterVar { value := "from" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "sender1" })
+                                                      { value := "go" }
+                                                      [Relico.DTR.GeneralExpr.intLiteral 1]
+                                                      { value := 0 }]
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "sender2" })
+                                                      { value := "go" }
+                                                      [Relico.DTR.GeneralExpr.intLiteral 2]
+                                                      { value := 0 }]]],
+                                     priority := none }] },
+              { name := { value := "Sender" },
+                knownRebecs := [{ name := { value := "receiver1" }, className := { value := "receiver" } }],
+                stateVariables := [{ name := { value := "id" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [{ name := { value := "_id" },
+                                                  declaredType := Relico.DTR.GeneralType.int }],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "id" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "_id" }),
+                                          Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "sendMsg" }
+                                            [Relico.DTR.GeneralExpr.stateVar { value := "id" }]
+                                            { value := 0 }] },
+                messageServers := [{ name := { value := "sendMsg" },
+                                     parameters := [{ name := { value := "msg" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "receiver1" })
+                                                { value := "rcvMsg" }
+                                                [Relico.DTR.GeneralExpr.stateVar { value := "id" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "go" },
+                                     parameters := [{ name := { value := "from" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "sendMsg" }
+                                                [Relico.DTR.GeneralExpr.stateVar { value := "id" }]
+                                                { value := 1 }],
+                                     priority := none }] }],
+  instances := [{ name := { value := "receiver1" },
+                  className := { value := "receiver" },
+                  bindings := [({ value := "sender0" }, { value := "sender0" }),
+                               ({ value := "sender1" }, { value := "sender1" }),
+                               ({ value := "sender2" }, { value := "sender2" })],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "sender0" },
+                  className := { value := "Sender" },
+                  bindings := [({ value := "receiver1" }, { value := "receiver1" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "sender1" },
+                  className := { value := "Sender" },
+                  bindings := [({ value := "receiver1" }, { value := "receiver1" })],
+                  arguments := [Relico.DTR.GeneralValue.int 1],
+                  priority := none },
+                { name := { value := "sender2" },
+                  className := { value := "Sender" },
+                  bindings := [({ value := "receiver1" }, { value := "receiver1" })],
+                  arguments := [Relico.DTR.GeneralValue.int 2],
+                  priority := none }] }

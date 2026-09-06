@@ -1,0 +1,429 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 15,
+            "target": "resolved",
+            "value": {
+              "kind": "intLiteral",
+              "line": 15,
+              "value": 0
+            }
+          },
+          {
+            "after": null,
+            "arguments": [
+              {
+                "kind": "intLiteral",
+                "line": 16,
+                "value": 1
+              }
+            ],
+            "kind": "send",
+            "line": 16,
+            "messageServer": "sendMsg",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Sender"
+          }
+        ],
+        "line": 14,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "receiver",
+          "line": 6,
+          "name": "recv0"
+        },
+        {
+          "className": "receiver",
+          "line": 7,
+          "name": "recv1"
+        },
+        {
+          "className": "receiver",
+          "line": 8,
+          "name": "recv2"
+        },
+        {
+          "className": "receiver",
+          "line": 9,
+          "name": "recv3"
+        }
+      ],
+      "line": 4,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 19,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 19,
+              "messageServer": "rcvMsg",
+              "target": {
+                "kind": "knownRebec",
+                "name": "recv0"
+              },
+              "targetClassName": "receiver"
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 20,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 20,
+              "messageServer": "rcvMsg",
+              "target": {
+                "kind": "knownRebec",
+                "name": "recv1"
+              },
+              "targetClassName": "receiver"
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 21,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 21,
+              "messageServer": "rcvMsg",
+              "target": {
+                "kind": "knownRebec",
+                "name": "recv2"
+              },
+              "targetClassName": "receiver"
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 22,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 22,
+              "messageServer": "rcvMsg",
+              "target": {
+                "kind": "knownRebec",
+                "name": "recv3"
+              },
+              "targetClassName": "receiver"
+            }
+          ],
+          "line": 18,
+          "name": "sendMsg",
+          "parameters": [
+            {
+              "line": 18,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 25,
+              "target": "resolved",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 25,
+                  "name": "resolved"
+                },
+                "line": 25,
+                "operator": "+",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 25,
+                  "value": 1
+                }
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 26,
+                  "name": "resolved"
+                },
+                "line": 26,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 26,
+                  "value": 4
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 26,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 27,
+                  "target": "resolved",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 27,
+                    "value": 0
+                  }
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 28,
+                      "value": 1
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 28,
+                  "messageServer": "sendMsg",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Sender"
+                }
+              ]
+            }
+          ],
+          "line": 24,
+          "name": "ack",
+          "parameters": [
+            {
+              "line": 24,
+              "name": "from",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Sender",
+      "queueBound": 4,
+      "stateVariables": [
+        {
+          "line": 12,
+          "name": "resolved",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 40,
+            "target": "id",
+            "value": {
+              "kind": "variable",
+              "line": 40,
+              "name": "_id"
+            }
+          }
+        ],
+        "line": 39,
+        "parameters": [
+          {
+            "line": 39,
+            "name": "_id",
+            "type": "int"
+          }
+        ]
+      },
+      "knownRebecs": [
+        {
+          "className": "Sender",
+          "line": 34,
+          "name": "origin"
+        }
+      ],
+      "line": 32,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 43,
+                  "name": "id"
+                }
+              ],
+              "kind": "send",
+              "line": 43,
+              "messageServer": "ack",
+              "target": {
+                "kind": "knownRebec",
+                "name": "origin"
+              },
+              "targetClassName": "Sender"
+            }
+          ],
+          "line": 42,
+          "name": "rcvMsg",
+          "parameters": [
+            {
+              "line": 42,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "receiver",
+      "queueBound": 4,
+      "stateVariables": [
+        {
+          "line": 37,
+          "name": "id",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Sender",
+          "instance": "sender1",
+          "knownRebec": "origin"
+        }
+      ],
+      "className": "receiver",
+      "line": 47,
+      "name": "receiver0",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 1
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Sender",
+          "instance": "sender1",
+          "knownRebec": "origin"
+        }
+      ],
+      "className": "receiver",
+      "line": 48,
+      "name": "receiver1",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 2
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Sender",
+          "instance": "sender1",
+          "knownRebec": "origin"
+        }
+      ],
+      "className": "receiver",
+      "line": 49,
+      "name": "receiver2",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 3
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Sender",
+          "instance": "sender1",
+          "knownRebec": "origin"
+        }
+      ],
+      "className": "receiver",
+      "line": 50,
+      "name": "receiver3",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "receiver",
+          "instance": "receiver0",
+          "knownRebec": "recv0"
+        },
+        {
+          "className": "receiver",
+          "instance": "receiver1",
+          "knownRebec": "recv1"
+        },
+        {
+          "className": "receiver",
+          "instance": "receiver2",
+          "knownRebec": "recv2"
+        },
+        {
+          "className": "receiver",
+          "instance": "receiver3",
+          "knownRebec": "recv3"
+        }
+      ],
+      "className": "Sender",
+      "line": 51,
+      "name": "sender1",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

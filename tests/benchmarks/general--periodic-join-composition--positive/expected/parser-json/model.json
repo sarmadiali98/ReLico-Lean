@@ -1,0 +1,359 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [],
+        "line": null,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Sender",
+          "line": 6,
+          "name": "sender0"
+        },
+        {
+          "className": "Sender",
+          "line": 7,
+          "name": "sender1"
+        },
+        {
+          "className": "Sender",
+          "line": 8,
+          "name": "sender2"
+        }
+      ],
+      "line": 4,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 11,
+                  "name": "from"
+                },
+                "line": 11,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 11,
+                  "value": 0
+                }
+              },
+              "else": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 14,
+                      "name": "from"
+                    },
+                    "line": 14,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 14,
+                      "value": 1
+                    }
+                  },
+                  "else": [
+                    {
+                      "after": null,
+                      "arguments": [
+                        {
+                          "kind": "intLiteral",
+                          "line": 17,
+                          "value": 2
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 17,
+                      "messageServer": "go",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "sender2"
+                      },
+                      "targetClassName": "Sender"
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 14,
+                  "then": [
+                    {
+                      "after": null,
+                      "arguments": [
+                        {
+                          "kind": "intLiteral",
+                          "line": 15,
+                          "value": 1
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 15,
+                      "messageServer": "go",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "sender1"
+                      },
+                      "targetClassName": "Sender"
+                    }
+                  ]
+                }
+              ],
+              "kind": "if",
+              "line": 11,
+              "then": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 12,
+                      "value": 0
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 12,
+                  "messageServer": "go",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "sender0"
+                  },
+                  "targetClassName": "Sender"
+                }
+              ]
+            }
+          ],
+          "line": 10,
+          "name": "rcvMsg",
+          "parameters": [
+            {
+              "line": 10,
+              "name": "from",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "receiver",
+      "queueBound": 4,
+      "stateVariables": []
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 30,
+            "target": "id",
+            "value": {
+              "kind": "variable",
+              "line": 30,
+              "name": "_id"
+            }
+          },
+          {
+            "after": null,
+            "arguments": [
+              {
+                "kind": "variable",
+                "line": 31,
+                "name": "id"
+              }
+            ],
+            "kind": "send",
+            "line": 31,
+            "messageServer": "sendMsg",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Sender"
+          }
+        ],
+        "line": 29,
+        "parameters": [
+          {
+            "line": 29,
+            "name": "_id",
+            "type": "int"
+          }
+        ]
+      },
+      "knownRebecs": [
+        {
+          "className": "receiver",
+          "line": 24,
+          "name": "receiver1"
+        }
+      ],
+      "line": 22,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 34,
+                  "name": "id"
+                }
+              ],
+              "kind": "send",
+              "line": 34,
+              "messageServer": "rcvMsg",
+              "target": {
+                "kind": "knownRebec",
+                "name": "receiver1"
+              },
+              "targetClassName": "receiver"
+            }
+          ],
+          "line": 33,
+          "name": "sendMsg",
+          "parameters": [
+            {
+              "line": 33,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 37,
+                  "name": "id"
+                }
+              ],
+              "kind": "send",
+              "line": 37,
+              "messageServer": "sendMsg",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Sender"
+            }
+          ],
+          "line": 36,
+          "name": "go",
+          "parameters": [
+            {
+              "line": 36,
+              "name": "from",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Sender",
+      "queueBound": 4,
+      "stateVariables": [
+        {
+          "line": 27,
+          "name": "id",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Sender",
+          "instance": "sender0",
+          "knownRebec": "sender0"
+        },
+        {
+          "className": "Sender",
+          "instance": "sender1",
+          "knownRebec": "sender1"
+        },
+        {
+          "className": "Sender",
+          "instance": "sender2",
+          "knownRebec": "sender2"
+        }
+      ],
+      "className": "receiver",
+      "line": 41,
+      "name": "receiver1",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "receiver",
+          "instance": "receiver1",
+          "knownRebec": "receiver1"
+        }
+      ],
+      "className": "Sender",
+      "line": 42,
+      "name": "sender0",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 1
+        }
+      ],
+      "bindings": [
+        {
+          "className": "receiver",
+          "instance": "receiver1",
+          "knownRebec": "receiver1"
+        }
+      ],
+      "className": "Sender",
+      "line": 43,
+      "name": "sender1",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 2
+        }
+      ],
+      "bindings": [
+        {
+          "className": "receiver",
+          "instance": "receiver1",
+          "knownRebec": "receiver1"
+        }
+      ],
+      "className": "Sender",
+      "line": 44,
+      "name": "sender2",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

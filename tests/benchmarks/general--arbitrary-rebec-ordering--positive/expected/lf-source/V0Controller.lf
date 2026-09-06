@@ -1,0 +1,122 @@
+target Cpp
+
+reactor Sender {
+  input ackToOriginFromReceiver0: int
+  input ackToOriginFromReceiver1: int
+  input ackToOriginFromReceiver2: int
+  input ackToOriginFromReceiver3: int
+  output rcvMsgToRecv0: int
+  output rcvMsgToRecv1: int
+  output rcvMsgToRecv2: int
+  output rcvMsgToRecv3: int
+  state resolved: int = 0
+  logical action sendMsg_action1: int
+  logical action sendMsg_action2: int
+  logical action ack_action: int
+
+  reaction(startup) -> sendMsg_action1 {=
+    resolved = 0;
+    sendMsg_action1.schedule(1, 0ms);
+  =}
+
+  reaction(sendMsg_action1) -> rcvMsgToRecv0, rcvMsgToRecv1, rcvMsgToRecv2, rcvMsgToRecv3 {=
+    auto msg = *sendMsg_action1.get();
+    rcvMsgToRecv0.set(msg);
+    rcvMsgToRecv1.set(msg);
+    rcvMsgToRecv2.set(msg);
+    rcvMsgToRecv3.set(msg);
+  =}
+
+  reaction(sendMsg_action2) -> rcvMsgToRecv0, rcvMsgToRecv1, rcvMsgToRecv2, rcvMsgToRecv3 {=
+    auto msg = *sendMsg_action2.get();
+    rcvMsgToRecv0.set(msg);
+    rcvMsgToRecv1.set(msg);
+    rcvMsgToRecv2.set(msg);
+    rcvMsgToRecv3.set(msg);
+  =}
+
+  reaction(ack_action) -> sendMsg_action2 {=
+    auto from = *ack_action.get();
+    resolved = (resolved + 1);
+    if ((resolved == 4)) { resolved = 0; sendMsg_action2.schedule(1, 1ms); } else {}
+  =}
+
+  reaction(ackToOriginFromReceiver0) -> sendMsg_action2 {=
+    auto from = *ackToOriginFromReceiver0.get();
+    resolved = (resolved + 1);
+    if ((resolved == 4)) { resolved = 0; sendMsg_action2.schedule(1, 1ms); } else {}
+  =}
+
+  reaction(ackToOriginFromReceiver1) -> sendMsg_action2 {=
+    auto from = *ackToOriginFromReceiver1.get();
+    resolved = (resolved + 1);
+    if ((resolved == 4)) { resolved = 0; sendMsg_action2.schedule(1, 1ms); } else {}
+  =}
+
+  reaction(ackToOriginFromReceiver2) -> sendMsg_action2 {=
+    auto from = *ackToOriginFromReceiver2.get();
+    resolved = (resolved + 1);
+    if ((resolved == 4)) { resolved = 0; sendMsg_action2.schedule(1, 1ms); } else {}
+  =}
+
+  reaction(ackToOriginFromReceiver3) -> sendMsg_action2 {=
+    auto from = *ackToOriginFromReceiver3.get();
+    resolved = (resolved + 1);
+    if ((resolved == 4)) { resolved = 0; sendMsg_action2.schedule(1, 1ms); } else {}
+  =}
+}
+
+reactor receiver(_id: int = 0) {
+  input rcvMsgToRecv0FromSender1: int
+  input rcvMsgToRecv1FromSender1: int
+  input rcvMsgToRecv2FromSender1: int
+  input rcvMsgToRecv3FromSender1: int
+  output ackToOrigin: int
+  state id: int = 0
+  logical action rcvMsg_action: int
+
+  reaction(startup) {=
+    id = _id;
+  =}
+
+  reaction(rcvMsg_action) -> ackToOrigin {=
+    auto msg = *rcvMsg_action.get();
+    ackToOrigin.set(id);
+  =}
+
+  reaction(rcvMsgToRecv0FromSender1) -> ackToOrigin {=
+    auto msg = *rcvMsgToRecv0FromSender1.get();
+    ackToOrigin.set(id);
+  =}
+
+  reaction(rcvMsgToRecv1FromSender1) -> ackToOrigin {=
+    auto msg = *rcvMsgToRecv1FromSender1.get();
+    ackToOrigin.set(id);
+  =}
+
+  reaction(rcvMsgToRecv2FromSender1) -> ackToOrigin {=
+    auto msg = *rcvMsgToRecv2FromSender1.get();
+    ackToOrigin.set(id);
+  =}
+
+  reaction(rcvMsgToRecv3FromSender1) -> ackToOrigin {=
+    auto msg = *rcvMsgToRecv3FromSender1.get();
+    ackToOrigin.set(id);
+  =}
+}
+
+main reactor {
+  receiver0 = new receiver(_id=0)
+  receiver1 = new receiver(_id=1)
+  receiver2 = new receiver(_id=2)
+  receiver3 = new receiver(_id=3)
+  sender1 = new Sender()
+  receiver0.ackToOrigin -> sender1.ackToOriginFromReceiver0 after 0 msec
+  receiver1.ackToOrigin -> sender1.ackToOriginFromReceiver1 after 0 msec
+  receiver2.ackToOrigin -> sender1.ackToOriginFromReceiver2 after 0 msec
+  receiver3.ackToOrigin -> sender1.ackToOriginFromReceiver3 after 0 msec
+  sender1.rcvMsgToRecv0 -> receiver0.rcvMsgToRecv0FromSender1 after 0 msec
+  sender1.rcvMsgToRecv1 -> receiver1.rcvMsgToRecv1FromSender1 after 0 msec
+  sender1.rcvMsgToRecv2 -> receiver2.rcvMsgToRecv2FromSender1 after 0 msec
+  sender1.rcvMsgToRecv3 -> receiver3.rcvMsgToRecv3FromSender1 after 0 msec
+}

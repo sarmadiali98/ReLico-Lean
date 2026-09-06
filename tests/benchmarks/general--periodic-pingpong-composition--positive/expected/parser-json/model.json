@@ -1,0 +1,173 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 12,
+            "target": "id",
+            "value": {
+              "kind": "variable",
+              "line": 12,
+              "name": "_id"
+            }
+          },
+          {
+            "after": null,
+            "arguments": [
+              {
+                "kind": "intLiteral",
+                "line": 13,
+                "value": 1
+              }
+            ],
+            "kind": "send",
+            "line": 13,
+            "messageServer": "sendMsg",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Node"
+          }
+        ],
+        "line": 11,
+        "parameters": [
+          {
+            "line": 11,
+            "name": "_id",
+            "type": "int"
+          }
+        ]
+      },
+      "knownRebecs": [
+        {
+          "className": "Node",
+          "line": 6,
+          "name": "next"
+        }
+      ],
+      "line": 4,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 17,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 17,
+              "messageServer": "rcvMsg",
+              "target": {
+                "kind": "knownRebec",
+                "name": "next"
+              },
+              "targetClassName": "Node"
+            }
+          ],
+          "line": 16,
+          "name": "sendMsg",
+          "parameters": [
+            {
+              "line": 16,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 21,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 21,
+              "messageServer": "sendMsg",
+              "target": {
+                "kind": "knownRebec",
+                "name": "next"
+              },
+              "targetClassName": "Node"
+            }
+          ],
+          "line": 20,
+          "name": "rcvMsg",
+          "parameters": [
+            {
+              "line": 20,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": 2
+        }
+      ],
+      "name": "Node",
+      "queueBound": 4,
+      "stateVariables": [
+        {
+          "line": 9,
+          "name": "id",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Node",
+          "instance": "node1",
+          "knownRebec": "next"
+        }
+      ],
+      "className": "Node",
+      "line": 25,
+      "name": "node0",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 1
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Node",
+          "instance": "node0",
+          "knownRebec": "next"
+        }
+      ],
+      "className": "Node",
+      "line": 26,
+      "name": "node1",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

@@ -1,0 +1,136 @@
+target Cpp
+
+reactor Sender {
+  input oneToOriginFromMedium3: int
+  input oneToOriginFromMedium4: int
+  output rcvMsgToMedium3: int
+  output rcvMsgToMedium4: int
+  state resolved: int = 0
+  logical action sendMsg_action1: int
+  logical action sendMsg_action2: int
+  logical action one_action: int
+
+  reaction(startup) -> sendMsg_action1 {=
+    resolved = 0;
+    sendMsg_action1.schedule(1, 0ms);
+  =}
+
+  reaction(sendMsg_action1) -> rcvMsgToMedium3, rcvMsgToMedium4 {=
+    auto msg = *sendMsg_action1.get();
+    rcvMsgToMedium3.set(msg);
+    rcvMsgToMedium4.set(msg);
+  =}
+
+  reaction(sendMsg_action2) -> rcvMsgToMedium3, rcvMsgToMedium4 {=
+    auto msg = *sendMsg_action2.get();
+    rcvMsgToMedium3.set(msg);
+    rcvMsgToMedium4.set(msg);
+  =}
+
+  reaction(one_action) -> sendMsg_action2 {=
+    auto chain = *one_action.get();
+    resolved = (resolved + 1);
+    if ((resolved == 2)) { resolved = 0; sendMsg_action2.schedule(1, 1ms); } else {}
+  =}
+
+  reaction(oneToOriginFromMedium3) -> sendMsg_action2 {=
+    auto chain = *oneToOriginFromMedium3.get();
+    resolved = (resolved + 1);
+    if ((resolved == 2)) { resolved = 0; sendMsg_action2.schedule(1, 1ms); } else {}
+  =}
+
+  reaction(oneToOriginFromMedium4) -> sendMsg_action2 {=
+    auto chain = *oneToOriginFromMedium4.get();
+    resolved = (resolved + 1);
+    if ((resolved == 2)) { resolved = 0; sendMsg_action2.schedule(1, 1ms); } else {}
+  =}
+}
+
+reactor Medium(_id: int = 0) {
+  input doneToMedium_FromReceiver1: int
+  input doneToMedium_FromReceiver2: int
+  input rcvMsgToMedium3FromSender1: int
+  input rcvMsgToMedium4FromSender1: int
+  output rcvMsgToReceiver_: int
+  output oneToOrigin: int
+  state id: int = 0
+  logical action rcvMsg_action: int
+  logical action done_action: int
+
+  reaction(startup) {=
+    id = _id;
+  =}
+
+  reaction(rcvMsg_action) -> rcvMsgToReceiver_ {=
+    auto msg = *rcvMsg_action.get();
+    rcvMsgToReceiver_.set(msg);
+  =}
+
+  reaction(rcvMsgToMedium3FromSender1) -> rcvMsgToReceiver_ {=
+    auto msg = *rcvMsgToMedium3FromSender1.get();
+    rcvMsgToReceiver_.set(msg);
+  =}
+
+  reaction(rcvMsgToMedium4FromSender1) -> rcvMsgToReceiver_ {=
+    auto msg = *rcvMsgToMedium4FromSender1.get();
+    rcvMsgToReceiver_.set(msg);
+  =}
+
+  reaction(done_action) -> oneToOrigin {=
+    auto chain = *done_action.get();
+    oneToOrigin.set(id);
+  =}
+
+  reaction(doneToMedium_FromReceiver1) -> oneToOrigin {=
+    auto chain = *doneToMedium_FromReceiver1.get();
+    oneToOrigin.set(id);
+  =}
+
+  reaction(doneToMedium_FromReceiver2) -> oneToOrigin {=
+    auto chain = *doneToMedium_FromReceiver2.get();
+    oneToOrigin.set(id);
+  =}
+}
+
+reactor receiver(_id: int = 0) {
+  input rcvMsgToReceiver_FromMedium3: int
+  input rcvMsgToReceiver_FromMedium4: int
+  output doneToMedium_: int
+  state id: int = 0
+  logical action rcvMsg_action: int
+
+  reaction(startup) {=
+    id = _id;
+  =}
+
+  reaction(rcvMsg_action) -> doneToMedium_ {=
+    auto msg = *rcvMsg_action.get();
+    doneToMedium_.set(id);
+  =}
+
+  reaction(rcvMsgToReceiver_FromMedium3) -> doneToMedium_ {=
+    auto msg = *rcvMsgToReceiver_FromMedium3.get();
+    doneToMedium_.set(id);
+  =}
+
+  reaction(rcvMsgToReceiver_FromMedium4) -> doneToMedium_ {=
+    auto msg = *rcvMsgToReceiver_FromMedium4.get();
+    doneToMedium_.set(id);
+  =}
+}
+
+main reactor {
+  receiver1 = new receiver(_id=1)
+  receiver2 = new receiver(_id=2)
+  medium3 = new Medium(_id=3)
+  medium4 = new Medium(_id=4)
+  sender1 = new Sender()
+  receiver1.doneToMedium_ -> medium3.doneToMedium_FromReceiver1 after 0 msec
+  receiver2.doneToMedium_ -> medium4.doneToMedium_FromReceiver2 after 0 msec
+  medium3.rcvMsgToReceiver_ -> receiver1.rcvMsgToReceiver_FromMedium3 after 0 msec
+  medium3.oneToOrigin -> sender1.oneToOriginFromMedium3 after 0 msec
+  medium4.rcvMsgToReceiver_ -> receiver2.rcvMsgToReceiver_FromMedium4 after 0 msec
+  medium4.oneToOrigin -> sender1.oneToOriginFromMedium4 after 0 msec
+  sender1.rcvMsgToMedium3 -> medium3.rcvMsgToMedium3FromSender1 after 0 msec
+  sender1.rcvMsgToMedium4 -> medium4.rcvMsgToMedium4FromSender1 after 0 msec
+}

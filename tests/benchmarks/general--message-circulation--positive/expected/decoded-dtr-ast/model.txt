@@ -1,0 +1,48 @@
+{ classes := [{ name := { value := "Node" },
+                knownRebecs := [{ name := { value := "next" }, className := { value := "Node" } }],
+                stateVariables := [{ name := { value := "id" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "seen" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [{ name := { value := "_id" },
+                                                  declaredType := Relico.DTR.GeneralType.int }],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "id" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "_id" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "seen" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "sendMsg" }
+                                            [Relico.DTR.GeneralExpr.intLiteral 1]
+                                            { value := 0 }] },
+                messageServers := [{ name := { value := "sendMsg" },
+                                     parameters := [{ name := { value := "msg" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "next" })
+                                                { value := "rcvMsg" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "msg" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "rcvMsg" },
+                                     parameters := [{ name := { value := "msg" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "seen" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "msg" }),
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "next" })
+                                                { value := "sendMsg" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "msg" }]
+                                                { value := 1 }],
+                                     priority := none }] }],
+  instances := [{ name := { value := "node0" },
+                  className := { value := "Node" },
+                  bindings := [({ value := "next" }, { value := "node1" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "node1" },
+                  className := { value := "Node" },
+                  bindings := [({ value := "next" }, { value := "node0" })],
+                  arguments := [Relico.DTR.GeneralValue.int 1],
+                  priority := none }] }

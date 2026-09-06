@@ -1,0 +1,123 @@
+{ classes := [{ name := { value := "Sender" },
+                knownRebecs := [{ name := { value := "medium3" }, className := { value := "Medium" } },
+                                { name := { value := "medium4" }, className := { value := "Medium" } }],
+                stateVariables := [{ name := { value := "resolved" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "resolved" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "sendMsg" }
+                                            [Relico.DTR.GeneralExpr.intLiteral 1]
+                                            { value := 0 }] },
+                messageServers := [{ name := { value := "sendMsg" },
+                                     parameters := [{ name := { value := "msg" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "medium3" })
+                                                { value := "rcvMsg" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "msg" }]
+                                                { value := 0 },
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "medium4" })
+                                                { value := "rcvMsg" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "msg" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "one" },
+                                     parameters := [{ name := { value := "chain" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "resolved" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.add)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "resolved" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "resolved" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 0),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "sendMsg" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 1]
+                                                   { value := 1 }]
+                                                []],
+                                     priority := none }] },
+              { name := { value := "Medium" },
+                knownRebecs := [{ name := { value := "origin" }, className := { value := "Sender" } },
+                                { name := { value := "receiver_" }, className := { value := "receiver" } }],
+                stateVariables := [{ name := { value := "id" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [{ name := { value := "_id" },
+                                                  declaredType := Relico.DTR.GeneralType.int }],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "id" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "_id" })] },
+                messageServers := [{ name := { value := "rcvMsg" },
+                                     parameters := [{ name := { value := "msg" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "receiver_" })
+                                                { value := "rcvMsg" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "msg" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "done" },
+                                     parameters := [{ name := { value := "chain" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "origin" })
+                                                { value := "one" }
+                                                [Relico.DTR.GeneralExpr.stateVar { value := "id" }]
+                                                { value := 0 }],
+                                     priority := none }] },
+              { name := { value := "receiver" },
+                knownRebecs := [{ name := { value := "medium_" }, className := { value := "Medium" } }],
+                stateVariables := [{ name := { value := "id" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [{ name := { value := "_id" },
+                                                  declaredType := Relico.DTR.GeneralType.int }],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "id" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "_id" })] },
+                messageServers := [{ name := { value := "rcvMsg" },
+                                     parameters := [{ name := { value := "msg" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "medium_" })
+                                                { value := "done" }
+                                                [Relico.DTR.GeneralExpr.stateVar { value := "id" }]
+                                                { value := 0 }],
+                                     priority := none }] }],
+  instances := [{ name := { value := "receiver1" },
+                  className := { value := "receiver" },
+                  bindings := [({ value := "medium_" }, { value := "medium3" })],
+                  arguments := [Relico.DTR.GeneralValue.int 1],
+                  priority := none },
+                { name := { value := "receiver2" },
+                  className := { value := "receiver" },
+                  bindings := [({ value := "medium_" }, { value := "medium4" })],
+                  arguments := [Relico.DTR.GeneralValue.int 2],
+                  priority := none },
+                { name := { value := "medium3" },
+                  className := { value := "Medium" },
+                  bindings := [({ value := "origin" }, { value := "sender1" }),
+                               ({ value := "receiver_" }, { value := "receiver1" })],
+                  arguments := [Relico.DTR.GeneralValue.int 3],
+                  priority := none },
+                { name := { value := "medium4" },
+                  className := { value := "Medium" },
+                  bindings := [({ value := "origin" }, { value := "sender1" }),
+                               ({ value := "receiver_" }, { value := "receiver2" })],
+                  arguments := [Relico.DTR.GeneralValue.int 4],
+                  priority := none },
+                { name := { value := "sender1" },
+                  className := { value := "Sender" },
+                  bindings := [({ value := "medium3" }, { value := "medium3" }),
+                               ({ value := "medium4" }, { value := "medium4" })],
+                  arguments := [],
+                  priority := none }] }

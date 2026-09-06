@@ -1,0 +1,307 @@
+{ reactors := [{ name := { value := "Sender" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "ackToOriginFromReceiver0" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "ackToOriginFromReceiver1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "ackToOriginFromReceiver2" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "ackToOriginFromReceiver3" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "rcvMsgToRecv0" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "rcvMsgToRecv1" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "rcvMsgToRecv2" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "rcvMsgToRecv3" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "resolved" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "sendMsg_action1" },
+                                      parameters := [{ name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "sendMsg_action2" },
+                                      parameters := [{ name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "ack_action" },
+                                      parameters := [{ name := { value := "from" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "resolved" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.schedule
+                                                 { value := "sendMsg_action1" }
+                                                 [Relico.LF.GeneralExpr.intLiteral 1]
+                                                 { value := 0 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "sendMsg_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sendMsg_action1" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToRecv0" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToRecv1" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToRecv2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToRecv3" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none },
+                                      { name := { value := "sendMsg_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sendMsg_action2" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToRecv0" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToRecv1" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToRecv2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToRecv3" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none },
+                                      { name := { value := "ack_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "ack_action" },
+                                        parameters := [{ value := "from" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 4))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resolved" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "sendMsg_action2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "ackToOriginFromReceiver0_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "ackToOriginFromReceiver0" },
+                                        parameters := [{ value := "from" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 4))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resolved" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "sendMsg_action2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "ackToOriginFromReceiver1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "ackToOriginFromReceiver1" },
+                                        parameters := [{ value := "from" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 4))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resolved" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "sendMsg_action2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "ackToOriginFromReceiver2_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "ackToOriginFromReceiver2" },
+                                        parameters := [{ value := "from" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 4))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resolved" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "sendMsg_action2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "ackToOriginFromReceiver3_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "ackToOriginFromReceiver3" },
+                                        parameters := [{ value := "from" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 4))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resolved" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "sendMsg_action2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none }] },
+               { name := { value := "receiver" },
+                 parameters := [{ name := { value := "_id" }, declaredType := Relico.LF.GeneralType.int }],
+                 inputPorts := [{ name := { value := "rcvMsgToRecv0FromSender1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "rcvMsgToRecv1FromSender1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "rcvMsgToRecv2FromSender1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "rcvMsgToRecv3FromSender1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "ackToOrigin" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "id" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "rcvMsg_action" },
+                                      parameters := [{ name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [{ value := "_id" }],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "id" }
+                                                 (Relico.LF.GeneralExpr.parameterVar { value := "_id" })],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "rcvMsg_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "rcvMsg_action" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "ackToOrigin" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none },
+                                      { name := { value := "rcvMsgToRecv0FromSender1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "rcvMsgToRecv0FromSender1" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "ackToOrigin" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none },
+                                      { name := { value := "rcvMsgToRecv1FromSender1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "rcvMsgToRecv1FromSender1" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "ackToOrigin" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none },
+                                      { name := { value := "rcvMsgToRecv2FromSender1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "rcvMsgToRecv2FromSender1" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "ackToOrigin" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none },
+                                      { name := { value := "rcvMsgToRecv3FromSender1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "rcvMsgToRecv3FromSender1" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "ackToOrigin" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none }] }],
+  instances := [{ name := { value := "receiver0" },
+                  reactorName := { value := "receiver" },
+                  arguments := [Relico.LF.GeneralValue.int 0] },
+                { name := { value := "receiver1" },
+                  reactorName := { value := "receiver" },
+                  arguments := [Relico.LF.GeneralValue.int 1] },
+                { name := { value := "receiver2" },
+                  reactorName := { value := "receiver" },
+                  arguments := [Relico.LF.GeneralValue.int 2] },
+                { name := { value := "receiver3" },
+                  reactorName := { value := "receiver" },
+                  arguments := [Relico.LF.GeneralValue.int 3] },
+                { name := { value := "sender1" }, reactorName := { value := "Sender" }, arguments := [] }],
+  connections := [{ sourceInstance := { value := "receiver0" },
+                    sourcePort := { value := "ackToOrigin" },
+                    targetInstance := { value := "sender1" },
+                    targetPort := { value := "ackToOriginFromReceiver0" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "receiver1" },
+                    sourcePort := { value := "ackToOrigin" },
+                    targetInstance := { value := "sender1" },
+                    targetPort := { value := "ackToOriginFromReceiver1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "receiver2" },
+                    sourcePort := { value := "ackToOrigin" },
+                    targetInstance := { value := "sender1" },
+                    targetPort := { value := "ackToOriginFromReceiver2" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "receiver3" },
+                    sourcePort := { value := "ackToOrigin" },
+                    targetInstance := { value := "sender1" },
+                    targetPort := { value := "ackToOriginFromReceiver3" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "sender1" },
+                    sourcePort := { value := "rcvMsgToRecv0" },
+                    targetInstance := { value := "receiver0" },
+                    targetPort := { value := "rcvMsgToRecv0FromSender1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "sender1" },
+                    sourcePort := { value := "rcvMsgToRecv1" },
+                    targetInstance := { value := "receiver1" },
+                    targetPort := { value := "rcvMsgToRecv1FromSender1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "sender1" },
+                    sourcePort := { value := "rcvMsgToRecv2" },
+                    targetInstance := { value := "receiver2" },
+                    targetPort := { value := "rcvMsgToRecv2FromSender1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "sender1" },
+                    sourcePort := { value := "rcvMsgToRecv3" },
+                    targetInstance := { value := "receiver3" },
+                    targetPort := { value := "rcvMsgToRecv3FromSender1" },
+                    delay := { value := 0 } }] }

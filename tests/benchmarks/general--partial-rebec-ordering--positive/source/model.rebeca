@@ -1,0 +1,66 @@
+// Benchmark: general--partial-rebec-ordering--positive
+// A DTR-fragment redesign of examples2 Paritial_Ordering_Rebec, whose original
+// form overflows the model checker's queue; see README for the redesign.
+reactiveclass Sender(4) {
+    knownrebecs {
+        Medium medium3;
+        Medium medium4;
+    }
+    statevars {
+        int resolved;
+    }
+    Sender() {
+        resolved = 0;
+        self.sendMsg(1);
+    }
+    msgsrv sendMsg(int msg) {
+        medium3.rcvMsg(msg);
+        medium4.rcvMsg(msg);
+    }
+    msgsrv one(int chain) {
+        resolved = resolved + 1;
+        if (resolved == 2) {
+            resolved = 0;
+            self.sendMsg(1) after(1);
+        }
+    }
+}
+reactiveclass Medium(4) {
+    knownrebecs {
+        Sender origin;
+        receiver receiver_;
+    }
+    statevars {
+        int id;
+    }
+    Medium(int _id) {
+        id = _id;
+    }
+    msgsrv rcvMsg(int msg) {
+        receiver_.rcvMsg(msg);
+    }
+    msgsrv done(int chain) {
+        origin.one(id);
+    }
+}
+reactiveclass receiver(4) {
+    knownrebecs {
+        Medium medium_;
+    }
+    statevars {
+        int id;
+    }
+    receiver(int _id) {
+        id = _id;
+    }
+    msgsrv rcvMsg(int msg) {
+        medium_.done(id);
+    }
+}
+main {
+  receiver receiver1(medium3):(1);
+  receiver receiver2(medium4):(2);
+  Medium medium3(sender1, receiver1):(3);
+  Medium medium4(sender1, receiver2):(4);
+  Sender sender1(medium3, medium4):();
+}
