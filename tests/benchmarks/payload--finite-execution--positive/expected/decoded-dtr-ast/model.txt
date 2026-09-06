@@ -1,0 +1,21 @@
+{ reactiveClass := { name := { value := "Rotor" },
+                     stateVariables := [{ name := { value := "x" }, initialValue := 0 },
+                                        { name := { value := "y" }, initialValue := 0 },
+                                        { name := { value := "z" }, initialValue := 0 }],
+                     constructor := { body := [Relico.DTR.Stmt.assign { value := "x" } (Relico.DTR.Expr.intLiteral 1),
+                                               Relico.DTR.Stmt.assign { value := "y" } (Relico.DTR.Expr.intLiteral 2),
+                                               Relico.DTR.Stmt.assign { value := "z" } (Relico.DTR.Expr.intLiteral 3),
+                                               Relico.DTR.Stmt.selfSend { value := "turn" } { value := 1 }] },
+                     messageServer := { name := { value := "turn" },
+                                        body := [Relico.DTR.Stmt.assign
+                                                   { value := "x" }
+                                                   (Relico.DTR.Expr.stateVar { value := "y" }),
+                                                 Relico.DTR.Stmt.assign
+                                                   { value := "y" }
+                                                   (Relico.DTR.Expr.stateVar { value := "z" }),
+                                                 Relico.DTR.Stmt.assign
+                                                   { value := "z" }
+                                                   (Relico.DTR.Expr.stateVar { value := "x" }),
+                                                 Relico.DTR.Stmt.selfSend { value := "turn" } { value := 1 }],
+                                        priority := none } },
+  actor := { name := { value := "rotor" }, className := { value := "Rotor" } } }

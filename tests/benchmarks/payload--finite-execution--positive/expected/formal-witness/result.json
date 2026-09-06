@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "payload--finite-execution--positive",
+  "elaborated_modules": [
+    "Relico/Tests/PayloadTrace.lean"
+  ],
+  "obligation_count": 9,
+  "obligation_ids": [
+    "PayloadTrace:0001",
+    "PayloadTrace:0002",
+    "PayloadTrace:0003",
+    "PayloadTrace:0004",
+    "PayloadTrace:0005",
+    "PayloadTrace:0006",
+    "PayloadTrace:0007",
+    "PayloadTrace:0008",
+    "PayloadTrace:0009"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

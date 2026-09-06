@@ -1,0 +1,118 @@
+{
+  "benchmark_id": "payload--finite-execution--positive",
+  "obligation_count": 9,
+  "obligations": [
+    {
+      "classification": "test_fixture_or_helper",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--finite-execution--positive",
+      "kind": "def",
+      "line_number": "8",
+      "mapping_status": "accepted",
+      "name_or_expression": "payloadSourceTraceLabels",
+      "obligation_id": "PayloadTrace:0001",
+      "original_benchmark_candidate": "payload--finite-execution--positive",
+      "test_file": "Relico/Tests/PayloadTrace.lean"
+    },
+    {
+      "classification": "test_fixture_or_helper",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--finite-execution--positive",
+      "kind": "def",
+      "line_number": "14",
+      "mapping_status": "accepted",
+      "name_or_expression": "payloadTargetTraceLabels",
+      "obligation_id": "PayloadTrace:0002",
+      "original_benchmark_candidate": "payload--finite-execution--positive",
+      "test_file": "Relico/Tests/PayloadTrace.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--finite-execution--positive",
+      "kind": "theorem",
+      "line_number": "20",
+      "mapping_status": "accepted",
+      "name_or_expression": "payload_source_finite_execution",
+      "obligation_id": "PayloadTrace:0003",
+      "original_benchmark_candidate": "payload--finite-execution--positive",
+      "test_file": "Relico/Tests/PayloadTrace.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--finite-execution--positive",
+      "kind": "theorem",
+      "line_number": "35",
+      "mapping_status": "accepted",
+      "name_or_expression": "payload_target_finite_execution",
+      "obligation_id": "PayloadTrace:0004",
+      "original_benchmark_candidate": "payload--finite-execution--positive",
+      "test_file": "Relico/Tests/PayloadTrace.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--finite-execution--positive",
+      "kind": "theorem",
+      "line_number": "50",
+      "mapping_status": "accepted",
+      "name_or_expression": "payload_concrete_trace_corresponds",
+      "obligation_id": "PayloadTrace:0005",
+      "original_benchmark_candidate": "payload--finite-execution--positive",
+      "test_file": "Relico/Tests/PayloadTrace.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--finite-execution--positive",
+      "kind": "theorem",
+      "line_number": "63",
+      "mapping_status": "accepted",
+      "name_or_expression": "payload_concrete_trace_lengths_equal",
+      "obligation_id": "PayloadTrace:0006",
+      "original_benchmark_candidate": "payload--finite-execution--positive",
+      "test_file": "Relico/Tests/PayloadTrace.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--finite-execution--positive",
+      "kind": "theorem",
+      "line_number": "71",
+      "mapping_status": "accepted",
+      "name_or_expression": "payload_trace_forward_exists",
+      "obligation_id": "PayloadTrace:0007",
+      "original_benchmark_candidate": "payload--finite-execution--positive",
+      "test_file": "Relico/Tests/PayloadTrace.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--finite-execution--positive",
+      "kind": "theorem",
+      "line_number": "90",
+      "mapping_status": "accepted",
+      "name_or_expression": "payload_trace_backward_exists",
+      "obligation_id": "PayloadTrace:0008",
+      "original_benchmark_candidate": "payload--finite-execution--positive",
+      "test_file": "Relico/Tests/PayloadTrace.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--finite-execution--positive",
+      "kind": "theorem",
+      "line_number": "113",
+      "mapping_status": "accepted",
+      "name_or_expression": "payload_source_finite_execution_preserves_well_formedness",
+      "obligation_id": "PayloadTrace:0009",
+      "original_benchmark_candidate": "payload--finite-execution--positive",
+      "test_file": "Relico/Tests/PayloadTrace.lean"
+    }
+  ],
+  "schema_version": 1,
+  "test_modules": [
+    "Relico/Tests/PayloadTrace.lean"
+  ]
+}

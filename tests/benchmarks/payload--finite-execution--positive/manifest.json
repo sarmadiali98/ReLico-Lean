@@ -1,0 +1,227 @@
+{
+  "benchmark_id": "payload--finite-execution--positive",
+  "description": "Payload benchmark for finite execution: a single server rotates the store every period, so any bounded window is a finite execution that repeats exactly.",
+  "expected_artifacts": [
+    {
+      "path": "source/result.json",
+      "required": true,
+      "sha256": "2f0c10f772094204537174fabdfda1af657ec4fa6f929a0bb1677b872bbcfbde"
+    },
+    {
+      "path": "rmc/verdict.json",
+      "required": true,
+      "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
+    },
+    {
+      "path": "parser-json/model.json",
+      "required": true,
+      "sha256": "97b13950bd3263b089715ebb7f71608178397983219a334bca304ac79278d13a"
+    },
+    {
+      "path": "decoded-dtr-ast/model.txt",
+      "required": true,
+      "sha256": "b1c15f82e1dd8d08e01377d295463b80c70b712cc9bfffd7c054fcdf7db5724e"
+    },
+    {
+      "path": "formal-witness/result.json",
+      "required": true,
+      "sha256": "b597599d2ea8e5c6ec16a01440321466dc9b7888c3dcb7a913fdb9a9114b7e4e"
+    },
+    {
+      "path": "translated-lf-ast/program.txt",
+      "required": true,
+      "sha256": "91e77fe7ceb92cb27ea3a073e3dd4c2a04810a7ff98fd967c68b38ac4d18aaf0"
+    },
+    {
+      "path": "lf-source/TranslatedLFProgram.lf",
+      "required": true,
+      "sha256": "1642e9122526943289f301084c6b67ff96963fdde115a425944b054c00691566"
+    },
+    {
+      "path": "lfc/result.json",
+      "required": true,
+      "sha256": "fb7581ee97c62580ef11bd0d765aed50c289ee1ca958df37ea6035aa72ef676d"
+    },
+    {
+      "path": "runtime/result.json",
+      "required": true,
+      "sha256": "98f94a1bb91705b98b1e45db395a59bc02ce8c115d7f2226c32fa551ed5e591a"
+    }
+  ],
+  "expected_terminal_stage": "runtime",
+  "polarity": "positive",
+  "schema_version": 1,
+  "source_files": [
+    "source/model.rebeca"
+  ],
+  "stages": [
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "source",
+        "--benchmark-id",
+        "payload--finite-execution--positive",
+        "--source",
+        "{source}",
+        "--output",
+        "{actual}/source/result.json"
+      ],
+      "name": "source"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc/verdict.json"
+      ],
+      "name": "rmc",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "parser-json",
+        "--family",
+        "payload",
+        "--repo",
+        "{repo}",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--artifact-zip",
+        "/Users/ali/Desktop/LFStructuringNonDeterminism/ReLico-fmcad-2026-artifact-v1.zip",
+        "--maven",
+        "/opt/homebrew/Cellar/maven/3.9.16/bin/mvn",
+        "--output",
+        "{actual}/parser-json/model.json"
+      ],
+      "name": "parser-json",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lean-export",
+        "--family",
+        "payload",
+        "--mode",
+        "decoded-dtr-ast",
+        "--repo",
+        "{repo}",
+        "--lake",
+        "/Users/ali/.elan/bin/lake",
+        "--input",
+        "{actual}/parser-json/model.json",
+        "--output",
+        "{actual}/decoded-dtr-ast/model.txt"
+      ],
+      "name": "decoded-dtr-ast",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "formal-witness",
+        "--repo",
+        "{repo}",
+        "--lake",
+        "/Users/ali/.elan/bin/lake",
+        "--coverage",
+        "{benchmark}/coverage.json",
+        "--output",
+        "{actual}/formal-witness/result.json"
+      ],
+      "name": "formal-witness",
+      "timeout_seconds": 1200
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lean-export",
+        "--family",
+        "payload",
+        "--mode",
+        "translated-lf-ast",
+        "--repo",
+        "{repo}",
+        "--lake",
+        "/Users/ali/.elan/bin/lake",
+        "--input",
+        "{actual}/parser-json/model.json",
+        "--output",
+        "{actual}/translated-lf-ast/program.txt"
+      ],
+      "name": "translated-lf-ast",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lean-export",
+        "--family",
+        "payload",
+        "--mode",
+        "lf-source",
+        "--repo",
+        "{repo}",
+        "--lake",
+        "/Users/ali/.elan/bin/lake",
+        "--input",
+        "{actual}/parser-json/model.json",
+        "--output",
+        "{actual}/lf-source/TranslatedLFProgram.lf"
+      ],
+      "name": "lf-source",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lfc",
+        "--lf-source",
+        "{actual}/lf-source/TranslatedLFProgram.lf",
+        "--work-directory",
+        "{actual}/work/lfc",
+        "--lfc",
+        "/Users/ali/.local/share/lingua-franca/cli/bin/lfc",
+        "--output",
+        "{actual}/lfc/result.json"
+      ],
+      "name": "lfc",
+      "timeout_seconds": 1200
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "runtime",
+        "--executable",
+        "{actual}/work/lfc/bin/TranslatedLFProgram",
+        "--output",
+        "{actual}/runtime/result.json"
+      ],
+      "name": "runtime",
+      "timeout_seconds": 600
+    }
+  ]
+}

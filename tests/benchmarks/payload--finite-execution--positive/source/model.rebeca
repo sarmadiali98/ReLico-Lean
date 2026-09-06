@@ -1,0 +1,30 @@
+// Benchmark: payload--finite-execution--positive
+// A single server rotates a three-variable store every period, so
+// every bounded window is a finite execution that repeats exactly.
+// An earlier draft branched on a step counter; the finite-store
+// bridge refuses conditionals, so the rotation is branchless.
+reactiveclass Rotor(10) {
+    statevars {
+        int x;
+        int y;
+        int z;
+    }
+
+    Rotor() {
+        x = 1;
+        y = 2;
+        z = 3;
+        self.turn() after(1);
+    }
+
+    msgsrv turn() {
+        x = y;
+        y = z;
+        z = x;
+        self.turn() after(1);
+    }
+}
+
+main {
+    Rotor rotor():();
+}
