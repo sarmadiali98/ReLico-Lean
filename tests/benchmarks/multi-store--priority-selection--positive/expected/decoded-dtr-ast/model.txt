@@ -1,0 +1,20 @@
+{ reactiveClass := { name := { value := "Selector" },
+                     stateVariables := [{ name := { value := "x" }, initialValue := 0 },
+                                        { name := { value := "y" }, initialValue := 0 }],
+                     constructor := { body := [Relico.DTR.Stmt.assign { value := "x" } (Relico.DTR.Expr.intLiteral 0),
+                                               Relico.DTR.Stmt.assign { value := "y" } (Relico.DTR.Expr.intLiteral 0),
+                                               Relico.DTR.Stmt.selfSend { value := "high" } { value := 1 },
+                                               Relico.DTR.Stmt.selfSend { value := "low" } { value := 1 }] },
+                     messageServers := [{ name := { value := "high" },
+                                          body := [Relico.DTR.Stmt.assign
+                                                     { value := "x" }
+                                                     (Relico.DTR.Expr.intLiteral 1),
+                                                   Relico.DTR.Stmt.selfSend { value := "high" } { value := 1 }],
+                                          priority := some 1 },
+                                        { name := { value := "low" },
+                                          body := [Relico.DTR.Stmt.assign
+                                                     { value := "y" }
+                                                     (Relico.DTR.Expr.intLiteral 1),
+                                                   Relico.DTR.Stmt.selfSend { value := "low" } { value := 1 }],
+                                          priority := some 2 }] },
+  actor := { name := { value := "selector" }, className := { value := "Selector" } } }
