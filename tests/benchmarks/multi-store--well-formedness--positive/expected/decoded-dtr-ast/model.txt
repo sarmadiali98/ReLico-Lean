@@ -1,0 +1,19 @@
+{ reactiveClass := { name := { value := "Model" },
+                     stateVariables := [{ name := { value := "x" }, initialValue := 0 },
+                                        { name := { value := "y" }, initialValue := 0 }],
+                     constructor := { body := [Relico.DTR.Stmt.assign { value := "x" } (Relico.DTR.Expr.intLiteral 0),
+                                               Relico.DTR.Stmt.assign { value := "y" } (Relico.DTR.Expr.intLiteral 0),
+                                               Relico.DTR.Stmt.selfSend { value := "alpha" } { value := 1 }] },
+                     messageServers := [{ name := { value := "alpha" },
+                                          body := [Relico.DTR.Stmt.assign
+                                                     { value := "x" }
+                                                     (Relico.DTR.Expr.stateVar { value := "y" }),
+                                                   Relico.DTR.Stmt.selfSend { value := "beta" } { value := 1 }],
+                                          priority := some 1 },
+                                        { name := { value := "beta" },
+                                          body := [Relico.DTR.Stmt.assign
+                                                     { value := "y" }
+                                                     (Relico.DTR.Expr.stateVar { value := "x" }),
+                                                   Relico.DTR.Stmt.selfSend { value := "alpha" } { value := 1 }],
+                                          priority := some 2 }] },
+  actor := { name := { value := "model" }, className := { value := "Model" } } }

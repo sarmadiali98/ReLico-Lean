@@ -1,0 +1,22 @@
+{ reactor := { name := { value := "Model" },
+               stateVariables := [{ name := { value := "x" }, initialValue := 0 },
+                                  { name := { value := "y" }, initialValue := 0 }],
+               logicalActions := [{ value := "alpha_action" }, { value := "beta_action" }],
+               startupReaction := { name := { value := "startup" },
+                                    trigger := Relico.LF.Trigger.startup,
+                                    body := [Relico.LF.Stmt.assign { value := "x" } (Relico.LF.Expr.intLiteral 0),
+                                             Relico.LF.Stmt.assign { value := "y" } (Relico.LF.Expr.intLiteral 0),
+                                             Relico.LF.Stmt.schedule { value := "alpha_action" } { value := 1 }] },
+               messageReactions := [{ name := { value := "alpha_reaction" },
+                                      trigger := Relico.LF.Trigger.logicalAction { value := "alpha_action" },
+                                      body := [Relico.LF.Stmt.assign
+                                                 { value := "x" }
+                                                 (Relico.LF.Expr.stateVar { value := "y" }),
+                                               Relico.LF.Stmt.schedule { value := "beta_action" } { value := 1 }] },
+                                    { name := { value := "beta_reaction" },
+                                      trigger := Relico.LF.Trigger.logicalAction { value := "beta_action" },
+                                      body := [Relico.LF.Stmt.assign
+                                                 { value := "y" }
+                                                 (Relico.LF.Expr.stateVar { value := "x" }),
+                                               Relico.LF.Stmt.schedule { value := "alpha_action" } { value := 1 }] }] },
+  reactorInstance := { name := { value := "model" }, reactorName := { value := "Model" } } }

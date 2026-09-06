@@ -1,0 +1,37 @@
+{
+  "benchmark_id": "multi-store--well-formedness--positive",
+  "elaborated_modules": [
+    "Relico/Tests/DirectLFStatementBackward.lean",
+    "Relico/Tests/MultiStoreModelTranslation.lean"
+  ],
+  "obligation_count": 25,
+  "obligation_ids": [
+    "DirectLFStatementBackward:0001",
+    "DirectLFStatementBackward:0002",
+    "DirectLFStatementBackward:0003",
+    "DirectLFStatementBackward:0004",
+    "DirectLFStatementBackward:0005",
+    "DirectLFStatementBackward:0006",
+    "MultiStoreModelTranslation:0001",
+    "MultiStoreModelTranslation:0002",
+    "MultiStoreModelTranslation:0003",
+    "MultiStoreModelTranslation:0004",
+    "MultiStoreModelTranslation:0005",
+    "MultiStoreModelTranslation:0006",
+    "MultiStoreModelTranslation:0007",
+    "MultiStoreModelTranslation:0008",
+    "MultiStoreModelTranslation:0009",
+    "MultiStoreModelTranslation:0010",
+    "MultiStoreModelTranslation:0011",
+    "MultiStoreModelTranslation:0012",
+    "MultiStoreModelTranslation:0013",
+    "MultiStoreModelTranslation:0014",
+    "MultiStoreModelTranslation:0015",
+    "MultiStoreModelTranslation:0016",
+    "MultiStoreModelTranslation:0017",
+    "MultiStoreModelTranslation:0018",
+    "MultiStoreModelTranslation:0019"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

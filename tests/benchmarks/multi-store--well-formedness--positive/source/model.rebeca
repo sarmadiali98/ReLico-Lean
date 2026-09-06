@@ -1,0 +1,30 @@
+// Benchmark: multi-store--well-formedness--positive
+// A multi-store source exercising well-formedness: a ranked two-server chain, exercising the structural surface the well-formedness predicate checks.
+reactiveclass Model(10) {
+    statevars {
+        int x;
+        int y;
+    }
+
+    Model() {
+        x = 0;
+        y = 0;
+        self.alpha() after(1);
+    }
+
+    @priority(1)
+    msgsrv alpha() {
+        x = y;
+        self.beta() after(1);
+    }
+
+    @priority(2)
+    msgsrv beta() {
+        y = x;
+        self.alpha() after(1);
+    }
+}
+
+main {
+    Model model():();
+}
