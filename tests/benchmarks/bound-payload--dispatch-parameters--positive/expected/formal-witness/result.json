@@ -1,0 +1,33 @@
+{
+  "benchmark_id": "bound-payload--dispatch-parameters--positive",
+  "elaborated_modules": [
+    "Relico/Tests/DetailedBoundPayloadInvariantMatches.lean"
+  ],
+  "obligation_count": 22,
+  "obligation_ids": [
+    "DetailedBoundPayloadInvariantMatches:0001",
+    "DetailedBoundPayloadInvariantMatches:0002",
+    "DetailedBoundPayloadInvariantMatches:0003",
+    "DetailedBoundPayloadInvariantMatches:0004",
+    "DetailedBoundPayloadInvariantMatches:0005",
+    "DetailedBoundPayloadInvariantMatches:0006",
+    "DetailedBoundPayloadInvariantMatches:0007",
+    "DetailedBoundPayloadInvariantMatches:0008",
+    "DetailedBoundPayloadInvariantMatches:0009",
+    "DetailedBoundPayloadInvariantMatches:0010",
+    "DetailedBoundPayloadInvariantMatches:0011",
+    "DetailedBoundPayloadInvariantMatches:0012",
+    "DetailedBoundPayloadInvariantMatches:0013",
+    "DetailedBoundPayloadInvariantMatches:0014",
+    "DetailedBoundPayloadInvariantMatches:0015",
+    "DetailedBoundPayloadInvariantMatches:0016",
+    "DetailedBoundPayloadInvariantMatches:0017",
+    "DetailedBoundPayloadInvariantMatches:0018",
+    "DetailedBoundPayloadInvariantMatches:0019",
+    "DetailedBoundPayloadInvariantMatches:0020",
+    "DetailedBoundPayloadInvariantMatches:0021",
+    "DetailedBoundPayloadInvariantMatches:0022"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

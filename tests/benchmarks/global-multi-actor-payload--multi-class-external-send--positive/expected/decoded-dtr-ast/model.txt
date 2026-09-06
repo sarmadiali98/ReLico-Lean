@@ -1,0 +1,50 @@
+{ classes := [{ name := { value := "Sender" },
+                knownRebecs := [{ name := { value := "receiver0" }, className := { value := "Receiver" } }],
+                stateVariables := [],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "sendMessage" }
+                                            [Relico.DTR.GeneralExpr.intLiteral 1]
+                                            { value := 0 },
+                                          Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "keepAlive" }
+                                            []
+                                            { value := 1 }] },
+                messageServers := [{ name := { value := "sendMessage" },
+                                     parameters := [{ name := { value := "data" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "receiver0" })
+                                                { value := "receiveMessage" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "data" }]
+                                                { value := 0 }],
+                                     priority := some 1 },
+                                   { name := { value := "keepAlive" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "keepAlive" }
+                                                []
+                                                { value := 1 }],
+                                     priority := none }] },
+              { name := { value := "Receiver" },
+                knownRebecs := [],
+                stateVariables := [],
+                constructor := { parameters := [], body := [] },
+                messageServers := [{ name := { value := "receiveMessage" },
+                                     parameters := [{ name := { value := "data" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [],
+                                     priority := some 1 }] }],
+  instances := [{ name := { value := "sender0" },
+                  className := { value := "Sender" },
+                  bindings := [({ value := "receiver0" }, { value := "receiver0" })],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "receiver0" },
+                  className := { value := "Receiver" },
+                  bindings := [],
+                  arguments := [],
+                  priority := none }] }

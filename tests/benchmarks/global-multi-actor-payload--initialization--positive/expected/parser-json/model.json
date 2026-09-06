@@ -1,0 +1,163 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "after": null,
+            "arguments": [
+              {
+                "kind": "intLiteral",
+                "line": 10,
+                "value": 1
+              }
+            ],
+            "kind": "send",
+            "line": 10,
+            "messageServer": "sendMessage",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Sender"
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 1
+            },
+            "arguments": [],
+            "kind": "send",
+            "line": 11,
+            "messageServer": "keepAlive",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Sender"
+          }
+        ],
+        "line": 9,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Receiver",
+          "line": 6,
+          "name": "receiver0"
+        }
+      ],
+      "line": 4,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 16,
+                  "name": "data"
+                }
+              ],
+              "kind": "send",
+              "line": 16,
+              "messageServer": "receiveMessage",
+              "target": {
+                "kind": "knownRebec",
+                "name": "receiver0"
+              },
+              "targetClassName": "Receiver"
+            }
+          ],
+          "line": 15,
+          "name": "sendMessage",
+          "parameters": [
+            {
+              "line": 15,
+              "name": "data",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 20,
+              "messageServer": "keepAlive",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Sender"
+            }
+          ],
+          "line": 19,
+          "name": "keepAlive",
+          "parameters": [],
+          "priority": null
+        }
+      ],
+      "name": "Sender",
+      "queueBound": 100,
+      "stateVariables": []
+    },
+    {
+      "constructor": {
+        "body": [],
+        "line": null,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 24,
+      "messageServers": [
+        {
+          "body": [],
+          "line": 26,
+          "name": "receiveMessage",
+          "parameters": [
+            {
+              "line": 26,
+              "name": "data",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        }
+      ],
+      "name": "Receiver",
+      "queueBound": 100,
+      "stateVariables": []
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Receiver",
+      "line": 32,
+      "name": "receiver0",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Receiver",
+          "instance": "receiver0",
+          "knownRebec": "receiver0"
+        }
+      ],
+      "className": "Sender",
+      "line": 33,
+      "name": "sender0",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

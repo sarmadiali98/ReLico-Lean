@@ -1,0 +1,28 @@
+target Cpp
+
+reactor Controller {
+  state x: int = 0
+  logical action dispatch_action1: int
+  logical action dispatch_action2: int
+
+  reaction(startup) -> dispatch_action1 {=
+    x = 0;
+    dispatch_action1.schedule(1, 1ms);
+  =}
+
+  reaction(dispatch_action1) -> dispatch_action2 {=
+    auto payload = *dispatch_action1.get();
+    x = payload;
+    dispatch_action2.schedule(payload, 1ms);
+  =}
+
+  reaction(dispatch_action2) -> dispatch_action2 {=
+    auto payload = *dispatch_action2.get();
+    x = payload;
+    dispatch_action2.schedule(payload, 1ms);
+  =}
+}
+
+main reactor {
+  controller = new Controller()
+}

@@ -1,0 +1,111 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 10,
+            "target": "x",
+            "value": {
+              "kind": "intLiteral",
+              "line": 10,
+              "value": 0
+            }
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 1
+            },
+            "arguments": [
+              {
+                "kind": "intLiteral",
+                "line": 11,
+                "value": 1
+              }
+            ],
+            "kind": "send",
+            "line": 11,
+            "messageServer": "dispatch",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Controller"
+          }
+        ],
+        "line": 9,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 4,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 15,
+              "target": "x",
+              "value": {
+                "kind": "variable",
+                "line": 15,
+                "name": "payload"
+              }
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 16,
+                  "name": "payload"
+                }
+              ],
+              "kind": "send",
+              "line": 16,
+              "messageServer": "dispatch",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Controller"
+            }
+          ],
+          "line": 14,
+          "name": "dispatch",
+          "parameters": [
+            {
+              "line": 14,
+              "name": "payload",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Controller",
+      "queueBound": 10,
+      "stateVariables": [
+        {
+          "line": 6,
+          "name": "x",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Controller",
+      "line": 21,
+      "name": "controller",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

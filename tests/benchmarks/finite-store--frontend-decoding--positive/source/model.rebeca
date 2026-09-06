@@ -1,0 +1,22 @@
+// Benchmark: finite-store--frontend-decoding--positive
+// Formerly finite-store--frontend-decoding--negative, re-polarized: the restriction it encoded is
+// obsolete under the current verified fragment. See README.
+reactiveclass Controller(10) {
+    statevars {
+        int x;
+    }
+
+    Controller() {
+        x = 0;
+        self.dispatch(1) after(1);
+    }
+
+    msgsrv dispatch(int payload) {
+        x = payload;
+        self.dispatch(payload) after(1);
+    }
+}
+
+main {
+    Controller controller():();
+}

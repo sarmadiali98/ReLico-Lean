@@ -1,0 +1,48 @@
+{ reactors := [{ name := { value := "Controller" },
+                 parameters := [],
+                 inputPorts := [],
+                 outputPorts := [],
+                 stateVariables := [{ name := { value := "x" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "dispatch_action1" },
+                                      parameters := [{ name := { value := "payload" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "dispatch_action2" },
+                                      parameters := [{ name := { value := "payload" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "x" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.schedule
+                                                 { value := "dispatch_action1" }
+                                                 [Relico.LF.GeneralExpr.intLiteral 1]
+                                                 { value := 1 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "dispatch_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "dispatch_action1" },
+                                        parameters := [{ value := "payload" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "x" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "payload" }),
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "dispatch_action2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "payload" }]
+                                                   { value := 1 }],
+                                        priority := none },
+                                      { name := { value := "dispatch_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "dispatch_action2" },
+                                        parameters := [{ value := "payload" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "x" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "payload" }),
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "dispatch_action2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "payload" }]
+                                                   { value := 1 }],
+                                        priority := none }] }],
+  instances := [{ name := { value := "controller" }, reactorName := { value := "Controller" }, arguments := [] }],
+  connections := [] }

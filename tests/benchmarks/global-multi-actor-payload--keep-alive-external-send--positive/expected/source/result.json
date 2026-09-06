@@ -1,0 +1,6 @@
+{
+  "benchmark_id": "global-multi-actor-payload--keep-alive-external-send--positive",
+  "schema_version": 1,
+  "sha256": "5d047366ce261398568d8d62933fb98289b8e98c206b53c22117fdc339d8791f",
+  "status": "pass"
+}

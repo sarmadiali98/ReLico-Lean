@@ -1,0 +1,45 @@
+target Cpp
+
+reactor Sender {
+  output receiveMessageToReceiver0: int
+  logical action sendMessage_action: int
+  logical action keepAlive_action1: void
+  logical action keepAlive_action2: void
+
+  reaction(startup) -> sendMessage_action, keepAlive_action1 {=
+    sendMessage_action.schedule(1, 0ms);
+    keepAlive_action1.schedule(1ms);
+  =}
+
+  reaction(sendMessage_action) -> receiveMessageToReceiver0 {=
+    auto data = *sendMessage_action.get();
+    receiveMessageToReceiver0.set((data + 1));
+  =}
+
+  reaction(keepAlive_action1) -> keepAlive_action2 {=
+    keepAlive_action2.schedule(1ms);
+  =}
+
+  reaction(keepAlive_action2) -> keepAlive_action2 {=
+    keepAlive_action2.schedule(1ms);
+  =}
+}
+
+reactor Receiver {
+  input receiveMessageToReceiver0FromSender0: int
+  logical action receiveMessage_action: int
+
+  reaction(receiveMessage_action) {=
+    auto data = *receiveMessage_action.get();
+  =}
+
+  reaction(receiveMessageToReceiver0FromSender0) {=
+    auto data = *receiveMessageToReceiver0FromSender0.get();
+  =}
+}
+
+main reactor {
+  sender0 = new Sender()
+  receiver0 = new Receiver()
+  sender0.receiveMessageToReceiver0 -> receiver0.receiveMessageToReceiver0FromSender0 after 0 msec
+}

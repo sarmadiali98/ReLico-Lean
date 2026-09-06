@@ -1,0 +1,29 @@
+{ classes := [{ name := { value := "Controller" },
+                knownRebecs := [],
+                stateVariables := [{ name := { value := "x" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "x" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "dispatch" }
+                                            [Relico.DTR.GeneralExpr.intLiteral 1]
+                                            { value := 1 }] },
+                messageServers := [{ name := { value := "dispatch" },
+                                     parameters := [{ name := { value := "payload" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "x" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "payload" }),
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "dispatch" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "payload" }]
+                                                { value := 1 }],
+                                     priority := none }] }],
+  instances := [{ name := { value := "controller" },
+                  className := { value := "Controller" },
+                  bindings := [],
+                  arguments := [],
+                  priority := none }] }

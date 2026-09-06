@@ -1,0 +1,22 @@
+{
+  "benchmark_id": "finite-store--frontend-decoding--positive",
+  "elaborated_modules": [
+    "Relico/Tests/StoreFrontendDecoder.lean"
+  ],
+  "obligation_count": 11,
+  "obligation_ids": [
+    "StoreFrontendDecoder:0001",
+    "StoreFrontendDecoder:0002",
+    "StoreFrontendDecoder:0003",
+    "StoreFrontendDecoder:0004",
+    "StoreFrontendDecoder:0005",
+    "StoreFrontendDecoder:0006",
+    "StoreFrontendDecoder:0007",
+    "StoreFrontendDecoder:0008",
+    "StoreFrontendDecoder:0009",
+    "StoreFrontendDecoder:0010",
+    "StoreFrontendDecoder:0011"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

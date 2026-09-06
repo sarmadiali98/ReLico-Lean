@@ -10,9 +10,9 @@ The registry currently contains:
 
 - 183 accepted Lean test modules
 - 2,468 mapped test obligations
-- 68 planned source benchmarks
-- 53 positive benchmarks
-- 15 negative benchmarks
+- 61 planned source benchmarks
+- 60 positive benchmarks
+- 1 negative benchmark
 - zero unresolved modules
 - zero unmapped obligations
 
@@ -87,3 +87,17 @@ separately.
 The six obsolete shell acceptance scripts remain scheduled for deletion.
 They may be removed only after their assertions have been migrated to
 the replacement benchmarks listed in legacy-script-migration.tsv.
+
+## The negative suite, re-measured
+
+Stage K re-ran every implemented negative benchmark's own source through the
+current verified pipeline. Seven of eight passed every stage and reported
+`satisfied` under the model checker: they encoded family-bridge limits
+(message-server parameters, a second reactive class, self-resolving external
+sends, reordered initialization, arithmetic payloads, a frame witness), not DTR
+violations, and were re-polarized into positive benchmarks with their
+obligations preserved. The seven planned negatives that had never been sourced
+were removed, their 240 obligations re-homed onto same-family, same-capability
+positive rows. `core--well-formedness--negative` remains the one genuine
+negative: upstream Timed Rebeca itself refuses its source. The rule going
+forward is recorded as F95 in `docs/STAGE_K_FINDINGS.md`.

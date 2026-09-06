@@ -1,0 +1,82 @@
+{ reactors := [{ name := { value := "Sender" },
+                 parameters := [],
+                 inputPorts := [],
+                 outputPorts := [{ name := { value := "receiveMessageToReceiver0" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [],
+                 logicalActions := [{ name := { value := "sendMessage_action" },
+                                      parameters := [{ name := { value := "data" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "keepAlive_action1" }, parameters := [] },
+                                    { name := { value := "keepAlive_action2" }, parameters := [] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.schedule
+                                                 { value := "sendMessage_action" }
+                                                 [Relico.LF.GeneralExpr.intLiteral 1]
+                                                 { value := 0 },
+                                               Relico.LF.GeneralStmt.schedule
+                                                 { value := "keepAlive_action1" }
+                                                 []
+                                                 { value := 1 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "sendMessage_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sendMessage_action" },
+                                        parameters := [{ value := "data" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "receiveMessageToReceiver0" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "data" }]],
+                                        priority := none },
+                                      { name := { value := "keepAlive_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "keepAlive_action1" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "keepAlive_action2" }
+                                                   []
+                                                   { value := 1 }],
+                                        priority := none },
+                                      { name := { value := "keepAlive_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "keepAlive_action2" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "keepAlive_action2" }
+                                                   []
+                                                   { value := 1 }],
+                                        priority := none }] },
+               { name := { value := "Receiver" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "receiveMessageToReceiver0FromSender0" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [],
+                 stateVariables := [],
+                 logicalActions := [{ name := { value := "receiveMessage_action" },
+                                      parameters := [{ name := { value := "data" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "receiveMessage_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "receiveMessage_action" },
+                                        parameters := [{ value := "data" }],
+                                        body := [],
+                                        priority := none },
+                                      { name := { value := "receiveMessageToReceiver0FromSender0_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "receiveMessageToReceiver0FromSender0" },
+                                        parameters := [{ value := "data" }],
+                                        body := [],
+                                        priority := none }] }],
+  instances := [{ name := { value := "sender0" }, reactorName := { value := "Sender" }, arguments := [] },
+                { name := { value := "receiver0" }, reactorName := { value := "Receiver" }, arguments := [] }],
+  connections := [{ sourceInstance := { value := "sender0" },
+                    sourcePort := { value := "receiveMessageToReceiver0" },
+                    targetInstance := { value := "receiver0" },
+                    targetPort := { value := "receiveMessageToReceiver0FromSender0" },
+                    delay := { value := 0 } }] }

@@ -143,3 +143,45 @@ A count that no committed instrument can reproduce is an estimate, whatever the 
 claims. When one appears in a decision record or a paper draft, either name the instrument in the same
 sentence or re-measure before quoting it — and when the real gate becomes runnable, re-measure every
 figure that predates it rather than only the one currently in dispute.
+
+---
+
+## F95: seven negative benchmarks were family limitations wearing subset semantics
+
+**Grade: measured** by putting every implemented negative's own source through the
+current verified pipeline.
+
+The negative suite dated from the era of single-family bridges, and it showed. Of
+eight implemented negatives, seven were re-run through the general parser bridge,
+the Lean decoder, the verified translation and LF compilation, and the model
+checker. **All seven pass every stage and all seven report `satisfied`** — the
+programs the suite called invalid are valid DTR programs that merely exceed what
+one family bridge once accepted: message-server parameters (twice, in two
+families), a second reactive class, a self-resolving external send, reordered
+initialization, an arithmetic payload, and a frame transition witness. The
+eighth, `core--well-formedness--negative`, is genuine: its source calls
+`missing()`, an undefined message server, and upstream Timed Rebeca refuses it
+before any ReLico layer sees it.
+
+Seven further negative rows were planned but never sourced, and were specified
+under the same narrower assumptions. They were removed rather than authored, and
+the 240 obligations their modules own were re-homed onto same-family,
+same-capability positive rows, because a negative that cannot be measured is a
+guess, not a boundary.
+
+The seven implemented rows were re-polarized, not deleted, because each owns Lean
+obligation evidence — 235 obligations across seven modules — and that evidence is
+about the programs, not about the refusal. Three renames could not be straight
+suffix flips (`bound-payload--dispatch--positive` and two external-send positives
+already existed), so those rows carry capability-named identifiers. Two of the
+seven share one byte-identical source: the old suite checked that model at two
+layers, and both rows own distinct evidence modules, so both were kept.
+
+### The transferable check
+
+When a fragment widens, re-run the negative suite's own inputs through the new
+pipeline before trusting the suite. A negative benchmark is an assertion that a
+program is invalid; if the only surviving evidence of invalidity is an
+implementation's refusal, the assertion has silently become a record of that
+implementation. The cheap instrument is the one used here: the negative's source,
+the current pipeline, and the model checker.

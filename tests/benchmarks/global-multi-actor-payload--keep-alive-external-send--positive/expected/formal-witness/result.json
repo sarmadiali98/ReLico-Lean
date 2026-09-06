@@ -1,0 +1,38 @@
+{
+  "benchmark_id": "global-multi-actor-payload--keep-alive-external-send--positive",
+  "elaborated_modules": [
+    "Relico/Tests/GlobalMultiStorePayloadExternalSendFrame.lean"
+  ],
+  "obligation_count": 27,
+  "obligation_ids": [
+    "GlobalMultiStorePayloadExternalSendFrame:0001",
+    "GlobalMultiStorePayloadExternalSendFrame:0002",
+    "GlobalMultiStorePayloadExternalSendFrame:0003",
+    "GlobalMultiStorePayloadExternalSendFrame:0004",
+    "GlobalMultiStorePayloadExternalSendFrame:0005",
+    "GlobalMultiStorePayloadExternalSendFrame:0006",
+    "GlobalMultiStorePayloadExternalSendFrame:0007",
+    "GlobalMultiStorePayloadExternalSendFrame:0008",
+    "GlobalMultiStorePayloadExternalSendFrame:0009",
+    "GlobalMultiStorePayloadExternalSendFrame:0010",
+    "GlobalMultiStorePayloadExternalSendFrame:0011",
+    "GlobalMultiStorePayloadExternalSendFrame:0012",
+    "GlobalMultiStorePayloadExternalSendFrame:0013",
+    "GlobalMultiStorePayloadExternalSendFrame:0014",
+    "GlobalMultiStorePayloadExternalSendFrame:0015",
+    "GlobalMultiStorePayloadExternalSendFrame:0016",
+    "GlobalMultiStorePayloadExternalSendFrame:0017",
+    "GlobalMultiStorePayloadExternalSendFrame:0018",
+    "GlobalMultiStorePayloadExternalSendFrame:0019",
+    "GlobalMultiStorePayloadExternalSendFrame:0020",
+    "GlobalMultiStorePayloadExternalSendFrame:0021",
+    "GlobalMultiStorePayloadExternalSendFrame:0022",
+    "GlobalMultiStorePayloadExternalSendFrame:0023",
+    "GlobalMultiStorePayloadExternalSendFrame:0024",
+    "GlobalMultiStorePayloadExternalSendFrame:0025",
+    "GlobalMultiStorePayloadExternalSendFrame:0026",
+    "GlobalMultiStorePayloadExternalSendFrame:0027"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

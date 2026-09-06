@@ -13,9 +13,13 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_ROOT = REPOSITORY_ROOT / "tests" / "benchmarks" / "registry"
 BENCHMARK_ROOT = REPOSITORY_ROOT / "tests" / "benchmarks"
 
-EXPECTED_BENCHMARKS = 68
-EXPECTED_POSITIVE = 53
-EXPECTED_NEGATIVE = 15
+EXPECTED_BENCHMARKS = 61
+EXPECTED_POSITIVE = 60
+# One genuine negative remains: core--well-formedness--negative, whose source is
+# refused by upstream Timed Rebeca itself (an undefined message server). Every
+# other former negative encoded a family bridge limit that the verified general
+# fragment has since lifted, and was re-polarized or removed in stage K.
+EXPECTED_NEGATIVE = 1
 EXPECTED_OBLIGATIONS = 2468
 EXPECTED_SHARED_FORMAL = 2
 EXPECTED_LEGACY = 6
@@ -122,7 +126,9 @@ NARRATIVE_COUNTER_CHECKS = (
     ("tests/benchmarks/registry/PROVENANCE.md",
      r"^- (\S+) positive benchmarks$", "positive"),
     ("tests/benchmarks/registry/PROVENANCE.md",
-     r"^- (\S+) negative benchmarks$", "negative"),
+     # Singular: exactly one genuine negative remains after the stage K
+     # re-polarization, and the sentence should not claim a plural.
+     r"^- (\S+) negative benchmarks?$", "negative"),
     ("tests/benchmarks/README.md",
      r"records the (\S+) planned source benchmarks", "benchmarks"),
     ("tests/benchmarks/README.md",
