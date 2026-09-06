@@ -14,10 +14,10 @@ themselves. Property and specification files are out of scope.
 - `tier2/` — the upstream corpus models the current verified fragment
   accepts, run through the pipeline **unmodified**, one row per model in
   `RESULTS.tsv`.
-- later phases: the paper-named systems that need one minimal source
-  adaptation each (`smarthome`, `TinyOSPV6-MACB`, `TinyOSPV6-TDMA`,
-  `LeasingNRPFD`, `AutonomousVehicles`, and others), with the adapted
-  source beside its results row.
+- `tier3/` — the paper-named case studies, each in its own directory with
+  the minimally adapted source and a before/after `ADAPTATION.md` record
+  naming the original blocker and every adaptation applied. First entry:
+  `smarthome`, the RQ2 ESP32 case study.
 
 ## Source provenance
 
