@@ -1,0 +1,22 @@
+{ reactor := { name := { value := "Dispatcher" },
+               stateVariables := [{ name := { value := "x" }, initialValue := 0 },
+                                  { name := { value := "y" }, initialValue := 0 }],
+               logicalActions := [{ value := "first_action" }, { value := "second_action" }],
+               startupReaction := { name := { value := "startup" },
+                                    trigger := Relico.LF.Trigger.startup,
+                                    body := [Relico.LF.Stmt.assign { value := "x" } (Relico.LF.Expr.intLiteral 1),
+                                             Relico.LF.Stmt.assign { value := "y" } (Relico.LF.Expr.intLiteral 2),
+                                             Relico.LF.Stmt.schedule { value := "first_action" } { value := 1 }] },
+               messageReactions := [{ name := { value := "first_reaction" },
+                                      trigger := Relico.LF.Trigger.logicalAction { value := "first_action" },
+                                      body := [Relico.LF.Stmt.assign
+                                                 { value := "x" }
+                                                 (Relico.LF.Expr.stateVar { value := "y" }),
+                                               Relico.LF.Stmt.schedule { value := "second_action" } { value := 1 }] },
+                                    { name := { value := "second_reaction" },
+                                      trigger := Relico.LF.Trigger.logicalAction { value := "second_action" },
+                                      body := [Relico.LF.Stmt.assign
+                                                 { value := "y" }
+                                                 (Relico.LF.Expr.stateVar { value := "x" }),
+                                               Relico.LF.Stmt.schedule { value := "first_action" } { value := 1 }] }] },
+  reactorInstance := { name := { value := "dispatcher" }, reactorName := { value := "Dispatcher" } } }

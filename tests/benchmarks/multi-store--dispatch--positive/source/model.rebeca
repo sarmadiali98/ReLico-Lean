@@ -1,0 +1,29 @@
+// Benchmark: multi-store--dispatch--positive
+// A multi-store dispatch chain: two message servers rotate the store in
+// turns, each server's dispatch reading what the previous one wrote.
+reactiveclass Dispatcher(10) {
+    statevars {
+        int x;
+        int y;
+    }
+
+    Dispatcher() {
+        x = 1;
+        y = 2;
+        self.first() after(1);
+    }
+
+    msgsrv first() {
+        x = y;
+        self.second() after(1);
+    }
+
+    msgsrv second() {
+        y = x;
+        self.first() after(1);
+    }
+}
+
+main {
+    Dispatcher dispatcher():();
+}

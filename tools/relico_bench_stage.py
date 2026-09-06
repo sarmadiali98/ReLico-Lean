@@ -208,6 +208,8 @@ def parser_json_stage(options: argparse.Namespace) -> None:
     artifact_family = getattr(options, "family", "v0")
     if artifact_family == "multi-store-payload":
         script = repo / "frontend/java-bridge/run-multistore-payload-from-zip.sh"
+    elif artifact_family == "multi-store":
+        script = repo / "frontend/java-bridge/run-multistore-from-zip.sh"
     elif artifact_family == "general":
         script = repo / "frontend/java-bridge/run-general-from-zip.sh"
     elif artifact_family != "v0":
@@ -267,6 +269,8 @@ def lean_export_stage(options: argparse.Namespace) -> None:
     artifact_family = getattr(options, "family", "v0")
     if artifact_family == "multi-store-payload":
         exporter = repo / "Relico/Benchmark/MultiStorePayloadArtifactExporter.lean"
+    elif artifact_family == "multi-store":
+        exporter = repo / "Relico/Benchmark/MultiStoreArtifactExporter.lean"
     elif artifact_family == "general":
         exporter = repo / "Relico/Benchmark/GeneralArtifactExporter.lean"
     elif artifact_family != "v0":
@@ -887,6 +891,7 @@ def build_parser() -> argparse.ArgumentParser:
         choices=[
             "v0",
             "multi-store-payload",
+            "multi-store",
             "general",
         ],
         default="v0",
@@ -905,6 +910,7 @@ def build_parser() -> argparse.ArgumentParser:
         choices=[
             "v0",
             "multi-store-payload",
+            "multi-store",
             "general",
         ],
         default="v0",
