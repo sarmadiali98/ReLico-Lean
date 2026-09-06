@@ -1,0 +1,109 @@
+target Cpp
+
+reactor Producer {
+  input ackToOriginFromFast: int
+  input ackToOriginFromSteady: int
+  input ackToOriginFromSlow: int
+  output workToFast: int
+  output workToSteady: int
+  output workToSlow: int
+  state resolved: int = 0
+  logical action fanout_action1: int
+  logical action fanout_action2: int
+  logical action ack_action: int
+
+  reaction(startup) -> fanout_action1 {=
+    resolved = 0;
+    fanout_action1.schedule(1, 1ms);
+  =}
+
+  reaction(fanout_action1) -> workToFast, workToSteady, workToSlow {=
+    auto round = *fanout_action1.get();
+    workToFast.set((round + 1));
+    workToSteady.set(round);
+    workToSlow.set((round - 1));
+  =}
+
+  reaction(fanout_action2) -> workToFast, workToSteady, workToSlow {=
+    auto round = *fanout_action2.get();
+    workToFast.set((round + 1));
+    workToSteady.set(round);
+    workToSlow.set((round - 1));
+  =}
+
+  reaction(ack_action) -> fanout_action2 {=
+    auto from = *ack_action.get();
+    resolved = (resolved + 1);
+    if ((resolved == 3)) { resolved = 0; fanout_action2.schedule(1, 1ms); } else {}
+  =}
+
+  reaction(ackToOriginFromFast) -> fanout_action2 {=
+    auto from = *ackToOriginFromFast.get();
+    resolved = (resolved + 1);
+    if ((resolved == 3)) { resolved = 0; fanout_action2.schedule(1, 1ms); } else {}
+  =}
+
+  reaction(ackToOriginFromSteady) -> fanout_action2 {=
+    auto from = *ackToOriginFromSteady.get();
+    resolved = (resolved + 1);
+    if ((resolved == 3)) { resolved = 0; fanout_action2.schedule(1, 1ms); } else {}
+  =}
+
+  reaction(ackToOriginFromSlow) -> fanout_action2 {=
+    auto from = *ackToOriginFromSlow.get();
+    resolved = (resolved + 1);
+    if ((resolved == 3)) { resolved = 0; fanout_action2.schedule(1, 1ms); } else {}
+  =}
+}
+
+reactor Worker(myId: int = 0) {
+  input workToFastFromProducer: int
+  input workToSteadyFromProducer: int
+  input workToSlowFromProducer: int
+  output ackToOrigin: int
+  state id: int = 0
+  state value: int = 0
+  logical action work_action: int
+
+  reaction(startup) {=
+    id = myId;
+    value = 0;
+  =}
+
+  reaction(work_action) -> ackToOrigin {=
+    auto v = *work_action.get();
+    value = v;
+    ackToOrigin.set(id);
+  =}
+
+  reaction(workToFastFromProducer) -> ackToOrigin {=
+    auto v = *workToFastFromProducer.get();
+    value = v;
+    ackToOrigin.set(id);
+  =}
+
+  reaction(workToSteadyFromProducer) -> ackToOrigin {=
+    auto v = *workToSteadyFromProducer.get();
+    value = v;
+    ackToOrigin.set(id);
+  =}
+
+  reaction(workToSlowFromProducer) -> ackToOrigin {=
+    auto v = *workToSlowFromProducer.get();
+    value = v;
+    ackToOrigin.set(id);
+  =}
+}
+
+main reactor {
+  fast = new Worker(myId=1)
+  steady = new Worker(myId=2)
+  slow = new Worker(myId=3)
+  producer = new Producer()
+  fast.ackToOrigin -> producer.ackToOriginFromFast after 0 msec
+  steady.ackToOrigin -> producer.ackToOriginFromSteady after 0 msec
+  slow.ackToOrigin -> producer.ackToOriginFromSlow after 0 msec
+  producer.workToFast -> fast.workToFastFromProducer after 0 msec
+  producer.workToSteady -> steady.workToSteadyFromProducer after 0 msec
+  producer.workToSlow -> slow.workToSlowFromProducer after 0 msec
+}

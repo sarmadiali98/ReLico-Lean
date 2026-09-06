@@ -1,0 +1,411 @@
+{ reactors := [{ name := { value := "Trigger" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "returnedToOriginFromNode0" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "returnedToOriginFromNode1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "returnedToOriginFromNode2" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "returnedToOriginFromNode3" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "startToNode0" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "round" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "fire_action1" },
+                                      parameters := [{ name := { value := "r" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "fire_action2" },
+                                      parameters := [{ name := { value := "r" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "returned_action" },
+                                      parameters := [{ name := { value := "r" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "round" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 1),
+                                               Relico.LF.GeneralStmt.schedule
+                                                 { value := "fire_action1" }
+                                                 [Relico.LF.GeneralExpr.intLiteral 1]
+                                                 { value := 1 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "fire_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "fire_action1" },
+                                        parameters := [{ value := "r" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "round" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "r" }),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "startToNode0" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "r" }]],
+                                        priority := none },
+                                      { name := { value := "fire_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "fire_action2" },
+                                        parameters := [{ value := "r" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "round" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "r" }),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "startToNode0" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "r" }]],
+                                        priority := none },
+                                      { name := { value := "returned_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "returned_action" },
+                                        parameters := [{ value := "r" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "fire_action2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "r" }]
+                                                   { value := 2 }],
+                                        priority := none },
+                                      { name := { value := "returnedToOriginFromNode0_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "returnedToOriginFromNode0" },
+                                        parameters := [{ value := "r" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "fire_action2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "r" }]
+                                                   { value := 2 }],
+                                        priority := none },
+                                      { name := { value := "returnedToOriginFromNode1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "returnedToOriginFromNode1" },
+                                        parameters := [{ value := "r" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "fire_action2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "r" }]
+                                                   { value := 2 }],
+                                        priority := none },
+                                      { name := { value := "returnedToOriginFromNode2_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "returnedToOriginFromNode2" },
+                                        parameters := [{ value := "r" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "fire_action2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "r" }]
+                                                   { value := 2 }],
+                                        priority := none },
+                                      { name := { value := "returnedToOriginFromNode3_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "returnedToOriginFromNode3" },
+                                        parameters := [{ value := "r" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "fire_action2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "r" }]
+                                                   { value := 2 }],
+                                        priority := none }] },
+               { name := { value := "Node" },
+                 parameters := [{ name := { value := "myId" }, declaredType := Relico.LF.GeneralType.int }],
+                 inputPorts := [{ name := { value := "hopToNext1FromNode0" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "hopToNext2FromNode0" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "hopToNext1FromNode1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "hopToNext2FromNode1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "hopToNext1FromNode2" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "hopToNext2FromNode2" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "hopToNext1FromNode3" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "hopToNext2FromNode3" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "startToNode0FromTrigger" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "hopToNext1" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "returnedToOrigin" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "hopToNext2" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "id" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "seen" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "start_action" },
+                                      parameters := [{ name := { value := "r" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "hop_action" },
+                                      parameters := [{ name := { value := "r" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [{ value := "myId" }],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "id" }
+                                                 (Relico.LF.GeneralExpr.parameterVar { value := "myId" }),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "seen" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "start_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "start_action" },
+                                        parameters := [{ value := "r" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "r" }),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "hopToNext1" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "r" }]],
+                                        priority := none },
+                                      { name := { value := "startToNode0FromTrigger_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "startToNode0FromTrigger" },
+                                        parameters := [{ value := "r" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "r" }),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "hopToNext1" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "r" }]],
+                                        priority := none },
+                                      { name := { value := "hop_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "hop_action" },
+                                        parameters := [{ value := "r" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "r" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "id" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 3))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "returnedToOrigin" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "r" }]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "hopToNext2" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "r" }]]],
+                                        priority := none },
+                                      { name := { value := "hopToNext1FromNode0_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "hopToNext1FromNode0" },
+                                        parameters := [{ value := "r" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "r" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "id" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 3))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "returnedToOrigin" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "r" }]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "hopToNext2" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "r" }]]],
+                                        priority := none },
+                                      { name := { value := "hopToNext2FromNode0_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "hopToNext2FromNode0" },
+                                        parameters := [{ value := "r" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "r" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "id" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 3))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "returnedToOrigin" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "r" }]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "hopToNext2" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "r" }]]],
+                                        priority := none },
+                                      { name := { value := "hopToNext1FromNode1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "hopToNext1FromNode1" },
+                                        parameters := [{ value := "r" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "r" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "id" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 3))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "returnedToOrigin" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "r" }]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "hopToNext2" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "r" }]]],
+                                        priority := none },
+                                      { name := { value := "hopToNext2FromNode1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "hopToNext2FromNode1" },
+                                        parameters := [{ value := "r" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "r" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "id" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 3))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "returnedToOrigin" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "r" }]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "hopToNext2" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "r" }]]],
+                                        priority := none },
+                                      { name := { value := "hopToNext1FromNode2_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "hopToNext1FromNode2" },
+                                        parameters := [{ value := "r" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "r" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "id" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 3))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "returnedToOrigin" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "r" }]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "hopToNext2" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "r" }]]],
+                                        priority := none },
+                                      { name := { value := "hopToNext2FromNode2_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "hopToNext2FromNode2" },
+                                        parameters := [{ value := "r" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "r" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "id" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 3))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "returnedToOrigin" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "r" }]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "hopToNext2" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "r" }]]],
+                                        priority := none },
+                                      { name := { value := "hopToNext1FromNode3_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "hopToNext1FromNode3" },
+                                        parameters := [{ value := "r" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "r" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "id" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 3))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "returnedToOrigin" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "r" }]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "hopToNext2" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "r" }]]],
+                                        priority := none },
+                                      { name := { value := "hopToNext2FromNode3_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "hopToNext2FromNode3" },
+                                        parameters := [{ value := "r" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "r" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "id" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 3))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "returnedToOrigin" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "r" }]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "hopToNext2" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "r" }]]],
+                                        priority := none }] }],
+  instances := [{ name := { value := "node0" },
+                  reactorName := { value := "Node" },
+                  arguments := [Relico.LF.GeneralValue.int 0] },
+                { name := { value := "node1" },
+                  reactorName := { value := "Node" },
+                  arguments := [Relico.LF.GeneralValue.int 1] },
+                { name := { value := "node2" },
+                  reactorName := { value := "Node" },
+                  arguments := [Relico.LF.GeneralValue.int 2] },
+                { name := { value := "node3" },
+                  reactorName := { value := "Node" },
+                  arguments := [Relico.LF.GeneralValue.int 3] },
+                { name := { value := "trigger" }, reactorName := { value := "Trigger" }, arguments := [] }],
+  connections := [{ sourceInstance := { value := "node0" },
+                    sourcePort := { value := "hopToNext1" },
+                    targetInstance := { value := "node1" },
+                    targetPort := { value := "hopToNext1FromNode0" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "node0" },
+                    sourcePort := { value := "returnedToOrigin" },
+                    targetInstance := { value := "trigger" },
+                    targetPort := { value := "returnedToOriginFromNode0" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "node0" },
+                    sourcePort := { value := "hopToNext2" },
+                    targetInstance := { value := "node1" },
+                    targetPort := { value := "hopToNext2FromNode0" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "node1" },
+                    sourcePort := { value := "hopToNext1" },
+                    targetInstance := { value := "node2" },
+                    targetPort := { value := "hopToNext1FromNode1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "node1" },
+                    sourcePort := { value := "returnedToOrigin" },
+                    targetInstance := { value := "trigger" },
+                    targetPort := { value := "returnedToOriginFromNode1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "node1" },
+                    sourcePort := { value := "hopToNext2" },
+                    targetInstance := { value := "node2" },
+                    targetPort := { value := "hopToNext2FromNode1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "node2" },
+                    sourcePort := { value := "hopToNext1" },
+                    targetInstance := { value := "node3" },
+                    targetPort := { value := "hopToNext1FromNode2" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "node2" },
+                    sourcePort := { value := "returnedToOrigin" },
+                    targetInstance := { value := "trigger" },
+                    targetPort := { value := "returnedToOriginFromNode2" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "node2" },
+                    sourcePort := { value := "hopToNext2" },
+                    targetInstance := { value := "node3" },
+                    targetPort := { value := "hopToNext2FromNode2" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "node3" },
+                    sourcePort := { value := "hopToNext1" },
+                    targetInstance := { value := "node0" },
+                    targetPort := { value := "hopToNext1FromNode3" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "node3" },
+                    sourcePort := { value := "returnedToOrigin" },
+                    targetInstance := { value := "trigger" },
+                    targetPort := { value := "returnedToOriginFromNode3" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "node3" },
+                    sourcePort := { value := "hopToNext2" },
+                    targetInstance := { value := "node0" },
+                    targetPort := { value := "hopToNext2FromNode3" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "trigger" },
+                    sourcePort := { value := "startToNode0" },
+                    targetInstance := { value := "node0" },
+                    targetPort := { value := "startToNode0FromTrigger" },
+                    delay := { value := 0 } }] }

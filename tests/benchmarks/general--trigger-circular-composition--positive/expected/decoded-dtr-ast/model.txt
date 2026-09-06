@@ -1,0 +1,109 @@
+{ classes := [{ name := { value := "Trigger" },
+                knownRebecs := [{ name := { value := "node0" }, className := { value := "Node" } }],
+                stateVariables := [{ name := { value := "round" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "round" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 1),
+                                          Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "fire" }
+                                            [Relico.DTR.GeneralExpr.intLiteral 1]
+                                            { value := 1 }] },
+                messageServers := [{ name := { value := "fire" },
+                                     parameters := [{ name := { value := "r" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "round" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "r" }),
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "node0" })
+                                                { value := "start" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "r" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "returned" },
+                                     parameters := [{ name := { value := "r" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "fire" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "r" }]
+                                                { value := 2 }],
+                                     priority := none }] },
+              { name := { value := "Node" },
+                knownRebecs := [{ name := { value := "next" }, className := { value := "Node" } },
+                                { name := { value := "origin" }, className := { value := "Trigger" } }],
+                stateVariables := [{ name := { value := "id" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "seen" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [{ name := { value := "myId" },
+                                                  declaredType := Relico.DTR.GeneralType.int }],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "id" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "myId" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "seen" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0)] },
+                messageServers := [{ name := { value := "start" },
+                                     parameters := [{ name := { value := "r" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "seen" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "r" }),
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "next" })
+                                                { value := "hop" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "r" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "hop" },
+                                     parameters := [{ name := { value := "r" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "seen" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "r" }),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "id" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 3))
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "origin" })
+                                                   { value := "returned" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "r" }]
+                                                   { value := 0 }]
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "next" })
+                                                   { value := "hop" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "r" }]
+                                                   { value := 0 }]],
+                                     priority := none }] }],
+  instances := [{ name := { value := "node0" },
+                  className := { value := "Node" },
+                  bindings := [({ value := "next" }, { value := "node1" }),
+                               ({ value := "origin" }, { value := "trigger" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "node1" },
+                  className := { value := "Node" },
+                  bindings := [({ value := "next" }, { value := "node2" }),
+                               ({ value := "origin" }, { value := "trigger" })],
+                  arguments := [Relico.DTR.GeneralValue.int 1],
+                  priority := none },
+                { name := { value := "node2" },
+                  className := { value := "Node" },
+                  bindings := [({ value := "next" }, { value := "node3" }),
+                               ({ value := "origin" }, { value := "trigger" })],
+                  arguments := [Relico.DTR.GeneralValue.int 2],
+                  priority := none },
+                { name := { value := "node3" },
+                  className := { value := "Node" },
+                  bindings := [({ value := "next" }, { value := "node0" }),
+                               ({ value := "origin" }, { value := "trigger" })],
+                  arguments := [Relico.DTR.GeneralValue.int 3],
+                  priority := none },
+                { name := { value := "trigger" },
+                  className := { value := "Trigger" },
+                  bindings := [({ value := "node0" }, { value := "node0" })],
+                  arguments := [],
+                  priority := none }] }

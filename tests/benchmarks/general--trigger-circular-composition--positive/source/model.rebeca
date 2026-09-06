@@ -1,0 +1,63 @@
+// Benchmark: general--trigger-circular-composition--positive
+// A trigger-activated ring that circulates once per firing: a Trigger arms the
+// ring, the message hops node0 to node3, and the last node reports the return,
+// after which the Trigger re-arms. Between firings the ring is at rest. A
+// differentiated redesign of the examples2 Trigger_Activated_Circular_
+// Composition model, whose byte-identical twin is already implemented as
+// general--circular-rebec-ordering--positive (a constructor-armed ring that
+// circulates perpetually); this source adds the trigger actor, the one-
+// circulation-per-firing shape, and the ring-at-rest interval between rounds.
+reactiveclass Trigger(4) {
+    knownrebecs {
+        Node node0;
+    }
+    statevars {
+        int round;
+    }
+    Trigger() {
+        round = 1;
+        self.fire(1) after(1);
+    }
+    msgsrv fire(int r) {
+        round = r;
+        node0.start(r);
+    }
+    msgsrv returned(int r) {
+        self.fire(r) after(2);
+    }
+}
+
+reactiveclass Node(4) {
+    knownrebecs {
+        Node next;
+        Trigger origin;
+    }
+    statevars {
+        int id;
+        int seen;
+    }
+    Node(int myId) {
+        id = myId;
+        seen = 0;
+    }
+    msgsrv start(int r) {
+        seen = r;
+        next.hop(r);
+    }
+    msgsrv hop(int r) {
+        seen = r;
+        if (id == 3) {
+            origin.returned(r);
+        } else {
+            next.hop(r);
+        }
+    }
+}
+
+main {
+    Node node0(node1, trigger):(0);
+    Node node1(node2, trigger):(1);
+    Node node2(node3, trigger):(2);
+    Node node3(node0, trigger):(3);
+    Trigger trigger(node0):();
+}

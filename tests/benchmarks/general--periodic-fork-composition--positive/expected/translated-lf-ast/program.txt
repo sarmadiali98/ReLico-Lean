@@ -1,0 +1,276 @@
+{ reactors := [{ name := { value := "Producer" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "ackToOriginFromFast" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "ackToOriginFromSteady" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "ackToOriginFromSlow" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "workToFast" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "workToSteady" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "workToSlow" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "resolved" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "fanout_action1" },
+                                      parameters := [{ name := { value := "round" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "fanout_action2" },
+                                      parameters := [{ name := { value := "round" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "ack_action" },
+                                      parameters := [{ name := { value := "from" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "resolved" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.schedule
+                                                 { value := "fanout_action1" }
+                                                 [Relico.LF.GeneralExpr.intLiteral 1]
+                                                 { value := 1 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "fanout_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "fanout_action1" },
+                                        parameters := [{ value := "round" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "workToFast" }
+                                                   [Relico.LF.GeneralExpr.binary
+                                                      (Relico.LF.GeneralBinaryOp.add)
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "round" })
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "workToSteady" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "round" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "workToSlow" }
+                                                   [Relico.LF.GeneralExpr.binary
+                                                      (Relico.LF.GeneralBinaryOp.sub)
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "round" })
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]],
+                                        priority := none },
+                                      { name := { value := "fanout_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "fanout_action2" },
+                                        parameters := [{ value := "round" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "workToFast" }
+                                                   [Relico.LF.GeneralExpr.binary
+                                                      (Relico.LF.GeneralBinaryOp.add)
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "round" })
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "workToSteady" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "round" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "workToSlow" }
+                                                   [Relico.LF.GeneralExpr.binary
+                                                      (Relico.LF.GeneralBinaryOp.sub)
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "round" })
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]],
+                                        priority := none },
+                                      { name := { value := "ack_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "ack_action" },
+                                        parameters := [{ value := "from" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 3))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resolved" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "fanout_action2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "ackToOriginFromFast_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "ackToOriginFromFast" },
+                                        parameters := [{ value := "from" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 3))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resolved" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "fanout_action2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "ackToOriginFromSteady_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "ackToOriginFromSteady" },
+                                        parameters := [{ value := "from" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 3))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resolved" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "fanout_action2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "ackToOriginFromSlow_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "ackToOriginFromSlow" },
+                                        parameters := [{ value := "from" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 3))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resolved" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "fanout_action2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none }] },
+               { name := { value := "Worker" },
+                 parameters := [{ name := { value := "myId" }, declaredType := Relico.LF.GeneralType.int }],
+                 inputPorts := [{ name := { value := "workToFastFromProducer" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "workToSteadyFromProducer" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "workToSlowFromProducer" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "ackToOrigin" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "id" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "value" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "work_action" },
+                                      parameters := [{ name := { value := "v" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [{ value := "myId" }],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "id" }
+                                                 (Relico.LF.GeneralExpr.parameterVar { value := "myId" }),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "value" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "work_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "work_action" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "value" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" }),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "ackToOrigin" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none },
+                                      { name := { value := "workToFastFromProducer_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "workToFastFromProducer" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "value" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" }),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "ackToOrigin" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none },
+                                      { name := { value := "workToSteadyFromProducer_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "workToSteadyFromProducer" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "value" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" }),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "ackToOrigin" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none },
+                                      { name := { value := "workToSlowFromProducer_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "workToSlowFromProducer" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "value" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" }),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "ackToOrigin" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none }] }],
+  instances := [{ name := { value := "fast" },
+                  reactorName := { value := "Worker" },
+                  arguments := [Relico.LF.GeneralValue.int 1] },
+                { name := { value := "steady" },
+                  reactorName := { value := "Worker" },
+                  arguments := [Relico.LF.GeneralValue.int 2] },
+                { name := { value := "slow" },
+                  reactorName := { value := "Worker" },
+                  arguments := [Relico.LF.GeneralValue.int 3] },
+                { name := { value := "producer" }, reactorName := { value := "Producer" }, arguments := [] }],
+  connections := [{ sourceInstance := { value := "fast" },
+                    sourcePort := { value := "ackToOrigin" },
+                    targetInstance := { value := "producer" },
+                    targetPort := { value := "ackToOriginFromFast" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "steady" },
+                    sourcePort := { value := "ackToOrigin" },
+                    targetInstance := { value := "producer" },
+                    targetPort := { value := "ackToOriginFromSteady" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "slow" },
+                    sourcePort := { value := "ackToOrigin" },
+                    targetInstance := { value := "producer" },
+                    targetPort := { value := "ackToOriginFromSlow" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "producer" },
+                    sourcePort := { value := "workToFast" },
+                    targetInstance := { value := "fast" },
+                    targetPort := { value := "workToFastFromProducer" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "producer" },
+                    sourcePort := { value := "workToSteady" },
+                    targetInstance := { value := "steady" },
+                    targetPort := { value := "workToSteadyFromProducer" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "producer" },
+                    sourcePort := { value := "workToSlow" },
+                    targetInstance := { value := "slow" },
+                    targetPort := { value := "workToSlowFromProducer" },
+                    delay := { value := 0 } }] }

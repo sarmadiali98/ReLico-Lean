@@ -1,0 +1,439 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 18,
+            "target": "round",
+            "value": {
+              "kind": "intLiteral",
+              "line": 18,
+              "value": 1
+            }
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 1
+            },
+            "arguments": [
+              {
+                "kind": "intLiteral",
+                "line": 19,
+                "value": 1
+              }
+            ],
+            "kind": "send",
+            "line": 19,
+            "messageServer": "fire",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Trigger"
+          }
+        ],
+        "line": 17,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Node",
+          "line": 12,
+          "name": "node0"
+        }
+      ],
+      "line": 10,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 22,
+              "target": "round",
+              "value": {
+                "kind": "variable",
+                "line": 22,
+                "name": "r"
+              }
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 23,
+                  "name": "r"
+                }
+              ],
+              "kind": "send",
+              "line": 23,
+              "messageServer": "start",
+              "target": {
+                "kind": "knownRebec",
+                "name": "node0"
+              },
+              "targetClassName": "Node"
+            }
+          ],
+          "line": 21,
+          "name": "fire",
+          "parameters": [
+            {
+              "line": 21,
+              "name": "r",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 2
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 26,
+                  "name": "r"
+                }
+              ],
+              "kind": "send",
+              "line": 26,
+              "messageServer": "fire",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Trigger"
+            }
+          ],
+          "line": 25,
+          "name": "returned",
+          "parameters": [
+            {
+              "line": 25,
+              "name": "r",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Trigger",
+      "queueBound": 4,
+      "stateVariables": [
+        {
+          "line": 15,
+          "name": "round",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 40,
+            "target": "id",
+            "value": {
+              "kind": "variable",
+              "line": 40,
+              "name": "myId"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 41,
+            "target": "seen",
+            "value": {
+              "kind": "intLiteral",
+              "line": 41,
+              "value": 0
+            }
+          }
+        ],
+        "line": 39,
+        "parameters": [
+          {
+            "line": 39,
+            "name": "myId",
+            "type": "int"
+          }
+        ]
+      },
+      "knownRebecs": [
+        {
+          "className": "Node",
+          "line": 32,
+          "name": "next"
+        },
+        {
+          "className": "Trigger",
+          "line": 33,
+          "name": "origin"
+        }
+      ],
+      "line": 30,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 44,
+              "target": "seen",
+              "value": {
+                "kind": "variable",
+                "line": 44,
+                "name": "r"
+              }
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 45,
+                  "name": "r"
+                }
+              ],
+              "kind": "send",
+              "line": 45,
+              "messageServer": "hop",
+              "target": {
+                "kind": "knownRebec",
+                "name": "next"
+              },
+              "targetClassName": "Node"
+            }
+          ],
+          "line": 43,
+          "name": "start",
+          "parameters": [
+            {
+              "line": 43,
+              "name": "r",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 48,
+              "target": "seen",
+              "value": {
+                "kind": "variable",
+                "line": 48,
+                "name": "r"
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 49,
+                  "name": "id"
+                },
+                "line": 49,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 49,
+                  "value": 3
+                }
+              },
+              "else": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 52,
+                      "name": "r"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 52,
+                  "messageServer": "hop",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "next"
+                  },
+                  "targetClassName": "Node"
+                }
+              ],
+              "kind": "if",
+              "line": 49,
+              "then": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 50,
+                      "name": "r"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 50,
+                  "messageServer": "returned",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "origin"
+                  },
+                  "targetClassName": "Trigger"
+                }
+              ]
+            }
+          ],
+          "line": 47,
+          "name": "hop",
+          "parameters": [
+            {
+              "line": 47,
+              "name": "r",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Node",
+      "queueBound": 4,
+      "stateVariables": [
+        {
+          "line": 36,
+          "name": "id",
+          "type": "int"
+        },
+        {
+          "line": 37,
+          "name": "seen",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Node",
+          "instance": "node1",
+          "knownRebec": "next"
+        },
+        {
+          "className": "Trigger",
+          "instance": "trigger",
+          "knownRebec": "origin"
+        }
+      ],
+      "className": "Node",
+      "line": 58,
+      "name": "node0",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 1
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Node",
+          "instance": "node2",
+          "knownRebec": "next"
+        },
+        {
+          "className": "Trigger",
+          "instance": "trigger",
+          "knownRebec": "origin"
+        }
+      ],
+      "className": "Node",
+      "line": 59,
+      "name": "node1",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 2
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Node",
+          "instance": "node3",
+          "knownRebec": "next"
+        },
+        {
+          "className": "Trigger",
+          "instance": "trigger",
+          "knownRebec": "origin"
+        }
+      ],
+      "className": "Node",
+      "line": 60,
+      "name": "node2",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 3
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Node",
+          "instance": "node0",
+          "knownRebec": "next"
+        },
+        {
+          "className": "Trigger",
+          "instance": "trigger",
+          "knownRebec": "origin"
+        }
+      ],
+      "className": "Node",
+      "line": 61,
+      "name": "node3",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Node",
+          "instance": "node0",
+          "knownRebec": "node0"
+        }
+      ],
+      "className": "Trigger",
+      "line": 62,
+      "name": "trigger",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

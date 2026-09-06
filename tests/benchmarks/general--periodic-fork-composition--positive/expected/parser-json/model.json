@@ -1,0 +1,430 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 20,
+            "target": "resolved",
+            "value": {
+              "kind": "intLiteral",
+              "line": 20,
+              "value": 0
+            }
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 1
+            },
+            "arguments": [
+              {
+                "kind": "intLiteral",
+                "line": 21,
+                "value": 1
+              }
+            ],
+            "kind": "send",
+            "line": 21,
+            "messageServer": "fanout",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Producer"
+          }
+        ],
+        "line": 19,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Worker",
+          "line": 12,
+          "name": "fast"
+        },
+        {
+          "className": "Worker",
+          "line": 13,
+          "name": "steady"
+        },
+        {
+          "className": "Worker",
+          "line": 14,
+          "name": "slow"
+        }
+      ],
+      "line": 10,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "variable",
+                    "line": 24,
+                    "name": "round"
+                  },
+                  "line": 24,
+                  "operator": "+",
+                  "right": {
+                    "kind": "intLiteral",
+                    "line": 24,
+                    "value": 1
+                  }
+                }
+              ],
+              "kind": "send",
+              "line": 24,
+              "messageServer": "work",
+              "target": {
+                "kind": "knownRebec",
+                "name": "fast"
+              },
+              "targetClassName": "Worker"
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 25,
+                  "name": "round"
+                }
+              ],
+              "kind": "send",
+              "line": 25,
+              "messageServer": "work",
+              "target": {
+                "kind": "knownRebec",
+                "name": "steady"
+              },
+              "targetClassName": "Worker"
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "variable",
+                    "line": 26,
+                    "name": "round"
+                  },
+                  "line": 26,
+                  "operator": "-",
+                  "right": {
+                    "kind": "intLiteral",
+                    "line": 26,
+                    "value": 1
+                  }
+                }
+              ],
+              "kind": "send",
+              "line": 26,
+              "messageServer": "work",
+              "target": {
+                "kind": "knownRebec",
+                "name": "slow"
+              },
+              "targetClassName": "Worker"
+            }
+          ],
+          "line": 23,
+          "name": "fanout",
+          "parameters": [
+            {
+              "line": 23,
+              "name": "round",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 29,
+              "target": "resolved",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 29,
+                  "name": "resolved"
+                },
+                "line": 29,
+                "operator": "+",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 29,
+                  "value": 1
+                }
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 30,
+                  "name": "resolved"
+                },
+                "line": 30,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 30,
+                  "value": 3
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 30,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 31,
+                  "target": "resolved",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 31,
+                    "value": 0
+                  }
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 32,
+                      "value": 1
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 32,
+                  "messageServer": "fanout",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Producer"
+                }
+              ]
+            }
+          ],
+          "line": 28,
+          "name": "ack",
+          "parameters": [
+            {
+              "line": 28,
+              "name": "from",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Producer",
+      "queueBound": 4,
+      "stateVariables": [
+        {
+          "line": 17,
+          "name": "resolved",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 46,
+            "target": "id",
+            "value": {
+              "kind": "variable",
+              "line": 46,
+              "name": "myId"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 47,
+            "target": "value",
+            "value": {
+              "kind": "intLiteral",
+              "line": 47,
+              "value": 0
+            }
+          }
+        ],
+        "line": 45,
+        "parameters": [
+          {
+            "line": 45,
+            "name": "myId",
+            "type": "int"
+          }
+        ]
+      },
+      "knownRebecs": [
+        {
+          "className": "Producer",
+          "line": 39,
+          "name": "origin"
+        }
+      ],
+      "line": 37,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 50,
+              "target": "value",
+              "value": {
+                "kind": "variable",
+                "line": 50,
+                "name": "v"
+              }
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 51,
+                  "name": "id"
+                }
+              ],
+              "kind": "send",
+              "line": 51,
+              "messageServer": "ack",
+              "target": {
+                "kind": "knownRebec",
+                "name": "origin"
+              },
+              "targetClassName": "Producer"
+            }
+          ],
+          "line": 49,
+          "name": "work",
+          "parameters": [
+            {
+              "line": 49,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Worker",
+      "queueBound": 4,
+      "stateVariables": [
+        {
+          "line": 42,
+          "name": "id",
+          "type": "int"
+        },
+        {
+          "line": 43,
+          "name": "value",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 1
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Producer",
+          "instance": "producer",
+          "knownRebec": "origin"
+        }
+      ],
+      "className": "Worker",
+      "line": 56,
+      "name": "fast",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 2
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Producer",
+          "instance": "producer",
+          "knownRebec": "origin"
+        }
+      ],
+      "className": "Worker",
+      "line": 57,
+      "name": "steady",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 3
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Producer",
+          "instance": "producer",
+          "knownRebec": "origin"
+        }
+      ],
+      "className": "Worker",
+      "line": 58,
+      "name": "slow",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Worker",
+          "instance": "fast",
+          "knownRebec": "fast"
+        },
+        {
+          "className": "Worker",
+          "instance": "steady",
+          "knownRebec": "steady"
+        },
+        {
+          "className": "Worker",
+          "instance": "slow",
+          "knownRebec": "slow"
+        }
+      ],
+      "className": "Producer",
+      "line": 59,
+      "name": "producer",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

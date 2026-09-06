@@ -1,0 +1,166 @@
+target Cpp
+
+reactor Trigger {
+  input returnedToOriginFromNode0: int
+  input returnedToOriginFromNode1: int
+  input returnedToOriginFromNode2: int
+  input returnedToOriginFromNode3: int
+  output startToNode0: int
+  state round: int = 0
+  logical action fire_action1: int
+  logical action fire_action2: int
+  logical action returned_action: int
+
+  reaction(startup) -> fire_action1 {=
+    round = 1;
+    fire_action1.schedule(1, 1ms);
+  =}
+
+  reaction(fire_action1) -> startToNode0 {=
+    auto r = *fire_action1.get();
+    round = r;
+    startToNode0.set(r);
+  =}
+
+  reaction(fire_action2) -> startToNode0 {=
+    auto r = *fire_action2.get();
+    round = r;
+    startToNode0.set(r);
+  =}
+
+  reaction(returned_action) -> fire_action2 {=
+    auto r = *returned_action.get();
+    fire_action2.schedule(r, 2ms);
+  =}
+
+  reaction(returnedToOriginFromNode0) -> fire_action2 {=
+    auto r = *returnedToOriginFromNode0.get();
+    fire_action2.schedule(r, 2ms);
+  =}
+
+  reaction(returnedToOriginFromNode1) -> fire_action2 {=
+    auto r = *returnedToOriginFromNode1.get();
+    fire_action2.schedule(r, 2ms);
+  =}
+
+  reaction(returnedToOriginFromNode2) -> fire_action2 {=
+    auto r = *returnedToOriginFromNode2.get();
+    fire_action2.schedule(r, 2ms);
+  =}
+
+  reaction(returnedToOriginFromNode3) -> fire_action2 {=
+    auto r = *returnedToOriginFromNode3.get();
+    fire_action2.schedule(r, 2ms);
+  =}
+}
+
+reactor Node(myId: int = 0) {
+  input hopToNext1FromNode0: int
+  input hopToNext2FromNode0: int
+  input hopToNext1FromNode1: int
+  input hopToNext2FromNode1: int
+  input hopToNext1FromNode2: int
+  input hopToNext2FromNode2: int
+  input hopToNext1FromNode3: int
+  input hopToNext2FromNode3: int
+  input startToNode0FromTrigger: int
+  output hopToNext1: int
+  output returnedToOrigin: int
+  output hopToNext2: int
+  state id: int = 0
+  state seen: int = 0
+  logical action start_action: int
+  logical action hop_action: int
+
+  reaction(startup) {=
+    id = myId;
+    seen = 0;
+  =}
+
+  reaction(start_action) -> hopToNext1 {=
+    auto r = *start_action.get();
+    seen = r;
+    hopToNext1.set(r);
+  =}
+
+  reaction(startToNode0FromTrigger) -> hopToNext1 {=
+    auto r = *startToNode0FromTrigger.get();
+    seen = r;
+    hopToNext1.set(r);
+  =}
+
+  reaction(hop_action) -> returnedToOrigin, hopToNext2 {=
+    auto r = *hop_action.get();
+    seen = r;
+    if ((id == 3)) { returnedToOrigin.set(r); } else { hopToNext2.set(r); }
+  =}
+
+  reaction(hopToNext1FromNode0) -> returnedToOrigin, hopToNext2 {=
+    auto r = *hopToNext1FromNode0.get();
+    seen = r;
+    if ((id == 3)) { returnedToOrigin.set(r); } else { hopToNext2.set(r); }
+  =}
+
+  reaction(hopToNext2FromNode0) -> returnedToOrigin, hopToNext2 {=
+    auto r = *hopToNext2FromNode0.get();
+    seen = r;
+    if ((id == 3)) { returnedToOrigin.set(r); } else { hopToNext2.set(r); }
+  =}
+
+  reaction(hopToNext1FromNode1) -> returnedToOrigin, hopToNext2 {=
+    auto r = *hopToNext1FromNode1.get();
+    seen = r;
+    if ((id == 3)) { returnedToOrigin.set(r); } else { hopToNext2.set(r); }
+  =}
+
+  reaction(hopToNext2FromNode1) -> returnedToOrigin, hopToNext2 {=
+    auto r = *hopToNext2FromNode1.get();
+    seen = r;
+    if ((id == 3)) { returnedToOrigin.set(r); } else { hopToNext2.set(r); }
+  =}
+
+  reaction(hopToNext1FromNode2) -> returnedToOrigin, hopToNext2 {=
+    auto r = *hopToNext1FromNode2.get();
+    seen = r;
+    if ((id == 3)) { returnedToOrigin.set(r); } else { hopToNext2.set(r); }
+  =}
+
+  reaction(hopToNext2FromNode2) -> returnedToOrigin, hopToNext2 {=
+    auto r = *hopToNext2FromNode2.get();
+    seen = r;
+    if ((id == 3)) { returnedToOrigin.set(r); } else { hopToNext2.set(r); }
+  =}
+
+  reaction(hopToNext1FromNode3) -> returnedToOrigin, hopToNext2 {=
+    auto r = *hopToNext1FromNode3.get();
+    seen = r;
+    if ((id == 3)) { returnedToOrigin.set(r); } else { hopToNext2.set(r); }
+  =}
+
+  reaction(hopToNext2FromNode3) -> returnedToOrigin, hopToNext2 {=
+    auto r = *hopToNext2FromNode3.get();
+    seen = r;
+    if ((id == 3)) { returnedToOrigin.set(r); } else { hopToNext2.set(r); }
+  =}
+}
+
+main reactor {
+  node0 = new Node(myId=0)
+  node1 = new Node(myId=1)
+  node2 = new Node(myId=2)
+  node3 = new Node(myId=3)
+  trigger = new Trigger()
+  node0.hopToNext1 -> node1.hopToNext1FromNode0 after 0 msec
+  node0.returnedToOrigin -> trigger.returnedToOriginFromNode0 after 0 msec
+  node0.hopToNext2 -> node1.hopToNext2FromNode0 after 0 msec
+  node1.hopToNext1 -> node2.hopToNext1FromNode1 after 0 msec
+  node1.returnedToOrigin -> trigger.returnedToOriginFromNode1 after 0 msec
+  node1.hopToNext2 -> node2.hopToNext2FromNode1 after 0 msec
+  node2.hopToNext1 -> node3.hopToNext1FromNode2 after 0 msec
+  node2.returnedToOrigin -> trigger.returnedToOriginFromNode2 after 0 msec
+  node2.hopToNext2 -> node3.hopToNext2FromNode2 after 0 msec
+  node3.hopToNext1 -> node0.hopToNext1FromNode3 after 0 msec
+  node3.returnedToOrigin -> trigger.returnedToOriginFromNode3 after 0 msec
+  node3.hopToNext2 -> node0.hopToNext2FromNode3 after 0 msec
+  trigger.startToNode0 -> node0.startToNode0FromTrigger after 0 msec
+}

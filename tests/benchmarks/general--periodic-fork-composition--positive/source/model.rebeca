@@ -1,0 +1,60 @@
+// Benchmark: general--periodic-fork-composition--positive
+// A periodic fork with heterogeneous branches: one producer fans out to three
+// workers, each branch carrying its own payload and each worker storing what
+// it received, before the producer re-arms on the last acknowledgement. A
+// differentiated redesign of the examples2 Periodic_Fork_Composition model,
+// whose original form is an uncoupled timer-driven fork that overflows the
+// model checker; its uniform-fan-out twin is already implemented as
+// general--arbitrary-rebec-ordering--positive, so this source carries
+// per-branch payloads and stored per-worker state instead.
+reactiveclass Producer(4) {
+    knownrebecs {
+        Worker fast;
+        Worker steady;
+        Worker slow;
+    }
+    statevars {
+        int resolved;
+    }
+    Producer() {
+        resolved = 0;
+        self.fanout(1) after(1);
+    }
+    msgsrv fanout(int round) {
+        fast.work(round + 1);
+        steady.work(round);
+        slow.work(round - 1);
+    }
+    msgsrv ack(int from) {
+        resolved = resolved + 1;
+        if (resolved == 3) {
+            resolved = 0;
+            self.fanout(1) after(1);
+        }
+    }
+}
+
+reactiveclass Worker(4) {
+    knownrebecs {
+        Producer origin;
+    }
+    statevars {
+        int id;
+        int value;
+    }
+    Worker(int myId) {
+        id = myId;
+        value = 0;
+    }
+    msgsrv work(int v) {
+        value = v;
+        origin.ack(id);
+    }
+}
+
+main {
+    Worker fast(producer):(1);
+    Worker steady(producer):(2);
+    Worker slow(producer):(3);
+    Producer producer(fast, steady, slow):();
+}
