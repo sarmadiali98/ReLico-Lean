@@ -14,7 +14,7 @@ REPOSITORY_ROOT="$(
 
 GENERATED_DIRECTORY="$REPOSITORY_ROOT/.lake/frontend"
 GENERATED_JSON="$GENERATED_DIRECTORY/v0-controller.parser.json"
-GENERATED_LF="$GENERATED_DIRECTORY/V0Controller.lf"
+GENERATED_LF="$GENERATED_DIRECTORY/TranslatedLFProgram.lf"
 LFC_DIRECTORY="$REPOSITORY_ROOT/.lake/lfc-check"
 
 mkdir -p "$GENERATED_DIRECTORY"
@@ -72,16 +72,16 @@ mkdir -p "$LFC_DIRECTORY/src"
 
 cp \
   "$GENERATED_LF" \
-  "$LFC_DIRECTORY/src/V0Controller.lf"
+  "$LFC_DIRECTORY/src/TranslatedLFProgram.lf"
 
 (
   cd "$LFC_DIRECTORY"
-  lfc src/V0Controller.lf
+  lfc src/TranslatedLFProgram.lf
 )
 
-test -x "$LFC_DIRECTORY/bin/V0Controller"
+test -x "$LFC_DIRECTORY/bin/TranslatedLFProgram"
 
 echo "Real Timed Rebeca parser-to-LF/C++ check passed."
 echo "Generated JSON: $GENERATED_JSON"
 echo "Generated LF:   $GENERATED_LF"
-echo "Generated C++ executable: $LFC_DIRECTORY/bin/V0Controller"
+echo "Generated C++ executable: $LFC_DIRECTORY/bin/TranslatedLFProgram"

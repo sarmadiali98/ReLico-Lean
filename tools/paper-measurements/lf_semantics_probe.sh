@@ -48,8 +48,8 @@ fi
 printf '  (harness pins exactly "lfc 0.11.0" -- relico_bench_stage.py:473)\n'
 
 # probe <name> <expectation>   ... LF source on stdin
-# Mirrors the harness exactly: file staged as src/V0Controller.lf, compiled with
-# `lfc src/V0Controller.lf` from the work dir, binary at bin/V0Controller, run
+# Mirrors the harness exactly: file staged as src/TranslatedLFProgram.lf, compiled with
+# `lfc src/TranslatedLFProgram.lf` from the work dir, binary at bin/TranslatedLFProgram, run
 # with --timeout 5 msec --fast  (relico_bench_stage.py:457, :462, :494).
 probe() {
   NAME=$1; EXPECT=$2
@@ -67,12 +67,12 @@ probe() {
 
   W=$ROOT/$NAME
   mkdir -p "$W/src"
-  cat > "$W/src/V0Controller.lf"
+  cat > "$W/src/TranslatedLFProgram.lf"
 
   printf '\n========== %s ==========\n' "$NAME"
   printf '  expectation: %s\n' "$EXPECT"
 
-  ( cd "$W" && "$LFC" src/V0Controller.lf ) > "$W/lfc.log" 2>&1
+  ( cd "$W" && "$LFC" src/TranslatedLFProgram.lf ) > "$W/lfc.log" 2>&1
   CRC=$?
   printf '  lfc exit: %s\n' "$CRC"
   if [ "$CRC" != 0 ]; then
@@ -82,11 +82,11 @@ probe() {
     return
   fi
 
-  if [ ! -x "$W/bin/V0Controller" ]; then
-    printf '  RESULT: compiled but no executable at bin/V0Controller\n'; return
+  if [ ! -x "$W/bin/TranslatedLFProgram" ]; then
+    printf '  RESULT: compiled but no executable at bin/TranslatedLFProgram\n'; return
   fi
 
-  ( cd "$W" && ./bin/V0Controller --timeout "5 msec" --fast ) > "$W/run.log" 2>&1
+  ( cd "$W" && ./bin/TranslatedLFProgram --timeout "5 msec" --fast ) > "$W/run.log" 2>&1
   RRC=$?
   printf '  run exit: %s\n' "$RRC"
   printf '  --- observed RELICO_ output, IN ORDER ---\n'
@@ -1330,12 +1330,12 @@ probe_repeat() {
 
   W=$ROOT/$NAME
   mkdir -p "$W/src"
-  cat > "$W/src/V0Controller.lf"
+  cat > "$W/src/TranslatedLFProgram.lf"
 
   printf '\n========== %s ==========\n' "$NAME"
   printf '  expectation: %s\n' "$EXPECT"
 
-  ( cd "$W" && "$LFC" src/V0Controller.lf ) > "$W/lfc.log" 2>&1
+  ( cd "$W" && "$LFC" src/TranslatedLFProgram.lf ) > "$W/lfc.log" 2>&1
   CRC=$?
   printf '  lfc exit: %s\n' "$CRC"
   if [ "$CRC" != 0 ]; then
@@ -1344,19 +1344,19 @@ probe_repeat() {
     printf '  RESULT: DID NOT COMPILE\n'
     return
   fi
-  if [ ! -x "$W/bin/V0Controller" ]; then
-    printf '  RESULT: compiled but no executable at bin/V0Controller\n'; return
+  if [ ! -x "$W/bin/TranslatedLFProgram" ]; then
+    printf '  RESULT: compiled but no executable at bin/TranslatedLFProgram\n'; return
   fi
 
   for ATTEMPT in 1 2 3 4 5; do
-    ( cd "$W" && ./bin/V0Controller --timeout "5 msec" --fast ) > "$W/run.$ATTEMPT.log" 2>&1
+    ( cd "$W" && ./bin/TranslatedLFProgram --timeout "5 msec" --fast ) > "$W/run.$ATTEMPT.log" 2>&1
     RRC=$?
     printf '  default-workers run %s (exit %s): %s\n' "$ATTEMPT" "$RRC" \
       "$(grep 'RELICO_' "$W/run.$ATTEMPT.log" | tr '\n' ' ')"
   done
 
   for WK in 1 4; do
-    ( cd "$W" && ./bin/V0Controller --timeout "5 msec" --fast --workers "$WK" ) > "$W/run.w$WK.log" 2>&1
+    ( cd "$W" && ./bin/TranslatedLFProgram --timeout "5 msec" --fast --workers "$WK" ) > "$W/run.w$WK.log" 2>&1
     RRC=$?
     printf '  --workers %s (exit %s): %s\n' "$WK" "$RRC" \
       "$(grep 'RELICO_' "$W/run.w$WK.log" | tr '\n' ' ')"

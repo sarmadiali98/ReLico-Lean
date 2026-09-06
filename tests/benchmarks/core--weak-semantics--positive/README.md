@@ -39,7 +39,7 @@ runtime artifact does not itself prove the 47 formal obligations.
 
 ## Runtime scope
 
-The terminal runtime stage executes the generated `V0Controller` binary using
+The terminal runtime stage executes the generated `TranslatedLFProgram` binary using
 bounded execution with `--timeout "5 msec" --fast`.
 
 A passing runtime artifact is a bounded execution observation. It is not

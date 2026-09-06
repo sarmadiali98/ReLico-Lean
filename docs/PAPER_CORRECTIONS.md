@@ -218,7 +218,7 @@ Rebeca and is deliberately not re-specified here.
 Fig. 5 has no `timer` production at all.
 
 **Why it diverges:** the checked-in fixture
-`tests/benchmarks/global-multi-actor-payload--external-send--positive/expected/lf-source/V0Controller.lf`
+`tests/benchmarks/global-multi-actor-payload--external-send--positive/expected/lf-source/TranslatedLFProgram.lf`
 renders the `keepAlive` self-send as `timer keepAlive(1 msec, 1 msec)` — a construct Fig. 5 does not
 contain, and one with different semantics: it fires unconditionally forever, rather than only when the
 message server body executes.
@@ -719,7 +719,7 @@ variable, the named-argument form still needs adding to `ArgList`.
 
 **What the tool does:** follows Table III rather than the figures, and this is measured, not asserted. The
 committed `lfc`-accepted output in
-`tests/benchmarks/bound-payload--dispatch--positive/expected/lf-source/V0Controller.lf` declares
+`tests/benchmarks/bound-payload--dispatch--positive/expected/lf-source/TranslatedLFProgram.lf` declares
 `state x: int = 0`, replays the constructor as `x = 0;` inside `reaction(startup)`, and instantiates with
 `main reactor { controller = new Controller() }` — no parameter list, no arguments. Stage C keeps
 argument-free instantiation for this reason (`docs/STAGE_C_DESIGN.md` §6.5); adopting the figures' shape

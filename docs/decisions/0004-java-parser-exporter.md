@@ -83,14 +83,14 @@ The previous Java LF generator is not part of this path.
 Official LF/C++ validation
 
 The reproducible bridge check also invokes the official lfc compiler
-on V0Controller.lf.
+on TranslatedLFProgram.lf.
 
 The check succeeds only when:
 
 the LF parser accepts the generated source;
 CMake configuration succeeds;
 generated C++ compilation succeeds;
-the V0Controller executable is produced.
+the TranslatedLFProgram executable is produced.
 
 ## Runtime execution validation
 

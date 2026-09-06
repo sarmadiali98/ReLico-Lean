@@ -33,14 +33,14 @@
       "sha256": "23456970c9054f6e506cc3dd2d9e3e61afb9f52190758e757a0e52cf209224a9"
     },
     {
-      "path": "lf-source/V0Controller.lf",
+      "path": "lf-source/TranslatedLFProgram.lf",
       "required": true,
       "sha256": "7c4df90aa46c3567d8396d7cb3f65fbe6affadfa4cf4d669827baa7a43f69329"
     },
     {
       "path": "lfc/result.json",
       "required": true,
-      "sha256": "2ee3d75e82d1daa3311d9c5f4f50fd35fb0ca8ce2ee5f542ce2d79451adcc059"
+      "sha256": "fb7581ee97c62580ef11bd0d765aed50c289ee1ca958df37ea6035aa72ef676d"
     },
     {
       "path": "runtime/result.json",
@@ -180,7 +180,7 @@
         "--input",
         "{actual}/parser-json/model.json",
         "--output",
-        "{actual}/lf-source/V0Controller.lf"
+        "{actual}/lf-source/TranslatedLFProgram.lf"
       ],
       "name": "lf-source",
       "timeout_seconds": 600
@@ -191,7 +191,7 @@
         "{repo}/tools/relico_bench_stage.py",
         "lfc",
         "--lf-source",
-        "{actual}/lf-source/V0Controller.lf",
+        "{actual}/lf-source/TranslatedLFProgram.lf",
         "--work-directory",
         "{actual}/work/lfc",
         "--lfc",
@@ -208,7 +208,7 @@
         "{repo}/tools/relico_bench_stage.py",
         "runtime",
         "--executable",
-        "{actual}/work/lfc/bin/V0Controller",
+        "{actual}/work/lfc/bin/TranslatedLFProgram",
         "--output",
         "{actual}/runtime/result.json"
       ],

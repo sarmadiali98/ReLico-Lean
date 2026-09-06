@@ -13,6 +13,14 @@ import xml.etree.ElementTree as ET
 RMC_SHA256 = "a39112046d99e0895cf47f890242ace21db896e609f7eef86751a0d416d477f5"
 PARSER_ZIP_SHA256 = "b58052952cb753d554696dd1c23dc4c43f43648228221a8ff2f494311dc41586"
 LFC_SHA256 = "a8e277076ef578a677fdf7731d95d3ee745e47266ea68d37a673f44bf069cf8a"
+
+# The canonical identity of a translated program across the whole pipeline:
+# the generated LF source artifact, the file the lfc stage stages and compiles,
+# and the executable it produces. One constant, so a future rename is one edit
+# and no layer can drift from the others. lfc names the executable after the
+# staged file's stem, so the staged name and the executable name are the same
+# string by construction.
+TRANSLATED_PROGRAM = "TranslatedLFProgram"
 class StageError(RuntimeError):
     pass
 
@@ -454,17 +462,19 @@ def lfc_stage(options: argparse.Namespace) -> None:
         shutil.rmtree(work)
     source_directory = work / "src"
     source_directory.mkdir(parents=True)
-    staged_source = source_directory / "V0Controller.lf"
+    staged_source = source_directory / f"{TRANSLATED_PROGRAM}.lf"
     shutil.copy2(lf_source, staged_source)
 
     run_checked(
-        [str(lfc), "src/V0Controller.lf"],
+        [str(lfc), f"src/{TRANSLATED_PROGRAM}.lf"],
         cwd=work,
         timeout=600,
     )
 
-    executable = work / "bin" / "V0Controller"
-    require_file(executable, "generated V0Controller executable")
+    executable = work / "bin" / TRANSLATED_PROGRAM
+    require_file(
+        executable, f"generated {TRANSLATED_PROGRAM} executable"
+    )
     if not os.access(executable, os.X_OK):
         raise StageError(f"generated executable is not executable: {executable}")
 
@@ -480,7 +490,7 @@ def lfc_stage(options: argparse.Namespace) -> None:
     write_json(
         output,
         {
-            "binary": "V0Controller",
+            "binary": TRANSLATED_PROGRAM,
             "compiler": version_text,
             "schema_version": 1,
             "status": "pass",

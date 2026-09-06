@@ -146,7 +146,7 @@ space**, not the `ms` the paper's figures print.
 **That last point is a trap, and it is the reason stage C does not reuse
 `renderDelay`.** `renderDelay` produces `1ms`, and every existing use of it is
 *inside* a `{= … =}` body — `dispatch_action.schedule(1, 1ms);` in
-`tests/benchmarks/bound-payload--dispatch--positive/expected/lf-source/V0Controller.lf`.
+`tests/benchmarks/bound-payload--dispatch--positive/expected/lf-source/TranslatedLFProgram.lf`.
 Inside `{= … =}` the text is **C++**, so `1ms` there is a `std::chrono` literal
 and says nothing about LF's own time syntax. A connection's `after` clause is LF
 syntax. The two languages happen to spell milliseconds similarly, which is

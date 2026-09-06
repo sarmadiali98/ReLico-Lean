@@ -1,5 +1,5 @@
 {
-  "binary": "V0Controller",
+  "binary": "TranslatedLFProgram",
   "compiler": "lfc 0.11.0",
   "schema_version": 1,
   "status": "pass"

@@ -87,7 +87,11 @@ Generated filename
 
 Toolchain checks store the generated source as:
 
-V0Controller.lf
+TranslatedLFProgram.lf
 
 The filename avoids characters such as hyphens that would produce an
-invalid generated C++ class identifier.
+invalid generated C++ class identifier. Renamed from `V0Controller.lf` in the stage K naming
+cleanup, which moved the staged filename, the compiled executable and the
+pinned `lfc/result.json` records to the same canonical name; the only
+remaining `V0Controller` strings in the tree are frozen historical
+records.
