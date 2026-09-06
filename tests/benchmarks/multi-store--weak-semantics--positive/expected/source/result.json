@@ -1,0 +1,6 @@
+{
+  "benchmark_id": "multi-store--weak-semantics--positive",
+  "schema_version": 1,
+  "sha256": "71245c38d7bd9d02c1a91a5836529aa419de895d1e777a48482fc3caebc89279",
+  "status": "pass"
+}

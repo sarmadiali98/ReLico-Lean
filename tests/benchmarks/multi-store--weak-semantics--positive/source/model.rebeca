@@ -1,0 +1,35 @@
+// Benchmark: multi-store--weak-semantics--positive
+// A multi-store source exercising weak semantics: a chain of state-only steps, all internal, which the observable projection quotients away.
+reactiveclass Quiet(10) {
+    statevars {
+        int x;
+        int y;
+        int z;
+    }
+
+    Quiet() {
+        x = 1;
+        y = 2;
+        z = 3;
+        self.stepA() after(1);
+    }
+
+    msgsrv stepA() {
+        x = y;
+        self.stepB() after(1);
+    }
+
+    msgsrv stepB() {
+        y = z;
+        self.stepC() after(1);
+    }
+
+    msgsrv stepC() {
+        z = x;
+        self.stepA() after(1);
+    }
+}
+
+main {
+    Quiet quiet():();
+}

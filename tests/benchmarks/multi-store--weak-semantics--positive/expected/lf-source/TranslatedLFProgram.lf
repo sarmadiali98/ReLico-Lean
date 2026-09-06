@@ -1,0 +1,36 @@
+target Cpp
+
+reactor Quiet {
+  state x: int = 0
+  state y: int = 0
+  state z: int = 0
+  logical action stepA_action: void
+  logical action stepB_action: void
+  logical action stepC_action: void
+
+  reaction(startup) -> stepA_action {=
+    x = 1;
+    y = 2;
+    z = 3;
+    stepA_action.schedule(1ms);
+  =}
+
+  reaction(stepA_action) -> stepB_action {=
+    x = y;
+    stepB_action.schedule(1ms);
+  =}
+
+  reaction(stepB_action) -> stepC_action {=
+    y = z;
+    stepC_action.schedule(1ms);
+  =}
+
+  reaction(stepC_action) -> stepA_action {=
+    z = x;
+    stepA_action.schedule(1ms);
+  =}
+}
+
+main reactor {
+  quiet = new Quiet()
+}

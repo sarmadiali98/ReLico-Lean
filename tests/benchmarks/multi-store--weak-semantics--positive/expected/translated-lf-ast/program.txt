@@ -1,0 +1,32 @@
+{ reactor := { name := { value := "Quiet" },
+               stateVariables := [{ name := { value := "x" }, initialValue := 0 },
+                                  { name := { value := "y" }, initialValue := 0 },
+                                  { name := { value := "z" }, initialValue := 0 }],
+               logicalActions := [{ value := "stepA_action" },
+                                  { value := "stepB_action" },
+                                  { value := "stepC_action" }],
+               startupReaction := { name := { value := "startup" },
+                                    trigger := Relico.LF.Trigger.startup,
+                                    body := [Relico.LF.Stmt.assign { value := "x" } (Relico.LF.Expr.intLiteral 1),
+                                             Relico.LF.Stmt.assign { value := "y" } (Relico.LF.Expr.intLiteral 2),
+                                             Relico.LF.Stmt.assign { value := "z" } (Relico.LF.Expr.intLiteral 3),
+                                             Relico.LF.Stmt.schedule { value := "stepA_action" } { value := 1 }] },
+               messageReactions := [{ name := { value := "stepA_reaction" },
+                                      trigger := Relico.LF.Trigger.logicalAction { value := "stepA_action" },
+                                      body := [Relico.LF.Stmt.assign
+                                                 { value := "x" }
+                                                 (Relico.LF.Expr.stateVar { value := "y" }),
+                                               Relico.LF.Stmt.schedule { value := "stepB_action" } { value := 1 }] },
+                                    { name := { value := "stepB_reaction" },
+                                      trigger := Relico.LF.Trigger.logicalAction { value := "stepB_action" },
+                                      body := [Relico.LF.Stmt.assign
+                                                 { value := "y" }
+                                                 (Relico.LF.Expr.stateVar { value := "z" }),
+                                               Relico.LF.Stmt.schedule { value := "stepC_action" } { value := 1 }] },
+                                    { name := { value := "stepC_reaction" },
+                                      trigger := Relico.LF.Trigger.logicalAction { value := "stepC_action" },
+                                      body := [Relico.LF.Stmt.assign
+                                                 { value := "z" }
+                                                 (Relico.LF.Expr.stateVar { value := "x" }),
+                                               Relico.LF.Stmt.schedule { value := "stepA_action" } { value := 1 }] }] },
+  reactorInstance := { name := { value := "quiet" }, reactorName := { value := "Quiet" } } }
