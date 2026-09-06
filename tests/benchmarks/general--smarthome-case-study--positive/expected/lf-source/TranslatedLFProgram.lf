@@ -1,0 +1,453 @@
+target Cpp
+
+reactor Heater {
+  input setOnToHeaterFromRc1: int
+  input setOffToHeater1FromRc1: int
+  input setOffToHeater2FromRc1: int
+  input setOffToHeater3FromRc1: int
+  output notifyHeaterToRc1: int
+  output notifyHeaterToRc2: int
+  state on: bool = false
+  logical action setOn_action: int
+  logical action setOff_action: int
+
+  reaction(startup) {=
+    on = false;
+  =}
+
+  reaction(setOff_action) -> notifyHeaterToRc2 {=
+    auto unit = *setOff_action.get();
+    if (on) { on = false; notifyHeaterToRc2.set(2); } else {}
+  =}
+
+  reaction(setOffToHeater1FromRc1) -> notifyHeaterToRc2 {=
+    auto unit = *setOffToHeater1FromRc1.get();
+    if (on) { on = false; notifyHeaterToRc2.set(2); } else {}
+  =}
+
+  reaction(setOffToHeater2FromRc1) -> notifyHeaterToRc2 {=
+    auto unit = *setOffToHeater2FromRc1.get();
+    if (on) { on = false; notifyHeaterToRc2.set(2); } else {}
+  =}
+
+  reaction(setOffToHeater3FromRc1) -> notifyHeaterToRc2 {=
+    auto unit = *setOffToHeater3FromRc1.get();
+    if (on) { on = false; notifyHeaterToRc2.set(2); } else {}
+  =}
+
+  reaction(setOn_action) -> notifyHeaterToRc1 {=
+    auto unit = *setOn_action.get();
+    if ((!on)) { on = true; notifyHeaterToRc1.set(3); } else {}
+  =}
+
+  reaction(setOnToHeaterFromRc1) -> notifyHeaterToRc1 {=
+    auto unit = *setOnToHeaterFromRc1.get();
+    if ((!on)) { on = true; notifyHeaterToRc1.set(3); } else {}
+  =}
+}
+
+reactor Light {
+  input setOnToLight1FromRc1: int
+  input setOffToLight1FromRc1: int
+  input setOffToLight2FromRc1: int
+  input setOnToLight2FromRc1: int
+  output notifyLightToRc1: int
+  output notifyLightToRc2: int
+  state on: bool = false
+  logical action setOn_action: int
+  logical action setOff_action: int
+
+  reaction(startup) {=
+    on = false;
+  =}
+
+  reaction(setOff_action) -> notifyLightToRc2 {=
+    auto unit = *setOff_action.get();
+    if (on) { on = false; notifyLightToRc2.set(4); } else {}
+  =}
+
+  reaction(setOffToLight1FromRc1) -> notifyLightToRc2 {=
+    auto unit = *setOffToLight1FromRc1.get();
+    if (on) { on = false; notifyLightToRc2.set(4); } else {}
+  =}
+
+  reaction(setOffToLight2FromRc1) -> notifyLightToRc2 {=
+    auto unit = *setOffToLight2FromRc1.get();
+    if (on) { on = false; notifyLightToRc2.set(4); } else {}
+  =}
+
+  reaction(setOn_action) -> notifyLightToRc1 {=
+    auto unit = *setOn_action.get();
+    if ((!on)) { on = true; notifyLightToRc1.set(5); } else {}
+  =}
+
+  reaction(setOnToLight1FromRc1) -> notifyLightToRc1 {=
+    auto unit = *setOnToLight1FromRc1.get();
+    if ((!on)) { on = true; notifyLightToRc1.set(5); } else {}
+  =}
+
+  reaction(setOnToLight2FromRc1) -> notifyLightToRc1 {=
+    auto unit = *setOnToLight2FromRc1.get();
+    if ((!on)) { on = true; notifyLightToRc1.set(5); } else {}
+  =}
+}
+
+reactor Door {
+  input openDoorToMainDoorFromCentral: int
+  input closeDoorToMainDoorFromCentral: int
+  output reportToCentral1: int
+  output reportToCentral2: int
+  state closed: bool = false
+  logical action closeDoor_action: int
+  logical action openDoor_action: int
+
+  reaction(startup) {=
+    closed = false;
+  =}
+
+  reaction(openDoor_action) -> reportToCentral2 {=
+    auto unit = *openDoor_action.get();
+    closed = false;
+    reportToCentral2.set(8);
+  =}
+
+  reaction(openDoorToMainDoorFromCentral) -> reportToCentral2 {=
+    auto unit = *openDoorToMainDoorFromCentral.get();
+    closed = false;
+    reportToCentral2.set(8);
+  =}
+
+  reaction(closeDoor_action) -> reportToCentral1 {=
+    auto unit = *closeDoor_action.get();
+    if ((!closed)) { closed = true; reportToCentral1.set(6); } else {}
+  =}
+
+  reaction(closeDoorToMainDoorFromCentral) -> reportToCentral1 {=
+    auto unit = *closeDoorToMainDoorFromCentral.get();
+    if ((!closed)) { closed = true; reportToCentral1.set(6); } else {}
+  =}
+}
+
+reactor TempSensor {
+  output tempUpdateToRc: int
+  logical action measure_action1: void
+  logical action measure_action2: void
+
+  reaction(startup) -> measure_action1 {=
+    measure_action1.schedule(0ms);
+  =}
+
+  reaction(measure_action1) -> tempUpdateToRc, measure_action2 {=
+    tempUpdateToRc.set(15);
+    measure_action2.schedule(1000ms);
+  =}
+
+  reaction(measure_action2) -> tempUpdateToRc, measure_action2 {=
+    tempUpdateToRc.set(15);
+    measure_action2.schedule(1000ms);
+  =}
+}
+
+reactor LightSensor {
+  output lightUpdateToRc: bool
+  logical action measure_action1: void
+  logical action measure_action2: void
+
+  reaction(startup) -> measure_action1 {=
+    measure_action1.schedule(0ms);
+  =}
+
+  reaction(measure_action1) -> lightUpdateToRc, measure_action2 {=
+    lightUpdateToRc.set(false);
+    measure_action2.schedule(1000ms);
+  =}
+
+  reaction(measure_action2) -> lightUpdateToRc, measure_action2 {=
+    lightUpdateToRc.set(false);
+    measure_action2.schedule(1000ms);
+  =}
+}
+
+reactor MotionSensor {
+  output motionDetectedToRc: int
+  logical action measure_action1: void
+  logical action measure_action2: void
+
+  reaction(startup) -> measure_action1 {=
+    measure_action1.schedule(0ms);
+  =}
+
+  reaction(measure_action1) -> motionDetectedToRc, measure_action2 {=
+    if (false) { motionDetectedToRc.set(0); } else {}
+    measure_action2.schedule(1000ms);
+  =}
+
+  reaction(measure_action2) -> motionDetectedToRc, measure_action2 {=
+    if (false) { motionDetectedToRc.set(0); } else {}
+    measure_action2.schedule(1000ms);
+  =}
+}
+
+reactor RoomController {
+  input deactivateLightOverrideToRc1FromCentral: int
+  input activateLightOverrideToRcFromCentral: int
+  input deactivateLightOverrideToRc2FromCentral: int
+  input notifyHeaterToRc1FromHeater1: int
+  input notifyHeaterToRc2FromHeater1: int
+  input notifyLightToRc1FromLight1: int
+  input notifyLightToRc2FromLight1: int
+  input tempUpdateToRcFromTs1: int
+  input motionDetectedToRcFromMs1: int
+  input lightUpdateToRcFromLs1: bool
+  output setOnToHeater: int
+  output setOffToHeater1: int
+  output fireAlertToCentral: int
+  output setOffToHeater2: int
+  output setOffToHeater3: int
+  output setOnToLight1: int
+  output setOffToLight1: int
+  output unwantedPersonAlertToCentral: int
+  output reportToCentral1: int
+  output reportToCentral2: int
+  output setOffToLight2: int
+  output setOnToLight2: int
+  state lastTemp: int = 0
+  state lastLightDark: bool = false
+  state lightIsOn: bool = false
+  state lightOverrideActive: bool = false
+  logical action tempUpdate_action: int
+  logical action lightUpdate_action: bool
+  logical action motionDetected_action: int
+  logical action notifyLight_action: int
+  logical action notifyHeater_action: int
+  logical action activateLightOverride_action: int
+  logical action deactivateLightOverride_action: int
+
+  reaction(startup) {=
+    lastTemp = 22;
+    lastLightDark = false;
+    lightIsOn = false;
+    lightOverrideActive = false;
+  =}
+
+  reaction(tempUpdate_action) -> setOnToHeater, setOffToHeater1, fireAlertToCentral, setOffToHeater2, setOffToHeater3 {=
+    auto t = *tempUpdate_action.get();
+    lastTemp = t;
+    if ((t < 20)) { setOnToHeater.set(0); } else { if ((t <= 25)) { setOffToHeater1.set(0); } else { if ((t > 35)) { fireAlertToCentral.set(0); setOffToHeater2.set(0); } else { setOffToHeater3.set(0); } } }
+  =}
+
+  reaction(tempUpdateToRcFromTs1) -> setOnToHeater, setOffToHeater1, fireAlertToCentral, setOffToHeater2, setOffToHeater3 {=
+    auto t = *tempUpdateToRcFromTs1.get();
+    lastTemp = t;
+    if ((t < 20)) { setOnToHeater.set(0); } else { if ((t <= 25)) { setOffToHeater1.set(0); } else { if ((t > 35)) { fireAlertToCentral.set(0); setOffToHeater2.set(0); } else { setOffToHeater3.set(0); } } }
+  =}
+
+  reaction(motionDetected_action) -> unwantedPersonAlertToCentral {=
+    auto unit = *motionDetected_action.get();
+    unwantedPersonAlertToCentral.set(0);
+  =}
+
+  reaction(motionDetectedToRcFromMs1) -> unwantedPersonAlertToCentral {=
+    auto unit = *motionDetectedToRcFromMs1.get();
+    unwantedPersonAlertToCentral.set(0);
+  =}
+
+  reaction(activateLightOverride_action) -> setOffToLight2 {=
+    auto unit = *activateLightOverride_action.get();
+    lightOverrideActive = true;
+    if (lightIsOn) { lightIsOn = false; setOffToLight2.set(0); } else {}
+  =}
+
+  reaction(activateLightOverrideToRcFromCentral) -> setOffToLight2 {=
+    auto unit = *activateLightOverrideToRcFromCentral.get();
+    lightOverrideActive = true;
+    if (lightIsOn) { lightIsOn = false; setOffToLight2.set(0); } else {}
+  =}
+
+  reaction(deactivateLightOverride_action) -> setOnToLight2 {=
+    auto unit = *deactivateLightOverride_action.get();
+    lightOverrideActive = false;
+    if (lastLightDark) { setOnToLight2.set(0); } else {}
+  =}
+
+  reaction(deactivateLightOverrideToRc1FromCentral) -> setOnToLight2 {=
+    auto unit = *deactivateLightOverrideToRc1FromCentral.get();
+    lightOverrideActive = false;
+    if (lastLightDark) { setOnToLight2.set(0); } else {}
+  =}
+
+  reaction(deactivateLightOverrideToRc2FromCentral) -> setOnToLight2 {=
+    auto unit = *deactivateLightOverrideToRc2FromCentral.get();
+    lightOverrideActive = false;
+    if (lastLightDark) { setOnToLight2.set(0); } else {}
+  =}
+
+  reaction(lightUpdate_action) -> setOnToLight1, setOffToLight1 {=
+    auto isDark = *lightUpdate_action.get();
+    lastLightDark = isDark;
+    if ((!lightOverrideActive)) { if (isDark) { setOnToLight1.set(0); } else { setOffToLight1.set(0); } } else {}
+  =}
+
+  reaction(lightUpdateToRcFromLs1) -> setOnToLight1, setOffToLight1 {=
+    auto isDark = *lightUpdateToRcFromLs1.get();
+    lastLightDark = isDark;
+    if ((!lightOverrideActive)) { if (isDark) { setOnToLight1.set(0); } else { setOffToLight1.set(0); } } else {}
+  =}
+
+  reaction(notifyHeater_action) -> reportToCentral2 {=
+    auto msg = *notifyHeater_action.get();
+    reportToCentral2.set(msg);
+  =}
+
+  reaction(notifyHeaterToRc1FromHeater1) -> reportToCentral2 {=
+    auto msg = *notifyHeaterToRc1FromHeater1.get();
+    reportToCentral2.set(msg);
+  =}
+
+  reaction(notifyHeaterToRc2FromHeater1) -> reportToCentral2 {=
+    auto msg = *notifyHeaterToRc2FromHeater1.get();
+    reportToCentral2.set(msg);
+  =}
+
+  reaction(notifyLight_action) -> reportToCentral1 {=
+    auto msg = *notifyLight_action.get();
+    if ((msg == 5)) { if ((!lightOverrideActive)) { lightIsOn = true; } else {} } else { if ((msg == 4)) { lightIsOn = false; } else {} }
+    reportToCentral1.set(msg);
+  =}
+
+  reaction(notifyLightToRc1FromLight1) -> reportToCentral1 {=
+    auto msg = *notifyLightToRc1FromLight1.get();
+    if ((msg == 5)) { if ((!lightOverrideActive)) { lightIsOn = true; } else {} } else { if ((msg == 4)) { lightIsOn = false; } else {} }
+    reportToCentral1.set(msg);
+  =}
+
+  reaction(notifyLightToRc2FromLight1) -> reportToCentral1 {=
+    auto msg = *notifyLightToRc2FromLight1.get();
+    if ((msg == 5)) { if ((!lightOverrideActive)) { lightIsOn = true; } else {} } else { if ((msg == 4)) { lightIsOn = false; } else {} }
+    reportToCentral1.set(msg);
+  =}
+}
+
+reactor CentralController {
+  input fireAlertToCentralFromRc1: int
+  input unwantedPersonAlertToCentralFromRc1: int
+  input reportToCentral1FromRc1: int
+  input reportToCentral2FromRc1: int
+  input reportToCentral1FromMainDoor: int
+  input reportToCentral2FromMainDoor: int
+  output openDoorToMainDoor: int
+  output deactivateLightOverrideToRc1: int
+  output activateLightOverrideToRc: int
+  output closeDoorToMainDoor: int
+  output deactivateLightOverrideToRc2: int
+  state fireAlarmActive: bool = false
+  state intrusionAlarmActive: bool = false
+  state emergencyModeActive: bool = false
+  state intrusionWasCleared: bool = false
+  state doorCloseRequested: bool = false
+  logical action fireAlert_action: int
+  logical action unwantedPersonAlert_action: int
+  logical action requestCloseDoor_action: void
+  logical action clearIntrusionAlarm_action: void
+  logical action report_action1: int
+  logical action report_action2: int
+
+  reaction(startup) {=
+    fireAlarmActive = false;
+    intrusionAlarmActive = false;
+    emergencyModeActive = false;
+    intrusionWasCleared = false;
+    doorCloseRequested = false;
+  =}
+
+  reaction(fireAlert_action) -> report_action1, openDoorToMainDoor, deactivateLightOverrideToRc1 {=
+    auto unit = *fireAlert_action.get();
+    if ((!fireAlarmActive)) { fireAlarmActive = true; emergencyModeActive = true; report_action1.schedule(9, 0ms); doorCloseRequested = false; openDoorToMainDoor.set(0); } else {}
+    if (intrusionAlarmActive) { intrusionAlarmActive = false; intrusionWasCleared = true; deactivateLightOverrideToRc1.set(0); } else {}
+  =}
+
+  reaction(fireAlertToCentralFromRc1) -> report_action1, openDoorToMainDoor, deactivateLightOverrideToRc1 {=
+    auto unit = *fireAlertToCentralFromRc1.get();
+    if ((!fireAlarmActive)) { fireAlarmActive = true; emergencyModeActive = true; report_action1.schedule(9, 0ms); doorCloseRequested = false; openDoorToMainDoor.set(0); } else {}
+    if (intrusionAlarmActive) { intrusionAlarmActive = false; intrusionWasCleared = true; deactivateLightOverrideToRc1.set(0); } else {}
+  =}
+
+  reaction(unwantedPersonAlert_action) -> report_action2, requestCloseDoor_action, activateLightOverrideToRc, clearIntrusionAlarm_action {=
+    auto unit = *unwantedPersonAlert_action.get();
+    if ((((!fireAlarmActive) && (!intrusionAlarmActive)) && (!intrusionWasCleared))) { intrusionAlarmActive = true; emergencyModeActive = true; report_action2.schedule(1, 0ms); doorCloseRequested = true; requestCloseDoor_action.schedule(1ms); activateLightOverrideToRc.set(0); clearIntrusionAlarm_action.schedule(30000ms); } else {}
+  =}
+
+  reaction(unwantedPersonAlertToCentralFromRc1) -> report_action2, requestCloseDoor_action, activateLightOverrideToRc, clearIntrusionAlarm_action {=
+    auto unit = *unwantedPersonAlertToCentralFromRc1.get();
+    if ((((!fireAlarmActive) && (!intrusionAlarmActive)) && (!intrusionWasCleared))) { intrusionAlarmActive = true; emergencyModeActive = true; report_action2.schedule(1, 0ms); doorCloseRequested = true; requestCloseDoor_action.schedule(1ms); activateLightOverrideToRc.set(0); clearIntrusionAlarm_action.schedule(30000ms); } else {}
+  =}
+
+  reaction(requestCloseDoor_action) -> closeDoorToMainDoor {=
+    if (((!fireAlarmActive) && doorCloseRequested)) { closeDoorToMainDoor.set(0); } else {}
+  =}
+
+  reaction(clearIntrusionAlarm_action) -> deactivateLightOverrideToRc2 {=
+    if ((intrusionAlarmActive && (!fireAlarmActive))) { intrusionAlarmActive = false; emergencyModeActive = false; intrusionWasCleared = true; deactivateLightOverrideToRc2.set(0); } else {}
+  =}
+
+  reaction(report_action1) {=
+    auto msg = *report_action1.get();
+  =}
+
+  reaction(report_action2) {=
+    auto msg = *report_action2.get();
+  =}
+
+  reaction(reportToCentral1FromRc1) {=
+    auto msg = *reportToCentral1FromRc1.get();
+  =}
+
+  reaction(reportToCentral2FromRc1) {=
+    auto msg = *reportToCentral2FromRc1.get();
+  =}
+
+  reaction(reportToCentral1FromMainDoor) {=
+    auto msg = *reportToCentral1FromMainDoor.get();
+  =}
+
+  reaction(reportToCentral2FromMainDoor) {=
+    auto msg = *reportToCentral2FromMainDoor.get();
+  =}
+}
+
+main reactor {
+  rc1 = new RoomController()
+  central = new CentralController()
+  mainDoor = new Door()
+  heater1 = new Heater()
+  light1 = new Light()
+  ts1 = new TempSensor()
+  ms1 = new MotionSensor()
+  ls1 = new LightSensor()
+  rc1.setOnToHeater -> heater1.setOnToHeaterFromRc1 after 1 msec
+  rc1.setOffToHeater1 -> heater1.setOffToHeater1FromRc1 after 1 msec
+  rc1.fireAlertToCentral -> central.fireAlertToCentralFromRc1 after 0 msec
+  rc1.setOffToHeater2 -> heater1.setOffToHeater2FromRc1 after 1 msec
+  rc1.setOffToHeater3 -> heater1.setOffToHeater3FromRc1 after 1 msec
+  rc1.setOnToLight1 -> light1.setOnToLight1FromRc1 after 1 msec
+  rc1.setOffToLight1 -> light1.setOffToLight1FromRc1 after 1 msec
+  rc1.unwantedPersonAlertToCentral -> central.unwantedPersonAlertToCentralFromRc1 after 0 msec
+  rc1.reportToCentral1 -> central.reportToCentral1FromRc1 after 0 msec
+  rc1.reportToCentral2 -> central.reportToCentral2FromRc1 after 0 msec
+  rc1.setOffToLight2 -> light1.setOffToLight2FromRc1 after 1 msec
+  rc1.setOnToLight2 -> light1.setOnToLight2FromRc1 after 1 msec
+  central.openDoorToMainDoor -> mainDoor.openDoorToMainDoorFromCentral after 0 msec
+  central.deactivateLightOverrideToRc1 -> rc1.deactivateLightOverrideToRc1FromCentral after 0 msec
+  central.activateLightOverrideToRc -> rc1.activateLightOverrideToRcFromCentral after 1 msec
+  central.closeDoorToMainDoor -> mainDoor.closeDoorToMainDoorFromCentral after 0 msec
+  central.deactivateLightOverrideToRc2 -> rc1.deactivateLightOverrideToRc2FromCentral after 0 msec
+  mainDoor.reportToCentral1 -> central.reportToCentral1FromMainDoor after 0 msec
+  mainDoor.reportToCentral2 -> central.reportToCentral2FromMainDoor after 0 msec
+  heater1.notifyHeaterToRc1 -> rc1.notifyHeaterToRc1FromHeater1 after 0 msec
+  heater1.notifyHeaterToRc2 -> rc1.notifyHeaterToRc2FromHeater1 after 0 msec
+  light1.notifyLightToRc1 -> rc1.notifyLightToRc1FromLight1 after 0 msec
+  light1.notifyLightToRc2 -> rc1.notifyLightToRc2FromLight1 after 0 msec
+  ts1.tempUpdateToRc -> rc1.tempUpdateToRcFromTs1 after 1 msec
+  ms1.motionDetectedToRc -> rc1.motionDetectedToRcFromMs1 after 1 msec
+  ls1.lightUpdateToRc -> rc1.lightUpdateToRcFromLs1 after 1 msec
+}

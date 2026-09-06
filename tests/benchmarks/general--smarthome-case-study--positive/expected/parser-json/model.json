@@ -1,0 +1,2049 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 37,
+            "target": "on",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 37,
+              "value": false
+            }
+          }
+        ],
+        "line": 36,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "RoomController",
+          "line": 33,
+          "name": "rc"
+        }
+      ],
+      "line": 32,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "unary",
+                "line": 42,
+                "operand": {
+                  "kind": "variable",
+                  "line": 42,
+                  "name": "on"
+                },
+                "operator": "!"
+              },
+              "else": [],
+              "kind": "if",
+              "line": 42,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 43,
+                  "target": "on",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 43,
+                    "value": true
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 44,
+                      "value": 3
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 44,
+                  "messageServer": "notifyHeater",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "rc"
+                  },
+                  "targetClassName": "RoomController"
+                }
+              ]
+            }
+          ],
+          "line": 41,
+          "name": "setOn",
+          "parameters": [
+            {
+              "line": 41,
+              "name": "unit",
+              "type": "int"
+            }
+          ],
+          "priority": 2
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "variable",
+                "line": 50,
+                "name": "on"
+              },
+              "else": [],
+              "kind": "if",
+              "line": 50,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 51,
+                  "target": "on",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 51,
+                    "value": false
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 52,
+                      "value": 2
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 52,
+                  "messageServer": "notifyHeater",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "rc"
+                  },
+                  "targetClassName": "RoomController"
+                }
+              ]
+            }
+          ],
+          "line": 49,
+          "name": "setOff",
+          "parameters": [
+            {
+              "line": 49,
+              "name": "unit",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        }
+      ],
+      "name": "Heater",
+      "queueBound": 3,
+      "stateVariables": [
+        {
+          "line": 34,
+          "name": "on",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 62,
+            "target": "on",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 62,
+              "value": false
+            }
+          }
+        ],
+        "line": 61,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "RoomController",
+          "line": 58,
+          "name": "rc"
+        }
+      ],
+      "line": 57,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "unary",
+                "line": 67,
+                "operand": {
+                  "kind": "variable",
+                  "line": 67,
+                  "name": "on"
+                },
+                "operator": "!"
+              },
+              "else": [],
+              "kind": "if",
+              "line": 67,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 68,
+                  "target": "on",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 68,
+                    "value": true
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 69,
+                      "value": 5
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 69,
+                  "messageServer": "notifyLight",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "rc"
+                  },
+                  "targetClassName": "RoomController"
+                }
+              ]
+            }
+          ],
+          "line": 66,
+          "name": "setOn",
+          "parameters": [
+            {
+              "line": 66,
+              "name": "unit",
+              "type": "int"
+            }
+          ],
+          "priority": 2
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "variable",
+                "line": 75,
+                "name": "on"
+              },
+              "else": [],
+              "kind": "if",
+              "line": 75,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 76,
+                  "target": "on",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 76,
+                    "value": false
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 77,
+                      "value": 4
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 77,
+                  "messageServer": "notifyLight",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "rc"
+                  },
+                  "targetClassName": "RoomController"
+                }
+              ]
+            }
+          ],
+          "line": 74,
+          "name": "setOff",
+          "parameters": [
+            {
+              "line": 74,
+              "name": "unit",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        }
+      ],
+      "name": "Light",
+      "queueBound": 3,
+      "stateVariables": [
+        {
+          "line": 59,
+          "name": "on",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 87,
+            "target": "closed",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 87,
+              "value": false
+            }
+          }
+        ],
+        "line": 86,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "CentralController",
+          "line": 83,
+          "name": "central"
+        }
+      ],
+      "line": 82,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "unary",
+                "line": 92,
+                "operand": {
+                  "kind": "variable",
+                  "line": 92,
+                  "name": "closed"
+                },
+                "operator": "!"
+              },
+              "else": [],
+              "kind": "if",
+              "line": 92,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 93,
+                  "target": "closed",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 93,
+                    "value": true
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 94,
+                      "value": 6
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 94,
+                  "messageServer": "report",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "central"
+                  },
+                  "targetClassName": "CentralController"
+                }
+              ]
+            }
+          ],
+          "line": 91,
+          "name": "closeDoor",
+          "parameters": [
+            {
+              "line": 91,
+              "name": "unit",
+              "type": "int"
+            }
+          ],
+          "priority": 2
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 100,
+              "target": "closed",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 100,
+                "value": false
+              }
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "intLiteral",
+                  "line": 101,
+                  "value": 8
+                }
+              ],
+              "kind": "send",
+              "line": 101,
+              "messageServer": "report",
+              "target": {
+                "kind": "knownRebec",
+                "name": "central"
+              },
+              "targetClassName": "CentralController"
+            }
+          ],
+          "line": 99,
+          "name": "openDoor",
+          "parameters": [
+            {
+              "line": 99,
+              "name": "unit",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        }
+      ],
+      "name": "Door",
+      "queueBound": 3,
+      "stateVariables": [
+        {
+          "line": 84,
+          "name": "closed",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 110,
+            "messageServer": "measure",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "TempSensor"
+          }
+        ],
+        "line": 109,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "RoomController",
+          "line": 107,
+          "name": "rc"
+        }
+      ],
+      "line": 106,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1
+              },
+              "arguments": [
+                {
+                  "kind": "intLiteral",
+                  "line": 115,
+                  "value": 15
+                }
+              ],
+              "kind": "send",
+              "line": 115,
+              "messageServer": "tempUpdate",
+              "target": {
+                "kind": "knownRebec",
+                "name": "rc"
+              },
+              "targetClassName": "RoomController"
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1000
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 116,
+              "messageServer": "measure",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "TempSensor"
+            }
+          ],
+          "line": 114,
+          "name": "measure",
+          "parameters": [],
+          "priority": 1
+        }
+      ],
+      "name": "TempSensor",
+      "queueBound": 3,
+      "stateVariables": []
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 124,
+            "messageServer": "measure",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "LightSensor"
+          }
+        ],
+        "line": 123,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "RoomController",
+          "line": 121,
+          "name": "rc"
+        }
+      ],
+      "line": 120,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1
+              },
+              "arguments": [
+                {
+                  "kind": "boolLiteral",
+                  "line": 130,
+                  "value": false
+                }
+              ],
+              "kind": "send",
+              "line": 130,
+              "messageServer": "lightUpdate",
+              "target": {
+                "kind": "knownRebec",
+                "name": "rc"
+              },
+              "targetClassName": "RoomController"
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1000
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 131,
+              "messageServer": "measure",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "LightSensor"
+            }
+          ],
+          "line": 128,
+          "name": "measure",
+          "parameters": [],
+          "priority": 1
+        }
+      ],
+      "name": "LightSensor",
+      "queueBound": 3,
+      "stateVariables": []
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 139,
+            "messageServer": "measure",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "MotionSensor"
+          }
+        ],
+        "line": 138,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "RoomController",
+          "line": 136,
+          "name": "rc"
+        }
+      ],
+      "line": 135,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "boolLiteral",
+                "line": 144,
+                "value": false
+              },
+              "else": [],
+              "kind": "if",
+              "line": 144,
+              "then": [
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 145,
+                      "value": 0
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 145,
+                  "messageServer": "motionDetected",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "rc"
+                  },
+                  "targetClassName": "RoomController"
+                }
+              ]
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1000
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 147,
+              "messageServer": "measure",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "MotionSensor"
+            }
+          ],
+          "line": 143,
+          "name": "measure",
+          "parameters": [],
+          "priority": 1
+        }
+      ],
+      "name": "MotionSensor",
+      "queueBound": 3,
+      "stateVariables": []
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 167,
+            "target": "lastTemp",
+            "value": {
+              "kind": "intLiteral",
+              "line": 167,
+              "value": 22
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 168,
+            "target": "lastLightDark",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 168,
+              "value": false
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 169,
+            "target": "lightIsOn",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 169,
+              "value": false
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 170,
+            "target": "lightOverrideActive",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 170,
+              "value": false
+            }
+          }
+        ],
+        "line": 166,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "CentralController",
+          "line": 154,
+          "name": "central"
+        },
+        {
+          "className": "Heater",
+          "line": 155,
+          "name": "heater"
+        },
+        {
+          "className": "Light",
+          "line": 156,
+          "name": "light"
+        }
+      ],
+      "line": 152,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 175,
+              "target": "lastTemp",
+              "value": {
+                "kind": "variable",
+                "line": 175,
+                "name": "t"
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 177,
+                  "name": "t"
+                },
+                "line": 177,
+                "operator": "<",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 177,
+                  "value": 20
+                }
+              },
+              "else": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 180,
+                      "name": "t"
+                    },
+                    "line": 180,
+                    "operator": "<=",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 180,
+                      "value": 25
+                    }
+                  },
+                  "else": [
+                    {
+                      "condition": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 183,
+                          "name": "t"
+                        },
+                        "line": 183,
+                        "operator": ">",
+                        "right": {
+                          "kind": "intLiteral",
+                          "line": 183,
+                          "value": 35
+                        }
+                      },
+                      "else": [
+                        {
+                          "after": {
+                            "kind": "intLiteral",
+                            "value": 1
+                          },
+                          "arguments": [
+                            {
+                              "kind": "intLiteral",
+                              "line": 189,
+                              "value": 0
+                            }
+                          ],
+                          "kind": "send",
+                          "line": 189,
+                          "messageServer": "setOff",
+                          "target": {
+                            "kind": "knownRebec",
+                            "name": "heater"
+                          },
+                          "targetClassName": "Heater"
+                        }
+                      ],
+                      "kind": "if",
+                      "line": 183,
+                      "then": [
+                        {
+                          "after": null,
+                          "arguments": [
+                            {
+                              "kind": "intLiteral",
+                              "line": 185,
+                              "value": 0
+                            }
+                          ],
+                          "kind": "send",
+                          "line": 185,
+                          "messageServer": "fireAlert",
+                          "target": {
+                            "kind": "knownRebec",
+                            "name": "central"
+                          },
+                          "targetClassName": "CentralController"
+                        },
+                        {
+                          "after": {
+                            "kind": "intLiteral",
+                            "value": 1
+                          },
+                          "arguments": [
+                            {
+                              "kind": "intLiteral",
+                              "line": 186,
+                              "value": 0
+                            }
+                          ],
+                          "kind": "send",
+                          "line": 186,
+                          "messageServer": "setOff",
+                          "target": {
+                            "kind": "knownRebec",
+                            "name": "heater"
+                          },
+                          "targetClassName": "Heater"
+                        }
+                      ]
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 180,
+                  "then": [
+                    {
+                      "after": {
+                        "kind": "intLiteral",
+                        "value": 1
+                      },
+                      "arguments": [
+                        {
+                          "kind": "intLiteral",
+                          "line": 182,
+                          "value": 0
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 182,
+                      "messageServer": "setOff",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "heater"
+                      },
+                      "targetClassName": "Heater"
+                    }
+                  ]
+                }
+              ],
+              "kind": "if",
+              "line": 177,
+              "then": [
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 179,
+                      "value": 0
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 179,
+                  "messageServer": "setOn",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "heater"
+                  },
+                  "targetClassName": "Heater"
+                }
+              ]
+            }
+          ],
+          "line": 174,
+          "name": "tempUpdate",
+          "parameters": [
+            {
+              "line": 174,
+              "name": "t",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 195,
+              "target": "lastLightDark",
+              "value": {
+                "kind": "variable",
+                "line": 195,
+                "name": "isDark"
+              }
+            },
+            {
+              "condition": {
+                "kind": "unary",
+                "line": 198,
+                "operand": {
+                  "kind": "variable",
+                  "line": 198,
+                  "name": "lightOverrideActive"
+                },
+                "operator": "!"
+              },
+              "else": [],
+              "kind": "if",
+              "line": 198,
+              "then": [
+                {
+                  "condition": {
+                    "kind": "variable",
+                    "line": 199,
+                    "name": "isDark"
+                  },
+                  "else": [
+                    {
+                      "after": {
+                        "kind": "intLiteral",
+                        "value": 1
+                      },
+                      "arguments": [
+                        {
+                          "kind": "intLiteral",
+                          "line": 204,
+                          "value": 0
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 204,
+                      "messageServer": "setOff",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "light"
+                      },
+                      "targetClassName": "Light"
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 199,
+                  "then": [
+                    {
+                      "after": {
+                        "kind": "intLiteral",
+                        "value": 1
+                      },
+                      "arguments": [
+                        {
+                          "kind": "intLiteral",
+                          "line": 201,
+                          "value": 0
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 201,
+                      "messageServer": "setOn",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "light"
+                      },
+                      "targetClassName": "Light"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "line": 194,
+          "name": "lightUpdate",
+          "parameters": [
+            {
+              "line": 194,
+              "name": "isDark",
+              "type": "boolean"
+            }
+          ],
+          "priority": 5
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "intLiteral",
+                  "line": 211,
+                  "value": 0
+                }
+              ],
+              "kind": "send",
+              "line": 211,
+              "messageServer": "unwantedPersonAlert",
+              "target": {
+                "kind": "knownRebec",
+                "name": "central"
+              },
+              "targetClassName": "CentralController"
+            }
+          ],
+          "line": 210,
+          "name": "motionDetected",
+          "parameters": [
+            {
+              "line": 210,
+              "name": "unit",
+              "type": "int"
+            }
+          ],
+          "priority": 2
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 216,
+                  "name": "msg"
+                },
+                "line": 216,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 216,
+                  "value": 5
+                }
+              },
+              "else": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 221,
+                      "name": "msg"
+                    },
+                    "line": 221,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 221,
+                      "value": 4
+                    }
+                  },
+                  "else": [],
+                  "kind": "if",
+                  "line": 221,
+                  "then": [
+                    {
+                      "kind": "assign",
+                      "line": 222,
+                      "target": "lightIsOn",
+                      "value": {
+                        "kind": "boolLiteral",
+                        "line": 222,
+                        "value": false
+                      }
+                    }
+                  ]
+                }
+              ],
+              "kind": "if",
+              "line": 216,
+              "then": [
+                {
+                  "condition": {
+                    "kind": "unary",
+                    "line": 218,
+                    "operand": {
+                      "kind": "variable",
+                      "line": 218,
+                      "name": "lightOverrideActive"
+                    },
+                    "operator": "!"
+                  },
+                  "else": [],
+                  "kind": "if",
+                  "line": 218,
+                  "then": [
+                    {
+                      "kind": "assign",
+                      "line": 219,
+                      "target": "lightIsOn",
+                      "value": {
+                        "kind": "boolLiteral",
+                        "line": 219,
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 225,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 225,
+              "messageServer": "report",
+              "target": {
+                "kind": "knownRebec",
+                "name": "central"
+              },
+              "targetClassName": "CentralController"
+            }
+          ],
+          "line": 215,
+          "name": "notifyLight",
+          "parameters": [
+            {
+              "line": 215,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": 7
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 231,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 231,
+              "messageServer": "report",
+              "target": {
+                "kind": "knownRebec",
+                "name": "central"
+              },
+              "targetClassName": "CentralController"
+            }
+          ],
+          "line": 229,
+          "name": "notifyHeater",
+          "parameters": [
+            {
+              "line": 229,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": 6
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 236,
+              "target": "lightOverrideActive",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 236,
+                "value": true
+              }
+            },
+            {
+              "condition": {
+                "kind": "variable",
+                "line": 238,
+                "name": "lightIsOn"
+              },
+              "else": [],
+              "kind": "if",
+              "line": 238,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 239,
+                  "target": "lightIsOn",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 239,
+                    "value": false
+                  }
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 240,
+                      "value": 0
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 240,
+                  "messageServer": "setOff",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "light"
+                  },
+                  "targetClassName": "Light"
+                }
+              ]
+            }
+          ],
+          "line": 235,
+          "name": "activateLightOverride",
+          "parameters": [
+            {
+              "line": 235,
+              "name": "unit",
+              "type": "int"
+            }
+          ],
+          "priority": 3
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 246,
+              "target": "lightOverrideActive",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 246,
+                "value": false
+              }
+            },
+            {
+              "condition": {
+                "kind": "variable",
+                "line": 248,
+                "name": "lastLightDark"
+              },
+              "else": [],
+              "kind": "if",
+              "line": 248,
+              "then": [
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 249,
+                      "value": 0
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 249,
+                  "messageServer": "setOn",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "light"
+                  },
+                  "targetClassName": "Light"
+                }
+              ]
+            }
+          ],
+          "line": 245,
+          "name": "deactivateLightOverride",
+          "parameters": [
+            {
+              "line": 245,
+              "name": "unit",
+              "type": "int"
+            }
+          ],
+          "priority": 4
+        }
+      ],
+      "name": "RoomController",
+      "queueBound": 6,
+      "stateVariables": [
+        {
+          "line": 160,
+          "name": "lastTemp",
+          "type": "int"
+        },
+        {
+          "line": 161,
+          "name": "lastLightDark",
+          "type": "boolean"
+        },
+        {
+          "line": 162,
+          "name": "lightIsOn",
+          "type": "boolean"
+        },
+        {
+          "line": 163,
+          "name": "lightOverrideActive",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 269,
+            "target": "fireAlarmActive",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 269,
+              "value": false
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 270,
+            "target": "intrusionAlarmActive",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 270,
+              "value": false
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 271,
+            "target": "emergencyModeActive",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 271,
+              "value": false
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 272,
+            "target": "intrusionWasCleared",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 272,
+              "value": false
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 273,
+            "target": "doorCloseRequested",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 273,
+              "value": false
+            }
+          }
+        ],
+        "line": 268,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Door",
+          "line": 256,
+          "name": "mainDoor"
+        },
+        {
+          "className": "RoomController",
+          "line": 257,
+          "name": "rc"
+        }
+      ],
+      "line": 254,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "unary",
+                "line": 278,
+                "operand": {
+                  "kind": "variable",
+                  "line": 278,
+                  "name": "fireAlarmActive"
+                },
+                "operator": "!"
+              },
+              "else": [],
+              "kind": "if",
+              "line": 278,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 279,
+                  "target": "fireAlarmActive",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 279,
+                    "value": true
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 280,
+                  "target": "emergencyModeActive",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 280,
+                    "value": true
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 281,
+                      "value": 9
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 281,
+                  "messageServer": "report",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "CentralController"
+                },
+                {
+                  "kind": "assign",
+                  "line": 282,
+                  "target": "doorCloseRequested",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 282,
+                    "value": false
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 283,
+                      "value": 0
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 283,
+                  "messageServer": "openDoor",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "mainDoor"
+                  },
+                  "targetClassName": "Door"
+                }
+              ]
+            },
+            {
+              "condition": {
+                "kind": "variable",
+                "line": 286,
+                "name": "intrusionAlarmActive"
+              },
+              "else": [],
+              "kind": "if",
+              "line": 286,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 287,
+                  "target": "intrusionAlarmActive",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 287,
+                    "value": false
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 288,
+                  "target": "intrusionWasCleared",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 288,
+                    "value": true
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 289,
+                      "value": 0
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 289,
+                  "messageServer": "deactivateLightOverride",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "rc"
+                  },
+                  "targetClassName": "RoomController"
+                }
+              ]
+            }
+          ],
+          "line": 277,
+          "name": "fireAlert",
+          "parameters": [
+            {
+              "line": 277,
+              "name": "unit",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "unary",
+                    "line": 296,
+                    "operand": {
+                      "kind": "variable",
+                      "line": 296,
+                      "name": "fireAlarmActive"
+                    },
+                    "operator": "!"
+                  },
+                  "line": 296,
+                  "operator": "&&",
+                  "right": {
+                    "kind": "unary",
+                    "line": 296,
+                    "operand": {
+                      "kind": "variable",
+                      "line": 296,
+                      "name": "intrusionAlarmActive"
+                    },
+                    "operator": "!"
+                  }
+                },
+                "line": 296,
+                "operator": "&&",
+                "right": {
+                  "kind": "unary",
+                  "line": 296,
+                  "operand": {
+                    "kind": "variable",
+                    "line": 296,
+                    "name": "intrusionWasCleared"
+                  },
+                  "operator": "!"
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 296,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 297,
+                  "target": "intrusionAlarmActive",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 297,
+                    "value": true
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 298,
+                  "target": "emergencyModeActive",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 298,
+                    "value": true
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 299,
+                      "value": 1
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 299,
+                  "messageServer": "report",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "CentralController"
+                },
+                {
+                  "kind": "assign",
+                  "line": 300,
+                  "target": "doorCloseRequested",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 300,
+                    "value": true
+                  }
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 301,
+                  "messageServer": "requestCloseDoor",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "CentralController"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 302,
+                      "value": 0
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 302,
+                  "messageServer": "activateLightOverride",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "rc"
+                  },
+                  "targetClassName": "RoomController"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 30000
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 303,
+                  "messageServer": "clearIntrusionAlarm",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "CentralController"
+                }
+              ]
+            }
+          ],
+          "line": 294,
+          "name": "unwantedPersonAlert",
+          "parameters": [
+            {
+              "line": 294,
+              "name": "unit",
+              "type": "int"
+            }
+          ],
+          "priority": 2
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "unary",
+                  "line": 310,
+                  "operand": {
+                    "kind": "variable",
+                    "line": 310,
+                    "name": "fireAlarmActive"
+                  },
+                  "operator": "!"
+                },
+                "line": 310,
+                "operator": "&&",
+                "right": {
+                  "kind": "variable",
+                  "line": 310,
+                  "name": "doorCloseRequested"
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 310,
+              "then": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 311,
+                      "value": 0
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 311,
+                  "messageServer": "closeDoor",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "mainDoor"
+                  },
+                  "targetClassName": "Door"
+                }
+              ]
+            }
+          ],
+          "line": 308,
+          "name": "requestCloseDoor",
+          "parameters": [],
+          "priority": 3
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 317,
+                  "name": "intrusionAlarmActive"
+                },
+                "line": 317,
+                "operator": "&&",
+                "right": {
+                  "kind": "unary",
+                  "line": 317,
+                  "operand": {
+                    "kind": "variable",
+                    "line": 317,
+                    "name": "fireAlarmActive"
+                  },
+                  "operator": "!"
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 317,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 318,
+                  "target": "intrusionAlarmActive",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 318,
+                    "value": false
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 319,
+                  "target": "emergencyModeActive",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 319,
+                    "value": false
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 320,
+                  "target": "intrusionWasCleared",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 320,
+                    "value": true
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 321,
+                      "value": 0
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 321,
+                  "messageServer": "deactivateLightOverride",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "rc"
+                  },
+                  "targetClassName": "RoomController"
+                }
+              ]
+            }
+          ],
+          "line": 316,
+          "name": "clearIntrusionAlarm",
+          "parameters": [],
+          "priority": 4
+        },
+        {
+          "body": [],
+          "line": 326,
+          "name": "report",
+          "parameters": [
+            {
+              "line": 326,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": 5
+        }
+      ],
+      "name": "CentralController",
+      "queueBound": 6,
+      "stateVariables": [
+        {
+          "line": 261,
+          "name": "fireAlarmActive",
+          "type": "boolean"
+        },
+        {
+          "line": 262,
+          "name": "intrusionAlarmActive",
+          "type": "boolean"
+        },
+        {
+          "line": 263,
+          "name": "emergencyModeActive",
+          "type": "boolean"
+        },
+        {
+          "line": 264,
+          "name": "intrusionWasCleared",
+          "type": "boolean"
+        },
+        {
+          "line": 265,
+          "name": "doorCloseRequested",
+          "type": "boolean"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "CentralController",
+          "instance": "central",
+          "knownRebec": "central"
+        },
+        {
+          "className": "Heater",
+          "instance": "heater1",
+          "knownRebec": "heater"
+        },
+        {
+          "className": "Light",
+          "instance": "light1",
+          "knownRebec": "light"
+        }
+      ],
+      "className": "RoomController",
+      "line": 332,
+      "name": "rc1",
+      "priority": 1
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Door",
+          "instance": "mainDoor",
+          "knownRebec": "mainDoor"
+        },
+        {
+          "className": "RoomController",
+          "instance": "rc1",
+          "knownRebec": "rc"
+        }
+      ],
+      "className": "CentralController",
+      "line": 333,
+      "name": "central",
+      "priority": 2
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "CentralController",
+          "instance": "central",
+          "knownRebec": "central"
+        }
+      ],
+      "className": "Door",
+      "line": 334,
+      "name": "mainDoor",
+      "priority": 3
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "RoomController",
+          "instance": "rc1",
+          "knownRebec": "rc"
+        }
+      ],
+      "className": "Heater",
+      "line": 337,
+      "name": "heater1",
+      "priority": 4
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "RoomController",
+          "instance": "rc1",
+          "knownRebec": "rc"
+        }
+      ],
+      "className": "Light",
+      "line": 338,
+      "name": "light1",
+      "priority": 5
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "RoomController",
+          "instance": "rc1",
+          "knownRebec": "rc"
+        }
+      ],
+      "className": "TempSensor",
+      "line": 339,
+      "name": "ts1",
+      "priority": 6
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "RoomController",
+          "instance": "rc1",
+          "knownRebec": "rc"
+        }
+      ],
+      "className": "MotionSensor",
+      "line": 340,
+      "name": "ms1",
+      "priority": 7
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "RoomController",
+          "instance": "rc1",
+          "knownRebec": "rc"
+        }
+      ],
+      "className": "LightSensor",
+      "line": 341,
+      "name": "ls1",
+      "priority": 8
+    }
+  ],
+  "schemaVersion": 1
+}

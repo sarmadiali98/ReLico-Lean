@@ -14,10 +14,11 @@ themselves. Property and specification files are out of scope.
 - `tier2/` — the upstream corpus models the current verified fragment
   accepts, run through the pipeline **unmodified**, one row per model in
   `RESULTS.tsv`.
-- `tier3/` — the paper-named case studies, each in its own directory with
-  the minimally adapted source and a before/after `ADAPTATION.md` record
-  naming the original blocker and every adaptation applied. First entry:
-  `smarthome`, the RQ2 ESP32 case study.
+- `tier3/` — **relocated.** The paper-named case studies now live in the
+  benchmark suite itself, as `general--<name>-case-study--positive` rows
+  under `tests/benchmarks/` with the full benchmark layout plus an
+  `ADAPTATION.md` before/after record. First entry:
+  `general--smarthome-case-study--positive`, the RQ2 ESP32 case study.
 
 ## Source provenance
 

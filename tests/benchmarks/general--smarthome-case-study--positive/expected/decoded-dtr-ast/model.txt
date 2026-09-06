@@ -1,0 +1,571 @@
+{ classes := [{ name := { value := "Heater" },
+                knownRebecs := [{ name := { value := "rc" }, className := { value := "RoomController" } }],
+                stateVariables := [{ name := { value := "on" }, declaredType := Relico.DTR.GeneralType.boolean }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "on" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false)] },
+                messageServers := [{ name := { value := "setOn" },
+                                     parameters := [{ name := { value := "unit" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.unary
+                                                  (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "on" }))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "on" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "rc" })
+                                                   { value := "notifyHeater" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 3]
+                                                   { value := 0 }]
+                                                []],
+                                     priority := some 2 },
+                                   { name := { value := "setOff" },
+                                     parameters := [{ name := { value := "unit" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.stateVar { value := "on" })
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "on" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "rc" })
+                                                   { value := "notifyHeater" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 2]
+                                                   { value := 0 }]
+                                                []],
+                                     priority := some 1 }] },
+              { name := { value := "Light" },
+                knownRebecs := [{ name := { value := "rc" }, className := { value := "RoomController" } }],
+                stateVariables := [{ name := { value := "on" }, declaredType := Relico.DTR.GeneralType.boolean }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "on" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false)] },
+                messageServers := [{ name := { value := "setOn" },
+                                     parameters := [{ name := { value := "unit" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.unary
+                                                  (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "on" }))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "on" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "rc" })
+                                                   { value := "notifyLight" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 5]
+                                                   { value := 0 }]
+                                                []],
+                                     priority := some 2 },
+                                   { name := { value := "setOff" },
+                                     parameters := [{ name := { value := "unit" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.stateVar { value := "on" })
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "on" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "rc" })
+                                                   { value := "notifyLight" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 4]
+                                                   { value := 0 }]
+                                                []],
+                                     priority := some 1 }] },
+              { name := { value := "Door" },
+                knownRebecs := [{ name := { value := "central" }, className := { value := "CentralController" } }],
+                stateVariables := [{ name := { value := "closed" }, declaredType := Relico.DTR.GeneralType.boolean }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "closed" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false)] },
+                messageServers := [{ name := { value := "closeDoor" },
+                                     parameters := [{ name := { value := "unit" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.unary
+                                                  (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "closed" }))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "closed" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "central" })
+                                                   { value := "report" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 6]
+                                                   { value := 0 }]
+                                                []],
+                                     priority := some 2 },
+                                   { name := { value := "openDoor" },
+                                     parameters := [{ name := { value := "unit" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "closed" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral false),
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "central" })
+                                                { value := "report" }
+                                                [Relico.DTR.GeneralExpr.intLiteral 8]
+                                                { value := 0 }],
+                                     priority := some 1 }] },
+              { name := { value := "TempSensor" },
+                knownRebecs := [{ name := { value := "rc" }, className := { value := "RoomController" } }],
+                stateVariables := [],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "measure" }
+                                            []
+                                            { value := 0 }] },
+                messageServers := [{ name := { value := "measure" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "rc" })
+                                                { value := "tempUpdate" }
+                                                [Relico.DTR.GeneralExpr.intLiteral 15]
+                                                { value := 1 },
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "measure" }
+                                                []
+                                                { value := 1000 }],
+                                     priority := some 1 }] },
+              { name := { value := "LightSensor" },
+                knownRebecs := [{ name := { value := "rc" }, className := { value := "RoomController" } }],
+                stateVariables := [],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "measure" }
+                                            []
+                                            { value := 0 }] },
+                messageServers := [{ name := { value := "measure" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "rc" })
+                                                { value := "lightUpdate" }
+                                                [Relico.DTR.GeneralExpr.boolLiteral false]
+                                                { value := 1 },
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "measure" }
+                                                []
+                                                { value := 1000 }],
+                                     priority := some 1 }] },
+              { name := { value := "MotionSensor" },
+                knownRebecs := [{ name := { value := "rc" }, className := { value := "RoomController" } }],
+                stateVariables := [],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "measure" }
+                                            []
+                                            { value := 0 }] },
+                messageServers := [{ name := { value := "measure" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.boolLiteral false)
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "rc" })
+                                                   { value := "motionDetected" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                   { value := 1 }]
+                                                [],
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "measure" }
+                                                []
+                                                { value := 1000 }],
+                                     priority := some 1 }] },
+              { name := { value := "RoomController" },
+                knownRebecs := [{ name := { value := "central" }, className := { value := "CentralController" } },
+                                { name := { value := "heater" }, className := { value := "Heater" } },
+                                { name := { value := "light" }, className := { value := "Light" } }],
+                stateVariables := [{ name := { value := "lastTemp" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "lastLightDark" },
+                                     declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "lightIsOn" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "lightOverrideActive" },
+                                     declaredType := Relico.DTR.GeneralType.boolean }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "lastTemp" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 22),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "lastLightDark" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "lightIsOn" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "lightOverrideActive" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false)] },
+                messageServers := [{ name := { value := "tempUpdate" },
+                                     parameters := [{ name := { value := "t" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "lastTemp" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "t" }),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.lt)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "t" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 20))
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "heater" })
+                                                   { value := "setOn" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                   { value := 1 }]
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.le)
+                                                     (Relico.DTR.GeneralExpr.parameterVar { value := "t" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 25))
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "heater" })
+                                                      { value := "setOff" }
+                                                      [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                      { value := 1 }]
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.gt)
+                                                        (Relico.DTR.GeneralExpr.parameterVar { value := "t" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 35))
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec
+                                                           { value := "central" })
+                                                         { value := "fireAlert" }
+                                                         [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                         { value := 0 },
+                                                       Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec { value := "heater" })
+                                                         { value := "setOff" }
+                                                         [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                         { value := 1 }]
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec { value := "heater" })
+                                                         { value := "setOff" }
+                                                         [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                         { value := 1 }]]]],
+                                     priority := some 1 },
+                                   { name := { value := "lightUpdate" },
+                                     parameters := [{ name := { value := "isDark" },
+                                                      declaredType := Relico.DTR.GeneralType.boolean }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "lastLightDark" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "isDark" }),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.unary
+                                                  (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "lightOverrideActive" }))
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.parameterVar { value := "isDark" })
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "light" })
+                                                      { value := "setOn" }
+                                                      [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                      { value := 1 }]
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "light" })
+                                                      { value := "setOff" }
+                                                      [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                      { value := 1 }]]
+                                                []],
+                                     priority := some 5 },
+                                   { name := { value := "motionDetected" },
+                                     parameters := [{ name := { value := "unit" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "central" })
+                                                { value := "unwantedPersonAlert" }
+                                                [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                { value := 0 }],
+                                     priority := some 2 },
+                                   { name := { value := "notifyLight" },
+                                     parameters := [{ name := { value := "msg" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "msg" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 5))
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.unary
+                                                     (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                     (Relico.DTR.GeneralExpr.stateVar
+                                                       { value := "lightOverrideActive" }))
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "lightIsOn" }
+                                                      (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                   []]
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.parameterVar { value := "msg" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 4))
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "lightIsOn" }
+                                                      (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                   []],
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "central" })
+                                                { value := "report" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "msg" }]
+                                                { value := 0 }],
+                                     priority := some 7 },
+                                   { name := { value := "notifyHeater" },
+                                     parameters := [{ name := { value := "msg" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "central" })
+                                                { value := "report" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "msg" }]
+                                                { value := 0 }],
+                                     priority := some 6 },
+                                   { name := { value := "activateLightOverride" },
+                                     parameters := [{ name := { value := "unit" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "lightOverrideActive" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral true),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.stateVar { value := "lightIsOn" })
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "lightIsOn" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "light" })
+                                                   { value := "setOff" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                   { value := 1 }]
+                                                []],
+                                     priority := some 3 },
+                                   { name := { value := "deactivateLightOverride" },
+                                     parameters := [{ name := { value := "unit" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "lightOverrideActive" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral false),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.stateVar { value := "lastLightDark" })
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "light" })
+                                                   { value := "setOn" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                   { value := 1 }]
+                                                []],
+                                     priority := some 4 }] },
+              { name := { value := "CentralController" },
+                knownRebecs := [{ name := { value := "mainDoor" }, className := { value := "Door" } },
+                                { name := { value := "rc" }, className := { value := "RoomController" } }],
+                stateVariables := [{ name := { value := "fireAlarmActive" },
+                                     declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "intrusionAlarmActive" },
+                                     declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "emergencyModeActive" },
+                                     declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "intrusionWasCleared" },
+                                     declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "doorCloseRequested" },
+                                     declaredType := Relico.DTR.GeneralType.boolean }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "fireAlarmActive" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "intrusionAlarmActive" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "emergencyModeActive" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "intrusionWasCleared" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "doorCloseRequested" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false)] },
+                messageServers := [{ name := { value := "fireAlert" },
+                                     parameters := [{ name := { value := "unit" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.unary
+                                                  (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "fireAlarmActive" }))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "fireAlarmActive" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "emergencyModeActive" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "report" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 9]
+                                                   { value := 0 },
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "doorCloseRequested" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "mainDoor" })
+                                                   { value := "openDoor" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                   { value := 0 }]
+                                                [],
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.stateVar { value := "intrusionAlarmActive" })
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "intrusionAlarmActive" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "intrusionWasCleared" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "rc" })
+                                                   { value := "deactivateLightOverride" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                   { value := 0 }]
+                                                []],
+                                     priority := some 1 },
+                                   { name := { value := "unwantedPersonAlert" },
+                                     parameters := [{ name := { value := "unit" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                  (Relico.DTR.GeneralExpr.binary
+                                                    (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                    (Relico.DTR.GeneralExpr.unary
+                                                      (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "fireAlarmActive" }))
+                                                    (Relico.DTR.GeneralExpr.unary
+                                                      (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                      (Relico.DTR.GeneralExpr.stateVar
+                                                        { value := "intrusionAlarmActive" })))
+                                                  (Relico.DTR.GeneralExpr.unary
+                                                    (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                    (Relico.DTR.GeneralExpr.stateVar
+                                                      { value := "intrusionWasCleared" })))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "intrusionAlarmActive" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "emergencyModeActive" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "report" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 1]
+                                                   { value := 0 },
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "doorCloseRequested" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "requestCloseDoor" }
+                                                   []
+                                                   { value := 1 },
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "rc" })
+                                                   { value := "activateLightOverride" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                   { value := 1 },
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "clearIntrusionAlarm" }
+                                                   []
+                                                   { value := 30000 }]
+                                                []],
+                                     priority := some 2 },
+                                   { name := { value := "requestCloseDoor" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                  (Relico.DTR.GeneralExpr.unary
+                                                    (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                    (Relico.DTR.GeneralExpr.stateVar { value := "fireAlarmActive" }))
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "doorCloseRequested" }))
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "mainDoor" })
+                                                   { value := "closeDoor" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                   { value := 0 }]
+                                                []],
+                                     priority := some 3 },
+                                   { name := { value := "clearIntrusionAlarm" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "intrusionAlarmActive" })
+                                                  (Relico.DTR.GeneralExpr.unary
+                                                    (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                    (Relico.DTR.GeneralExpr.stateVar { value := "fireAlarmActive" })))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "intrusionAlarmActive" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "emergencyModeActive" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "intrusionWasCleared" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "rc" })
+                                                   { value := "deactivateLightOverride" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                   { value := 0 }]
+                                                []],
+                                     priority := some 4 },
+                                   { name := { value := "report" },
+                                     parameters := [{ name := { value := "msg" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [],
+                                     priority := some 5 }] }],
+  instances := [{ name := { value := "rc1" },
+                  className := { value := "RoomController" },
+                  bindings := [({ value := "central" }, { value := "central" }),
+                               ({ value := "heater" }, { value := "heater1" }),
+                               ({ value := "light" }, { value := "light1" })],
+                  arguments := [],
+                  priority := some 1 },
+                { name := { value := "central" },
+                  className := { value := "CentralController" },
+                  bindings := [({ value := "mainDoor" }, { value := "mainDoor" }),
+                               ({ value := "rc" }, { value := "rc1" })],
+                  arguments := [],
+                  priority := some 2 },
+                { name := { value := "mainDoor" },
+                  className := { value := "Door" },
+                  bindings := [({ value := "central" }, { value := "central" })],
+                  arguments := [],
+                  priority := some 3 },
+                { name := { value := "heater1" },
+                  className := { value := "Heater" },
+                  bindings := [({ value := "rc" }, { value := "rc1" })],
+                  arguments := [],
+                  priority := some 4 },
+                { name := { value := "light1" },
+                  className := { value := "Light" },
+                  bindings := [({ value := "rc" }, { value := "rc1" })],
+                  arguments := [],
+                  priority := some 5 },
+                { name := { value := "ts1" },
+                  className := { value := "TempSensor" },
+                  bindings := [({ value := "rc" }, { value := "rc1" })],
+                  arguments := [],
+                  priority := some 6 },
+                { name := { value := "ms1" },
+                  className := { value := "MotionSensor" },
+                  bindings := [({ value := "rc" }, { value := "rc1" })],
+                  arguments := [],
+                  priority := some 7 },
+                { name := { value := "ls1" },
+                  className := { value := "LightSensor" },
+                  bindings := [({ value := "rc" }, { value := "rc1" })],
+                  arguments := [],
+                  priority := some 8 }] }

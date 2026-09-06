@@ -1,0 +1,1303 @@
+{ reactors := [{ name := { value := "Heater" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "setOnToHeaterFromRc1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "setOffToHeater1FromRc1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "setOffToHeater2FromRc1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "setOffToHeater3FromRc1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "notifyHeaterToRc1" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "notifyHeaterToRc2" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "on" }, declaredType := Relico.LF.GeneralType.boolean }],
+                 logicalActions := [{ name := { value := "setOn_action" },
+                                      parameters := [{ name := { value := "unit" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "setOff_action" },
+                                      parameters := [{ name := { value := "unit" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "on" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "setOff_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "setOff_action" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.stateVar { value := "on" })
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "on" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "notifyHeaterToRc2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 2]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "setOffToHeater1FromRc1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "setOffToHeater1FromRc1" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.stateVar { value := "on" })
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "on" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "notifyHeaterToRc2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 2]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "setOffToHeater2FromRc1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "setOffToHeater2FromRc1" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.stateVar { value := "on" })
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "on" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "notifyHeaterToRc2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 2]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "setOffToHeater3FromRc1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "setOffToHeater3FromRc1" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.stateVar { value := "on" })
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "on" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "notifyHeaterToRc2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 2]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "setOn_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "setOn_action" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "on" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "on" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "notifyHeaterToRc1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 3]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "setOnToHeaterFromRc1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "setOnToHeaterFromRc1" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "on" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "on" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "notifyHeaterToRc1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 3]]
+                                                   []],
+                                        priority := none }] },
+               { name := { value := "Light" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "setOnToLight1FromRc1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "setOffToLight1FromRc1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "setOffToLight2FromRc1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "setOnToLight2FromRc1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "notifyLightToRc1" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "notifyLightToRc2" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "on" }, declaredType := Relico.LF.GeneralType.boolean }],
+                 logicalActions := [{ name := { value := "setOn_action" },
+                                      parameters := [{ name := { value := "unit" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "setOff_action" },
+                                      parameters := [{ name := { value := "unit" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "on" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "setOff_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "setOff_action" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.stateVar { value := "on" })
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "on" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "notifyLightToRc2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 4]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "setOffToLight1FromRc1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "setOffToLight1FromRc1" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.stateVar { value := "on" })
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "on" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "notifyLightToRc2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 4]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "setOffToLight2FromRc1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "setOffToLight2FromRc1" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.stateVar { value := "on" })
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "on" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "notifyLightToRc2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 4]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "setOn_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "setOn_action" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "on" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "on" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "notifyLightToRc1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 5]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "setOnToLight1FromRc1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "setOnToLight1FromRc1" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "on" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "on" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "notifyLightToRc1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 5]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "setOnToLight2FromRc1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "setOnToLight2FromRc1" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "on" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "on" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "notifyLightToRc1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 5]]
+                                                   []],
+                                        priority := none }] },
+               { name := { value := "Door" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "openDoorToMainDoorFromCentral" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "closeDoorToMainDoorFromCentral" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "reportToCentral1" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "reportToCentral2" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "closed" }, declaredType := Relico.LF.GeneralType.boolean }],
+                 logicalActions := [{ name := { value := "closeDoor_action" },
+                                      parameters := [{ name := { value := "unit" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "openDoor_action" },
+                                      parameters := [{ name := { value := "unit" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "closed" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "openDoor_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "openDoor_action" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "closed" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral false),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "reportToCentral2" }
+                                                   [Relico.LF.GeneralExpr.intLiteral 8]],
+                                        priority := none },
+                                      { name := { value := "openDoorToMainDoorFromCentral_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "openDoorToMainDoorFromCentral" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "closed" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral false),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "reportToCentral2" }
+                                                   [Relico.LF.GeneralExpr.intLiteral 8]],
+                                        priority := none },
+                                      { name := { value := "closeDoor_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "closeDoor_action" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "closed" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "closed" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "reportToCentral1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 6]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "closeDoorToMainDoorFromCentral_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "closeDoorToMainDoorFromCentral" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "closed" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "closed" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "reportToCentral1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 6]]
+                                                   []],
+                                        priority := none }] },
+               { name := { value := "TempSensor" },
+                 parameters := [],
+                 inputPorts := [],
+                 outputPorts := [{ name := { value := "tempUpdateToRc" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [],
+                 logicalActions := [{ name := { value := "measure_action1" }, parameters := [] },
+                                    { name := { value := "measure_action2" }, parameters := [] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.schedule
+                                                 { value := "measure_action1" }
+                                                 []
+                                                 { value := 0 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "measure_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "measure_action1" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "tempUpdateToRc" }
+                                                   [Relico.LF.GeneralExpr.intLiteral 15],
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "measure_action2" }
+                                                   []
+                                                   { value := 1000 }],
+                                        priority := none },
+                                      { name := { value := "measure_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "measure_action2" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "tempUpdateToRc" }
+                                                   [Relico.LF.GeneralExpr.intLiteral 15],
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "measure_action2" }
+                                                   []
+                                                   { value := 1000 }],
+                                        priority := none }] },
+               { name := { value := "LightSensor" },
+                 parameters := [],
+                 inputPorts := [],
+                 outputPorts := [{ name := { value := "lightUpdateToRc" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.boolean) }],
+                 stateVariables := [],
+                 logicalActions := [{ name := { value := "measure_action1" }, parameters := [] },
+                                    { name := { value := "measure_action2" }, parameters := [] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.schedule
+                                                 { value := "measure_action1" }
+                                                 []
+                                                 { value := 0 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "measure_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "measure_action1" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "lightUpdateToRc" }
+                                                   [Relico.LF.GeneralExpr.boolLiteral false],
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "measure_action2" }
+                                                   []
+                                                   { value := 1000 }],
+                                        priority := none },
+                                      { name := { value := "measure_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "measure_action2" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "lightUpdateToRc" }
+                                                   [Relico.LF.GeneralExpr.boolLiteral false],
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "measure_action2" }
+                                                   []
+                                                   { value := 1000 }],
+                                        priority := none }] },
+               { name := { value := "MotionSensor" },
+                 parameters := [],
+                 inputPorts := [],
+                 outputPorts := [{ name := { value := "motionDetectedToRc" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [],
+                 logicalActions := [{ name := { value := "measure_action1" }, parameters := [] },
+                                    { name := { value := "measure_action2" }, parameters := [] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.schedule
+                                                 { value := "measure_action1" }
+                                                 []
+                                                 { value := 0 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "measure_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "measure_action1" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.boolLiteral false)
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "motionDetectedToRc" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "measure_action2" }
+                                                   []
+                                                   { value := 1000 }],
+                                        priority := none },
+                                      { name := { value := "measure_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "measure_action2" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.boolLiteral false)
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "motionDetectedToRc" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "measure_action2" }
+                                                   []
+                                                   { value := 1000 }],
+                                        priority := none }] },
+               { name := { value := "RoomController" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "deactivateLightOverrideToRc1FromCentral" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "activateLightOverrideToRcFromCentral" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "deactivateLightOverrideToRc2FromCentral" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "notifyHeaterToRc1FromHeater1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "notifyHeaterToRc2FromHeater1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "notifyLightToRc1FromLight1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "notifyLightToRc2FromLight1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "tempUpdateToRcFromTs1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "motionDetectedToRcFromMs1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "lightUpdateToRcFromLs1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.boolean) }],
+                 outputPorts := [{ name := { value := "setOnToHeater" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "setOffToHeater1" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "fireAlertToCentral" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "setOffToHeater2" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "setOffToHeater3" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "setOnToLight1" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "setOffToLight1" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "unwantedPersonAlertToCentral" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "reportToCentral1" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "reportToCentral2" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "setOffToLight2" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "setOnToLight2" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "lastTemp" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "lastLightDark" },
+                                      declaredType := Relico.LF.GeneralType.boolean },
+                                    { name := { value := "lightIsOn" }, declaredType := Relico.LF.GeneralType.boolean },
+                                    { name := { value := "lightOverrideActive" },
+                                      declaredType := Relico.LF.GeneralType.boolean }],
+                 logicalActions := [{ name := { value := "tempUpdate_action" },
+                                      parameters := [{ name := { value := "t" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "lightUpdate_action" },
+                                      parameters := [{ name := { value := "isDark" },
+                                                       declaredType := Relico.LF.GeneralType.boolean }] },
+                                    { name := { value := "motionDetected_action" },
+                                      parameters := [{ name := { value := "unit" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "notifyLight_action" },
+                                      parameters := [{ name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "notifyHeater_action" },
+                                      parameters := [{ name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "activateLightOverride_action" },
+                                      parameters := [{ name := { value := "unit" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "deactivateLightOverride_action" },
+                                      parameters := [{ name := { value := "unit" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "lastTemp" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 22),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "lastLightDark" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "lightIsOn" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "lightOverrideActive" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "tempUpdate_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "tempUpdate_action" },
+                                        parameters := [{ value := "t" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "lastTemp" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "t" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.lt)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "t" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 20))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "setOnToHeater" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.le)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "t" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 25))
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "setOffToHeater1" }
+                                                         [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                      [Relico.LF.GeneralStmt.ifThenElse
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.gt)
+                                                           (Relico.LF.GeneralExpr.parameterVar { value := "t" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 35))
+                                                         [Relico.LF.GeneralStmt.setPort
+                                                            { value := "fireAlertToCentral" }
+                                                            [Relico.LF.GeneralExpr.intLiteral 0],
+                                                          Relico.LF.GeneralStmt.setPort
+                                                            { value := "setOffToHeater2" }
+                                                            [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                         [Relico.LF.GeneralStmt.setPort
+                                                            { value := "setOffToHeater3" }
+                                                            [Relico.LF.GeneralExpr.intLiteral 0]]]]],
+                                        priority := none },
+                                      { name := { value := "tempUpdateToRcFromTs1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "tempUpdateToRcFromTs1" },
+                                        parameters := [{ value := "t" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "lastTemp" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "t" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.lt)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "t" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 20))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "setOnToHeater" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.le)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "t" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 25))
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "setOffToHeater1" }
+                                                         [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                      [Relico.LF.GeneralStmt.ifThenElse
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.gt)
+                                                           (Relico.LF.GeneralExpr.parameterVar { value := "t" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 35))
+                                                         [Relico.LF.GeneralStmt.setPort
+                                                            { value := "fireAlertToCentral" }
+                                                            [Relico.LF.GeneralExpr.intLiteral 0],
+                                                          Relico.LF.GeneralStmt.setPort
+                                                            { value := "setOffToHeater2" }
+                                                            [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                         [Relico.LF.GeneralStmt.setPort
+                                                            { value := "setOffToHeater3" }
+                                                            [Relico.LF.GeneralExpr.intLiteral 0]]]]],
+                                        priority := none },
+                                      { name := { value := "motionDetected_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "motionDetected_action" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "unwantedPersonAlertToCentral" }
+                                                   [Relico.LF.GeneralExpr.intLiteral 0]],
+                                        priority := none },
+                                      { name := { value := "motionDetectedToRcFromMs1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "motionDetectedToRcFromMs1" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "unwantedPersonAlertToCentral" }
+                                                   [Relico.LF.GeneralExpr.intLiteral 0]],
+                                        priority := none },
+                                      { name := { value := "activateLightOverride_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "activateLightOverride_action" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "lightOverrideActive" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral true),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.stateVar { value := "lightIsOn" })
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "lightIsOn" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "setOffToLight2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "activateLightOverrideToRcFromCentral_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "activateLightOverrideToRcFromCentral" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "lightOverrideActive" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral true),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.stateVar { value := "lightIsOn" })
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "lightIsOn" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "setOffToLight2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "deactivateLightOverride_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "deactivateLightOverride_action" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "lightOverrideActive" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral false),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.stateVar { value := "lastLightDark" })
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "setOnToLight2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "deactivateLightOverrideToRc1FromCentral_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "deactivateLightOverrideToRc1FromCentral" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "lightOverrideActive" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral false),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.stateVar { value := "lastLightDark" })
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "setOnToLight2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "deactivateLightOverrideToRc2FromCentral_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "deactivateLightOverrideToRc2FromCentral" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "lightOverrideActive" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral false),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.stateVar { value := "lastLightDark" })
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "setOnToLight2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "lightUpdate_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "lightUpdate_action" },
+                                        parameters := [{ value := "isDark" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "lastLightDark" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "isDark" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                     (Relico.LF.GeneralExpr.stateVar
+                                                       { value := "lightOverrideActive" }))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "isDark" })
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "setOnToLight1" }
+                                                         [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "setOffToLight1" }
+                                                         [Relico.LF.GeneralExpr.intLiteral 0]]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "lightUpdateToRcFromLs1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "lightUpdateToRcFromLs1" },
+                                        parameters := [{ value := "isDark" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "lastLightDark" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "isDark" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                     (Relico.LF.GeneralExpr.stateVar
+                                                       { value := "lightOverrideActive" }))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "isDark" })
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "setOnToLight1" }
+                                                         [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "setOffToLight1" }
+                                                         [Relico.LF.GeneralExpr.intLiteral 0]]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "notifyHeater_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "notifyHeater_action" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "reportToCentral2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none },
+                                      { name := { value := "notifyHeaterToRc1FromHeater1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "notifyHeaterToRc1FromHeater1" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "reportToCentral2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none },
+                                      { name := { value := "notifyHeaterToRc2FromHeater1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "notifyHeaterToRc2FromHeater1" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "reportToCentral2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none },
+                                      { name := { value := "notifyLight_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "notifyLight_action" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "msg" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 5))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.unary
+                                                        (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                        (Relico.LF.GeneralExpr.stateVar
+                                                          { value := "lightOverrideActive" }))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "lightIsOn" }
+                                                         (Relico.LF.GeneralExpr.boolLiteral true)]
+                                                      []]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "msg" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 4))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "lightIsOn" }
+                                                         (Relico.LF.GeneralExpr.boolLiteral false)]
+                                                      []],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "reportToCentral1" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none },
+                                      { name := { value := "notifyLightToRc1FromLight1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "notifyLightToRc1FromLight1" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "msg" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 5))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.unary
+                                                        (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                        (Relico.LF.GeneralExpr.stateVar
+                                                          { value := "lightOverrideActive" }))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "lightIsOn" }
+                                                         (Relico.LF.GeneralExpr.boolLiteral true)]
+                                                      []]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "msg" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 4))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "lightIsOn" }
+                                                         (Relico.LF.GeneralExpr.boolLiteral false)]
+                                                      []],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "reportToCentral1" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none },
+                                      { name := { value := "notifyLightToRc2FromLight1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "notifyLightToRc2FromLight1" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "msg" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 5))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.unary
+                                                        (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                        (Relico.LF.GeneralExpr.stateVar
+                                                          { value := "lightOverrideActive" }))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "lightIsOn" }
+                                                         (Relico.LF.GeneralExpr.boolLiteral true)]
+                                                      []]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "msg" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 4))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "lightIsOn" }
+                                                         (Relico.LF.GeneralExpr.boolLiteral false)]
+                                                      []],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "reportToCentral1" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none }] },
+               { name := { value := "CentralController" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "fireAlertToCentralFromRc1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "unwantedPersonAlertToCentralFromRc1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "reportToCentral1FromRc1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "reportToCentral2FromRc1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "reportToCentral1FromMainDoor" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "reportToCentral2FromMainDoor" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "openDoorToMainDoor" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "deactivateLightOverrideToRc1" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "activateLightOverrideToRc" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "closeDoorToMainDoor" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "deactivateLightOverrideToRc2" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "fireAlarmActive" },
+                                      declaredType := Relico.LF.GeneralType.boolean },
+                                    { name := { value := "intrusionAlarmActive" },
+                                      declaredType := Relico.LF.GeneralType.boolean },
+                                    { name := { value := "emergencyModeActive" },
+                                      declaredType := Relico.LF.GeneralType.boolean },
+                                    { name := { value := "intrusionWasCleared" },
+                                      declaredType := Relico.LF.GeneralType.boolean },
+                                    { name := { value := "doorCloseRequested" },
+                                      declaredType := Relico.LF.GeneralType.boolean }],
+                 logicalActions := [{ name := { value := "fireAlert_action" },
+                                      parameters := [{ name := { value := "unit" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "unwantedPersonAlert_action" },
+                                      parameters := [{ name := { value := "unit" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "requestCloseDoor_action" }, parameters := [] },
+                                    { name := { value := "clearIntrusionAlarm_action" }, parameters := [] },
+                                    { name := { value := "report_action1" },
+                                      parameters := [{ name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "report_action2" },
+                                      parameters := [{ name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "fireAlarmActive" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "intrusionAlarmActive" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "emergencyModeActive" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "intrusionWasCleared" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "doorCloseRequested" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "fireAlert_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "fireAlert_action" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fireAlarmActive" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "fireAlarmActive" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "emergencyModeActive" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "report_action1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 9]
+                                                      { value := 0 },
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "doorCloseRequested" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "openDoorToMainDoor" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.stateVar { value := "intrusionAlarmActive" })
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "intrusionAlarmActive" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "intrusionWasCleared" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "deactivateLightOverrideToRc1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "fireAlertToCentralFromRc1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "fireAlertToCentralFromRc1" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fireAlarmActive" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "fireAlarmActive" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "emergencyModeActive" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "report_action1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 9]
+                                                      { value := 0 },
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "doorCloseRequested" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "openDoorToMainDoor" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.stateVar { value := "intrusionAlarmActive" })
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "intrusionAlarmActive" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "intrusionWasCleared" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "deactivateLightOverrideToRc1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "unwantedPersonAlert_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "unwantedPersonAlert_action" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                       (Relico.LF.GeneralExpr.unary
+                                                         (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                         (Relico.LF.GeneralExpr.stateVar
+                                                           { value := "fireAlarmActive" }))
+                                                       (Relico.LF.GeneralExpr.unary
+                                                         (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                         (Relico.LF.GeneralExpr.stateVar
+                                                           { value := "intrusionAlarmActive" })))
+                                                     (Relico.LF.GeneralExpr.unary
+                                                       (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                       (Relico.LF.GeneralExpr.stateVar
+                                                         { value := "intrusionWasCleared" })))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "intrusionAlarmActive" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "emergencyModeActive" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "report_action2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]
+                                                      { value := 0 },
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "doorCloseRequested" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "requestCloseDoor_action" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "activateLightOverrideToRc" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0],
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "clearIntrusionAlarm_action" }
+                                                      []
+                                                      { value := 30000 }]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "unwantedPersonAlertToCentralFromRc1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "unwantedPersonAlertToCentralFromRc1" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                       (Relico.LF.GeneralExpr.unary
+                                                         (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                         (Relico.LF.GeneralExpr.stateVar
+                                                           { value := "fireAlarmActive" }))
+                                                       (Relico.LF.GeneralExpr.unary
+                                                         (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                         (Relico.LF.GeneralExpr.stateVar
+                                                           { value := "intrusionAlarmActive" })))
+                                                     (Relico.LF.GeneralExpr.unary
+                                                       (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                       (Relico.LF.GeneralExpr.stateVar
+                                                         { value := "intrusionWasCleared" })))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "intrusionAlarmActive" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "emergencyModeActive" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "report_action2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]
+                                                      { value := 0 },
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "doorCloseRequested" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "requestCloseDoor_action" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "activateLightOverrideToRc" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0],
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "clearIntrusionAlarm_action" }
+                                                      []
+                                                      { value := 30000 }]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "requestCloseDoor_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "requestCloseDoor_action" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.unary
+                                                       (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                       (Relico.LF.GeneralExpr.stateVar { value := "fireAlarmActive" }))
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "doorCloseRequested" }))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "closeDoorToMainDoor" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "clearIntrusionAlarm_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "clearIntrusionAlarm_action" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.stateVar
+                                                       { value := "intrusionAlarmActive" })
+                                                     (Relico.LF.GeneralExpr.unary
+                                                       (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                       (Relico.LF.GeneralExpr.stateVar { value := "fireAlarmActive" })))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "intrusionAlarmActive" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "emergencyModeActive" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "intrusionWasCleared" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "deactivateLightOverrideToRc2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "report_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "report_action1" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [],
+                                        priority := none },
+                                      { name := { value := "report_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "report_action2" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [],
+                                        priority := none },
+                                      { name := { value := "reportToCentral1FromRc1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "reportToCentral1FromRc1" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [],
+                                        priority := none },
+                                      { name := { value := "reportToCentral2FromRc1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "reportToCentral2FromRc1" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [],
+                                        priority := none },
+                                      { name := { value := "reportToCentral1FromMainDoor_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "reportToCentral1FromMainDoor" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [],
+                                        priority := none },
+                                      { name := { value := "reportToCentral2FromMainDoor_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "reportToCentral2FromMainDoor" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [],
+                                        priority := none }] }],
+  instances := [{ name := { value := "rc1" }, reactorName := { value := "RoomController" }, arguments := [] },
+                { name := { value := "central" }, reactorName := { value := "CentralController" }, arguments := [] },
+                { name := { value := "mainDoor" }, reactorName := { value := "Door" }, arguments := [] },
+                { name := { value := "heater1" }, reactorName := { value := "Heater" }, arguments := [] },
+                { name := { value := "light1" }, reactorName := { value := "Light" }, arguments := [] },
+                { name := { value := "ts1" }, reactorName := { value := "TempSensor" }, arguments := [] },
+                { name := { value := "ms1" }, reactorName := { value := "MotionSensor" }, arguments := [] },
+                { name := { value := "ls1" }, reactorName := { value := "LightSensor" }, arguments := [] }],
+  connections := [{ sourceInstance := { value := "rc1" },
+                    sourcePort := { value := "setOnToHeater" },
+                    targetInstance := { value := "heater1" },
+                    targetPort := { value := "setOnToHeaterFromRc1" },
+                    delay := { value := 1 } },
+                  { sourceInstance := { value := "rc1" },
+                    sourcePort := { value := "setOffToHeater1" },
+                    targetInstance := { value := "heater1" },
+                    targetPort := { value := "setOffToHeater1FromRc1" },
+                    delay := { value := 1 } },
+                  { sourceInstance := { value := "rc1" },
+                    sourcePort := { value := "fireAlertToCentral" },
+                    targetInstance := { value := "central" },
+                    targetPort := { value := "fireAlertToCentralFromRc1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "rc1" },
+                    sourcePort := { value := "setOffToHeater2" },
+                    targetInstance := { value := "heater1" },
+                    targetPort := { value := "setOffToHeater2FromRc1" },
+                    delay := { value := 1 } },
+                  { sourceInstance := { value := "rc1" },
+                    sourcePort := { value := "setOffToHeater3" },
+                    targetInstance := { value := "heater1" },
+                    targetPort := { value := "setOffToHeater3FromRc1" },
+                    delay := { value := 1 } },
+                  { sourceInstance := { value := "rc1" },
+                    sourcePort := { value := "setOnToLight1" },
+                    targetInstance := { value := "light1" },
+                    targetPort := { value := "setOnToLight1FromRc1" },
+                    delay := { value := 1 } },
+                  { sourceInstance := { value := "rc1" },
+                    sourcePort := { value := "setOffToLight1" },
+                    targetInstance := { value := "light1" },
+                    targetPort := { value := "setOffToLight1FromRc1" },
+                    delay := { value := 1 } },
+                  { sourceInstance := { value := "rc1" },
+                    sourcePort := { value := "unwantedPersonAlertToCentral" },
+                    targetInstance := { value := "central" },
+                    targetPort := { value := "unwantedPersonAlertToCentralFromRc1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "rc1" },
+                    sourcePort := { value := "reportToCentral1" },
+                    targetInstance := { value := "central" },
+                    targetPort := { value := "reportToCentral1FromRc1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "rc1" },
+                    sourcePort := { value := "reportToCentral2" },
+                    targetInstance := { value := "central" },
+                    targetPort := { value := "reportToCentral2FromRc1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "rc1" },
+                    sourcePort := { value := "setOffToLight2" },
+                    targetInstance := { value := "light1" },
+                    targetPort := { value := "setOffToLight2FromRc1" },
+                    delay := { value := 1 } },
+                  { sourceInstance := { value := "rc1" },
+                    sourcePort := { value := "setOnToLight2" },
+                    targetInstance := { value := "light1" },
+                    targetPort := { value := "setOnToLight2FromRc1" },
+                    delay := { value := 1 } },
+                  { sourceInstance := { value := "central" },
+                    sourcePort := { value := "openDoorToMainDoor" },
+                    targetInstance := { value := "mainDoor" },
+                    targetPort := { value := "openDoorToMainDoorFromCentral" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "central" },
+                    sourcePort := { value := "deactivateLightOverrideToRc1" },
+                    targetInstance := { value := "rc1" },
+                    targetPort := { value := "deactivateLightOverrideToRc1FromCentral" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "central" },
+                    sourcePort := { value := "activateLightOverrideToRc" },
+                    targetInstance := { value := "rc1" },
+                    targetPort := { value := "activateLightOverrideToRcFromCentral" },
+                    delay := { value := 1 } },
+                  { sourceInstance := { value := "central" },
+                    sourcePort := { value := "closeDoorToMainDoor" },
+                    targetInstance := { value := "mainDoor" },
+                    targetPort := { value := "closeDoorToMainDoorFromCentral" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "central" },
+                    sourcePort := { value := "deactivateLightOverrideToRc2" },
+                    targetInstance := { value := "rc1" },
+                    targetPort := { value := "deactivateLightOverrideToRc2FromCentral" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "mainDoor" },
+                    sourcePort := { value := "reportToCentral1" },
+                    targetInstance := { value := "central" },
+                    targetPort := { value := "reportToCentral1FromMainDoor" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "mainDoor" },
+                    sourcePort := { value := "reportToCentral2" },
+                    targetInstance := { value := "central" },
+                    targetPort := { value := "reportToCentral2FromMainDoor" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "heater1" },
+                    sourcePort := { value := "notifyHeaterToRc1" },
+                    targetInstance := { value := "rc1" },
+                    targetPort := { value := "notifyHeaterToRc1FromHeater1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "heater1" },
+                    sourcePort := { value := "notifyHeaterToRc2" },
+                    targetInstance := { value := "rc1" },
+                    targetPort := { value := "notifyHeaterToRc2FromHeater1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "light1" },
+                    sourcePort := { value := "notifyLightToRc1" },
+                    targetInstance := { value := "rc1" },
+                    targetPort := { value := "notifyLightToRc1FromLight1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "light1" },
+                    sourcePort := { value := "notifyLightToRc2" },
+                    targetInstance := { value := "rc1" },
+                    targetPort := { value := "notifyLightToRc2FromLight1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "ts1" },
+                    sourcePort := { value := "tempUpdateToRc" },
+                    targetInstance := { value := "rc1" },
+                    targetPort := { value := "tempUpdateToRcFromTs1" },
+                    delay := { value := 1 } },
+                  { sourceInstance := { value := "ms1" },
+                    sourcePort := { value := "motionDetectedToRc" },
+                    targetInstance := { value := "rc1" },
+                    targetPort := { value := "motionDetectedToRcFromMs1" },
+                    delay := { value := 1 } },
+                  { sourceInstance := { value := "ls1" },
+                    sourcePort := { value := "lightUpdateToRc" },
+                    targetInstance := { value := "rc1" },
+                    targetPort := { value := "lightUpdateToRcFromLs1" },
+                    delay := { value := 1 } }] }
