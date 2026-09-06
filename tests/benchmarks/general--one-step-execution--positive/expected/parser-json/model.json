@@ -1,0 +1,173 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 13,
+            "target": "x",
+            "value": {
+              "kind": "intLiteral",
+              "line": 13,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 14,
+            "target": "violation",
+            "value": {
+              "kind": "intLiteral",
+              "line": 14,
+              "value": 0
+            }
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 1
+            },
+            "arguments": [],
+            "kind": "send",
+            "line": 15,
+            "messageServer": "tick",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Counter"
+          }
+        ],
+        "line": 12,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 6,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 20,
+                  "name": "x"
+                },
+                "line": 20,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 20,
+                  "value": 0
+                }
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 23,
+                  "target": "x",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 23,
+                    "value": 0
+                  }
+                }
+              ],
+              "kind": "if",
+              "line": 20,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 21,
+                  "target": "x",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 21,
+                    "value": 1
+                  }
+                }
+              ]
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 26,
+                  "name": "x"
+                },
+                "line": 26,
+                "operator": "<",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 26,
+                  "value": 0
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 26,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 27,
+                  "target": "violation",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 27,
+                    "value": 1
+                  }
+                }
+              ]
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 30,
+              "messageServer": "tick",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Counter"
+            }
+          ],
+          "line": 19,
+          "name": "tick",
+          "parameters": [],
+          "priority": 1
+        }
+      ],
+      "name": "Counter",
+      "queueBound": 5,
+      "stateVariables": [
+        {
+          "line": 8,
+          "name": "x",
+          "type": "int"
+        },
+        {
+          "line": 9,
+          "name": "violation",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Counter",
+      "line": 35,
+      "name": "ctr",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

@@ -1,0 +1,82 @@
+// Benchmark: general--priority-selection--positive
+// Exercises message-server priority selection: the light ranks its
+// phase change above its periodic tick, so when both are enabled the
+// declared priority decides which reaction runs.
+// Source: upstream corpus model TrafficLight/TrafficLight, adapted; see README.
+reactiveclass Checker(5) {
+    statevars {
+        int lastState;
+        int violation;
+    }
+
+    Checker() {
+        lastState = 0;
+        violation = 0;
+    }
+
+    @priority(1)
+    msgsrv stateIn(int v) {
+        lastState = v;
+    }
+
+    @priority(2)
+    msgsrv sigGIn(int light) {
+        if (lastState != 1) {
+            violation = 1;
+        }
+    }
+}
+
+reactiveclass TrafficLightCore(5) {
+    knownrebecs {
+        Checker chk;
+    }
+
+    statevars {
+        int lightState;
+    }
+
+    TrafficLightCore() {
+        lightState = 0;
+        self.start();
+    }
+
+    @priority(1)
+    msgsrv start() {
+        chk.stateIn(lightState);
+        self.emitGreen() after(1);
+    }
+
+    @priority(2)
+    msgsrv emitGreen() {
+        // Bug preserved: green is emitted, but the state never changes to GREEN.
+        chk.sigGIn(1);
+    }
+}
+
+reactiveclass KeepAlive(2) {
+    statevars {
+        int phase;
+    }
+
+    KeepAlive() {
+        phase = 0;
+        self.tick() after(100);
+    }
+
+    @priority(1)
+    msgsrv tick() {
+        if (phase == 0) {
+            phase = 1;
+        } else {
+            phase = 0;
+        }
+        self.tick() after(100);
+    }
+}
+
+main {
+    @priority(1) TrafficLightCore tl(chk):();
+    @priority(2) Checker chk():();
+    KeepAlive ka():();
+}

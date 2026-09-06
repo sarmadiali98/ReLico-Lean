@@ -1,0 +1,107 @@
+// Benchmark: general--trace-execution--positive
+// Exercises trace execution: a subway door sequence of delayed steps
+// with a timeout path, giving the longest observable trace among the
+// mid-sized corpus models.
+// Source: upstream corpus model Subway/Subway, adapted; see README.
+reactiveclass Scenario(5) {
+    knownrebecs {
+        Checker chk;
+    }
+
+    Scenario() {
+    }
+
+    @priority(1)
+    msgsrv start(int at) {
+        self.requestAfterWait() after(2);
+    }
+
+    @priority(2)
+    msgsrv requestAfterWait() {
+        self.finishPassing() after(10);
+    }
+
+    @priority(3)
+    msgsrv finishPassing() {
+        chk.doneIn(1);
+    }
+}
+
+reactiveclass Checker(5) {
+    statevars {
+        int gotDone;
+        int violation;
+    }
+
+    Checker() {
+        gotDone = 0;
+        violation = 0;
+    }
+
+    @priority(1)
+    msgsrv arm(int at) {
+        self.timeout() after(11);
+    }
+
+    @priority(2)
+    msgsrv doneIn(int at) {
+        gotDone = 1;
+    }
+
+    @priority(3)
+    msgsrv timeout() {
+        if (gotDone == 0) {
+            violation = 1;
+        }
+    }
+}
+
+reactiveclass KeepAlive(2) {
+    statevars {
+        int phase;
+    }
+
+    KeepAlive() {
+        phase = 0;
+        self.kick();
+    }
+
+    @priority(1)
+    msgsrv kick() {
+        self.tick() after(100);
+    }
+
+    @priority(2)
+    msgsrv tick() {
+        if (phase == 0) {
+            phase = 1;
+        } else {
+            phase = 0;
+        }
+        self.tick() after(100);
+    }
+}
+
+reactiveclass Bootstrap(5) {
+    knownrebecs {
+        Scenario s;
+        Checker chk;
+    }
+
+    Bootstrap() {
+        self.start(1);
+    }
+
+    @priority(1)
+    msgsrv start(int at) {
+        chk.arm(1);
+        s.start(1);
+    }
+}
+
+main {
+    Checker chk():();
+    Scenario s(chk):();
+    KeepAlive ka():();
+    Bootstrap boot(s, chk):();
+}

@@ -1,0 +1,944 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 30,
+            "target": "busy",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 30,
+              "value": false
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 31,
+            "target": "carried",
+            "value": {
+              "kind": "intLiteral",
+              "line": 31,
+              "value": 0
+            }
+          }
+        ],
+        "line": 29,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Arbiter",
+          "line": 23,
+          "name": "arbiter"
+        }
+      ],
+      "line": 21,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 34,
+                  "name": "busy"
+                },
+                "line": 34,
+                "operator": "==",
+                "right": {
+                  "kind": "boolLiteral",
+                  "line": 34,
+                  "value": true
+                }
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 37,
+                  "target": "busy",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 37,
+                    "value": true
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 38,
+                  "target": "carried",
+                  "value": {
+                    "kind": "variable",
+                    "line": 38,
+                    "name": "station"
+                  }
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 39,
+                  "messageServer": "release",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Medium"
+                }
+              ],
+              "kind": "if",
+              "line": 34,
+              "then": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 35,
+                      "name": "station"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 35,
+                  "messageServer": "collided",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "arbiter"
+                  },
+                  "targetClassName": "Arbiter"
+                }
+              ]
+            }
+          ],
+          "line": 33,
+          "name": "acquire",
+          "parameters": [
+            {
+              "line": 33,
+              "name": "station",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 43,
+              "target": "busy",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 43,
+                "value": false
+              }
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 44,
+                  "name": "carried"
+                }
+              ],
+              "kind": "send",
+              "line": 44,
+              "messageServer": "freed",
+              "target": {
+                "kind": "knownRebec",
+                "name": "arbiter"
+              },
+              "targetClassName": "Arbiter"
+            },
+            {
+              "kind": "assign",
+              "line": 45,
+              "target": "carried",
+              "value": {
+                "kind": "intLiteral",
+                "line": 45,
+                "value": 0
+              }
+            }
+          ],
+          "line": 42,
+          "name": "release",
+          "parameters": [],
+          "priority": null
+        }
+      ],
+      "name": "Medium",
+      "queueBound": 4,
+      "stateVariables": [
+        {
+          "line": 26,
+          "name": "busy",
+          "type": "boolean"
+        },
+        {
+          "line": 27,
+          "name": "carried",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 59,
+            "target": "id",
+            "value": {
+              "kind": "variable",
+              "line": 59,
+              "name": "myId"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 60,
+            "target": "slot",
+            "value": {
+              "kind": "intLiteral",
+              "line": 60,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 61,
+            "target": "holding",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 61,
+              "value": false
+            }
+          }
+        ],
+        "line": 58,
+        "parameters": [
+          {
+            "line": 58,
+            "name": "myId",
+            "type": "int"
+          }
+        ]
+      },
+      "knownRebecs": [
+        {
+          "className": "Medium",
+          "line": 51,
+          "name": "medium"
+        }
+      ],
+      "line": 49,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 64,
+              "target": "slot",
+              "value": {
+                "kind": "variable",
+                "line": 64,
+                "name": "round"
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 65,
+              "target": "holding",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 65,
+                "value": true
+              }
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 66,
+                  "name": "id"
+                }
+              ],
+              "kind": "send",
+              "line": 66,
+              "messageServer": "acquire",
+              "target": {
+                "kind": "knownRebec",
+                "name": "medium"
+              },
+              "targetClassName": "Medium"
+            }
+          ],
+          "line": 63,
+          "name": "grant",
+          "parameters": [
+            {
+              "line": 63,
+              "name": "round",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 69,
+              "target": "holding",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 69,
+                "value": false
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 70,
+                  "name": "cause"
+                },
+                "line": 70,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 70,
+                  "value": 1
+                }
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 73,
+                  "target": "slot",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 73,
+                    "value": 1
+                  }
+                }
+              ],
+              "kind": "if",
+              "line": 70,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 71,
+                  "target": "slot",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 71,
+                    "value": 0
+                  }
+                }
+              ]
+            }
+          ],
+          "line": 68,
+          "name": "backoff",
+          "parameters": [
+            {
+              "line": 68,
+              "name": "cause",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Station",
+      "queueBound": 4,
+      "stateVariables": [
+        {
+          "line": 54,
+          "name": "id",
+          "type": "int"
+        },
+        {
+          "line": 55,
+          "name": "slot",
+          "type": "int"
+        },
+        {
+          "line": 56,
+          "name": "holding",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 90,
+            "target": "contended",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 90,
+              "value": false
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 91,
+            "target": "lastHolder",
+            "value": {
+              "kind": "intLiteral",
+              "line": 91,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 92,
+            "target": "resolved",
+            "value": {
+              "kind": "intLiteral",
+              "line": 92,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 93,
+            "target": "round",
+            "value": {
+              "kind": "intLiteral",
+              "line": 93,
+              "value": 0
+            }
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 1
+            },
+            "arguments": [],
+            "kind": "send",
+            "line": 94,
+            "messageServer": "poll",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Arbiter"
+          }
+        ],
+        "line": 89,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Station",
+          "line": 80,
+          "name": "stationHigh"
+        },
+        {
+          "className": "Station",
+          "line": 81,
+          "name": "stationLow"
+        }
+      ],
+      "line": 78,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 97,
+              "target": "contended",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 97,
+                "value": false
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 98,
+              "target": "resolved",
+              "value": {
+                "kind": "intLiteral",
+                "line": 98,
+                "value": 0
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 99,
+                  "name": "round"
+                },
+                "line": 99,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 99,
+                  "value": 0
+                }
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 102,
+                  "target": "round",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 102,
+                    "value": 0
+                  }
+                }
+              ],
+              "kind": "if",
+              "line": 99,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 100,
+                  "target": "round",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 100,
+                    "value": 1
+                  }
+                }
+              ]
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 104,
+                  "name": "round"
+                }
+              ],
+              "kind": "send",
+              "line": 104,
+              "messageServer": "grant",
+              "target": {
+                "kind": "knownRebec",
+                "name": "stationHigh"
+              },
+              "targetClassName": "Station"
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 105,
+                  "name": "round"
+                }
+              ],
+              "kind": "send",
+              "line": 105,
+              "messageServer": "grant",
+              "target": {
+                "kind": "knownRebec",
+                "name": "stationLow"
+              },
+              "targetClassName": "Station"
+            }
+          ],
+          "line": 96,
+          "name": "poll",
+          "parameters": [],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 108,
+              "target": "contended",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 108,
+                "value": true
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 109,
+              "target": "resolved",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 109,
+                  "name": "resolved"
+                },
+                "line": 109,
+                "operator": "+",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 109,
+                  "value": 1
+                }
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 110,
+                  "name": "station"
+                },
+                "line": 110,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 110,
+                  "value": 1
+                }
+              },
+              "else": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 113,
+                      "value": 1
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 113,
+                  "messageServer": "backoff",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "stationLow"
+                  },
+                  "targetClassName": "Station"
+                }
+              ],
+              "kind": "if",
+              "line": 110,
+              "then": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 111,
+                      "value": 1
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 111,
+                  "messageServer": "backoff",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "stationHigh"
+                  },
+                  "targetClassName": "Station"
+                }
+              ]
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 115,
+                  "name": "resolved"
+                },
+                "line": 115,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 115,
+                  "value": 2
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 115,
+              "then": [
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 116,
+                  "messageServer": "poll",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Arbiter"
+                }
+              ]
+            }
+          ],
+          "line": 107,
+          "name": "collided",
+          "parameters": [
+            {
+              "line": 107,
+              "name": "station",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 120,
+              "target": "lastHolder",
+              "value": {
+                "kind": "variable",
+                "line": 120,
+                "name": "station"
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 121,
+              "target": "resolved",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 121,
+                  "name": "resolved"
+                },
+                "line": 121,
+                "operator": "+",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 121,
+                  "value": 1
+                }
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 122,
+                  "name": "station"
+                },
+                "line": 122,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 122,
+                  "value": 1
+                }
+              },
+              "else": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 125,
+                      "value": 2
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 125,
+                  "messageServer": "backoff",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "stationLow"
+                  },
+                  "targetClassName": "Station"
+                }
+              ],
+              "kind": "if",
+              "line": 122,
+              "then": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 123,
+                      "value": 2
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 123,
+                  "messageServer": "backoff",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "stationHigh"
+                  },
+                  "targetClassName": "Station"
+                }
+              ]
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 127,
+                  "name": "resolved"
+                },
+                "line": 127,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 127,
+                  "value": 2
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 127,
+              "then": [
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 128,
+                  "messageServer": "poll",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Arbiter"
+                }
+              ]
+            }
+          ],
+          "line": 119,
+          "name": "freed",
+          "parameters": [
+            {
+              "line": 119,
+              "name": "station",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Arbiter",
+      "queueBound": 4,
+      "stateVariables": [
+        {
+          "line": 84,
+          "name": "contended",
+          "type": "boolean"
+        },
+        {
+          "line": 85,
+          "name": "lastHolder",
+          "type": "int"
+        },
+        {
+          "line": 86,
+          "name": "resolved",
+          "type": "int"
+        },
+        {
+          "line": 87,
+          "name": "round",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 1
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Medium",
+          "instance": "medium",
+          "knownRebec": "medium"
+        }
+      ],
+      "className": "Station",
+      "line": 134,
+      "name": "stationHigh",
+      "priority": 1
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 2
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Medium",
+          "instance": "medium",
+          "knownRebec": "medium"
+        }
+      ],
+      "className": "Station",
+      "line": 135,
+      "name": "stationLow",
+      "priority": 2
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Arbiter",
+          "instance": "arbiter",
+          "knownRebec": "arbiter"
+        }
+      ],
+      "className": "Medium",
+      "line": 136,
+      "name": "medium",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Station",
+          "instance": "stationHigh",
+          "knownRebec": "stationHigh"
+        },
+        {
+          "className": "Station",
+          "instance": "stationLow",
+          "knownRebec": "stationLow"
+        }
+      ],
+      "className": "Arbiter",
+      "line": 137,
+      "name": "arbiter",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

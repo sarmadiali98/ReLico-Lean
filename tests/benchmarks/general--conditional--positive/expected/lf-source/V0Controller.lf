@@ -1,0 +1,93 @@
+target Cpp
+
+reactor Checker {
+  input heatInToChk1FromT: int
+  input heatInToChk2FromT: int
+  state violation: int = 0
+  logical action heatIn_action: int
+
+  reaction(startup) {=
+    violation = 0;
+  =}
+
+  reaction(heatIn_action) {=
+    auto v = *heatIn_action.get();
+    if ((v != 1)) { violation = 1; } else {}
+  =}
+
+  reaction(heatInToChk1FromT) {=
+    auto v = *heatInToChk1FromT.get();
+    if ((v != 1)) { violation = 1; } else {}
+  =}
+
+  reaction(heatInToChk2FromT) {=
+    auto v = *heatInToChk2FromT.get();
+    if ((v != 1)) { violation = 1; } else {}
+  =}
+}
+
+reactor ThermostatCore {
+  input temperatureToTFromSrc: int
+  output heatInToChk1: int
+  output heatInToChk2: int
+  state thermoState: int = 0
+  logical action temperature_action: int
+
+  reaction(startup) {=
+    thermoState = 0;
+  =}
+
+  reaction(temperature_action) -> heatInToChk1, heatInToChk2 {=
+    auto v = *temperature_action.get();
+    if ((v <= 18)) { thermoState = 1; heatInToChk1.set(1); } else { if ((v >= 22)) { thermoState = 0; heatInToChk2.set(0); } else {} }
+  =}
+
+  reaction(temperatureToTFromSrc) -> heatInToChk1, heatInToChk2 {=
+    auto v = *temperatureToTFromSrc.get();
+    if ((v <= 18)) { thermoState = 1; heatInToChk1.set(1); } else { if ((v >= 22)) { thermoState = 0; heatInToChk2.set(0); } else {} }
+  =}
+}
+
+reactor TemperatureSource {
+  output temperatureToT: int
+  logical action start_action: void
+
+  reaction(startup) -> start_action {=
+    start_action.schedule(0ms);
+  =}
+
+  reaction(start_action) -> temperatureToT {=
+    temperatureToT.set(18);
+  =}
+}
+
+reactor KeepAlive {
+  state phase: int = 0
+  logical action tick_action1: void
+  logical action tick_action2: void
+
+  reaction(startup) -> tick_action1 {=
+    phase = 0;
+    tick_action1.schedule(100ms);
+  =}
+
+  reaction(tick_action1) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+
+  reaction(tick_action2) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+}
+
+main reactor {
+  src = new TemperatureSource()
+  t = new ThermostatCore()
+  chk = new Checker()
+  ka = new KeepAlive()
+  src.temperatureToT -> t.temperatureToTFromSrc after 0 msec
+  t.heatInToChk1 -> chk.heatInToChk1FromT after 0 msec
+  t.heatInToChk2 -> chk.heatInToChk2FromT after 0 msec
+}

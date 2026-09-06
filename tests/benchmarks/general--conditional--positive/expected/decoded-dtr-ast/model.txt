@@ -1,0 +1,126 @@
+{ classes := [{ name := { value := "Checker" },
+                knownRebecs := [],
+                stateVariables := [{ name := { value := "violation" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "violation" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0)] },
+                messageServers := [{ name := { value := "heatIn" },
+                                     parameters := [{ name := { value := "v" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.ne)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "v" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "violation" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1)]
+                                                []],
+                                     priority := some 1 }] },
+              { name := { value := "ThermostatCore" },
+                knownRebecs := [{ name := { value := "chk" }, className := { value := "Checker" } }],
+                stateVariables := [{ name := { value := "thermoState" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "thermoState" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0)] },
+                messageServers := [{ name := { value := "temperature" },
+                                     parameters := [{ name := { value := "v" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.le)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "v" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 18))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "thermoState" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "chk" })
+                                                   { value := "heatIn" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 1]
+                                                   { value := 0 }]
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.ge)
+                                                     (Relico.DTR.GeneralExpr.parameterVar { value := "v" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 22))
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "thermoState" }
+                                                      (Relico.DTR.GeneralExpr.intLiteral 0),
+                                                    Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "chk" })
+                                                      { value := "heatIn" }
+                                                      [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                      { value := 0 }]
+                                                   []]],
+                                     priority := some 1 }] },
+              { name := { value := "TemperatureSource" },
+                knownRebecs := [{ name := { value := "t" }, className := { value := "ThermostatCore" } }],
+                stateVariables := [],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "start" }
+                                            []
+                                            { value := 0 }] },
+                messageServers := [{ name := { value := "start" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "t" })
+                                                { value := "temperature" }
+                                                [Relico.DTR.GeneralExpr.intLiteral 18]
+                                                { value := 0 }],
+                                     priority := some 1 }] },
+              { name := { value := "KeepAlive" },
+                knownRebecs := [],
+                stateVariables := [{ name := { value := "phase" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "phase" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "tick" }
+                                            []
+                                            { value := 100 }] },
+                messageServers := [{ name := { value := "tick" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "phase" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "phase" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1)]
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "phase" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 0)],
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "tick" }
+                                                []
+                                                { value := 100 }],
+                                     priority := some 1 }] }],
+  instances := [{ name := { value := "src" },
+                  className := { value := "TemperatureSource" },
+                  bindings := [({ value := "t" }, { value := "t" })],
+                  arguments := [],
+                  priority := some 1 },
+                { name := { value := "t" },
+                  className := { value := "ThermostatCore" },
+                  bindings := [({ value := "chk" }, { value := "chk" })],
+                  arguments := [],
+                  priority := some 2 },
+                { name := { value := "chk" },
+                  className := { value := "Checker" },
+                  bindings := [],
+                  arguments := [],
+                  priority := some 3 },
+                { name := { value := "ka" },
+                  className := { value := "KeepAlive" },
+                  bindings := [],
+                  arguments := [],
+                  priority := none }] }

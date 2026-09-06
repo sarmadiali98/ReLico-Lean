@@ -1,0 +1,211 @@
+target Cpp
+
+reactor Medium {
+  input acquireToMediumFromStationHigh: int
+  input acquireToMediumFromStationLow: int
+  output collidedToArbiter: int
+  output freedToArbiter: int
+  state busy: bool = false
+  state carried: int = 0
+  logical action acquire_action: int
+  logical action release_action: void
+
+  reaction(startup) {=
+    busy = false;
+    carried = 0;
+  =}
+
+  reaction(acquire_action) -> collidedToArbiter, release_action {=
+    auto station = *acquire_action.get();
+    if ((busy == true)) { collidedToArbiter.set(station); } else { busy = true; carried = station; release_action.schedule(1ms); }
+  =}
+
+  reaction(acquireToMediumFromStationHigh) -> collidedToArbiter, release_action {=
+    auto station = *acquireToMediumFromStationHigh.get();
+    if ((busy == true)) { collidedToArbiter.set(station); } else { busy = true; carried = station; release_action.schedule(1ms); }
+  =}
+
+  reaction(acquireToMediumFromStationLow) -> collidedToArbiter, release_action {=
+    auto station = *acquireToMediumFromStationLow.get();
+    if ((busy == true)) { collidedToArbiter.set(station); } else { busy = true; carried = station; release_action.schedule(1ms); }
+  =}
+
+  reaction(release_action) -> freedToArbiter {=
+    busy = false;
+    freedToArbiter.set(carried);
+    carried = 0;
+  =}
+}
+
+reactor Station(myId: int = 0) {
+  input grantToStationHighFromArbiter: int
+  input grantToStationLowFromArbiter: int
+  input backoffToStationHigh1FromArbiter: int
+  input backoffToStationLow1FromArbiter: int
+  input backoffToStationHigh2FromArbiter: int
+  input backoffToStationLow2FromArbiter: int
+  output acquireToMedium: int
+  state id: int = 0
+  state slot: int = 0
+  state holding: bool = false
+  logical action grant_action: int
+  logical action backoff_action: int
+
+  reaction(startup) {=
+    id = myId;
+    slot = 0;
+    holding = false;
+  =}
+
+  reaction(grant_action) -> acquireToMedium {=
+    auto round = *grant_action.get();
+    slot = round;
+    holding = true;
+    acquireToMedium.set(id);
+  =}
+
+  reaction(grantToStationHighFromArbiter) -> acquireToMedium {=
+    auto round = *grantToStationHighFromArbiter.get();
+    slot = round;
+    holding = true;
+    acquireToMedium.set(id);
+  =}
+
+  reaction(grantToStationLowFromArbiter) -> acquireToMedium {=
+    auto round = *grantToStationLowFromArbiter.get();
+    slot = round;
+    holding = true;
+    acquireToMedium.set(id);
+  =}
+
+  reaction(backoff_action) {=
+    auto cause = *backoff_action.get();
+    holding = false;
+    if ((cause == 1)) { slot = 0; } else { slot = 1; }
+  =}
+
+  reaction(backoffToStationHigh1FromArbiter) {=
+    auto cause = *backoffToStationHigh1FromArbiter.get();
+    holding = false;
+    if ((cause == 1)) { slot = 0; } else { slot = 1; }
+  =}
+
+  reaction(backoffToStationLow1FromArbiter) {=
+    auto cause = *backoffToStationLow1FromArbiter.get();
+    holding = false;
+    if ((cause == 1)) { slot = 0; } else { slot = 1; }
+  =}
+
+  reaction(backoffToStationHigh2FromArbiter) {=
+    auto cause = *backoffToStationHigh2FromArbiter.get();
+    holding = false;
+    if ((cause == 1)) { slot = 0; } else { slot = 1; }
+  =}
+
+  reaction(backoffToStationLow2FromArbiter) {=
+    auto cause = *backoffToStationLow2FromArbiter.get();
+    holding = false;
+    if ((cause == 1)) { slot = 0; } else { slot = 1; }
+  =}
+}
+
+reactor Arbiter {
+  input collidedToArbiterFromMedium: int
+  input freedToArbiterFromMedium: int
+  output grantToStationHigh: int
+  output grantToStationLow: int
+  output backoffToStationHigh1: int
+  output backoffToStationLow1: int
+  output backoffToStationHigh2: int
+  output backoffToStationLow2: int
+  state contended: bool = false
+  state lastHolder: int = 0
+  state resolved: int = 0
+  state round: int = 0
+  logical action poll_action1: void
+  logical action poll_action2: void
+  logical action poll_action3: void
+  logical action collided_action: int
+  logical action freed_action: int
+
+  reaction(startup) -> poll_action1 {=
+    contended = false;
+    lastHolder = 0;
+    resolved = 0;
+    round = 0;
+    poll_action1.schedule(1ms);
+  =}
+
+  reaction(poll_action1) -> grantToStationHigh, grantToStationLow {=
+    contended = false;
+    resolved = 0;
+    if ((round == 0)) { round = 1; } else { round = 0; }
+    grantToStationHigh.set(round);
+    grantToStationLow.set(round);
+  =}
+
+  reaction(poll_action2) -> grantToStationHigh, grantToStationLow {=
+    contended = false;
+    resolved = 0;
+    if ((round == 0)) { round = 1; } else { round = 0; }
+    grantToStationHigh.set(round);
+    grantToStationLow.set(round);
+  =}
+
+  reaction(poll_action3) -> grantToStationHigh, grantToStationLow {=
+    contended = false;
+    resolved = 0;
+    if ((round == 0)) { round = 1; } else { round = 0; }
+    grantToStationHigh.set(round);
+    grantToStationLow.set(round);
+  =}
+
+  reaction(collided_action) -> backoffToStationHigh1, backoffToStationLow1, poll_action2 {=
+    auto station = *collided_action.get();
+    contended = true;
+    resolved = (resolved + 1);
+    if ((station == 1)) { backoffToStationHigh1.set(1); } else { backoffToStationLow1.set(1); }
+    if ((resolved == 2)) { poll_action2.schedule(1ms); } else {}
+  =}
+
+  reaction(collidedToArbiterFromMedium) -> backoffToStationHigh1, backoffToStationLow1, poll_action2 {=
+    auto station = *collidedToArbiterFromMedium.get();
+    contended = true;
+    resolved = (resolved + 1);
+    if ((station == 1)) { backoffToStationHigh1.set(1); } else { backoffToStationLow1.set(1); }
+    if ((resolved == 2)) { poll_action2.schedule(1ms); } else {}
+  =}
+
+  reaction(freed_action) -> backoffToStationHigh2, backoffToStationLow2, poll_action3 {=
+    auto station = *freed_action.get();
+    lastHolder = station;
+    resolved = (resolved + 1);
+    if ((station == 1)) { backoffToStationHigh2.set(2); } else { backoffToStationLow2.set(2); }
+    if ((resolved == 2)) { poll_action3.schedule(1ms); } else {}
+  =}
+
+  reaction(freedToArbiterFromMedium) -> backoffToStationHigh2, backoffToStationLow2, poll_action3 {=
+    auto station = *freedToArbiterFromMedium.get();
+    lastHolder = station;
+    resolved = (resolved + 1);
+    if ((station == 1)) { backoffToStationHigh2.set(2); } else { backoffToStationLow2.set(2); }
+    if ((resolved == 2)) { poll_action3.schedule(1ms); } else {}
+  =}
+}
+
+main reactor {
+  stationHigh = new Station(myId=1)
+  stationLow = new Station(myId=2)
+  medium = new Medium()
+  arbiter = new Arbiter()
+  stationHigh.acquireToMedium -> medium.acquireToMediumFromStationHigh after 0 msec
+  stationLow.acquireToMedium -> medium.acquireToMediumFromStationLow after 0 msec
+  medium.collidedToArbiter -> arbiter.collidedToArbiterFromMedium after 0 msec
+  medium.freedToArbiter -> arbiter.freedToArbiterFromMedium after 0 msec
+  arbiter.grantToStationHigh -> stationHigh.grantToStationHighFromArbiter after 0 msec
+  arbiter.grantToStationLow -> stationLow.grantToStationLowFromArbiter after 0 msec
+  arbiter.backoffToStationHigh1 -> stationHigh.backoffToStationHigh1FromArbiter after 0 msec
+  arbiter.backoffToStationLow1 -> stationLow.backoffToStationLow1FromArbiter after 0 msec
+  arbiter.backoffToStationHigh2 -> stationHigh.backoffToStationHigh2FromArbiter after 0 msec
+  arbiter.backoffToStationLow2 -> stationLow.backoffToStationLow2FromArbiter after 0 msec
+}

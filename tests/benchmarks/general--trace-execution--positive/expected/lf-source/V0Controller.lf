@@ -1,0 +1,118 @@
+target Cpp
+
+reactor Scenario {
+  input startToSFromBoot: int
+  output doneInToChk: int
+  logical action start_action: int
+  logical action requestAfterWait_action: void
+  logical action finishPassing_action: void
+
+  reaction(start_action) -> requestAfterWait_action {=
+    auto at = *start_action.get();
+    requestAfterWait_action.schedule(2ms);
+  =}
+
+  reaction(startToSFromBoot) -> requestAfterWait_action {=
+    auto at = *startToSFromBoot.get();
+    requestAfterWait_action.schedule(2ms);
+  =}
+
+  reaction(requestAfterWait_action) -> finishPassing_action {=
+    finishPassing_action.schedule(10ms);
+  =}
+
+  reaction(finishPassing_action) -> doneInToChk {=
+    doneInToChk.set(1);
+  =}
+}
+
+reactor Checker {
+  input doneInToChkFromS: int
+  input armToChkFromBoot: int
+  state gotDone: int = 0
+  state violation: int = 0
+  logical action arm_action: int
+  logical action doneIn_action: int
+  logical action timeout_action: void
+
+  reaction(startup) {=
+    gotDone = 0;
+    violation = 0;
+  =}
+
+  reaction(arm_action) -> timeout_action {=
+    auto at = *arm_action.get();
+    timeout_action.schedule(11ms);
+  =}
+
+  reaction(armToChkFromBoot) -> timeout_action {=
+    auto at = *armToChkFromBoot.get();
+    timeout_action.schedule(11ms);
+  =}
+
+  reaction(doneIn_action) {=
+    auto at = *doneIn_action.get();
+    gotDone = 1;
+  =}
+
+  reaction(doneInToChkFromS) {=
+    auto at = *doneInToChkFromS.get();
+    gotDone = 1;
+  =}
+
+  reaction(timeout_action) {=
+    if ((gotDone == 0)) { violation = 1; } else {}
+  =}
+}
+
+reactor KeepAlive {
+  state phase: int = 0
+  logical action kick_action: void
+  logical action tick_action1: void
+  logical action tick_action2: void
+
+  reaction(startup) -> kick_action {=
+    phase = 0;
+    kick_action.schedule(0ms);
+  =}
+
+  reaction(kick_action) -> tick_action1 {=
+    tick_action1.schedule(100ms);
+  =}
+
+  reaction(tick_action1) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+
+  reaction(tick_action2) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+}
+
+reactor Bootstrap {
+  output armToChk: int
+  output startToS: int
+  logical action start_action: int
+
+  reaction(startup) -> start_action {=
+    start_action.schedule(1, 0ms);
+  =}
+
+  reaction(start_action) -> armToChk, startToS {=
+    auto at = *start_action.get();
+    armToChk.set(1);
+    startToS.set(1);
+  =}
+}
+
+main reactor {
+  chk = new Checker()
+  s = new Scenario()
+  ka = new KeepAlive()
+  boot = new Bootstrap()
+  s.doneInToChk -> chk.doneInToChkFromS after 0 msec
+  boot.armToChk -> chk.armToChkFromBoot after 0 msec
+  boot.startToS -> s.startToSFromBoot after 0 msec
+}

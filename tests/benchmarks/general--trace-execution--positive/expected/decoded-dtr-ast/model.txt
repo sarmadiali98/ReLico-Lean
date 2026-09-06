@@ -1,0 +1,151 @@
+{ classes := [{ name := { value := "Scenario" },
+                knownRebecs := [{ name := { value := "chk" }, className := { value := "Checker" } }],
+                stateVariables := [],
+                constructor := { parameters := [], body := [] },
+                messageServers := [{ name := { value := "start" },
+                                     parameters := [{ name := { value := "at" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "requestAfterWait" }
+                                                []
+                                                { value := 2 }],
+                                     priority := some 1 },
+                                   { name := { value := "requestAfterWait" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "finishPassing" }
+                                                []
+                                                { value := 10 }],
+                                     priority := some 2 },
+                                   { name := { value := "finishPassing" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "chk" })
+                                                { value := "doneIn" }
+                                                [Relico.DTR.GeneralExpr.intLiteral 1]
+                                                { value := 0 }],
+                                     priority := some 3 }] },
+              { name := { value := "Checker" },
+                knownRebecs := [],
+                stateVariables := [{ name := { value := "gotDone" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "violation" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "gotDone" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "violation" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0)] },
+                messageServers := [{ name := { value := "arm" },
+                                     parameters := [{ name := { value := "at" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "timeout" }
+                                                []
+                                                { value := 11 }],
+                                     priority := some 1 },
+                                   { name := { value := "doneIn" },
+                                     parameters := [{ name := { value := "at" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "gotDone" }
+                                                (Relico.DTR.GeneralExpr.intLiteral 1)],
+                                     priority := some 2 },
+                                   { name := { value := "timeout" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "gotDone" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "violation" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1)]
+                                                []],
+                                     priority := some 3 }] },
+              { name := { value := "KeepAlive" },
+                knownRebecs := [],
+                stateVariables := [{ name := { value := "phase" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "phase" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "kick" }
+                                            []
+                                            { value := 0 }] },
+                messageServers := [{ name := { value := "kick" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "tick" }
+                                                []
+                                                { value := 100 }],
+                                     priority := some 1 },
+                                   { name := { value := "tick" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "phase" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "phase" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1)]
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "phase" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 0)],
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "tick" }
+                                                []
+                                                { value := 100 }],
+                                     priority := some 2 }] },
+              { name := { value := "Bootstrap" },
+                knownRebecs := [{ name := { value := "s" }, className := { value := "Scenario" } },
+                                { name := { value := "chk" }, className := { value := "Checker" } }],
+                stateVariables := [],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "start" }
+                                            [Relico.DTR.GeneralExpr.intLiteral 1]
+                                            { value := 0 }] },
+                messageServers := [{ name := { value := "start" },
+                                     parameters := [{ name := { value := "at" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "chk" })
+                                                { value := "arm" }
+                                                [Relico.DTR.GeneralExpr.intLiteral 1]
+                                                { value := 0 },
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "s" })
+                                                { value := "start" }
+                                                [Relico.DTR.GeneralExpr.intLiteral 1]
+                                                { value := 0 }],
+                                     priority := some 1 }] }],
+  instances := [{ name := { value := "chk" },
+                  className := { value := "Checker" },
+                  bindings := [],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "s" },
+                  className := { value := "Scenario" },
+                  bindings := [({ value := "chk" }, { value := "chk" })],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "ka" },
+                  className := { value := "KeepAlive" },
+                  bindings := [],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "boot" },
+                  className := { value := "Bootstrap" },
+                  bindings := [({ value := "s" }, { value := "s" }), ({ value := "chk" }, { value := "chk" })],
+                  arguments := [],
+                  priority := none }] }

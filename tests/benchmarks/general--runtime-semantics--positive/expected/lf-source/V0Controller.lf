@@ -1,0 +1,112 @@
+target Cpp
+
+reactor Source {
+  input inToSFromN2: int
+  output inToN1: int
+  output returnedToChk: int
+  logical action start_action: void
+  logical action in_action: int
+
+  reaction(startup) -> start_action {=
+    start_action.schedule(0ms);
+  =}
+
+  reaction(start_action) -> inToN1 {=
+    inToN1.set(0);
+  =}
+
+  reaction(in_action) -> returnedToChk {=
+    auto v = *in_action.get();
+    returnedToChk.set(v);
+  =}
+
+  reaction(inToSFromN2) -> returnedToChk {=
+    auto v = *inToSFromN2.get();
+    returnedToChk.set(v);
+  =}
+}
+
+reactor Node1 {
+  input inToN1FromS: int
+  output inToN2: int
+  logical action in_action: int
+
+  reaction(in_action) -> inToN2 {=
+    auto v = *in_action.get();
+    inToN2.set(1);
+  =}
+
+  reaction(inToN1FromS) -> inToN2 {=
+    auto v = *inToN1FromS.get();
+    inToN2.set(1);
+  =}
+}
+
+reactor Node2 {
+  input inToN2FromN1: int
+  output inToS: int
+  logical action in_action: int
+
+  reaction(in_action) -> inToS {=
+    auto v = *in_action.get();
+    inToS.set(2);
+  =}
+
+  reaction(inToN2FromN1) -> inToS {=
+    auto v = *inToN2FromN1.get();
+    inToS.set(2);
+  =}
+}
+
+reactor Checker {
+  input returnedToChkFromS: int
+  state violation: int = 0
+  logical action returned_action: int
+
+  reaction(startup) {=
+    violation = 0;
+  =}
+
+  reaction(returned_action) {=
+    auto v = *returned_action.get();
+    if ((v != 2)) { violation = 1; } else {}
+  =}
+
+  reaction(returnedToChkFromS) {=
+    auto v = *returnedToChkFromS.get();
+    if ((v != 2)) { violation = 1; } else {}
+  =}
+}
+
+reactor KeepAlive {
+  state phase: int = 0
+  logical action tick_action1: void
+  logical action tick_action2: void
+
+  reaction(startup) -> tick_action1 {=
+    phase = 0;
+    tick_action1.schedule(100ms);
+  =}
+
+  reaction(tick_action1) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+
+  reaction(tick_action2) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+}
+
+main reactor {
+  s = new Source()
+  n1 = new Node1()
+  n2 = new Node2()
+  chk = new Checker()
+  ka = new KeepAlive()
+  s.inToN1 -> n1.inToN1FromS after 10 msec
+  s.returnedToChk -> chk.returnedToChkFromS after 0 msec
+  n1.inToN2 -> n2.inToN2FromN1 after 10 msec
+  n2.inToS -> s.inToSFromN2 after 10 msec
+}

@@ -1,0 +1,209 @@
+{
+  "benchmark_id": "general--actor-priority--positive",
+  "description": "General-family benchmark for actor priority: two stations contend for a shared medium in the same round and instance-level priority decides which actor the scheduler selects. A DTR-fragment benchmark inspired by the upstream tcsma model, not a translation of it.",
+  "expected_artifacts": [
+    {
+      "path": "source/result.json",
+      "required": true,
+      "sha256": "375eec5d66bc11bc03bbc4a49971037b44048278dbb62bbda30bd1e7f6a93adf"
+    },
+    {
+      "path": "rmc/verdict.json",
+      "required": true,
+      "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
+    },
+    {
+      "path": "parser-json/model.json",
+      "required": true,
+      "sha256": "f72ae28aa1de256a8c30e361c567edc958329612ab6212a33be0b2354a94b31e"
+    },
+    {
+      "path": "decoded-dtr-ast/model.txt",
+      "required": true,
+      "sha256": "5555467811e1464f9196a2bdd8d585bdc022d678da2a4d125b71890e839c6b05"
+    },
+    {
+      "path": "formal-witness/result.json",
+      "required": true,
+      "sha256": "d9dff6bdf43ea15ddb58a10383eb6ec7f40c534331098d75ccd867de63cfeae1"
+    },
+    {
+      "path": "translated-lf-ast/program.txt",
+      "required": true,
+      "sha256": "3253e3eb9d6283d7535211a16a13c58d80c26ded1d80e8ce7dce0b15358dbc4c"
+    },
+    {
+      "path": "lf-source/V0Controller.lf",
+      "required": true,
+      "sha256": "0f0ce482786e6e23aff3a1ab8d7a5fca3ce4930f1389e8a5341b4e35348d09a4"
+    },
+    {
+      "path": "lfc/result.json",
+      "required": true,
+      "sha256": "2ee3d75e82d1daa3311d9c5f4f50fd35fb0ca8ce2ee5f542ce2d79451adcc059"
+    }
+  ],
+  "expected_terminal_stage": "lfc",
+  "polarity": "positive",
+  "schema_version": 1,
+  "source_files": [
+    "source/model.rebeca"
+  ],
+  "stages": [
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "source",
+        "--benchmark-id",
+        "general--actor-priority--positive",
+        "--source",
+        "{source}",
+        "--output",
+        "{actual}/source/result.json"
+      ],
+      "name": "source"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc/verdict.json"
+      ],
+      "name": "rmc",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "parser-json",
+        "--family",
+        "general",
+        "--repo",
+        "{repo}",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--artifact-zip",
+        "/Users/ali/Desktop/LFStructuringNonDeterminism/ReLico-fmcad-2026-artifact-v1.zip",
+        "--maven",
+        "/opt/homebrew/Cellar/maven/3.9.16/bin/mvn",
+        "--output",
+        "{actual}/parser-json/model.json"
+      ],
+      "name": "parser-json",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lean-export",
+        "--family",
+        "general",
+        "--mode",
+        "decoded-dtr-ast",
+        "--repo",
+        "{repo}",
+        "--lake",
+        "/Users/ali/.elan/bin/lake",
+        "--input",
+        "{actual}/parser-json/model.json",
+        "--output",
+        "{actual}/decoded-dtr-ast/model.txt"
+      ],
+      "name": "decoded-dtr-ast",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "formal-witness",
+        "--repo",
+        "{repo}",
+        "--lake",
+        "/Users/ali/.elan/bin/lake",
+        "--coverage",
+        "{benchmark}/coverage.json",
+        "--output",
+        "{actual}/formal-witness/result.json"
+      ],
+      "name": "formal-witness",
+      "timeout_seconds": 1200
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lean-export",
+        "--family",
+        "general",
+        "--mode",
+        "translated-lf-ast",
+        "--repo",
+        "{repo}",
+        "--lake",
+        "/Users/ali/.elan/bin/lake",
+        "--input",
+        "{actual}/parser-json/model.json",
+        "--output",
+        "{actual}/translated-lf-ast/program.txt"
+      ],
+      "name": "translated-lf-ast",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lean-export",
+        "--family",
+        "general",
+        "--mode",
+        "lf-source",
+        "--repo",
+        "{repo}",
+        "--lake",
+        "/Users/ali/.elan/bin/lake",
+        "--input",
+        "{actual}/parser-json/model.json",
+        "--output",
+        "{actual}/lf-source/V0Controller.lf"
+      ],
+      "name": "lf-source",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lfc",
+        "--lf-source",
+        "{actual}/lf-source/V0Controller.lf",
+        "--work-directory",
+        "{actual}/work/lfc",
+        "--lfc",
+        "/Users/ali/.local/share/lingua-franca/cli/bin/lfc",
+        "--output",
+        "{actual}/lfc/result.json"
+      ],
+      "name": "lfc",
+      "timeout_seconds": 1200
+    }
+  ]
+}

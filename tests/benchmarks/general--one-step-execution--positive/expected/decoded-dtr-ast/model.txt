@@ -1,0 +1,49 @@
+{ classes := [{ name := { value := "Counter" },
+                knownRebecs := [],
+                stateVariables := [{ name := { value := "x" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "violation" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "x" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "violation" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "tick" }
+                                            []
+                                            { value := 1 }] },
+                messageServers := [{ name := { value := "tick" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "x" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "x" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1)]
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "x" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 0)],
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.lt)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "x" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "violation" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1)]
+                                                [],
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "tick" }
+                                                []
+                                                { value := 1 }],
+                                     priority := some 1 }] }],
+  instances := [{ name := { value := "ctr" },
+                  className := { value := "Counter" },
+                  bindings := [],
+                  arguments := [],
+                  priority := none }] }

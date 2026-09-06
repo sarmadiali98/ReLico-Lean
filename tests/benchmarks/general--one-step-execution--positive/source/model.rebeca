@@ -1,0 +1,36 @@
+// Benchmark: general--one-step-execution--positive
+// The smallest recurring corpus model: one class, one self-send and
+// one branch. It isolates a single dispatch-and-execute step from
+// every topology and timing feature in the fragment.
+// Source: upstream corpus model Minimal/Minimal, adapted; see README.
+reactiveclass Counter(5) {
+    statevars {
+        int x;
+        int violation;
+    }
+
+    Counter() {
+        x = 0;
+        violation = 0;
+        self.tick() after(1);
+    }
+
+    @priority(1)
+    msgsrv tick() {
+        if (x == 0) {
+            x = 1;
+        } else {
+            x = 0;
+        }
+
+        if (x < 0) {
+            violation = 1;
+        }
+
+        self.tick() after(1);
+    }
+}
+
+main {
+    Counter ctr():();
+}

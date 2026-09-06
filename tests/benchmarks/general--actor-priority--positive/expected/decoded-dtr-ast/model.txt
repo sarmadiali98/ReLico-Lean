@@ -1,0 +1,253 @@
+{ classes := [{ name := { value := "Medium" },
+                knownRebecs := [{ name := { value := "arbiter" }, className := { value := "Arbiter" } }],
+                stateVariables := [{ name := { value := "busy" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "carried" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "busy" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "carried" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0)] },
+                messageServers := [{ name := { value := "acquire" },
+                                     parameters := [{ name := { value := "station" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "busy" })
+                                                  (Relico.DTR.GeneralExpr.boolLiteral true))
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "arbiter" })
+                                                   { value := "collided" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "station" }]
+                                                   { value := 0 }]
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "busy" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "carried" }
+                                                   (Relico.DTR.GeneralExpr.parameterVar { value := "station" }),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "release" }
+                                                   []
+                                                   { value := 1 }]],
+                                     priority := none },
+                                   { name := { value := "release" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "busy" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral false),
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "arbiter" })
+                                                { value := "freed" }
+                                                [Relico.DTR.GeneralExpr.stateVar { value := "carried" }]
+                                                { value := 0 },
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "carried" }
+                                                (Relico.DTR.GeneralExpr.intLiteral 0)],
+                                     priority := none }] },
+              { name := { value := "Station" },
+                knownRebecs := [{ name := { value := "medium" }, className := { value := "Medium" } }],
+                stateVariables := [{ name := { value := "id" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "slot" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "holding" }, declaredType := Relico.DTR.GeneralType.boolean }],
+                constructor := { parameters := [{ name := { value := "myId" },
+                                                  declaredType := Relico.DTR.GeneralType.int }],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "id" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "myId" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "slot" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "holding" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false)] },
+                messageServers := [{ name := { value := "grant" },
+                                     parameters := [{ name := { value := "round" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "slot" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "round" }),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "holding" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral true),
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "medium" })
+                                                { value := "acquire" }
+                                                [Relico.DTR.GeneralExpr.stateVar { value := "id" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "backoff" },
+                                     parameters := [{ name := { value := "cause" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "holding" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral false),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "cause" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "slot" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 0)]
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "slot" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1)]],
+                                     priority := none }] },
+              { name := { value := "Arbiter" },
+                knownRebecs := [{ name := { value := "stationHigh" }, className := { value := "Station" } },
+                                { name := { value := "stationLow" }, className := { value := "Station" } }],
+                stateVariables := [{ name := { value := "contended" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "lastHolder" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "resolved" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "round" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "contended" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "lastHolder" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "resolved" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "round" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "poll" }
+                                            []
+                                            { value := 1 }] },
+                messageServers := [{ name := { value := "poll" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "contended" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral false),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "resolved" }
+                                                (Relico.DTR.GeneralExpr.intLiteral 0),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "round" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "round" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1)]
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "round" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 0)],
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "stationHigh" })
+                                                { value := "grant" }
+                                                [Relico.DTR.GeneralExpr.stateVar { value := "round" }]
+                                                { value := 0 },
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "stationLow" })
+                                                { value := "grant" }
+                                                [Relico.DTR.GeneralExpr.stateVar { value := "round" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "collided" },
+                                     parameters := [{ name := { value := "station" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "contended" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral true),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "resolved" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.add)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "resolved" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "station" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "stationHigh" })
+                                                   { value := "backoff" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 1]
+                                                   { value := 0 }]
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "stationLow" })
+                                                   { value := "backoff" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 1]
+                                                   { value := 0 }],
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "resolved" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "poll" }
+                                                   []
+                                                   { value := 1 }]
+                                                []],
+                                     priority := none },
+                                   { name := { value := "freed" },
+                                     parameters := [{ name := { value := "station" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "lastHolder" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "station" }),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "resolved" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.add)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "resolved" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "station" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "stationHigh" })
+                                                   { value := "backoff" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 2]
+                                                   { value := 0 }]
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "stationLow" })
+                                                   { value := "backoff" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 2]
+                                                   { value := 0 }],
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "resolved" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "poll" }
+                                                   []
+                                                   { value := 1 }]
+                                                []],
+                                     priority := none }] }],
+  instances := [{ name := { value := "stationHigh" },
+                  className := { value := "Station" },
+                  bindings := [({ value := "medium" }, { value := "medium" })],
+                  arguments := [Relico.DTR.GeneralValue.int 1],
+                  priority := some 1 },
+                { name := { value := "stationLow" },
+                  className := { value := "Station" },
+                  bindings := [({ value := "medium" }, { value := "medium" })],
+                  arguments := [Relico.DTR.GeneralValue.int 2],
+                  priority := some 2 },
+                { name := { value := "medium" },
+                  className := { value := "Medium" },
+                  bindings := [({ value := "arbiter" }, { value := "arbiter" })],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "arbiter" },
+                  className := { value := "Arbiter" },
+                  bindings := [({ value := "stationHigh" }, { value := "stationHigh" }),
+                               ({ value := "stationLow" }, { value := "stationLow" })],
+                  arguments := [],
+                  priority := none }] }

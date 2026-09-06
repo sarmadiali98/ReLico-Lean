@@ -1,0 +1,130 @@
+{
+  "benchmark_id": "general--trace-execution--positive",
+  "obligation_count": 10,
+  "obligations": [
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "general--trace-execution--positive",
+      "kind": "theorem",
+      "line_number": "58",
+      "mapping_status": "accepted",
+      "name_or_expression": "pinRoutes",
+      "obligation_id": "GeneralTraceTransfer:0001",
+      "original_benchmark_candidate": "general--trace-execution--positive",
+      "test_file": "Relico/Tests/GeneralTraceTransfer.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "general--trace-execution--positive",
+      "kind": "theorem",
+      "line_number": "66",
+      "mapping_status": "accepted",
+      "name_or_expression": "pinEnv",
+      "obligation_id": "GeneralTraceTransfer:0002",
+      "original_benchmark_candidate": "general--trace-execution--positive",
+      "test_file": "Relico/Tests/GeneralTraceTransfer.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "general--trace-execution--positive",
+      "kind": "theorem",
+      "line_number": "75",
+      "mapping_status": "accepted",
+      "name_or_expression": "pinNames",
+      "obligation_id": "GeneralTraceTransfer:0003",
+      "original_benchmark_candidate": "general--trace-execution--positive",
+      "test_file": "Relico/Tests/GeneralTraceTransfer.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "general--trace-execution--positive",
+      "kind": "theorem",
+      "line_number": "88",
+      "mapping_status": "accepted",
+      "name_or_expression": "pinEnvNodup",
+      "obligation_id": "GeneralTraceTransfer:0004",
+      "original_benchmark_candidate": "general--trace-execution--positive",
+      "test_file": "Relico/Tests/GeneralTraceTransfer.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "general--trace-execution--positive",
+      "kind": "theorem",
+      "line_number": "153",
+      "mapping_status": "accepted",
+      "name_or_expression": "pinRelated",
+      "obligation_id": "GeneralTraceTransfer:0005",
+      "original_benchmark_candidate": "general--trace-execution--positive",
+      "test_file": "Relico/Tests/GeneralTraceTransfer.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "general--trace-execution--positive",
+      "kind": "theorem",
+      "line_number": "185",
+      "mapping_status": "accepted",
+      "name_or_expression": "pinNoMessageServer",
+      "obligation_id": "GeneralTraceTransfer:0006",
+      "original_benchmark_candidate": "general--trace-execution--positive",
+      "test_file": "Relico/Tests/GeneralTraceTransfer.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "general--trace-execution--positive",
+      "kind": "example",
+      "line_number": "258",
+      "mapping_status": "accepted",
+      "name_or_expression": "example@258",
+      "obligation_id": "GeneralTraceTransfer:0007",
+      "original_benchmark_candidate": "general--trace-execution--positive",
+      "test_file": "Relico/Tests/GeneralTraceTransfer.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "general--trace-execution--positive",
+      "kind": "example",
+      "line_number": "310",
+      "mapping_status": "accepted",
+      "name_or_expression": "example@310",
+      "obligation_id": "GeneralTraceTransfer:0008",
+      "original_benchmark_candidate": "general--trace-execution--positive",
+      "test_file": "Relico/Tests/GeneralTraceTransfer.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "general--trace-execution--positive",
+      "kind": "example",
+      "line_number": "367",
+      "mapping_status": "accepted",
+      "name_or_expression": "example@367",
+      "obligation_id": "GeneralTraceTransfer:0009",
+      "original_benchmark_candidate": "general--trace-execution--positive",
+      "test_file": "Relico/Tests/GeneralTraceTransfer.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "general--trace-execution--positive",
+      "kind": "example",
+      "line_number": "493",
+      "mapping_status": "accepted",
+      "name_or_expression": "example@493",
+      "obligation_id": "GeneralTraceTransfer:0010",
+      "original_benchmark_candidate": "general--trace-execution--positive",
+      "test_file": "Relico/Tests/GeneralTraceTransfer.lean"
+    }
+  ],
+  "schema_version": 1,
+  "test_modules": [
+    "Relico/Tests/GeneralTraceTransfer.lean"
+  ]
+}

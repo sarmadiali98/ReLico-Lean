@@ -1,0 +1,609 @@
+{ reactors := [{ name := { value := "Medium" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "acquireToMediumFromStationHigh" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "acquireToMediumFromStationLow" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "collidedToArbiter" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "freedToArbiter" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "busy" }, declaredType := Relico.LF.GeneralType.boolean },
+                                    { name := { value := "carried" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "acquire_action" },
+                                      parameters := [{ name := { value := "station" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "release_action" }, parameters := [] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "busy" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "carried" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "acquire_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "acquire_action" },
+                                        parameters := [{ value := "station" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "busy" })
+                                                     (Relico.LF.GeneralExpr.boolLiteral true))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "collidedToArbiter" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "station" }]]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "busy" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "carried" }
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "station" }),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "release_action" }
+                                                      []
+                                                      { value := 1 }]],
+                                        priority := none },
+                                      { name := { value := "acquireToMediumFromStationHigh_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "acquireToMediumFromStationHigh" },
+                                        parameters := [{ value := "station" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "busy" })
+                                                     (Relico.LF.GeneralExpr.boolLiteral true))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "collidedToArbiter" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "station" }]]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "busy" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "carried" }
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "station" }),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "release_action" }
+                                                      []
+                                                      { value := 1 }]],
+                                        priority := none },
+                                      { name := { value := "acquireToMediumFromStationLow_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "acquireToMediumFromStationLow" },
+                                        parameters := [{ value := "station" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "busy" })
+                                                     (Relico.LF.GeneralExpr.boolLiteral true))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "collidedToArbiter" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "station" }]]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "busy" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "carried" }
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "station" }),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "release_action" }
+                                                      []
+                                                      { value := 1 }]],
+                                        priority := none },
+                                      { name := { value := "release_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "release_action" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "busy" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral false),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "freedToArbiter" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "carried" }],
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "carried" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0)],
+                                        priority := none }] },
+               { name := { value := "Station" },
+                 parameters := [{ name := { value := "myId" }, declaredType := Relico.LF.GeneralType.int }],
+                 inputPorts := [{ name := { value := "grantToStationHighFromArbiter" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "grantToStationLowFromArbiter" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "backoffToStationHigh1FromArbiter" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "backoffToStationLow1FromArbiter" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "backoffToStationHigh2FromArbiter" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "backoffToStationLow2FromArbiter" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "acquireToMedium" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "id" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "slot" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "holding" }, declaredType := Relico.LF.GeneralType.boolean }],
+                 logicalActions := [{ name := { value := "grant_action" },
+                                      parameters := [{ name := { value := "round" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "backoff_action" },
+                                      parameters := [{ name := { value := "cause" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [{ value := "myId" }],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "id" }
+                                                 (Relico.LF.GeneralExpr.parameterVar { value := "myId" }),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "slot" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "holding" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "grant_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "grant_action" },
+                                        parameters := [{ value := "round" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "slot" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "round" }),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "holding" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral true),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "acquireToMedium" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none },
+                                      { name := { value := "grantToStationHighFromArbiter_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "grantToStationHighFromArbiter" },
+                                        parameters := [{ value := "round" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "slot" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "round" }),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "holding" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral true),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "acquireToMedium" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none },
+                                      { name := { value := "grantToStationLowFromArbiter_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "grantToStationLowFromArbiter" },
+                                        parameters := [{ value := "round" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "slot" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "round" }),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "holding" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral true),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "acquireToMedium" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none },
+                                      { name := { value := "backoff_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "backoff_action" },
+                                        parameters := [{ value := "cause" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "holding" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral false),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "cause" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "slot" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "slot" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]],
+                                        priority := none },
+                                      { name := { value := "backoffToStationHigh1FromArbiter_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "backoffToStationHigh1FromArbiter" },
+                                        parameters := [{ value := "cause" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "holding" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral false),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "cause" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "slot" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "slot" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]],
+                                        priority := none },
+                                      { name := { value := "backoffToStationLow1FromArbiter_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "backoffToStationLow1FromArbiter" },
+                                        parameters := [{ value := "cause" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "holding" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral false),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "cause" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "slot" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "slot" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]],
+                                        priority := none },
+                                      { name := { value := "backoffToStationHigh2FromArbiter_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "backoffToStationHigh2FromArbiter" },
+                                        parameters := [{ value := "cause" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "holding" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral false),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "cause" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "slot" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "slot" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]],
+                                        priority := none },
+                                      { name := { value := "backoffToStationLow2FromArbiter_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "backoffToStationLow2FromArbiter" },
+                                        parameters := [{ value := "cause" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "holding" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral false),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "cause" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "slot" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "slot" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]],
+                                        priority := none }] },
+               { name := { value := "Arbiter" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "collidedToArbiterFromMedium" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "freedToArbiterFromMedium" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "grantToStationHigh" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "grantToStationLow" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "backoffToStationHigh1" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "backoffToStationLow1" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "backoffToStationHigh2" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "backoffToStationLow2" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "contended" }, declaredType := Relico.LF.GeneralType.boolean },
+                                    { name := { value := "lastHolder" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "resolved" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "round" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "poll_action1" }, parameters := [] },
+                                    { name := { value := "poll_action2" }, parameters := [] },
+                                    { name := { value := "poll_action3" }, parameters := [] },
+                                    { name := { value := "collided_action" },
+                                      parameters := [{ name := { value := "station" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "freed_action" },
+                                      parameters := [{ name := { value := "station" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "contended" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "lastHolder" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "resolved" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "round" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.schedule
+                                                 { value := "poll_action1" }
+                                                 []
+                                                 { value := 1 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "poll_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "poll_action1" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "contended" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral false),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "round" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "round" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0)],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "grantToStationHigh" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "round" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "grantToStationLow" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "round" }]],
+                                        priority := none },
+                                      { name := { value := "poll_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "poll_action2" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "contended" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral false),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "round" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "round" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0)],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "grantToStationHigh" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "round" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "grantToStationLow" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "round" }]],
+                                        priority := none },
+                                      { name := { value := "poll_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "poll_action3" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "contended" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral false),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "round" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "round" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0)],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "grantToStationHigh" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "round" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "grantToStationLow" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "round" }]],
+                                        priority := none },
+                                      { name := { value := "collided_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "collided_action" },
+                                        parameters := [{ value := "station" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "contended" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral true),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "station" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "backoffToStationHigh1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "backoffToStationLow1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 2))
+                                                   [Relico.LF.GeneralStmt.schedule
+                                                      { value := "poll_action2" }
+                                                      []
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "collidedToArbiterFromMedium_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "collidedToArbiterFromMedium" },
+                                        parameters := [{ value := "station" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "contended" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral true),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "station" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "backoffToStationHigh1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "backoffToStationLow1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 2))
+                                                   [Relico.LF.GeneralStmt.schedule
+                                                      { value := "poll_action2" }
+                                                      []
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "freed_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "freed_action" },
+                                        parameters := [{ value := "station" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "lastHolder" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "station" }),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "station" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "backoffToStationHigh2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 2]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "backoffToStationLow2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 2]],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 2))
+                                                   [Relico.LF.GeneralStmt.schedule
+                                                      { value := "poll_action3" }
+                                                      []
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "freedToArbiterFromMedium_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "freedToArbiterFromMedium" },
+                                        parameters := [{ value := "station" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "lastHolder" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "station" }),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "station" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "backoffToStationHigh2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 2]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "backoffToStationLow2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 2]],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 2))
+                                                   [Relico.LF.GeneralStmt.schedule
+                                                      { value := "poll_action3" }
+                                                      []
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none }] }],
+  instances := [{ name := { value := "stationHigh" },
+                  reactorName := { value := "Station" },
+                  arguments := [Relico.LF.GeneralValue.int 1] },
+                { name := { value := "stationLow" },
+                  reactorName := { value := "Station" },
+                  arguments := [Relico.LF.GeneralValue.int 2] },
+                { name := { value := "medium" }, reactorName := { value := "Medium" }, arguments := [] },
+                { name := { value := "arbiter" }, reactorName := { value := "Arbiter" }, arguments := [] }],
+  connections := [{ sourceInstance := { value := "stationHigh" },
+                    sourcePort := { value := "acquireToMedium" },
+                    targetInstance := { value := "medium" },
+                    targetPort := { value := "acquireToMediumFromStationHigh" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "stationLow" },
+                    sourcePort := { value := "acquireToMedium" },
+                    targetInstance := { value := "medium" },
+                    targetPort := { value := "acquireToMediumFromStationLow" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "medium" },
+                    sourcePort := { value := "collidedToArbiter" },
+                    targetInstance := { value := "arbiter" },
+                    targetPort := { value := "collidedToArbiterFromMedium" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "medium" },
+                    sourcePort := { value := "freedToArbiter" },
+                    targetInstance := { value := "arbiter" },
+                    targetPort := { value := "freedToArbiterFromMedium" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "arbiter" },
+                    sourcePort := { value := "grantToStationHigh" },
+                    targetInstance := { value := "stationHigh" },
+                    targetPort := { value := "grantToStationHighFromArbiter" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "arbiter" },
+                    sourcePort := { value := "grantToStationLow" },
+                    targetInstance := { value := "stationLow" },
+                    targetPort := { value := "grantToStationLowFromArbiter" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "arbiter" },
+                    sourcePort := { value := "backoffToStationHigh1" },
+                    targetInstance := { value := "stationHigh" },
+                    targetPort := { value := "backoffToStationHigh1FromArbiter" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "arbiter" },
+                    sourcePort := { value := "backoffToStationLow1" },
+                    targetInstance := { value := "stationLow" },
+                    targetPort := { value := "backoffToStationLow1FromArbiter" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "arbiter" },
+                    sourcePort := { value := "backoffToStationHigh2" },
+                    targetInstance := { value := "stationHigh" },
+                    targetPort := { value := "backoffToStationHigh2FromArbiter" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "arbiter" },
+                    sourcePort := { value := "backoffToStationLow2" },
+                    targetInstance := { value := "stationLow" },
+                    targetPort := { value := "backoffToStationLow2FromArbiter" },
+                    delay := { value := 0 } }] }

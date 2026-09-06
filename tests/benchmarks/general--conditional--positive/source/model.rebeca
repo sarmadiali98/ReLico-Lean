@@ -1,0 +1,89 @@
+// Benchmark: general--conditional--positive
+// Exercises the general fragment's conditional: four if/else
+// decisions drive a thermostat's control loop, so both arms of the
+// branch are on the model's critical path rather than incidental.
+// Source: upstream corpus model Thermostat/Thermostat, unmodified.
+reactiveclass Checker(5) {
+    statevars {
+        int violation;
+    }
+
+    Checker() {
+        violation = 0;
+    }
+
+    @priority(1)
+    msgsrv heatIn(int v) {
+        if (v != 1) {
+            violation = 1;
+        }
+    }
+}
+
+reactiveclass ThermostatCore(5) {
+    knownrebecs {
+        Checker chk;
+    }
+
+    statevars {
+        int thermoState;
+    }
+
+    ThermostatCore() {
+        thermoState = 0;
+    }
+
+    @priority(1)
+    msgsrv temperature(int v) {
+        if (v <= 18) {
+            thermoState = 1;
+            chk.heatIn(1);
+        } else if (v >= 22) {
+            thermoState = 0;
+            chk.heatIn(0);
+        }
+    }
+}
+
+reactiveclass TemperatureSource(5) {
+    knownrebecs {
+        ThermostatCore t;
+    }
+
+    TemperatureSource() {
+        self.start();
+    }
+
+    @priority(1)
+    msgsrv start() {
+        t.temperature(18);
+    }
+}
+
+reactiveclass KeepAlive(2) {
+    statevars {
+        int phase;
+    }
+
+    KeepAlive() {
+        phase = 0;
+        self.tick() after(100);
+    }
+
+    @priority(1)
+    msgsrv tick() {
+        if (phase == 0) {
+            phase = 1;
+        } else {
+            phase = 0;
+        }
+        self.tick() after(100);
+    }
+}
+
+main {
+    @priority(1) TemperatureSource src(t):();
+    @priority(2) ThermostatCore t(chk):();
+    @priority(3) Checker chk():();
+    KeepAlive ka():();
+}

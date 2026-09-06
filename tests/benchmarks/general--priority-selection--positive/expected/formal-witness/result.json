@@ -1,0 +1,36 @@
+{
+  "benchmark_id": "general--priority-selection--positive",
+  "elaborated_modules": [
+    "Relico/Tests/GeneralPriority.lean"
+  ],
+  "obligation_count": 25,
+  "obligation_ids": [
+    "GeneralPriority:0001",
+    "GeneralPriority:0002",
+    "GeneralPriority:0003",
+    "GeneralPriority:0004",
+    "GeneralPriority:0005",
+    "GeneralPriority:0006",
+    "GeneralPriority:0007",
+    "GeneralPriority:0008",
+    "GeneralPriority:0009",
+    "GeneralPriority:0010",
+    "GeneralPriority:0011",
+    "GeneralPriority:0012",
+    "GeneralPriority:0013",
+    "GeneralPriority:0014",
+    "GeneralPriority:0015",
+    "GeneralPriority:0016",
+    "GeneralPriority:0017",
+    "GeneralPriority:0018",
+    "GeneralPriority:0019",
+    "GeneralPriority:0020",
+    "GeneralPriority:0021",
+    "GeneralPriority:0022",
+    "GeneralPriority:0023",
+    "GeneralPriority:0024",
+    "GeneralPriority:0025"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

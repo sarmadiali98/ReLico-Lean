@@ -1,0 +1,80 @@
+{ reactors := [{ name := { value := "Counter" },
+                 parameters := [],
+                 inputPorts := [],
+                 outputPorts := [],
+                 stateVariables := [{ name := { value := "x" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "violation" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "tick_action1" }, parameters := [] },
+                                    { name := { value := "tick_action2" }, parameters := [] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "x" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "violation" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.schedule
+                                                 { value := "tick_action1" }
+                                                 []
+                                                 { value := 1 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "tick_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "tick_action1" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "x" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "x" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "x" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0)],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.lt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "x" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "tick_action2" }
+                                                   []
+                                                   { value := 1 }],
+                                        priority := none },
+                                      { name := { value := "tick_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "tick_action2" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "x" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "x" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "x" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0)],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.lt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "x" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "tick_action2" }
+                                                   []
+                                                   { value := 1 }],
+                                        priority := none }] }],
+  instances := [{ name := { value := "ctr" }, reactorName := { value := "Counter" }, arguments := [] }],
+  connections := [] }

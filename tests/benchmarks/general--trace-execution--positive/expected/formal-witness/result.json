@@ -1,0 +1,21 @@
+{
+  "benchmark_id": "general--trace-execution--positive",
+  "elaborated_modules": [
+    "Relico/Tests/GeneralTraceTransfer.lean"
+  ],
+  "obligation_count": 10,
+  "obligation_ids": [
+    "GeneralTraceTransfer:0001",
+    "GeneralTraceTransfer:0002",
+    "GeneralTraceTransfer:0003",
+    "GeneralTraceTransfer:0004",
+    "GeneralTraceTransfer:0005",
+    "GeneralTraceTransfer:0006",
+    "GeneralTraceTransfer:0007",
+    "GeneralTraceTransfer:0008",
+    "GeneralTraceTransfer:0009",
+    "GeneralTraceTransfer:0010"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

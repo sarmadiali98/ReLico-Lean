@@ -1,0 +1,86 @@
+target Cpp
+
+reactor Checker {
+  input stateInToChkFromTl: int
+  input sigGInToChkFromTl: int
+  state lastState: int = 0
+  state violation: int = 0
+  logical action stateIn_action: int
+  logical action sigGIn_action: int
+
+  reaction(startup) {=
+    lastState = 0;
+    violation = 0;
+  =}
+
+  reaction(stateIn_action) {=
+    auto v = *stateIn_action.get();
+    lastState = v;
+  =}
+
+  reaction(stateInToChkFromTl) {=
+    auto v = *stateInToChkFromTl.get();
+    lastState = v;
+  =}
+
+  reaction(sigGIn_action) {=
+    auto light = *sigGIn_action.get();
+    if ((lastState != 1)) { violation = 1; } else {}
+  =}
+
+  reaction(sigGInToChkFromTl) {=
+    auto light = *sigGInToChkFromTl.get();
+    if ((lastState != 1)) { violation = 1; } else {}
+  =}
+}
+
+reactor TrafficLightCore {
+  output stateInToChk: int
+  output sigGInToChk: int
+  state lightState: int = 0
+  logical action start_action: void
+  logical action emitGreen_action: void
+
+  reaction(startup) -> start_action {=
+    lightState = 0;
+    start_action.schedule(0ms);
+  =}
+
+  reaction(start_action) -> stateInToChk, emitGreen_action {=
+    stateInToChk.set(lightState);
+    emitGreen_action.schedule(1ms);
+  =}
+
+  reaction(emitGreen_action) -> sigGInToChk {=
+    sigGInToChk.set(1);
+  =}
+}
+
+reactor KeepAlive {
+  state phase: int = 0
+  logical action tick_action1: void
+  logical action tick_action2: void
+
+  reaction(startup) -> tick_action1 {=
+    phase = 0;
+    tick_action1.schedule(100ms);
+  =}
+
+  reaction(tick_action1) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+
+  reaction(tick_action2) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+}
+
+main reactor {
+  tl = new TrafficLightCore()
+  chk = new Checker()
+  ka = new KeepAlive()
+  tl.stateInToChk -> chk.stateInToChkFromTl after 0 msec
+  tl.sigGInToChk -> chk.sigGInToChkFromTl after 0 msec
+}

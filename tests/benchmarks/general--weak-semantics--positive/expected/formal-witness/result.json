@@ -1,0 +1,35 @@
+{
+  "benchmark_id": "general--weak-semantics--positive",
+  "elaborated_modules": [
+    "Relico/Tests/GeneralLabelWeakBisimulation.lean",
+    "Relico/Tests/GeneralObservable.lean"
+  ],
+  "obligation_count": 23,
+  "obligation_ids": [
+    "GeneralLabelWeakBisimulation:0001",
+    "GeneralLabelWeakBisimulation:0002",
+    "GeneralLabelWeakBisimulation:0003",
+    "GeneralLabelWeakBisimulation:0004",
+    "GeneralLabelWeakBisimulation:0005",
+    "GeneralObservable:0001",
+    "GeneralObservable:0002",
+    "GeneralObservable:0003",
+    "GeneralObservable:0004",
+    "GeneralObservable:0005",
+    "GeneralObservable:0006",
+    "GeneralObservable:0007",
+    "GeneralObservable:0008",
+    "GeneralObservable:0009",
+    "GeneralObservable:0010",
+    "GeneralObservable:0011",
+    "GeneralObservable:0012",
+    "GeneralObservable:0013",
+    "GeneralObservable:0014",
+    "GeneralObservable:0015",
+    "GeneralObservable:0016",
+    "GeneralObservable:0017",
+    "GeneralObservable:0018"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

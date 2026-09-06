@@ -25,7 +25,10 @@ models containing local variable declarations — and measured that **zero** mod
 locals alone: every one of the nine also needs `sender`, arrays, `while`, `deadline` or `env`.
 Local declarations were therefore justified as a prerequisite the corpus needs in combination, not
 as a delivery, and the stage was sequenced after the work that did move coverage — stage I0's
-acceptance of conditionals, which took the fragment from 8 to 31 of 49 models.
+acceptance of conditionals, which took the fragment from 8 to 27 of 49 models. That second figure
+read 31 when this record was written, taken from the I0 census; stage K re-measured it against the
+real frontend at **27** and the correction is recorded as [F94](../STAGE_K_FINDINGS.md). The decision
+below is unaffected, since locals moved coverage by zero on either figure.
 
 The design constraint was set by the existing architecture: `DTR.GeneralActorRuntime`'s valuation
 is a flat `Store VarName DTR.GeneralValue` that already holds state variables and bound message
@@ -111,8 +114,9 @@ form, was defensible and was declined for the consistency argument alone.
 **Decision:** the milestone that accepted `if`/`else` in the frontend (`if` elaboration, nested-body
 recursion, the two well-formedness arms) landed before any local-declaration work.
 
-**Why:** I0 moved fragment coverage from 8 to 31 of 49 models while locals moved it by zero, and
-the two changes to `elaborateBody` are separable — `"if"` needs the nested-body recursion but not
+**Why:** I0 moved fragment coverage from 8 to 27 of 49 models (re-measured; see F94) while locals
+moved it by zero, and the two changes to `elaborateBody` are separable — `"if"` needs the
+nested-body recursion but not
 the scope-threading fold, so doing I0 first let locals inherit a working recursion instead of
 introducing a recursion and a fold at once. It also decoupled I0 from four of the five rulings
 above, allowing it to start while they were still open.

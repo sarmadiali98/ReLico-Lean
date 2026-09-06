@@ -1,0 +1,381 @@
+{ classes := [{ name := { value := "Controller" },
+                knownRebecs := [{ name := { value := "t" }, className := { value := "Train" } },
+                                { name := { value := "d" }, className := { value := "DoorA" } },
+                                { name := { value := "d2" }, className := { value := "DoorB" } }],
+                stateVariables := [],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "start" }
+                                            []
+                                            { value := 0 }] },
+                messageServers := [{ name := { value := "start" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "t" })
+                                                { value := "in" }
+                                                [Relico.DTR.GeneralExpr.intLiteral 1]
+                                                { value := 1 },
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "d" })
+                                                { value := "in" }
+                                                [Relico.DTR.GeneralExpr.intLiteral 2]
+                                                { value := 1 },
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "d2" })
+                                                { value := "in" }
+                                                [Relico.DTR.GeneralExpr.intLiteral 3]
+                                                { value := 1 }],
+                                     priority := some 1 }] },
+              { name := { value := "Train" },
+                knownRebecs := [{ name := { value := "s12" }, className := { value := "Sum2" } }],
+                stateVariables := [{ name := { value := "received" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "received" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0)] },
+                messageServers := [{ name := { value := "in" },
+                                     parameters := [{ name := { value := "v" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "received" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "v" }),
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "s12" })
+                                                { value := "a" }
+                                                [Relico.DTR.GeneralExpr.stateVar { value := "received" }]
+                                                { value := 0 }],
+                                     priority := some 1 }] },
+              { name := { value := "DoorA" },
+                knownRebecs := [{ name := { value := "s12" }, className := { value := "Sum2" } }],
+                stateVariables := [{ name := { value := "received" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "received" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0)] },
+                messageServers := [{ name := { value := "in" },
+                                     parameters := [{ name := { value := "v" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "received" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "v" }),
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "s12" })
+                                                { value := "b" }
+                                                [Relico.DTR.GeneralExpr.stateVar { value := "received" }]
+                                                { value := 0 }],
+                                     priority := some 1 }] },
+              { name := { value := "DoorB" },
+                knownRebecs := [{ name := { value := "s123" }, className := { value := "SumFinal" } }],
+                stateVariables := [{ name := { value := "received" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "received" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0)] },
+                messageServers := [{ name := { value := "in" },
+                                     parameters := [{ name := { value := "v" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "received" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "v" }),
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "s123" })
+                                                { value := "c" }
+                                                [Relico.DTR.GeneralExpr.stateVar { value := "received" }]
+                                                { value := 0 }],
+                                     priority := some 1 }] },
+              { name := { value := "Sum2" },
+                knownRebecs := [{ name := { value := "s123" }, className := { value := "SumFinal" } }],
+                stateVariables := [{ name := { value := "seenA" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "seenB" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "va" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "vb" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "emitted" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "seenA" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "seenB" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "va" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "vb" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "emitted" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0)] },
+                messageServers := [{ name := { value := "a" },
+                                     parameters := [{ name := { value := "v" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "seenA" }
+                                                (Relico.DTR.GeneralExpr.intLiteral 1),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "va" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "v" }),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                  (Relico.DTR.GeneralExpr.binary
+                                                    (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                    (Relico.DTR.GeneralExpr.binary
+                                                      (Relico.DTR.GeneralBinaryOp.eq)
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "seenA" })
+                                                      (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                    (Relico.DTR.GeneralExpr.binary
+                                                      (Relico.DTR.GeneralBinaryOp.eq)
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "seenB" })
+                                                      (Relico.DTR.GeneralExpr.intLiteral 1)))
+                                                  (Relico.DTR.GeneralExpr.binary
+                                                    (Relico.DTR.GeneralBinaryOp.eq)
+                                                    (Relico.DTR.GeneralExpr.stateVar { value := "emitted" })
+                                                    (Relico.DTR.GeneralExpr.intLiteral 0)))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "emitted" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "s123" })
+                                                   { value := "partial" }
+                                                   [Relico.DTR.GeneralExpr.binary
+                                                      (Relico.DTR.GeneralBinaryOp.add)
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "va" })
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "vb" })]
+                                                   { value := 0 }]
+                                                []],
+                                     priority := some 1 },
+                                   { name := { value := "b" },
+                                     parameters := [{ name := { value := "v" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "seenB" }
+                                                (Relico.DTR.GeneralExpr.intLiteral 1),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "vb" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "v" }),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                  (Relico.DTR.GeneralExpr.binary
+                                                    (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                    (Relico.DTR.GeneralExpr.binary
+                                                      (Relico.DTR.GeneralBinaryOp.eq)
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "seenA" })
+                                                      (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                    (Relico.DTR.GeneralExpr.binary
+                                                      (Relico.DTR.GeneralBinaryOp.eq)
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "seenB" })
+                                                      (Relico.DTR.GeneralExpr.intLiteral 1)))
+                                                  (Relico.DTR.GeneralExpr.binary
+                                                    (Relico.DTR.GeneralBinaryOp.eq)
+                                                    (Relico.DTR.GeneralExpr.stateVar { value := "emitted" })
+                                                    (Relico.DTR.GeneralExpr.intLiteral 0)))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "emitted" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "s123" })
+                                                   { value := "partial" }
+                                                   [Relico.DTR.GeneralExpr.binary
+                                                      (Relico.DTR.GeneralBinaryOp.add)
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "va" })
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "vb" })]
+                                                   { value := 0 }]
+                                                []],
+                                     priority := some 2 }] },
+              { name := { value := "SumFinal" },
+                knownRebecs := [{ name := { value := "chk" }, className := { value := "Checker" } }],
+                stateVariables := [{ name := { value := "seenP" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "seenC" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "vp" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "vc" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "emitted" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "seenP" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "seenC" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "vp" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "vc" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "emitted" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0)] },
+                messageServers := [{ name := { value := "partial" },
+                                     parameters := [{ name := { value := "v" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "seenP" }
+                                                (Relico.DTR.GeneralExpr.intLiteral 1),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "vp" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "v" }),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                  (Relico.DTR.GeneralExpr.binary
+                                                    (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                    (Relico.DTR.GeneralExpr.binary
+                                                      (Relico.DTR.GeneralBinaryOp.eq)
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "seenP" })
+                                                      (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                    (Relico.DTR.GeneralExpr.binary
+                                                      (Relico.DTR.GeneralBinaryOp.eq)
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "seenC" })
+                                                      (Relico.DTR.GeneralExpr.intLiteral 1)))
+                                                  (Relico.DTR.GeneralExpr.binary
+                                                    (Relico.DTR.GeneralBinaryOp.eq)
+                                                    (Relico.DTR.GeneralExpr.stateVar { value := "emitted" })
+                                                    (Relico.DTR.GeneralExpr.intLiteral 0)))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "emitted" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "chk" })
+                                                   { value := "sumIn" }
+                                                   [Relico.DTR.GeneralExpr.binary
+                                                      (Relico.DTR.GeneralBinaryOp.add)
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "vp" })
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "vc" })]
+                                                   { value := 0 }]
+                                                []],
+                                     priority := some 1 },
+                                   { name := { value := "c" },
+                                     parameters := [{ name := { value := "v" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "seenC" }
+                                                (Relico.DTR.GeneralExpr.intLiteral 1),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "vc" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "v" }),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                  (Relico.DTR.GeneralExpr.binary
+                                                    (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                    (Relico.DTR.GeneralExpr.binary
+                                                      (Relico.DTR.GeneralBinaryOp.eq)
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "seenP" })
+                                                      (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                    (Relico.DTR.GeneralExpr.binary
+                                                      (Relico.DTR.GeneralBinaryOp.eq)
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "seenC" })
+                                                      (Relico.DTR.GeneralExpr.intLiteral 1)))
+                                                  (Relico.DTR.GeneralExpr.binary
+                                                    (Relico.DTR.GeneralBinaryOp.eq)
+                                                    (Relico.DTR.GeneralExpr.stateVar { value := "emitted" })
+                                                    (Relico.DTR.GeneralExpr.intLiteral 0)))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "emitted" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "chk" })
+                                                   { value := "sumIn" }
+                                                   [Relico.DTR.GeneralExpr.binary
+                                                      (Relico.DTR.GeneralBinaryOp.add)
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "vp" })
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "vc" })]
+                                                   { value := 0 }]
+                                                []],
+                                     priority := some 2 }] },
+              { name := { value := "Checker" },
+                knownRebecs := [],
+                stateVariables := [{ name := { value := "violation" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "violation" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0)] },
+                messageServers := [{ name := { value := "sumIn" },
+                                     parameters := [{ name := { value := "v" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.ne)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "v" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 6))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "violation" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1)]
+                                                []],
+                                     priority := some 1 }] },
+              { name := { value := "KeepAlive" },
+                knownRebecs := [],
+                stateVariables := [{ name := { value := "phase" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "phase" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "tick" }
+                                            []
+                                            { value := 100 }] },
+                messageServers := [{ name := { value := "tick" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "phase" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "phase" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1)]
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "phase" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 0)],
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "tick" }
+                                                []
+                                                { value := 100 }],
+                                     priority := some 1 }] }],
+  instances := [{ name := { value := "t" },
+                  className := { value := "Train" },
+                  bindings := [({ value := "s12" }, { value := "s12" })],
+                  arguments := [],
+                  priority := some 1 },
+                { name := { value := "d" },
+                  className := { value := "DoorA" },
+                  bindings := [({ value := "s12" }, { value := "s12" })],
+                  arguments := [],
+                  priority := some 1 },
+                { name := { value := "d2" },
+                  className := { value := "DoorB" },
+                  bindings := [({ value := "s123" }, { value := "s123" })],
+                  arguments := [],
+                  priority := some 1 },
+                { name := { value := "s12" },
+                  className := { value := "Sum2" },
+                  bindings := [({ value := "s123" }, { value := "s123" })],
+                  arguments := [],
+                  priority := some 2 },
+                { name := { value := "s123" },
+                  className := { value := "SumFinal" },
+                  bindings := [({ value := "chk" }, { value := "chk" })],
+                  arguments := [],
+                  priority := some 3 },
+                { name := { value := "chk" },
+                  className := { value := "Checker" },
+                  bindings := [],
+                  arguments := [],
+                  priority := some 4 },
+                { name := { value := "c" },
+                  className := { value := "Controller" },
+                  bindings := [({ value := "t" }, { value := "t" }),
+                               ({ value := "d" }, { value := "d" }),
+                               ({ value := "d2" }, { value := "d2" })],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "ka" },
+                  className := { value := "KeepAlive" },
+                  bindings := [],
+                  arguments := [],
+                  priority := none }] }

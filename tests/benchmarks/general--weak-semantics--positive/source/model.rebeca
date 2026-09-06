@@ -1,0 +1,216 @@
+// Benchmark: general--weak-semantics--positive
+// Exercises weak semantics: eight coordinating actors produce many
+// internal steps per externally visible door transition, which is
+// what an observable projection has to quotient away.
+// Source: upstream corpus model TrainDoorFeedback/TrainDoorFeedback, unmodified.
+reactiveclass Controller(5) {
+    knownrebecs {
+        Train t;
+        DoorA d;
+        DoorB d2;
+    }
+
+    Controller() {
+        self.start();
+    }
+
+    @priority(1)
+    msgsrv start() {
+        t.in(1) after(1);
+        d.in(2) after(1);
+        d2.in(3) after(1);
+    }
+}
+
+reactiveclass Train(5) {
+    knownrebecs {
+        Sum2 s12;
+    }
+
+    statevars {
+        int received;
+    }
+
+    Train() {
+        received = 0;
+    }
+
+    @priority(1)
+    msgsrv in(int v) {
+        received = v;
+        s12.a(received);
+    }
+}
+
+reactiveclass DoorA(5) {
+    knownrebecs {
+        Sum2 s12;
+    }
+
+    statevars {
+        int received;
+    }
+
+    DoorA() {
+        received = 0;
+    }
+
+    @priority(1)
+    msgsrv in(int v) {
+        received = v;
+        s12.b(received);
+    }
+}
+
+reactiveclass DoorB(5) {
+    knownrebecs {
+        SumFinal s123;
+    }
+
+    statevars {
+        int received;
+    }
+
+    DoorB() {
+        received = 0;
+    }
+
+    @priority(1)
+    msgsrv in(int v) {
+        received = v;
+        s123.c(received);
+    }
+}
+
+reactiveclass Sum2(5) {
+    knownrebecs {
+        SumFinal s123;
+    }
+
+    statevars {
+        int seenA;
+        int seenB;
+        int va;
+        int vb;
+        int emitted;
+    }
+
+    Sum2() {
+        seenA = 0;
+        seenB = 0;
+        va = 0;
+        vb = 0;
+        emitted = 0;
+    }
+
+    @priority(1)
+    msgsrv a(int v) {
+        seenA = 1;
+        va = v;
+        if (seenA == 1 && seenB == 1 && emitted == 0) {
+            emitted = 1;
+            s123.partial(va + vb);
+        }
+    }
+
+    @priority(2)
+    msgsrv b(int v) {
+        seenB = 1;
+        vb = v;
+        if (seenA == 1 && seenB == 1 && emitted == 0) {
+            emitted = 1;
+            s123.partial(va + vb);
+        }
+    }
+}
+
+reactiveclass SumFinal(5) {
+    knownrebecs {
+        Checker chk;
+    }
+
+    statevars {
+        int seenP;
+        int seenC;
+        int vp;
+        int vc;
+        int emitted;
+    }
+
+    SumFinal() {
+        seenP = 0;
+        seenC = 0;
+        vp = 0;
+        vc = 0;
+        emitted = 0;
+    }
+
+    @priority(1)
+    msgsrv partial(int v) {
+        seenP = 1;
+        vp = v;
+        if (seenP == 1 && seenC == 1 && emitted == 0) {
+            emitted = 1;
+            chk.sumIn(vp + vc);
+        }
+    }
+
+    @priority(2)
+    msgsrv c(int v) {
+        seenC = 1;
+        vc = v;
+        if (seenP == 1 && seenC == 1 && emitted == 0) {
+            emitted = 1;
+            chk.sumIn(vp + vc);
+        }
+    }
+}
+
+reactiveclass Checker(5) {
+    statevars {
+        int violation;
+    }
+
+    Checker() {
+        violation = 0;
+    }
+
+    @priority(1)
+    msgsrv sumIn(int v) {
+        if (v != 6) {
+            violation = 1;
+        }
+    }
+}
+
+reactiveclass KeepAlive(2) {
+    statevars {
+        int phase;
+    }
+
+    KeepAlive() {
+        phase = 0;
+        self.tick() after(100);
+    }
+
+    @priority(1)
+    msgsrv tick() {
+        if (phase == 0) {
+            phase = 1;
+        } else {
+            phase = 0;
+        }
+        self.tick() after(100);
+    }
+}
+
+main {
+    @priority(1) Train t(s12):();
+    @priority(1) DoorA d(s12):();
+    @priority(1) DoorB d2(s123):();
+    @priority(2) Sum2 s12(s123):();
+    @priority(3) SumFinal s123(chk):();
+    @priority(4) Checker chk():();
+    Controller c(t, d, d2):();
+    KeepAlive ka():();
+}

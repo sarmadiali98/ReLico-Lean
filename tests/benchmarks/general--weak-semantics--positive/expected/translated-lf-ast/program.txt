@@ -1,0 +1,733 @@
+{ reactors := [{ name := { value := "Controller" },
+                 parameters := [],
+                 inputPorts := [],
+                 outputPorts := [{ name := { value := "inToT" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "inToD" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "inToD2" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [],
+                 logicalActions := [{ name := { value := "start_action" }, parameters := [] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.schedule
+                                                 { value := "start_action" }
+                                                 []
+                                                 { value := 0 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "start_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "start_action" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "inToT" }
+                                                   [Relico.LF.GeneralExpr.intLiteral 1],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "inToD" }
+                                                   [Relico.LF.GeneralExpr.intLiteral 2],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "inToD2" }
+                                                   [Relico.LF.GeneralExpr.intLiteral 3]],
+                                        priority := none }] },
+               { name := { value := "Train" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "inToTFromC" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "aToS12" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "received" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "in_action" },
+                                      parameters := [{ name := { value := "v" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "received" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "in_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "in_action" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "received" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" }),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "aToS12" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "received" }]],
+                                        priority := none },
+                                      { name := { value := "inToTFromC_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "inToTFromC" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "received" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" }),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "aToS12" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "received" }]],
+                                        priority := none }] },
+               { name := { value := "DoorA" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "inToDFromC" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "bToS12" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "received" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "in_action" },
+                                      parameters := [{ name := { value := "v" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "received" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "in_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "in_action" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "received" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" }),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "bToS12" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "received" }]],
+                                        priority := none },
+                                      { name := { value := "inToDFromC_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "inToDFromC" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "received" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" }),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "bToS12" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "received" }]],
+                                        priority := none }] },
+               { name := { value := "DoorB" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "inToD2FromC" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "cToS123" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "received" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "in_action" },
+                                      parameters := [{ name := { value := "v" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "received" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "in_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "in_action" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "received" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" }),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "cToS123" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "received" }]],
+                                        priority := none },
+                                      { name := { value := "inToD2FromC_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "inToD2FromC" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "received" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" }),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "cToS123" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "received" }]],
+                                        priority := none }] },
+               { name := { value := "Sum2" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "aToS12FromT" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "bToS12FromD" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "partialToS1231" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "partialToS1232" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "seenA" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "seenB" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "va" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "vb" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "emitted" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "a_action" },
+                                      parameters := [{ name := { value := "v" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "b_action" },
+                                      parameters := [{ name := { value := "v" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "seenA" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "seenB" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "va" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "vb" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "emitted" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "a_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "a_action" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seenA" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 1),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "va" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.eq)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "seenA" })
+                                                         (Relico.LF.GeneralExpr.intLiteral 1))
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.eq)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "seenB" })
+                                                         (Relico.LF.GeneralExpr.intLiteral 1)))
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.eq)
+                                                       (Relico.LF.GeneralExpr.stateVar { value := "emitted" })
+                                                       (Relico.LF.GeneralExpr.intLiteral 0)))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "emitted" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "partialToS1231" }
+                                                      [Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.add)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "va" })
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "vb" })]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "aToS12FromT_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "aToS12FromT" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seenA" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 1),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "va" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.eq)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "seenA" })
+                                                         (Relico.LF.GeneralExpr.intLiteral 1))
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.eq)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "seenB" })
+                                                         (Relico.LF.GeneralExpr.intLiteral 1)))
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.eq)
+                                                       (Relico.LF.GeneralExpr.stateVar { value := "emitted" })
+                                                       (Relico.LF.GeneralExpr.intLiteral 0)))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "emitted" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "partialToS1231" }
+                                                      [Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.add)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "va" })
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "vb" })]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "b_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "b_action" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seenB" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 1),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "vb" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.eq)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "seenA" })
+                                                         (Relico.LF.GeneralExpr.intLiteral 1))
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.eq)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "seenB" })
+                                                         (Relico.LF.GeneralExpr.intLiteral 1)))
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.eq)
+                                                       (Relico.LF.GeneralExpr.stateVar { value := "emitted" })
+                                                       (Relico.LF.GeneralExpr.intLiteral 0)))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "emitted" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "partialToS1232" }
+                                                      [Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.add)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "va" })
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "vb" })]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "bToS12FromD_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "bToS12FromD" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seenB" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 1),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "vb" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.eq)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "seenA" })
+                                                         (Relico.LF.GeneralExpr.intLiteral 1))
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.eq)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "seenB" })
+                                                         (Relico.LF.GeneralExpr.intLiteral 1)))
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.eq)
+                                                       (Relico.LF.GeneralExpr.stateVar { value := "emitted" })
+                                                       (Relico.LF.GeneralExpr.intLiteral 0)))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "emitted" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "partialToS1232" }
+                                                      [Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.add)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "va" })
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "vb" })]]
+                                                   []],
+                                        priority := none }] },
+               { name := { value := "SumFinal" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "cToS123FromD2" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "partialToS1231FromS12" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "partialToS1232FromS12" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "sumInToChk1" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "sumInToChk2" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "seenP" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "seenC" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "vp" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "vc" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "emitted" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "partial_action" },
+                                      parameters := [{ name := { value := "v" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "c_action" },
+                                      parameters := [{ name := { value := "v" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "seenP" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "seenC" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "vp" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "vc" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "emitted" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "partial_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "partial_action" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seenP" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 1),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "vp" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.eq)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "seenP" })
+                                                         (Relico.LF.GeneralExpr.intLiteral 1))
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.eq)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "seenC" })
+                                                         (Relico.LF.GeneralExpr.intLiteral 1)))
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.eq)
+                                                       (Relico.LF.GeneralExpr.stateVar { value := "emitted" })
+                                                       (Relico.LF.GeneralExpr.intLiteral 0)))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "emitted" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "sumInToChk1" }
+                                                      [Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.add)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "vp" })
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "vc" })]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "partialToS1231FromS12_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "partialToS1231FromS12" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seenP" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 1),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "vp" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.eq)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "seenP" })
+                                                         (Relico.LF.GeneralExpr.intLiteral 1))
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.eq)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "seenC" })
+                                                         (Relico.LF.GeneralExpr.intLiteral 1)))
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.eq)
+                                                       (Relico.LF.GeneralExpr.stateVar { value := "emitted" })
+                                                       (Relico.LF.GeneralExpr.intLiteral 0)))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "emitted" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "sumInToChk1" }
+                                                      [Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.add)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "vp" })
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "vc" })]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "partialToS1232FromS12_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "partialToS1232FromS12" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seenP" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 1),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "vp" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.eq)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "seenP" })
+                                                         (Relico.LF.GeneralExpr.intLiteral 1))
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.eq)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "seenC" })
+                                                         (Relico.LF.GeneralExpr.intLiteral 1)))
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.eq)
+                                                       (Relico.LF.GeneralExpr.stateVar { value := "emitted" })
+                                                       (Relico.LF.GeneralExpr.intLiteral 0)))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "emitted" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "sumInToChk1" }
+                                                      [Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.add)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "vp" })
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "vc" })]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "c_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "c_action" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seenC" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 1),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "vc" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.eq)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "seenP" })
+                                                         (Relico.LF.GeneralExpr.intLiteral 1))
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.eq)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "seenC" })
+                                                         (Relico.LF.GeneralExpr.intLiteral 1)))
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.eq)
+                                                       (Relico.LF.GeneralExpr.stateVar { value := "emitted" })
+                                                       (Relico.LF.GeneralExpr.intLiteral 0)))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "emitted" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "sumInToChk2" }
+                                                      [Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.add)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "vp" })
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "vc" })]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "cToS123FromD2_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "cToS123FromD2" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seenC" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 1),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "vc" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" }),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.eq)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "seenP" })
+                                                         (Relico.LF.GeneralExpr.intLiteral 1))
+                                                       (Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.eq)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "seenC" })
+                                                         (Relico.LF.GeneralExpr.intLiteral 1)))
+                                                     (Relico.LF.GeneralExpr.binary
+                                                       (Relico.LF.GeneralBinaryOp.eq)
+                                                       (Relico.LF.GeneralExpr.stateVar { value := "emitted" })
+                                                       (Relico.LF.GeneralExpr.intLiteral 0)))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "emitted" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "sumInToChk2" }
+                                                      [Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.add)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "vp" })
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "vc" })]]
+                                                   []],
+                                        priority := none }] },
+               { name := { value := "Checker" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "sumInToChk1FromS123" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "sumInToChk2FromS123" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [],
+                 stateVariables := [{ name := { value := "violation" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "sumIn_action" },
+                                      parameters := [{ name := { value := "v" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "violation" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "sumIn_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "sumIn_action" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.ne)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "v" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 6))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "sumInToChk1FromS123_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "sumInToChk1FromS123" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.ne)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "v" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 6))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "sumInToChk2FromS123_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "sumInToChk2FromS123" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.ne)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "v" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 6))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   []],
+                                        priority := none }] },
+               { name := { value := "KeepAlive" },
+                 parameters := [],
+                 inputPorts := [],
+                 outputPorts := [],
+                 stateVariables := [{ name := { value := "phase" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "tick_action1" }, parameters := [] },
+                                    { name := { value := "tick_action2" }, parameters := [] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "phase" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.schedule
+                                                 { value := "tick_action1" }
+                                                 []
+                                                 { value := 100 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "tick_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "tick_action1" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "phase" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "phase" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "phase" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0)],
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "tick_action2" }
+                                                   []
+                                                   { value := 100 }],
+                                        priority := none },
+                                      { name := { value := "tick_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "tick_action2" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "phase" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "phase" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "phase" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0)],
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "tick_action2" }
+                                                   []
+                                                   { value := 100 }],
+                                        priority := none }] }],
+  instances := [{ name := { value := "t" }, reactorName := { value := "Train" }, arguments := [] },
+                { name := { value := "d" }, reactorName := { value := "DoorA" }, arguments := [] },
+                { name := { value := "d2" }, reactorName := { value := "DoorB" }, arguments := [] },
+                { name := { value := "s12" }, reactorName := { value := "Sum2" }, arguments := [] },
+                { name := { value := "s123" }, reactorName := { value := "SumFinal" }, arguments := [] },
+                { name := { value := "chk" }, reactorName := { value := "Checker" }, arguments := [] },
+                { name := { value := "c" }, reactorName := { value := "Controller" }, arguments := [] },
+                { name := { value := "ka" }, reactorName := { value := "KeepAlive" }, arguments := [] }],
+  connections := [{ sourceInstance := { value := "t" },
+                    sourcePort := { value := "aToS12" },
+                    targetInstance := { value := "s12" },
+                    targetPort := { value := "aToS12FromT" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "d" },
+                    sourcePort := { value := "bToS12" },
+                    targetInstance := { value := "s12" },
+                    targetPort := { value := "bToS12FromD" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "d2" },
+                    sourcePort := { value := "cToS123" },
+                    targetInstance := { value := "s123" },
+                    targetPort := { value := "cToS123FromD2" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "s12" },
+                    sourcePort := { value := "partialToS1231" },
+                    targetInstance := { value := "s123" },
+                    targetPort := { value := "partialToS1231FromS12" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "s12" },
+                    sourcePort := { value := "partialToS1232" },
+                    targetInstance := { value := "s123" },
+                    targetPort := { value := "partialToS1232FromS12" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "s123" },
+                    sourcePort := { value := "sumInToChk1" },
+                    targetInstance := { value := "chk" },
+                    targetPort := { value := "sumInToChk1FromS123" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "s123" },
+                    sourcePort := { value := "sumInToChk2" },
+                    targetInstance := { value := "chk" },
+                    targetPort := { value := "sumInToChk2FromS123" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "c" },
+                    sourcePort := { value := "inToT" },
+                    targetInstance := { value := "t" },
+                    targetPort := { value := "inToTFromC" },
+                    delay := { value := 1 } },
+                  { sourceInstance := { value := "c" },
+                    sourcePort := { value := "inToD" },
+                    targetInstance := { value := "d" },
+                    targetPort := { value := "inToDFromC" },
+                    delay := { value := 1 } },
+                  { sourceInstance := { value := "c" },
+                    sourcePort := { value := "inToD2" },
+                    targetInstance := { value := "d2" },
+                    targetPort := { value := "inToD2FromC" },
+                    delay := { value := 1 } }] }

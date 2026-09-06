@@ -1,0 +1,378 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 13,
+            "target": "lastState",
+            "value": {
+              "kind": "intLiteral",
+              "line": 13,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 14,
+            "target": "violation",
+            "value": {
+              "kind": "intLiteral",
+              "line": 14,
+              "value": 0
+            }
+          }
+        ],
+        "line": 12,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 6,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 19,
+              "target": "lastState",
+              "value": {
+                "kind": "variable",
+                "line": 19,
+                "name": "v"
+              }
+            }
+          ],
+          "line": 18,
+          "name": "stateIn",
+          "parameters": [
+            {
+              "line": 18,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 24,
+                  "name": "lastState"
+                },
+                "line": 24,
+                "operator": "!=",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 24,
+                  "value": 1
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 24,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 25,
+                  "target": "violation",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 25,
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          ],
+          "line": 23,
+          "name": "sigGIn",
+          "parameters": [
+            {
+              "line": 23,
+              "name": "light",
+              "type": "int"
+            }
+          ],
+          "priority": 2
+        }
+      ],
+      "name": "Checker",
+      "queueBound": 5,
+      "stateVariables": [
+        {
+          "line": 8,
+          "name": "lastState",
+          "type": "int"
+        },
+        {
+          "line": 9,
+          "name": "violation",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 40,
+            "target": "lightState",
+            "value": {
+              "kind": "intLiteral",
+              "line": 40,
+              "value": 0
+            }
+          },
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 41,
+            "messageServer": "start",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "TrafficLightCore"
+          }
+        ],
+        "line": 39,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Checker",
+          "line": 32,
+          "name": "chk"
+        }
+      ],
+      "line": 30,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 46,
+                  "name": "lightState"
+                }
+              ],
+              "kind": "send",
+              "line": 46,
+              "messageServer": "stateIn",
+              "target": {
+                "kind": "knownRebec",
+                "name": "chk"
+              },
+              "targetClassName": "Checker"
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 47,
+              "messageServer": "emitGreen",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "TrafficLightCore"
+            }
+          ],
+          "line": 45,
+          "name": "start",
+          "parameters": [],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "intLiteral",
+                  "line": 53,
+                  "value": 1
+                }
+              ],
+              "kind": "send",
+              "line": 53,
+              "messageServer": "sigGIn",
+              "target": {
+                "kind": "knownRebec",
+                "name": "chk"
+              },
+              "targetClassName": "Checker"
+            }
+          ],
+          "line": 51,
+          "name": "emitGreen",
+          "parameters": [],
+          "priority": 2
+        }
+      ],
+      "name": "TrafficLightCore",
+      "queueBound": 5,
+      "stateVariables": [
+        {
+          "line": 36,
+          "name": "lightState",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 63,
+            "target": "phase",
+            "value": {
+              "kind": "intLiteral",
+              "line": 63,
+              "value": 0
+            }
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 100
+            },
+            "arguments": [],
+            "kind": "send",
+            "line": 64,
+            "messageServer": "tick",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "KeepAlive"
+          }
+        ],
+        "line": 62,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 57,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 69,
+                  "name": "phase"
+                },
+                "line": 69,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 69,
+                  "value": 0
+                }
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 72,
+                  "target": "phase",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 72,
+                    "value": 0
+                  }
+                }
+              ],
+              "kind": "if",
+              "line": 69,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 70,
+                  "target": "phase",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 70,
+                    "value": 1
+                  }
+                }
+              ]
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 100
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 74,
+              "messageServer": "tick",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "KeepAlive"
+            }
+          ],
+          "line": 68,
+          "name": "tick",
+          "parameters": [],
+          "priority": 1
+        }
+      ],
+      "name": "KeepAlive",
+      "queueBound": 2,
+      "stateVariables": [
+        {
+          "line": 59,
+          "name": "phase",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Checker",
+          "instance": "chk",
+          "knownRebec": "chk"
+        }
+      ],
+      "className": "TrafficLightCore",
+      "line": 79,
+      "name": "tl",
+      "priority": 1
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Checker",
+      "line": 80,
+      "name": "chk",
+      "priority": 2
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "KeepAlive",
+      "line": 81,
+      "name": "ka",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

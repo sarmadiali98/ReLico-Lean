@@ -1,0 +1,99 @@
+// Benchmark: general--runtime-semantics--positive
+// Exercises runtime semantics: a token circulates a ring of actors,
+// each forwarding after a delay, so the model's content is what the
+// runtime does over time rather than what it computes.
+// Source: upstream corpus model Ring/Ring, unmodified.
+reactiveclass Source(5) {
+    knownrebecs {
+        Node1 n1;
+        Checker chk;
+    }
+
+    Source() {
+        self.start();
+    }
+
+    @priority(1)
+    msgsrv start() {
+        n1.in(0) after(10);
+    }
+
+    @priority(2)
+    msgsrv in(int v) {
+        chk.returned(v);
+    }
+}
+
+reactiveclass Node1(5) {
+    knownrebecs {
+        Node2 n2;
+    }
+
+    Node1() {
+    }
+
+    @priority(1)
+    msgsrv in(int v) {
+        n2.in(1) after(10);
+    }
+}
+
+reactiveclass Node2(5) {
+    knownrebecs {
+        Source s;
+    }
+
+    Node2() {
+    }
+
+    @priority(1)
+    msgsrv in(int v) {
+        s.in(2) after(10);
+    }
+}
+
+reactiveclass Checker(5) {
+    statevars {
+        int violation;
+    }
+
+    Checker() {
+        violation = 0;
+    }
+
+    @priority(1)
+    msgsrv returned(int v) {
+        if (v != 2) {
+            violation = 1;
+        }
+    }
+}
+
+reactiveclass KeepAlive(2) {
+    statevars {
+        int phase;
+    }
+
+    KeepAlive() {
+        phase = 0;
+        self.tick() after(100);
+    }
+
+    @priority(1)
+    msgsrv tick() {
+        if (phase == 0) {
+            phase = 1;
+        } else {
+            phase = 0;
+        }
+        self.tick() after(100);
+    }
+}
+
+main {
+    @priority(1) Source s(n1, chk):();
+    Node1 n1(n2):();
+    Node2 n2(s):();
+    @priority(2) Checker chk():();
+    KeepAlive ka():();
+}

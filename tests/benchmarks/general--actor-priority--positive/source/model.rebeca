@@ -1,0 +1,138 @@
+// Benchmark: general--actor-priority--positive
+// A DTR-fragment benchmark inspired by the upstream tcsma model. It is not a
+// translation of tcsma and does not reproduce its protocol; it preserves that
+// benchmark's research objective -- contention for a shared medium, resolved by
+// arbitration -- in the smallest model that exercises it.
+//
+// Two stations are granted the medium in the same round, so they contend for it.
+// Instance-level @priority decides which actor the scheduler selects first, so
+// the high-priority station reaches the medium while it is still free and the
+// low-priority station finds it busy and backs off. The medium reports the
+// winner when it clears, and lastHolder therefore records which actor priority
+// selected -- the observable this benchmark exists to exercise.
+//
+// Two shapes here are forced by measurement rather than chosen. The next round
+// is clocked by both stations resolving, counted in `resolved`, not by a timer:
+// a timer-driven arbiter grants faster than the medium drains under some
+// interleaving and leaves the loser's `acquire` queued, which RMC finds as a
+// queue overflow. And every externally sent message server carries a parameter,
+// because the translator refuses a parameterless external target: its LF port
+// would have no value type, and whether the target accepts that is unmeasured.
+reactiveclass Medium(4) {
+    knownrebecs {
+        Arbiter arbiter;
+    }
+    statevars {
+        boolean busy;
+        int carried;
+    }
+    Medium() {
+        busy = false;
+        carried = 0;
+    }
+    msgsrv acquire(int station) {
+        if (busy == true) {
+            arbiter.collided(station);
+        } else {
+            busy = true;
+            carried = station;
+            self.release() after(1);
+        }
+    }
+    msgsrv release() {
+        busy = false;
+        arbiter.freed(carried);
+        carried = 0;
+    }
+}
+
+reactiveclass Station(4) {
+    knownrebecs {
+        Medium medium;
+    }
+    statevars {
+        int id;
+        int slot;
+        boolean holding;
+    }
+    Station(int myId) {
+        id = myId;
+        slot = 0;
+        holding = false;
+    }
+    msgsrv grant(int round) {
+        slot = round;
+        holding = true;
+        medium.acquire(id);
+    }
+    msgsrv backoff(int cause) {
+        holding = false;
+        if (cause == 1) {
+            slot = 0;
+        } else {
+            slot = 1;
+        }
+    }
+}
+
+reactiveclass Arbiter(4) {
+    knownrebecs {
+        Station stationHigh;
+        Station stationLow;
+    }
+    statevars {
+        boolean contended;
+        int lastHolder;
+        int resolved;
+        int round;
+    }
+    Arbiter() {
+        contended = false;
+        lastHolder = 0;
+        resolved = 0;
+        round = 0;
+        self.poll() after(1);
+    }
+    msgsrv poll() {
+        contended = false;
+        resolved = 0;
+        if (round == 0) {
+            round = 1;
+        } else {
+            round = 0;
+        }
+        stationHigh.grant(round);
+        stationLow.grant(round);
+    }
+    msgsrv collided(int station) {
+        contended = true;
+        resolved = resolved + 1;
+        if (station == 1) {
+            stationHigh.backoff(1);
+        } else {
+            stationLow.backoff(1);
+        }
+        if (resolved == 2) {
+            self.poll() after(1);
+        }
+    }
+    msgsrv freed(int station) {
+        lastHolder = station;
+        resolved = resolved + 1;
+        if (station == 1) {
+            stationHigh.backoff(2);
+        } else {
+            stationLow.backoff(2);
+        }
+        if (resolved == 2) {
+            self.poll() after(1);
+        }
+    }
+}
+
+main {
+    @priority(1) Station stationHigh(medium):(1);
+    @priority(2) Station stationLow(medium):(2);
+    Medium medium(arbiter):();
+    Arbiter arbiter(stationHigh, stationLow):();
+}

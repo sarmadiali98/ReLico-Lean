@@ -243,6 +243,8 @@ def validate_corpus_candidates(
             "status_basis",
             "construct_profile",
             "blocking_constructs",
+            "refusal_reason",
+            "rmc_verdict",
             "candidate_capabilities",
             "candidate_polarity",
         },
@@ -270,7 +272,29 @@ def validate_corpus_candidates(
         "refused-upstream",
     }
 
-    screen_verdicts = {"screen-clear", "screen-blocked"}
+    # The upstream population no longer carries a static screen. Every one of
+    # those rows has been through the real exporter and, where the exporter
+    # accepted it, the Lean decoder, so its column is a verdict and its values
+    # name the layer that refused.
+    frontend_verdicts = {
+        "inside-fragment",
+        "exporter-refused",
+        "lean-refused",
+    }
+
+    accepting_verdicts = {"accepted", "inside-fragment"}
+
+    # RMC is the second mandatory gate and is independent of the first: the
+    # general fixtures were authored for the frontend and most of them fail the
+    # model checker. 'not-measured' is honest rather than absent, and applies to
+    # the negative fixtures, which never become a benchmark source.
+    rmc_verdicts = {
+        "satisfied",
+        "deadlock",
+        "queue-overflow",
+        "no-report",
+        "not-measured",
+    }
 
     fixture_count = 0
     upstream_count = 0
@@ -281,6 +305,12 @@ def validate_corpus_candidates(
         if row["candidate_polarity"] not in {"positive", "negative"}:
             raise RegistryError(
                 f"{model_id}: invalid candidate polarity"
+            )
+
+        if row["rmc_verdict"] not in rmc_verdicts:
+            raise RegistryError(
+                f"{model_id}: unknown RMC verdict "
+                f"{row['rmc_verdict']!r}"
             )
 
         for capability in row["candidate_capabilities"].split(";"):
@@ -304,27 +334,35 @@ def validate_corpus_candidates(
                     f"{model_id}: fixture path is absent: {row['path']}"
                 )
 
-        elif row["status_basis"] == "static-screen":
+        elif row["status_basis"] == "frontend-verdict":
             upstream_count += 1
 
-            if row["fragment_status"] not in screen_verdicts:
+            if row["fragment_status"] not in frontend_verdicts:
                 raise RegistryError(
-                    f"{model_id}: screen result "
-                    f"{row['fragment_status']!r} is not a screen outcome"
-                )
-
-            blocked = row["blocking_constructs"] != "none"
-
-            if blocked != (row["fragment_status"] == "screen-blocked"):
-                raise RegistryError(
-                    f"{model_id}: screen result disagrees with its own "
-                    "blocking constructs"
+                    f"{model_id}: frontend verdict "
+                    f"{row['fragment_status']!r} is not a frontend outcome"
                 )
 
         else:
             raise RegistryError(
                 f"{model_id}: unknown status basis "
                 f"{row['status_basis']!r}"
+            )
+
+        # One rule across both populations: a refused candidate owes a reason
+        # and an accepted one must not invent it.
+        accepted = row["fragment_status"] in accepting_verdicts
+
+        if accepted != (row["refusal_reason"] == "none"):
+            raise RegistryError(
+                f"{model_id}: refusal reason disagrees with the verdict "
+                f"{row['fragment_status']!r}"
+            )
+
+        if accepted != (row["candidate_polarity"] == "positive"):
+            raise RegistryError(
+                f"{model_id}: candidate polarity disagrees with the verdict "
+                f"{row['fragment_status']!r}"
             )
 
     return [

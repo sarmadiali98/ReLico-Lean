@@ -1,0 +1,263 @@
+target Cpp
+
+reactor Controller {
+  output inToT: int
+  output inToD: int
+  output inToD2: int
+  logical action start_action: void
+
+  reaction(startup) -> start_action {=
+    start_action.schedule(0ms);
+  =}
+
+  reaction(start_action) -> inToT, inToD, inToD2 {=
+    inToT.set(1);
+    inToD.set(2);
+    inToD2.set(3);
+  =}
+}
+
+reactor Train {
+  input inToTFromC: int
+  output aToS12: int
+  state received: int = 0
+  logical action in_action: int
+
+  reaction(startup) {=
+    received = 0;
+  =}
+
+  reaction(in_action) -> aToS12 {=
+    auto v = *in_action.get();
+    received = v;
+    aToS12.set(received);
+  =}
+
+  reaction(inToTFromC) -> aToS12 {=
+    auto v = *inToTFromC.get();
+    received = v;
+    aToS12.set(received);
+  =}
+}
+
+reactor DoorA {
+  input inToDFromC: int
+  output bToS12: int
+  state received: int = 0
+  logical action in_action: int
+
+  reaction(startup) {=
+    received = 0;
+  =}
+
+  reaction(in_action) -> bToS12 {=
+    auto v = *in_action.get();
+    received = v;
+    bToS12.set(received);
+  =}
+
+  reaction(inToDFromC) -> bToS12 {=
+    auto v = *inToDFromC.get();
+    received = v;
+    bToS12.set(received);
+  =}
+}
+
+reactor DoorB {
+  input inToD2FromC: int
+  output cToS123: int
+  state received: int = 0
+  logical action in_action: int
+
+  reaction(startup) {=
+    received = 0;
+  =}
+
+  reaction(in_action) -> cToS123 {=
+    auto v = *in_action.get();
+    received = v;
+    cToS123.set(received);
+  =}
+
+  reaction(inToD2FromC) -> cToS123 {=
+    auto v = *inToD2FromC.get();
+    received = v;
+    cToS123.set(received);
+  =}
+}
+
+reactor Sum2 {
+  input aToS12FromT: int
+  input bToS12FromD: int
+  output partialToS1231: int
+  output partialToS1232: int
+  state seenA: int = 0
+  state seenB: int = 0
+  state va: int = 0
+  state vb: int = 0
+  state emitted: int = 0
+  logical action a_action: int
+  logical action b_action: int
+
+  reaction(startup) {=
+    seenA = 0;
+    seenB = 0;
+    va = 0;
+    vb = 0;
+    emitted = 0;
+  =}
+
+  reaction(a_action) -> partialToS1231 {=
+    auto v = *a_action.get();
+    seenA = 1;
+    va = v;
+    if ((((seenA == 1) && (seenB == 1)) && (emitted == 0))) { emitted = 1; partialToS1231.set((va + vb)); } else {}
+  =}
+
+  reaction(aToS12FromT) -> partialToS1231 {=
+    auto v = *aToS12FromT.get();
+    seenA = 1;
+    va = v;
+    if ((((seenA == 1) && (seenB == 1)) && (emitted == 0))) { emitted = 1; partialToS1231.set((va + vb)); } else {}
+  =}
+
+  reaction(b_action) -> partialToS1232 {=
+    auto v = *b_action.get();
+    seenB = 1;
+    vb = v;
+    if ((((seenA == 1) && (seenB == 1)) && (emitted == 0))) { emitted = 1; partialToS1232.set((va + vb)); } else {}
+  =}
+
+  reaction(bToS12FromD) -> partialToS1232 {=
+    auto v = *bToS12FromD.get();
+    seenB = 1;
+    vb = v;
+    if ((((seenA == 1) && (seenB == 1)) && (emitted == 0))) { emitted = 1; partialToS1232.set((va + vb)); } else {}
+  =}
+}
+
+reactor SumFinal {
+  input cToS123FromD2: int
+  input partialToS1231FromS12: int
+  input partialToS1232FromS12: int
+  output sumInToChk1: int
+  output sumInToChk2: int
+  state seenP: int = 0
+  state seenC: int = 0
+  state vp: int = 0
+  state vc: int = 0
+  state emitted: int = 0
+  logical action partial_action: int
+  logical action c_action: int
+
+  reaction(startup) {=
+    seenP = 0;
+    seenC = 0;
+    vp = 0;
+    vc = 0;
+    emitted = 0;
+  =}
+
+  reaction(partial_action) -> sumInToChk1 {=
+    auto v = *partial_action.get();
+    seenP = 1;
+    vp = v;
+    if ((((seenP == 1) && (seenC == 1)) && (emitted == 0))) { emitted = 1; sumInToChk1.set((vp + vc)); } else {}
+  =}
+
+  reaction(partialToS1231FromS12) -> sumInToChk1 {=
+    auto v = *partialToS1231FromS12.get();
+    seenP = 1;
+    vp = v;
+    if ((((seenP == 1) && (seenC == 1)) && (emitted == 0))) { emitted = 1; sumInToChk1.set((vp + vc)); } else {}
+  =}
+
+  reaction(partialToS1232FromS12) -> sumInToChk1 {=
+    auto v = *partialToS1232FromS12.get();
+    seenP = 1;
+    vp = v;
+    if ((((seenP == 1) && (seenC == 1)) && (emitted == 0))) { emitted = 1; sumInToChk1.set((vp + vc)); } else {}
+  =}
+
+  reaction(c_action) -> sumInToChk2 {=
+    auto v = *c_action.get();
+    seenC = 1;
+    vc = v;
+    if ((((seenP == 1) && (seenC == 1)) && (emitted == 0))) { emitted = 1; sumInToChk2.set((vp + vc)); } else {}
+  =}
+
+  reaction(cToS123FromD2) -> sumInToChk2 {=
+    auto v = *cToS123FromD2.get();
+    seenC = 1;
+    vc = v;
+    if ((((seenP == 1) && (seenC == 1)) && (emitted == 0))) { emitted = 1; sumInToChk2.set((vp + vc)); } else {}
+  =}
+}
+
+reactor Checker {
+  input sumInToChk1FromS123: int
+  input sumInToChk2FromS123: int
+  state violation: int = 0
+  logical action sumIn_action: int
+
+  reaction(startup) {=
+    violation = 0;
+  =}
+
+  reaction(sumIn_action) {=
+    auto v = *sumIn_action.get();
+    if ((v != 6)) { violation = 1; } else {}
+  =}
+
+  reaction(sumInToChk1FromS123) {=
+    auto v = *sumInToChk1FromS123.get();
+    if ((v != 6)) { violation = 1; } else {}
+  =}
+
+  reaction(sumInToChk2FromS123) {=
+    auto v = *sumInToChk2FromS123.get();
+    if ((v != 6)) { violation = 1; } else {}
+  =}
+}
+
+reactor KeepAlive {
+  state phase: int = 0
+  logical action tick_action1: void
+  logical action tick_action2: void
+
+  reaction(startup) -> tick_action1 {=
+    phase = 0;
+    tick_action1.schedule(100ms);
+  =}
+
+  reaction(tick_action1) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+
+  reaction(tick_action2) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+}
+
+main reactor {
+  t = new Train()
+  d = new DoorA()
+  d2 = new DoorB()
+  s12 = new Sum2()
+  s123 = new SumFinal()
+  chk = new Checker()
+  c = new Controller()
+  ka = new KeepAlive()
+  t.aToS12 -> s12.aToS12FromT after 0 msec
+  d.bToS12 -> s12.bToS12FromD after 0 msec
+  d2.cToS123 -> s123.cToS123FromD2 after 0 msec
+  s12.partialToS1231 -> s123.partialToS1231FromS12 after 0 msec
+  s12.partialToS1232 -> s123.partialToS1232FromS12 after 0 msec
+  s123.sumInToChk1 -> chk.sumInToChk1FromS123 after 0 msec
+  s123.sumInToChk2 -> chk.sumInToChk2FromS123 after 0 msec
+  c.inToT -> t.inToTFromC after 1 msec
+  c.inToD -> d.inToDFromC after 1 msec
+  c.inToD2 -> d2.inToD2FromC after 1 msec
+}

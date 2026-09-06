@@ -1,0 +1,1385 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 14,
+            "messageServer": "start",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Controller"
+          }
+        ],
+        "line": 13,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Train",
+          "line": 8,
+          "name": "t"
+        },
+        {
+          "className": "DoorA",
+          "line": 9,
+          "name": "d"
+        },
+        {
+          "className": "DoorB",
+          "line": 10,
+          "name": "d2"
+        }
+      ],
+      "line": 6,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1
+              },
+              "arguments": [
+                {
+                  "kind": "intLiteral",
+                  "line": 19,
+                  "value": 1
+                }
+              ],
+              "kind": "send",
+              "line": 19,
+              "messageServer": "in",
+              "target": {
+                "kind": "knownRebec",
+                "name": "t"
+              },
+              "targetClassName": "Train"
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1
+              },
+              "arguments": [
+                {
+                  "kind": "intLiteral",
+                  "line": 20,
+                  "value": 2
+                }
+              ],
+              "kind": "send",
+              "line": 20,
+              "messageServer": "in",
+              "target": {
+                "kind": "knownRebec",
+                "name": "d"
+              },
+              "targetClassName": "DoorA"
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1
+              },
+              "arguments": [
+                {
+                  "kind": "intLiteral",
+                  "line": 21,
+                  "value": 3
+                }
+              ],
+              "kind": "send",
+              "line": 21,
+              "messageServer": "in",
+              "target": {
+                "kind": "knownRebec",
+                "name": "d2"
+              },
+              "targetClassName": "DoorB"
+            }
+          ],
+          "line": 18,
+          "name": "start",
+          "parameters": [],
+          "priority": 1
+        }
+      ],
+      "name": "Controller",
+      "queueBound": 5,
+      "stateVariables": []
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 35,
+            "target": "received",
+            "value": {
+              "kind": "intLiteral",
+              "line": 35,
+              "value": 0
+            }
+          }
+        ],
+        "line": 34,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Sum2",
+          "line": 27,
+          "name": "s12"
+        }
+      ],
+      "line": 25,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 40,
+              "target": "received",
+              "value": {
+                "kind": "variable",
+                "line": 40,
+                "name": "v"
+              }
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 41,
+                  "name": "received"
+                }
+              ],
+              "kind": "send",
+              "line": 41,
+              "messageServer": "a",
+              "target": {
+                "kind": "knownRebec",
+                "name": "s12"
+              },
+              "targetClassName": "Sum2"
+            }
+          ],
+          "line": 39,
+          "name": "in",
+          "parameters": [
+            {
+              "line": 39,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        }
+      ],
+      "name": "Train",
+      "queueBound": 5,
+      "stateVariables": [
+        {
+          "line": 31,
+          "name": "received",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 55,
+            "target": "received",
+            "value": {
+              "kind": "intLiteral",
+              "line": 55,
+              "value": 0
+            }
+          }
+        ],
+        "line": 54,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Sum2",
+          "line": 47,
+          "name": "s12"
+        }
+      ],
+      "line": 45,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 60,
+              "target": "received",
+              "value": {
+                "kind": "variable",
+                "line": 60,
+                "name": "v"
+              }
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 61,
+                  "name": "received"
+                }
+              ],
+              "kind": "send",
+              "line": 61,
+              "messageServer": "b",
+              "target": {
+                "kind": "knownRebec",
+                "name": "s12"
+              },
+              "targetClassName": "Sum2"
+            }
+          ],
+          "line": 59,
+          "name": "in",
+          "parameters": [
+            {
+              "line": 59,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        }
+      ],
+      "name": "DoorA",
+      "queueBound": 5,
+      "stateVariables": [
+        {
+          "line": 51,
+          "name": "received",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 75,
+            "target": "received",
+            "value": {
+              "kind": "intLiteral",
+              "line": 75,
+              "value": 0
+            }
+          }
+        ],
+        "line": 74,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "SumFinal",
+          "line": 67,
+          "name": "s123"
+        }
+      ],
+      "line": 65,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 80,
+              "target": "received",
+              "value": {
+                "kind": "variable",
+                "line": 80,
+                "name": "v"
+              }
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 81,
+                  "name": "received"
+                }
+              ],
+              "kind": "send",
+              "line": 81,
+              "messageServer": "c",
+              "target": {
+                "kind": "knownRebec",
+                "name": "s123"
+              },
+              "targetClassName": "SumFinal"
+            }
+          ],
+          "line": 79,
+          "name": "in",
+          "parameters": [
+            {
+              "line": 79,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        }
+      ],
+      "name": "DoorB",
+      "queueBound": 5,
+      "stateVariables": [
+        {
+          "line": 71,
+          "name": "received",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 99,
+            "target": "seenA",
+            "value": {
+              "kind": "intLiteral",
+              "line": 99,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 100,
+            "target": "seenB",
+            "value": {
+              "kind": "intLiteral",
+              "line": 100,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 101,
+            "target": "va",
+            "value": {
+              "kind": "intLiteral",
+              "line": 101,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 102,
+            "target": "vb",
+            "value": {
+              "kind": "intLiteral",
+              "line": 102,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 103,
+            "target": "emitted",
+            "value": {
+              "kind": "intLiteral",
+              "line": 103,
+              "value": 0
+            }
+          }
+        ],
+        "line": 98,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "SumFinal",
+          "line": 87,
+          "name": "s123"
+        }
+      ],
+      "line": 85,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 108,
+              "target": "seenA",
+              "value": {
+                "kind": "intLiteral",
+                "line": 108,
+                "value": 1
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 109,
+              "target": "va",
+              "value": {
+                "kind": "variable",
+                "line": 109,
+                "name": "v"
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 110,
+                      "name": "seenA"
+                    },
+                    "line": 110,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 110,
+                      "value": 1
+                    }
+                  },
+                  "line": 110,
+                  "operator": "&&",
+                  "right": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 110,
+                      "name": "seenB"
+                    },
+                    "line": 110,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 110,
+                      "value": 1
+                    }
+                  }
+                },
+                "line": 110,
+                "operator": "&&",
+                "right": {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "variable",
+                    "line": 110,
+                    "name": "emitted"
+                  },
+                  "line": 110,
+                  "operator": "==",
+                  "right": {
+                    "kind": "intLiteral",
+                    "line": 110,
+                    "value": 0
+                  }
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 110,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 111,
+                  "target": "emitted",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 111,
+                    "value": 1
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "binary",
+                      "left": {
+                        "kind": "variable",
+                        "line": 112,
+                        "name": "va"
+                      },
+                      "line": 112,
+                      "operator": "+",
+                      "right": {
+                        "kind": "variable",
+                        "line": 112,
+                        "name": "vb"
+                      }
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 112,
+                  "messageServer": "partial",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "s123"
+                  },
+                  "targetClassName": "SumFinal"
+                }
+              ]
+            }
+          ],
+          "line": 107,
+          "name": "a",
+          "parameters": [
+            {
+              "line": 107,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 118,
+              "target": "seenB",
+              "value": {
+                "kind": "intLiteral",
+                "line": 118,
+                "value": 1
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 119,
+              "target": "vb",
+              "value": {
+                "kind": "variable",
+                "line": 119,
+                "name": "v"
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 120,
+                      "name": "seenA"
+                    },
+                    "line": 120,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 120,
+                      "value": 1
+                    }
+                  },
+                  "line": 120,
+                  "operator": "&&",
+                  "right": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 120,
+                      "name": "seenB"
+                    },
+                    "line": 120,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 120,
+                      "value": 1
+                    }
+                  }
+                },
+                "line": 120,
+                "operator": "&&",
+                "right": {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "variable",
+                    "line": 120,
+                    "name": "emitted"
+                  },
+                  "line": 120,
+                  "operator": "==",
+                  "right": {
+                    "kind": "intLiteral",
+                    "line": 120,
+                    "value": 0
+                  }
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 120,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 121,
+                  "target": "emitted",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 121,
+                    "value": 1
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "binary",
+                      "left": {
+                        "kind": "variable",
+                        "line": 122,
+                        "name": "va"
+                      },
+                      "line": 122,
+                      "operator": "+",
+                      "right": {
+                        "kind": "variable",
+                        "line": 122,
+                        "name": "vb"
+                      }
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 122,
+                  "messageServer": "partial",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "s123"
+                  },
+                  "targetClassName": "SumFinal"
+                }
+              ]
+            }
+          ],
+          "line": 117,
+          "name": "b",
+          "parameters": [
+            {
+              "line": 117,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 2
+        }
+      ],
+      "name": "Sum2",
+      "queueBound": 5,
+      "stateVariables": [
+        {
+          "line": 91,
+          "name": "seenA",
+          "type": "int"
+        },
+        {
+          "line": 92,
+          "name": "seenB",
+          "type": "int"
+        },
+        {
+          "line": 93,
+          "name": "va",
+          "type": "int"
+        },
+        {
+          "line": 94,
+          "name": "vb",
+          "type": "int"
+        },
+        {
+          "line": 95,
+          "name": "emitted",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 141,
+            "target": "seenP",
+            "value": {
+              "kind": "intLiteral",
+              "line": 141,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 142,
+            "target": "seenC",
+            "value": {
+              "kind": "intLiteral",
+              "line": 142,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 143,
+            "target": "vp",
+            "value": {
+              "kind": "intLiteral",
+              "line": 143,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 144,
+            "target": "vc",
+            "value": {
+              "kind": "intLiteral",
+              "line": 144,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 145,
+            "target": "emitted",
+            "value": {
+              "kind": "intLiteral",
+              "line": 145,
+              "value": 0
+            }
+          }
+        ],
+        "line": 140,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Checker",
+          "line": 129,
+          "name": "chk"
+        }
+      ],
+      "line": 127,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 150,
+              "target": "seenP",
+              "value": {
+                "kind": "intLiteral",
+                "line": 150,
+                "value": 1
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 151,
+              "target": "vp",
+              "value": {
+                "kind": "variable",
+                "line": 151,
+                "name": "v"
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 152,
+                      "name": "seenP"
+                    },
+                    "line": 152,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 152,
+                      "value": 1
+                    }
+                  },
+                  "line": 152,
+                  "operator": "&&",
+                  "right": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 152,
+                      "name": "seenC"
+                    },
+                    "line": 152,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 152,
+                      "value": 1
+                    }
+                  }
+                },
+                "line": 152,
+                "operator": "&&",
+                "right": {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "variable",
+                    "line": 152,
+                    "name": "emitted"
+                  },
+                  "line": 152,
+                  "operator": "==",
+                  "right": {
+                    "kind": "intLiteral",
+                    "line": 152,
+                    "value": 0
+                  }
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 152,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 153,
+                  "target": "emitted",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 153,
+                    "value": 1
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "binary",
+                      "left": {
+                        "kind": "variable",
+                        "line": 154,
+                        "name": "vp"
+                      },
+                      "line": 154,
+                      "operator": "+",
+                      "right": {
+                        "kind": "variable",
+                        "line": 154,
+                        "name": "vc"
+                      }
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 154,
+                  "messageServer": "sumIn",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "chk"
+                  },
+                  "targetClassName": "Checker"
+                }
+              ]
+            }
+          ],
+          "line": 149,
+          "name": "partial",
+          "parameters": [
+            {
+              "line": 149,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 160,
+              "target": "seenC",
+              "value": {
+                "kind": "intLiteral",
+                "line": 160,
+                "value": 1
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 161,
+              "target": "vc",
+              "value": {
+                "kind": "variable",
+                "line": 161,
+                "name": "v"
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 162,
+                      "name": "seenP"
+                    },
+                    "line": 162,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 162,
+                      "value": 1
+                    }
+                  },
+                  "line": 162,
+                  "operator": "&&",
+                  "right": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 162,
+                      "name": "seenC"
+                    },
+                    "line": 162,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 162,
+                      "value": 1
+                    }
+                  }
+                },
+                "line": 162,
+                "operator": "&&",
+                "right": {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "variable",
+                    "line": 162,
+                    "name": "emitted"
+                  },
+                  "line": 162,
+                  "operator": "==",
+                  "right": {
+                    "kind": "intLiteral",
+                    "line": 162,
+                    "value": 0
+                  }
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 162,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 163,
+                  "target": "emitted",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 163,
+                    "value": 1
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "binary",
+                      "left": {
+                        "kind": "variable",
+                        "line": 164,
+                        "name": "vp"
+                      },
+                      "line": 164,
+                      "operator": "+",
+                      "right": {
+                        "kind": "variable",
+                        "line": 164,
+                        "name": "vc"
+                      }
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 164,
+                  "messageServer": "sumIn",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "chk"
+                  },
+                  "targetClassName": "Checker"
+                }
+              ]
+            }
+          ],
+          "line": 159,
+          "name": "c",
+          "parameters": [
+            {
+              "line": 159,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 2
+        }
+      ],
+      "name": "SumFinal",
+      "queueBound": 5,
+      "stateVariables": [
+        {
+          "line": 133,
+          "name": "seenP",
+          "type": "int"
+        },
+        {
+          "line": 134,
+          "name": "seenC",
+          "type": "int"
+        },
+        {
+          "line": 135,
+          "name": "vp",
+          "type": "int"
+        },
+        {
+          "line": 136,
+          "name": "vc",
+          "type": "int"
+        },
+        {
+          "line": 137,
+          "name": "emitted",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 175,
+            "target": "violation",
+            "value": {
+              "kind": "intLiteral",
+              "line": 175,
+              "value": 0
+            }
+          }
+        ],
+        "line": 174,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 169,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 180,
+                  "name": "v"
+                },
+                "line": 180,
+                "operator": "!=",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 180,
+                  "value": 6
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 180,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 181,
+                  "target": "violation",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 181,
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          ],
+          "line": 179,
+          "name": "sumIn",
+          "parameters": [
+            {
+              "line": 179,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        }
+      ],
+      "name": "Checker",
+      "queueBound": 5,
+      "stateVariables": [
+        {
+          "line": 171,
+          "name": "violation",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 192,
+            "target": "phase",
+            "value": {
+              "kind": "intLiteral",
+              "line": 192,
+              "value": 0
+            }
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 100
+            },
+            "arguments": [],
+            "kind": "send",
+            "line": 193,
+            "messageServer": "tick",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "KeepAlive"
+          }
+        ],
+        "line": 191,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 186,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 198,
+                  "name": "phase"
+                },
+                "line": 198,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 198,
+                  "value": 0
+                }
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 201,
+                  "target": "phase",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 201,
+                    "value": 0
+                  }
+                }
+              ],
+              "kind": "if",
+              "line": 198,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 199,
+                  "target": "phase",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 199,
+                    "value": 1
+                  }
+                }
+              ]
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 100
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 203,
+              "messageServer": "tick",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "KeepAlive"
+            }
+          ],
+          "line": 197,
+          "name": "tick",
+          "parameters": [],
+          "priority": 1
+        }
+      ],
+      "name": "KeepAlive",
+      "queueBound": 2,
+      "stateVariables": [
+        {
+          "line": 188,
+          "name": "phase",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Sum2",
+          "instance": "s12",
+          "knownRebec": "s12"
+        }
+      ],
+      "className": "Train",
+      "line": 208,
+      "name": "t",
+      "priority": 1
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Sum2",
+          "instance": "s12",
+          "knownRebec": "s12"
+        }
+      ],
+      "className": "DoorA",
+      "line": 209,
+      "name": "d",
+      "priority": 1
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "SumFinal",
+          "instance": "s123",
+          "knownRebec": "s123"
+        }
+      ],
+      "className": "DoorB",
+      "line": 210,
+      "name": "d2",
+      "priority": 1
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "SumFinal",
+          "instance": "s123",
+          "knownRebec": "s123"
+        }
+      ],
+      "className": "Sum2",
+      "line": 211,
+      "name": "s12",
+      "priority": 2
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Checker",
+          "instance": "chk",
+          "knownRebec": "chk"
+        }
+      ],
+      "className": "SumFinal",
+      "line": 212,
+      "name": "s123",
+      "priority": 3
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Checker",
+      "line": 213,
+      "name": "chk",
+      "priority": 4
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Train",
+          "instance": "t",
+          "knownRebec": "t"
+        },
+        {
+          "className": "DoorA",
+          "instance": "d",
+          "knownRebec": "d"
+        },
+        {
+          "className": "DoorB",
+          "instance": "d2",
+          "knownRebec": "d2"
+        }
+      ],
+      "className": "Controller",
+      "line": 214,
+      "name": "c",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "KeepAlive",
+      "line": 215,
+      "name": "ka",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

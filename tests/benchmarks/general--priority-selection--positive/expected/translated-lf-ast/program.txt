@@ -1,0 +1,174 @@
+{ reactors := [{ name := { value := "Checker" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "stateInToChkFromTl" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "sigGInToChkFromTl" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [],
+                 stateVariables := [{ name := { value := "lastState" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "violation" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "stateIn_action" },
+                                      parameters := [{ name := { value := "v" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "sigGIn_action" },
+                                      parameters := [{ name := { value := "light" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "lastState" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "violation" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "stateIn_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "stateIn_action" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "lastState" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" })],
+                                        priority := none },
+                                      { name := { value := "stateInToChkFromTl_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "stateInToChkFromTl" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "lastState" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "v" })],
+                                        priority := none },
+                                      { name := { value := "sigGIn_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "sigGIn_action" },
+                                        parameters := [{ value := "light" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.ne)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "lastState" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "sigGInToChkFromTl_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "sigGInToChkFromTl" },
+                                        parameters := [{ value := "light" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.ne)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "lastState" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   []],
+                                        priority := none }] },
+               { name := { value := "TrafficLightCore" },
+                 parameters := [],
+                 inputPorts := [],
+                 outputPorts := [{ name := { value := "stateInToChk" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "sigGInToChk" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "lightState" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "start_action" }, parameters := [] },
+                                    { name := { value := "emitGreen_action" }, parameters := [] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "lightState" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.schedule
+                                                 { value := "start_action" }
+                                                 []
+                                                 { value := 0 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "start_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "start_action" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "stateInToChk" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "lightState" }],
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "emitGreen_action" }
+                                                   []
+                                                   { value := 1 }],
+                                        priority := none },
+                                      { name := { value := "emitGreen_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "emitGreen_action" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "sigGInToChk" }
+                                                   [Relico.LF.GeneralExpr.intLiteral 1]],
+                                        priority := none }] },
+               { name := { value := "KeepAlive" },
+                 parameters := [],
+                 inputPorts := [],
+                 outputPorts := [],
+                 stateVariables := [{ name := { value := "phase" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "tick_action1" }, parameters := [] },
+                                    { name := { value := "tick_action2" }, parameters := [] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "phase" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.schedule
+                                                 { value := "tick_action1" }
+                                                 []
+                                                 { value := 100 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "tick_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "tick_action1" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "phase" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "phase" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "phase" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0)],
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "tick_action2" }
+                                                   []
+                                                   { value := 100 }],
+                                        priority := none },
+                                      { name := { value := "tick_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "tick_action2" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "phase" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "phase" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "phase" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0)],
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "tick_action2" }
+                                                   []
+                                                   { value := 100 }],
+                                        priority := none }] }],
+  instances := [{ name := { value := "tl" }, reactorName := { value := "TrafficLightCore" }, arguments := [] },
+                { name := { value := "chk" }, reactorName := { value := "Checker" }, arguments := [] },
+                { name := { value := "ka" }, reactorName := { value := "KeepAlive" }, arguments := [] }],
+  connections := [{ sourceInstance := { value := "tl" },
+                    sourcePort := { value := "stateInToChk" },
+                    targetInstance := { value := "chk" },
+                    targetPort := { value := "stateInToChkFromTl" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "tl" },
+                    sourcePort := { value := "sigGInToChk" },
+                    targetInstance := { value := "chk" },
+                    targetPort := { value := "sigGInToChkFromTl" },
+                    delay := { value := 0 } }] }
