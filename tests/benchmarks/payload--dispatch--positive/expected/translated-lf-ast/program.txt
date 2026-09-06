@@ -1,0 +1,19 @@
+{ reactor := { name := { value := "Carrier" },
+               stateVariables := [{ name := { value := "held" }, initialValue := 0 },
+                                  { name := { value := "next" }, initialValue := 0 }],
+               logicalAction := { value := "dispatch_action" },
+               startupReaction := { name := { value := "startup" },
+                                    trigger := Relico.LF.Trigger.startup,
+                                    body := [Relico.LF.Stmt.assign { value := "held" } (Relico.LF.Expr.intLiteral 1),
+                                             Relico.LF.Stmt.assign { value := "next" } (Relico.LF.Expr.intLiteral 2),
+                                             Relico.LF.Stmt.schedule { value := "dispatch_action" } { value := 1 }] },
+               messageReaction := { name := { value := "dispatch_reaction" },
+                                    trigger := Relico.LF.Trigger.logicalAction { value := "dispatch_action" },
+                                    body := [Relico.LF.Stmt.assign
+                                               { value := "held" }
+                                               (Relico.LF.Expr.stateVar { value := "next" }),
+                                             Relico.LF.Stmt.assign
+                                               { value := "next" }
+                                               (Relico.LF.Expr.stateVar { value := "held" }),
+                                             Relico.LF.Stmt.schedule { value := "dispatch_action" } { value := 1 }] } },
+  reactorInstance := { name := { value := "carrier" }, reactorName := { value := "Carrier" } } }

@@ -1,0 +1,20 @@
+{ reactiveClass := { name := { value := "Carrier" },
+                     stateVariables := [{ name := { value := "held" }, initialValue := 0 },
+                                        { name := { value := "next" }, initialValue := 0 }],
+                     constructor := { body := [Relico.DTR.Stmt.assign
+                                                 { value := "held" }
+                                                 (Relico.DTR.Expr.intLiteral 1),
+                                               Relico.DTR.Stmt.assign
+                                                 { value := "next" }
+                                                 (Relico.DTR.Expr.intLiteral 2),
+                                               Relico.DTR.Stmt.selfSend { value := "dispatch" } { value := 1 }] },
+                     messageServer := { name := { value := "dispatch" },
+                                        body := [Relico.DTR.Stmt.assign
+                                                   { value := "held" }
+                                                   (Relico.DTR.Expr.stateVar { value := "next" }),
+                                                 Relico.DTR.Stmt.assign
+                                                   { value := "next" }
+                                                   (Relico.DTR.Expr.stateVar { value := "held" }),
+                                                 Relico.DTR.Stmt.selfSend { value := "dispatch" } { value := 1 }],
+                                        priority := none } },
+  actor := { name := { value := "carrier" }, className := { value := "Carrier" } } }

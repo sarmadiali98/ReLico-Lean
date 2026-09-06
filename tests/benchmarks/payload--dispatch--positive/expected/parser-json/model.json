@@ -1,0 +1,63 @@
+{
+  "actorClass": "Carrier",
+  "actorName": "carrier",
+  "className": "Carrier",
+  "constructorBody": [
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 1
+      },
+      "kind": "assign",
+      "target": "held"
+    },
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 2
+      },
+      "kind": "assign",
+      "target": "next"
+    },
+    {
+      "delay": 1,
+      "kind": "selfSend",
+      "message": "dispatch"
+    }
+  ],
+  "messageServer": "dispatch",
+  "messageServerBody": [
+    {
+      "expression": {
+        "kind": "stateVar",
+        "name": "next"
+      },
+      "kind": "assign",
+      "target": "held"
+    },
+    {
+      "expression": {
+        "kind": "stateVar",
+        "name": "held"
+      },
+      "kind": "assign",
+      "target": "next"
+    },
+    {
+      "delay": 1,
+      "kind": "selfSend",
+      "message": "dispatch"
+    }
+  ],
+  "schemaVersion": 2,
+  "stateVariables": [
+    {
+      "initialValue": 0,
+      "name": "held"
+    },
+    {
+      "initialValue": 0,
+      "name": "next"
+    }
+  ]
+}

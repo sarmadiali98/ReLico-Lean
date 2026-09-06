@@ -1,0 +1,23 @@
+target Cpp
+
+reactor Carrier {
+  state held: int = 0
+  state next: int = 0
+  logical action dispatch_action: void
+
+  reaction(startup) -> dispatch_action {=
+    held = 1;
+    next = 2;
+    dispatch_action.schedule(1ms);
+  =}
+
+  reaction(dispatch_action) -> dispatch_action {=
+    held = next;
+    next = held;
+    dispatch_action.schedule(1ms);
+  =}
+}
+
+main reactor {
+  carrier = new Carrier()
+}

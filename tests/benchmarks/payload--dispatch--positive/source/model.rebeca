@@ -1,0 +1,25 @@
+// Benchmark: payload--dispatch--positive
+// A single-server store dispatch: the server swaps the carried payload
+// with the next one on every dispatch, so the store is the payload.
+reactiveclass Carrier(10) {
+    statevars {
+        int held;
+        int next;
+    }
+
+    Carrier() {
+        held = 1;
+        next = 2;
+        self.dispatch() after(1);
+    }
+
+    msgsrv dispatch() {
+        held = next;
+        next = held;
+        self.dispatch() after(1);
+    }
+}
+
+main {
+    Carrier carrier():();
+}
