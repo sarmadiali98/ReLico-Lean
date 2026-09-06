@@ -1,0 +1,24 @@
+{
+  "benchmark_id": "multi-store--initialization--positive",
+  "elaborated_modules": [
+    "Relico/Tests/MultiStoreExecutableTranslation.lean",
+    "Relico/Tests/MultiStoreInitialization.lean"
+  ],
+  "obligation_count": 12,
+  "obligation_ids": [
+    "MultiStoreExecutableTranslation:0001",
+    "MultiStoreExecutableTranslation:0002",
+    "MultiStoreExecutableTranslation:0003",
+    "MultiStoreExecutableTranslation:0004",
+    "MultiStoreExecutableTranslation:0005",
+    "MultiStoreInitialization:0001",
+    "MultiStoreInitialization:0002",
+    "MultiStoreInitialization:0003",
+    "MultiStoreInitialization:0004",
+    "MultiStoreInitialization:0005",
+    "MultiStoreInitialization:0006",
+    "MultiStoreInitialization:0007"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

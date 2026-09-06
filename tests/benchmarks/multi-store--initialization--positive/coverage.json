@@ -1,0 +1,155 @@
+{
+  "benchmark_id": "multi-store--initialization--positive",
+  "obligation_count": 12,
+  "obligations": [
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "multi-store--initialization--positive",
+      "kind": "theorem",
+      "line_number": "8",
+      "mapping_status": "accepted",
+      "name_or_expression": "twoMessage_initial_refl_execution_forward",
+      "obligation_id": "MultiStoreExecutableTranslation:0001",
+      "original_benchmark_candidate": "multi-store--initialization--positive",
+      "test_file": "Relico/Tests/MultiStoreExecutableTranslation.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "multi-store--initialization--positive",
+      "kind": "theorem",
+      "line_number": "64",
+      "mapping_status": "accepted",
+      "name_or_expression": "twoMessage_public_initial_refl_execution_forward",
+      "obligation_id": "MultiStoreExecutableTranslation:0002",
+      "original_benchmark_candidate": "multi-store--initialization--positive",
+      "test_file": "Relico/Tests/MultiStoreExecutableTranslation.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "multi-store--initialization--positive",
+      "kind": "theorem",
+      "line_number": "124",
+      "mapping_status": "accepted",
+      "name_or_expression": "twoMessageModel_priorityTimingWellFormed",
+      "obligation_id": "MultiStoreExecutableTranslation:0003",
+      "original_benchmark_candidate": "multi-store--initialization--positive",
+      "test_file": "Relico/Tests/MultiStoreExecutableTranslation.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "multi-store--initialization--positive",
+      "kind": "theorem",
+      "line_number": "170",
+      "mapping_status": "accepted",
+      "name_or_expression": "twoMessage_initial_refl_execution_backward",
+      "obligation_id": "MultiStoreExecutableTranslation:0004",
+      "original_benchmark_candidate": "multi-store--initialization--positive",
+      "test_file": "Relico/Tests/MultiStoreExecutableTranslation.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "multi-store--initialization--positive",
+      "kind": "theorem",
+      "line_number": "201",
+      "mapping_status": "accepted",
+      "name_or_expression": "twoMessage_public_initial_refl_execution_backward",
+      "obligation_id": "MultiStoreExecutableTranslation:0005",
+      "original_benchmark_candidate": "multi-store--initialization--positive",
+      "test_file": "Relico/Tests/MultiStoreExecutableTranslation.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "multi-store--initialization--positive",
+      "kind": "theorem",
+      "line_number": "9",
+      "mapping_status": "accepted",
+      "name_or_expression": "twoMessage_dtr_initial_store",
+      "obligation_id": "MultiStoreInitialization:0001",
+      "original_benchmark_candidate": "multi-store--initialization--positive",
+      "test_file": "Relico/Tests/MultiStoreInitialization.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "multi-store--initialization--positive",
+      "kind": "theorem",
+      "line_number": "15",
+      "mapping_status": "accepted",
+      "name_or_expression": "twoMessage_lf_initial_store",
+      "obligation_id": "MultiStoreInitialization:0002",
+      "original_benchmark_candidate": "multi-store--initialization--positive",
+      "test_file": "Relico/Tests/MultiStoreInitialization.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "multi-store--initialization--positive",
+      "kind": "theorem",
+      "line_number": "22",
+      "mapping_status": "accepted",
+      "name_or_expression": "twoMessage_dtr_initial_state",
+      "obligation_id": "MultiStoreInitialization:0003",
+      "original_benchmark_candidate": "multi-store--initialization--positive",
+      "test_file": "Relico/Tests/MultiStoreInitialization.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "multi-store--initialization--positive",
+      "kind": "theorem",
+      "line_number": "39",
+      "mapping_status": "accepted",
+      "name_or_expression": "twoMessage_lf_initial_state",
+      "obligation_id": "MultiStoreInitialization:0004",
+      "original_benchmark_candidate": "multi-store--initialization--positive",
+      "test_file": "Relico/Tests/MultiStoreInitialization.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "multi-store--initialization--positive",
+      "kind": "theorem",
+      "line_number": "58",
+      "mapping_status": "accepted",
+      "name_or_expression": "twoMessage_initial_source_runtimeWellFormed",
+      "obligation_id": "MultiStoreInitialization:0005",
+      "original_benchmark_candidate": "multi-store--initialization--positive",
+      "test_file": "Relico/Tests/MultiStoreInitialization.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "multi-store--initialization--positive",
+      "kind": "theorem",
+      "line_number": "71",
+      "mapping_status": "accepted",
+      "name_or_expression": "twoMessage_initial_states_correspond",
+      "obligation_id": "MultiStoreInitialization:0006",
+      "original_benchmark_candidate": "multi-store--initialization--positive",
+      "test_file": "Relico/Tests/MultiStoreInitialization.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "multi-store--initialization--positive",
+      "kind": "theorem",
+      "line_number": "83",
+      "mapping_status": "accepted",
+      "name_or_expression": "twoMessage_public_translation_initial_states_correspond",
+      "obligation_id": "MultiStoreInitialization:0007",
+      "original_benchmark_candidate": "multi-store--initialization--positive",
+      "test_file": "Relico/Tests/MultiStoreInitialization.lean"
+    }
+  ],
+  "schema_version": 1,
+  "test_modules": [
+    "Relico/Tests/MultiStoreExecutableTranslation.lean",
+    "Relico/Tests/MultiStoreInitialization.lean"
+  ]
+}
