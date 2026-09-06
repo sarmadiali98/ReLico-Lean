@@ -1,0 +1,34 @@
+{ reactor := { name := { value := "Dispatcher" },
+               stateVariables := [{ name := { value := "x" }, initialValue := 0 },
+                                  { name := { value := "y" }, initialValue := 0 }],
+               logicalActions := [{ name := { value := "dispatch_action" }, parameters := [{ value := "payload" }] }],
+               startupReaction := { name := { value := "startup" },
+                                    trigger := Relico.LF.MultiStorePayloadTrigger.startup,
+                                    parameters := [],
+                                    body := [Relico.LF.MultiStorePayloadStmt.assign
+                                               { value := "x" }
+                                               (Relico.LF.MultiStorePayloadExpr.intLiteral 1),
+                                             Relico.LF.MultiStorePayloadStmt.assign
+                                               { value := "y" }
+                                               (Relico.LF.MultiStorePayloadExpr.intLiteral 2),
+                                             Relico.LF.MultiStorePayloadStmt.schedule
+                                               { value := "dispatch_action" }
+                                               [Relico.LF.MultiStorePayloadExpr.intLiteral 1]
+                                               { value := 1 }],
+                                    priority := none },
+               messageReactions := [{ name := { value := "dispatch_reaction" },
+                                      trigger := Relico.LF.MultiStorePayloadTrigger.logicalAction
+                                                   { value := "dispatch_action" },
+                                      parameters := [{ value := "payload" }],
+                                      body := [Relico.LF.MultiStorePayloadStmt.assign
+                                                 { value := "x" }
+                                                 (Relico.LF.MultiStorePayloadExpr.stateVar { value := "y" }),
+                                               Relico.LF.MultiStorePayloadStmt.assign
+                                                 { value := "y" }
+                                                 (Relico.LF.MultiStorePayloadExpr.parameterVar { value := "payload" }),
+                                               Relico.LF.MultiStorePayloadStmt.schedule
+                                                 { value := "dispatch_action" }
+                                                 [Relico.LF.MultiStorePayloadExpr.stateVar { value := "y" }]
+                                                 { value := 1 }],
+                                      priority := none }] },
+  reactorInstance := { name := { value := "dispatcher" }, reactorName := { value := "Dispatcher" } } }

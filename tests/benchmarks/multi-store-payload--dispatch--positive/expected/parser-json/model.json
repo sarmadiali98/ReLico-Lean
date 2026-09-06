@@ -1,0 +1,84 @@
+{
+  "actorClass": "Dispatcher",
+  "actorName": "dispatcher",
+  "className": "Dispatcher",
+  "constructorBody": [
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 1
+      },
+      "kind": "assign",
+      "target": "x"
+    },
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 2
+      },
+      "kind": "assign",
+      "target": "y"
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 1
+        }
+      ],
+      "delay": 1,
+      "kind": "selfSend",
+      "message": "dispatch"
+    }
+  ],
+  "family": "multiStorePayload",
+  "messageServers": [
+    {
+      "body": [
+        {
+          "expression": {
+            "kind": "stateVar",
+            "name": "y"
+          },
+          "kind": "assign",
+          "target": "x"
+        },
+        {
+          "expression": {
+            "kind": "parameterVar",
+            "name": "payload"
+          },
+          "kind": "assign",
+          "target": "y"
+        },
+        {
+          "arguments": [
+            {
+              "kind": "stateVar",
+              "name": "y"
+            }
+          ],
+          "delay": 1,
+          "kind": "selfSend",
+          "message": "dispatch"
+        }
+      ],
+      "name": "dispatch",
+      "parameters": [
+        "payload"
+      ],
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1,
+  "stateVariables": [
+    {
+      "initialValue": 0,
+      "name": "x"
+    },
+    {
+      "initialValue": 0,
+      "name": "y"
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "actorClass": "Binder",
+  "actorName": "binder",
+  "className": "Binder",
+  "constructorBody": [
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 0
+      },
+      "kind": "assign",
+      "target": "x"
+    },
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 0
+      },
+      "kind": "assign",
+      "target": "y"
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 1
+        }
+      ],
+      "delay": 1,
+      "kind": "selfSend",
+      "message": "ping"
+    }
+  ],
+  "family": "multiStorePayload",
+  "messageServers": [
+    {
+      "body": [
+        {
+          "expression": {
+            "kind": "parameterVar",
+            "name": "payload"
+          },
+          "kind": "assign",
+          "target": "x"
+        },
+        {
+          "arguments": [
+            {
+              "kind": "stateVar",
+              "name": "x"
+            }
+          ],
+          "delay": 1,
+          "kind": "selfSend",
+          "message": "pong"
+        }
+      ],
+      "name": "ping",
+      "parameters": [
+        "payload"
+      ],
+      "priority": null
+    },
+    {
+      "body": [
+        {
+          "expression": {
+            "kind": "parameterVar",
+            "name": "payload"
+          },
+          "kind": "assign",
+          "target": "y"
+        },
+        {
+          "arguments": [
+            {
+              "kind": "stateVar",
+              "name": "y"
+            }
+          ],
+          "delay": 1,
+          "kind": "selfSend",
+          "message": "ping"
+        }
+      ],
+      "name": "pong",
+      "parameters": [
+        "payload"
+      ],
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1,
+  "stateVariables": [
+    {
+      "initialValue": 0,
+      "name": "x"
+    },
+    {
+      "initialValue": 0,
+      "name": "y"
+    }
+  ]
+}

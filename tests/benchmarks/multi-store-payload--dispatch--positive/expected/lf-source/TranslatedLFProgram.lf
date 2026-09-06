@@ -1,0 +1,24 @@
+target Cpp
+
+reactor Dispatcher {
+  state x: int = 0
+  state y: int = 0
+  logical action dispatch_action: int
+
+  reaction(startup) -> dispatch_action {=
+    x = 1;
+    y = 2;
+    dispatch_action.schedule(1, 1ms);
+  =}
+
+  reaction(dispatch_action) -> dispatch_action {=
+    auto payload = *dispatch_action.get();
+    x = y;
+    y = payload;
+    dispatch_action.schedule(y, 1ms);
+  =}
+}
+
+main reactor {
+  dispatcher = new Dispatcher()
+}

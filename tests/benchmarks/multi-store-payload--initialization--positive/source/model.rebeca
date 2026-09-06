@@ -1,0 +1,27 @@
+// Benchmark: multi-store-payload--initialization--positive
+// A multi-store-payload source: a three-variable initialization and rotation cycle.
+reactiveclass Initializer(10) {
+    statevars {
+        int x;
+        int y;
+        int z;
+    }
+
+    Initializer() {
+        x = 1;
+        y = 2;
+        z = 3;
+        self.begin() after(1);
+    }
+
+    msgsrv begin() {
+        x = y;
+        y = z;
+        z = x;
+        self.begin() after(1);
+    }
+}
+
+main {
+    Initializer initializer():();
+}

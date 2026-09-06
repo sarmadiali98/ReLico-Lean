@@ -1,0 +1,24 @@
+// Benchmark: multi-store-payload--finite-execution--positive
+// A multi-store-payload source: a swap-settling finite execution: cross-assignment drives the state to a fixed point and holds it.
+reactiveclass Stepper(10) {
+    statevars {
+        int x;
+        int y;
+    }
+
+    Stepper() {
+        x = 1;
+        y = 2;
+        self.step() after(1);
+    }
+
+    msgsrv step() {
+        x = y;
+        y = x;
+        self.step() after(1);
+    }
+}
+
+main {
+    Stepper stepper():();
+}

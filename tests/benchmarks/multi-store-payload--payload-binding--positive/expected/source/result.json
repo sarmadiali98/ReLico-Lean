@@ -1,0 +1,6 @@
+{
+  "benchmark_id": "multi-store-payload--payload-binding--positive",
+  "schema_version": 1,
+  "sha256": "cdfb69416f2b980fa2fc6c9c9233e4a39869c371a3beb9317bfac7ae42aedf51",
+  "status": "pass"
+}

@@ -1,0 +1,44 @@
+{ reactor := { name := { value := "Binder" },
+               stateVariables := [{ name := { value := "x" }, initialValue := 0 },
+                                  { name := { value := "y" }, initialValue := 0 }],
+               logicalActions := [{ name := { value := "ping_action" }, parameters := [{ value := "payload" }] },
+                                  { name := { value := "pong_action" }, parameters := [{ value := "payload" }] }],
+               startupReaction := { name := { value := "startup" },
+                                    trigger := Relico.LF.MultiStorePayloadTrigger.startup,
+                                    parameters := [],
+                                    body := [Relico.LF.MultiStorePayloadStmt.assign
+                                               { value := "x" }
+                                               (Relico.LF.MultiStorePayloadExpr.intLiteral 0),
+                                             Relico.LF.MultiStorePayloadStmt.assign
+                                               { value := "y" }
+                                               (Relico.LF.MultiStorePayloadExpr.intLiteral 0),
+                                             Relico.LF.MultiStorePayloadStmt.schedule
+                                               { value := "ping_action" }
+                                               [Relico.LF.MultiStorePayloadExpr.intLiteral 1]
+                                               { value := 1 }],
+                                    priority := none },
+               messageReactions := [{ name := { value := "ping_reaction" },
+                                      trigger := Relico.LF.MultiStorePayloadTrigger.logicalAction
+                                                   { value := "ping_action" },
+                                      parameters := [{ value := "payload" }],
+                                      body := [Relico.LF.MultiStorePayloadStmt.assign
+                                                 { value := "x" }
+                                                 (Relico.LF.MultiStorePayloadExpr.parameterVar { value := "payload" }),
+                                               Relico.LF.MultiStorePayloadStmt.schedule
+                                                 { value := "pong_action" }
+                                                 [Relico.LF.MultiStorePayloadExpr.stateVar { value := "x" }]
+                                                 { value := 1 }],
+                                      priority := none },
+                                    { name := { value := "pong_reaction" },
+                                      trigger := Relico.LF.MultiStorePayloadTrigger.logicalAction
+                                                   { value := "pong_action" },
+                                      parameters := [{ value := "payload" }],
+                                      body := [Relico.LF.MultiStorePayloadStmt.assign
+                                                 { value := "y" }
+                                                 (Relico.LF.MultiStorePayloadExpr.parameterVar { value := "payload" }),
+                                               Relico.LF.MultiStorePayloadStmt.schedule
+                                                 { value := "ping_action" }
+                                                 [Relico.LF.MultiStorePayloadExpr.stateVar { value := "y" }]
+                                                 { value := 1 }],
+                                      priority := none }] },
+  reactorInstance := { name := { value := "binder" }, reactorName := { value := "Binder" } } }

@@ -1,0 +1,24 @@
+// Benchmark: multi-store-payload--dispatch--positive
+// A multi-store-payload source: a rotating-slot payload dispatch: each dispatch shifts the previous payload through state and forwards it on.
+reactiveclass Dispatcher(10) {
+    statevars {
+        int x;
+        int y;
+    }
+
+    Dispatcher() {
+        x = 1;
+        y = 2;
+        self.dispatch(1) after(1);
+    }
+
+    msgsrv dispatch(int payload) {
+        x = y;
+        y = payload;
+        self.dispatch(y) after(1);
+    }
+}
+
+main {
+    Dispatcher dispatcher():();
+}

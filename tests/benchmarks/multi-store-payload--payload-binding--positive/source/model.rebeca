@@ -1,0 +1,28 @@
+// Benchmark: multi-store-payload--payload-binding--positive
+// A multi-store-payload source: a two-server payload relay: ping binds the payload into one variable and chains to pong, which binds it into the other.
+reactiveclass Binder(10) {
+    statevars {
+        int x;
+        int y;
+    }
+
+    Binder() {
+        x = 0;
+        y = 0;
+        self.ping(1) after(1);
+    }
+
+    msgsrv ping(int payload) {
+        x = payload;
+        self.pong(x) after(1);
+    }
+
+    msgsrv pong(int payload) {
+        y = payload;
+        self.ping(y) after(1);
+    }
+}
+
+main {
+    Binder binder():();
+}

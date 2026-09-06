@@ -1,0 +1,30 @@
+target Cpp
+
+reactor Binder {
+  state x: int = 0
+  state y: int = 0
+  logical action ping_action: int
+  logical action pong_action: int
+
+  reaction(startup) -> ping_action {=
+    x = 0;
+    y = 0;
+    ping_action.schedule(1, 1ms);
+  =}
+
+  reaction(ping_action) -> pong_action {=
+    auto payload = *ping_action.get();
+    x = payload;
+    pong_action.schedule(x, 1ms);
+  =}
+
+  reaction(pong_action) -> ping_action {=
+    auto payload = *pong_action.get();
+    y = payload;
+    ping_action.schedule(y, 1ms);
+  =}
+}
+
+main reactor {
+  binder = new Binder()
+}

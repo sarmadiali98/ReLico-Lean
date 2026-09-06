@@ -1,0 +1,41 @@
+{ reactor := { name := { value := "Initializer" },
+               stateVariables := [{ name := { value := "x" }, initialValue := 0 },
+                                  { name := { value := "y" }, initialValue := 0 },
+                                  { name := { value := "z" }, initialValue := 0 }],
+               logicalActions := [{ name := { value := "begin_action" }, parameters := [] }],
+               startupReaction := { name := { value := "startup" },
+                                    trigger := Relico.LF.MultiStorePayloadTrigger.startup,
+                                    parameters := [],
+                                    body := [Relico.LF.MultiStorePayloadStmt.assign
+                                               { value := "x" }
+                                               (Relico.LF.MultiStorePayloadExpr.intLiteral 1),
+                                             Relico.LF.MultiStorePayloadStmt.assign
+                                               { value := "y" }
+                                               (Relico.LF.MultiStorePayloadExpr.intLiteral 2),
+                                             Relico.LF.MultiStorePayloadStmt.assign
+                                               { value := "z" }
+                                               (Relico.LF.MultiStorePayloadExpr.intLiteral 3),
+                                             Relico.LF.MultiStorePayloadStmt.schedule
+                                               { value := "begin_action" }
+                                               []
+                                               { value := 1 }],
+                                    priority := none },
+               messageReactions := [{ name := { value := "begin_reaction" },
+                                      trigger := Relico.LF.MultiStorePayloadTrigger.logicalAction
+                                                   { value := "begin_action" },
+                                      parameters := [],
+                                      body := [Relico.LF.MultiStorePayloadStmt.assign
+                                                 { value := "x" }
+                                                 (Relico.LF.MultiStorePayloadExpr.stateVar { value := "y" }),
+                                               Relico.LF.MultiStorePayloadStmt.assign
+                                                 { value := "y" }
+                                                 (Relico.LF.MultiStorePayloadExpr.stateVar { value := "z" }),
+                                               Relico.LF.MultiStorePayloadStmt.assign
+                                                 { value := "z" }
+                                                 (Relico.LF.MultiStorePayloadExpr.stateVar { value := "x" }),
+                                               Relico.LF.MultiStorePayloadStmt.schedule
+                                                 { value := "begin_action" }
+                                                 []
+                                                 { value := 1 }],
+                                      priority := none }] },
+  reactorInstance := { name := { value := "initializer" }, reactorName := { value := "Initializer" } } }
