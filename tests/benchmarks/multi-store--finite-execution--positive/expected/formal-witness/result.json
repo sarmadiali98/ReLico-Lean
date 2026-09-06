@@ -1,0 +1,43 @@
+{
+  "benchmark_id": "multi-store--finite-execution--positive",
+  "elaborated_modules": [
+    "Relico/Tests/DetailedFiniteWeakExecution.lean",
+    "Relico/Tests/DetailedInitialFiniteWeakExecution.lean",
+    "Relico/Tests/DetailedInvariantCarryingFiniteWeakExecution.lean",
+    "Relico/Tests/DirectLFDetailedFiniteWeakExecution.lean"
+  ],
+  "obligation_count": 29,
+  "obligation_ids": [
+    "DetailedFiniteWeakExecution:0001",
+    "DetailedFiniteWeakExecution:0002",
+    "DetailedInitialFiniteWeakExecution:0001",
+    "DetailedInitialFiniteWeakExecution:0002",
+    "DetailedInitialFiniteWeakExecution:0003",
+    "DetailedInitialFiniteWeakExecution:0004",
+    "DetailedInitialFiniteWeakExecution:0005",
+    "DetailedInvariantCarryingFiniteWeakExecution:0001",
+    "DetailedInvariantCarryingFiniteWeakExecution:0002",
+    "DirectLFDetailedFiniteWeakExecution:0001",
+    "DirectLFDetailedFiniteWeakExecution:0002",
+    "DirectLFDetailedFiniteWeakExecution:0003",
+    "DirectLFDetailedFiniteWeakExecution:0004",
+    "DirectLFDetailedFiniteWeakExecution:0005",
+    "DirectLFDetailedFiniteWeakExecution:0006",
+    "DirectLFDetailedFiniteWeakExecution:0007",
+    "DirectLFDetailedFiniteWeakExecution:0008",
+    "DirectLFDetailedFiniteWeakExecution:0009",
+    "DirectLFDetailedFiniteWeakExecution:0010",
+    "DirectLFDetailedFiniteWeakExecution:0011",
+    "DirectLFDetailedFiniteWeakExecution:0012",
+    "DirectLFDetailedFiniteWeakExecution:0013",
+    "DirectLFDetailedFiniteWeakExecution:0014",
+    "DirectLFDetailedFiniteWeakExecution:0015",
+    "DirectLFDetailedFiniteWeakExecution:0016",
+    "DirectLFDetailedFiniteWeakExecution:0017",
+    "DirectLFDetailedFiniteWeakExecution:0018",
+    "DirectLFDetailedFiniteWeakExecution:0019",
+    "DirectLFDetailedFiniteWeakExecution:0020"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

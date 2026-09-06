@@ -1,0 +1,83 @@
+{
+  "actorClass": "Runner",
+  "actorName": "runner",
+  "className": "Runner",
+  "constructorBody": [
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 0
+      },
+      "kind": "assign",
+      "target": "x"
+    },
+    {
+      "delay": 1,
+      "kind": "selfSend",
+      "message": "one"
+    }
+  ],
+  "messageServers": [
+    {
+      "body": [
+        {
+          "expression": {
+            "kind": "intLiteral",
+            "value": 1
+          },
+          "kind": "assign",
+          "target": "x"
+        },
+        {
+          "delay": 1,
+          "kind": "selfSend",
+          "message": "two"
+        }
+      ],
+      "name": "one"
+    },
+    {
+      "body": [
+        {
+          "expression": {
+            "kind": "intLiteral",
+            "value": 2
+          },
+          "kind": "assign",
+          "target": "x"
+        },
+        {
+          "delay": 1,
+          "kind": "selfSend",
+          "message": "three"
+        }
+      ],
+      "name": "two"
+    },
+    {
+      "body": [
+        {
+          "expression": {
+            "kind": "intLiteral",
+            "value": 3
+          },
+          "kind": "assign",
+          "target": "x"
+        },
+        {
+          "delay": 1,
+          "kind": "selfSend",
+          "message": "one"
+        }
+      ],
+      "name": "three"
+    }
+  ],
+  "schemaVersion": 3,
+  "stateVariables": [
+    {
+      "initialValue": 0,
+      "name": "x"
+    }
+  ]
+}

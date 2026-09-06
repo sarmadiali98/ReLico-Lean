@@ -1,0 +1,32 @@
+target Cpp
+
+reactor Runner {
+  state x: int = 0
+  logical action one_action: void
+  logical action two_action: void
+  logical action three_action: void
+
+  reaction(startup) -> one_action {=
+    x = 0;
+    one_action.schedule(1ms);
+  =}
+
+  reaction(one_action) -> two_action {=
+    x = 1;
+    two_action.schedule(1ms);
+  =}
+
+  reaction(two_action) -> three_action {=
+    x = 2;
+    three_action.schedule(1ms);
+  =}
+
+  reaction(three_action) -> one_action {=
+    x = 3;
+    one_action.schedule(1ms);
+  =}
+}
+
+main reactor {
+  runner = new Runner()
+}

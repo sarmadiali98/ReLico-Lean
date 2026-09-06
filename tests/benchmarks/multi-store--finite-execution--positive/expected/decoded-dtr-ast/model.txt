@@ -1,0 +1,23 @@
+{ reactiveClass := { name := { value := "Runner" },
+                     stateVariables := [{ name := { value := "x" }, initialValue := 0 }],
+                     constructor := { body := [Relico.DTR.Stmt.assign { value := "x" } (Relico.DTR.Expr.intLiteral 0),
+                                               Relico.DTR.Stmt.selfSend { value := "one" } { value := 1 }] },
+                     messageServers := [{ name := { value := "one" },
+                                          body := [Relico.DTR.Stmt.assign
+                                                     { value := "x" }
+                                                     (Relico.DTR.Expr.intLiteral 1),
+                                                   Relico.DTR.Stmt.selfSend { value := "two" } { value := 1 }],
+                                          priority := none },
+                                        { name := { value := "two" },
+                                          body := [Relico.DTR.Stmt.assign
+                                                     { value := "x" }
+                                                     (Relico.DTR.Expr.intLiteral 2),
+                                                   Relico.DTR.Stmt.selfSend { value := "three" } { value := 1 }],
+                                          priority := none },
+                                        { name := { value := "three" },
+                                          body := [Relico.DTR.Stmt.assign
+                                                     { value := "x" }
+                                                     (Relico.DTR.Expr.intLiteral 3),
+                                                   Relico.DTR.Stmt.selfSend { value := "one" } { value := 1 }],
+                                          priority := none }] },
+  actor := { name := { value := "runner" }, className := { value := "Runner" } } }
