@@ -1,0 +1,209 @@
+{
+  "benchmark_id": "multi-store--queue-correspondence--positive",
+  "description": "Multi-store benchmark for queue correspondence: three staggered servers keep up to three self-messages pending at once, so the queue's contents are the property, through the multi-store parser bridge and the multi-store Lean exporter.",
+  "expected_artifacts": [
+    {
+      "path": "source/result.json",
+      "required": true,
+      "sha256": "578482c0bb0bee79c346e2d9f456684edeaf55793671728cc9416990598f35a9"
+    },
+    {
+      "path": "rmc/verdict.json",
+      "required": true,
+      "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
+    },
+    {
+      "path": "parser-json/model.json",
+      "required": true,
+      "sha256": "4ca9cf6345cf62ae7f02f1963dbb3702f5309767a30c918e144feb9c9ee46175"
+    },
+    {
+      "path": "decoded-dtr-ast/model.txt",
+      "required": true,
+      "sha256": "1c073abd1ccd29e5808c8e2f7103d8e41c2562a8325974dc3b484df0228aedee"
+    },
+    {
+      "path": "formal-witness/result.json",
+      "required": true,
+      "sha256": "3251553a1d9fc1f6d572d04e0cb64a9a2b7caf2686c1587088be9ce9fad5253e"
+    },
+    {
+      "path": "translated-lf-ast/program.txt",
+      "required": true,
+      "sha256": "162ddfb7f5def989c4aeefb0d3b89f32c8ed57cb13c8a29174e3739be8a80a08"
+    },
+    {
+      "path": "lf-source/TranslatedLFProgram.lf",
+      "required": true,
+      "sha256": "2a28d9893d2b2b1fe8b11e03ea2c3175f0e89e003038289d3287884778e0b850"
+    },
+    {
+      "path": "lfc/result.json",
+      "required": true,
+      "sha256": "fb7581ee97c62580ef11bd0d765aed50c289ee1ca958df37ea6035aa72ef676d"
+    }
+  ],
+  "expected_terminal_stage": "lfc",
+  "polarity": "positive",
+  "schema_version": 1,
+  "source_files": [
+    "source/model.rebeca"
+  ],
+  "stages": [
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "source",
+        "--benchmark-id",
+        "multi-store--queue-correspondence--positive",
+        "--source",
+        "{source}",
+        "--output",
+        "{actual}/source/result.json"
+      ],
+      "name": "source"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc/verdict.json"
+      ],
+      "name": "rmc",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "parser-json",
+        "--family",
+        "multi-store",
+        "--repo",
+        "{repo}",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--artifact-zip",
+        "/Users/ali/Desktop/LFStructuringNonDeterminism/ReLico-fmcad-2026-artifact-v1.zip",
+        "--maven",
+        "/opt/homebrew/Cellar/maven/3.9.16/bin/mvn",
+        "--output",
+        "{actual}/parser-json/model.json"
+      ],
+      "name": "parser-json",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lean-export",
+        "--family",
+        "multi-store",
+        "--mode",
+        "decoded-dtr-ast",
+        "--repo",
+        "{repo}",
+        "--lake",
+        "/Users/ali/.elan/bin/lake",
+        "--input",
+        "{actual}/parser-json/model.json",
+        "--output",
+        "{actual}/decoded-dtr-ast/model.txt"
+      ],
+      "name": "decoded-dtr-ast",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "formal-witness",
+        "--repo",
+        "{repo}",
+        "--lake",
+        "/Users/ali/.elan/bin/lake",
+        "--coverage",
+        "{benchmark}/coverage.json",
+        "--output",
+        "{actual}/formal-witness/result.json"
+      ],
+      "name": "formal-witness",
+      "timeout_seconds": 1200
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lean-export",
+        "--family",
+        "multi-store",
+        "--mode",
+        "translated-lf-ast",
+        "--repo",
+        "{repo}",
+        "--lake",
+        "/Users/ali/.elan/bin/lake",
+        "--input",
+        "{actual}/parser-json/model.json",
+        "--output",
+        "{actual}/translated-lf-ast/program.txt"
+      ],
+      "name": "translated-lf-ast",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lean-export",
+        "--family",
+        "multi-store",
+        "--mode",
+        "lf-source",
+        "--repo",
+        "{repo}",
+        "--lake",
+        "/Users/ali/.elan/bin/lake",
+        "--input",
+        "{actual}/parser-json/model.json",
+        "--output",
+        "{actual}/lf-source/TranslatedLFProgram.lf"
+      ],
+      "name": "lf-source",
+      "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "lfc",
+        "--lf-source",
+        "{actual}/lf-source/TranslatedLFProgram.lf",
+        "--work-directory",
+        "{actual}/work/lfc",
+        "--lfc",
+        "/Users/ali/.local/share/lingua-franca/cli/bin/lfc",
+        "--output",
+        "{actual}/lfc/result.json"
+      ],
+      "name": "lfc",
+      "timeout_seconds": 1200
+    }
+  ]
+}

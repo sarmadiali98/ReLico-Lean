@@ -1,0 +1,38 @@
+target Cpp
+
+reactor Queue {
+  state a: int = 0
+  state b: int = 0
+  state c: int = 0
+  logical action alpha_action: void
+  logical action beta_action: void
+  logical action gamma_action: void
+
+  reaction(startup) -> alpha_action, beta_action, gamma_action {=
+    a = 0;
+    b = 0;
+    c = 0;
+    alpha_action.schedule(1ms);
+    beta_action.schedule(2ms);
+    gamma_action.schedule(3ms);
+  =}
+
+  reaction(alpha_action) -> alpha_action {=
+    a = 1;
+    alpha_action.schedule(3ms);
+  =}
+
+  reaction(beta_action) -> beta_action {=
+    b = 2;
+    beta_action.schedule(3ms);
+  =}
+
+  reaction(gamma_action) -> gamma_action {=
+    c = 3;
+    gamma_action.schedule(3ms);
+  =}
+}
+
+main reactor {
+  queue = new Queue()
+}

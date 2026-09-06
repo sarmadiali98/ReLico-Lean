@@ -1,0 +1,38 @@
+{
+  "benchmark_id": "multi-store--queue-correspondence--positive",
+  "elaborated_modules": [
+    "Relico/Tests/DirectLFStatementForward.lean",
+    "Relico/Tests/MultiStoreSemantics.lean"
+  ],
+  "obligation_count": 26,
+  "obligation_ids": [
+    "DirectLFStatementForward:0001",
+    "DirectLFStatementForward:0002",
+    "DirectLFStatementForward:0003",
+    "DirectLFStatementForward:0004",
+    "DirectLFStatementForward:0005",
+    "DirectLFStatementForward:0006",
+    "DirectLFStatementForward:0007",
+    "DirectLFStatementForward:0008",
+    "MultiStoreSemantics:0001",
+    "MultiStoreSemantics:0002",
+    "MultiStoreSemantics:0003",
+    "MultiStoreSemantics:0004",
+    "MultiStoreSemantics:0005",
+    "MultiStoreSemantics:0006",
+    "MultiStoreSemantics:0007",
+    "MultiStoreSemantics:0008",
+    "MultiStoreSemantics:0009",
+    "MultiStoreSemantics:0010",
+    "MultiStoreSemantics:0011",
+    "MultiStoreSemantics:0012",
+    "MultiStoreSemantics:0013",
+    "MultiStoreSemantics:0014",
+    "MultiStoreSemantics:0015",
+    "MultiStoreSemantics:0016",
+    "MultiStoreSemantics:0017",
+    "MultiStoreSemantics:0018"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

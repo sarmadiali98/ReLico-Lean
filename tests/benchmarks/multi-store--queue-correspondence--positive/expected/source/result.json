@@ -1,0 +1,6 @@
+{
+  "benchmark_id": "multi-store--queue-correspondence--positive",
+  "schema_version": 1,
+  "sha256": "0f86fa2db8ef39e0fd92cff0b0d128dd977d0fdbbe455cc6f9e2e3131dc39e06",
+  "status": "pass"
+}

@@ -1,0 +1,37 @@
+// Benchmark: multi-store--queue-correspondence--positive
+// A multi-store source exercising queue correspondence: three staggered servers keep up to three self-messages pending at once, so the queue's contents are the property.
+reactiveclass Queue(10) {
+    statevars {
+        int a;
+        int b;
+        int c;
+    }
+
+    Queue() {
+        a = 0;
+        b = 0;
+        c = 0;
+        self.alpha() after(1);
+        self.beta() after(2);
+        self.gamma() after(3);
+    }
+
+    msgsrv alpha() {
+        a = 1;
+        self.alpha() after(3);
+    }
+
+    msgsrv beta() {
+        b = 2;
+        self.beta() after(3);
+    }
+
+    msgsrv gamma() {
+        c = 3;
+        self.gamma() after(3);
+    }
+}
+
+main {
+    Queue queue():();
+}

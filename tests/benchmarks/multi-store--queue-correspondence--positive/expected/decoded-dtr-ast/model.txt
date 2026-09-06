@@ -1,0 +1,29 @@
+{ reactiveClass := { name := { value := "Queue" },
+                     stateVariables := [{ name := { value := "a" }, initialValue := 0 },
+                                        { name := { value := "b" }, initialValue := 0 },
+                                        { name := { value := "c" }, initialValue := 0 }],
+                     constructor := { body := [Relico.DTR.Stmt.assign { value := "a" } (Relico.DTR.Expr.intLiteral 0),
+                                               Relico.DTR.Stmt.assign { value := "b" } (Relico.DTR.Expr.intLiteral 0),
+                                               Relico.DTR.Stmt.assign { value := "c" } (Relico.DTR.Expr.intLiteral 0),
+                                               Relico.DTR.Stmt.selfSend { value := "alpha" } { value := 1 },
+                                               Relico.DTR.Stmt.selfSend { value := "beta" } { value := 2 },
+                                               Relico.DTR.Stmt.selfSend { value := "gamma" } { value := 3 }] },
+                     messageServers := [{ name := { value := "alpha" },
+                                          body := [Relico.DTR.Stmt.assign
+                                                     { value := "a" }
+                                                     (Relico.DTR.Expr.intLiteral 1),
+                                                   Relico.DTR.Stmt.selfSend { value := "alpha" } { value := 3 }],
+                                          priority := none },
+                                        { name := { value := "beta" },
+                                          body := [Relico.DTR.Stmt.assign
+                                                     { value := "b" }
+                                                     (Relico.DTR.Expr.intLiteral 2),
+                                                   Relico.DTR.Stmt.selfSend { value := "beta" } { value := 3 }],
+                                          priority := none },
+                                        { name := { value := "gamma" },
+                                          body := [Relico.DTR.Stmt.assign
+                                                     { value := "c" }
+                                                     (Relico.DTR.Expr.intLiteral 3),
+                                                   Relico.DTR.Stmt.selfSend { value := "gamma" } { value := 3 }],
+                                          priority := none }] },
+  actor := { name := { value := "queue" }, className := { value := "Queue" } } }

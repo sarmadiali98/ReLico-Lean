@@ -1,0 +1,117 @@
+{
+  "actorClass": "Queue",
+  "actorName": "queue",
+  "className": "Queue",
+  "constructorBody": [
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 0
+      },
+      "kind": "assign",
+      "target": "a"
+    },
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 0
+      },
+      "kind": "assign",
+      "target": "b"
+    },
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 0
+      },
+      "kind": "assign",
+      "target": "c"
+    },
+    {
+      "delay": 1,
+      "kind": "selfSend",
+      "message": "alpha"
+    },
+    {
+      "delay": 2,
+      "kind": "selfSend",
+      "message": "beta"
+    },
+    {
+      "delay": 3,
+      "kind": "selfSend",
+      "message": "gamma"
+    }
+  ],
+  "messageServers": [
+    {
+      "body": [
+        {
+          "expression": {
+            "kind": "intLiteral",
+            "value": 1
+          },
+          "kind": "assign",
+          "target": "a"
+        },
+        {
+          "delay": 3,
+          "kind": "selfSend",
+          "message": "alpha"
+        }
+      ],
+      "name": "alpha"
+    },
+    {
+      "body": [
+        {
+          "expression": {
+            "kind": "intLiteral",
+            "value": 2
+          },
+          "kind": "assign",
+          "target": "b"
+        },
+        {
+          "delay": 3,
+          "kind": "selfSend",
+          "message": "beta"
+        }
+      ],
+      "name": "beta"
+    },
+    {
+      "body": [
+        {
+          "expression": {
+            "kind": "intLiteral",
+            "value": 3
+          },
+          "kind": "assign",
+          "target": "c"
+        },
+        {
+          "delay": 3,
+          "kind": "selfSend",
+          "message": "gamma"
+        }
+      ],
+      "name": "gamma"
+    }
+  ],
+  "schemaVersion": 3,
+  "stateVariables": [
+    {
+      "initialValue": 0,
+      "name": "a"
+    },
+    {
+      "initialValue": 0,
+      "name": "b"
+    },
+    {
+      "initialValue": 0,
+      "name": "c"
+    }
+  ]
+}
