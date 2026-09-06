@@ -1,0 +1,54 @@
+// Benchmark: global-multi-actor-payload--actor-priority--positive
+// Two feeders are ready in the same round and both deliver to one collector;
+// instance-level @priority decides which actor the scheduler selects first,
+// and the collector's `last` records who was consumed most recently -- the
+// arrival order that priority produced. Each feeder re-arms only when its own
+// delivery has been consumed, so no queue can grow under any interleaving.
+// Distinct from the tcsma-inspired general--actor-priority benchmark: no
+// medium, no arbitration protocol, just two prioritized producers racing a
+// shared sink.
+reactiveclass Feeder(4) {
+    knownrebecs {
+        Collector collector;
+    }
+    statevars {
+        int id;
+    }
+    Feeder(int myId) {
+        id = myId;
+        self.emit(1) after(1);
+    }
+    msgsrv emit(int round) {
+        collector.collect(id);
+    }
+    msgsrv ack(int from) {
+        self.emit(from) after(2);
+    }
+}
+
+reactiveclass Collector(4) {
+    knownrebecs {
+        Feeder urgent;
+        Feeder routine;
+    }
+    statevars {
+        int last;
+    }
+    Collector() {
+        last = 0;
+    }
+    msgsrv collect(int from) {
+        last = from;
+        if (from == 1) {
+            urgent.ack(1);
+        } else {
+            routine.ack(2);
+        }
+    }
+}
+
+main {
+    @priority(1) Feeder urgent(collector):(1);
+    @priority(2) Feeder routine(collector):(2);
+    Collector collector(urgent, routine):();
+}

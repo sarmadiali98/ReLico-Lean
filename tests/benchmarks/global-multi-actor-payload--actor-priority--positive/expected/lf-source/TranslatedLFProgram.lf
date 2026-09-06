@@ -1,0 +1,82 @@
+target Cpp
+
+reactor Feeder(myId: int = 0) {
+  input ackToUrgentFromCollector: int
+  input ackToRoutineFromCollector: int
+  output collectToCollector: int
+  state id: int = 0
+  logical action emit_action1: int
+  logical action emit_action2: int
+  logical action ack_action: int
+
+  reaction(startup) -> emit_action1 {=
+    id = myId;
+    emit_action1.schedule(1, 1ms);
+  =}
+
+  reaction(emit_action1) -> collectToCollector {=
+    auto round = *emit_action1.get();
+    collectToCollector.set(id);
+  =}
+
+  reaction(emit_action2) -> collectToCollector {=
+    auto round = *emit_action2.get();
+    collectToCollector.set(id);
+  =}
+
+  reaction(ack_action) -> emit_action2 {=
+    auto from = *ack_action.get();
+    emit_action2.schedule(from, 2ms);
+  =}
+
+  reaction(ackToUrgentFromCollector) -> emit_action2 {=
+    auto from = *ackToUrgentFromCollector.get();
+    emit_action2.schedule(from, 2ms);
+  =}
+
+  reaction(ackToRoutineFromCollector) -> emit_action2 {=
+    auto from = *ackToRoutineFromCollector.get();
+    emit_action2.schedule(from, 2ms);
+  =}
+}
+
+reactor Collector {
+  input collectToCollectorFromUrgent: int
+  input collectToCollectorFromRoutine: int
+  output ackToUrgent: int
+  output ackToRoutine: int
+  state last: int = 0
+  logical action collect_action: int
+
+  reaction(startup) {=
+    last = 0;
+  =}
+
+  reaction(collect_action) -> ackToUrgent, ackToRoutine {=
+    auto from = *collect_action.get();
+    last = from;
+    if ((from == 1)) { ackToUrgent.set(1); } else { ackToRoutine.set(2); }
+  =}
+
+  reaction(collectToCollectorFromUrgent) -> ackToUrgent, ackToRoutine {=
+    auto from = *collectToCollectorFromUrgent.get();
+    last = from;
+    if ((from == 1)) { ackToUrgent.set(1); } else { ackToRoutine.set(2); }
+  =}
+
+  reaction(collectToCollectorFromRoutine) -> ackToUrgent, ackToRoutine {=
+    auto from = *collectToCollectorFromRoutine.get();
+    last = from;
+    if ((from == 1)) { ackToUrgent.set(1); } else { ackToRoutine.set(2); }
+  =}
+}
+
+main reactor {
+  urgent = new Feeder(myId=1)
+  routine = new Feeder(myId=2)
+  collector = new Collector()
+  urgent.collectToCollector -> collector.collectToCollectorFromUrgent after 0 msec
+  routine.collectToCollector -> collector.collectToCollectorFromRoutine after 0 msec
+  collector.ackToUrgent -> urgent.ackToUrgentFromCollector after 0 msec
+  collector.ackToRoutine -> routine.ackToRoutineFromCollector after 0 msec
+}

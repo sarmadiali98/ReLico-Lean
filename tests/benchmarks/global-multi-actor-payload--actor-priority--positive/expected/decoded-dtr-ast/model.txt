@@ -1,0 +1,77 @@
+{ classes := [{ name := { value := "Feeder" },
+                knownRebecs := [{ name := { value := "collector" }, className := { value := "Collector" } }],
+                stateVariables := [{ name := { value := "id" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [{ name := { value := "myId" },
+                                                  declaredType := Relico.DTR.GeneralType.int }],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "id" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "myId" }),
+                                          Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "emit" }
+                                            [Relico.DTR.GeneralExpr.intLiteral 1]
+                                            { value := 1 }] },
+                messageServers := [{ name := { value := "emit" },
+                                     parameters := [{ name := { value := "round" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "collector" })
+                                                { value := "collect" }
+                                                [Relico.DTR.GeneralExpr.stateVar { value := "id" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "ack" },
+                                     parameters := [{ name := { value := "from" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "emit" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "from" }]
+                                                { value := 2 }],
+                                     priority := none }] },
+              { name := { value := "Collector" },
+                knownRebecs := [{ name := { value := "urgent" }, className := { value := "Feeder" } },
+                                { name := { value := "routine" }, className := { value := "Feeder" } }],
+                stateVariables := [{ name := { value := "last" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "last" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0)] },
+                messageServers := [{ name := { value := "collect" },
+                                     parameters := [{ name := { value := "from" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "last" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "from" }),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "from" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "urgent" })
+                                                   { value := "ack" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 1]
+                                                   { value := 0 }]
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "routine" })
+                                                   { value := "ack" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 2]
+                                                   { value := 0 }]],
+                                     priority := none }] }],
+  instances := [{ name := { value := "urgent" },
+                  className := { value := "Feeder" },
+                  bindings := [({ value := "collector" }, { value := "collector" })],
+                  arguments := [Relico.DTR.GeneralValue.int 1],
+                  priority := some 1 },
+                { name := { value := "routine" },
+                  className := { value := "Feeder" },
+                  bindings := [({ value := "collector" }, { value := "collector" })],
+                  arguments := [Relico.DTR.GeneralValue.int 2],
+                  priority := some 2 },
+                { name := { value := "collector" },
+                  className := { value := "Collector" },
+                  bindings := [({ value := "urgent" }, { value := "urgent" }),
+                               ({ value := "routine" }, { value := "routine" })],
+                  arguments := [],
+                  priority := none }] }

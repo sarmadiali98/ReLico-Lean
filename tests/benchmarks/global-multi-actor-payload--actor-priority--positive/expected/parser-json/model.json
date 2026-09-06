@@ -1,0 +1,319 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 18,
+            "target": "id",
+            "value": {
+              "kind": "variable",
+              "line": 18,
+              "name": "myId"
+            }
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 1
+            },
+            "arguments": [
+              {
+                "kind": "intLiteral",
+                "line": 19,
+                "value": 1
+              }
+            ],
+            "kind": "send",
+            "line": 19,
+            "messageServer": "emit",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Feeder"
+          }
+        ],
+        "line": 17,
+        "parameters": [
+          {
+            "line": 17,
+            "name": "myId",
+            "type": "int"
+          }
+        ]
+      },
+      "knownRebecs": [
+        {
+          "className": "Collector",
+          "line": 12,
+          "name": "collector"
+        }
+      ],
+      "line": 10,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 22,
+                  "name": "id"
+                }
+              ],
+              "kind": "send",
+              "line": 22,
+              "messageServer": "collect",
+              "target": {
+                "kind": "knownRebec",
+                "name": "collector"
+              },
+              "targetClassName": "Collector"
+            }
+          ],
+          "line": 21,
+          "name": "emit",
+          "parameters": [
+            {
+              "line": 21,
+              "name": "round",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 2
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 25,
+                  "name": "from"
+                }
+              ],
+              "kind": "send",
+              "line": 25,
+              "messageServer": "emit",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Feeder"
+            }
+          ],
+          "line": 24,
+          "name": "ack",
+          "parameters": [
+            {
+              "line": 24,
+              "name": "from",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Feeder",
+      "queueBound": 4,
+      "stateVariables": [
+        {
+          "line": 15,
+          "name": "id",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 38,
+            "target": "last",
+            "value": {
+              "kind": "intLiteral",
+              "line": 38,
+              "value": 0
+            }
+          }
+        ],
+        "line": 37,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Feeder",
+          "line": 31,
+          "name": "urgent"
+        },
+        {
+          "className": "Feeder",
+          "line": 32,
+          "name": "routine"
+        }
+      ],
+      "line": 29,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 41,
+              "target": "last",
+              "value": {
+                "kind": "variable",
+                "line": 41,
+                "name": "from"
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 42,
+                  "name": "from"
+                },
+                "line": 42,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 42,
+                  "value": 1
+                }
+              },
+              "else": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 45,
+                      "value": 2
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 45,
+                  "messageServer": "ack",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "routine"
+                  },
+                  "targetClassName": "Feeder"
+                }
+              ],
+              "kind": "if",
+              "line": 42,
+              "then": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 43,
+                      "value": 1
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 43,
+                  "messageServer": "ack",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "urgent"
+                  },
+                  "targetClassName": "Feeder"
+                }
+              ]
+            }
+          ],
+          "line": 40,
+          "name": "collect",
+          "parameters": [
+            {
+              "line": 40,
+              "name": "from",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Collector",
+      "queueBound": 4,
+      "stateVariables": [
+        {
+          "line": 35,
+          "name": "last",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 1
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Collector",
+          "instance": "collector",
+          "knownRebec": "collector"
+        }
+      ],
+      "className": "Feeder",
+      "line": 51,
+      "name": "urgent",
+      "priority": 1
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 2
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Collector",
+          "instance": "collector",
+          "knownRebec": "collector"
+        }
+      ],
+      "className": "Feeder",
+      "line": 52,
+      "name": "routine",
+      "priority": 2
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Feeder",
+          "instance": "urgent",
+          "knownRebec": "urgent"
+        },
+        {
+          "className": "Feeder",
+          "instance": "routine",
+          "knownRebec": "routine"
+        }
+      ],
+      "className": "Collector",
+      "line": 53,
+      "name": "collector",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}
