@@ -1,0 +1,24 @@
+{ reactiveClass := { name := { value := "Clock" },
+                     stateVariables := [{ name := { value := "quick" }, initialValue := 0 },
+                                        { name := { value := "late" }, initialValue := 0 }],
+                     constructor := { body := [Relico.DTR.Stmt.assign
+                                                 { value := "quick" }
+                                                 (Relico.DTR.Expr.intLiteral 0),
+                                               Relico.DTR.Stmt.assign
+                                                 { value := "late" }
+                                                 (Relico.DTR.Expr.intLiteral 0),
+                                               Relico.DTR.Stmt.selfSend { value := "tick" } { value := 1 },
+                                               Relico.DTR.Stmt.selfSend { value := "tock" } { value := 3 }] },
+                     messageServers := [{ name := { value := "tick" },
+                                          body := [Relico.DTR.Stmt.assign
+                                                     { value := "quick" }
+                                                     (Relico.DTR.Expr.intLiteral 1),
+                                                   Relico.DTR.Stmt.selfSend { value := "tick" } { value := 3 }],
+                                          priority := none },
+                                        { name := { value := "tock" },
+                                          body := [Relico.DTR.Stmt.assign
+                                                     { value := "late" }
+                                                     (Relico.DTR.Expr.intLiteral 2),
+                                                   Relico.DTR.Stmt.selfSend { value := "tock" } { value := 3 }],
+                                          priority := none }] },
+  actor := { name := { value := "clock" }, className := { value := "Clock" } } }

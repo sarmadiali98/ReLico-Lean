@@ -1,0 +1,34 @@
+{
+  "benchmark_id": "multi-store--runtime-semantics--positive",
+  "obligation_count": 2,
+  "obligations": [
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "multi-store--runtime-semantics--positive",
+      "kind": "theorem",
+      "line_number": "8",
+      "mapping_status": "accepted",
+      "name_or_expression": "forward_runtime_match_regression",
+      "obligation_id": "DetailedInvariantMatches:0001",
+      "original_benchmark_candidate": "multi-store--runtime-semantics--positive",
+      "test_file": "Relico/Tests/DetailedInvariantMatches.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "multi-store--runtime-semantics--positive",
+      "kind": "theorem",
+      "line_number": "49",
+      "mapping_status": "accepted",
+      "name_or_expression": "backward_runtime_match_regression",
+      "obligation_id": "DetailedInvariantMatches:0002",
+      "original_benchmark_candidate": "multi-store--runtime-semantics--positive",
+      "test_file": "Relico/Tests/DetailedInvariantMatches.lean"
+    }
+  ],
+  "schema_version": 1,
+  "test_modules": [
+    "Relico/Tests/DetailedInvariantMatches.lean"
+  ]
+}

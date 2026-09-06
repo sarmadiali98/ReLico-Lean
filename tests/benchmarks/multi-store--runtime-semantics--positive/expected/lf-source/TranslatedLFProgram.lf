@@ -1,0 +1,29 @@
+target Cpp
+
+reactor Clock {
+  state quick: int = 0
+  state late: int = 0
+  logical action tick_action: void
+  logical action tock_action: void
+
+  reaction(startup) -> tick_action, tock_action {=
+    quick = 0;
+    late = 0;
+    tick_action.schedule(1ms);
+    tock_action.schedule(3ms);
+  =}
+
+  reaction(tick_action) -> tick_action {=
+    quick = 1;
+    tick_action.schedule(3ms);
+  =}
+
+  reaction(tock_action) -> tock_action {=
+    late = 2;
+    tock_action.schedule(3ms);
+  =}
+}
+
+main reactor {
+  clock = new Clock()
+}

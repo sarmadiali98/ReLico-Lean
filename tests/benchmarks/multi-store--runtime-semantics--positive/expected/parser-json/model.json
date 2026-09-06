@@ -1,0 +1,82 @@
+{
+  "actorClass": "Clock",
+  "actorName": "clock",
+  "className": "Clock",
+  "constructorBody": [
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 0
+      },
+      "kind": "assign",
+      "target": "quick"
+    },
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 0
+      },
+      "kind": "assign",
+      "target": "late"
+    },
+    {
+      "delay": 1,
+      "kind": "selfSend",
+      "message": "tick"
+    },
+    {
+      "delay": 3,
+      "kind": "selfSend",
+      "message": "tock"
+    }
+  ],
+  "messageServers": [
+    {
+      "body": [
+        {
+          "expression": {
+            "kind": "intLiteral",
+            "value": 1
+          },
+          "kind": "assign",
+          "target": "quick"
+        },
+        {
+          "delay": 3,
+          "kind": "selfSend",
+          "message": "tick"
+        }
+      ],
+      "name": "tick"
+    },
+    {
+      "body": [
+        {
+          "expression": {
+            "kind": "intLiteral",
+            "value": 2
+          },
+          "kind": "assign",
+          "target": "late"
+        },
+        {
+          "delay": 3,
+          "kind": "selfSend",
+          "message": "tock"
+        }
+      ],
+      "name": "tock"
+    }
+  ],
+  "schemaVersion": 3,
+  "stateVariables": [
+    {
+      "initialValue": 0,
+      "name": "quick"
+    },
+    {
+      "initialValue": 0,
+      "name": "late"
+    }
+  ]
+}

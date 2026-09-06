@@ -1,0 +1,29 @@
+// Benchmark: multi-store--runtime-semantics--positive
+// A multi-store source exercising runtime semantics: two servers on staggered periods, so the runtime's time-ordering of their executions is the property.
+reactiveclass Clock(10) {
+    statevars {
+        int quick;
+        int late;
+    }
+
+    Clock() {
+        quick = 0;
+        late = 0;
+        self.tick() after(1);
+        self.tock() after(3);
+    }
+
+    msgsrv tick() {
+        quick = 1;
+        self.tick() after(3);
+    }
+
+    msgsrv tock() {
+        late = 2;
+        self.tock() after(3);
+    }
+}
+
+main {
+    Clock clock():();
+}

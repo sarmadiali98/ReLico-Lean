@@ -1,0 +1,13 @@
+{
+  "benchmark_id": "multi-store--runtime-semantics--positive",
+  "elaborated_modules": [
+    "Relico/Tests/DetailedInvariantMatches.lean"
+  ],
+  "obligation_count": 2,
+  "obligation_ids": [
+    "DetailedInvariantMatches:0001",
+    "DetailedInvariantMatches:0002"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}
