@@ -1,0 +1,24 @@
+// Benchmark: payload--initialization--positive
+// The constructor seeds two distinct values into the store; the
+// server then propagates the seed every period.
+reactiveclass Seed(10) {
+    statevars {
+        int x;
+        int y;
+    }
+
+    Seed() {
+        x = 7;
+        y = 3;
+        self.run() after(1);
+    }
+
+    msgsrv run() {
+        x = y;
+        self.run() after(1);
+    }
+}
+
+main {
+    Seed seed():();
+}

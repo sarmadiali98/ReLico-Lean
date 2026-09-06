@@ -1,0 +1,154 @@
+{
+  "benchmark_id": "payload--initialization--positive",
+  "obligation_count": 12,
+  "obligations": [
+    {
+      "classification": "test_fixture_or_helper",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--initialization--positive",
+      "kind": "def",
+      "line_number": "8",
+      "mapping_status": "accepted",
+      "name_or_expression": "payloadStatementMessageName",
+      "obligation_id": "PayloadStatementTranslation:0001",
+      "original_benchmark_candidate": "payload--initialization--positive",
+      "test_file": "Relico/Tests/PayloadStatementTranslation.lean"
+    },
+    {
+      "classification": "test_fixture_or_helper",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--initialization--positive",
+      "kind": "def",
+      "line_number": "12",
+      "mapping_status": "accepted",
+      "name_or_expression": "payloadStatementActionName",
+      "obligation_id": "PayloadStatementTranslation:0002",
+      "original_benchmark_candidate": "payload--initialization--positive",
+      "test_file": "Relico/Tests/PayloadStatementTranslation.lean"
+    },
+    {
+      "classification": "test_fixture_or_helper",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--initialization--positive",
+      "kind": "def",
+      "line_number": "17",
+      "mapping_status": "accepted",
+      "name_or_expression": "payloadStatementSource",
+      "obligation_id": "PayloadStatementTranslation:0003",
+      "original_benchmark_candidate": "payload--initialization--positive",
+      "test_file": "Relico/Tests/PayloadStatementTranslation.lean"
+    },
+    {
+      "classification": "test_fixture_or_helper",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--initialization--positive",
+      "kind": "def",
+      "line_number": "24",
+      "mapping_status": "accepted",
+      "name_or_expression": "payloadStatementTarget",
+      "obligation_id": "PayloadStatementTranslation:0004",
+      "original_benchmark_candidate": "payload--initialization--positive",
+      "test_file": "Relico/Tests/PayloadStatementTranslation.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--initialization--positive",
+      "kind": "theorem",
+      "line_number": "31",
+      "mapping_status": "accepted",
+      "name_or_expression": "payload_statement_translation_exact",
+      "obligation_id": "PayloadStatementTranslation:0005",
+      "original_benchmark_candidate": "payload--initialization--positive",
+      "test_file": "Relico/Tests/PayloadStatementTranslation.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--initialization--positive",
+      "kind": "theorem",
+      "line_number": "37",
+      "mapping_status": "accepted",
+      "name_or_expression": "payload_statement_cpp_exact",
+      "obligation_id": "PayloadStatementTranslation:0006",
+      "original_benchmark_candidate": "payload--initialization--positive",
+      "test_file": "Relico/Tests/PayloadStatementTranslation.lean"
+    },
+    {
+      "classification": "test_fixture_or_helper",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--initialization--positive",
+      "kind": "def",
+      "line_number": "43",
+      "mapping_status": "accepted",
+      "name_or_expression": "payloadStatementProgram",
+      "obligation_id": "PayloadStatementTranslation:0007",
+      "original_benchmark_candidate": "payload--initialization--positive",
+      "test_file": "Relico/Tests/PayloadStatementTranslation.lean"
+    },
+    {
+      "classification": "test_fixture_or_helper",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--initialization--positive",
+      "kind": "def",
+      "line_number": "69",
+      "mapping_status": "accepted",
+      "name_or_expression": "payloadStatementProgramSource",
+      "obligation_id": "PayloadStatementTranslation:0008",
+      "original_benchmark_candidate": "payload--initialization--positive",
+      "test_file": "Relico/Tests/PayloadStatementTranslation.lean"
+    },
+    {
+      "classification": "test_fixture_or_helper",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--initialization--positive",
+      "kind": "def",
+      "line_number": "74",
+      "mapping_status": "accepted",
+      "name_or_expression": "expectedPayloadStatementProgramSource",
+      "obligation_id": "PayloadStatementTranslation:0009",
+      "original_benchmark_candidate": "payload--initialization--positive",
+      "test_file": "Relico/Tests/PayloadStatementTranslation.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--initialization--positive",
+      "kind": "theorem",
+      "line_number": "93",
+      "mapping_status": "accepted",
+      "name_or_expression": "payload_statement_program_cpp_exact",
+      "obligation_id": "PayloadStatementTranslation:0010",
+      "original_benchmark_candidate": "payload--initialization--positive",
+      "test_file": "Relico/Tests/PayloadStatementTranslation.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--initialization--positive",
+      "kind": "theorem",
+      "line_number": "97",
+      "mapping_status": "accepted",
+      "name_or_expression": "payload_statement_translation_preserves_value",
+      "obligation_id": "PayloadStatementTranslation:0011",
+      "original_benchmark_candidate": "payload--initialization--positive",
+      "test_file": "Relico/Tests/PayloadStatementTranslation.lean"
+    },
+    {
+      "classification": "proof_obligation",
+      "evidence_role": "source-capability",
+      "final_benchmark_id": "payload--initialization--positive",
+      "kind": "theorem",
+      "line_number": "108",
+      "mapping_status": "accepted",
+      "name_or_expression": "payload_statement_translation_preserves_delay",
+      "obligation_id": "PayloadStatementTranslation:0012",
+      "original_benchmark_candidate": "payload--initialization--positive",
+      "test_file": "Relico/Tests/PayloadStatementTranslation.lean"
+    }
+  ],
+  "schema_version": 1,
+  "test_modules": [
+    "Relico/Tests/PayloadStatementTranslation.lean"
+  ]
+}

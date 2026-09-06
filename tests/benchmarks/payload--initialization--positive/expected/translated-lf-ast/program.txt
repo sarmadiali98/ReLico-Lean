@@ -1,0 +1,16 @@
+{ reactor := { name := { value := "Seed" },
+               stateVariables := [{ name := { value := "x" }, initialValue := 0 },
+                                  { name := { value := "y" }, initialValue := 0 }],
+               logicalAction := { value := "run_action" },
+               startupReaction := { name := { value := "startup" },
+                                    trigger := Relico.LF.Trigger.startup,
+                                    body := [Relico.LF.Stmt.assign { value := "x" } (Relico.LF.Expr.intLiteral 7),
+                                             Relico.LF.Stmt.assign { value := "y" } (Relico.LF.Expr.intLiteral 3),
+                                             Relico.LF.Stmt.schedule { value := "run_action" } { value := 1 }] },
+               messageReaction := { name := { value := "run_reaction" },
+                                    trigger := Relico.LF.Trigger.logicalAction { value := "run_action" },
+                                    body := [Relico.LF.Stmt.assign
+                                               { value := "x" }
+                                               (Relico.LF.Expr.stateVar { value := "y" }),
+                                             Relico.LF.Stmt.schedule { value := "run_action" } { value := 1 }] } },
+  reactorInstance := { name := { value := "seed" }, reactorName := { value := "Seed" } } }
