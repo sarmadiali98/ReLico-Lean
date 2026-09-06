@@ -1,0 +1,22 @@
+model	source	exporter	decode	translation	lf_generation	lfc	runtime	rmc_verdict	final_status	failure_reason
+AircraftDoor/AircraftDoor	examples.zip:ReLico-main/AircraftDoor/AircraftDoor.rebeca	pass	pass	fail	fail	n/a	n/a	satisfied	fail	message server `KeepAlive`.`kick` takes no parameters, so the port that would carry it ha; value type unknown, so the port would carry no value
+Alarm/Alarm	examples.zip:ReLico-main/Alarm/Alarm.rebeca	pass	pass	pass	pass	pass	pass	satisfied	pass	
+CheckpointBarrier2/CheckpointBarrier2	examples.zip:ReLico-main/CheckpointBarrier2/CheckpointBarrier2.rebeca	pass	pass	pass	pass	pass	pass	satisfied	pass	
+Election/Election	examples.zip:ReLico-main/Election/Election.rebeca	pass	pass	pass	pass	pass	pass	satisfied	pass	
+Factorial/Factorial	examples.zip:ReLico-main/Factorial/Factorial.rebeca	pass	pass	fail	fail	n/a	n/a	satisfied	fail	message server `KeepAlive`.`kick` takes no parameters, so the port that would carry it ha; value type unknown, so the port would carry no value
+Fibonacci/Fibonacci	examples.zip:ReLico-main/Fibonacci/Fibonacci.rebeca	pass	pass	pass	pass	pass	pass	satisfied	pass	
+Minimal/Minimal	examples.zip:ReLico-main/Minimal/Minimal.rebeca	pass	pass	pass	pass	pass	fail	satisfied	fail	runtime wall-clock guard: zero-delay recurrence never advances logical time past the 5 msec budget
+PingPong/PingPong	examples.zip:ReLico-main/PingPong/PingPong.rebeca	pass	pass	pass	pass	pass	pass	satisfied	pass	
+Pipe/Pipe	examples.zip:ReLico-main/Pipe/Pipe.rebeca	pass	pass	pass	pass	pass	pass	satisfied	pass	
+ProcessMsg/ProcessMsg	examples.zip:ReLico-main/ProcessMsg/ProcessMsg.rebeca	pass	pass	pass	pass	pass	pass	satisfied	pass	
+Ring/Ring	examples.zip:ReLico-main/Ring/Ring.rebeca	pass	pass	pass	pass	pass	pass	satisfied	pass	
+SafeSend/SafeSend	examples.zip:ReLico-main/SafeSend/SafeSend.rebeca	pass	pass	fail	fail	n/a	n/a	satisfied	fail	message server `Checker`.`errorIn` takes no parameters, so the port that would carry it h; value type unknown, so the port would carry no value
+Subway/Subway	examples.zip:ReLico-main/Subway/Subway.rebeca	pass	pass	fail	fail	n/a	n/a	satisfied	fail	message server `Checker`.`doneIn` takes no parameters, so the port that would carry it ha; value type unknown, so the port would carry no value
+Thermostat/Thermostat	examples.zip:ReLico-main/Thermostat/Thermostat.rebeca	pass	pass	pass	pass	pass	pass	satisfied	pass	
+TrafficLight/TrafficLight	examples.zip:ReLico-main/TrafficLight/TrafficLight.rebeca	pass	pass	fail	fail	n/a	n/a	satisfied	fail	message server `Checker`.`sigGIn` takes no parameters, so the port that would carry it ha; value type unknown, so the port would carry no value
+TrainDoor/TrainDoor	examples.zip:ReLico-main/TrainDoor/TrainDoor.rebeca	pass	pass	fail	fail	n/a	n/a	satisfied	fail	message server `Checker`.`trainEvt` takes no parameters, so the port that would carry it ; value type unknown, so the port would carry no value
+TrainDoor2/TrainDoor2	examples.zip:ReLico-main/TrainDoor2/TrainDoor2.rebeca	pass	pass	pass	pass	pass	pass	satisfied	pass	
+TrainDoorFeedback/TrainDoorFeedback	examples.zip:ReLico-main/TrainDoorFeedback/TrainDoorFeedback.rebeca	pass	pass	pass	pass	pass	pass	satisfied	pass	
+UnsafeSend/UnsafeSend	examples.zip:ReLico-main/UnsafeSend/UnsafeSend.rebeca	pass	pass	fail	fail	n/a	n/a	satisfied	fail	message server `Checker`.`errorIn` takes no parameters, so the port that would carry it h; value type unknown, so the port would carry no value
+WideBarrier24/WideBarrier24	examples.zip:ReLico-main/WideBarrier24/WideBarrier24.rebeca	pass	pass	pass	pass	pass	pass	satisfied	pass	
+benchmarks/tcsma	examples.zip:ReLico-main/benchmarks/tcsma.rebeca	pass	pass	fail	fail	n/a	n/a	queue overflow	fail	message server `User`.`sendData` takes no parameters, so the port that would carry it has; value type unknown, so the port would carry no value
