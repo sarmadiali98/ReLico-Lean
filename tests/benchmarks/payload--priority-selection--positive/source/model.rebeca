@@ -1,0 +1,23 @@
+// Benchmark: payload--priority-selection--positive
+// The store fragment admits exactly one message server and refuses
+// annotations on it, so this family's selection surface is the
+// unannotated server's ordering rule; see README for the boundary.
+reactiveclass Solo(10) {
+    statevars {
+        int x;
+    }
+
+    Solo() {
+        x = 0;
+        self.pick() after(1);
+    }
+
+    msgsrv pick() {
+        x = 1;
+        self.pick() after(1);
+    }
+}
+
+main {
+    Solo solo():();
+}

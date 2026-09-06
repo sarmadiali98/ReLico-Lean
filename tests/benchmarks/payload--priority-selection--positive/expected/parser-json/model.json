@@ -1,0 +1,43 @@
+{
+  "actorClass": "Solo",
+  "actorName": "solo",
+  "className": "Solo",
+  "constructorBody": [
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 0
+      },
+      "kind": "assign",
+      "target": "x"
+    },
+    {
+      "delay": 1,
+      "kind": "selfSend",
+      "message": "pick"
+    }
+  ],
+  "messageServer": "pick",
+  "messageServerBody": [
+    {
+      "expression": {
+        "kind": "intLiteral",
+        "value": 1
+      },
+      "kind": "assign",
+      "target": "x"
+    },
+    {
+      "delay": 1,
+      "kind": "selfSend",
+      "message": "pick"
+    }
+  ],
+  "schemaVersion": 2,
+  "stateVariables": [
+    {
+      "initialValue": 0,
+      "name": "x"
+    }
+  ]
+}

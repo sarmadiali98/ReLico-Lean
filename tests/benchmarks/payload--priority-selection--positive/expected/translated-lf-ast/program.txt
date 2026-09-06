@@ -1,0 +1,12 @@
+{ reactor := { name := { value := "Solo" },
+               stateVariables := [{ name := { value := "x" }, initialValue := 0 }],
+               logicalAction := { value := "pick_action" },
+               startupReaction := { name := { value := "startup" },
+                                    trigger := Relico.LF.Trigger.startup,
+                                    body := [Relico.LF.Stmt.assign { value := "x" } (Relico.LF.Expr.intLiteral 0),
+                                             Relico.LF.Stmt.schedule { value := "pick_action" } { value := 1 }] },
+               messageReaction := { name := { value := "pick_reaction" },
+                                    trigger := Relico.LF.Trigger.logicalAction { value := "pick_action" },
+                                    body := [Relico.LF.Stmt.assign { value := "x" } (Relico.LF.Expr.intLiteral 1),
+                                             Relico.LF.Stmt.schedule { value := "pick_action" } { value := 1 }] } },
+  reactorInstance := { name := { value := "solo" }, reactorName := { value := "Solo" } } }

@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "payload--priority-selection--positive",
+  "elaborated_modules": [
+    "Relico/Tests/DirectLFPayloadSelectionCompatibility.lean",
+    "Relico/Tests/DirectLFPayloadSelectionRemoval.lean"
+  ],
+  "obligation_count": 28,
+  "obligation_ids": [
+    "DirectLFPayloadSelectionCompatibility:0001",
+    "DirectLFPayloadSelectionCompatibility:0002",
+    "DirectLFPayloadSelectionCompatibility:0003",
+    "DirectLFPayloadSelectionCompatibility:0004",
+    "DirectLFPayloadSelectionCompatibility:0005",
+    "DirectLFPayloadSelectionCompatibility:0006",
+    "DirectLFPayloadSelectionCompatibility:0007",
+    "DirectLFPayloadSelectionCompatibility:0008",
+    "DirectLFPayloadSelectionCompatibility:0009",
+    "DirectLFPayloadSelectionCompatibility:0010",
+    "DirectLFPayloadSelectionCompatibility:0011",
+    "DirectLFPayloadSelectionCompatibility:0012",
+    "DirectLFPayloadSelectionCompatibility:0013",
+    "DirectLFPayloadSelectionCompatibility:0014",
+    "DirectLFPayloadSelectionCompatibility:0015",
+    "DirectLFPayloadSelectionCompatibility:0016",
+    "DirectLFPayloadSelectionCompatibility:0017",
+    "DirectLFPayloadSelectionCompatibility:0018",
+    "DirectLFPayloadSelectionCompatibility:0019",
+    "DirectLFPayloadSelectionCompatibility:0020",
+    "DirectLFPayloadSelectionRemoval:0001",
+    "DirectLFPayloadSelectionRemoval:0002",
+    "DirectLFPayloadSelectionRemoval:0003",
+    "DirectLFPayloadSelectionRemoval:0004",
+    "DirectLFPayloadSelectionRemoval:0005",
+    "DirectLFPayloadSelectionRemoval:0006",
+    "DirectLFPayloadSelectionRemoval:0007",
+    "DirectLFPayloadSelectionRemoval:0008"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}
