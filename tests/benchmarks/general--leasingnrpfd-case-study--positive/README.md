@@ -25,24 +25,23 @@ artifacts themselves.
   R16, D5, D9, the `mode`/`nodeMode` target-keyword collision) is in
   [`ADAPTATION.md`](ADAPTATION.md); the ruling evidence for the
   transformation is in
-  [`ROUTING-COMPARISON.md`](ROUTING-COMPARISON.md).
+  [`ROUTING_COMPARISON.md`](ROUTING_COMPARISON.md).
 
 ## Stages
 
-7 stages, terminal `runtime`: `source`, `parser-json`,
+8 stages, terminal `runtime`: `source`, `rmc`, `parser-json`,
 `decoded-dtr-ast`, `translated-lf-ast`, `lf-source`, `lfc`, `runtime`,
-through the `--family general` arm. The `rmc` stage is deliberately
-absent: the model checker reports `queue overflow` on this model (the
-unfair-interleaving accumulation shape; see `ADAPTATION.md`), and
-case-study rows record model-checker verdicts as bonuses rather than
-gates, per the tier-2 policy.
+through the `--family general` arm. The `rmc` stage reports
+**`satisfied`** after the ping-pending boundedness fix recorded in
+`ADAPTATION.md`.
 
 ## Evidence
 
-- every pipeline stage exits 0;
-- the generated LF compiles under `lfc 0.11.0` and the binary runs
-  within its budget;
-- RMC verdict recorded in `ADAPTATION.md` and `RESULTS.md`.
+- every pipeline stage exits 0, including the model checker;
+- the generated LF (141 KB, preserved and SHA-256-pinned at
+  `expected/lf-source/TranslatedLFProgram.lf`) compiles under
+  `lfc 0.11.0` and the binary runs within its budget;
+- RMC reports `satisfied` for `Deadlock-Freedom and No Deadline Missed`.
 
 ## Keep-alive
 

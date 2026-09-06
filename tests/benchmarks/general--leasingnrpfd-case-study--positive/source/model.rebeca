@@ -86,6 +86,7 @@ reactiveclass Node (4){
 	        }
 	     }else if (nodeMode == 1){
                   if (ping_pending) {
+                         ping_pending = false;
 	                 NRP_network = NRP_network + 1;
 				     if(NRP_network<2){
 				        if (NRP_network == 0) NRP_switch_id = NRPCandidates0; else NRP_switch_id = NRPCandidates1;
@@ -154,6 +155,7 @@ reactiveclass Node (4){
  //PRIMARY : 
                       attacker = attacker + 1;
                       if(attacker>1) attacker=1;
+            		  if (!ping_pending) {
             		  if(NRP_network==0){	
     	               	 ping_pending = true;
             			 out1.pingNRP(id,id, NRP_switch_id) after(5);
@@ -163,6 +165,7 @@ reactiveclass Node (4){
                  		   out2.pingNRP(id,id, NRP_switch_id) after(5);
                  		   self.ping_timed_out() after(100);
             		   }
+            		  }
 	                   NRP_pending = true;
         }
         else if (nodeMode == 2) {
@@ -180,6 +183,7 @@ reactiveclass Node (4){
 //	              				   primary=id;
 //	                               NRP_pending = true;
 //	              				}else{
+							if (!ping_pending) {
 							if(NRP_network==0){	
     	            		   ping_pending = true;
 	            			  //NRP_network=-1;
@@ -191,9 +195,11 @@ reactiveclass Node (4){
                  			   out2.pingNRP(id,id, NRP_switch_id) after(15);
                  			   self.ping_timed_out() after(100);
             				 }
+							}
 	                         NRP_pending = true;
 //	              				}
 	              		}else if(heartbeats_missed_1 > 2|| heartbeats_missed_2 > 2){
+                    			 if (!ping_pending) {
                     			 if(NRP_network==0 && heartbeats_missed_1 > 2) {
             				        ping_pending = true;
             				        out1.pingNRP(id,id, NRP_switch_id) after(5);
@@ -203,6 +209,7 @@ reactiveclass Node (4){
             				              out2.pingNRP(id,id, NRP_switch_id) after(5);
             				              self.ping_timed_out() after(100);
             				            }
+                    			 }
                                   if (heartbeats_missed_1 > 2+2) { heartbeats_missed_1 = 2+2; }
                                   if (heartbeats_missed_2 > 2+2) { heartbeats_missed_2 = 2+2; }
             			}

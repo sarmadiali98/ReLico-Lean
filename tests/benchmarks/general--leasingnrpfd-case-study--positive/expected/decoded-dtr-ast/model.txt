@@ -1,0 +1,1304 @@
+{ classes := [{ name := { value := "Node" },
+                knownRebecs := [{ name := { value := "out1" }, className := { value := "Switch" } },
+                                { name := { value := "out2" }, className := { value := "Switch" } }],
+                stateVariables := [{ name := { value := "nodeMode" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "id" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "NRPCandidates0" },
+                                     declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "NRPCandidates1" },
+                                     declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "heartbeats_missed_1" },
+                                     declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "heartbeats_missed_2" },
+                                     declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "NRP_network" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "attacker" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "which" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "prevWhich" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "NRP_switch_id" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "NRP_pending" },
+                                     declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "become_primary_on_ping_response" },
+                                     declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "primary" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "ping_pending" },
+                                     declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "init" }, declaredType := Relico.DTR.GeneralType.boolean }],
+                constructor := { parameters := [{ name := { value := "Myid" },
+                                                  declaredType := Relico.DTR.GeneralType.int },
+                                                { name := { value := "Myprimary" },
+                                                  declaredType := Relico.DTR.GeneralType.int },
+                                                { name := { value := "NRPCan1_id" },
+                                                  declaredType := Relico.DTR.GeneralType.int },
+                                                { name := { value := "NRPCan2_id" },
+                                                  declaredType := Relico.DTR.GeneralType.int },
+                                                { name := { value := "myFailTime" },
+                                                  declaredType := Relico.DTR.GeneralType.int }],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "id" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "Myid" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "attacker" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "which" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "prevWhich" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral true),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "NRPCandidates0" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "NRPCan1_id" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "NRPCandidates1" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "NRPCan2_id" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "heartbeats_missed_1" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "heartbeats_missed_2" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "NRP_network" }
+                                            (Relico.DTR.GeneralExpr.unary
+                                              (Relico.DTR.GeneralUnaryOp.negate)
+                                              (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "NRP_switch_id" }
+                                            (Relico.DTR.GeneralExpr.unary
+                                              (Relico.DTR.GeneralUnaryOp.negate)
+                                              (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "NRP_pending" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral true),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "become_primary_on_ping_response" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "primary" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "Myprimary" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "ping_pending" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "init" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral true),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "nodeMode" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.ifThenElse
+                                            (Relico.DTR.GeneralExpr.binary
+                                              (Relico.DTR.GeneralBinaryOp.eq)
+                                              (Relico.DTR.GeneralExpr.parameterVar { value := "myFailTime" })
+                                              (Relico.DTR.GeneralExpr.intLiteral 2500))
+                                            [Relico.DTR.GeneralStmt.send
+                                               (Relico.DTR.GeneralSendTarget.selfTarget)
+                                               { value := "nodeFail" }
+                                               []
+                                               { value := 2500 }]
+                                            [Relico.DTR.GeneralStmt.ifThenElse
+                                               (Relico.DTR.GeneralExpr.binary
+                                                 (Relico.DTR.GeneralBinaryOp.eq)
+                                                 (Relico.DTR.GeneralExpr.parameterVar { value := "myFailTime" })
+                                                 (Relico.DTR.GeneralExpr.intLiteral 5000))
+                                               [Relico.DTR.GeneralStmt.send
+                                                  (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                  { value := "nodeFail" }
+                                                  []
+                                                  { value := 5000 }]
+                                               []],
+                                          Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "runMe" }
+                                            []
+                                            { value := 0 }] },
+                messageServers := [{ name := { value := "new_NRP_request_timed_out" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "nodeMode" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.stateVar { value := "NRP_pending" })
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "NRP_pending" }
+                                                      (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                    Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.stateVar
+                                                        { value := "become_primary_on_ping_response" })
+                                                      [Relico.DTR.GeneralStmt.assign
+                                                         { value := "become_primary_on_ping_response" }
+                                                         (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                      []]
+                                                   []]
+                                                []],
+                                     priority := none },
+                                   { name := { value := "ping_timed_out" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "nodeMode" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.stateVar { value := "ping_pending" })
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "ping_pending" }
+                                                      (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.gt)
+                                                        (Relico.DTR.GeneralExpr.stateVar { value := "which" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                      [Relico.DTR.GeneralStmt.assign
+                                                         { value := "nodeMode" }
+                                                         (Relico.DTR.GeneralExpr.intLiteral 1),
+                                                       Relico.DTR.GeneralStmt.assign
+                                                         { value := "heartbeats_missed_1" }
+                                                         (Relico.DTR.GeneralExpr.intLiteral 0),
+                                                       Relico.DTR.GeneralStmt.assign
+                                                         { value := "heartbeats_missed_2" }
+                                                         (Relico.DTR.GeneralExpr.intLiteral 0),
+                                                       Relico.DTR.GeneralStmt.assign
+                                                         { value := "primary" }
+                                                         (Relico.DTR.GeneralExpr.stateVar { value := "id" }),
+                                                       Relico.DTR.GeneralStmt.ifThenElse
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.eq)
+                                                           (Relico.DTR.GeneralExpr.stateVar { value := "NRP_network" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                         [Relico.DTR.GeneralStmt.send
+                                                            (Relico.DTR.GeneralSendTarget.knownRebec
+                                                              { value := "out1" })
+                                                            { value := "new_NRPBack" }
+                                                            [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                             Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                             Relico.DTR.GeneralExpr.stateVar { value := "NRP_network" },
+                                                             Relico.DTR.GeneralExpr.stateVar
+                                                               { value := "NRP_switch_id" }]
+                                                            { value := 0 }]
+                                                         [Relico.DTR.GeneralStmt.send
+                                                            (Relico.DTR.GeneralSendTarget.knownRebec
+                                                              { value := "out2" })
+                                                            { value := "new_NRPBack" }
+                                                            [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                             Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                             Relico.DTR.GeneralExpr.stateVar { value := "NRP_network" },
+                                                             Relico.DTR.GeneralExpr.stateVar
+                                                               { value := "NRP_switch_id" }]
+                                                            { value := 0 }],
+                                                       Relico.DTR.GeneralStmt.assign
+                                                         { value := "nodeMode" }
+                                                         (Relico.DTR.GeneralExpr.intLiteral 1),
+                                                       Relico.DTR.GeneralStmt.assign
+                                                         { value := "heartbeats_missed_1" }
+                                                         (Relico.DTR.GeneralExpr.intLiteral 0),
+                                                       Relico.DTR.GeneralStmt.assign
+                                                         { value := "heartbeats_missed_2" }
+                                                         (Relico.DTR.GeneralExpr.intLiteral 0),
+                                                       Relico.DTR.GeneralStmt.assign
+                                                         { value := "primary" }
+                                                         (Relico.DTR.GeneralExpr.stateVar { value := "id" }),
+                                                       Relico.DTR.GeneralStmt.assign
+                                                         { value := "NRP_pending" }
+                                                         (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                      [Relico.DTR.GeneralStmt.assign
+                                                         { value := "NRP_pending" }
+                                                         (Relico.DTR.GeneralExpr.boolLiteral true)]]]
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.stateVar { value := "nodeMode" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "ping_pending" })
+                                                      [Relico.DTR.GeneralStmt.assign
+                                                         { value := "ping_pending" }
+                                                         (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                       Relico.DTR.GeneralStmt.assign
+                                                         { value := "NRP_network" }
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.add)
+                                                           (Relico.DTR.GeneralExpr.stateVar { value := "NRP_network" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                                       Relico.DTR.GeneralStmt.ifThenElse
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.lt)
+                                                           (Relico.DTR.GeneralExpr.stateVar { value := "NRP_network" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                         [Relico.DTR.GeneralStmt.ifThenElse
+                                                            (Relico.DTR.GeneralExpr.binary
+                                                              (Relico.DTR.GeneralBinaryOp.eq)
+                                                              (Relico.DTR.GeneralExpr.stateVar
+                                                                { value := "NRP_network" })
+                                                              (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                            [Relico.DTR.GeneralStmt.assign
+                                                               { value := "NRP_switch_id" }
+                                                               (Relico.DTR.GeneralExpr.stateVar
+                                                                 { value := "NRPCandidates0" })]
+                                                            [Relico.DTR.GeneralStmt.assign
+                                                               { value := "NRP_switch_id" }
+                                                               (Relico.DTR.GeneralExpr.stateVar
+                                                                 { value := "NRPCandidates1" })],
+                                                          Relico.DTR.GeneralStmt.ifThenElse
+                                                            (Relico.DTR.GeneralExpr.binary
+                                                              (Relico.DTR.GeneralBinaryOp.eq)
+                                                              (Relico.DTR.GeneralExpr.stateVar
+                                                                { value := "NRP_network" })
+                                                              (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                            [Relico.DTR.GeneralStmt.send
+                                                               (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                 { value := "out1" })
+                                                               { value := "new_NRP" }
+                                                               [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                                Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                                Relico.DTR.GeneralExpr.stateVar
+                                                                  { value := "NRP_network" },
+                                                                Relico.DTR.GeneralExpr.stateVar
+                                                                  { value := "NRP_switch_id" }]
+                                                               { value := 0 }]
+                                                            [Relico.DTR.GeneralStmt.send
+                                                               (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                 { value := "out2" })
+                                                               { value := "new_NRP" }
+                                                               [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                                Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                                Relico.DTR.GeneralExpr.stateVar
+                                                                  { value := "NRP_network" },
+                                                                Relico.DTR.GeneralExpr.stateVar
+                                                                  { value := "NRP_switch_id" }]
+                                                               { value := 0 }]]
+                                                         [Relico.DTR.GeneralStmt.assign
+                                                            { value := "NRP_network" }
+                                                            (Relico.DTR.GeneralExpr.intLiteral 2),
+                                                          Relico.DTR.GeneralStmt.assign
+                                                            { value := "nodeMode" }
+                                                            (Relico.DTR.GeneralExpr.intLiteral 0)],
+                                                       Relico.DTR.GeneralStmt.assign
+                                                         { value := "NRP_pending" }
+                                                         (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                      [Relico.DTR.GeneralStmt.ifThenElse
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.lt)
+                                                           (Relico.DTR.GeneralExpr.stateVar { value := "attacker" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                         [Relico.DTR.GeneralStmt.send
+                                                            (Relico.DTR.GeneralSendTarget.knownRebec
+                                                              { value := "out1" })
+                                                            { value := "heartBeat" }
+                                                            [Relico.DTR.GeneralExpr.intLiteral 0,
+                                                             Relico.DTR.GeneralExpr.stateVar { value := "id" }]
+                                                            { value := 1 },
+                                                          Relico.DTR.GeneralStmt.send
+                                                            (Relico.DTR.GeneralSendTarget.knownRebec
+                                                              { value := "out2" })
+                                                            { value := "heartBeat" }
+                                                            [Relico.DTR.GeneralExpr.intLiteral 1,
+                                                             Relico.DTR.GeneralExpr.stateVar { value := "id" }]
+                                                            { value := 1 }]
+                                                         []]]
+                                                   []]],
+                                     priority := none },
+                                   { name := { value := "pingNRP_response" },
+                                     parameters := [{ name := { value := "mid" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "w" },
+                                                      declaredType := Relico.DTR.GeneralType.boolean },
+                                                    { name := { value := "pw" },
+                                                      declaredType := Relico.DTR.GeneralType.boolean }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "nodeMode" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.DTR.GeneralExpr.unary
+                                                       (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                       (Relico.DTR.GeneralExpr.parameterVar { value := "w" }))
+                                                     (Relico.DTR.GeneralExpr.unary
+                                                       (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                       (Relico.DTR.GeneralExpr.parameterVar { value := "pw" })))
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "which" }
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.add)
+                                                        (Relico.DTR.GeneralExpr.stateVar { value := "which" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 1))]
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "which" }
+                                                      (Relico.DTR.GeneralExpr.intLiteral 0)],
+                                                 Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.gt)
+                                                     (Relico.DTR.GeneralExpr.stateVar { value := "which" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "ping_pending" }
+                                                      (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                   []]
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.stateVar { value := "nodeMode" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "ping_pending" }
+                                                      (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                   []]],
+                                     priority := none },
+                                   { name := { value := "new_NRP" },
+                                     parameters := [{ name := { value := "mid" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "prim" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "mNRP_network" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "mNRP_switch_id" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.ne)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "nodeMode" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 3))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "NRP_network" }
+                                                   (Relico.DTR.GeneralExpr.parameterVar { value := "mNRP_network" }),
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "NRP_switch_id" }
+                                                   (Relico.DTR.GeneralExpr.parameterVar { value := "mNRP_switch_id" })]
+                                                []],
+                                     priority := none },
+                                   { name := { value := "new_NRPBack" },
+                                     parameters := [{ name := { value := "mid" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "prim" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "mNRP_network" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "mNRP_switch_id" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.ne)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "nodeMode" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 3))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "NRP_network" }
+                                                   (Relico.DTR.GeneralExpr.parameterVar { value := "mNRP_network" }),
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "NRP_switch_id" }
+                                                   (Relico.DTR.GeneralExpr.parameterVar { value := "mNRP_switch_id" })]
+                                                []],
+                                     priority := none },
+                                   { name := { value := "runMe" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "nodeMode" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.stateVar { value := "init" })
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.eq)
+                                                        (Relico.DTR.GeneralExpr.stateVar { value := "id" })
+                                                        (Relico.DTR.GeneralExpr.stateVar { value := "primary" }))
+                                                      [Relico.DTR.GeneralStmt.assign
+                                                         { value := "nodeMode" }
+                                                         (Relico.DTR.GeneralExpr.intLiteral 1),
+                                                       Relico.DTR.GeneralStmt.assign
+                                                         { value := "NRP_network" }
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.add)
+                                                           (Relico.DTR.GeneralExpr.stateVar { value := "NRP_network" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                                       Relico.DTR.GeneralStmt.ifThenElse
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.lt)
+                                                           (Relico.DTR.GeneralExpr.stateVar { value := "NRP_network" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                         [Relico.DTR.GeneralStmt.ifThenElse
+                                                            (Relico.DTR.GeneralExpr.binary
+                                                              (Relico.DTR.GeneralBinaryOp.eq)
+                                                              (Relico.DTR.GeneralExpr.stateVar
+                                                                { value := "NRP_network" })
+                                                              (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                            [Relico.DTR.GeneralStmt.assign
+                                                               { value := "NRP_switch_id" }
+                                                               (Relico.DTR.GeneralExpr.stateVar
+                                                                 { value := "NRPCandidates0" })]
+                                                            [Relico.DTR.GeneralStmt.assign
+                                                               { value := "NRP_switch_id" }
+                                                               (Relico.DTR.GeneralExpr.stateVar
+                                                                 { value := "NRPCandidates1" })],
+                                                          Relico.DTR.GeneralStmt.ifThenElse
+                                                            (Relico.DTR.GeneralExpr.binary
+                                                              (Relico.DTR.GeneralBinaryOp.eq)
+                                                              (Relico.DTR.GeneralExpr.stateVar
+                                                                { value := "NRP_network" })
+                                                              (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                            [Relico.DTR.GeneralStmt.send
+                                                               (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                 { value := "out1" })
+                                                               { value := "new_NRP" }
+                                                               [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                                Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                                Relico.DTR.GeneralExpr.stateVar
+                                                                  { value := "NRP_network" },
+                                                                Relico.DTR.GeneralExpr.stateVar
+                                                                  { value := "NRP_switch_id" }]
+                                                               { value := 0 }]
+                                                            [Relico.DTR.GeneralStmt.send
+                                                               (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                 { value := "out2" })
+                                                               { value := "new_NRP" }
+                                                               [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                                Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                                Relico.DTR.GeneralExpr.stateVar
+                                                                  { value := "NRP_network" },
+                                                                Relico.DTR.GeneralExpr.stateVar
+                                                                  { value := "NRP_switch_id" }]
+                                                               { value := 0 }]]
+                                                         [Relico.DTR.GeneralStmt.assign
+                                                            { value := "NRP_network" }
+                                                            (Relico.DTR.GeneralExpr.intLiteral 2)]]
+                                                      [Relico.DTR.GeneralStmt.assign
+                                                         { value := "nodeMode" }
+                                                         (Relico.DTR.GeneralExpr.intLiteral 2)],
+                                                    Relico.DTR.GeneralStmt.assign
+                                                      { value := "init" }
+                                                      (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                   []]
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.stateVar { value := "nodeMode" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "attacker" }
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.add)
+                                                        (Relico.DTR.GeneralExpr.stateVar { value := "attacker" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                                    Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.gt)
+                                                        (Relico.DTR.GeneralExpr.stateVar { value := "attacker" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                      [Relico.DTR.GeneralStmt.assign
+                                                         { value := "attacker" }
+                                                         (Relico.DTR.GeneralExpr.intLiteral 1)]
+                                                      [],
+                                                    Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.unary
+                                                        (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                        (Relico.DTR.GeneralExpr.stateVar { value := "ping_pending" }))
+                                                      [Relico.DTR.GeneralStmt.ifThenElse
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.eq)
+                                                           (Relico.DTR.GeneralExpr.stateVar { value := "NRP_network" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                         [Relico.DTR.GeneralStmt.assign
+                                                            { value := "ping_pending" }
+                                                            (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                          Relico.DTR.GeneralStmt.send
+                                                            (Relico.DTR.GeneralSendTarget.knownRebec
+                                                              { value := "out1" })
+                                                            { value := "pingNRP" }
+                                                            [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                             Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                             Relico.DTR.GeneralExpr.stateVar
+                                                               { value := "NRP_switch_id" }]
+                                                            { value := 5 },
+                                                          Relico.DTR.GeneralStmt.send
+                                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                            { value := "ping_timed_out" }
+                                                            []
+                                                            { value := 100 }]
+                                                         [Relico.DTR.GeneralStmt.assign
+                                                            { value := "ping_pending" }
+                                                            (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                          Relico.DTR.GeneralStmt.send
+                                                            (Relico.DTR.GeneralSendTarget.knownRebec
+                                                              { value := "out2" })
+                                                            { value := "pingNRP" }
+                                                            [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                             Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                             Relico.DTR.GeneralExpr.stateVar
+                                                               { value := "NRP_switch_id" }]
+                                                            { value := 5 },
+                                                          Relico.DTR.GeneralStmt.send
+                                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                            { value := "ping_timed_out" }
+                                                            []
+                                                            { value := 100 }]]
+                                                      [],
+                                                    Relico.DTR.GeneralStmt.assign
+                                                      { value := "NRP_pending" }
+                                                      (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.eq)
+                                                        (Relico.DTR.GeneralExpr.stateVar { value := "nodeMode" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                      [Relico.DTR.GeneralStmt.assign
+                                                         { value := "heartbeats_missed_1" }
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.add)
+                                                           (Relico.DTR.GeneralExpr.stateVar
+                                                             { value := "heartbeats_missed_1" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                                       Relico.DTR.GeneralStmt.assign
+                                                         { value := "heartbeats_missed_2" }
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.add)
+                                                           (Relico.DTR.GeneralExpr.stateVar
+                                                             { value := "heartbeats_missed_2" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                                       Relico.DTR.GeneralStmt.ifThenElse
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                           (Relico.DTR.GeneralExpr.binary
+                                                             (Relico.DTR.GeneralBinaryOp.gt)
+                                                             (Relico.DTR.GeneralExpr.stateVar
+                                                               { value := "heartbeats_missed_1" })
+                                                             (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                           (Relico.DTR.GeneralExpr.binary
+                                                             (Relico.DTR.GeneralBinaryOp.gt)
+                                                             (Relico.DTR.GeneralExpr.stateVar
+                                                               { value := "heartbeats_missed_2" })
+                                                             (Relico.DTR.GeneralExpr.intLiteral 2)))
+                                                         [Relico.DTR.GeneralStmt.ifThenElse
+                                                            (Relico.DTR.GeneralExpr.binary
+                                                              (Relico.DTR.GeneralBinaryOp.gt)
+                                                              (Relico.DTR.GeneralExpr.stateVar
+                                                                { value := "heartbeats_missed_1" })
+                                                              (Relico.DTR.GeneralExpr.binary
+                                                                (Relico.DTR.GeneralBinaryOp.add)
+                                                                (Relico.DTR.GeneralExpr.intLiteral 2)
+                                                                (Relico.DTR.GeneralExpr.intLiteral 2)))
+                                                            [Relico.DTR.GeneralStmt.assign
+                                                               { value := "heartbeats_missed_1" }
+                                                               (Relico.DTR.GeneralExpr.binary
+                                                                 (Relico.DTR.GeneralBinaryOp.add)
+                                                                 (Relico.DTR.GeneralExpr.intLiteral 2)
+                                                                 (Relico.DTR.GeneralExpr.intLiteral 2))]
+                                                            [],
+                                                          Relico.DTR.GeneralStmt.ifThenElse
+                                                            (Relico.DTR.GeneralExpr.binary
+                                                              (Relico.DTR.GeneralBinaryOp.gt)
+                                                              (Relico.DTR.GeneralExpr.stateVar
+                                                                { value := "heartbeats_missed_2" })
+                                                              (Relico.DTR.GeneralExpr.binary
+                                                                (Relico.DTR.GeneralBinaryOp.add)
+                                                                (Relico.DTR.GeneralExpr.intLiteral 2)
+                                                                (Relico.DTR.GeneralExpr.intLiteral 2)))
+                                                            [Relico.DTR.GeneralStmt.assign
+                                                               { value := "heartbeats_missed_2" }
+                                                               (Relico.DTR.GeneralExpr.binary
+                                                                 (Relico.DTR.GeneralBinaryOp.add)
+                                                                 (Relico.DTR.GeneralExpr.intLiteral 2)
+                                                                 (Relico.DTR.GeneralExpr.intLiteral 2))]
+                                                            [],
+                                                          Relico.DTR.GeneralStmt.ifThenElse
+                                                            (Relico.DTR.GeneralExpr.unary
+                                                              (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                              (Relico.DTR.GeneralExpr.stateVar
+                                                                { value := "ping_pending" }))
+                                                            [Relico.DTR.GeneralStmt.ifThenElse
+                                                               (Relico.DTR.GeneralExpr.binary
+                                                                 (Relico.DTR.GeneralBinaryOp.eq)
+                                                                 (Relico.DTR.GeneralExpr.stateVar
+                                                                   { value := "NRP_network" })
+                                                                 (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                               [Relico.DTR.GeneralStmt.assign
+                                                                  { value := "ping_pending" }
+                                                                  (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                                Relico.DTR.GeneralStmt.send
+                                                                  (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                    { value := "out1" })
+                                                                  { value := "pingNRP" }
+                                                                  [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                                   Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                                   Relico.DTR.GeneralExpr.stateVar
+                                                                     { value := "NRP_switch_id" }]
+                                                                  { value := 15 },
+                                                                Relico.DTR.GeneralStmt.send
+                                                                  (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                                  { value := "ping_timed_out" }
+                                                                  []
+                                                                  { value := 100 }]
+                                                               [Relico.DTR.GeneralStmt.assign
+                                                                  { value := "ping_pending" }
+                                                                  (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                                Relico.DTR.GeneralStmt.send
+                                                                  (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                    { value := "out2" })
+                                                                  { value := "pingNRP" }
+                                                                  [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                                   Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                                   Relico.DTR.GeneralExpr.stateVar
+                                                                     { value := "NRP_switch_id" }]
+                                                                  { value := 15 },
+                                                                Relico.DTR.GeneralStmt.send
+                                                                  (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                                  { value := "ping_timed_out" }
+                                                                  []
+                                                                  { value := 100 }]]
+                                                            [],
+                                                          Relico.DTR.GeneralStmt.assign
+                                                            { value := "NRP_pending" }
+                                                            (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                         [Relico.DTR.GeneralStmt.ifThenElse
+                                                            (Relico.DTR.GeneralExpr.binary
+                                                              (Relico.DTR.GeneralBinaryOp.logicalOr)
+                                                              (Relico.DTR.GeneralExpr.binary
+                                                                (Relico.DTR.GeneralBinaryOp.gt)
+                                                                (Relico.DTR.GeneralExpr.stateVar
+                                                                  { value := "heartbeats_missed_1" })
+                                                                (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                              (Relico.DTR.GeneralExpr.binary
+                                                                (Relico.DTR.GeneralBinaryOp.gt)
+                                                                (Relico.DTR.GeneralExpr.stateVar
+                                                                  { value := "heartbeats_missed_2" })
+                                                                (Relico.DTR.GeneralExpr.intLiteral 2)))
+                                                            [Relico.DTR.GeneralStmt.ifThenElse
+                                                               (Relico.DTR.GeneralExpr.unary
+                                                                 (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                                 (Relico.DTR.GeneralExpr.stateVar
+                                                                   { value := "ping_pending" }))
+                                                               [Relico.DTR.GeneralStmt.ifThenElse
+                                                                  (Relico.DTR.GeneralExpr.binary
+                                                                    (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                                    (Relico.DTR.GeneralExpr.binary
+                                                                      (Relico.DTR.GeneralBinaryOp.eq)
+                                                                      (Relico.DTR.GeneralExpr.stateVar
+                                                                        { value := "NRP_network" })
+                                                                      (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                                    (Relico.DTR.GeneralExpr.binary
+                                                                      (Relico.DTR.GeneralBinaryOp.gt)
+                                                                      (Relico.DTR.GeneralExpr.stateVar
+                                                                        { value := "heartbeats_missed_1" })
+                                                                      (Relico.DTR.GeneralExpr.intLiteral 2)))
+                                                                  [Relico.DTR.GeneralStmt.assign
+                                                                     { value := "ping_pending" }
+                                                                     (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                                   Relico.DTR.GeneralStmt.send
+                                                                     (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                       { value := "out1" })
+                                                                     { value := "pingNRP" }
+                                                                     [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                                      Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                                      Relico.DTR.GeneralExpr.stateVar
+                                                                        { value := "NRP_switch_id" }]
+                                                                     { value := 5 },
+                                                                   Relico.DTR.GeneralStmt.send
+                                                                     (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                                     { value := "ping_timed_out" }
+                                                                     []
+                                                                     { value := 100 }]
+                                                                  [Relico.DTR.GeneralStmt.ifThenElse
+                                                                     (Relico.DTR.GeneralExpr.binary
+                                                                       (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                                       (Relico.DTR.GeneralExpr.binary
+                                                                         (Relico.DTR.GeneralBinaryOp.eq)
+                                                                         (Relico.DTR.GeneralExpr.stateVar
+                                                                           { value := "NRP_network" })
+                                                                         (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                                       (Relico.DTR.GeneralExpr.binary
+                                                                         (Relico.DTR.GeneralBinaryOp.gt)
+                                                                         (Relico.DTR.GeneralExpr.stateVar
+                                                                           { value := "heartbeats_missed_2" })
+                                                                         (Relico.DTR.GeneralExpr.intLiteral 2)))
+                                                                     [Relico.DTR.GeneralStmt.assign
+                                                                        { value := "ping_pending" }
+                                                                        (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                                      Relico.DTR.GeneralStmt.send
+                                                                        (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                          { value := "out2" })
+                                                                        { value := "pingNRP" }
+                                                                        [Relico.DTR.GeneralExpr.stateVar
+                                                                           { value := "id" },
+                                                                         Relico.DTR.GeneralExpr.stateVar
+                                                                           { value := "id" },
+                                                                         Relico.DTR.GeneralExpr.stateVar
+                                                                           { value := "NRP_switch_id" }]
+                                                                        { value := 5 },
+                                                                      Relico.DTR.GeneralStmt.send
+                                                                        (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                                        { value := "ping_timed_out" }
+                                                                        []
+                                                                        { value := 100 }]
+                                                                     []]]
+                                                               [],
+                                                             Relico.DTR.GeneralStmt.ifThenElse
+                                                               (Relico.DTR.GeneralExpr.binary
+                                                                 (Relico.DTR.GeneralBinaryOp.gt)
+                                                                 (Relico.DTR.GeneralExpr.stateVar
+                                                                   { value := "heartbeats_missed_1" })
+                                                                 (Relico.DTR.GeneralExpr.binary
+                                                                   (Relico.DTR.GeneralBinaryOp.add)
+                                                                   (Relico.DTR.GeneralExpr.intLiteral 2)
+                                                                   (Relico.DTR.GeneralExpr.intLiteral 2)))
+                                                               [Relico.DTR.GeneralStmt.assign
+                                                                  { value := "heartbeats_missed_1" }
+                                                                  (Relico.DTR.GeneralExpr.binary
+                                                                    (Relico.DTR.GeneralBinaryOp.add)
+                                                                    (Relico.DTR.GeneralExpr.intLiteral 2)
+                                                                    (Relico.DTR.GeneralExpr.intLiteral 2))]
+                                                               [],
+                                                             Relico.DTR.GeneralStmt.ifThenElse
+                                                               (Relico.DTR.GeneralExpr.binary
+                                                                 (Relico.DTR.GeneralBinaryOp.gt)
+                                                                 (Relico.DTR.GeneralExpr.stateVar
+                                                                   { value := "heartbeats_missed_2" })
+                                                                 (Relico.DTR.GeneralExpr.binary
+                                                                   (Relico.DTR.GeneralBinaryOp.add)
+                                                                   (Relico.DTR.GeneralExpr.intLiteral 2)
+                                                                   (Relico.DTR.GeneralExpr.intLiteral 2)))
+                                                               [Relico.DTR.GeneralStmt.assign
+                                                                  { value := "heartbeats_missed_2" }
+                                                                  (Relico.DTR.GeneralExpr.binary
+                                                                    (Relico.DTR.GeneralBinaryOp.add)
+                                                                    (Relico.DTR.GeneralExpr.intLiteral 2)
+                                                                    (Relico.DTR.GeneralExpr.intLiteral 2))]
+                                                               []]
+                                                            []]]
+                                                      [Relico.DTR.GeneralStmt.ifThenElse
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.eq)
+                                                           (Relico.DTR.GeneralExpr.stateVar { value := "nodeMode" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 3))
+                                                         []
+                                                         []]]],
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "runMe" }
+                                                []
+                                                { value := 1000 }],
+                                     priority := none },
+                                   { name := { value := "heartBeat" },
+                                     parameters := [{ name := { value := "networkId" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "senderid" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "nodeMode" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.parameterVar { value := "networkId" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "heartbeats_missed_1" }
+                                                      (Relico.DTR.GeneralExpr.intLiteral 0)]
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "heartbeats_missed_2" }
+                                                      (Relico.DTR.GeneralExpr.intLiteral 0)]]
+                                                []],
+                                     priority := none },
+                                   { name := { value := "nodeFail" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "primary" }
+                                                (Relico.DTR.GeneralExpr.unary
+                                                  (Relico.DTR.GeneralUnaryOp.negate)
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "nodeMode" }
+                                                (Relico.DTR.GeneralExpr.intLiteral 3),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "NRP_network" }
+                                                (Relico.DTR.GeneralExpr.unary
+                                                  (Relico.DTR.GeneralUnaryOp.negate)
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "NRP_switch_id" }
+                                                (Relico.DTR.GeneralExpr.unary
+                                                  (Relico.DTR.GeneralUnaryOp.negate)
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "heartbeats_missed_1" }
+                                                (Relico.DTR.GeneralExpr.intLiteral 0),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "heartbeats_missed_2" }
+                                                (Relico.DTR.GeneralExpr.intLiteral 0),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "NRP_pending" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral true),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "become_primary_on_ping_response" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral false),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "ping_pending" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral false)],
+                                     priority := none }] },
+              { name := { value := "Switch" },
+                knownRebecs := [{ name := { value := "nodeTarget1" }, className := { value := "Node" } },
+                                { name := { value := "up" }, className := { value := "Switch" } },
+                                { name := { value := "down" }, className := { value := "Switch" } }],
+                stateVariables := [{ name := { value := "mynetworkId" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "id" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "which" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "prevWhich" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "failed" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "amINRP" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "primaryPinged" },
+                                     declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "terminal" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "primary" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [{ name := { value := "myid" },
+                                                  declaredType := Relico.DTR.GeneralType.int },
+                                                { name := { value := "networkId" },
+                                                  declaredType := Relico.DTR.GeneralType.int },
+                                                { name := { value := "endSwitch" },
+                                                  declaredType := Relico.DTR.GeneralType.boolean },
+                                                { name := { value := "myFailTime" },
+                                                  declaredType := Relico.DTR.GeneralType.int }],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "mynetworkId" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "networkId" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "primary" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "id" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "myid" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "primaryPinged" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "terminal" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "endSwitch" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "amINRP" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "failed" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "which" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral true),
+                                          Relico.DTR.GeneralStmt.ifThenElse
+                                            (Relico.DTR.GeneralExpr.binary
+                                              (Relico.DTR.GeneralBinaryOp.eq)
+                                              (Relico.DTR.GeneralExpr.parameterVar { value := "myFailTime" })
+                                              (Relico.DTR.GeneralExpr.intLiteral 2500))
+                                            [Relico.DTR.GeneralStmt.send
+                                               (Relico.DTR.GeneralSendTarget.selfTarget)
+                                               { value := "switchFail" }
+                                               []
+                                               { value := 2500 }]
+                                            [Relico.DTR.GeneralStmt.ifThenElse
+                                               (Relico.DTR.GeneralExpr.binary
+                                                 (Relico.DTR.GeneralBinaryOp.eq)
+                                                 (Relico.DTR.GeneralExpr.parameterVar { value := "myFailTime" })
+                                                 (Relico.DTR.GeneralExpr.intLiteral 5000))
+                                               [Relico.DTR.GeneralStmt.send
+                                                  (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                  { value := "switchFail" }
+                                                  []
+                                                  { value := 5000 }]
+                                               []]] },
+                messageServers := [{ name := { value := "switchFail" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "failed" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral true),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "amINRP" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral false)],
+                                     priority := none },
+                                   { name := { value := "pingNRP_response" },
+                                     parameters := [{ name := { value := "senderNode" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "w" },
+                                                      declaredType := Relico.DTR.GeneralType.boolean },
+                                                    { name := { value := "pw" },
+                                                      declaredType := Relico.DTR.GeneralType.boolean }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.unary
+                                                  (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "failed" }))
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.DTR.GeneralExpr.stateVar { value := "terminal" })
+                                                     (Relico.DTR.GeneralExpr.binary
+                                                       (Relico.DTR.GeneralBinaryOp.le)
+                                                       (Relico.DTR.GeneralExpr.parameterVar { value := "senderNode" })
+                                                       (Relico.DTR.GeneralExpr.intLiteral 99)))
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec
+                                                        { value := "nodeTarget1" })
+                                                      { value := "pingNRP_response" }
+                                                      [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                       Relico.DTR.GeneralExpr.parameterVar { value := "w" },
+                                                       Relico.DTR.GeneralExpr.parameterVar { value := "pw" }]
+                                                      { value := 0 }]
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.gt)
+                                                        (Relico.DTR.GeneralExpr.parameterVar { value := "senderNode" })
+                                                        (Relico.DTR.GeneralExpr.stateVar { value := "id" }))
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec { value := "up" })
+                                                         { value := "pingNRP_response" }
+                                                         [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                          Relico.DTR.GeneralExpr.parameterVar { value := "w" },
+                                                          Relico.DTR.GeneralExpr.parameterVar { value := "pw" }]
+                                                         { value := 0 }]
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec { value := "down" })
+                                                         { value := "pingNRP_response" }
+                                                         [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                          Relico.DTR.GeneralExpr.parameterVar { value := "w" },
+                                                          Relico.DTR.GeneralExpr.parameterVar { value := "pw" }]
+                                                         { value := 0 }]]]
+                                                []],
+                                     priority := none },
+                                   { name := { value := "pingNRP" },
+                                     parameters := [{ name := { value := "switchNode" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "senderNode" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "NRP" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.unary
+                                                  (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "failed" }))
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.DTR.GeneralExpr.stateVar { value := "terminal" })
+                                                     (Relico.DTR.GeneralExpr.binary
+                                                       (Relico.DTR.GeneralBinaryOp.eq)
+                                                       (Relico.DTR.GeneralExpr.parameterVar { value := "NRP" })
+                                                       (Relico.DTR.GeneralExpr.stateVar { value := "id" })))
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "prevWhich" }
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "which" }),
+                                                    Relico.DTR.GeneralStmt.assign
+                                                      { value := "which" }
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.eq)
+                                                        (Relico.DTR.GeneralExpr.parameterVar { value := "senderNode" })
+                                                        (Relico.DTR.GeneralExpr.stateVar { value := "primary" })),
+                                                    Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.le)
+                                                        (Relico.DTR.GeneralExpr.parameterVar { value := "switchNode" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 99))
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec { value := "up" })
+                                                         { value := "pingNRP_response" }
+                                                         [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                          Relico.DTR.GeneralExpr.stateVar { value := "which" },
+                                                          Relico.DTR.GeneralExpr.stateVar { value := "prevWhich" }]
+                                                         { value := 0 }]
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec
+                                                           { value := "nodeTarget1" })
+                                                         { value := "pingNRP_response" }
+                                                         [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                          Relico.DTR.GeneralExpr.stateVar { value := "which" },
+                                                          Relico.DTR.GeneralExpr.stateVar { value := "prevWhich" }]
+                                                         { value := 0 }]]
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.gt)
+                                                        (Relico.DTR.GeneralExpr.parameterVar { value := "switchNode" })
+                                                        (Relico.DTR.GeneralExpr.stateVar { value := "id" }))
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec { value := "up" })
+                                                         { value := "pingNRP" }
+                                                         [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                          Relico.DTR.GeneralExpr.parameterVar { value := "senderNode" },
+                                                          Relico.DTR.GeneralExpr.parameterVar { value := "NRP" }]
+                                                         { value := 0 }]
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec { value := "down" })
+                                                         { value := "pingNRP" }
+                                                         [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                          Relico.DTR.GeneralExpr.parameterVar { value := "senderNode" },
+                                                          Relico.DTR.GeneralExpr.parameterVar { value := "NRP" }]
+                                                         { value := 0 }]]]
+                                                []],
+                                     priority := none },
+                                   { name := { value := "new_NRP" },
+                                     parameters := [{ name := { value := "senderNode" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "prim" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "mNRP_network" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "mNRP_switch_id" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.unary
+                                                  (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "failed" }))
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.stateVar { value := "id" })
+                                                     (Relico.DTR.GeneralExpr.parameterVar
+                                                       { value := "mNRP_switch_id" }))
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "amINRP" }
+                                                      (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                    Relico.DTR.GeneralStmt.assign
+                                                      { value := "primary" }
+                                                      (Relico.DTR.GeneralExpr.parameterVar { value := "prim" })]
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "amINRP" }
+                                                      (Relico.DTR.GeneralExpr.boolLiteral false)],
+                                                 Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.DTR.GeneralExpr.stateVar { value := "terminal" })
+                                                     (Relico.DTR.GeneralExpr.binary
+                                                       (Relico.DTR.GeneralBinaryOp.le)
+                                                       (Relico.DTR.GeneralExpr.parameterVar { value := "senderNode" })
+                                                       (Relico.DTR.GeneralExpr.intLiteral 99)))
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec
+                                                        { value := "nodeTarget1" })
+                                                      { value := "new_NRP" }
+                                                      [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                       Relico.DTR.GeneralExpr.parameterVar { value := "prim" },
+                                                       Relico.DTR.GeneralExpr.parameterVar { value := "mNRP_network" },
+                                                       Relico.DTR.GeneralExpr.parameterVar
+                                                         { value := "mNRP_switch_id" }]
+                                                      { value := 0 }]
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.gt)
+                                                        (Relico.DTR.GeneralExpr.parameterVar { value := "senderNode" })
+                                                        (Relico.DTR.GeneralExpr.stateVar { value := "id" }))
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec { value := "up" })
+                                                         { value := "new_NRP" }
+                                                         [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                          Relico.DTR.GeneralExpr.parameterVar { value := "prim" },
+                                                          Relico.DTR.GeneralExpr.parameterVar
+                                                            { value := "mNRP_network" },
+                                                          Relico.DTR.GeneralExpr.parameterVar
+                                                            { value := "mNRP_switch_id" }]
+                                                         { value := 0 }]
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec { value := "down" })
+                                                         { value := "new_NRP" }
+                                                         [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                          Relico.DTR.GeneralExpr.parameterVar { value := "prim" },
+                                                          Relico.DTR.GeneralExpr.parameterVar
+                                                            { value := "mNRP_network" },
+                                                          Relico.DTR.GeneralExpr.parameterVar
+                                                            { value := "mNRP_switch_id" }]
+                                                         { value := 0 }]]]
+                                                []],
+                                     priority := none },
+                                   { name := { value := "new_NRPBack" },
+                                     parameters := [{ name := { value := "senderNode" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "prim" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "mNRP_network" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "mNRP_switch_id" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.unary
+                                                  (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "failed" }))
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.stateVar { value := "id" })
+                                                     (Relico.DTR.GeneralExpr.parameterVar
+                                                       { value := "mNRP_switch_id" }))
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "amINRP" }
+                                                      (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                    Relico.DTR.GeneralStmt.assign
+                                                      { value := "primary" }
+                                                      (Relico.DTR.GeneralExpr.parameterVar { value := "prim" })]
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "amINRP" }
+                                                      (Relico.DTR.GeneralExpr.boolLiteral false)],
+                                                 Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.DTR.GeneralExpr.stateVar { value := "terminal" })
+                                                     (Relico.DTR.GeneralExpr.binary
+                                                       (Relico.DTR.GeneralBinaryOp.le)
+                                                       (Relico.DTR.GeneralExpr.parameterVar { value := "senderNode" })
+                                                       (Relico.DTR.GeneralExpr.intLiteral 99)))
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec
+                                                        { value := "nodeTarget1" })
+                                                      { value := "new_NRPBack" }
+                                                      [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                       Relico.DTR.GeneralExpr.parameterVar { value := "prim" },
+                                                       Relico.DTR.GeneralExpr.parameterVar { value := "mNRP_network" },
+                                                       Relico.DTR.GeneralExpr.parameterVar
+                                                         { value := "mNRP_switch_id" }]
+                                                      { value := 0 }]
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.gt)
+                                                        (Relico.DTR.GeneralExpr.parameterVar { value := "senderNode" })
+                                                        (Relico.DTR.GeneralExpr.stateVar { value := "id" }))
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec { value := "up" })
+                                                         { value := "new_NRPBack" }
+                                                         [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                          Relico.DTR.GeneralExpr.parameterVar { value := "prim" },
+                                                          Relico.DTR.GeneralExpr.parameterVar
+                                                            { value := "mNRP_network" },
+                                                          Relico.DTR.GeneralExpr.parameterVar
+                                                            { value := "mNRP_switch_id" }]
+                                                         { value := 0 }]
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec { value := "down" })
+                                                         { value := "new_NRPBack" }
+                                                         [Relico.DTR.GeneralExpr.stateVar { value := "id" },
+                                                          Relico.DTR.GeneralExpr.parameterVar { value := "prim" },
+                                                          Relico.DTR.GeneralExpr.parameterVar
+                                                            { value := "mNRP_network" },
+                                                          Relico.DTR.GeneralExpr.parameterVar
+                                                            { value := "mNRP_switch_id" }]
+                                                         { value := 0 }]]]
+                                                []],
+                                     priority := none },
+                                   { name := { value := "heartBeat" },
+                                     parameters := [{ name := { value := "networkId" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "senderNode" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.unary
+                                                  (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "failed" }))
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.DTR.GeneralExpr.stateVar { value := "terminal" })
+                                                     (Relico.DTR.GeneralExpr.binary
+                                                       (Relico.DTR.GeneralBinaryOp.le)
+                                                       (Relico.DTR.GeneralExpr.parameterVar { value := "senderNode" })
+                                                       (Relico.DTR.GeneralExpr.intLiteral 99)))
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec
+                                                        { value := "nodeTarget1" })
+                                                      { value := "heartBeat" }
+                                                      [Relico.DTR.GeneralExpr.parameterVar { value := "networkId" },
+                                                       Relico.DTR.GeneralExpr.stateVar { value := "id" }]
+                                                      { value := 1 }]
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.gt)
+                                                        (Relico.DTR.GeneralExpr.parameterVar { value := "senderNode" })
+                                                        (Relico.DTR.GeneralExpr.stateVar { value := "id" }))
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec { value := "up" })
+                                                         { value := "heartBeat" }
+                                                         [Relico.DTR.GeneralExpr.parameterVar { value := "networkId" },
+                                                          Relico.DTR.GeneralExpr.stateVar { value := "id" }]
+                                                         { value := 1 }]
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec { value := "down" })
+                                                         { value := "heartBeat" }
+                                                         [Relico.DTR.GeneralExpr.parameterVar { value := "networkId" },
+                                                          Relico.DTR.GeneralExpr.stateVar { value := "id" }]
+                                                         { value := 1 }]]]
+                                                []],
+                                     priority := none }] }],
+  instances := [{ name := { value := "switchA1" },
+                  className := { value := "Switch" },
+                  bindings := [({ value := "nodeTarget1" }, { value := "DCN1" }),
+                               ({ value := "up" }, { value := "switchA2" }),
+                               ({ value := "down" }, { value := "switchA2" })],
+                  arguments := [Relico.DTR.GeneralValue.int 1,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.bool true,
+                                Relico.DTR.GeneralValue.int 2500],
+                  priority := some 1 },
+                { name := { value := "switchA2" },
+                  className := { value := "Switch" },
+                  bindings := [({ value := "nodeTarget1" }, { value := "DCN1" }),
+                               ({ value := "up" }, { value := "switchA1" }),
+                               ({ value := "down" }, { value := "switchA3" })],
+                  arguments := [Relico.DTR.GeneralValue.int 2,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 2500],
+                  priority := some 1 },
+                { name := { value := "switchA3" },
+                  className := { value := "Switch" },
+                  bindings := [({ value := "nodeTarget1" }, { value := "DCN2" }),
+                               ({ value := "up" }, { value := "switchA2" }),
+                               ({ value := "down" }, { value := "switchA2" })],
+                  arguments := [Relico.DTR.GeneralValue.int 3,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.bool true,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := some 1 },
+                { name := { value := "switchB1" },
+                  className := { value := "Switch" },
+                  bindings := [({ value := "nodeTarget1" }, { value := "DCN1" }),
+                               ({ value := "up" }, { value := "switchB2" }),
+                               ({ value := "down" }, { value := "switchB2" })],
+                  arguments := [Relico.DTR.GeneralValue.int 4,
+                                Relico.DTR.GeneralValue.int 1,
+                                Relico.DTR.GeneralValue.bool true,
+                                Relico.DTR.GeneralValue.int 2500],
+                  priority := some 1 },
+                { name := { value := "switchB2" },
+                  className := { value := "Switch" },
+                  bindings := [({ value := "nodeTarget1" }, { value := "DCN1" }),
+                               ({ value := "up" }, { value := "switchB1" }),
+                               ({ value := "down" }, { value := "switchB3" })],
+                  arguments := [Relico.DTR.GeneralValue.int 5,
+                                Relico.DTR.GeneralValue.int 1,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 2500],
+                  priority := some 1 },
+                { name := { value := "switchB3" },
+                  className := { value := "Switch" },
+                  bindings := [({ value := "nodeTarget1" }, { value := "DCN2" }),
+                               ({ value := "up" }, { value := "switchB2" }),
+                               ({ value := "down" }, { value := "switchB2" })],
+                  arguments := [Relico.DTR.GeneralValue.int 6,
+                                Relico.DTR.GeneralValue.int 1,
+                                Relico.DTR.GeneralValue.bool true,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := some 1 },
+                { name := { value := "DCN1" },
+                  className := { value := "Node" },
+                  bindings := [({ value := "out1" }, { value := "switchA1" }),
+                               ({ value := "out2" }, { value := "switchB1" })],
+                  arguments := [Relico.DTR.GeneralValue.int 100,
+                                Relico.DTR.GeneralValue.int 100,
+                                Relico.DTR.GeneralValue.int 1,
+                                Relico.DTR.GeneralValue.int 4,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := some 2 },
+                { name := { value := "DCN2" },
+                  className := { value := "Node" },
+                  bindings := [({ value := "out1" }, { value := "switchA3" }),
+                               ({ value := "out2" }, { value := "switchB3" })],
+                  arguments := [Relico.DTR.GeneralValue.int 101,
+                                Relico.DTR.GeneralValue.int 100,
+                                Relico.DTR.GeneralValue.int 3,
+                                Relico.DTR.GeneralValue.int 6,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := some 2 }] }

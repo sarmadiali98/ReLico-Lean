@@ -1,34 +1,46 @@
 {
   "benchmark_id": "general--leasingnrpfd-case-study--positive",
-  "description": "General-family case-study benchmark: the LeasingNRPFD leasing-NRP failover protocol, mechanically adapted plus the approved knownrebec routing transformation; see ADAPTATION.md.",
+  "description": "General-family case-study benchmark: the LeasingNRPFD leasing-NRP failover protocol, mechanically adapted, the approved knownrebec routing transformation, and the ping-pending boundedness fix; see ADAPTATION.md.",
   "expected_artifacts": [
     {
       "path": "source/result.json",
-      "required": true
+      "required": true,
+      "sha256": "bd953315841458ee7c9a380c434a7df22cbd885ffc60253c583eb3967c1ae050"
+    },
+    {
+      "path": "rmc/verdict.json",
+      "required": true,
+      "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
     },
     {
       "path": "parser-json/model.json",
-      "required": true
+      "required": true,
+      "sha256": "71baec6c368bc328ebedf6ad13c66a2b8b251f92fec69993065c9a42ebddbe7f"
     },
     {
       "path": "decoded-dtr-ast/model.txt",
-      "required": true
+      "required": true,
+      "sha256": "36358cb79de19f292eeeaeeec9d9f2e2c56bb0ace40e93585550e093eba4b4f6"
     },
     {
       "path": "translated-lf-ast/program.txt",
-      "required": true
+      "required": true,
+      "sha256": "3b0c42023ba585516c8fe166bad0e30ccc993e460e24781de27c8aa3cf7f1a2e"
     },
     {
       "path": "lf-source/TranslatedLFProgram.lf",
-      "required": true
+      "required": true,
+      "sha256": "753a96a63c34509bfafd540dca58ea67b2c0cf6fe2465933431c107d97e6425b"
     },
     {
       "path": "lfc/result.json",
-      "required": true
+      "required": true,
+      "sha256": "fb7581ee97c62580ef11bd0d765aed50c289ee1ca958df37ea6035aa72ef676d"
     },
     {
       "path": "runtime/result.json",
-      "required": true
+      "required": true,
+      "sha256": "98f94a1bb91705b98b1e45db395a59bc02ce8c115d7f2226c32fa551ed5e591a"
     }
   ],
   "expected_terminal_stage": "runtime",
@@ -51,6 +63,27 @@
         "{actual}/source/result.json"
       ],
       "name": "source"
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc/verdict.json"
+      ],
+      "name": "rmc",
+      "timeout_seconds": 600
     },
     {
       "command": [

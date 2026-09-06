@@ -1,16 +1,9 @@
 # LeasingNRPFD — adaptation record
 
-Status: **translation-complete, registry-blocked.** The approved
-category-2 transformation (ruling evidence:
-[`ROUTING-COMPARISON.md`](ROUTING-COMPARISON.md)) was applied on
-2026-09-07 and the model now clears the entire translation pipeline —
-exporter, decode, translation, LF generation, `lfc`, runtime all pass.
-The benchmark row was **not** added: the registry validator requires the
-`rmc` stage on every row, and the `rmc` stage raises on this model's
-`queue overflow` verdict. The blocking decision — record as a case study
-without a row (this directory's current state), approve a category-3
-boundedness redesign of the relay/ping loop, or amend the mandatory-RMC
-rule — belongs to the maintainer.
+Status: **implemented** as `general--leasingnrpfd-case-study--positive`,
+all eight stages green including `rmc`, after the approved category-2
+transformation (ruling evidence: [`ROUTING_COMPARISON.md`](ROUTING_COMPARISON.md))
+and the ping-pending boundedness fix below.
 
 Source: `examples.zip:ReLico-main/LeasingNRPFD/LeasingNRPFD.rebeca`,
 359 lines.
@@ -83,14 +76,48 @@ The routing *guards* (`senderNode > id` etc.) are untouched — the
 original already selected the target by value; only the reference
 channel changed.
 
-## RMC verdict — recorded, not a gate
+## Boundedness fix — the model's own `ping_pending` discipline, enforced
 
-`queue overflow`. The counter-example ends with `DCN1`'s queue holding
-repeated messages at logical time 0 under an interleaving that starves
-the node while the switch relay chain continues — the same model-checking
-shape as `Minimal`'s zero-delay recurrence and `benchmarks/tcsma`'s
-overflow: an unbounded queue under unfair scheduling, not a translation
-defect. Per the tier-2 policy (model-checker verdicts are recorded
-bonuses for case studies, not gates), this benchmark's stage list
-excludes `rmc`; the verdict is recorded here and in
-[`RESULTS.md`](RESULTS.md).
+**Measured cause.** RMC reported `queue overflow`, and its
+counter-example is diagnostic: thirteen transitions, all at
+`executionTime="0"`, with every `after(d)` message queued at
+`arrival="0"` — DCN1's `runMe` re-arms itself and its `ping_timed_out`
+at time 0 while earlier timeouts sit unconsumed, so the node piles its
+own timeout messages into its bound-4 queue. Two control runs pin the
+cause on the gate's exploration semantics rather than on this
+adaptation: the **unmodified upstream** LeasingNRPFD produces the same
+all-zero-time overflow, and so does the **unmodified upstream tcsma**
+(362 messages, all `arrival="0"`). Under this checker's exploration,
+`after` delays collapse to time 0, so boundedness must hold under
+zero-delay scheduling — a strictly stronger requirement than the real
+time semantics needs.
+
+The model-level gap that makes it fail: `runMe`'s six ping send sites
+re-arm `pingNRP` and `ping_timed_out` unconditionally, and the mode-1
+timeout handler performs its failover **without clearing `ping_pending`**
+(the mode-2 branch already clears it). So nothing enforces "at most one
+ping and one timeout in flight", and under zero-delay scheduling the
+re-arms outrun the consumption.
+
+**The fix — two edits, the flag's own semantics.** (1) The mode-1
+timeout handler clears `ping_pending` when it consumes a timeout,
+exactly as the mode-2 branch already does. (2) All three ping-pair
+blocks in `runMe` (mode 1, and both mode-2 escalations — six send sites)
+are guarded with `if (!ping_pending)`. At most one ping and one timeout
+are in flight per node: the same at-most-one-unacknowledged-message
+principle as the tcsma-inspired benchmark, expressed here with the
+flag the model itself already carries.
+
+**Why the intent is preserved.** Under real time the original already
+has one ping in flight per cycle by construction — the period is 1000
+and the timeout 100, so a response or timeout always resolves long
+before the next cycle — and the failover sequence is identical: ping
+network A, timeout, elect network B, ping B, timeout, give up to
+WAITING. The guard enforces that invariant instead of assuming the
+timing. One genuine small behavioural delta, recorded: the original
+could arm overlapping timeouts within one period (a second
+`ping_timed_out` while the first was still in flight), which would
+advance `NRP_network` twice in a single cycle and skip a network in the
+failover — the guard prevents that, which is what `ping_pending` exists
+to express. The periodic relay and heartbeat behaviour continues
+unchanged, every queue is bounded, and RMC reports **`satisfied`**.

@@ -1,0 +1,4577 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 34,
+            "target": "id",
+            "value": {
+              "kind": "variable",
+              "line": 34,
+              "name": "Myid"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 35,
+            "target": "attacker",
+            "value": {
+              "kind": "intLiteral",
+              "line": 35,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 36,
+            "target": "which",
+            "value": {
+              "kind": "intLiteral",
+              "line": 36,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 37,
+            "target": "prevWhich",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 37,
+              "value": true
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 38,
+            "target": "NRPCandidates0",
+            "value": {
+              "kind": "variable",
+              "line": 38,
+              "name": "NRPCan1_id"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 39,
+            "target": "NRPCandidates1",
+            "value": {
+              "kind": "variable",
+              "line": 39,
+              "name": "NRPCan2_id"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 40,
+            "target": "heartbeats_missed_1",
+            "value": {
+              "kind": "intLiteral",
+              "line": 40,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 41,
+            "target": "heartbeats_missed_2",
+            "value": {
+              "kind": "intLiteral",
+              "line": 41,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 42,
+            "target": "NRP_network",
+            "value": {
+              "kind": "unary",
+              "line": 42,
+              "operand": {
+                "kind": "intLiteral",
+                "line": 42,
+                "value": 1
+              },
+              "operator": "-"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 43,
+            "target": "NRP_switch_id",
+            "value": {
+              "kind": "unary",
+              "line": 43,
+              "operand": {
+                "kind": "intLiteral",
+                "line": 43,
+                "value": 1
+              },
+              "operator": "-"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 44,
+            "target": "NRP_pending",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 44,
+              "value": true
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 45,
+            "target": "become_primary_on_ping_response",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 45,
+              "value": false
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 46,
+            "target": "primary",
+            "value": {
+              "kind": "variable",
+              "line": 46,
+              "name": "Myprimary"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 47,
+            "target": "ping_pending",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 47,
+              "value": false
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 48,
+            "target": "init",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 48,
+              "value": true
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 50,
+            "target": "nodeMode",
+            "value": {
+              "kind": "intLiteral",
+              "line": 50,
+              "value": 0
+            }
+          },
+          {
+            "condition": {
+              "kind": "binary",
+              "left": {
+                "kind": "variable",
+                "line": 51,
+                "name": "myFailTime"
+              },
+              "line": 51,
+              "operator": "==",
+              "right": {
+                "kind": "intLiteral",
+                "line": 51,
+                "value": 2500
+              }
+            },
+            "else": [
+              {
+                "condition": {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "variable",
+                    "line": 52,
+                    "name": "myFailTime"
+                  },
+                  "line": 52,
+                  "operator": "==",
+                  "right": {
+                    "kind": "intLiteral",
+                    "line": 52,
+                    "value": 5000
+                  }
+                },
+                "else": [],
+                "kind": "if",
+                "line": 52,
+                "then": [
+                  {
+                    "after": {
+                      "kind": "intLiteral",
+                      "value": 5000
+                    },
+                    "arguments": [],
+                    "kind": "send",
+                    "line": 52,
+                    "messageServer": "nodeFail",
+                    "target": {
+                      "kind": "self"
+                    },
+                    "targetClassName": "Node"
+                  }
+                ]
+              }
+            ],
+            "kind": "if",
+            "line": 51,
+            "then": [
+              {
+                "after": {
+                  "kind": "intLiteral",
+                  "value": 2500
+                },
+                "arguments": [],
+                "kind": "send",
+                "line": 51,
+                "messageServer": "nodeFail",
+                "target": {
+                  "kind": "self"
+                },
+                "targetClassName": "Node"
+              }
+            ]
+          },
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 53,
+            "messageServer": "runMe",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Node"
+          }
+        ],
+        "line": 33,
+        "parameters": [
+          {
+            "line": 33,
+            "name": "Myid",
+            "type": "int"
+          },
+          {
+            "line": 33,
+            "name": "Myprimary",
+            "type": "int"
+          },
+          {
+            "line": 33,
+            "name": "NRPCan1_id",
+            "type": "int"
+          },
+          {
+            "line": 33,
+            "name": "NRPCan2_id",
+            "type": "int"
+          },
+          {
+            "line": 33,
+            "name": "myFailTime",
+            "type": "int"
+          }
+        ]
+      },
+      "knownRebecs": [
+        {
+          "className": "Switch",
+          "line": 12,
+          "name": "out1"
+        },
+        {
+          "className": "Switch",
+          "line": 12,
+          "name": "out2"
+        }
+      ],
+      "line": 9,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 58,
+                  "name": "nodeMode"
+                },
+                "line": 58,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 58,
+                  "value": 2
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 58,
+              "then": [
+                {
+                  "condition": {
+                    "kind": "variable",
+                    "line": 59,
+                    "name": "NRP_pending"
+                  },
+                  "else": [],
+                  "kind": "if",
+                  "line": 59,
+                  "then": [
+                    {
+                      "kind": "assign",
+                      "line": 60,
+                      "target": "NRP_pending",
+                      "value": {
+                        "kind": "boolLiteral",
+                        "line": 60,
+                        "value": false
+                      }
+                    },
+                    {
+                      "condition": {
+                        "kind": "variable",
+                        "line": 61,
+                        "name": "become_primary_on_ping_response"
+                      },
+                      "else": [],
+                      "kind": "if",
+                      "line": 61,
+                      "then": [
+                        {
+                          "kind": "assign",
+                          "line": 62,
+                          "target": "become_primary_on_ping_response",
+                          "value": {
+                            "kind": "boolLiteral",
+                            "line": 62,
+                            "value": false
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "line": 56,
+          "name": "new_NRP_request_timed_out",
+          "parameters": [],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 70,
+                  "name": "nodeMode"
+                },
+                "line": 70,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 70,
+                  "value": 2
+                }
+              },
+              "else": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 87,
+                      "name": "nodeMode"
+                    },
+                    "line": 87,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 87,
+                      "value": 1
+                    }
+                  },
+                  "else": [],
+                  "kind": "if",
+                  "line": 87,
+                  "then": [
+                    {
+                      "condition": {
+                        "kind": "variable",
+                        "line": 88,
+                        "name": "ping_pending"
+                      },
+                      "else": [
+                        {
+                          "condition": {
+                            "kind": "binary",
+                            "left": {
+                              "kind": "variable",
+                              "line": 101,
+                              "name": "attacker"
+                            },
+                            "line": 101,
+                            "operator": "<",
+                            "right": {
+                              "kind": "intLiteral",
+                              "line": 101,
+                              "value": 1
+                            }
+                          },
+                          "else": [],
+                          "kind": "if",
+                          "line": 101,
+                          "then": [
+                            {
+                              "after": {
+                                "kind": "intLiteral",
+                                "value": 1
+                              },
+                              "arguments": [
+                                {
+                                  "kind": "intLiteral",
+                                  "line": 102,
+                                  "value": 0
+                                },
+                                {
+                                  "kind": "variable",
+                                  "line": 102,
+                                  "name": "id"
+                                }
+                              ],
+                              "kind": "send",
+                              "line": 102,
+                              "messageServer": "heartBeat",
+                              "target": {
+                                "kind": "knownRebec",
+                                "name": "out1"
+                              },
+                              "targetClassName": "Switch"
+                            },
+                            {
+                              "after": {
+                                "kind": "intLiteral",
+                                "value": 1
+                              },
+                              "arguments": [
+                                {
+                                  "kind": "intLiteral",
+                                  "line": 103,
+                                  "value": 1
+                                },
+                                {
+                                  "kind": "variable",
+                                  "line": 103,
+                                  "name": "id"
+                                }
+                              ],
+                              "kind": "send",
+                              "line": 103,
+                              "messageServer": "heartBeat",
+                              "target": {
+                                "kind": "knownRebec",
+                                "name": "out2"
+                              },
+                              "targetClassName": "Switch"
+                            }
+                          ]
+                        }
+                      ],
+                      "kind": "if",
+                      "line": 88,
+                      "then": [
+                        {
+                          "kind": "assign",
+                          "line": 89,
+                          "target": "ping_pending",
+                          "value": {
+                            "kind": "boolLiteral",
+                            "line": 89,
+                            "value": false
+                          }
+                        },
+                        {
+                          "kind": "assign",
+                          "line": 90,
+                          "target": "NRP_network",
+                          "value": {
+                            "kind": "binary",
+                            "left": {
+                              "kind": "variable",
+                              "line": 90,
+                              "name": "NRP_network"
+                            },
+                            "line": 90,
+                            "operator": "+",
+                            "right": {
+                              "kind": "intLiteral",
+                              "line": 90,
+                              "value": 1
+                            }
+                          }
+                        },
+                        {
+                          "condition": {
+                            "kind": "binary",
+                            "left": {
+                              "kind": "variable",
+                              "line": 91,
+                              "name": "NRP_network"
+                            },
+                            "line": 91,
+                            "operator": "<",
+                            "right": {
+                              "kind": "intLiteral",
+                              "line": 91,
+                              "value": 2
+                            }
+                          },
+                          "else": [
+                            {
+                              "kind": "assign",
+                              "line": 96,
+                              "target": "NRP_network",
+                              "value": {
+                                "kind": "intLiteral",
+                                "line": 96,
+                                "value": 2
+                              }
+                            },
+                            {
+                              "kind": "assign",
+                              "line": 97,
+                              "target": "nodeMode",
+                              "value": {
+                                "kind": "intLiteral",
+                                "line": 97,
+                                "value": 0
+                              }
+                            }
+                          ],
+                          "kind": "if",
+                          "line": 91,
+                          "then": [
+                            {
+                              "condition": {
+                                "kind": "binary",
+                                "left": {
+                                  "kind": "variable",
+                                  "line": 92,
+                                  "name": "NRP_network"
+                                },
+                                "line": 92,
+                                "operator": "==",
+                                "right": {
+                                  "kind": "intLiteral",
+                                  "line": 92,
+                                  "value": 0
+                                }
+                              },
+                              "else": [
+                                {
+                                  "kind": "assign",
+                                  "line": 92,
+                                  "target": "NRP_switch_id",
+                                  "value": {
+                                    "kind": "variable",
+                                    "line": 92,
+                                    "name": "NRPCandidates1"
+                                  }
+                                }
+                              ],
+                              "kind": "if",
+                              "line": 92,
+                              "then": [
+                                {
+                                  "kind": "assign",
+                                  "line": 92,
+                                  "target": "NRP_switch_id",
+                                  "value": {
+                                    "kind": "variable",
+                                    "line": 92,
+                                    "name": "NRPCandidates0"
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "condition": {
+                                "kind": "binary",
+                                "left": {
+                                  "kind": "variable",
+                                  "line": 93,
+                                  "name": "NRP_network"
+                                },
+                                "line": 93,
+                                "operator": "==",
+                                "right": {
+                                  "kind": "intLiteral",
+                                  "line": 93,
+                                  "value": 0
+                                }
+                              },
+                              "else": [
+                                {
+                                  "after": null,
+                                  "arguments": [
+                                    {
+                                      "kind": "variable",
+                                      "line": 94,
+                                      "name": "id"
+                                    },
+                                    {
+                                      "kind": "variable",
+                                      "line": 94,
+                                      "name": "id"
+                                    },
+                                    {
+                                      "kind": "variable",
+                                      "line": 94,
+                                      "name": "NRP_network"
+                                    },
+                                    {
+                                      "kind": "variable",
+                                      "line": 94,
+                                      "name": "NRP_switch_id"
+                                    }
+                                  ],
+                                  "kind": "send",
+                                  "line": 94,
+                                  "messageServer": "new_NRP",
+                                  "target": {
+                                    "kind": "knownRebec",
+                                    "name": "out2"
+                                  },
+                                  "targetClassName": "Switch"
+                                }
+                              ],
+                              "kind": "if",
+                              "line": 93,
+                              "then": [
+                                {
+                                  "after": null,
+                                  "arguments": [
+                                    {
+                                      "kind": "variable",
+                                      "line": 93,
+                                      "name": "id"
+                                    },
+                                    {
+                                      "kind": "variable",
+                                      "line": 93,
+                                      "name": "id"
+                                    },
+                                    {
+                                      "kind": "variable",
+                                      "line": 93,
+                                      "name": "NRP_network"
+                                    },
+                                    {
+                                      "kind": "variable",
+                                      "line": 93,
+                                      "name": "NRP_switch_id"
+                                    }
+                                  ],
+                                  "kind": "send",
+                                  "line": 93,
+                                  "messageServer": "new_NRP",
+                                  "target": {
+                                    "kind": "knownRebec",
+                                    "name": "out1"
+                                  },
+                                  "targetClassName": "Switch"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "kind": "assign",
+                          "line": 99,
+                          "target": "NRP_pending",
+                          "value": {
+                            "kind": "boolLiteral",
+                            "line": 99,
+                            "value": true
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "kind": "if",
+              "line": 70,
+              "then": [
+                {
+                  "condition": {
+                    "kind": "variable",
+                    "line": 71,
+                    "name": "ping_pending"
+                  },
+                  "else": [
+                    {
+                      "condition": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 73,
+                          "name": "which"
+                        },
+                        "line": 73,
+                        "operator": ">",
+                        "right": {
+                          "kind": "intLiteral",
+                          "line": 73,
+                          "value": 1
+                        }
+                      },
+                      "else": [
+                        {
+                          "kind": "assign",
+                          "line": 85,
+                          "target": "NRP_pending",
+                          "value": {
+                            "kind": "boolLiteral",
+                            "line": 85,
+                            "value": true
+                          }
+                        }
+                      ],
+                      "kind": "if",
+                      "line": 73,
+                      "then": [
+                        {
+                          "kind": "assign",
+                          "line": 74,
+                          "target": "nodeMode",
+                          "value": {
+                            "kind": "intLiteral",
+                            "line": 74,
+                            "value": 1
+                          }
+                        },
+                        {
+                          "kind": "assign",
+                          "line": 75,
+                          "target": "heartbeats_missed_1",
+                          "value": {
+                            "kind": "intLiteral",
+                            "line": 75,
+                            "value": 0
+                          }
+                        },
+                        {
+                          "kind": "assign",
+                          "line": 76,
+                          "target": "heartbeats_missed_2",
+                          "value": {
+                            "kind": "intLiteral",
+                            "line": 76,
+                            "value": 0
+                          }
+                        },
+                        {
+                          "kind": "assign",
+                          "line": 77,
+                          "target": "primary",
+                          "value": {
+                            "kind": "variable",
+                            "line": 77,
+                            "name": "id"
+                          }
+                        },
+                        {
+                          "condition": {
+                            "kind": "binary",
+                            "left": {
+                              "kind": "variable",
+                              "line": 78,
+                              "name": "NRP_network"
+                            },
+                            "line": 78,
+                            "operator": "==",
+                            "right": {
+                              "kind": "intLiteral",
+                              "line": 78,
+                              "value": 0
+                            }
+                          },
+                          "else": [
+                            {
+                              "after": null,
+                              "arguments": [
+                                {
+                                  "kind": "variable",
+                                  "line": 79,
+                                  "name": "id"
+                                },
+                                {
+                                  "kind": "variable",
+                                  "line": 79,
+                                  "name": "id"
+                                },
+                                {
+                                  "kind": "variable",
+                                  "line": 79,
+                                  "name": "NRP_network"
+                                },
+                                {
+                                  "kind": "variable",
+                                  "line": 79,
+                                  "name": "NRP_switch_id"
+                                }
+                              ],
+                              "kind": "send",
+                              "line": 79,
+                              "messageServer": "new_NRPBack",
+                              "target": {
+                                "kind": "knownRebec",
+                                "name": "out2"
+                              },
+                              "targetClassName": "Switch"
+                            }
+                          ],
+                          "kind": "if",
+                          "line": 78,
+                          "then": [
+                            {
+                              "after": null,
+                              "arguments": [
+                                {
+                                  "kind": "variable",
+                                  "line": 78,
+                                  "name": "id"
+                                },
+                                {
+                                  "kind": "variable",
+                                  "line": 78,
+                                  "name": "id"
+                                },
+                                {
+                                  "kind": "variable",
+                                  "line": 78,
+                                  "name": "NRP_network"
+                                },
+                                {
+                                  "kind": "variable",
+                                  "line": 78,
+                                  "name": "NRP_switch_id"
+                                }
+                              ],
+                              "kind": "send",
+                              "line": 78,
+                              "messageServer": "new_NRPBack",
+                              "target": {
+                                "kind": "knownRebec",
+                                "name": "out1"
+                              },
+                              "targetClassName": "Switch"
+                            }
+                          ]
+                        },
+                        {
+                          "kind": "assign",
+                          "line": 80,
+                          "target": "nodeMode",
+                          "value": {
+                            "kind": "intLiteral",
+                            "line": 80,
+                            "value": 1
+                          }
+                        },
+                        {
+                          "kind": "assign",
+                          "line": 81,
+                          "target": "heartbeats_missed_1",
+                          "value": {
+                            "kind": "intLiteral",
+                            "line": 81,
+                            "value": 0
+                          }
+                        },
+                        {
+                          "kind": "assign",
+                          "line": 82,
+                          "target": "heartbeats_missed_2",
+                          "value": {
+                            "kind": "intLiteral",
+                            "line": 82,
+                            "value": 0
+                          }
+                        },
+                        {
+                          "kind": "assign",
+                          "line": 83,
+                          "target": "primary",
+                          "value": {
+                            "kind": "variable",
+                            "line": 83,
+                            "name": "id"
+                          }
+                        },
+                        {
+                          "kind": "assign",
+                          "line": 84,
+                          "target": "NRP_pending",
+                          "value": {
+                            "kind": "boolLiteral",
+                            "line": 84,
+                            "value": true
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 71,
+                  "then": [
+                    {
+                      "kind": "assign",
+                      "line": 71,
+                      "target": "ping_pending",
+                      "value": {
+                        "kind": "boolLiteral",
+                        "line": 71,
+                        "value": false
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "line": 68,
+          "name": "ping_timed_out",
+          "parameters": [],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 113,
+                  "name": "nodeMode"
+                },
+                "line": 113,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 113,
+                  "value": 2
+                }
+              },
+              "else": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 119,
+                      "name": "nodeMode"
+                    },
+                    "line": 119,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 119,
+                      "value": 1
+                    }
+                  },
+                  "else": [],
+                  "kind": "if",
+                  "line": 119,
+                  "then": [
+                    {
+                      "kind": "assign",
+                      "line": 120,
+                      "target": "ping_pending",
+                      "value": {
+                        "kind": "boolLiteral",
+                        "line": 120,
+                        "value": false
+                      }
+                    }
+                  ]
+                }
+              ],
+              "kind": "if",
+              "line": 113,
+              "then": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "unary",
+                      "line": 114,
+                      "operand": {
+                        "kind": "variable",
+                        "line": 114,
+                        "name": "w"
+                      },
+                      "operator": "!"
+                    },
+                    "line": 114,
+                    "operator": "&&",
+                    "right": {
+                      "kind": "unary",
+                      "line": 114,
+                      "operand": {
+                        "kind": "variable",
+                        "line": 114,
+                        "name": "pw"
+                      },
+                      "operator": "!"
+                    }
+                  },
+                  "else": [
+                    {
+                      "kind": "assign",
+                      "line": 115,
+                      "target": "which",
+                      "value": {
+                        "kind": "intLiteral",
+                        "line": 115,
+                        "value": 0
+                      }
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 114,
+                  "then": [
+                    {
+                      "kind": "assign",
+                      "line": 114,
+                      "target": "which",
+                      "value": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 114,
+                          "name": "which"
+                        },
+                        "line": 114,
+                        "operator": "+",
+                        "right": {
+                          "kind": "intLiteral",
+                          "line": 114,
+                          "value": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 116,
+                      "name": "which"
+                    },
+                    "line": 116,
+                    "operator": ">",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 116,
+                      "value": 1
+                    }
+                  },
+                  "else": [],
+                  "kind": "if",
+                  "line": 116,
+                  "then": [
+                    {
+                      "kind": "assign",
+                      "line": 117,
+                      "target": "ping_pending",
+                      "value": {
+                        "kind": "boolLiteral",
+                        "line": 117,
+                        "value": false
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "line": 111,
+          "name": "pingNRP_response",
+          "parameters": [
+            {
+              "line": 111,
+              "name": "mid",
+              "type": "int"
+            },
+            {
+              "line": 111,
+              "name": "w",
+              "type": "boolean"
+            },
+            {
+              "line": 111,
+              "name": "pw",
+              "type": "boolean"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 125,
+                  "name": "nodeMode"
+                },
+                "line": 125,
+                "operator": "!=",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 125,
+                  "value": 3
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 125,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 126,
+                  "target": "NRP_network",
+                  "value": {
+                    "kind": "variable",
+                    "line": 126,
+                    "name": "mNRP_network"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 127,
+                  "target": "NRP_switch_id",
+                  "value": {
+                    "kind": "variable",
+                    "line": 127,
+                    "name": "mNRP_switch_id"
+                  }
+                }
+              ]
+            }
+          ],
+          "line": 123,
+          "name": "new_NRP",
+          "parameters": [
+            {
+              "line": 123,
+              "name": "mid",
+              "type": "int"
+            },
+            {
+              "line": 123,
+              "name": "prim",
+              "type": "int"
+            },
+            {
+              "line": 123,
+              "name": "mNRP_network",
+              "type": "int"
+            },
+            {
+              "line": 123,
+              "name": "mNRP_switch_id",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 132,
+                  "name": "nodeMode"
+                },
+                "line": 132,
+                "operator": "!=",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 132,
+                  "value": 3
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 132,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 133,
+                  "target": "NRP_network",
+                  "value": {
+                    "kind": "variable",
+                    "line": 133,
+                    "name": "mNRP_network"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 134,
+                  "target": "NRP_switch_id",
+                  "value": {
+                    "kind": "variable",
+                    "line": 134,
+                    "name": "mNRP_switch_id"
+                  }
+                }
+              ]
+            }
+          ],
+          "line": 130,
+          "name": "new_NRPBack",
+          "parameters": [
+            {
+              "line": 130,
+              "name": "mid",
+              "type": "int"
+            },
+            {
+              "line": 130,
+              "name": "prim",
+              "type": "int"
+            },
+            {
+              "line": 130,
+              "name": "mNRP_network",
+              "type": "int"
+            },
+            {
+              "line": 130,
+              "name": "mNRP_switch_id",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 139,
+                  "name": "nodeMode"
+                },
+                "line": 139,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 139,
+                  "value": 0
+                }
+              },
+              "else": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 154,
+                      "name": "nodeMode"
+                    },
+                    "line": 154,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 154,
+                      "value": 1
+                    }
+                  },
+                  "else": [
+                    {
+                      "condition": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 171,
+                          "name": "nodeMode"
+                        },
+                        "line": 171,
+                        "operator": "==",
+                        "right": {
+                          "kind": "intLiteral",
+                          "line": 171,
+                          "value": 2
+                        }
+                      },
+                      "else": [
+                        {
+                          "condition": {
+                            "kind": "binary",
+                            "left": {
+                              "kind": "variable",
+                              "line": 217,
+                              "name": "nodeMode"
+                            },
+                            "line": 217,
+                            "operator": "==",
+                            "right": {
+                              "kind": "intLiteral",
+                              "line": 217,
+                              "value": 3
+                            }
+                          },
+                          "else": [],
+                          "kind": "if",
+                          "line": 217,
+                          "then": []
+                        }
+                      ],
+                      "kind": "if",
+                      "line": 171,
+                      "then": [
+                        {
+                          "kind": "assign",
+                          "line": 173,
+                          "target": "heartbeats_missed_1",
+                          "value": {
+                            "kind": "binary",
+                            "left": {
+                              "kind": "variable",
+                              "line": 173,
+                              "name": "heartbeats_missed_1"
+                            },
+                            "line": 173,
+                            "operator": "+",
+                            "right": {
+                              "kind": "intLiteral",
+                              "line": 173,
+                              "value": 1
+                            }
+                          }
+                        },
+                        {
+                          "kind": "assign",
+                          "line": 174,
+                          "target": "heartbeats_missed_2",
+                          "value": {
+                            "kind": "binary",
+                            "left": {
+                              "kind": "variable",
+                              "line": 174,
+                              "name": "heartbeats_missed_2"
+                            },
+                            "line": 174,
+                            "operator": "+",
+                            "right": {
+                              "kind": "intLiteral",
+                              "line": 174,
+                              "value": 1
+                            }
+                          }
+                        },
+                        {
+                          "condition": {
+                            "kind": "binary",
+                            "left": {
+                              "kind": "binary",
+                              "left": {
+                                "kind": "variable",
+                                "line": 175,
+                                "name": "heartbeats_missed_1"
+                              },
+                              "line": 175,
+                              "operator": ">",
+                              "right": {
+                                "kind": "intLiteral",
+                                "line": 175,
+                                "value": 2
+                              }
+                            },
+                            "line": 175,
+                            "operator": "&&",
+                            "right": {
+                              "kind": "binary",
+                              "left": {
+                                "kind": "variable",
+                                "line": 175,
+                                "name": "heartbeats_missed_2"
+                              },
+                              "line": 175,
+                              "operator": ">",
+                              "right": {
+                                "kind": "intLiteral",
+                                "line": 175,
+                                "value": 2
+                              }
+                            }
+                          },
+                          "else": [
+                            {
+                              "condition": {
+                                "kind": "binary",
+                                "left": {
+                                  "kind": "binary",
+                                  "left": {
+                                    "kind": "variable",
+                                    "line": 201,
+                                    "name": "heartbeats_missed_1"
+                                  },
+                                  "line": 201,
+                                  "operator": ">",
+                                  "right": {
+                                    "kind": "intLiteral",
+                                    "line": 201,
+                                    "value": 2
+                                  }
+                                },
+                                "line": 201,
+                                "operator": "||",
+                                "right": {
+                                  "kind": "binary",
+                                  "left": {
+                                    "kind": "variable",
+                                    "line": 201,
+                                    "name": "heartbeats_missed_2"
+                                  },
+                                  "line": 201,
+                                  "operator": ">",
+                                  "right": {
+                                    "kind": "intLiteral",
+                                    "line": 201,
+                                    "value": 2
+                                  }
+                                }
+                              },
+                              "else": [],
+                              "kind": "if",
+                              "line": 201,
+                              "then": [
+                                {
+                                  "condition": {
+                                    "kind": "unary",
+                                    "line": 202,
+                                    "operand": {
+                                      "kind": "variable",
+                                      "line": 202,
+                                      "name": "ping_pending"
+                                    },
+                                    "operator": "!"
+                                  },
+                                  "else": [],
+                                  "kind": "if",
+                                  "line": 202,
+                                  "then": [
+                                    {
+                                      "condition": {
+                                        "kind": "binary",
+                                        "left": {
+                                          "kind": "binary",
+                                          "left": {
+                                            "kind": "variable",
+                                            "line": 203,
+                                            "name": "NRP_network"
+                                          },
+                                          "line": 203,
+                                          "operator": "==",
+                                          "right": {
+                                            "kind": "intLiteral",
+                                            "line": 203,
+                                            "value": 0
+                                          }
+                                        },
+                                        "line": 203,
+                                        "operator": "&&",
+                                        "right": {
+                                          "kind": "binary",
+                                          "left": {
+                                            "kind": "variable",
+                                            "line": 203,
+                                            "name": "heartbeats_missed_1"
+                                          },
+                                          "line": 203,
+                                          "operator": ">",
+                                          "right": {
+                                            "kind": "intLiteral",
+                                            "line": 203,
+                                            "value": 2
+                                          }
+                                        }
+                                      },
+                                      "else": [
+                                        {
+                                          "condition": {
+                                            "kind": "binary",
+                                            "left": {
+                                              "kind": "binary",
+                                              "left": {
+                                                "kind": "variable",
+                                                "line": 207,
+                                                "name": "NRP_network"
+                                              },
+                                              "line": 207,
+                                              "operator": "==",
+                                              "right": {
+                                                "kind": "intLiteral",
+                                                "line": 207,
+                                                "value": 1
+                                              }
+                                            },
+                                            "line": 207,
+                                            "operator": "&&",
+                                            "right": {
+                                              "kind": "binary",
+                                              "left": {
+                                                "kind": "variable",
+                                                "line": 207,
+                                                "name": "heartbeats_missed_2"
+                                              },
+                                              "line": 207,
+                                              "operator": ">",
+                                              "right": {
+                                                "kind": "intLiteral",
+                                                "line": 207,
+                                                "value": 2
+                                              }
+                                            }
+                                          },
+                                          "else": [],
+                                          "kind": "if",
+                                          "line": 207,
+                                          "then": [
+                                            {
+                                              "kind": "assign",
+                                              "line": 208,
+                                              "target": "ping_pending",
+                                              "value": {
+                                                "kind": "boolLiteral",
+                                                "line": 208,
+                                                "value": true
+                                              }
+                                            },
+                                            {
+                                              "after": {
+                                                "kind": "intLiteral",
+                                                "value": 5
+                                              },
+                                              "arguments": [
+                                                {
+                                                  "kind": "variable",
+                                                  "line": 209,
+                                                  "name": "id"
+                                                },
+                                                {
+                                                  "kind": "variable",
+                                                  "line": 209,
+                                                  "name": "id"
+                                                },
+                                                {
+                                                  "kind": "variable",
+                                                  "line": 209,
+                                                  "name": "NRP_switch_id"
+                                                }
+                                              ],
+                                              "kind": "send",
+                                              "line": 209,
+                                              "messageServer": "pingNRP",
+                                              "target": {
+                                                "kind": "knownRebec",
+                                                "name": "out2"
+                                              },
+                                              "targetClassName": "Switch"
+                                            },
+                                            {
+                                              "after": {
+                                                "kind": "intLiteral",
+                                                "value": 100
+                                              },
+                                              "arguments": [],
+                                              "kind": "send",
+                                              "line": 210,
+                                              "messageServer": "ping_timed_out",
+                                              "target": {
+                                                "kind": "self"
+                                              },
+                                              "targetClassName": "Node"
+                                            }
+                                          ]
+                                        }
+                                      ],
+                                      "kind": "if",
+                                      "line": 203,
+                                      "then": [
+                                        {
+                                          "kind": "assign",
+                                          "line": 204,
+                                          "target": "ping_pending",
+                                          "value": {
+                                            "kind": "boolLiteral",
+                                            "line": 204,
+                                            "value": true
+                                          }
+                                        },
+                                        {
+                                          "after": {
+                                            "kind": "intLiteral",
+                                            "value": 5
+                                          },
+                                          "arguments": [
+                                            {
+                                              "kind": "variable",
+                                              "line": 205,
+                                              "name": "id"
+                                            },
+                                            {
+                                              "kind": "variable",
+                                              "line": 205,
+                                              "name": "id"
+                                            },
+                                            {
+                                              "kind": "variable",
+                                              "line": 205,
+                                              "name": "NRP_switch_id"
+                                            }
+                                          ],
+                                          "kind": "send",
+                                          "line": 205,
+                                          "messageServer": "pingNRP",
+                                          "target": {
+                                            "kind": "knownRebec",
+                                            "name": "out1"
+                                          },
+                                          "targetClassName": "Switch"
+                                        },
+                                        {
+                                          "after": {
+                                            "kind": "intLiteral",
+                                            "value": 100
+                                          },
+                                          "arguments": [],
+                                          "kind": "send",
+                                          "line": 206,
+                                          "messageServer": "ping_timed_out",
+                                          "target": {
+                                            "kind": "self"
+                                          },
+                                          "targetClassName": "Node"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "condition": {
+                                    "kind": "binary",
+                                    "left": {
+                                      "kind": "variable",
+                                      "line": 213,
+                                      "name": "heartbeats_missed_1"
+                                    },
+                                    "line": 213,
+                                    "operator": ">",
+                                    "right": {
+                                      "kind": "binary",
+                                      "left": {
+                                        "kind": "intLiteral",
+                                        "line": 213,
+                                        "value": 2
+                                      },
+                                      "line": 213,
+                                      "operator": "+",
+                                      "right": {
+                                        "kind": "intLiteral",
+                                        "line": 213,
+                                        "value": 2
+                                      }
+                                    }
+                                  },
+                                  "else": [],
+                                  "kind": "if",
+                                  "line": 213,
+                                  "then": [
+                                    {
+                                      "kind": "assign",
+                                      "line": 213,
+                                      "target": "heartbeats_missed_1",
+                                      "value": {
+                                        "kind": "binary",
+                                        "left": {
+                                          "kind": "intLiteral",
+                                          "line": 213,
+                                          "value": 2
+                                        },
+                                        "line": 213,
+                                        "operator": "+",
+                                        "right": {
+                                          "kind": "intLiteral",
+                                          "line": 213,
+                                          "value": 2
+                                        }
+                                      }
+                                    }
+                                  ]
+                                },
+                                {
+                                  "condition": {
+                                    "kind": "binary",
+                                    "left": {
+                                      "kind": "variable",
+                                      "line": 214,
+                                      "name": "heartbeats_missed_2"
+                                    },
+                                    "line": 214,
+                                    "operator": ">",
+                                    "right": {
+                                      "kind": "binary",
+                                      "left": {
+                                        "kind": "intLiteral",
+                                        "line": 214,
+                                        "value": 2
+                                      },
+                                      "line": 214,
+                                      "operator": "+",
+                                      "right": {
+                                        "kind": "intLiteral",
+                                        "line": 214,
+                                        "value": 2
+                                      }
+                                    }
+                                  },
+                                  "else": [],
+                                  "kind": "if",
+                                  "line": 214,
+                                  "then": [
+                                    {
+                                      "kind": "assign",
+                                      "line": 214,
+                                      "target": "heartbeats_missed_2",
+                                      "value": {
+                                        "kind": "binary",
+                                        "left": {
+                                          "kind": "intLiteral",
+                                          "line": 214,
+                                          "value": 2
+                                        },
+                                        "line": 214,
+                                        "operator": "+",
+                                        "right": {
+                                          "kind": "intLiteral",
+                                          "line": 214,
+                                          "value": 2
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "kind": "if",
+                          "line": 175,
+                          "then": [
+                            {
+                              "condition": {
+                                "kind": "binary",
+                                "left": {
+                                  "kind": "variable",
+                                  "line": 176,
+                                  "name": "heartbeats_missed_1"
+                                },
+                                "line": 176,
+                                "operator": ">",
+                                "right": {
+                                  "kind": "binary",
+                                  "left": {
+                                    "kind": "intLiteral",
+                                    "line": 176,
+                                    "value": 2
+                                  },
+                                  "line": 176,
+                                  "operator": "+",
+                                  "right": {
+                                    "kind": "intLiteral",
+                                    "line": 176,
+                                    "value": 2
+                                  }
+                                }
+                              },
+                              "else": [],
+                              "kind": "if",
+                              "line": 176,
+                              "then": [
+                                {
+                                  "kind": "assign",
+                                  "line": 176,
+                                  "target": "heartbeats_missed_1",
+                                  "value": {
+                                    "kind": "binary",
+                                    "left": {
+                                      "kind": "intLiteral",
+                                      "line": 176,
+                                      "value": 2
+                                    },
+                                    "line": 176,
+                                    "operator": "+",
+                                    "right": {
+                                      "kind": "intLiteral",
+                                      "line": 176,
+                                      "value": 2
+                                    }
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "condition": {
+                                "kind": "binary",
+                                "left": {
+                                  "kind": "variable",
+                                  "line": 177,
+                                  "name": "heartbeats_missed_2"
+                                },
+                                "line": 177,
+                                "operator": ">",
+                                "right": {
+                                  "kind": "binary",
+                                  "left": {
+                                    "kind": "intLiteral",
+                                    "line": 177,
+                                    "value": 2
+                                  },
+                                  "line": 177,
+                                  "operator": "+",
+                                  "right": {
+                                    "kind": "intLiteral",
+                                    "line": 177,
+                                    "value": 2
+                                  }
+                                }
+                              },
+                              "else": [],
+                              "kind": "if",
+                              "line": 177,
+                              "then": [
+                                {
+                                  "kind": "assign",
+                                  "line": 177,
+                                  "target": "heartbeats_missed_2",
+                                  "value": {
+                                    "kind": "binary",
+                                    "left": {
+                                      "kind": "intLiteral",
+                                      "line": 177,
+                                      "value": 2
+                                    },
+                                    "line": 177,
+                                    "operator": "+",
+                                    "right": {
+                                      "kind": "intLiteral",
+                                      "line": 177,
+                                      "value": 2
+                                    }
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "condition": {
+                                "kind": "unary",
+                                "line": 186,
+                                "operand": {
+                                  "kind": "variable",
+                                  "line": 186,
+                                  "name": "ping_pending"
+                                },
+                                "operator": "!"
+                              },
+                              "else": [],
+                              "kind": "if",
+                              "line": 186,
+                              "then": [
+                                {
+                                  "condition": {
+                                    "kind": "binary",
+                                    "left": {
+                                      "kind": "variable",
+                                      "line": 187,
+                                      "name": "NRP_network"
+                                    },
+                                    "line": 187,
+                                    "operator": "==",
+                                    "right": {
+                                      "kind": "intLiteral",
+                                      "line": 187,
+                                      "value": 0
+                                    }
+                                  },
+                                  "else": [
+                                    {
+                                      "kind": "assign",
+                                      "line": 193,
+                                      "target": "ping_pending",
+                                      "value": {
+                                        "kind": "boolLiteral",
+                                        "line": 193,
+                                        "value": true
+                                      }
+                                    },
+                                    {
+                                      "after": {
+                                        "kind": "intLiteral",
+                                        "value": 15
+                                      },
+                                      "arguments": [
+                                        {
+                                          "kind": "variable",
+                                          "line": 195,
+                                          "name": "id"
+                                        },
+                                        {
+                                          "kind": "variable",
+                                          "line": 195,
+                                          "name": "id"
+                                        },
+                                        {
+                                          "kind": "variable",
+                                          "line": 195,
+                                          "name": "NRP_switch_id"
+                                        }
+                                      ],
+                                      "kind": "send",
+                                      "line": 195,
+                                      "messageServer": "pingNRP",
+                                      "target": {
+                                        "kind": "knownRebec",
+                                        "name": "out2"
+                                      },
+                                      "targetClassName": "Switch"
+                                    },
+                                    {
+                                      "after": {
+                                        "kind": "intLiteral",
+                                        "value": 100
+                                      },
+                                      "arguments": [],
+                                      "kind": "send",
+                                      "line": 196,
+                                      "messageServer": "ping_timed_out",
+                                      "target": {
+                                        "kind": "self"
+                                      },
+                                      "targetClassName": "Node"
+                                    }
+                                  ],
+                                  "kind": "if",
+                                  "line": 187,
+                                  "then": [
+                                    {
+                                      "kind": "assign",
+                                      "line": 188,
+                                      "target": "ping_pending",
+                                      "value": {
+                                        "kind": "boolLiteral",
+                                        "line": 188,
+                                        "value": true
+                                      }
+                                    },
+                                    {
+                                      "after": {
+                                        "kind": "intLiteral",
+                                        "value": 15
+                                      },
+                                      "arguments": [
+                                        {
+                                          "kind": "variable",
+                                          "line": 190,
+                                          "name": "id"
+                                        },
+                                        {
+                                          "kind": "variable",
+                                          "line": 190,
+                                          "name": "id"
+                                        },
+                                        {
+                                          "kind": "variable",
+                                          "line": 190,
+                                          "name": "NRP_switch_id"
+                                        }
+                                      ],
+                                      "kind": "send",
+                                      "line": 190,
+                                      "messageServer": "pingNRP",
+                                      "target": {
+                                        "kind": "knownRebec",
+                                        "name": "out1"
+                                      },
+                                      "targetClassName": "Switch"
+                                    },
+                                    {
+                                      "after": {
+                                        "kind": "intLiteral",
+                                        "value": 100
+                                      },
+                                      "arguments": [],
+                                      "kind": "send",
+                                      "line": 191,
+                                      "messageServer": "ping_timed_out",
+                                      "target": {
+                                        "kind": "self"
+                                      },
+                                      "targetClassName": "Node"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "kind": "assign",
+                              "line": 199,
+                              "target": "NRP_pending",
+                              "value": {
+                                "kind": "boolLiteral",
+                                "line": 199,
+                                "value": true
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 154,
+                  "then": [
+                    {
+                      "kind": "assign",
+                      "line": 156,
+                      "target": "attacker",
+                      "value": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 156,
+                          "name": "attacker"
+                        },
+                        "line": 156,
+                        "operator": "+",
+                        "right": {
+                          "kind": "intLiteral",
+                          "line": 156,
+                          "value": 1
+                        }
+                      }
+                    },
+                    {
+                      "condition": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 157,
+                          "name": "attacker"
+                        },
+                        "line": 157,
+                        "operator": ">",
+                        "right": {
+                          "kind": "intLiteral",
+                          "line": 157,
+                          "value": 1
+                        }
+                      },
+                      "else": [],
+                      "kind": "if",
+                      "line": 157,
+                      "then": [
+                        {
+                          "kind": "assign",
+                          "line": 157,
+                          "target": "attacker",
+                          "value": {
+                            "kind": "intLiteral",
+                            "line": 157,
+                            "value": 1
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "condition": {
+                        "kind": "unary",
+                        "line": 158,
+                        "operand": {
+                          "kind": "variable",
+                          "line": 158,
+                          "name": "ping_pending"
+                        },
+                        "operator": "!"
+                      },
+                      "else": [],
+                      "kind": "if",
+                      "line": 158,
+                      "then": [
+                        {
+                          "condition": {
+                            "kind": "binary",
+                            "left": {
+                              "kind": "variable",
+                              "line": 159,
+                              "name": "NRP_network"
+                            },
+                            "line": 159,
+                            "operator": "==",
+                            "right": {
+                              "kind": "intLiteral",
+                              "line": 159,
+                              "value": 0
+                            }
+                          },
+                          "else": [
+                            {
+                              "kind": "assign",
+                              "line": 164,
+                              "target": "ping_pending",
+                              "value": {
+                                "kind": "boolLiteral",
+                                "line": 164,
+                                "value": true
+                              }
+                            },
+                            {
+                              "after": {
+                                "kind": "intLiteral",
+                                "value": 5
+                              },
+                              "arguments": [
+                                {
+                                  "kind": "variable",
+                                  "line": 165,
+                                  "name": "id"
+                                },
+                                {
+                                  "kind": "variable",
+                                  "line": 165,
+                                  "name": "id"
+                                },
+                                {
+                                  "kind": "variable",
+                                  "line": 165,
+                                  "name": "NRP_switch_id"
+                                }
+                              ],
+                              "kind": "send",
+                              "line": 165,
+                              "messageServer": "pingNRP",
+                              "target": {
+                                "kind": "knownRebec",
+                                "name": "out2"
+                              },
+                              "targetClassName": "Switch"
+                            },
+                            {
+                              "after": {
+                                "kind": "intLiteral",
+                                "value": 100
+                              },
+                              "arguments": [],
+                              "kind": "send",
+                              "line": 166,
+                              "messageServer": "ping_timed_out",
+                              "target": {
+                                "kind": "self"
+                              },
+                              "targetClassName": "Node"
+                            }
+                          ],
+                          "kind": "if",
+                          "line": 159,
+                          "then": [
+                            {
+                              "kind": "assign",
+                              "line": 160,
+                              "target": "ping_pending",
+                              "value": {
+                                "kind": "boolLiteral",
+                                "line": 160,
+                                "value": true
+                              }
+                            },
+                            {
+                              "after": {
+                                "kind": "intLiteral",
+                                "value": 5
+                              },
+                              "arguments": [
+                                {
+                                  "kind": "variable",
+                                  "line": 161,
+                                  "name": "id"
+                                },
+                                {
+                                  "kind": "variable",
+                                  "line": 161,
+                                  "name": "id"
+                                },
+                                {
+                                  "kind": "variable",
+                                  "line": 161,
+                                  "name": "NRP_switch_id"
+                                }
+                              ],
+                              "kind": "send",
+                              "line": 161,
+                              "messageServer": "pingNRP",
+                              "target": {
+                                "kind": "knownRebec",
+                                "name": "out1"
+                              },
+                              "targetClassName": "Switch"
+                            },
+                            {
+                              "after": {
+                                "kind": "intLiteral",
+                                "value": 100
+                              },
+                              "arguments": [],
+                              "kind": "send",
+                              "line": 162,
+                              "messageServer": "ping_timed_out",
+                              "target": {
+                                "kind": "self"
+                              },
+                              "targetClassName": "Node"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "assign",
+                      "line": 169,
+                      "target": "NRP_pending",
+                      "value": {
+                        "kind": "boolLiteral",
+                        "line": 169,
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              ],
+              "kind": "if",
+              "line": 139,
+              "then": [
+                {
+                  "condition": {
+                    "kind": "variable",
+                    "line": 141,
+                    "name": "init"
+                  },
+                  "else": [],
+                  "kind": "if",
+                  "line": 141,
+                  "then": [
+                    {
+                      "condition": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 142,
+                          "name": "id"
+                        },
+                        "line": 142,
+                        "operator": "==",
+                        "right": {
+                          "kind": "variable",
+                          "line": 142,
+                          "name": "primary"
+                        }
+                      },
+                      "else": [
+                        {
+                          "kind": "assign",
+                          "line": 150,
+                          "target": "nodeMode",
+                          "value": {
+                            "kind": "intLiteral",
+                            "line": 150,
+                            "value": 2
+                          }
+                        }
+                      ],
+                      "kind": "if",
+                      "line": 142,
+                      "then": [
+                        {
+                          "kind": "assign",
+                          "line": 143,
+                          "target": "nodeMode",
+                          "value": {
+                            "kind": "intLiteral",
+                            "line": 143,
+                            "value": 1
+                          }
+                        },
+                        {
+                          "kind": "assign",
+                          "line": 144,
+                          "target": "NRP_network",
+                          "value": {
+                            "kind": "binary",
+                            "left": {
+                              "kind": "variable",
+                              "line": 144,
+                              "name": "NRP_network"
+                            },
+                            "line": 144,
+                            "operator": "+",
+                            "right": {
+                              "kind": "intLiteral",
+                              "line": 144,
+                              "value": 1
+                            }
+                          }
+                        },
+                        {
+                          "condition": {
+                            "kind": "binary",
+                            "left": {
+                              "kind": "variable",
+                              "line": 145,
+                              "name": "NRP_network"
+                            },
+                            "line": 145,
+                            "operator": "<",
+                            "right": {
+                              "kind": "intLiteral",
+                              "line": 145,
+                              "value": 2
+                            }
+                          },
+                          "else": [
+                            {
+                              "kind": "assign",
+                              "line": 149,
+                              "target": "NRP_network",
+                              "value": {
+                                "kind": "intLiteral",
+                                "line": 149,
+                                "value": 2
+                              }
+                            }
+                          ],
+                          "kind": "if",
+                          "line": 145,
+                          "then": [
+                            {
+                              "condition": {
+                                "kind": "binary",
+                                "left": {
+                                  "kind": "variable",
+                                  "line": 146,
+                                  "name": "NRP_network"
+                                },
+                                "line": 146,
+                                "operator": "==",
+                                "right": {
+                                  "kind": "intLiteral",
+                                  "line": 146,
+                                  "value": 0
+                                }
+                              },
+                              "else": [
+                                {
+                                  "kind": "assign",
+                                  "line": 146,
+                                  "target": "NRP_switch_id",
+                                  "value": {
+                                    "kind": "variable",
+                                    "line": 146,
+                                    "name": "NRPCandidates1"
+                                  }
+                                }
+                              ],
+                              "kind": "if",
+                              "line": 146,
+                              "then": [
+                                {
+                                  "kind": "assign",
+                                  "line": 146,
+                                  "target": "NRP_switch_id",
+                                  "value": {
+                                    "kind": "variable",
+                                    "line": 146,
+                                    "name": "NRPCandidates0"
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "condition": {
+                                "kind": "binary",
+                                "left": {
+                                  "kind": "variable",
+                                  "line": 147,
+                                  "name": "NRP_network"
+                                },
+                                "line": 147,
+                                "operator": "==",
+                                "right": {
+                                  "kind": "intLiteral",
+                                  "line": 147,
+                                  "value": 0
+                                }
+                              },
+                              "else": [
+                                {
+                                  "after": null,
+                                  "arguments": [
+                                    {
+                                      "kind": "variable",
+                                      "line": 148,
+                                      "name": "id"
+                                    },
+                                    {
+                                      "kind": "variable",
+                                      "line": 148,
+                                      "name": "id"
+                                    },
+                                    {
+                                      "kind": "variable",
+                                      "line": 148,
+                                      "name": "NRP_network"
+                                    },
+                                    {
+                                      "kind": "variable",
+                                      "line": 148,
+                                      "name": "NRP_switch_id"
+                                    }
+                                  ],
+                                  "kind": "send",
+                                  "line": 148,
+                                  "messageServer": "new_NRP",
+                                  "target": {
+                                    "kind": "knownRebec",
+                                    "name": "out2"
+                                  },
+                                  "targetClassName": "Switch"
+                                }
+                              ],
+                              "kind": "if",
+                              "line": 147,
+                              "then": [
+                                {
+                                  "after": null,
+                                  "arguments": [
+                                    {
+                                      "kind": "variable",
+                                      "line": 147,
+                                      "name": "id"
+                                    },
+                                    {
+                                      "kind": "variable",
+                                      "line": 147,
+                                      "name": "id"
+                                    },
+                                    {
+                                      "kind": "variable",
+                                      "line": 147,
+                                      "name": "NRP_network"
+                                    },
+                                    {
+                                      "kind": "variable",
+                                      "line": 147,
+                                      "name": "NRP_switch_id"
+                                    }
+                                  ],
+                                  "kind": "send",
+                                  "line": 147,
+                                  "messageServer": "new_NRP",
+                                  "target": {
+                                    "kind": "knownRebec",
+                                    "name": "out1"
+                                  },
+                                  "targetClassName": "Switch"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "assign",
+                      "line": 151,
+                      "target": "init",
+                      "value": {
+                        "kind": "boolLiteral",
+                        "line": 151,
+                        "value": false
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1000
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 220,
+              "messageServer": "runMe",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Node"
+            }
+          ],
+          "line": 138,
+          "name": "runMe",
+          "parameters": [],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 225,
+                  "name": "nodeMode"
+                },
+                "line": 225,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 225,
+                  "value": 2
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 225,
+              "then": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 226,
+                      "name": "networkId"
+                    },
+                    "line": 226,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 226,
+                      "value": 0
+                    }
+                  },
+                  "else": [
+                    {
+                      "kind": "assign",
+                      "line": 227,
+                      "target": "heartbeats_missed_2",
+                      "value": {
+                        "kind": "intLiteral",
+                        "line": 227,
+                        "value": 0
+                      }
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 226,
+                  "then": [
+                    {
+                      "kind": "assign",
+                      "line": 226,
+                      "target": "heartbeats_missed_1",
+                      "value": {
+                        "kind": "intLiteral",
+                        "line": 226,
+                        "value": 0
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "line": 223,
+          "name": "heartBeat",
+          "parameters": [
+            {
+              "line": 223,
+              "name": "networkId",
+              "type": "int"
+            },
+            {
+              "line": 223,
+              "name": "senderid",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 231,
+              "target": "primary",
+              "value": {
+                "kind": "unary",
+                "line": 231,
+                "operand": {
+                  "kind": "intLiteral",
+                  "line": 231,
+                  "value": 1
+                },
+                "operator": "-"
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 232,
+              "target": "nodeMode",
+              "value": {
+                "kind": "intLiteral",
+                "line": 232,
+                "value": 3
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 233,
+              "target": "NRP_network",
+              "value": {
+                "kind": "unary",
+                "line": 233,
+                "operand": {
+                  "kind": "intLiteral",
+                  "line": 233,
+                  "value": 1
+                },
+                "operator": "-"
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 234,
+              "target": "NRP_switch_id",
+              "value": {
+                "kind": "unary",
+                "line": 234,
+                "operand": {
+                  "kind": "intLiteral",
+                  "line": 234,
+                  "value": 1
+                },
+                "operator": "-"
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 235,
+              "target": "heartbeats_missed_1",
+              "value": {
+                "kind": "intLiteral",
+                "line": 235,
+                "value": 0
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 236,
+              "target": "heartbeats_missed_2",
+              "value": {
+                "kind": "intLiteral",
+                "line": 236,
+                "value": 0
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 237,
+              "target": "NRP_pending",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 237,
+                "value": true
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 238,
+              "target": "become_primary_on_ping_response",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 238,
+                "value": false
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 239,
+              "target": "ping_pending",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 239,
+                "value": false
+              }
+            }
+          ],
+          "line": 230,
+          "name": "nodeFail",
+          "parameters": [],
+          "priority": null
+        }
+      ],
+      "name": "Node",
+      "queueBound": 4,
+      "stateVariables": [
+        {
+          "line": 16,
+          "name": "nodeMode",
+          "type": "int"
+        },
+        {
+          "line": 17,
+          "name": "id",
+          "type": "int"
+        },
+        {
+          "line": 18,
+          "name": "NRPCandidates0",
+          "type": "int"
+        },
+        {
+          "line": 19,
+          "name": "NRPCandidates1",
+          "type": "int"
+        },
+        {
+          "line": 20,
+          "name": "heartbeats_missed_1",
+          "type": "int"
+        },
+        {
+          "line": 21,
+          "name": "heartbeats_missed_2",
+          "type": "int"
+        },
+        {
+          "line": 22,
+          "name": "NRP_network",
+          "type": "int"
+        },
+        {
+          "line": 23,
+          "name": "attacker",
+          "type": "int"
+        },
+        {
+          "line": 24,
+          "name": "which",
+          "type": "int"
+        },
+        {
+          "line": 25,
+          "name": "prevWhich",
+          "type": "boolean"
+        },
+        {
+          "line": 26,
+          "name": "NRP_switch_id",
+          "type": "int"
+        },
+        {
+          "line": 27,
+          "name": "NRP_pending",
+          "type": "boolean"
+        },
+        {
+          "line": 28,
+          "name": "become_primary_on_ping_response",
+          "type": "boolean"
+        },
+        {
+          "line": 29,
+          "name": "primary",
+          "type": "int"
+        },
+        {
+          "line": 30,
+          "name": "ping_pending",
+          "type": "boolean"
+        },
+        {
+          "line": 31,
+          "name": "init",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 263,
+            "target": "mynetworkId",
+            "value": {
+              "kind": "variable",
+              "line": 263,
+              "name": "networkId"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 264,
+            "target": "primary",
+            "value": {
+              "kind": "intLiteral",
+              "line": 264,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 265,
+            "target": "id",
+            "value": {
+              "kind": "variable",
+              "line": 265,
+              "name": "myid"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 266,
+            "target": "primaryPinged",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 266,
+              "value": false
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 267,
+            "target": "terminal",
+            "value": {
+              "kind": "variable",
+              "line": 267,
+              "name": "endSwitch"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 268,
+            "target": "amINRP",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 268,
+              "value": false
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 269,
+            "target": "failed",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 269,
+              "value": false
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 270,
+            "target": "which",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 270,
+              "value": true
+            }
+          },
+          {
+            "condition": {
+              "kind": "binary",
+              "left": {
+                "kind": "variable",
+                "line": 271,
+                "name": "myFailTime"
+              },
+              "line": 271,
+              "operator": "==",
+              "right": {
+                "kind": "intLiteral",
+                "line": 271,
+                "value": 2500
+              }
+            },
+            "else": [
+              {
+                "condition": {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "variable",
+                    "line": 272,
+                    "name": "myFailTime"
+                  },
+                  "line": 272,
+                  "operator": "==",
+                  "right": {
+                    "kind": "intLiteral",
+                    "line": 272,
+                    "value": 5000
+                  }
+                },
+                "else": [],
+                "kind": "if",
+                "line": 272,
+                "then": [
+                  {
+                    "after": {
+                      "kind": "intLiteral",
+                      "value": 5000
+                    },
+                    "arguments": [],
+                    "kind": "send",
+                    "line": 272,
+                    "messageServer": "switchFail",
+                    "target": {
+                      "kind": "self"
+                    },
+                    "targetClassName": "Switch"
+                  }
+                ]
+              }
+            ],
+            "kind": "if",
+            "line": 271,
+            "then": [
+              {
+                "after": {
+                  "kind": "intLiteral",
+                  "value": 2500
+                },
+                "arguments": [],
+                "kind": "send",
+                "line": 271,
+                "messageServer": "switchFail",
+                "target": {
+                  "kind": "self"
+                },
+                "targetClassName": "Switch"
+              }
+            ]
+          }
+        ],
+        "line": 262,
+        "parameters": [
+          {
+            "line": 262,
+            "name": "myid",
+            "type": "int"
+          },
+          {
+            "line": 262,
+            "name": "networkId",
+            "type": "int"
+          },
+          {
+            "line": 262,
+            "name": "endSwitch",
+            "type": "boolean"
+          },
+          {
+            "line": 262,
+            "name": "myFailTime",
+            "type": "int"
+          }
+        ]
+      },
+      "knownRebecs": [
+        {
+          "className": "Node",
+          "line": 247,
+          "name": "nodeTarget1"
+        },
+        {
+          "className": "Switch",
+          "line": 248,
+          "name": "up"
+        },
+        {
+          "className": "Switch",
+          "line": 249,
+          "name": "down"
+        }
+      ],
+      "line": 245,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 276,
+              "target": "failed",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 276,
+                "value": true
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 277,
+              "target": "amINRP",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 277,
+                "value": false
+              }
+            }
+          ],
+          "line": 275,
+          "name": "switchFail",
+          "parameters": [],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "unary",
+                "line": 282,
+                "operand": {
+                  "kind": "variable",
+                  "line": 282,
+                  "name": "failed"
+                },
+                "operator": "!"
+              },
+              "else": [],
+              "kind": "if",
+              "line": 282,
+              "then": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 283,
+                      "name": "terminal"
+                    },
+                    "line": 283,
+                    "operator": "&&",
+                    "right": {
+                      "kind": "binary",
+                      "left": {
+                        "kind": "variable",
+                        "line": 283,
+                        "name": "senderNode"
+                      },
+                      "line": 283,
+                      "operator": "<=",
+                      "right": {
+                        "kind": "intLiteral",
+                        "line": 283,
+                        "value": 99
+                      }
+                    }
+                  },
+                  "else": [
+                    {
+                      "condition": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 284,
+                          "name": "senderNode"
+                        },
+                        "line": 284,
+                        "operator": ">",
+                        "right": {
+                          "kind": "variable",
+                          "line": 284,
+                          "name": "id"
+                        }
+                      },
+                      "else": [
+                        {
+                          "after": null,
+                          "arguments": [
+                            {
+                              "kind": "variable",
+                              "line": 285,
+                              "name": "id"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 285,
+                              "name": "w"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 285,
+                              "name": "pw"
+                            }
+                          ],
+                          "kind": "send",
+                          "line": 285,
+                          "messageServer": "pingNRP_response",
+                          "target": {
+                            "kind": "knownRebec",
+                            "name": "down"
+                          },
+                          "targetClassName": "Switch"
+                        }
+                      ],
+                      "kind": "if",
+                      "line": 284,
+                      "then": [
+                        {
+                          "after": null,
+                          "arguments": [
+                            {
+                              "kind": "variable",
+                              "line": 284,
+                              "name": "id"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 284,
+                              "name": "w"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 284,
+                              "name": "pw"
+                            }
+                          ],
+                          "kind": "send",
+                          "line": 284,
+                          "messageServer": "pingNRP_response",
+                          "target": {
+                            "kind": "knownRebec",
+                            "name": "up"
+                          },
+                          "targetClassName": "Switch"
+                        }
+                      ]
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 283,
+                  "then": [
+                    {
+                      "after": null,
+                      "arguments": [
+                        {
+                          "kind": "variable",
+                          "line": 283,
+                          "name": "id"
+                        },
+                        {
+                          "kind": "variable",
+                          "line": 283,
+                          "name": "w"
+                        },
+                        {
+                          "kind": "variable",
+                          "line": 283,
+                          "name": "pw"
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 283,
+                      "messageServer": "pingNRP_response",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "nodeTarget1"
+                      },
+                      "targetClassName": "Node"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "line": 280,
+          "name": "pingNRP_response",
+          "parameters": [
+            {
+              "line": 280,
+              "name": "senderNode",
+              "type": "int"
+            },
+            {
+              "line": 280,
+              "name": "w",
+              "type": "boolean"
+            },
+            {
+              "line": 280,
+              "name": "pw",
+              "type": "boolean"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "unary",
+                "line": 290,
+                "operand": {
+                  "kind": "variable",
+                  "line": 290,
+                  "name": "failed"
+                },
+                "operator": "!"
+              },
+              "else": [],
+              "kind": "if",
+              "line": 290,
+              "then": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 291,
+                      "name": "terminal"
+                    },
+                    "line": 291,
+                    "operator": "&&",
+                    "right": {
+                      "kind": "binary",
+                      "left": {
+                        "kind": "variable",
+                        "line": 291,
+                        "name": "NRP"
+                      },
+                      "line": 291,
+                      "operator": "==",
+                      "right": {
+                        "kind": "variable",
+                        "line": 291,
+                        "name": "id"
+                      }
+                    }
+                  },
+                  "else": [
+                    {
+                      "condition": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 296,
+                          "name": "switchNode"
+                        },
+                        "line": 296,
+                        "operator": ">",
+                        "right": {
+                          "kind": "variable",
+                          "line": 296,
+                          "name": "id"
+                        }
+                      },
+                      "else": [
+                        {
+                          "after": null,
+                          "arguments": [
+                            {
+                              "kind": "variable",
+                              "line": 297,
+                              "name": "id"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 297,
+                              "name": "senderNode"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 297,
+                              "name": "NRP"
+                            }
+                          ],
+                          "kind": "send",
+                          "line": 297,
+                          "messageServer": "pingNRP",
+                          "target": {
+                            "kind": "knownRebec",
+                            "name": "down"
+                          },
+                          "targetClassName": "Switch"
+                        }
+                      ],
+                      "kind": "if",
+                      "line": 296,
+                      "then": [
+                        {
+                          "after": null,
+                          "arguments": [
+                            {
+                              "kind": "variable",
+                              "line": 296,
+                              "name": "id"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 296,
+                              "name": "senderNode"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 296,
+                              "name": "NRP"
+                            }
+                          ],
+                          "kind": "send",
+                          "line": 296,
+                          "messageServer": "pingNRP",
+                          "target": {
+                            "kind": "knownRebec",
+                            "name": "up"
+                          },
+                          "targetClassName": "Switch"
+                        }
+                      ]
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 291,
+                  "then": [
+                    {
+                      "kind": "assign",
+                      "line": 292,
+                      "target": "prevWhich",
+                      "value": {
+                        "kind": "variable",
+                        "line": 292,
+                        "name": "which"
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "line": 293,
+                      "target": "which",
+                      "value": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 293,
+                          "name": "senderNode"
+                        },
+                        "line": 293,
+                        "operator": "==",
+                        "right": {
+                          "kind": "variable",
+                          "line": 293,
+                          "name": "primary"
+                        }
+                      }
+                    },
+                    {
+                      "condition": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 294,
+                          "name": "switchNode"
+                        },
+                        "line": 294,
+                        "operator": "<=",
+                        "right": {
+                          "kind": "intLiteral",
+                          "line": 294,
+                          "value": 99
+                        }
+                      },
+                      "else": [
+                        {
+                          "after": null,
+                          "arguments": [
+                            {
+                              "kind": "variable",
+                              "line": 295,
+                              "name": "id"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 295,
+                              "name": "which"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 295,
+                              "name": "prevWhich"
+                            }
+                          ],
+                          "kind": "send",
+                          "line": 295,
+                          "messageServer": "pingNRP_response",
+                          "target": {
+                            "kind": "knownRebec",
+                            "name": "nodeTarget1"
+                          },
+                          "targetClassName": "Node"
+                        }
+                      ],
+                      "kind": "if",
+                      "line": 294,
+                      "then": [
+                        {
+                          "after": null,
+                          "arguments": [
+                            {
+                              "kind": "variable",
+                              "line": 294,
+                              "name": "id"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 294,
+                              "name": "which"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 294,
+                              "name": "prevWhich"
+                            }
+                          ],
+                          "kind": "send",
+                          "line": 294,
+                          "messageServer": "pingNRP_response",
+                          "target": {
+                            "kind": "knownRebec",
+                            "name": "up"
+                          },
+                          "targetClassName": "Switch"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "line": 288,
+          "name": "pingNRP",
+          "parameters": [
+            {
+              "line": 288,
+              "name": "switchNode",
+              "type": "int"
+            },
+            {
+              "line": 288,
+              "name": "senderNode",
+              "type": "int"
+            },
+            {
+              "line": 288,
+              "name": "NRP",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "unary",
+                "line": 302,
+                "operand": {
+                  "kind": "variable",
+                  "line": 302,
+                  "name": "failed"
+                },
+                "operator": "!"
+              },
+              "else": [],
+              "kind": "if",
+              "line": 302,
+              "then": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 303,
+                      "name": "id"
+                    },
+                    "line": 303,
+                    "operator": "==",
+                    "right": {
+                      "kind": "variable",
+                      "line": 303,
+                      "name": "mNRP_switch_id"
+                    }
+                  },
+                  "else": [
+                    {
+                      "kind": "assign",
+                      "line": 306,
+                      "target": "amINRP",
+                      "value": {
+                        "kind": "boolLiteral",
+                        "line": 306,
+                        "value": false
+                      }
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 303,
+                  "then": [
+                    {
+                      "kind": "assign",
+                      "line": 304,
+                      "target": "amINRP",
+                      "value": {
+                        "kind": "boolLiteral",
+                        "line": 304,
+                        "value": true
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "line": 305,
+                      "target": "primary",
+                      "value": {
+                        "kind": "variable",
+                        "line": 305,
+                        "name": "prim"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 307,
+                      "name": "terminal"
+                    },
+                    "line": 307,
+                    "operator": "&&",
+                    "right": {
+                      "kind": "binary",
+                      "left": {
+                        "kind": "variable",
+                        "line": 307,
+                        "name": "senderNode"
+                      },
+                      "line": 307,
+                      "operator": "<=",
+                      "right": {
+                        "kind": "intLiteral",
+                        "line": 307,
+                        "value": 99
+                      }
+                    }
+                  },
+                  "else": [
+                    {
+                      "condition": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 308,
+                          "name": "senderNode"
+                        },
+                        "line": 308,
+                        "operator": ">",
+                        "right": {
+                          "kind": "variable",
+                          "line": 308,
+                          "name": "id"
+                        }
+                      },
+                      "else": [
+                        {
+                          "after": null,
+                          "arguments": [
+                            {
+                              "kind": "variable",
+                              "line": 309,
+                              "name": "id"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 309,
+                              "name": "prim"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 309,
+                              "name": "mNRP_network"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 309,
+                              "name": "mNRP_switch_id"
+                            }
+                          ],
+                          "kind": "send",
+                          "line": 309,
+                          "messageServer": "new_NRP",
+                          "target": {
+                            "kind": "knownRebec",
+                            "name": "down"
+                          },
+                          "targetClassName": "Switch"
+                        }
+                      ],
+                      "kind": "if",
+                      "line": 308,
+                      "then": [
+                        {
+                          "after": null,
+                          "arguments": [
+                            {
+                              "kind": "variable",
+                              "line": 308,
+                              "name": "id"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 308,
+                              "name": "prim"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 308,
+                              "name": "mNRP_network"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 308,
+                              "name": "mNRP_switch_id"
+                            }
+                          ],
+                          "kind": "send",
+                          "line": 308,
+                          "messageServer": "new_NRP",
+                          "target": {
+                            "kind": "knownRebec",
+                            "name": "up"
+                          },
+                          "targetClassName": "Switch"
+                        }
+                      ]
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 307,
+                  "then": [
+                    {
+                      "after": null,
+                      "arguments": [
+                        {
+                          "kind": "variable",
+                          "line": 307,
+                          "name": "id"
+                        },
+                        {
+                          "kind": "variable",
+                          "line": 307,
+                          "name": "prim"
+                        },
+                        {
+                          "kind": "variable",
+                          "line": 307,
+                          "name": "mNRP_network"
+                        },
+                        {
+                          "kind": "variable",
+                          "line": 307,
+                          "name": "mNRP_switch_id"
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 307,
+                      "messageServer": "new_NRP",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "nodeTarget1"
+                      },
+                      "targetClassName": "Node"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "line": 300,
+          "name": "new_NRP",
+          "parameters": [
+            {
+              "line": 300,
+              "name": "senderNode",
+              "type": "int"
+            },
+            {
+              "line": 300,
+              "name": "prim",
+              "type": "int"
+            },
+            {
+              "line": 300,
+              "name": "mNRP_network",
+              "type": "int"
+            },
+            {
+              "line": 300,
+              "name": "mNRP_switch_id",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "unary",
+                "line": 315,
+                "operand": {
+                  "kind": "variable",
+                  "line": 315,
+                  "name": "failed"
+                },
+                "operator": "!"
+              },
+              "else": [],
+              "kind": "if",
+              "line": 315,
+              "then": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 316,
+                      "name": "id"
+                    },
+                    "line": 316,
+                    "operator": "==",
+                    "right": {
+                      "kind": "variable",
+                      "line": 316,
+                      "name": "mNRP_switch_id"
+                    }
+                  },
+                  "else": [
+                    {
+                      "kind": "assign",
+                      "line": 319,
+                      "target": "amINRP",
+                      "value": {
+                        "kind": "boolLiteral",
+                        "line": 319,
+                        "value": false
+                      }
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 316,
+                  "then": [
+                    {
+                      "kind": "assign",
+                      "line": 317,
+                      "target": "amINRP",
+                      "value": {
+                        "kind": "boolLiteral",
+                        "line": 317,
+                        "value": true
+                      }
+                    },
+                    {
+                      "kind": "assign",
+                      "line": 318,
+                      "target": "primary",
+                      "value": {
+                        "kind": "variable",
+                        "line": 318,
+                        "name": "prim"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 320,
+                      "name": "terminal"
+                    },
+                    "line": 320,
+                    "operator": "&&",
+                    "right": {
+                      "kind": "binary",
+                      "left": {
+                        "kind": "variable",
+                        "line": 320,
+                        "name": "senderNode"
+                      },
+                      "line": 320,
+                      "operator": "<=",
+                      "right": {
+                        "kind": "intLiteral",
+                        "line": 320,
+                        "value": 99
+                      }
+                    }
+                  },
+                  "else": [
+                    {
+                      "condition": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 321,
+                          "name": "senderNode"
+                        },
+                        "line": 321,
+                        "operator": ">",
+                        "right": {
+                          "kind": "variable",
+                          "line": 321,
+                          "name": "id"
+                        }
+                      },
+                      "else": [
+                        {
+                          "after": null,
+                          "arguments": [
+                            {
+                              "kind": "variable",
+                              "line": 322,
+                              "name": "id"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 322,
+                              "name": "prim"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 322,
+                              "name": "mNRP_network"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 322,
+                              "name": "mNRP_switch_id"
+                            }
+                          ],
+                          "kind": "send",
+                          "line": 322,
+                          "messageServer": "new_NRPBack",
+                          "target": {
+                            "kind": "knownRebec",
+                            "name": "down"
+                          },
+                          "targetClassName": "Switch"
+                        }
+                      ],
+                      "kind": "if",
+                      "line": 321,
+                      "then": [
+                        {
+                          "after": null,
+                          "arguments": [
+                            {
+                              "kind": "variable",
+                              "line": 321,
+                              "name": "id"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 321,
+                              "name": "prim"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 321,
+                              "name": "mNRP_network"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 321,
+                              "name": "mNRP_switch_id"
+                            }
+                          ],
+                          "kind": "send",
+                          "line": 321,
+                          "messageServer": "new_NRPBack",
+                          "target": {
+                            "kind": "knownRebec",
+                            "name": "up"
+                          },
+                          "targetClassName": "Switch"
+                        }
+                      ]
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 320,
+                  "then": [
+                    {
+                      "after": null,
+                      "arguments": [
+                        {
+                          "kind": "variable",
+                          "line": 320,
+                          "name": "id"
+                        },
+                        {
+                          "kind": "variable",
+                          "line": 320,
+                          "name": "prim"
+                        },
+                        {
+                          "kind": "variable",
+                          "line": 320,
+                          "name": "mNRP_network"
+                        },
+                        {
+                          "kind": "variable",
+                          "line": 320,
+                          "name": "mNRP_switch_id"
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 320,
+                      "messageServer": "new_NRPBack",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "nodeTarget1"
+                      },
+                      "targetClassName": "Node"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "line": 313,
+          "name": "new_NRPBack",
+          "parameters": [
+            {
+              "line": 313,
+              "name": "senderNode",
+              "type": "int"
+            },
+            {
+              "line": 313,
+              "name": "prim",
+              "type": "int"
+            },
+            {
+              "line": 313,
+              "name": "mNRP_network",
+              "type": "int"
+            },
+            {
+              "line": 313,
+              "name": "mNRP_switch_id",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "unary",
+                "line": 328,
+                "operand": {
+                  "kind": "variable",
+                  "line": 328,
+                  "name": "failed"
+                },
+                "operator": "!"
+              },
+              "else": [],
+              "kind": "if",
+              "line": 328,
+              "then": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 329,
+                      "name": "terminal"
+                    },
+                    "line": 329,
+                    "operator": "&&",
+                    "right": {
+                      "kind": "binary",
+                      "left": {
+                        "kind": "variable",
+                        "line": 329,
+                        "name": "senderNode"
+                      },
+                      "line": 329,
+                      "operator": "<=",
+                      "right": {
+                        "kind": "intLiteral",
+                        "line": 329,
+                        "value": 99
+                      }
+                    }
+                  },
+                  "else": [
+                    {
+                      "condition": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 330,
+                          "name": "senderNode"
+                        },
+                        "line": 330,
+                        "operator": ">",
+                        "right": {
+                          "kind": "variable",
+                          "line": 330,
+                          "name": "id"
+                        }
+                      },
+                      "else": [
+                        {
+                          "after": {
+                            "kind": "intLiteral",
+                            "value": 1
+                          },
+                          "arguments": [
+                            {
+                              "kind": "variable",
+                              "line": 331,
+                              "name": "networkId"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 331,
+                              "name": "id"
+                            }
+                          ],
+                          "kind": "send",
+                          "line": 331,
+                          "messageServer": "heartBeat",
+                          "target": {
+                            "kind": "knownRebec",
+                            "name": "down"
+                          },
+                          "targetClassName": "Switch"
+                        }
+                      ],
+                      "kind": "if",
+                      "line": 330,
+                      "then": [
+                        {
+                          "after": {
+                            "kind": "intLiteral",
+                            "value": 1
+                          },
+                          "arguments": [
+                            {
+                              "kind": "variable",
+                              "line": 330,
+                              "name": "networkId"
+                            },
+                            {
+                              "kind": "variable",
+                              "line": 330,
+                              "name": "id"
+                            }
+                          ],
+                          "kind": "send",
+                          "line": 330,
+                          "messageServer": "heartBeat",
+                          "target": {
+                            "kind": "knownRebec",
+                            "name": "up"
+                          },
+                          "targetClassName": "Switch"
+                        }
+                      ]
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 329,
+                  "then": [
+                    {
+                      "after": {
+                        "kind": "intLiteral",
+                        "value": 1
+                      },
+                      "arguments": [
+                        {
+                          "kind": "variable",
+                          "line": 329,
+                          "name": "networkId"
+                        },
+                        {
+                          "kind": "variable",
+                          "line": 329,
+                          "name": "id"
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 329,
+                      "messageServer": "heartBeat",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "nodeTarget1"
+                      },
+                      "targetClassName": "Node"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "line": 326,
+          "name": "heartBeat",
+          "parameters": [
+            {
+              "line": 326,
+              "name": "networkId",
+              "type": "int"
+            },
+            {
+              "line": 326,
+              "name": "senderNode",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Switch",
+      "queueBound": 10,
+      "stateVariables": [
+        {
+          "line": 252,
+          "name": "mynetworkId",
+          "type": "int"
+        },
+        {
+          "line": 253,
+          "name": "id",
+          "type": "int"
+        },
+        {
+          "line": 254,
+          "name": "which",
+          "type": "boolean"
+        },
+        {
+          "line": 255,
+          "name": "prevWhich",
+          "type": "boolean"
+        },
+        {
+          "line": 256,
+          "name": "failed",
+          "type": "boolean"
+        },
+        {
+          "line": 257,
+          "name": "amINRP",
+          "type": "boolean"
+        },
+        {
+          "line": 258,
+          "name": "primaryPinged",
+          "type": "boolean"
+        },
+        {
+          "line": 259,
+          "name": "terminal",
+          "type": "boolean"
+        },
+        {
+          "line": 260,
+          "name": "primary",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 1
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "boolLiteral",
+          "value": true
+        },
+        {
+          "kind": "intLiteral",
+          "value": 2500
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Node",
+          "instance": "DCN1",
+          "knownRebec": "nodeTarget1"
+        },
+        {
+          "className": "Switch",
+          "instance": "switchA2",
+          "knownRebec": "up"
+        },
+        {
+          "className": "Switch",
+          "instance": "switchA2",
+          "knownRebec": "down"
+        }
+      ],
+      "className": "Switch",
+      "line": 336,
+      "name": "switchA1",
+      "priority": 1
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 2
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 2500
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Node",
+          "instance": "DCN1",
+          "knownRebec": "nodeTarget1"
+        },
+        {
+          "className": "Switch",
+          "instance": "switchA1",
+          "knownRebec": "up"
+        },
+        {
+          "className": "Switch",
+          "instance": "switchA3",
+          "knownRebec": "down"
+        }
+      ],
+      "className": "Switch",
+      "line": 338,
+      "name": "switchA2",
+      "priority": 1
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 3
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "boolLiteral",
+          "value": true
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Node",
+          "instance": "DCN2",
+          "knownRebec": "nodeTarget1"
+        },
+        {
+          "className": "Switch",
+          "instance": "switchA2",
+          "knownRebec": "up"
+        },
+        {
+          "className": "Switch",
+          "instance": "switchA2",
+          "knownRebec": "down"
+        }
+      ],
+      "className": "Switch",
+      "line": 340,
+      "name": "switchA3",
+      "priority": 1
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 4
+        },
+        {
+          "kind": "intLiteral",
+          "value": 1
+        },
+        {
+          "kind": "boolLiteral",
+          "value": true
+        },
+        {
+          "kind": "intLiteral",
+          "value": 2500
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Node",
+          "instance": "DCN1",
+          "knownRebec": "nodeTarget1"
+        },
+        {
+          "className": "Switch",
+          "instance": "switchB2",
+          "knownRebec": "up"
+        },
+        {
+          "className": "Switch",
+          "instance": "switchB2",
+          "knownRebec": "down"
+        }
+      ],
+      "className": "Switch",
+      "line": 342,
+      "name": "switchB1",
+      "priority": 1
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 5
+        },
+        {
+          "kind": "intLiteral",
+          "value": 1
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 2500
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Node",
+          "instance": "DCN1",
+          "knownRebec": "nodeTarget1"
+        },
+        {
+          "className": "Switch",
+          "instance": "switchB1",
+          "knownRebec": "up"
+        },
+        {
+          "className": "Switch",
+          "instance": "switchB3",
+          "knownRebec": "down"
+        }
+      ],
+      "className": "Switch",
+      "line": 344,
+      "name": "switchB2",
+      "priority": 1
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 6
+        },
+        {
+          "kind": "intLiteral",
+          "value": 1
+        },
+        {
+          "kind": "boolLiteral",
+          "value": true
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Node",
+          "instance": "DCN2",
+          "knownRebec": "nodeTarget1"
+        },
+        {
+          "className": "Switch",
+          "instance": "switchB2",
+          "knownRebec": "up"
+        },
+        {
+          "className": "Switch",
+          "instance": "switchB2",
+          "knownRebec": "down"
+        }
+      ],
+      "className": "Switch",
+      "line": 346,
+      "name": "switchB3",
+      "priority": 1
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 100
+        },
+        {
+          "kind": "intLiteral",
+          "value": 100
+        },
+        {
+          "kind": "intLiteral",
+          "value": 1
+        },
+        {
+          "kind": "intLiteral",
+          "value": 4
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Switch",
+          "instance": "switchA1",
+          "knownRebec": "out1"
+        },
+        {
+          "className": "Switch",
+          "instance": "switchB1",
+          "knownRebec": "out2"
+        }
+      ],
+      "className": "Node",
+      "line": 348,
+      "name": "DCN1",
+      "priority": 2
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 101
+        },
+        {
+          "kind": "intLiteral",
+          "value": 100
+        },
+        {
+          "kind": "intLiteral",
+          "value": 3
+        },
+        {
+          "kind": "intLiteral",
+          "value": 6
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Switch",
+          "instance": "switchA3",
+          "knownRebec": "out1"
+        },
+        {
+          "className": "Switch",
+          "instance": "switchB3",
+          "knownRebec": "out2"
+        }
+      ],
+      "className": "Node",
+      "line": 349,
+      "name": "DCN2",
+      "priority": 2
+    }
+  ],
+  "schemaVersion": 1
+}

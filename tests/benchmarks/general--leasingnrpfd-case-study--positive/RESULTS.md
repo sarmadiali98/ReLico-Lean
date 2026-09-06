@@ -11,9 +11,9 @@ category-2 transformation.
 | LF generation | `lean-export --family general --mode lf-source` | pass |
 | compile | `lfc 0.11.0`, C++ target | pass |
 | runtime | generated binary, 5 msec logical-time budget | pass |
-| model checker (recorded bonus, not a gate) | RMC 2.14 | `queue overflow` — the unfair-interleaving accumulation shape; see `ADAPTATION.md` |
+| model checker | RMC 2.14, `Deadlock-Freedom and No Deadline Missed` | **`satisfied`** |
 
-No benchmark-runner bootstrap ran: with the `rmc` stage required by the
-registry and its `queue overflow` verdict, the benchmark row cannot be
-added, so there is no `expected/` tree. The stage results above were
-measured directly through the pipeline's stage tool on 2026-09-07.
+The benchmark-runner bootstrap on 2026-09-07: unpinned run **pass**
+(8/8 stages), `--regenerate` **pass**, 8 artifacts SHA-256 pinned
+(including the generated LF at `expected/lf-source/TranslatedLFProgram.lf`),
+pinned re-run **pass** (8/8 stages, ~54 s per run).

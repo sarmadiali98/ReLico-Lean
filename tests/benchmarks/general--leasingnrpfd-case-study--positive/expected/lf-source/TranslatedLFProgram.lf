@@ -1,0 +1,1552 @@
+target Cpp
+
+public preamble {=
+  struct Node_pingNRP_response_action_Args { int mid; bool w; bool pw; };
+  struct Node_new_NRP_action_Args { int mid; int prim; int mNRP_network; int mNRP_switch_id; };
+  struct Node_new_NRPBack_action_Args { int mid; int prim; int mNRP_network; int mNRP_switch_id; };
+  struct Node_heartBeat_action_Args { int networkId; int senderid; };
+  struct Switch_new_NRPBack_action_Args { int senderNode; int prim; int mNRP_network; int mNRP_switch_id; };
+  struct Switch_new_NRP_action_Args { int senderNode; int prim; int mNRP_network; int mNRP_switch_id; };
+  struct Switch_heartBeat_action_Args { int networkId; int senderNode; };
+  struct Switch_pingNRP_action_Args { int switchNode; int senderNode; int NRP; };
+  struct Switch_pingNRP_response_action_Args { int senderNode; bool w; bool pw; };
+=}
+
+reactor Node(Myid: int = 0, Myprimary: int = 0, NRPCan1_id: int = 0, NRPCan2_id: int = 0, myFailTime: int = 0) {
+  input pingNRP_responseToNodeTarget11FromSwitchA1: Node_pingNRP_response_action_Args
+  input pingNRP_responseToNodeTarget12FromSwitchA1: Node_pingNRP_response_action_Args
+  input new_NRPToNodeTarget1FromSwitchA1: Node_new_NRP_action_Args
+  input new_NRPBackToNodeTarget1FromSwitchA1: Node_new_NRPBack_action_Args
+  input heartBeatToNodeTarget1FromSwitchA1: Node_heartBeat_action_Args
+  input pingNRP_responseToNodeTarget11FromSwitchA2: Node_pingNRP_response_action_Args
+  input pingNRP_responseToNodeTarget12FromSwitchA2: Node_pingNRP_response_action_Args
+  input new_NRPToNodeTarget1FromSwitchA2: Node_new_NRP_action_Args
+  input new_NRPBackToNodeTarget1FromSwitchA2: Node_new_NRPBack_action_Args
+  input heartBeatToNodeTarget1FromSwitchA2: Node_heartBeat_action_Args
+  input pingNRP_responseToNodeTarget11FromSwitchA3: Node_pingNRP_response_action_Args
+  input pingNRP_responseToNodeTarget12FromSwitchA3: Node_pingNRP_response_action_Args
+  input new_NRPToNodeTarget1FromSwitchA3: Node_new_NRP_action_Args
+  input new_NRPBackToNodeTarget1FromSwitchA3: Node_new_NRPBack_action_Args
+  input heartBeatToNodeTarget1FromSwitchA3: Node_heartBeat_action_Args
+  input pingNRP_responseToNodeTarget11FromSwitchB1: Node_pingNRP_response_action_Args
+  input pingNRP_responseToNodeTarget12FromSwitchB1: Node_pingNRP_response_action_Args
+  input new_NRPToNodeTarget1FromSwitchB1: Node_new_NRP_action_Args
+  input new_NRPBackToNodeTarget1FromSwitchB1: Node_new_NRPBack_action_Args
+  input heartBeatToNodeTarget1FromSwitchB1: Node_heartBeat_action_Args
+  input pingNRP_responseToNodeTarget11FromSwitchB2: Node_pingNRP_response_action_Args
+  input pingNRP_responseToNodeTarget12FromSwitchB2: Node_pingNRP_response_action_Args
+  input new_NRPToNodeTarget1FromSwitchB2: Node_new_NRP_action_Args
+  input new_NRPBackToNodeTarget1FromSwitchB2: Node_new_NRPBack_action_Args
+  input heartBeatToNodeTarget1FromSwitchB2: Node_heartBeat_action_Args
+  input pingNRP_responseToNodeTarget11FromSwitchB3: Node_pingNRP_response_action_Args
+  input pingNRP_responseToNodeTarget12FromSwitchB3: Node_pingNRP_response_action_Args
+  input new_NRPToNodeTarget1FromSwitchB3: Node_new_NRP_action_Args
+  input new_NRPBackToNodeTarget1FromSwitchB3: Node_new_NRPBack_action_Args
+  input heartBeatToNodeTarget1FromSwitchB3: Node_heartBeat_action_Args
+  output new_NRPBackToOut1: Switch_new_NRPBack_action_Args
+  output new_NRPBackToOut2: Switch_new_NRPBack_action_Args
+  output new_NRPToOut11: Switch_new_NRP_action_Args
+  output new_NRPToOut21: Switch_new_NRP_action_Args
+  output heartBeatToOut1: Switch_heartBeat_action_Args
+  output heartBeatToOut2: Switch_heartBeat_action_Args
+  output new_NRPToOut12: Switch_new_NRP_action_Args
+  output new_NRPToOut22: Switch_new_NRP_action_Args
+  output pingNRPToOut11: Switch_pingNRP_action_Args
+  output pingNRPToOut21: Switch_pingNRP_action_Args
+  output pingNRPToOut12: Switch_pingNRP_action_Args
+  output pingNRPToOut22: Switch_pingNRP_action_Args
+  output pingNRPToOut13: Switch_pingNRP_action_Args
+  output pingNRPToOut23: Switch_pingNRP_action_Args
+  state nodeMode: int = 0
+  state id: int = 0
+  state NRPCandidates0: int = 0
+  state NRPCandidates1: int = 0
+  state heartbeats_missed_1: int = 0
+  state heartbeats_missed_2: int = 0
+  state NRP_network: int = 0
+  state attacker: int = 0
+  state which: int = 0
+  state prevWhich: bool = false
+  state NRP_switch_id: int = 0
+  state NRP_pending: bool = false
+  state become_primary_on_ping_response: bool = false
+  state primary: int = 0
+  state ping_pending: bool = false
+  state init: bool = false
+  logical action new_NRP_request_timed_out_action: void
+  logical action ping_timed_out_action1: void
+  logical action ping_timed_out_action2: void
+  logical action ping_timed_out_action3: void
+  logical action ping_timed_out_action4: void
+  logical action ping_timed_out_action5: void
+  logical action ping_timed_out_action6: void
+  logical action pingNRP_response_action: Node_pingNRP_response_action_Args
+  logical action new_NRP_action: Node_new_NRP_action_Args
+  logical action new_NRPBack_action: Node_new_NRPBack_action_Args
+  logical action runMe_action1: void
+  logical action runMe_action2: void
+  logical action heartBeat_action: Node_heartBeat_action_Args
+  logical action nodeFail_action1: void
+  logical action nodeFail_action2: void
+
+  reaction(startup) -> nodeFail_action1, nodeFail_action2, runMe_action1 {=
+    id = Myid;
+    attacker = 0;
+    which = 0;
+    prevWhich = true;
+    NRPCandidates0 = NRPCan1_id;
+    NRPCandidates1 = NRPCan2_id;
+    heartbeats_missed_1 = 0;
+    heartbeats_missed_2 = 0;
+    NRP_network = (-1);
+    NRP_switch_id = (-1);
+    NRP_pending = true;
+    become_primary_on_ping_response = false;
+    primary = Myprimary;
+    ping_pending = false;
+    init = true;
+    nodeMode = 0;
+    if ((myFailTime == 2500)) { nodeFail_action1.schedule(2500ms); } else { if ((myFailTime == 5000)) { nodeFail_action2.schedule(5000ms); } else {} }
+    runMe_action1.schedule(0ms);
+  =}
+
+  reaction(new_NRP_request_timed_out_action) {=
+    if ((nodeMode == 2)) { if (NRP_pending) { NRP_pending = false; if (become_primary_on_ping_response) { become_primary_on_ping_response = false; } else {} } else {} } else {}
+  =}
+
+  reaction(ping_timed_out_action1) -> new_NRPBackToOut1, new_NRPBackToOut2, new_NRPToOut11, new_NRPToOut21, heartBeatToOut1, heartBeatToOut2 {=
+    if ((nodeMode == 2)) { if (ping_pending) { ping_pending = false; } else { if ((which > 1)) { nodeMode = 1; heartbeats_missed_1 = 0; heartbeats_missed_2 = 0; primary = id; if ((NRP_network == 0)) { new_NRPBackToOut1.set(Switch_new_NRPBack_action_Args{id, id, NRP_network, NRP_switch_id}); } else { new_NRPBackToOut2.set(Switch_new_NRPBack_action_Args{id, id, NRP_network, NRP_switch_id}); } nodeMode = 1; heartbeats_missed_1 = 0; heartbeats_missed_2 = 0; primary = id; NRP_pending = true; } else { NRP_pending = true; } } } else { if ((nodeMode == 1)) { if (ping_pending) { ping_pending = false; NRP_network = (NRP_network + 1); if ((NRP_network < 2)) { if ((NRP_network == 0)) { NRP_switch_id = NRPCandidates0; } else { NRP_switch_id = NRPCandidates1; } if ((NRP_network == 0)) { new_NRPToOut11.set(Switch_new_NRP_action_Args{id, id, NRP_network, NRP_switch_id}); } else { new_NRPToOut21.set(Switch_new_NRP_action_Args{id, id, NRP_network, NRP_switch_id}); } } else { NRP_network = 2; nodeMode = 0; } NRP_pending = true; } else { if ((attacker < 1)) { heartBeatToOut1.set(Switch_heartBeat_action_Args{0, id}); heartBeatToOut2.set(Switch_heartBeat_action_Args{1, id}); } else {} } } else {} }
+  =}
+
+  reaction(ping_timed_out_action2) -> new_NRPBackToOut1, new_NRPBackToOut2, new_NRPToOut11, new_NRPToOut21, heartBeatToOut1, heartBeatToOut2 {=
+    if ((nodeMode == 2)) { if (ping_pending) { ping_pending = false; } else { if ((which > 1)) { nodeMode = 1; heartbeats_missed_1 = 0; heartbeats_missed_2 = 0; primary = id; if ((NRP_network == 0)) { new_NRPBackToOut1.set(Switch_new_NRPBack_action_Args{id, id, NRP_network, NRP_switch_id}); } else { new_NRPBackToOut2.set(Switch_new_NRPBack_action_Args{id, id, NRP_network, NRP_switch_id}); } nodeMode = 1; heartbeats_missed_1 = 0; heartbeats_missed_2 = 0; primary = id; NRP_pending = true; } else { NRP_pending = true; } } } else { if ((nodeMode == 1)) { if (ping_pending) { ping_pending = false; NRP_network = (NRP_network + 1); if ((NRP_network < 2)) { if ((NRP_network == 0)) { NRP_switch_id = NRPCandidates0; } else { NRP_switch_id = NRPCandidates1; } if ((NRP_network == 0)) { new_NRPToOut11.set(Switch_new_NRP_action_Args{id, id, NRP_network, NRP_switch_id}); } else { new_NRPToOut21.set(Switch_new_NRP_action_Args{id, id, NRP_network, NRP_switch_id}); } } else { NRP_network = 2; nodeMode = 0; } NRP_pending = true; } else { if ((attacker < 1)) { heartBeatToOut1.set(Switch_heartBeat_action_Args{0, id}); heartBeatToOut2.set(Switch_heartBeat_action_Args{1, id}); } else {} } } else {} }
+  =}
+
+  reaction(ping_timed_out_action3) -> new_NRPBackToOut1, new_NRPBackToOut2, new_NRPToOut11, new_NRPToOut21, heartBeatToOut1, heartBeatToOut2 {=
+    if ((nodeMode == 2)) { if (ping_pending) { ping_pending = false; } else { if ((which > 1)) { nodeMode = 1; heartbeats_missed_1 = 0; heartbeats_missed_2 = 0; primary = id; if ((NRP_network == 0)) { new_NRPBackToOut1.set(Switch_new_NRPBack_action_Args{id, id, NRP_network, NRP_switch_id}); } else { new_NRPBackToOut2.set(Switch_new_NRPBack_action_Args{id, id, NRP_network, NRP_switch_id}); } nodeMode = 1; heartbeats_missed_1 = 0; heartbeats_missed_2 = 0; primary = id; NRP_pending = true; } else { NRP_pending = true; } } } else { if ((nodeMode == 1)) { if (ping_pending) { ping_pending = false; NRP_network = (NRP_network + 1); if ((NRP_network < 2)) { if ((NRP_network == 0)) { NRP_switch_id = NRPCandidates0; } else { NRP_switch_id = NRPCandidates1; } if ((NRP_network == 0)) { new_NRPToOut11.set(Switch_new_NRP_action_Args{id, id, NRP_network, NRP_switch_id}); } else { new_NRPToOut21.set(Switch_new_NRP_action_Args{id, id, NRP_network, NRP_switch_id}); } } else { NRP_network = 2; nodeMode = 0; } NRP_pending = true; } else { if ((attacker < 1)) { heartBeatToOut1.set(Switch_heartBeat_action_Args{0, id}); heartBeatToOut2.set(Switch_heartBeat_action_Args{1, id}); } else {} } } else {} }
+  =}
+
+  reaction(ping_timed_out_action4) -> new_NRPBackToOut1, new_NRPBackToOut2, new_NRPToOut11, new_NRPToOut21, heartBeatToOut1, heartBeatToOut2 {=
+    if ((nodeMode == 2)) { if (ping_pending) { ping_pending = false; } else { if ((which > 1)) { nodeMode = 1; heartbeats_missed_1 = 0; heartbeats_missed_2 = 0; primary = id; if ((NRP_network == 0)) { new_NRPBackToOut1.set(Switch_new_NRPBack_action_Args{id, id, NRP_network, NRP_switch_id}); } else { new_NRPBackToOut2.set(Switch_new_NRPBack_action_Args{id, id, NRP_network, NRP_switch_id}); } nodeMode = 1; heartbeats_missed_1 = 0; heartbeats_missed_2 = 0; primary = id; NRP_pending = true; } else { NRP_pending = true; } } } else { if ((nodeMode == 1)) { if (ping_pending) { ping_pending = false; NRP_network = (NRP_network + 1); if ((NRP_network < 2)) { if ((NRP_network == 0)) { NRP_switch_id = NRPCandidates0; } else { NRP_switch_id = NRPCandidates1; } if ((NRP_network == 0)) { new_NRPToOut11.set(Switch_new_NRP_action_Args{id, id, NRP_network, NRP_switch_id}); } else { new_NRPToOut21.set(Switch_new_NRP_action_Args{id, id, NRP_network, NRP_switch_id}); } } else { NRP_network = 2; nodeMode = 0; } NRP_pending = true; } else { if ((attacker < 1)) { heartBeatToOut1.set(Switch_heartBeat_action_Args{0, id}); heartBeatToOut2.set(Switch_heartBeat_action_Args{1, id}); } else {} } } else {} }
+  =}
+
+  reaction(ping_timed_out_action5) -> new_NRPBackToOut1, new_NRPBackToOut2, new_NRPToOut11, new_NRPToOut21, heartBeatToOut1, heartBeatToOut2 {=
+    if ((nodeMode == 2)) { if (ping_pending) { ping_pending = false; } else { if ((which > 1)) { nodeMode = 1; heartbeats_missed_1 = 0; heartbeats_missed_2 = 0; primary = id; if ((NRP_network == 0)) { new_NRPBackToOut1.set(Switch_new_NRPBack_action_Args{id, id, NRP_network, NRP_switch_id}); } else { new_NRPBackToOut2.set(Switch_new_NRPBack_action_Args{id, id, NRP_network, NRP_switch_id}); } nodeMode = 1; heartbeats_missed_1 = 0; heartbeats_missed_2 = 0; primary = id; NRP_pending = true; } else { NRP_pending = true; } } } else { if ((nodeMode == 1)) { if (ping_pending) { ping_pending = false; NRP_network = (NRP_network + 1); if ((NRP_network < 2)) { if ((NRP_network == 0)) { NRP_switch_id = NRPCandidates0; } else { NRP_switch_id = NRPCandidates1; } if ((NRP_network == 0)) { new_NRPToOut11.set(Switch_new_NRP_action_Args{id, id, NRP_network, NRP_switch_id}); } else { new_NRPToOut21.set(Switch_new_NRP_action_Args{id, id, NRP_network, NRP_switch_id}); } } else { NRP_network = 2; nodeMode = 0; } NRP_pending = true; } else { if ((attacker < 1)) { heartBeatToOut1.set(Switch_heartBeat_action_Args{0, id}); heartBeatToOut2.set(Switch_heartBeat_action_Args{1, id}); } else {} } } else {} }
+  =}
+
+  reaction(ping_timed_out_action6) -> new_NRPBackToOut1, new_NRPBackToOut2, new_NRPToOut11, new_NRPToOut21, heartBeatToOut1, heartBeatToOut2 {=
+    if ((nodeMode == 2)) { if (ping_pending) { ping_pending = false; } else { if ((which > 1)) { nodeMode = 1; heartbeats_missed_1 = 0; heartbeats_missed_2 = 0; primary = id; if ((NRP_network == 0)) { new_NRPBackToOut1.set(Switch_new_NRPBack_action_Args{id, id, NRP_network, NRP_switch_id}); } else { new_NRPBackToOut2.set(Switch_new_NRPBack_action_Args{id, id, NRP_network, NRP_switch_id}); } nodeMode = 1; heartbeats_missed_1 = 0; heartbeats_missed_2 = 0; primary = id; NRP_pending = true; } else { NRP_pending = true; } } } else { if ((nodeMode == 1)) { if (ping_pending) { ping_pending = false; NRP_network = (NRP_network + 1); if ((NRP_network < 2)) { if ((NRP_network == 0)) { NRP_switch_id = NRPCandidates0; } else { NRP_switch_id = NRPCandidates1; } if ((NRP_network == 0)) { new_NRPToOut11.set(Switch_new_NRP_action_Args{id, id, NRP_network, NRP_switch_id}); } else { new_NRPToOut21.set(Switch_new_NRP_action_Args{id, id, NRP_network, NRP_switch_id}); } } else { NRP_network = 2; nodeMode = 0; } NRP_pending = true; } else { if ((attacker < 1)) { heartBeatToOut1.set(Switch_heartBeat_action_Args{0, id}); heartBeatToOut2.set(Switch_heartBeat_action_Args{1, id}); } else {} } } else {} }
+  =}
+
+  reaction(pingNRP_response_action) {=
+    auto pingNRP_response_action_payload = *pingNRP_response_action.get();
+    auto mid = pingNRP_response_action_payload.mid;
+    auto w = pingNRP_response_action_payload.w;
+    auto pw = pingNRP_response_action_payload.pw;
+    if ((nodeMode == 2)) { if (((!w) && (!pw))) { which = (which + 1); } else { which = 0; } if ((which > 1)) { ping_pending = false; } else {} } else { if ((nodeMode == 1)) { ping_pending = false; } else {} }
+  =}
+
+  reaction(pingNRP_responseToNodeTarget11FromSwitchA1) {=
+    auto pingNRP_responseToNodeTarget11FromSwitchA1_payload = *pingNRP_responseToNodeTarget11FromSwitchA1.get();
+    auto mid = pingNRP_responseToNodeTarget11FromSwitchA1_payload.mid;
+    auto w = pingNRP_responseToNodeTarget11FromSwitchA1_payload.w;
+    auto pw = pingNRP_responseToNodeTarget11FromSwitchA1_payload.pw;
+    if ((nodeMode == 2)) { if (((!w) && (!pw))) { which = (which + 1); } else { which = 0; } if ((which > 1)) { ping_pending = false; } else {} } else { if ((nodeMode == 1)) { ping_pending = false; } else {} }
+  =}
+
+  reaction(pingNRP_responseToNodeTarget12FromSwitchA1) {=
+    auto pingNRP_responseToNodeTarget12FromSwitchA1_payload = *pingNRP_responseToNodeTarget12FromSwitchA1.get();
+    auto mid = pingNRP_responseToNodeTarget12FromSwitchA1_payload.mid;
+    auto w = pingNRP_responseToNodeTarget12FromSwitchA1_payload.w;
+    auto pw = pingNRP_responseToNodeTarget12FromSwitchA1_payload.pw;
+    if ((nodeMode == 2)) { if (((!w) && (!pw))) { which = (which + 1); } else { which = 0; } if ((which > 1)) { ping_pending = false; } else {} } else { if ((nodeMode == 1)) { ping_pending = false; } else {} }
+  =}
+
+  reaction(pingNRP_responseToNodeTarget11FromSwitchA2) {=
+    auto pingNRP_responseToNodeTarget11FromSwitchA2_payload = *pingNRP_responseToNodeTarget11FromSwitchA2.get();
+    auto mid = pingNRP_responseToNodeTarget11FromSwitchA2_payload.mid;
+    auto w = pingNRP_responseToNodeTarget11FromSwitchA2_payload.w;
+    auto pw = pingNRP_responseToNodeTarget11FromSwitchA2_payload.pw;
+    if ((nodeMode == 2)) { if (((!w) && (!pw))) { which = (which + 1); } else { which = 0; } if ((which > 1)) { ping_pending = false; } else {} } else { if ((nodeMode == 1)) { ping_pending = false; } else {} }
+  =}
+
+  reaction(pingNRP_responseToNodeTarget12FromSwitchA2) {=
+    auto pingNRP_responseToNodeTarget12FromSwitchA2_payload = *pingNRP_responseToNodeTarget12FromSwitchA2.get();
+    auto mid = pingNRP_responseToNodeTarget12FromSwitchA2_payload.mid;
+    auto w = pingNRP_responseToNodeTarget12FromSwitchA2_payload.w;
+    auto pw = pingNRP_responseToNodeTarget12FromSwitchA2_payload.pw;
+    if ((nodeMode == 2)) { if (((!w) && (!pw))) { which = (which + 1); } else { which = 0; } if ((which > 1)) { ping_pending = false; } else {} } else { if ((nodeMode == 1)) { ping_pending = false; } else {} }
+  =}
+
+  reaction(pingNRP_responseToNodeTarget11FromSwitchA3) {=
+    auto pingNRP_responseToNodeTarget11FromSwitchA3_payload = *pingNRP_responseToNodeTarget11FromSwitchA3.get();
+    auto mid = pingNRP_responseToNodeTarget11FromSwitchA3_payload.mid;
+    auto w = pingNRP_responseToNodeTarget11FromSwitchA3_payload.w;
+    auto pw = pingNRP_responseToNodeTarget11FromSwitchA3_payload.pw;
+    if ((nodeMode == 2)) { if (((!w) && (!pw))) { which = (which + 1); } else { which = 0; } if ((which > 1)) { ping_pending = false; } else {} } else { if ((nodeMode == 1)) { ping_pending = false; } else {} }
+  =}
+
+  reaction(pingNRP_responseToNodeTarget12FromSwitchA3) {=
+    auto pingNRP_responseToNodeTarget12FromSwitchA3_payload = *pingNRP_responseToNodeTarget12FromSwitchA3.get();
+    auto mid = pingNRP_responseToNodeTarget12FromSwitchA3_payload.mid;
+    auto w = pingNRP_responseToNodeTarget12FromSwitchA3_payload.w;
+    auto pw = pingNRP_responseToNodeTarget12FromSwitchA3_payload.pw;
+    if ((nodeMode == 2)) { if (((!w) && (!pw))) { which = (which + 1); } else { which = 0; } if ((which > 1)) { ping_pending = false; } else {} } else { if ((nodeMode == 1)) { ping_pending = false; } else {} }
+  =}
+
+  reaction(pingNRP_responseToNodeTarget11FromSwitchB1) {=
+    auto pingNRP_responseToNodeTarget11FromSwitchB1_payload = *pingNRP_responseToNodeTarget11FromSwitchB1.get();
+    auto mid = pingNRP_responseToNodeTarget11FromSwitchB1_payload.mid;
+    auto w = pingNRP_responseToNodeTarget11FromSwitchB1_payload.w;
+    auto pw = pingNRP_responseToNodeTarget11FromSwitchB1_payload.pw;
+    if ((nodeMode == 2)) { if (((!w) && (!pw))) { which = (which + 1); } else { which = 0; } if ((which > 1)) { ping_pending = false; } else {} } else { if ((nodeMode == 1)) { ping_pending = false; } else {} }
+  =}
+
+  reaction(pingNRP_responseToNodeTarget12FromSwitchB1) {=
+    auto pingNRP_responseToNodeTarget12FromSwitchB1_payload = *pingNRP_responseToNodeTarget12FromSwitchB1.get();
+    auto mid = pingNRP_responseToNodeTarget12FromSwitchB1_payload.mid;
+    auto w = pingNRP_responseToNodeTarget12FromSwitchB1_payload.w;
+    auto pw = pingNRP_responseToNodeTarget12FromSwitchB1_payload.pw;
+    if ((nodeMode == 2)) { if (((!w) && (!pw))) { which = (which + 1); } else { which = 0; } if ((which > 1)) { ping_pending = false; } else {} } else { if ((nodeMode == 1)) { ping_pending = false; } else {} }
+  =}
+
+  reaction(pingNRP_responseToNodeTarget11FromSwitchB2) {=
+    auto pingNRP_responseToNodeTarget11FromSwitchB2_payload = *pingNRP_responseToNodeTarget11FromSwitchB2.get();
+    auto mid = pingNRP_responseToNodeTarget11FromSwitchB2_payload.mid;
+    auto w = pingNRP_responseToNodeTarget11FromSwitchB2_payload.w;
+    auto pw = pingNRP_responseToNodeTarget11FromSwitchB2_payload.pw;
+    if ((nodeMode == 2)) { if (((!w) && (!pw))) { which = (which + 1); } else { which = 0; } if ((which > 1)) { ping_pending = false; } else {} } else { if ((nodeMode == 1)) { ping_pending = false; } else {} }
+  =}
+
+  reaction(pingNRP_responseToNodeTarget12FromSwitchB2) {=
+    auto pingNRP_responseToNodeTarget12FromSwitchB2_payload = *pingNRP_responseToNodeTarget12FromSwitchB2.get();
+    auto mid = pingNRP_responseToNodeTarget12FromSwitchB2_payload.mid;
+    auto w = pingNRP_responseToNodeTarget12FromSwitchB2_payload.w;
+    auto pw = pingNRP_responseToNodeTarget12FromSwitchB2_payload.pw;
+    if ((nodeMode == 2)) { if (((!w) && (!pw))) { which = (which + 1); } else { which = 0; } if ((which > 1)) { ping_pending = false; } else {} } else { if ((nodeMode == 1)) { ping_pending = false; } else {} }
+  =}
+
+  reaction(pingNRP_responseToNodeTarget11FromSwitchB3) {=
+    auto pingNRP_responseToNodeTarget11FromSwitchB3_payload = *pingNRP_responseToNodeTarget11FromSwitchB3.get();
+    auto mid = pingNRP_responseToNodeTarget11FromSwitchB3_payload.mid;
+    auto w = pingNRP_responseToNodeTarget11FromSwitchB3_payload.w;
+    auto pw = pingNRP_responseToNodeTarget11FromSwitchB3_payload.pw;
+    if ((nodeMode == 2)) { if (((!w) && (!pw))) { which = (which + 1); } else { which = 0; } if ((which > 1)) { ping_pending = false; } else {} } else { if ((nodeMode == 1)) { ping_pending = false; } else {} }
+  =}
+
+  reaction(pingNRP_responseToNodeTarget12FromSwitchB3) {=
+    auto pingNRP_responseToNodeTarget12FromSwitchB3_payload = *pingNRP_responseToNodeTarget12FromSwitchB3.get();
+    auto mid = pingNRP_responseToNodeTarget12FromSwitchB3_payload.mid;
+    auto w = pingNRP_responseToNodeTarget12FromSwitchB3_payload.w;
+    auto pw = pingNRP_responseToNodeTarget12FromSwitchB3_payload.pw;
+    if ((nodeMode == 2)) { if (((!w) && (!pw))) { which = (which + 1); } else { which = 0; } if ((which > 1)) { ping_pending = false; } else {} } else { if ((nodeMode == 1)) { ping_pending = false; } else {} }
+  =}
+
+  reaction(new_NRP_action) {=
+    auto new_NRP_action_payload = *new_NRP_action.get();
+    auto mid = new_NRP_action_payload.mid;
+    auto prim = new_NRP_action_payload.prim;
+    auto mNRP_network = new_NRP_action_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRP_action_payload.mNRP_switch_id;
+    if ((nodeMode != 3)) { NRP_network = mNRP_network; NRP_switch_id = mNRP_switch_id; } else {}
+  =}
+
+  reaction(new_NRPToNodeTarget1FromSwitchA1) {=
+    auto new_NRPToNodeTarget1FromSwitchA1_payload = *new_NRPToNodeTarget1FromSwitchA1.get();
+    auto mid = new_NRPToNodeTarget1FromSwitchA1_payload.mid;
+    auto prim = new_NRPToNodeTarget1FromSwitchA1_payload.prim;
+    auto mNRP_network = new_NRPToNodeTarget1FromSwitchA1_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToNodeTarget1FromSwitchA1_payload.mNRP_switch_id;
+    if ((nodeMode != 3)) { NRP_network = mNRP_network; NRP_switch_id = mNRP_switch_id; } else {}
+  =}
+
+  reaction(new_NRPToNodeTarget1FromSwitchA2) {=
+    auto new_NRPToNodeTarget1FromSwitchA2_payload = *new_NRPToNodeTarget1FromSwitchA2.get();
+    auto mid = new_NRPToNodeTarget1FromSwitchA2_payload.mid;
+    auto prim = new_NRPToNodeTarget1FromSwitchA2_payload.prim;
+    auto mNRP_network = new_NRPToNodeTarget1FromSwitchA2_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToNodeTarget1FromSwitchA2_payload.mNRP_switch_id;
+    if ((nodeMode != 3)) { NRP_network = mNRP_network; NRP_switch_id = mNRP_switch_id; } else {}
+  =}
+
+  reaction(new_NRPToNodeTarget1FromSwitchA3) {=
+    auto new_NRPToNodeTarget1FromSwitchA3_payload = *new_NRPToNodeTarget1FromSwitchA3.get();
+    auto mid = new_NRPToNodeTarget1FromSwitchA3_payload.mid;
+    auto prim = new_NRPToNodeTarget1FromSwitchA3_payload.prim;
+    auto mNRP_network = new_NRPToNodeTarget1FromSwitchA3_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToNodeTarget1FromSwitchA3_payload.mNRP_switch_id;
+    if ((nodeMode != 3)) { NRP_network = mNRP_network; NRP_switch_id = mNRP_switch_id; } else {}
+  =}
+
+  reaction(new_NRPToNodeTarget1FromSwitchB1) {=
+    auto new_NRPToNodeTarget1FromSwitchB1_payload = *new_NRPToNodeTarget1FromSwitchB1.get();
+    auto mid = new_NRPToNodeTarget1FromSwitchB1_payload.mid;
+    auto prim = new_NRPToNodeTarget1FromSwitchB1_payload.prim;
+    auto mNRP_network = new_NRPToNodeTarget1FromSwitchB1_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToNodeTarget1FromSwitchB1_payload.mNRP_switch_id;
+    if ((nodeMode != 3)) { NRP_network = mNRP_network; NRP_switch_id = mNRP_switch_id; } else {}
+  =}
+
+  reaction(new_NRPToNodeTarget1FromSwitchB2) {=
+    auto new_NRPToNodeTarget1FromSwitchB2_payload = *new_NRPToNodeTarget1FromSwitchB2.get();
+    auto mid = new_NRPToNodeTarget1FromSwitchB2_payload.mid;
+    auto prim = new_NRPToNodeTarget1FromSwitchB2_payload.prim;
+    auto mNRP_network = new_NRPToNodeTarget1FromSwitchB2_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToNodeTarget1FromSwitchB2_payload.mNRP_switch_id;
+    if ((nodeMode != 3)) { NRP_network = mNRP_network; NRP_switch_id = mNRP_switch_id; } else {}
+  =}
+
+  reaction(new_NRPToNodeTarget1FromSwitchB3) {=
+    auto new_NRPToNodeTarget1FromSwitchB3_payload = *new_NRPToNodeTarget1FromSwitchB3.get();
+    auto mid = new_NRPToNodeTarget1FromSwitchB3_payload.mid;
+    auto prim = new_NRPToNodeTarget1FromSwitchB3_payload.prim;
+    auto mNRP_network = new_NRPToNodeTarget1FromSwitchB3_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToNodeTarget1FromSwitchB3_payload.mNRP_switch_id;
+    if ((nodeMode != 3)) { NRP_network = mNRP_network; NRP_switch_id = mNRP_switch_id; } else {}
+  =}
+
+  reaction(new_NRPBack_action) {=
+    auto new_NRPBack_action_payload = *new_NRPBack_action.get();
+    auto mid = new_NRPBack_action_payload.mid;
+    auto prim = new_NRPBack_action_payload.prim;
+    auto mNRP_network = new_NRPBack_action_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBack_action_payload.mNRP_switch_id;
+    if ((nodeMode != 3)) { NRP_network = mNRP_network; NRP_switch_id = mNRP_switch_id; } else {}
+  =}
+
+  reaction(new_NRPBackToNodeTarget1FromSwitchA1) {=
+    auto new_NRPBackToNodeTarget1FromSwitchA1_payload = *new_NRPBackToNodeTarget1FromSwitchA1.get();
+    auto mid = new_NRPBackToNodeTarget1FromSwitchA1_payload.mid;
+    auto prim = new_NRPBackToNodeTarget1FromSwitchA1_payload.prim;
+    auto mNRP_network = new_NRPBackToNodeTarget1FromSwitchA1_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToNodeTarget1FromSwitchA1_payload.mNRP_switch_id;
+    if ((nodeMode != 3)) { NRP_network = mNRP_network; NRP_switch_id = mNRP_switch_id; } else {}
+  =}
+
+  reaction(new_NRPBackToNodeTarget1FromSwitchA2) {=
+    auto new_NRPBackToNodeTarget1FromSwitchA2_payload = *new_NRPBackToNodeTarget1FromSwitchA2.get();
+    auto mid = new_NRPBackToNodeTarget1FromSwitchA2_payload.mid;
+    auto prim = new_NRPBackToNodeTarget1FromSwitchA2_payload.prim;
+    auto mNRP_network = new_NRPBackToNodeTarget1FromSwitchA2_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToNodeTarget1FromSwitchA2_payload.mNRP_switch_id;
+    if ((nodeMode != 3)) { NRP_network = mNRP_network; NRP_switch_id = mNRP_switch_id; } else {}
+  =}
+
+  reaction(new_NRPBackToNodeTarget1FromSwitchA3) {=
+    auto new_NRPBackToNodeTarget1FromSwitchA3_payload = *new_NRPBackToNodeTarget1FromSwitchA3.get();
+    auto mid = new_NRPBackToNodeTarget1FromSwitchA3_payload.mid;
+    auto prim = new_NRPBackToNodeTarget1FromSwitchA3_payload.prim;
+    auto mNRP_network = new_NRPBackToNodeTarget1FromSwitchA3_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToNodeTarget1FromSwitchA3_payload.mNRP_switch_id;
+    if ((nodeMode != 3)) { NRP_network = mNRP_network; NRP_switch_id = mNRP_switch_id; } else {}
+  =}
+
+  reaction(new_NRPBackToNodeTarget1FromSwitchB1) {=
+    auto new_NRPBackToNodeTarget1FromSwitchB1_payload = *new_NRPBackToNodeTarget1FromSwitchB1.get();
+    auto mid = new_NRPBackToNodeTarget1FromSwitchB1_payload.mid;
+    auto prim = new_NRPBackToNodeTarget1FromSwitchB1_payload.prim;
+    auto mNRP_network = new_NRPBackToNodeTarget1FromSwitchB1_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToNodeTarget1FromSwitchB1_payload.mNRP_switch_id;
+    if ((nodeMode != 3)) { NRP_network = mNRP_network; NRP_switch_id = mNRP_switch_id; } else {}
+  =}
+
+  reaction(new_NRPBackToNodeTarget1FromSwitchB2) {=
+    auto new_NRPBackToNodeTarget1FromSwitchB2_payload = *new_NRPBackToNodeTarget1FromSwitchB2.get();
+    auto mid = new_NRPBackToNodeTarget1FromSwitchB2_payload.mid;
+    auto prim = new_NRPBackToNodeTarget1FromSwitchB2_payload.prim;
+    auto mNRP_network = new_NRPBackToNodeTarget1FromSwitchB2_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToNodeTarget1FromSwitchB2_payload.mNRP_switch_id;
+    if ((nodeMode != 3)) { NRP_network = mNRP_network; NRP_switch_id = mNRP_switch_id; } else {}
+  =}
+
+  reaction(new_NRPBackToNodeTarget1FromSwitchB3) {=
+    auto new_NRPBackToNodeTarget1FromSwitchB3_payload = *new_NRPBackToNodeTarget1FromSwitchB3.get();
+    auto mid = new_NRPBackToNodeTarget1FromSwitchB3_payload.mid;
+    auto prim = new_NRPBackToNodeTarget1FromSwitchB3_payload.prim;
+    auto mNRP_network = new_NRPBackToNodeTarget1FromSwitchB3_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToNodeTarget1FromSwitchB3_payload.mNRP_switch_id;
+    if ((nodeMode != 3)) { NRP_network = mNRP_network; NRP_switch_id = mNRP_switch_id; } else {}
+  =}
+
+  reaction(runMe_action1) -> new_NRPToOut12, new_NRPToOut22, pingNRPToOut11, ping_timed_out_action1, pingNRPToOut21, ping_timed_out_action2, pingNRPToOut12, ping_timed_out_action3, pingNRPToOut22, ping_timed_out_action4, pingNRPToOut13, ping_timed_out_action5, pingNRPToOut23, ping_timed_out_action6, runMe_action2 {=
+    if ((nodeMode == 0)) { if (init) { if ((id == primary)) { nodeMode = 1; NRP_network = (NRP_network + 1); if ((NRP_network < 2)) { if ((NRP_network == 0)) { NRP_switch_id = NRPCandidates0; } else { NRP_switch_id = NRPCandidates1; } if ((NRP_network == 0)) { new_NRPToOut12.set(Switch_new_NRP_action_Args{id, id, NRP_network, NRP_switch_id}); } else { new_NRPToOut22.set(Switch_new_NRP_action_Args{id, id, NRP_network, NRP_switch_id}); } } else { NRP_network = 2; } } else { nodeMode = 2; } init = false; } else {} } else { if ((nodeMode == 1)) { attacker = (attacker + 1); if ((attacker > 1)) { attacker = 1; } else {} if ((!ping_pending)) { if ((NRP_network == 0)) { ping_pending = true; pingNRPToOut11.set(Switch_pingNRP_action_Args{id, id, NRP_switch_id}); ping_timed_out_action1.schedule(100ms); } else { ping_pending = true; pingNRPToOut21.set(Switch_pingNRP_action_Args{id, id, NRP_switch_id}); ping_timed_out_action2.schedule(100ms); } } else {} NRP_pending = true; } else { if ((nodeMode == 2)) { heartbeats_missed_1 = (heartbeats_missed_1 + 1); heartbeats_missed_2 = (heartbeats_missed_2 + 1); if (((heartbeats_missed_1 > 2) && (heartbeats_missed_2 > 2))) { if ((heartbeats_missed_1 > (2 + 2))) { heartbeats_missed_1 = (2 + 2); } else {} if ((heartbeats_missed_2 > (2 + 2))) { heartbeats_missed_2 = (2 + 2); } else {} if ((!ping_pending)) { if ((NRP_network == 0)) { ping_pending = true; pingNRPToOut12.set(Switch_pingNRP_action_Args{id, id, NRP_switch_id}); ping_timed_out_action3.schedule(100ms); } else { ping_pending = true; pingNRPToOut22.set(Switch_pingNRP_action_Args{id, id, NRP_switch_id}); ping_timed_out_action4.schedule(100ms); } } else {} NRP_pending = true; } else { if (((heartbeats_missed_1 > 2) || (heartbeats_missed_2 > 2))) { if ((!ping_pending)) { if (((NRP_network == 0) && (heartbeats_missed_1 > 2))) { ping_pending = true; pingNRPToOut13.set(Switch_pingNRP_action_Args{id, id, NRP_switch_id}); ping_timed_out_action5.schedule(100ms); } else { if (((NRP_network == 1) && (heartbeats_missed_2 > 2))) { ping_pending = true; pingNRPToOut23.set(Switch_pingNRP_action_Args{id, id, NRP_switch_id}); ping_timed_out_action6.schedule(100ms); } else {} } } else {} if ((heartbeats_missed_1 > (2 + 2))) { heartbeats_missed_1 = (2 + 2); } else {} if ((heartbeats_missed_2 > (2 + 2))) { heartbeats_missed_2 = (2 + 2); } else {} } else {} } } else { if ((nodeMode == 3)) {} else {} } } }
+    runMe_action2.schedule(1000ms);
+  =}
+
+  reaction(runMe_action2) -> new_NRPToOut12, new_NRPToOut22, pingNRPToOut11, ping_timed_out_action1, pingNRPToOut21, ping_timed_out_action2, pingNRPToOut12, ping_timed_out_action3, pingNRPToOut22, ping_timed_out_action4, pingNRPToOut13, ping_timed_out_action5, pingNRPToOut23, ping_timed_out_action6, runMe_action2 {=
+    if ((nodeMode == 0)) { if (init) { if ((id == primary)) { nodeMode = 1; NRP_network = (NRP_network + 1); if ((NRP_network < 2)) { if ((NRP_network == 0)) { NRP_switch_id = NRPCandidates0; } else { NRP_switch_id = NRPCandidates1; } if ((NRP_network == 0)) { new_NRPToOut12.set(Switch_new_NRP_action_Args{id, id, NRP_network, NRP_switch_id}); } else { new_NRPToOut22.set(Switch_new_NRP_action_Args{id, id, NRP_network, NRP_switch_id}); } } else { NRP_network = 2; } } else { nodeMode = 2; } init = false; } else {} } else { if ((nodeMode == 1)) { attacker = (attacker + 1); if ((attacker > 1)) { attacker = 1; } else {} if ((!ping_pending)) { if ((NRP_network == 0)) { ping_pending = true; pingNRPToOut11.set(Switch_pingNRP_action_Args{id, id, NRP_switch_id}); ping_timed_out_action1.schedule(100ms); } else { ping_pending = true; pingNRPToOut21.set(Switch_pingNRP_action_Args{id, id, NRP_switch_id}); ping_timed_out_action2.schedule(100ms); } } else {} NRP_pending = true; } else { if ((nodeMode == 2)) { heartbeats_missed_1 = (heartbeats_missed_1 + 1); heartbeats_missed_2 = (heartbeats_missed_2 + 1); if (((heartbeats_missed_1 > 2) && (heartbeats_missed_2 > 2))) { if ((heartbeats_missed_1 > (2 + 2))) { heartbeats_missed_1 = (2 + 2); } else {} if ((heartbeats_missed_2 > (2 + 2))) { heartbeats_missed_2 = (2 + 2); } else {} if ((!ping_pending)) { if ((NRP_network == 0)) { ping_pending = true; pingNRPToOut12.set(Switch_pingNRP_action_Args{id, id, NRP_switch_id}); ping_timed_out_action3.schedule(100ms); } else { ping_pending = true; pingNRPToOut22.set(Switch_pingNRP_action_Args{id, id, NRP_switch_id}); ping_timed_out_action4.schedule(100ms); } } else {} NRP_pending = true; } else { if (((heartbeats_missed_1 > 2) || (heartbeats_missed_2 > 2))) { if ((!ping_pending)) { if (((NRP_network == 0) && (heartbeats_missed_1 > 2))) { ping_pending = true; pingNRPToOut13.set(Switch_pingNRP_action_Args{id, id, NRP_switch_id}); ping_timed_out_action5.schedule(100ms); } else { if (((NRP_network == 1) && (heartbeats_missed_2 > 2))) { ping_pending = true; pingNRPToOut23.set(Switch_pingNRP_action_Args{id, id, NRP_switch_id}); ping_timed_out_action6.schedule(100ms); } else {} } } else {} if ((heartbeats_missed_1 > (2 + 2))) { heartbeats_missed_1 = (2 + 2); } else {} if ((heartbeats_missed_2 > (2 + 2))) { heartbeats_missed_2 = (2 + 2); } else {} } else {} } } else { if ((nodeMode == 3)) {} else {} } } }
+    runMe_action2.schedule(1000ms);
+  =}
+
+  reaction(heartBeat_action) {=
+    auto heartBeat_action_payload = *heartBeat_action.get();
+    auto networkId = heartBeat_action_payload.networkId;
+    auto senderid = heartBeat_action_payload.senderid;
+    if ((nodeMode == 2)) { if ((networkId == 0)) { heartbeats_missed_1 = 0; } else { heartbeats_missed_2 = 0; } } else {}
+  =}
+
+  reaction(heartBeatToNodeTarget1FromSwitchA1) {=
+    auto heartBeatToNodeTarget1FromSwitchA1_payload = *heartBeatToNodeTarget1FromSwitchA1.get();
+    auto networkId = heartBeatToNodeTarget1FromSwitchA1_payload.networkId;
+    auto senderid = heartBeatToNodeTarget1FromSwitchA1_payload.senderid;
+    if ((nodeMode == 2)) { if ((networkId == 0)) { heartbeats_missed_1 = 0; } else { heartbeats_missed_2 = 0; } } else {}
+  =}
+
+  reaction(heartBeatToNodeTarget1FromSwitchA2) {=
+    auto heartBeatToNodeTarget1FromSwitchA2_payload = *heartBeatToNodeTarget1FromSwitchA2.get();
+    auto networkId = heartBeatToNodeTarget1FromSwitchA2_payload.networkId;
+    auto senderid = heartBeatToNodeTarget1FromSwitchA2_payload.senderid;
+    if ((nodeMode == 2)) { if ((networkId == 0)) { heartbeats_missed_1 = 0; } else { heartbeats_missed_2 = 0; } } else {}
+  =}
+
+  reaction(heartBeatToNodeTarget1FromSwitchA3) {=
+    auto heartBeatToNodeTarget1FromSwitchA3_payload = *heartBeatToNodeTarget1FromSwitchA3.get();
+    auto networkId = heartBeatToNodeTarget1FromSwitchA3_payload.networkId;
+    auto senderid = heartBeatToNodeTarget1FromSwitchA3_payload.senderid;
+    if ((nodeMode == 2)) { if ((networkId == 0)) { heartbeats_missed_1 = 0; } else { heartbeats_missed_2 = 0; } } else {}
+  =}
+
+  reaction(heartBeatToNodeTarget1FromSwitchB1) {=
+    auto heartBeatToNodeTarget1FromSwitchB1_payload = *heartBeatToNodeTarget1FromSwitchB1.get();
+    auto networkId = heartBeatToNodeTarget1FromSwitchB1_payload.networkId;
+    auto senderid = heartBeatToNodeTarget1FromSwitchB1_payload.senderid;
+    if ((nodeMode == 2)) { if ((networkId == 0)) { heartbeats_missed_1 = 0; } else { heartbeats_missed_2 = 0; } } else {}
+  =}
+
+  reaction(heartBeatToNodeTarget1FromSwitchB2) {=
+    auto heartBeatToNodeTarget1FromSwitchB2_payload = *heartBeatToNodeTarget1FromSwitchB2.get();
+    auto networkId = heartBeatToNodeTarget1FromSwitchB2_payload.networkId;
+    auto senderid = heartBeatToNodeTarget1FromSwitchB2_payload.senderid;
+    if ((nodeMode == 2)) { if ((networkId == 0)) { heartbeats_missed_1 = 0; } else { heartbeats_missed_2 = 0; } } else {}
+  =}
+
+  reaction(heartBeatToNodeTarget1FromSwitchB3) {=
+    auto heartBeatToNodeTarget1FromSwitchB3_payload = *heartBeatToNodeTarget1FromSwitchB3.get();
+    auto networkId = heartBeatToNodeTarget1FromSwitchB3_payload.networkId;
+    auto senderid = heartBeatToNodeTarget1FromSwitchB3_payload.senderid;
+    if ((nodeMode == 2)) { if ((networkId == 0)) { heartbeats_missed_1 = 0; } else { heartbeats_missed_2 = 0; } } else {}
+  =}
+
+  reaction(nodeFail_action1) {=
+    primary = (-1);
+    nodeMode = 3;
+    NRP_network = (-1);
+    NRP_switch_id = (-1);
+    heartbeats_missed_1 = 0;
+    heartbeats_missed_2 = 0;
+    NRP_pending = true;
+    become_primary_on_ping_response = false;
+    ping_pending = false;
+  =}
+
+  reaction(nodeFail_action2) {=
+    primary = (-1);
+    nodeMode = 3;
+    NRP_network = (-1);
+    NRP_switch_id = (-1);
+    heartbeats_missed_1 = 0;
+    heartbeats_missed_2 = 0;
+    NRP_pending = true;
+    become_primary_on_ping_response = false;
+    ping_pending = false;
+  =}
+}
+
+reactor Switch(myid: int = 0, networkId: int = 0, endSwitch: bool = false, myFailTime: int = 0) {
+  input pingNRP_responseToUp1FromSwitchA1: Switch_pingNRP_response_action_Args
+  input pingNRP_responseToDownFromSwitchA1: Switch_pingNRP_response_action_Args
+  input pingNRP_responseToUp2FromSwitchA1: Switch_pingNRP_response_action_Args
+  input pingNRPToUpFromSwitchA1: Switch_pingNRP_action_Args
+  input pingNRPToDownFromSwitchA1: Switch_pingNRP_action_Args
+  input new_NRPToUpFromSwitchA1: Switch_new_NRP_action_Args
+  input new_NRPToDownFromSwitchA1: Switch_new_NRP_action_Args
+  input new_NRPBackToUpFromSwitchA1: Switch_new_NRPBack_action_Args
+  input new_NRPBackToDownFromSwitchA1: Switch_new_NRPBack_action_Args
+  input heartBeatToUpFromSwitchA1: Switch_heartBeat_action_Args
+  input heartBeatToDownFromSwitchA1: Switch_heartBeat_action_Args
+  input pingNRP_responseToUp1FromSwitchA2: Switch_pingNRP_response_action_Args
+  input pingNRP_responseToDownFromSwitchA2: Switch_pingNRP_response_action_Args
+  input pingNRP_responseToUp2FromSwitchA2: Switch_pingNRP_response_action_Args
+  input pingNRPToUpFromSwitchA2: Switch_pingNRP_action_Args
+  input pingNRPToDownFromSwitchA2: Switch_pingNRP_action_Args
+  input new_NRPToUpFromSwitchA2: Switch_new_NRP_action_Args
+  input new_NRPToDownFromSwitchA2: Switch_new_NRP_action_Args
+  input new_NRPBackToUpFromSwitchA2: Switch_new_NRPBack_action_Args
+  input new_NRPBackToDownFromSwitchA2: Switch_new_NRPBack_action_Args
+  input heartBeatToUpFromSwitchA2: Switch_heartBeat_action_Args
+  input heartBeatToDownFromSwitchA2: Switch_heartBeat_action_Args
+  input pingNRP_responseToUp1FromSwitchA3: Switch_pingNRP_response_action_Args
+  input pingNRP_responseToDownFromSwitchA3: Switch_pingNRP_response_action_Args
+  input pingNRP_responseToUp2FromSwitchA3: Switch_pingNRP_response_action_Args
+  input pingNRPToUpFromSwitchA3: Switch_pingNRP_action_Args
+  input pingNRPToDownFromSwitchA3: Switch_pingNRP_action_Args
+  input new_NRPToUpFromSwitchA3: Switch_new_NRP_action_Args
+  input new_NRPToDownFromSwitchA3: Switch_new_NRP_action_Args
+  input new_NRPBackToUpFromSwitchA3: Switch_new_NRPBack_action_Args
+  input new_NRPBackToDownFromSwitchA3: Switch_new_NRPBack_action_Args
+  input heartBeatToUpFromSwitchA3: Switch_heartBeat_action_Args
+  input heartBeatToDownFromSwitchA3: Switch_heartBeat_action_Args
+  input pingNRP_responseToUp1FromSwitchB1: Switch_pingNRP_response_action_Args
+  input pingNRP_responseToDownFromSwitchB1: Switch_pingNRP_response_action_Args
+  input pingNRP_responseToUp2FromSwitchB1: Switch_pingNRP_response_action_Args
+  input pingNRPToUpFromSwitchB1: Switch_pingNRP_action_Args
+  input pingNRPToDownFromSwitchB1: Switch_pingNRP_action_Args
+  input new_NRPToUpFromSwitchB1: Switch_new_NRP_action_Args
+  input new_NRPToDownFromSwitchB1: Switch_new_NRP_action_Args
+  input new_NRPBackToUpFromSwitchB1: Switch_new_NRPBack_action_Args
+  input new_NRPBackToDownFromSwitchB1: Switch_new_NRPBack_action_Args
+  input heartBeatToUpFromSwitchB1: Switch_heartBeat_action_Args
+  input heartBeatToDownFromSwitchB1: Switch_heartBeat_action_Args
+  input pingNRP_responseToUp1FromSwitchB2: Switch_pingNRP_response_action_Args
+  input pingNRP_responseToDownFromSwitchB2: Switch_pingNRP_response_action_Args
+  input pingNRP_responseToUp2FromSwitchB2: Switch_pingNRP_response_action_Args
+  input pingNRPToUpFromSwitchB2: Switch_pingNRP_action_Args
+  input pingNRPToDownFromSwitchB2: Switch_pingNRP_action_Args
+  input new_NRPToUpFromSwitchB2: Switch_new_NRP_action_Args
+  input new_NRPToDownFromSwitchB2: Switch_new_NRP_action_Args
+  input new_NRPBackToUpFromSwitchB2: Switch_new_NRPBack_action_Args
+  input new_NRPBackToDownFromSwitchB2: Switch_new_NRPBack_action_Args
+  input heartBeatToUpFromSwitchB2: Switch_heartBeat_action_Args
+  input heartBeatToDownFromSwitchB2: Switch_heartBeat_action_Args
+  input pingNRP_responseToUp1FromSwitchB3: Switch_pingNRP_response_action_Args
+  input pingNRP_responseToDownFromSwitchB3: Switch_pingNRP_response_action_Args
+  input pingNRP_responseToUp2FromSwitchB3: Switch_pingNRP_response_action_Args
+  input pingNRPToUpFromSwitchB3: Switch_pingNRP_action_Args
+  input pingNRPToDownFromSwitchB3: Switch_pingNRP_action_Args
+  input new_NRPToUpFromSwitchB3: Switch_new_NRP_action_Args
+  input new_NRPToDownFromSwitchB3: Switch_new_NRP_action_Args
+  input new_NRPBackToUpFromSwitchB3: Switch_new_NRPBack_action_Args
+  input new_NRPBackToDownFromSwitchB3: Switch_new_NRPBack_action_Args
+  input heartBeatToUpFromSwitchB3: Switch_heartBeat_action_Args
+  input heartBeatToDownFromSwitchB3: Switch_heartBeat_action_Args
+  input new_NRPBackToOut1FromDCN1: Switch_new_NRPBack_action_Args
+  input new_NRPBackToOut2FromDCN1: Switch_new_NRPBack_action_Args
+  input new_NRPToOut11FromDCN1: Switch_new_NRP_action_Args
+  input new_NRPToOut21FromDCN1: Switch_new_NRP_action_Args
+  input heartBeatToOut1FromDCN1: Switch_heartBeat_action_Args
+  input heartBeatToOut2FromDCN1: Switch_heartBeat_action_Args
+  input new_NRPToOut12FromDCN1: Switch_new_NRP_action_Args
+  input new_NRPToOut22FromDCN1: Switch_new_NRP_action_Args
+  input pingNRPToOut11FromDCN1: Switch_pingNRP_action_Args
+  input pingNRPToOut21FromDCN1: Switch_pingNRP_action_Args
+  input pingNRPToOut12FromDCN1: Switch_pingNRP_action_Args
+  input pingNRPToOut22FromDCN1: Switch_pingNRP_action_Args
+  input pingNRPToOut13FromDCN1: Switch_pingNRP_action_Args
+  input pingNRPToOut23FromDCN1: Switch_pingNRP_action_Args
+  input new_NRPBackToOut1FromDCN2: Switch_new_NRPBack_action_Args
+  input new_NRPBackToOut2FromDCN2: Switch_new_NRPBack_action_Args
+  input new_NRPToOut11FromDCN2: Switch_new_NRP_action_Args
+  input new_NRPToOut21FromDCN2: Switch_new_NRP_action_Args
+  input heartBeatToOut1FromDCN2: Switch_heartBeat_action_Args
+  input heartBeatToOut2FromDCN2: Switch_heartBeat_action_Args
+  input new_NRPToOut12FromDCN2: Switch_new_NRP_action_Args
+  input new_NRPToOut22FromDCN2: Switch_new_NRP_action_Args
+  input pingNRPToOut11FromDCN2: Switch_pingNRP_action_Args
+  input pingNRPToOut21FromDCN2: Switch_pingNRP_action_Args
+  input pingNRPToOut12FromDCN2: Switch_pingNRP_action_Args
+  input pingNRPToOut22FromDCN2: Switch_pingNRP_action_Args
+  input pingNRPToOut13FromDCN2: Switch_pingNRP_action_Args
+  input pingNRPToOut23FromDCN2: Switch_pingNRP_action_Args
+  output pingNRP_responseToNodeTarget11: Node_pingNRP_response_action_Args
+  output pingNRP_responseToUp1: Switch_pingNRP_response_action_Args
+  output pingNRP_responseToDown: Switch_pingNRP_response_action_Args
+  output pingNRP_responseToUp2: Switch_pingNRP_response_action_Args
+  output pingNRP_responseToNodeTarget12: Node_pingNRP_response_action_Args
+  output pingNRPToUp: Switch_pingNRP_action_Args
+  output pingNRPToDown: Switch_pingNRP_action_Args
+  output new_NRPToNodeTarget1: Node_new_NRP_action_Args
+  output new_NRPToUp: Switch_new_NRP_action_Args
+  output new_NRPToDown: Switch_new_NRP_action_Args
+  output new_NRPBackToNodeTarget1: Node_new_NRPBack_action_Args
+  output new_NRPBackToUp: Switch_new_NRPBack_action_Args
+  output new_NRPBackToDown: Switch_new_NRPBack_action_Args
+  output heartBeatToNodeTarget1: Node_heartBeat_action_Args
+  output heartBeatToUp: Switch_heartBeat_action_Args
+  output heartBeatToDown: Switch_heartBeat_action_Args
+  state mynetworkId: int = 0
+  state id: int = 0
+  state which: bool = false
+  state prevWhich: bool = false
+  state failed: bool = false
+  state amINRP: bool = false
+  state primaryPinged: bool = false
+  state terminal: bool = false
+  state primary: int = 0
+  logical action switchFail_action1: void
+  logical action switchFail_action2: void
+  logical action pingNRP_response_action: Switch_pingNRP_response_action_Args
+  logical action pingNRP_action: Switch_pingNRP_action_Args
+  logical action new_NRP_action: Switch_new_NRP_action_Args
+  logical action new_NRPBack_action: Switch_new_NRPBack_action_Args
+  logical action heartBeat_action: Switch_heartBeat_action_Args
+
+  reaction(startup) -> switchFail_action1, switchFail_action2 {=
+    mynetworkId = networkId;
+    primary = 0;
+    id = myid;
+    primaryPinged = false;
+    terminal = endSwitch;
+    amINRP = false;
+    failed = false;
+    which = true;
+    if ((myFailTime == 2500)) { switchFail_action1.schedule(2500ms); } else { if ((myFailTime == 5000)) { switchFail_action2.schedule(5000ms); } else {} }
+  =}
+
+  reaction(switchFail_action1) {=
+    failed = true;
+    amINRP = false;
+  =}
+
+  reaction(switchFail_action2) {=
+    failed = true;
+    amINRP = false;
+  =}
+
+  reaction(pingNRP_response_action) -> pingNRP_responseToNodeTarget11, pingNRP_responseToUp1, pingNRP_responseToDown {=
+    auto pingNRP_response_action_payload = *pingNRP_response_action.get();
+    auto senderNode = pingNRP_response_action_payload.senderNode;
+    auto w = pingNRP_response_action_payload.w;
+    auto pw = pingNRP_response_action_payload.pw;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { pingNRP_responseToNodeTarget11.set(Node_pingNRP_response_action_Args{id, w, pw}); } else { if ((senderNode > id)) { pingNRP_responseToUp1.set(Switch_pingNRP_response_action_Args{id, w, pw}); } else { pingNRP_responseToDown.set(Switch_pingNRP_response_action_Args{id, w, pw}); } } } else {}
+  =}
+
+  reaction(pingNRP_responseToUp1FromSwitchA1) -> pingNRP_responseToNodeTarget11, pingNRP_responseToUp1, pingNRP_responseToDown {=
+    auto pingNRP_responseToUp1FromSwitchA1_payload = *pingNRP_responseToUp1FromSwitchA1.get();
+    auto senderNode = pingNRP_responseToUp1FromSwitchA1_payload.senderNode;
+    auto w = pingNRP_responseToUp1FromSwitchA1_payload.w;
+    auto pw = pingNRP_responseToUp1FromSwitchA1_payload.pw;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { pingNRP_responseToNodeTarget11.set(Node_pingNRP_response_action_Args{id, w, pw}); } else { if ((senderNode > id)) { pingNRP_responseToUp1.set(Switch_pingNRP_response_action_Args{id, w, pw}); } else { pingNRP_responseToDown.set(Switch_pingNRP_response_action_Args{id, w, pw}); } } } else {}
+  =}
+
+  reaction(pingNRP_responseToDownFromSwitchA1) -> pingNRP_responseToNodeTarget11, pingNRP_responseToUp1, pingNRP_responseToDown {=
+    auto pingNRP_responseToDownFromSwitchA1_payload = *pingNRP_responseToDownFromSwitchA1.get();
+    auto senderNode = pingNRP_responseToDownFromSwitchA1_payload.senderNode;
+    auto w = pingNRP_responseToDownFromSwitchA1_payload.w;
+    auto pw = pingNRP_responseToDownFromSwitchA1_payload.pw;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { pingNRP_responseToNodeTarget11.set(Node_pingNRP_response_action_Args{id, w, pw}); } else { if ((senderNode > id)) { pingNRP_responseToUp1.set(Switch_pingNRP_response_action_Args{id, w, pw}); } else { pingNRP_responseToDown.set(Switch_pingNRP_response_action_Args{id, w, pw}); } } } else {}
+  =}
+
+  reaction(pingNRP_responseToUp2FromSwitchA1) -> pingNRP_responseToNodeTarget11, pingNRP_responseToUp1, pingNRP_responseToDown {=
+    auto pingNRP_responseToUp2FromSwitchA1_payload = *pingNRP_responseToUp2FromSwitchA1.get();
+    auto senderNode = pingNRP_responseToUp2FromSwitchA1_payload.senderNode;
+    auto w = pingNRP_responseToUp2FromSwitchA1_payload.w;
+    auto pw = pingNRP_responseToUp2FromSwitchA1_payload.pw;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { pingNRP_responseToNodeTarget11.set(Node_pingNRP_response_action_Args{id, w, pw}); } else { if ((senderNode > id)) { pingNRP_responseToUp1.set(Switch_pingNRP_response_action_Args{id, w, pw}); } else { pingNRP_responseToDown.set(Switch_pingNRP_response_action_Args{id, w, pw}); } } } else {}
+  =}
+
+  reaction(pingNRP_responseToUp1FromSwitchA2) -> pingNRP_responseToNodeTarget11, pingNRP_responseToUp1, pingNRP_responseToDown {=
+    auto pingNRP_responseToUp1FromSwitchA2_payload = *pingNRP_responseToUp1FromSwitchA2.get();
+    auto senderNode = pingNRP_responseToUp1FromSwitchA2_payload.senderNode;
+    auto w = pingNRP_responseToUp1FromSwitchA2_payload.w;
+    auto pw = pingNRP_responseToUp1FromSwitchA2_payload.pw;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { pingNRP_responseToNodeTarget11.set(Node_pingNRP_response_action_Args{id, w, pw}); } else { if ((senderNode > id)) { pingNRP_responseToUp1.set(Switch_pingNRP_response_action_Args{id, w, pw}); } else { pingNRP_responseToDown.set(Switch_pingNRP_response_action_Args{id, w, pw}); } } } else {}
+  =}
+
+  reaction(pingNRP_responseToDownFromSwitchA2) -> pingNRP_responseToNodeTarget11, pingNRP_responseToUp1, pingNRP_responseToDown {=
+    auto pingNRP_responseToDownFromSwitchA2_payload = *pingNRP_responseToDownFromSwitchA2.get();
+    auto senderNode = pingNRP_responseToDownFromSwitchA2_payload.senderNode;
+    auto w = pingNRP_responseToDownFromSwitchA2_payload.w;
+    auto pw = pingNRP_responseToDownFromSwitchA2_payload.pw;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { pingNRP_responseToNodeTarget11.set(Node_pingNRP_response_action_Args{id, w, pw}); } else { if ((senderNode > id)) { pingNRP_responseToUp1.set(Switch_pingNRP_response_action_Args{id, w, pw}); } else { pingNRP_responseToDown.set(Switch_pingNRP_response_action_Args{id, w, pw}); } } } else {}
+  =}
+
+  reaction(pingNRP_responseToUp2FromSwitchA2) -> pingNRP_responseToNodeTarget11, pingNRP_responseToUp1, pingNRP_responseToDown {=
+    auto pingNRP_responseToUp2FromSwitchA2_payload = *pingNRP_responseToUp2FromSwitchA2.get();
+    auto senderNode = pingNRP_responseToUp2FromSwitchA2_payload.senderNode;
+    auto w = pingNRP_responseToUp2FromSwitchA2_payload.w;
+    auto pw = pingNRP_responseToUp2FromSwitchA2_payload.pw;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { pingNRP_responseToNodeTarget11.set(Node_pingNRP_response_action_Args{id, w, pw}); } else { if ((senderNode > id)) { pingNRP_responseToUp1.set(Switch_pingNRP_response_action_Args{id, w, pw}); } else { pingNRP_responseToDown.set(Switch_pingNRP_response_action_Args{id, w, pw}); } } } else {}
+  =}
+
+  reaction(pingNRP_responseToUp1FromSwitchA3) -> pingNRP_responseToNodeTarget11, pingNRP_responseToUp1, pingNRP_responseToDown {=
+    auto pingNRP_responseToUp1FromSwitchA3_payload = *pingNRP_responseToUp1FromSwitchA3.get();
+    auto senderNode = pingNRP_responseToUp1FromSwitchA3_payload.senderNode;
+    auto w = pingNRP_responseToUp1FromSwitchA3_payload.w;
+    auto pw = pingNRP_responseToUp1FromSwitchA3_payload.pw;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { pingNRP_responseToNodeTarget11.set(Node_pingNRP_response_action_Args{id, w, pw}); } else { if ((senderNode > id)) { pingNRP_responseToUp1.set(Switch_pingNRP_response_action_Args{id, w, pw}); } else { pingNRP_responseToDown.set(Switch_pingNRP_response_action_Args{id, w, pw}); } } } else {}
+  =}
+
+  reaction(pingNRP_responseToDownFromSwitchA3) -> pingNRP_responseToNodeTarget11, pingNRP_responseToUp1, pingNRP_responseToDown {=
+    auto pingNRP_responseToDownFromSwitchA3_payload = *pingNRP_responseToDownFromSwitchA3.get();
+    auto senderNode = pingNRP_responseToDownFromSwitchA3_payload.senderNode;
+    auto w = pingNRP_responseToDownFromSwitchA3_payload.w;
+    auto pw = pingNRP_responseToDownFromSwitchA3_payload.pw;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { pingNRP_responseToNodeTarget11.set(Node_pingNRP_response_action_Args{id, w, pw}); } else { if ((senderNode > id)) { pingNRP_responseToUp1.set(Switch_pingNRP_response_action_Args{id, w, pw}); } else { pingNRP_responseToDown.set(Switch_pingNRP_response_action_Args{id, w, pw}); } } } else {}
+  =}
+
+  reaction(pingNRP_responseToUp2FromSwitchA3) -> pingNRP_responseToNodeTarget11, pingNRP_responseToUp1, pingNRP_responseToDown {=
+    auto pingNRP_responseToUp2FromSwitchA3_payload = *pingNRP_responseToUp2FromSwitchA3.get();
+    auto senderNode = pingNRP_responseToUp2FromSwitchA3_payload.senderNode;
+    auto w = pingNRP_responseToUp2FromSwitchA3_payload.w;
+    auto pw = pingNRP_responseToUp2FromSwitchA3_payload.pw;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { pingNRP_responseToNodeTarget11.set(Node_pingNRP_response_action_Args{id, w, pw}); } else { if ((senderNode > id)) { pingNRP_responseToUp1.set(Switch_pingNRP_response_action_Args{id, w, pw}); } else { pingNRP_responseToDown.set(Switch_pingNRP_response_action_Args{id, w, pw}); } } } else {}
+  =}
+
+  reaction(pingNRP_responseToUp1FromSwitchB1) -> pingNRP_responseToNodeTarget11, pingNRP_responseToUp1, pingNRP_responseToDown {=
+    auto pingNRP_responseToUp1FromSwitchB1_payload = *pingNRP_responseToUp1FromSwitchB1.get();
+    auto senderNode = pingNRP_responseToUp1FromSwitchB1_payload.senderNode;
+    auto w = pingNRP_responseToUp1FromSwitchB1_payload.w;
+    auto pw = pingNRP_responseToUp1FromSwitchB1_payload.pw;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { pingNRP_responseToNodeTarget11.set(Node_pingNRP_response_action_Args{id, w, pw}); } else { if ((senderNode > id)) { pingNRP_responseToUp1.set(Switch_pingNRP_response_action_Args{id, w, pw}); } else { pingNRP_responseToDown.set(Switch_pingNRP_response_action_Args{id, w, pw}); } } } else {}
+  =}
+
+  reaction(pingNRP_responseToDownFromSwitchB1) -> pingNRP_responseToNodeTarget11, pingNRP_responseToUp1, pingNRP_responseToDown {=
+    auto pingNRP_responseToDownFromSwitchB1_payload = *pingNRP_responseToDownFromSwitchB1.get();
+    auto senderNode = pingNRP_responseToDownFromSwitchB1_payload.senderNode;
+    auto w = pingNRP_responseToDownFromSwitchB1_payload.w;
+    auto pw = pingNRP_responseToDownFromSwitchB1_payload.pw;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { pingNRP_responseToNodeTarget11.set(Node_pingNRP_response_action_Args{id, w, pw}); } else { if ((senderNode > id)) { pingNRP_responseToUp1.set(Switch_pingNRP_response_action_Args{id, w, pw}); } else { pingNRP_responseToDown.set(Switch_pingNRP_response_action_Args{id, w, pw}); } } } else {}
+  =}
+
+  reaction(pingNRP_responseToUp2FromSwitchB1) -> pingNRP_responseToNodeTarget11, pingNRP_responseToUp1, pingNRP_responseToDown {=
+    auto pingNRP_responseToUp2FromSwitchB1_payload = *pingNRP_responseToUp2FromSwitchB1.get();
+    auto senderNode = pingNRP_responseToUp2FromSwitchB1_payload.senderNode;
+    auto w = pingNRP_responseToUp2FromSwitchB1_payload.w;
+    auto pw = pingNRP_responseToUp2FromSwitchB1_payload.pw;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { pingNRP_responseToNodeTarget11.set(Node_pingNRP_response_action_Args{id, w, pw}); } else { if ((senderNode > id)) { pingNRP_responseToUp1.set(Switch_pingNRP_response_action_Args{id, w, pw}); } else { pingNRP_responseToDown.set(Switch_pingNRP_response_action_Args{id, w, pw}); } } } else {}
+  =}
+
+  reaction(pingNRP_responseToUp1FromSwitchB2) -> pingNRP_responseToNodeTarget11, pingNRP_responseToUp1, pingNRP_responseToDown {=
+    auto pingNRP_responseToUp1FromSwitchB2_payload = *pingNRP_responseToUp1FromSwitchB2.get();
+    auto senderNode = pingNRP_responseToUp1FromSwitchB2_payload.senderNode;
+    auto w = pingNRP_responseToUp1FromSwitchB2_payload.w;
+    auto pw = pingNRP_responseToUp1FromSwitchB2_payload.pw;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { pingNRP_responseToNodeTarget11.set(Node_pingNRP_response_action_Args{id, w, pw}); } else { if ((senderNode > id)) { pingNRP_responseToUp1.set(Switch_pingNRP_response_action_Args{id, w, pw}); } else { pingNRP_responseToDown.set(Switch_pingNRP_response_action_Args{id, w, pw}); } } } else {}
+  =}
+
+  reaction(pingNRP_responseToDownFromSwitchB2) -> pingNRP_responseToNodeTarget11, pingNRP_responseToUp1, pingNRP_responseToDown {=
+    auto pingNRP_responseToDownFromSwitchB2_payload = *pingNRP_responseToDownFromSwitchB2.get();
+    auto senderNode = pingNRP_responseToDownFromSwitchB2_payload.senderNode;
+    auto w = pingNRP_responseToDownFromSwitchB2_payload.w;
+    auto pw = pingNRP_responseToDownFromSwitchB2_payload.pw;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { pingNRP_responseToNodeTarget11.set(Node_pingNRP_response_action_Args{id, w, pw}); } else { if ((senderNode > id)) { pingNRP_responseToUp1.set(Switch_pingNRP_response_action_Args{id, w, pw}); } else { pingNRP_responseToDown.set(Switch_pingNRP_response_action_Args{id, w, pw}); } } } else {}
+  =}
+
+  reaction(pingNRP_responseToUp2FromSwitchB2) -> pingNRP_responseToNodeTarget11, pingNRP_responseToUp1, pingNRP_responseToDown {=
+    auto pingNRP_responseToUp2FromSwitchB2_payload = *pingNRP_responseToUp2FromSwitchB2.get();
+    auto senderNode = pingNRP_responseToUp2FromSwitchB2_payload.senderNode;
+    auto w = pingNRP_responseToUp2FromSwitchB2_payload.w;
+    auto pw = pingNRP_responseToUp2FromSwitchB2_payload.pw;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { pingNRP_responseToNodeTarget11.set(Node_pingNRP_response_action_Args{id, w, pw}); } else { if ((senderNode > id)) { pingNRP_responseToUp1.set(Switch_pingNRP_response_action_Args{id, w, pw}); } else { pingNRP_responseToDown.set(Switch_pingNRP_response_action_Args{id, w, pw}); } } } else {}
+  =}
+
+  reaction(pingNRP_responseToUp1FromSwitchB3) -> pingNRP_responseToNodeTarget11, pingNRP_responseToUp1, pingNRP_responseToDown {=
+    auto pingNRP_responseToUp1FromSwitchB3_payload = *pingNRP_responseToUp1FromSwitchB3.get();
+    auto senderNode = pingNRP_responseToUp1FromSwitchB3_payload.senderNode;
+    auto w = pingNRP_responseToUp1FromSwitchB3_payload.w;
+    auto pw = pingNRP_responseToUp1FromSwitchB3_payload.pw;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { pingNRP_responseToNodeTarget11.set(Node_pingNRP_response_action_Args{id, w, pw}); } else { if ((senderNode > id)) { pingNRP_responseToUp1.set(Switch_pingNRP_response_action_Args{id, w, pw}); } else { pingNRP_responseToDown.set(Switch_pingNRP_response_action_Args{id, w, pw}); } } } else {}
+  =}
+
+  reaction(pingNRP_responseToDownFromSwitchB3) -> pingNRP_responseToNodeTarget11, pingNRP_responseToUp1, pingNRP_responseToDown {=
+    auto pingNRP_responseToDownFromSwitchB3_payload = *pingNRP_responseToDownFromSwitchB3.get();
+    auto senderNode = pingNRP_responseToDownFromSwitchB3_payload.senderNode;
+    auto w = pingNRP_responseToDownFromSwitchB3_payload.w;
+    auto pw = pingNRP_responseToDownFromSwitchB3_payload.pw;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { pingNRP_responseToNodeTarget11.set(Node_pingNRP_response_action_Args{id, w, pw}); } else { if ((senderNode > id)) { pingNRP_responseToUp1.set(Switch_pingNRP_response_action_Args{id, w, pw}); } else { pingNRP_responseToDown.set(Switch_pingNRP_response_action_Args{id, w, pw}); } } } else {}
+  =}
+
+  reaction(pingNRP_responseToUp2FromSwitchB3) -> pingNRP_responseToNodeTarget11, pingNRP_responseToUp1, pingNRP_responseToDown {=
+    auto pingNRP_responseToUp2FromSwitchB3_payload = *pingNRP_responseToUp2FromSwitchB3.get();
+    auto senderNode = pingNRP_responseToUp2FromSwitchB3_payload.senderNode;
+    auto w = pingNRP_responseToUp2FromSwitchB3_payload.w;
+    auto pw = pingNRP_responseToUp2FromSwitchB3_payload.pw;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { pingNRP_responseToNodeTarget11.set(Node_pingNRP_response_action_Args{id, w, pw}); } else { if ((senderNode > id)) { pingNRP_responseToUp1.set(Switch_pingNRP_response_action_Args{id, w, pw}); } else { pingNRP_responseToDown.set(Switch_pingNRP_response_action_Args{id, w, pw}); } } } else {}
+  =}
+
+  reaction(pingNRP_action) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRP_action_payload = *pingNRP_action.get();
+    auto switchNode = pingNRP_action_payload.switchNode;
+    auto senderNode = pingNRP_action_payload.senderNode;
+    auto NRP = pingNRP_action_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToUpFromSwitchA1) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToUpFromSwitchA1_payload = *pingNRPToUpFromSwitchA1.get();
+    auto switchNode = pingNRPToUpFromSwitchA1_payload.switchNode;
+    auto senderNode = pingNRPToUpFromSwitchA1_payload.senderNode;
+    auto NRP = pingNRPToUpFromSwitchA1_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToDownFromSwitchA1) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToDownFromSwitchA1_payload = *pingNRPToDownFromSwitchA1.get();
+    auto switchNode = pingNRPToDownFromSwitchA1_payload.switchNode;
+    auto senderNode = pingNRPToDownFromSwitchA1_payload.senderNode;
+    auto NRP = pingNRPToDownFromSwitchA1_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToUpFromSwitchA2) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToUpFromSwitchA2_payload = *pingNRPToUpFromSwitchA2.get();
+    auto switchNode = pingNRPToUpFromSwitchA2_payload.switchNode;
+    auto senderNode = pingNRPToUpFromSwitchA2_payload.senderNode;
+    auto NRP = pingNRPToUpFromSwitchA2_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToDownFromSwitchA2) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToDownFromSwitchA2_payload = *pingNRPToDownFromSwitchA2.get();
+    auto switchNode = pingNRPToDownFromSwitchA2_payload.switchNode;
+    auto senderNode = pingNRPToDownFromSwitchA2_payload.senderNode;
+    auto NRP = pingNRPToDownFromSwitchA2_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToUpFromSwitchA3) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToUpFromSwitchA3_payload = *pingNRPToUpFromSwitchA3.get();
+    auto switchNode = pingNRPToUpFromSwitchA3_payload.switchNode;
+    auto senderNode = pingNRPToUpFromSwitchA3_payload.senderNode;
+    auto NRP = pingNRPToUpFromSwitchA3_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToDownFromSwitchA3) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToDownFromSwitchA3_payload = *pingNRPToDownFromSwitchA3.get();
+    auto switchNode = pingNRPToDownFromSwitchA3_payload.switchNode;
+    auto senderNode = pingNRPToDownFromSwitchA3_payload.senderNode;
+    auto NRP = pingNRPToDownFromSwitchA3_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToUpFromSwitchB1) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToUpFromSwitchB1_payload = *pingNRPToUpFromSwitchB1.get();
+    auto switchNode = pingNRPToUpFromSwitchB1_payload.switchNode;
+    auto senderNode = pingNRPToUpFromSwitchB1_payload.senderNode;
+    auto NRP = pingNRPToUpFromSwitchB1_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToDownFromSwitchB1) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToDownFromSwitchB1_payload = *pingNRPToDownFromSwitchB1.get();
+    auto switchNode = pingNRPToDownFromSwitchB1_payload.switchNode;
+    auto senderNode = pingNRPToDownFromSwitchB1_payload.senderNode;
+    auto NRP = pingNRPToDownFromSwitchB1_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToUpFromSwitchB2) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToUpFromSwitchB2_payload = *pingNRPToUpFromSwitchB2.get();
+    auto switchNode = pingNRPToUpFromSwitchB2_payload.switchNode;
+    auto senderNode = pingNRPToUpFromSwitchB2_payload.senderNode;
+    auto NRP = pingNRPToUpFromSwitchB2_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToDownFromSwitchB2) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToDownFromSwitchB2_payload = *pingNRPToDownFromSwitchB2.get();
+    auto switchNode = pingNRPToDownFromSwitchB2_payload.switchNode;
+    auto senderNode = pingNRPToDownFromSwitchB2_payload.senderNode;
+    auto NRP = pingNRPToDownFromSwitchB2_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToUpFromSwitchB3) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToUpFromSwitchB3_payload = *pingNRPToUpFromSwitchB3.get();
+    auto switchNode = pingNRPToUpFromSwitchB3_payload.switchNode;
+    auto senderNode = pingNRPToUpFromSwitchB3_payload.senderNode;
+    auto NRP = pingNRPToUpFromSwitchB3_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToDownFromSwitchB3) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToDownFromSwitchB3_payload = *pingNRPToDownFromSwitchB3.get();
+    auto switchNode = pingNRPToDownFromSwitchB3_payload.switchNode;
+    auto senderNode = pingNRPToDownFromSwitchB3_payload.senderNode;
+    auto NRP = pingNRPToDownFromSwitchB3_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToOut11FromDCN1) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToOut11FromDCN1_payload = *pingNRPToOut11FromDCN1.get();
+    auto switchNode = pingNRPToOut11FromDCN1_payload.switchNode;
+    auto senderNode = pingNRPToOut11FromDCN1_payload.senderNode;
+    auto NRP = pingNRPToOut11FromDCN1_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToOut21FromDCN1) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToOut21FromDCN1_payload = *pingNRPToOut21FromDCN1.get();
+    auto switchNode = pingNRPToOut21FromDCN1_payload.switchNode;
+    auto senderNode = pingNRPToOut21FromDCN1_payload.senderNode;
+    auto NRP = pingNRPToOut21FromDCN1_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToOut12FromDCN1) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToOut12FromDCN1_payload = *pingNRPToOut12FromDCN1.get();
+    auto switchNode = pingNRPToOut12FromDCN1_payload.switchNode;
+    auto senderNode = pingNRPToOut12FromDCN1_payload.senderNode;
+    auto NRP = pingNRPToOut12FromDCN1_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToOut22FromDCN1) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToOut22FromDCN1_payload = *pingNRPToOut22FromDCN1.get();
+    auto switchNode = pingNRPToOut22FromDCN1_payload.switchNode;
+    auto senderNode = pingNRPToOut22FromDCN1_payload.senderNode;
+    auto NRP = pingNRPToOut22FromDCN1_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToOut13FromDCN1) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToOut13FromDCN1_payload = *pingNRPToOut13FromDCN1.get();
+    auto switchNode = pingNRPToOut13FromDCN1_payload.switchNode;
+    auto senderNode = pingNRPToOut13FromDCN1_payload.senderNode;
+    auto NRP = pingNRPToOut13FromDCN1_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToOut23FromDCN1) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToOut23FromDCN1_payload = *pingNRPToOut23FromDCN1.get();
+    auto switchNode = pingNRPToOut23FromDCN1_payload.switchNode;
+    auto senderNode = pingNRPToOut23FromDCN1_payload.senderNode;
+    auto NRP = pingNRPToOut23FromDCN1_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToOut11FromDCN2) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToOut11FromDCN2_payload = *pingNRPToOut11FromDCN2.get();
+    auto switchNode = pingNRPToOut11FromDCN2_payload.switchNode;
+    auto senderNode = pingNRPToOut11FromDCN2_payload.senderNode;
+    auto NRP = pingNRPToOut11FromDCN2_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToOut21FromDCN2) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToOut21FromDCN2_payload = *pingNRPToOut21FromDCN2.get();
+    auto switchNode = pingNRPToOut21FromDCN2_payload.switchNode;
+    auto senderNode = pingNRPToOut21FromDCN2_payload.senderNode;
+    auto NRP = pingNRPToOut21FromDCN2_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToOut12FromDCN2) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToOut12FromDCN2_payload = *pingNRPToOut12FromDCN2.get();
+    auto switchNode = pingNRPToOut12FromDCN2_payload.switchNode;
+    auto senderNode = pingNRPToOut12FromDCN2_payload.senderNode;
+    auto NRP = pingNRPToOut12FromDCN2_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToOut22FromDCN2) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToOut22FromDCN2_payload = *pingNRPToOut22FromDCN2.get();
+    auto switchNode = pingNRPToOut22FromDCN2_payload.switchNode;
+    auto senderNode = pingNRPToOut22FromDCN2_payload.senderNode;
+    auto NRP = pingNRPToOut22FromDCN2_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToOut13FromDCN2) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToOut13FromDCN2_payload = *pingNRPToOut13FromDCN2.get();
+    auto switchNode = pingNRPToOut13FromDCN2_payload.switchNode;
+    auto senderNode = pingNRPToOut13FromDCN2_payload.senderNode;
+    auto NRP = pingNRPToOut13FromDCN2_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(pingNRPToOut23FromDCN2) -> pingNRP_responseToUp2, pingNRP_responseToNodeTarget12, pingNRPToUp, pingNRPToDown {=
+    auto pingNRPToOut23FromDCN2_payload = *pingNRPToOut23FromDCN2.get();
+    auto switchNode = pingNRPToOut23FromDCN2_payload.switchNode;
+    auto senderNode = pingNRPToOut23FromDCN2_payload.senderNode;
+    auto NRP = pingNRPToOut23FromDCN2_payload.NRP;
+    if ((!failed)) { if ((terminal && (NRP == id))) { prevWhich = which; which = (senderNode == primary); if ((switchNode <= 99)) { pingNRP_responseToUp2.set(Switch_pingNRP_response_action_Args{id, which, prevWhich}); } else { pingNRP_responseToNodeTarget12.set(Node_pingNRP_response_action_Args{id, which, prevWhich}); } } else { if ((switchNode > id)) { pingNRPToUp.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } else { pingNRPToDown.set(Switch_pingNRP_action_Args{id, senderNode, NRP}); } } } else {}
+  =}
+
+  reaction(new_NRP_action) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRP_action_payload = *new_NRP_action.get();
+    auto senderNode = new_NRP_action_payload.senderNode;
+    auto prim = new_NRP_action_payload.prim;
+    auto mNRP_network = new_NRP_action_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRP_action_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToUpFromSwitchA1) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToUpFromSwitchA1_payload = *new_NRPToUpFromSwitchA1.get();
+    auto senderNode = new_NRPToUpFromSwitchA1_payload.senderNode;
+    auto prim = new_NRPToUpFromSwitchA1_payload.prim;
+    auto mNRP_network = new_NRPToUpFromSwitchA1_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToUpFromSwitchA1_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToDownFromSwitchA1) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToDownFromSwitchA1_payload = *new_NRPToDownFromSwitchA1.get();
+    auto senderNode = new_NRPToDownFromSwitchA1_payload.senderNode;
+    auto prim = new_NRPToDownFromSwitchA1_payload.prim;
+    auto mNRP_network = new_NRPToDownFromSwitchA1_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToDownFromSwitchA1_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToUpFromSwitchA2) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToUpFromSwitchA2_payload = *new_NRPToUpFromSwitchA2.get();
+    auto senderNode = new_NRPToUpFromSwitchA2_payload.senderNode;
+    auto prim = new_NRPToUpFromSwitchA2_payload.prim;
+    auto mNRP_network = new_NRPToUpFromSwitchA2_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToUpFromSwitchA2_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToDownFromSwitchA2) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToDownFromSwitchA2_payload = *new_NRPToDownFromSwitchA2.get();
+    auto senderNode = new_NRPToDownFromSwitchA2_payload.senderNode;
+    auto prim = new_NRPToDownFromSwitchA2_payload.prim;
+    auto mNRP_network = new_NRPToDownFromSwitchA2_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToDownFromSwitchA2_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToUpFromSwitchA3) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToUpFromSwitchA3_payload = *new_NRPToUpFromSwitchA3.get();
+    auto senderNode = new_NRPToUpFromSwitchA3_payload.senderNode;
+    auto prim = new_NRPToUpFromSwitchA3_payload.prim;
+    auto mNRP_network = new_NRPToUpFromSwitchA3_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToUpFromSwitchA3_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToDownFromSwitchA3) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToDownFromSwitchA3_payload = *new_NRPToDownFromSwitchA3.get();
+    auto senderNode = new_NRPToDownFromSwitchA3_payload.senderNode;
+    auto prim = new_NRPToDownFromSwitchA3_payload.prim;
+    auto mNRP_network = new_NRPToDownFromSwitchA3_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToDownFromSwitchA3_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToUpFromSwitchB1) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToUpFromSwitchB1_payload = *new_NRPToUpFromSwitchB1.get();
+    auto senderNode = new_NRPToUpFromSwitchB1_payload.senderNode;
+    auto prim = new_NRPToUpFromSwitchB1_payload.prim;
+    auto mNRP_network = new_NRPToUpFromSwitchB1_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToUpFromSwitchB1_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToDownFromSwitchB1) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToDownFromSwitchB1_payload = *new_NRPToDownFromSwitchB1.get();
+    auto senderNode = new_NRPToDownFromSwitchB1_payload.senderNode;
+    auto prim = new_NRPToDownFromSwitchB1_payload.prim;
+    auto mNRP_network = new_NRPToDownFromSwitchB1_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToDownFromSwitchB1_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToUpFromSwitchB2) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToUpFromSwitchB2_payload = *new_NRPToUpFromSwitchB2.get();
+    auto senderNode = new_NRPToUpFromSwitchB2_payload.senderNode;
+    auto prim = new_NRPToUpFromSwitchB2_payload.prim;
+    auto mNRP_network = new_NRPToUpFromSwitchB2_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToUpFromSwitchB2_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToDownFromSwitchB2) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToDownFromSwitchB2_payload = *new_NRPToDownFromSwitchB2.get();
+    auto senderNode = new_NRPToDownFromSwitchB2_payload.senderNode;
+    auto prim = new_NRPToDownFromSwitchB2_payload.prim;
+    auto mNRP_network = new_NRPToDownFromSwitchB2_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToDownFromSwitchB2_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToUpFromSwitchB3) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToUpFromSwitchB3_payload = *new_NRPToUpFromSwitchB3.get();
+    auto senderNode = new_NRPToUpFromSwitchB3_payload.senderNode;
+    auto prim = new_NRPToUpFromSwitchB3_payload.prim;
+    auto mNRP_network = new_NRPToUpFromSwitchB3_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToUpFromSwitchB3_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToDownFromSwitchB3) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToDownFromSwitchB3_payload = *new_NRPToDownFromSwitchB3.get();
+    auto senderNode = new_NRPToDownFromSwitchB3_payload.senderNode;
+    auto prim = new_NRPToDownFromSwitchB3_payload.prim;
+    auto mNRP_network = new_NRPToDownFromSwitchB3_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToDownFromSwitchB3_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToOut11FromDCN1) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToOut11FromDCN1_payload = *new_NRPToOut11FromDCN1.get();
+    auto senderNode = new_NRPToOut11FromDCN1_payload.senderNode;
+    auto prim = new_NRPToOut11FromDCN1_payload.prim;
+    auto mNRP_network = new_NRPToOut11FromDCN1_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToOut11FromDCN1_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToOut21FromDCN1) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToOut21FromDCN1_payload = *new_NRPToOut21FromDCN1.get();
+    auto senderNode = new_NRPToOut21FromDCN1_payload.senderNode;
+    auto prim = new_NRPToOut21FromDCN1_payload.prim;
+    auto mNRP_network = new_NRPToOut21FromDCN1_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToOut21FromDCN1_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToOut12FromDCN1) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToOut12FromDCN1_payload = *new_NRPToOut12FromDCN1.get();
+    auto senderNode = new_NRPToOut12FromDCN1_payload.senderNode;
+    auto prim = new_NRPToOut12FromDCN1_payload.prim;
+    auto mNRP_network = new_NRPToOut12FromDCN1_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToOut12FromDCN1_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToOut22FromDCN1) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToOut22FromDCN1_payload = *new_NRPToOut22FromDCN1.get();
+    auto senderNode = new_NRPToOut22FromDCN1_payload.senderNode;
+    auto prim = new_NRPToOut22FromDCN1_payload.prim;
+    auto mNRP_network = new_NRPToOut22FromDCN1_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToOut22FromDCN1_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToOut11FromDCN2) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToOut11FromDCN2_payload = *new_NRPToOut11FromDCN2.get();
+    auto senderNode = new_NRPToOut11FromDCN2_payload.senderNode;
+    auto prim = new_NRPToOut11FromDCN2_payload.prim;
+    auto mNRP_network = new_NRPToOut11FromDCN2_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToOut11FromDCN2_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToOut21FromDCN2) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToOut21FromDCN2_payload = *new_NRPToOut21FromDCN2.get();
+    auto senderNode = new_NRPToOut21FromDCN2_payload.senderNode;
+    auto prim = new_NRPToOut21FromDCN2_payload.prim;
+    auto mNRP_network = new_NRPToOut21FromDCN2_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToOut21FromDCN2_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToOut12FromDCN2) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToOut12FromDCN2_payload = *new_NRPToOut12FromDCN2.get();
+    auto senderNode = new_NRPToOut12FromDCN2_payload.senderNode;
+    auto prim = new_NRPToOut12FromDCN2_payload.prim;
+    auto mNRP_network = new_NRPToOut12FromDCN2_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToOut12FromDCN2_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPToOut22FromDCN2) -> new_NRPToNodeTarget1, new_NRPToUp, new_NRPToDown {=
+    auto new_NRPToOut22FromDCN2_payload = *new_NRPToOut22FromDCN2.get();
+    auto senderNode = new_NRPToOut22FromDCN2_payload.senderNode;
+    auto prim = new_NRPToOut22FromDCN2_payload.prim;
+    auto mNRP_network = new_NRPToOut22FromDCN2_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPToOut22FromDCN2_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPToNodeTarget1.set(Node_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPToUp.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPToDown.set(Switch_new_NRP_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPBack_action) -> new_NRPBackToNodeTarget1, new_NRPBackToUp, new_NRPBackToDown {=
+    auto new_NRPBack_action_payload = *new_NRPBack_action.get();
+    auto senderNode = new_NRPBack_action_payload.senderNode;
+    auto prim = new_NRPBack_action_payload.prim;
+    auto mNRP_network = new_NRPBack_action_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBack_action_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPBackToNodeTarget1.set(Node_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPBackToUp.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPBackToDown.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPBackToUpFromSwitchA1) -> new_NRPBackToNodeTarget1, new_NRPBackToUp, new_NRPBackToDown {=
+    auto new_NRPBackToUpFromSwitchA1_payload = *new_NRPBackToUpFromSwitchA1.get();
+    auto senderNode = new_NRPBackToUpFromSwitchA1_payload.senderNode;
+    auto prim = new_NRPBackToUpFromSwitchA1_payload.prim;
+    auto mNRP_network = new_NRPBackToUpFromSwitchA1_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToUpFromSwitchA1_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPBackToNodeTarget1.set(Node_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPBackToUp.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPBackToDown.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPBackToDownFromSwitchA1) -> new_NRPBackToNodeTarget1, new_NRPBackToUp, new_NRPBackToDown {=
+    auto new_NRPBackToDownFromSwitchA1_payload = *new_NRPBackToDownFromSwitchA1.get();
+    auto senderNode = new_NRPBackToDownFromSwitchA1_payload.senderNode;
+    auto prim = new_NRPBackToDownFromSwitchA1_payload.prim;
+    auto mNRP_network = new_NRPBackToDownFromSwitchA1_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToDownFromSwitchA1_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPBackToNodeTarget1.set(Node_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPBackToUp.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPBackToDown.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPBackToUpFromSwitchA2) -> new_NRPBackToNodeTarget1, new_NRPBackToUp, new_NRPBackToDown {=
+    auto new_NRPBackToUpFromSwitchA2_payload = *new_NRPBackToUpFromSwitchA2.get();
+    auto senderNode = new_NRPBackToUpFromSwitchA2_payload.senderNode;
+    auto prim = new_NRPBackToUpFromSwitchA2_payload.prim;
+    auto mNRP_network = new_NRPBackToUpFromSwitchA2_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToUpFromSwitchA2_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPBackToNodeTarget1.set(Node_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPBackToUp.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPBackToDown.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPBackToDownFromSwitchA2) -> new_NRPBackToNodeTarget1, new_NRPBackToUp, new_NRPBackToDown {=
+    auto new_NRPBackToDownFromSwitchA2_payload = *new_NRPBackToDownFromSwitchA2.get();
+    auto senderNode = new_NRPBackToDownFromSwitchA2_payload.senderNode;
+    auto prim = new_NRPBackToDownFromSwitchA2_payload.prim;
+    auto mNRP_network = new_NRPBackToDownFromSwitchA2_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToDownFromSwitchA2_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPBackToNodeTarget1.set(Node_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPBackToUp.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPBackToDown.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPBackToUpFromSwitchA3) -> new_NRPBackToNodeTarget1, new_NRPBackToUp, new_NRPBackToDown {=
+    auto new_NRPBackToUpFromSwitchA3_payload = *new_NRPBackToUpFromSwitchA3.get();
+    auto senderNode = new_NRPBackToUpFromSwitchA3_payload.senderNode;
+    auto prim = new_NRPBackToUpFromSwitchA3_payload.prim;
+    auto mNRP_network = new_NRPBackToUpFromSwitchA3_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToUpFromSwitchA3_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPBackToNodeTarget1.set(Node_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPBackToUp.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPBackToDown.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPBackToDownFromSwitchA3) -> new_NRPBackToNodeTarget1, new_NRPBackToUp, new_NRPBackToDown {=
+    auto new_NRPBackToDownFromSwitchA3_payload = *new_NRPBackToDownFromSwitchA3.get();
+    auto senderNode = new_NRPBackToDownFromSwitchA3_payload.senderNode;
+    auto prim = new_NRPBackToDownFromSwitchA3_payload.prim;
+    auto mNRP_network = new_NRPBackToDownFromSwitchA3_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToDownFromSwitchA3_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPBackToNodeTarget1.set(Node_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPBackToUp.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPBackToDown.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPBackToUpFromSwitchB1) -> new_NRPBackToNodeTarget1, new_NRPBackToUp, new_NRPBackToDown {=
+    auto new_NRPBackToUpFromSwitchB1_payload = *new_NRPBackToUpFromSwitchB1.get();
+    auto senderNode = new_NRPBackToUpFromSwitchB1_payload.senderNode;
+    auto prim = new_NRPBackToUpFromSwitchB1_payload.prim;
+    auto mNRP_network = new_NRPBackToUpFromSwitchB1_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToUpFromSwitchB1_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPBackToNodeTarget1.set(Node_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPBackToUp.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPBackToDown.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPBackToDownFromSwitchB1) -> new_NRPBackToNodeTarget1, new_NRPBackToUp, new_NRPBackToDown {=
+    auto new_NRPBackToDownFromSwitchB1_payload = *new_NRPBackToDownFromSwitchB1.get();
+    auto senderNode = new_NRPBackToDownFromSwitchB1_payload.senderNode;
+    auto prim = new_NRPBackToDownFromSwitchB1_payload.prim;
+    auto mNRP_network = new_NRPBackToDownFromSwitchB1_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToDownFromSwitchB1_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPBackToNodeTarget1.set(Node_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPBackToUp.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPBackToDown.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPBackToUpFromSwitchB2) -> new_NRPBackToNodeTarget1, new_NRPBackToUp, new_NRPBackToDown {=
+    auto new_NRPBackToUpFromSwitchB2_payload = *new_NRPBackToUpFromSwitchB2.get();
+    auto senderNode = new_NRPBackToUpFromSwitchB2_payload.senderNode;
+    auto prim = new_NRPBackToUpFromSwitchB2_payload.prim;
+    auto mNRP_network = new_NRPBackToUpFromSwitchB2_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToUpFromSwitchB2_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPBackToNodeTarget1.set(Node_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPBackToUp.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPBackToDown.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPBackToDownFromSwitchB2) -> new_NRPBackToNodeTarget1, new_NRPBackToUp, new_NRPBackToDown {=
+    auto new_NRPBackToDownFromSwitchB2_payload = *new_NRPBackToDownFromSwitchB2.get();
+    auto senderNode = new_NRPBackToDownFromSwitchB2_payload.senderNode;
+    auto prim = new_NRPBackToDownFromSwitchB2_payload.prim;
+    auto mNRP_network = new_NRPBackToDownFromSwitchB2_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToDownFromSwitchB2_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPBackToNodeTarget1.set(Node_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPBackToUp.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPBackToDown.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPBackToUpFromSwitchB3) -> new_NRPBackToNodeTarget1, new_NRPBackToUp, new_NRPBackToDown {=
+    auto new_NRPBackToUpFromSwitchB3_payload = *new_NRPBackToUpFromSwitchB3.get();
+    auto senderNode = new_NRPBackToUpFromSwitchB3_payload.senderNode;
+    auto prim = new_NRPBackToUpFromSwitchB3_payload.prim;
+    auto mNRP_network = new_NRPBackToUpFromSwitchB3_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToUpFromSwitchB3_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPBackToNodeTarget1.set(Node_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPBackToUp.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPBackToDown.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPBackToDownFromSwitchB3) -> new_NRPBackToNodeTarget1, new_NRPBackToUp, new_NRPBackToDown {=
+    auto new_NRPBackToDownFromSwitchB3_payload = *new_NRPBackToDownFromSwitchB3.get();
+    auto senderNode = new_NRPBackToDownFromSwitchB3_payload.senderNode;
+    auto prim = new_NRPBackToDownFromSwitchB3_payload.prim;
+    auto mNRP_network = new_NRPBackToDownFromSwitchB3_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToDownFromSwitchB3_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPBackToNodeTarget1.set(Node_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPBackToUp.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPBackToDown.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPBackToOut1FromDCN1) -> new_NRPBackToNodeTarget1, new_NRPBackToUp, new_NRPBackToDown {=
+    auto new_NRPBackToOut1FromDCN1_payload = *new_NRPBackToOut1FromDCN1.get();
+    auto senderNode = new_NRPBackToOut1FromDCN1_payload.senderNode;
+    auto prim = new_NRPBackToOut1FromDCN1_payload.prim;
+    auto mNRP_network = new_NRPBackToOut1FromDCN1_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToOut1FromDCN1_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPBackToNodeTarget1.set(Node_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPBackToUp.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPBackToDown.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPBackToOut2FromDCN1) -> new_NRPBackToNodeTarget1, new_NRPBackToUp, new_NRPBackToDown {=
+    auto new_NRPBackToOut2FromDCN1_payload = *new_NRPBackToOut2FromDCN1.get();
+    auto senderNode = new_NRPBackToOut2FromDCN1_payload.senderNode;
+    auto prim = new_NRPBackToOut2FromDCN1_payload.prim;
+    auto mNRP_network = new_NRPBackToOut2FromDCN1_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToOut2FromDCN1_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPBackToNodeTarget1.set(Node_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPBackToUp.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPBackToDown.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPBackToOut1FromDCN2) -> new_NRPBackToNodeTarget1, new_NRPBackToUp, new_NRPBackToDown {=
+    auto new_NRPBackToOut1FromDCN2_payload = *new_NRPBackToOut1FromDCN2.get();
+    auto senderNode = new_NRPBackToOut1FromDCN2_payload.senderNode;
+    auto prim = new_NRPBackToOut1FromDCN2_payload.prim;
+    auto mNRP_network = new_NRPBackToOut1FromDCN2_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToOut1FromDCN2_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPBackToNodeTarget1.set(Node_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPBackToUp.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPBackToDown.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(new_NRPBackToOut2FromDCN2) -> new_NRPBackToNodeTarget1, new_NRPBackToUp, new_NRPBackToDown {=
+    auto new_NRPBackToOut2FromDCN2_payload = *new_NRPBackToOut2FromDCN2.get();
+    auto senderNode = new_NRPBackToOut2FromDCN2_payload.senderNode;
+    auto prim = new_NRPBackToOut2FromDCN2_payload.prim;
+    auto mNRP_network = new_NRPBackToOut2FromDCN2_payload.mNRP_network;
+    auto mNRP_switch_id = new_NRPBackToOut2FromDCN2_payload.mNRP_switch_id;
+    if ((!failed)) { if ((id == mNRP_switch_id)) { amINRP = true; primary = prim; } else { amINRP = false; } if ((terminal && (senderNode <= 99))) { new_NRPBackToNodeTarget1.set(Node_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { if ((senderNode > id)) { new_NRPBackToUp.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } else { new_NRPBackToDown.set(Switch_new_NRPBack_action_Args{id, prim, mNRP_network, mNRP_switch_id}); } } } else {}
+  =}
+
+  reaction(heartBeat_action) -> heartBeatToNodeTarget1, heartBeatToUp, heartBeatToDown {=
+    auto heartBeat_action_payload = *heartBeat_action.get();
+    auto networkId = heartBeat_action_payload.networkId;
+    auto senderNode = heartBeat_action_payload.senderNode;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { heartBeatToNodeTarget1.set(Node_heartBeat_action_Args{networkId, id}); } else { if ((senderNode > id)) { heartBeatToUp.set(Switch_heartBeat_action_Args{networkId, id}); } else { heartBeatToDown.set(Switch_heartBeat_action_Args{networkId, id}); } } } else {}
+  =}
+
+  reaction(heartBeatToUpFromSwitchA1) -> heartBeatToNodeTarget1, heartBeatToUp, heartBeatToDown {=
+    auto heartBeatToUpFromSwitchA1_payload = *heartBeatToUpFromSwitchA1.get();
+    auto networkId = heartBeatToUpFromSwitchA1_payload.networkId;
+    auto senderNode = heartBeatToUpFromSwitchA1_payload.senderNode;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { heartBeatToNodeTarget1.set(Node_heartBeat_action_Args{networkId, id}); } else { if ((senderNode > id)) { heartBeatToUp.set(Switch_heartBeat_action_Args{networkId, id}); } else { heartBeatToDown.set(Switch_heartBeat_action_Args{networkId, id}); } } } else {}
+  =}
+
+  reaction(heartBeatToDownFromSwitchA1) -> heartBeatToNodeTarget1, heartBeatToUp, heartBeatToDown {=
+    auto heartBeatToDownFromSwitchA1_payload = *heartBeatToDownFromSwitchA1.get();
+    auto networkId = heartBeatToDownFromSwitchA1_payload.networkId;
+    auto senderNode = heartBeatToDownFromSwitchA1_payload.senderNode;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { heartBeatToNodeTarget1.set(Node_heartBeat_action_Args{networkId, id}); } else { if ((senderNode > id)) { heartBeatToUp.set(Switch_heartBeat_action_Args{networkId, id}); } else { heartBeatToDown.set(Switch_heartBeat_action_Args{networkId, id}); } } } else {}
+  =}
+
+  reaction(heartBeatToUpFromSwitchA2) -> heartBeatToNodeTarget1, heartBeatToUp, heartBeatToDown {=
+    auto heartBeatToUpFromSwitchA2_payload = *heartBeatToUpFromSwitchA2.get();
+    auto networkId = heartBeatToUpFromSwitchA2_payload.networkId;
+    auto senderNode = heartBeatToUpFromSwitchA2_payload.senderNode;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { heartBeatToNodeTarget1.set(Node_heartBeat_action_Args{networkId, id}); } else { if ((senderNode > id)) { heartBeatToUp.set(Switch_heartBeat_action_Args{networkId, id}); } else { heartBeatToDown.set(Switch_heartBeat_action_Args{networkId, id}); } } } else {}
+  =}
+
+  reaction(heartBeatToDownFromSwitchA2) -> heartBeatToNodeTarget1, heartBeatToUp, heartBeatToDown {=
+    auto heartBeatToDownFromSwitchA2_payload = *heartBeatToDownFromSwitchA2.get();
+    auto networkId = heartBeatToDownFromSwitchA2_payload.networkId;
+    auto senderNode = heartBeatToDownFromSwitchA2_payload.senderNode;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { heartBeatToNodeTarget1.set(Node_heartBeat_action_Args{networkId, id}); } else { if ((senderNode > id)) { heartBeatToUp.set(Switch_heartBeat_action_Args{networkId, id}); } else { heartBeatToDown.set(Switch_heartBeat_action_Args{networkId, id}); } } } else {}
+  =}
+
+  reaction(heartBeatToUpFromSwitchA3) -> heartBeatToNodeTarget1, heartBeatToUp, heartBeatToDown {=
+    auto heartBeatToUpFromSwitchA3_payload = *heartBeatToUpFromSwitchA3.get();
+    auto networkId = heartBeatToUpFromSwitchA3_payload.networkId;
+    auto senderNode = heartBeatToUpFromSwitchA3_payload.senderNode;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { heartBeatToNodeTarget1.set(Node_heartBeat_action_Args{networkId, id}); } else { if ((senderNode > id)) { heartBeatToUp.set(Switch_heartBeat_action_Args{networkId, id}); } else { heartBeatToDown.set(Switch_heartBeat_action_Args{networkId, id}); } } } else {}
+  =}
+
+  reaction(heartBeatToDownFromSwitchA3) -> heartBeatToNodeTarget1, heartBeatToUp, heartBeatToDown {=
+    auto heartBeatToDownFromSwitchA3_payload = *heartBeatToDownFromSwitchA3.get();
+    auto networkId = heartBeatToDownFromSwitchA3_payload.networkId;
+    auto senderNode = heartBeatToDownFromSwitchA3_payload.senderNode;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { heartBeatToNodeTarget1.set(Node_heartBeat_action_Args{networkId, id}); } else { if ((senderNode > id)) { heartBeatToUp.set(Switch_heartBeat_action_Args{networkId, id}); } else { heartBeatToDown.set(Switch_heartBeat_action_Args{networkId, id}); } } } else {}
+  =}
+
+  reaction(heartBeatToUpFromSwitchB1) -> heartBeatToNodeTarget1, heartBeatToUp, heartBeatToDown {=
+    auto heartBeatToUpFromSwitchB1_payload = *heartBeatToUpFromSwitchB1.get();
+    auto networkId = heartBeatToUpFromSwitchB1_payload.networkId;
+    auto senderNode = heartBeatToUpFromSwitchB1_payload.senderNode;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { heartBeatToNodeTarget1.set(Node_heartBeat_action_Args{networkId, id}); } else { if ((senderNode > id)) { heartBeatToUp.set(Switch_heartBeat_action_Args{networkId, id}); } else { heartBeatToDown.set(Switch_heartBeat_action_Args{networkId, id}); } } } else {}
+  =}
+
+  reaction(heartBeatToDownFromSwitchB1) -> heartBeatToNodeTarget1, heartBeatToUp, heartBeatToDown {=
+    auto heartBeatToDownFromSwitchB1_payload = *heartBeatToDownFromSwitchB1.get();
+    auto networkId = heartBeatToDownFromSwitchB1_payload.networkId;
+    auto senderNode = heartBeatToDownFromSwitchB1_payload.senderNode;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { heartBeatToNodeTarget1.set(Node_heartBeat_action_Args{networkId, id}); } else { if ((senderNode > id)) { heartBeatToUp.set(Switch_heartBeat_action_Args{networkId, id}); } else { heartBeatToDown.set(Switch_heartBeat_action_Args{networkId, id}); } } } else {}
+  =}
+
+  reaction(heartBeatToUpFromSwitchB2) -> heartBeatToNodeTarget1, heartBeatToUp, heartBeatToDown {=
+    auto heartBeatToUpFromSwitchB2_payload = *heartBeatToUpFromSwitchB2.get();
+    auto networkId = heartBeatToUpFromSwitchB2_payload.networkId;
+    auto senderNode = heartBeatToUpFromSwitchB2_payload.senderNode;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { heartBeatToNodeTarget1.set(Node_heartBeat_action_Args{networkId, id}); } else { if ((senderNode > id)) { heartBeatToUp.set(Switch_heartBeat_action_Args{networkId, id}); } else { heartBeatToDown.set(Switch_heartBeat_action_Args{networkId, id}); } } } else {}
+  =}
+
+  reaction(heartBeatToDownFromSwitchB2) -> heartBeatToNodeTarget1, heartBeatToUp, heartBeatToDown {=
+    auto heartBeatToDownFromSwitchB2_payload = *heartBeatToDownFromSwitchB2.get();
+    auto networkId = heartBeatToDownFromSwitchB2_payload.networkId;
+    auto senderNode = heartBeatToDownFromSwitchB2_payload.senderNode;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { heartBeatToNodeTarget1.set(Node_heartBeat_action_Args{networkId, id}); } else { if ((senderNode > id)) { heartBeatToUp.set(Switch_heartBeat_action_Args{networkId, id}); } else { heartBeatToDown.set(Switch_heartBeat_action_Args{networkId, id}); } } } else {}
+  =}
+
+  reaction(heartBeatToUpFromSwitchB3) -> heartBeatToNodeTarget1, heartBeatToUp, heartBeatToDown {=
+    auto heartBeatToUpFromSwitchB3_payload = *heartBeatToUpFromSwitchB3.get();
+    auto networkId = heartBeatToUpFromSwitchB3_payload.networkId;
+    auto senderNode = heartBeatToUpFromSwitchB3_payload.senderNode;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { heartBeatToNodeTarget1.set(Node_heartBeat_action_Args{networkId, id}); } else { if ((senderNode > id)) { heartBeatToUp.set(Switch_heartBeat_action_Args{networkId, id}); } else { heartBeatToDown.set(Switch_heartBeat_action_Args{networkId, id}); } } } else {}
+  =}
+
+  reaction(heartBeatToDownFromSwitchB3) -> heartBeatToNodeTarget1, heartBeatToUp, heartBeatToDown {=
+    auto heartBeatToDownFromSwitchB3_payload = *heartBeatToDownFromSwitchB3.get();
+    auto networkId = heartBeatToDownFromSwitchB3_payload.networkId;
+    auto senderNode = heartBeatToDownFromSwitchB3_payload.senderNode;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { heartBeatToNodeTarget1.set(Node_heartBeat_action_Args{networkId, id}); } else { if ((senderNode > id)) { heartBeatToUp.set(Switch_heartBeat_action_Args{networkId, id}); } else { heartBeatToDown.set(Switch_heartBeat_action_Args{networkId, id}); } } } else {}
+  =}
+
+  reaction(heartBeatToOut1FromDCN1) -> heartBeatToNodeTarget1, heartBeatToUp, heartBeatToDown {=
+    auto heartBeatToOut1FromDCN1_payload = *heartBeatToOut1FromDCN1.get();
+    auto networkId = heartBeatToOut1FromDCN1_payload.networkId;
+    auto senderNode = heartBeatToOut1FromDCN1_payload.senderNode;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { heartBeatToNodeTarget1.set(Node_heartBeat_action_Args{networkId, id}); } else { if ((senderNode > id)) { heartBeatToUp.set(Switch_heartBeat_action_Args{networkId, id}); } else { heartBeatToDown.set(Switch_heartBeat_action_Args{networkId, id}); } } } else {}
+  =}
+
+  reaction(heartBeatToOut2FromDCN1) -> heartBeatToNodeTarget1, heartBeatToUp, heartBeatToDown {=
+    auto heartBeatToOut2FromDCN1_payload = *heartBeatToOut2FromDCN1.get();
+    auto networkId = heartBeatToOut2FromDCN1_payload.networkId;
+    auto senderNode = heartBeatToOut2FromDCN1_payload.senderNode;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { heartBeatToNodeTarget1.set(Node_heartBeat_action_Args{networkId, id}); } else { if ((senderNode > id)) { heartBeatToUp.set(Switch_heartBeat_action_Args{networkId, id}); } else { heartBeatToDown.set(Switch_heartBeat_action_Args{networkId, id}); } } } else {}
+  =}
+
+  reaction(heartBeatToOut1FromDCN2) -> heartBeatToNodeTarget1, heartBeatToUp, heartBeatToDown {=
+    auto heartBeatToOut1FromDCN2_payload = *heartBeatToOut1FromDCN2.get();
+    auto networkId = heartBeatToOut1FromDCN2_payload.networkId;
+    auto senderNode = heartBeatToOut1FromDCN2_payload.senderNode;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { heartBeatToNodeTarget1.set(Node_heartBeat_action_Args{networkId, id}); } else { if ((senderNode > id)) { heartBeatToUp.set(Switch_heartBeat_action_Args{networkId, id}); } else { heartBeatToDown.set(Switch_heartBeat_action_Args{networkId, id}); } } } else {}
+  =}
+
+  reaction(heartBeatToOut2FromDCN2) -> heartBeatToNodeTarget1, heartBeatToUp, heartBeatToDown {=
+    auto heartBeatToOut2FromDCN2_payload = *heartBeatToOut2FromDCN2.get();
+    auto networkId = heartBeatToOut2FromDCN2_payload.networkId;
+    auto senderNode = heartBeatToOut2FromDCN2_payload.senderNode;
+    if ((!failed)) { if ((terminal && (senderNode <= 99))) { heartBeatToNodeTarget1.set(Node_heartBeat_action_Args{networkId, id}); } else { if ((senderNode > id)) { heartBeatToUp.set(Switch_heartBeat_action_Args{networkId, id}); } else { heartBeatToDown.set(Switch_heartBeat_action_Args{networkId, id}); } } } else {}
+  =}
+}
+
+main reactor {
+  switchA1 = new Switch(myid=1, networkId=0, endSwitch=true, myFailTime=2500)
+  switchA2 = new Switch(myid=2, networkId=0, endSwitch=false, myFailTime=2500)
+  switchA3 = new Switch(myid=3, networkId=0, endSwitch=true, myFailTime=0)
+  switchB1 = new Switch(myid=4, networkId=1, endSwitch=true, myFailTime=2500)
+  switchB2 = new Switch(myid=5, networkId=1, endSwitch=false, myFailTime=2500)
+  switchB3 = new Switch(myid=6, networkId=1, endSwitch=true, myFailTime=0)
+  DCN1 = new Node(Myid=100, Myprimary=100, NRPCan1_id=1, NRPCan2_id=4, myFailTime=0)
+  DCN2 = new Node(Myid=101, Myprimary=100, NRPCan1_id=3, NRPCan2_id=6, myFailTime=0)
+  switchA1.pingNRP_responseToNodeTarget11 -> DCN1.pingNRP_responseToNodeTarget11FromSwitchA1 after 0 msec
+  switchA1.pingNRP_responseToUp1 -> switchA2.pingNRP_responseToUp1FromSwitchA1 after 0 msec
+  switchA1.pingNRP_responseToDown -> switchA2.pingNRP_responseToDownFromSwitchA1 after 0 msec
+  switchA1.pingNRP_responseToUp2 -> switchA2.pingNRP_responseToUp2FromSwitchA1 after 0 msec
+  switchA1.pingNRP_responseToNodeTarget12 -> DCN1.pingNRP_responseToNodeTarget12FromSwitchA1 after 0 msec
+  switchA1.pingNRPToUp -> switchA2.pingNRPToUpFromSwitchA1 after 0 msec
+  switchA1.pingNRPToDown -> switchA2.pingNRPToDownFromSwitchA1 after 0 msec
+  switchA1.new_NRPToNodeTarget1 -> DCN1.new_NRPToNodeTarget1FromSwitchA1 after 0 msec
+  switchA1.new_NRPToUp -> switchA2.new_NRPToUpFromSwitchA1 after 0 msec
+  switchA1.new_NRPToDown -> switchA2.new_NRPToDownFromSwitchA1 after 0 msec
+  switchA1.new_NRPBackToNodeTarget1 -> DCN1.new_NRPBackToNodeTarget1FromSwitchA1 after 0 msec
+  switchA1.new_NRPBackToUp -> switchA2.new_NRPBackToUpFromSwitchA1 after 0 msec
+  switchA1.new_NRPBackToDown -> switchA2.new_NRPBackToDownFromSwitchA1 after 0 msec
+  switchA1.heartBeatToNodeTarget1 -> DCN1.heartBeatToNodeTarget1FromSwitchA1 after 1 msec
+  switchA1.heartBeatToUp -> switchA2.heartBeatToUpFromSwitchA1 after 1 msec
+  switchA1.heartBeatToDown -> switchA2.heartBeatToDownFromSwitchA1 after 1 msec
+  switchA2.pingNRP_responseToNodeTarget11 -> DCN1.pingNRP_responseToNodeTarget11FromSwitchA2 after 0 msec
+  switchA2.pingNRP_responseToUp1 -> switchA1.pingNRP_responseToUp1FromSwitchA2 after 0 msec
+  switchA2.pingNRP_responseToDown -> switchA3.pingNRP_responseToDownFromSwitchA2 after 0 msec
+  switchA2.pingNRP_responseToUp2 -> switchA1.pingNRP_responseToUp2FromSwitchA2 after 0 msec
+  switchA2.pingNRP_responseToNodeTarget12 -> DCN1.pingNRP_responseToNodeTarget12FromSwitchA2 after 0 msec
+  switchA2.pingNRPToUp -> switchA1.pingNRPToUpFromSwitchA2 after 0 msec
+  switchA2.pingNRPToDown -> switchA3.pingNRPToDownFromSwitchA2 after 0 msec
+  switchA2.new_NRPToNodeTarget1 -> DCN1.new_NRPToNodeTarget1FromSwitchA2 after 0 msec
+  switchA2.new_NRPToUp -> switchA1.new_NRPToUpFromSwitchA2 after 0 msec
+  switchA2.new_NRPToDown -> switchA3.new_NRPToDownFromSwitchA2 after 0 msec
+  switchA2.new_NRPBackToNodeTarget1 -> DCN1.new_NRPBackToNodeTarget1FromSwitchA2 after 0 msec
+  switchA2.new_NRPBackToUp -> switchA1.new_NRPBackToUpFromSwitchA2 after 0 msec
+  switchA2.new_NRPBackToDown -> switchA3.new_NRPBackToDownFromSwitchA2 after 0 msec
+  switchA2.heartBeatToNodeTarget1 -> DCN1.heartBeatToNodeTarget1FromSwitchA2 after 1 msec
+  switchA2.heartBeatToUp -> switchA1.heartBeatToUpFromSwitchA2 after 1 msec
+  switchA2.heartBeatToDown -> switchA3.heartBeatToDownFromSwitchA2 after 1 msec
+  switchA3.pingNRP_responseToNodeTarget11 -> DCN2.pingNRP_responseToNodeTarget11FromSwitchA3 after 0 msec
+  switchA3.pingNRP_responseToUp1 -> switchA2.pingNRP_responseToUp1FromSwitchA3 after 0 msec
+  switchA3.pingNRP_responseToDown -> switchA2.pingNRP_responseToDownFromSwitchA3 after 0 msec
+  switchA3.pingNRP_responseToUp2 -> switchA2.pingNRP_responseToUp2FromSwitchA3 after 0 msec
+  switchA3.pingNRP_responseToNodeTarget12 -> DCN2.pingNRP_responseToNodeTarget12FromSwitchA3 after 0 msec
+  switchA3.pingNRPToUp -> switchA2.pingNRPToUpFromSwitchA3 after 0 msec
+  switchA3.pingNRPToDown -> switchA2.pingNRPToDownFromSwitchA3 after 0 msec
+  switchA3.new_NRPToNodeTarget1 -> DCN2.new_NRPToNodeTarget1FromSwitchA3 after 0 msec
+  switchA3.new_NRPToUp -> switchA2.new_NRPToUpFromSwitchA3 after 0 msec
+  switchA3.new_NRPToDown -> switchA2.new_NRPToDownFromSwitchA3 after 0 msec
+  switchA3.new_NRPBackToNodeTarget1 -> DCN2.new_NRPBackToNodeTarget1FromSwitchA3 after 0 msec
+  switchA3.new_NRPBackToUp -> switchA2.new_NRPBackToUpFromSwitchA3 after 0 msec
+  switchA3.new_NRPBackToDown -> switchA2.new_NRPBackToDownFromSwitchA3 after 0 msec
+  switchA3.heartBeatToNodeTarget1 -> DCN2.heartBeatToNodeTarget1FromSwitchA3 after 1 msec
+  switchA3.heartBeatToUp -> switchA2.heartBeatToUpFromSwitchA3 after 1 msec
+  switchA3.heartBeatToDown -> switchA2.heartBeatToDownFromSwitchA3 after 1 msec
+  switchB1.pingNRP_responseToNodeTarget11 -> DCN1.pingNRP_responseToNodeTarget11FromSwitchB1 after 0 msec
+  switchB1.pingNRP_responseToUp1 -> switchB2.pingNRP_responseToUp1FromSwitchB1 after 0 msec
+  switchB1.pingNRP_responseToDown -> switchB2.pingNRP_responseToDownFromSwitchB1 after 0 msec
+  switchB1.pingNRP_responseToUp2 -> switchB2.pingNRP_responseToUp2FromSwitchB1 after 0 msec
+  switchB1.pingNRP_responseToNodeTarget12 -> DCN1.pingNRP_responseToNodeTarget12FromSwitchB1 after 0 msec
+  switchB1.pingNRPToUp -> switchB2.pingNRPToUpFromSwitchB1 after 0 msec
+  switchB1.pingNRPToDown -> switchB2.pingNRPToDownFromSwitchB1 after 0 msec
+  switchB1.new_NRPToNodeTarget1 -> DCN1.new_NRPToNodeTarget1FromSwitchB1 after 0 msec
+  switchB1.new_NRPToUp -> switchB2.new_NRPToUpFromSwitchB1 after 0 msec
+  switchB1.new_NRPToDown -> switchB2.new_NRPToDownFromSwitchB1 after 0 msec
+  switchB1.new_NRPBackToNodeTarget1 -> DCN1.new_NRPBackToNodeTarget1FromSwitchB1 after 0 msec
+  switchB1.new_NRPBackToUp -> switchB2.new_NRPBackToUpFromSwitchB1 after 0 msec
+  switchB1.new_NRPBackToDown -> switchB2.new_NRPBackToDownFromSwitchB1 after 0 msec
+  switchB1.heartBeatToNodeTarget1 -> DCN1.heartBeatToNodeTarget1FromSwitchB1 after 1 msec
+  switchB1.heartBeatToUp -> switchB2.heartBeatToUpFromSwitchB1 after 1 msec
+  switchB1.heartBeatToDown -> switchB2.heartBeatToDownFromSwitchB1 after 1 msec
+  switchB2.pingNRP_responseToNodeTarget11 -> DCN1.pingNRP_responseToNodeTarget11FromSwitchB2 after 0 msec
+  switchB2.pingNRP_responseToUp1 -> switchB1.pingNRP_responseToUp1FromSwitchB2 after 0 msec
+  switchB2.pingNRP_responseToDown -> switchB3.pingNRP_responseToDownFromSwitchB2 after 0 msec
+  switchB2.pingNRP_responseToUp2 -> switchB1.pingNRP_responseToUp2FromSwitchB2 after 0 msec
+  switchB2.pingNRP_responseToNodeTarget12 -> DCN1.pingNRP_responseToNodeTarget12FromSwitchB2 after 0 msec
+  switchB2.pingNRPToUp -> switchB1.pingNRPToUpFromSwitchB2 after 0 msec
+  switchB2.pingNRPToDown -> switchB3.pingNRPToDownFromSwitchB2 after 0 msec
+  switchB2.new_NRPToNodeTarget1 -> DCN1.new_NRPToNodeTarget1FromSwitchB2 after 0 msec
+  switchB2.new_NRPToUp -> switchB1.new_NRPToUpFromSwitchB2 after 0 msec
+  switchB2.new_NRPToDown -> switchB3.new_NRPToDownFromSwitchB2 after 0 msec
+  switchB2.new_NRPBackToNodeTarget1 -> DCN1.new_NRPBackToNodeTarget1FromSwitchB2 after 0 msec
+  switchB2.new_NRPBackToUp -> switchB1.new_NRPBackToUpFromSwitchB2 after 0 msec
+  switchB2.new_NRPBackToDown -> switchB3.new_NRPBackToDownFromSwitchB2 after 0 msec
+  switchB2.heartBeatToNodeTarget1 -> DCN1.heartBeatToNodeTarget1FromSwitchB2 after 1 msec
+  switchB2.heartBeatToUp -> switchB1.heartBeatToUpFromSwitchB2 after 1 msec
+  switchB2.heartBeatToDown -> switchB3.heartBeatToDownFromSwitchB2 after 1 msec
+  switchB3.pingNRP_responseToNodeTarget11 -> DCN2.pingNRP_responseToNodeTarget11FromSwitchB3 after 0 msec
+  switchB3.pingNRP_responseToUp1 -> switchB2.pingNRP_responseToUp1FromSwitchB3 after 0 msec
+  switchB3.pingNRP_responseToDown -> switchB2.pingNRP_responseToDownFromSwitchB3 after 0 msec
+  switchB3.pingNRP_responseToUp2 -> switchB2.pingNRP_responseToUp2FromSwitchB3 after 0 msec
+  switchB3.pingNRP_responseToNodeTarget12 -> DCN2.pingNRP_responseToNodeTarget12FromSwitchB3 after 0 msec
+  switchB3.pingNRPToUp -> switchB2.pingNRPToUpFromSwitchB3 after 0 msec
+  switchB3.pingNRPToDown -> switchB2.pingNRPToDownFromSwitchB3 after 0 msec
+  switchB3.new_NRPToNodeTarget1 -> DCN2.new_NRPToNodeTarget1FromSwitchB3 after 0 msec
+  switchB3.new_NRPToUp -> switchB2.new_NRPToUpFromSwitchB3 after 0 msec
+  switchB3.new_NRPToDown -> switchB2.new_NRPToDownFromSwitchB3 after 0 msec
+  switchB3.new_NRPBackToNodeTarget1 -> DCN2.new_NRPBackToNodeTarget1FromSwitchB3 after 0 msec
+  switchB3.new_NRPBackToUp -> switchB2.new_NRPBackToUpFromSwitchB3 after 0 msec
+  switchB3.new_NRPBackToDown -> switchB2.new_NRPBackToDownFromSwitchB3 after 0 msec
+  switchB3.heartBeatToNodeTarget1 -> DCN2.heartBeatToNodeTarget1FromSwitchB3 after 1 msec
+  switchB3.heartBeatToUp -> switchB2.heartBeatToUpFromSwitchB3 after 1 msec
+  switchB3.heartBeatToDown -> switchB2.heartBeatToDownFromSwitchB3 after 1 msec
+  DCN1.new_NRPBackToOut1 -> switchA1.new_NRPBackToOut1FromDCN1 after 0 msec
+  DCN1.new_NRPBackToOut2 -> switchB1.new_NRPBackToOut2FromDCN1 after 0 msec
+  DCN1.new_NRPToOut11 -> switchA1.new_NRPToOut11FromDCN1 after 0 msec
+  DCN1.new_NRPToOut21 -> switchB1.new_NRPToOut21FromDCN1 after 0 msec
+  DCN1.heartBeatToOut1 -> switchA1.heartBeatToOut1FromDCN1 after 1 msec
+  DCN1.heartBeatToOut2 -> switchB1.heartBeatToOut2FromDCN1 after 1 msec
+  DCN1.new_NRPToOut12 -> switchA1.new_NRPToOut12FromDCN1 after 0 msec
+  DCN1.new_NRPToOut22 -> switchB1.new_NRPToOut22FromDCN1 after 0 msec
+  DCN1.pingNRPToOut11 -> switchA1.pingNRPToOut11FromDCN1 after 5 msec
+  DCN1.pingNRPToOut21 -> switchB1.pingNRPToOut21FromDCN1 after 5 msec
+  DCN1.pingNRPToOut12 -> switchA1.pingNRPToOut12FromDCN1 after 15 msec
+  DCN1.pingNRPToOut22 -> switchB1.pingNRPToOut22FromDCN1 after 15 msec
+  DCN1.pingNRPToOut13 -> switchA1.pingNRPToOut13FromDCN1 after 5 msec
+  DCN1.pingNRPToOut23 -> switchB1.pingNRPToOut23FromDCN1 after 5 msec
+  DCN2.new_NRPBackToOut1 -> switchA3.new_NRPBackToOut1FromDCN2 after 0 msec
+  DCN2.new_NRPBackToOut2 -> switchB3.new_NRPBackToOut2FromDCN2 after 0 msec
+  DCN2.new_NRPToOut11 -> switchA3.new_NRPToOut11FromDCN2 after 0 msec
+  DCN2.new_NRPToOut21 -> switchB3.new_NRPToOut21FromDCN2 after 0 msec
+  DCN2.heartBeatToOut1 -> switchA3.heartBeatToOut1FromDCN2 after 1 msec
+  DCN2.heartBeatToOut2 -> switchB3.heartBeatToOut2FromDCN2 after 1 msec
+  DCN2.new_NRPToOut12 -> switchA3.new_NRPToOut12FromDCN2 after 0 msec
+  DCN2.new_NRPToOut22 -> switchB3.new_NRPToOut22FromDCN2 after 0 msec
+  DCN2.pingNRPToOut11 -> switchA3.pingNRPToOut11FromDCN2 after 5 msec
+  DCN2.pingNRPToOut21 -> switchB3.pingNRPToOut21FromDCN2 after 5 msec
+  DCN2.pingNRPToOut12 -> switchA3.pingNRPToOut12FromDCN2 after 15 msec
+  DCN2.pingNRPToOut22 -> switchB3.pingNRPToOut22FromDCN2 after 15 msec
+  DCN2.pingNRPToOut13 -> switchA3.pingNRPToOut13FromDCN2 after 5 msec
+  DCN2.pingNRPToOut23 -> switchB3.pingNRPToOut23FromDCN2 after 5 msec
+}
