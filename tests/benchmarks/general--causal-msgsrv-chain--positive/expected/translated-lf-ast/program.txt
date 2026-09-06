@@ -1,0 +1,51 @@
+{ reactors := [{ name := { value := "Node" },
+                 parameters := [],
+                 inputPorts := [],
+                 outputPorts := [],
+                 stateVariables := [],
+                 logicalActions := [{ name := { value := "sendMsg1_action" },
+                                      parameters := [{ name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "sendMsg2_action1" },
+                                      parameters := [{ name := { value := "msg2" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "sendMsg2_action2" },
+                                      parameters := [{ name := { value := "msg2" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.schedule
+                                                 { value := "sendMsg1_action" }
+                                                 [Relico.LF.GeneralExpr.intLiteral 1]
+                                                 { value := 0 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "sendMsg1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sendMsg1_action" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "sendMsg2_action1" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]
+                                                   { value := 0 }],
+                                        priority := none },
+                                      { name := { value := "sendMsg2_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sendMsg2_action1" },
+                                        parameters := [{ value := "msg2" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "sendMsg2_action2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg2" }]
+                                                   { value := 0 }],
+                                        priority := none },
+                                      { name := { value := "sendMsg2_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sendMsg2_action2" },
+                                        parameters := [{ value := "msg2" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "sendMsg2_action2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg2" }]
+                                                   { value := 0 }],
+                                        priority := none }] }],
+  instances := [{ name := { value := "node0" }, reactorName := { value := "Node" }, arguments := [] }],
+  connections := [] }

@@ -1,0 +1,49 @@
+target Cpp
+
+reactor Node {
+  logical action sendMsg1_action: int
+  logical action sendMsg2_action: int
+  logical action sendMsg3_action1: int
+  logical action sendMsg3_action2: int
+  logical action sendMsg4_action1: int
+  logical action sendMsg4_action2: int
+
+  reaction(startup) -> sendMsg1_action, sendMsg2_action {=
+    sendMsg1_action.schedule(1, 0ms);
+    sendMsg2_action.schedule(1, 0ms);
+  =}
+
+  reaction(sendMsg1_action) -> sendMsg3_action1 {=
+    auto msg = *sendMsg1_action.get();
+    sendMsg3_action1.schedule(msg, 0ms);
+  =}
+
+  reaction(sendMsg2_action) -> sendMsg4_action1 {=
+    auto msg = *sendMsg2_action.get();
+    sendMsg4_action1.schedule(msg, 0ms);
+  =}
+
+  reaction(sendMsg3_action1) -> sendMsg3_action2 {=
+    auto msg = *sendMsg3_action1.get();
+    sendMsg3_action2.schedule(msg, 1ms);
+  =}
+
+  reaction(sendMsg3_action2) -> sendMsg3_action2 {=
+    auto msg = *sendMsg3_action2.get();
+    sendMsg3_action2.schedule(msg, 1ms);
+  =}
+
+  reaction(sendMsg4_action1) -> sendMsg4_action2 {=
+    auto msg = *sendMsg4_action1.get();
+    sendMsg4_action2.schedule(msg, 1ms);
+  =}
+
+  reaction(sendMsg4_action2) -> sendMsg4_action2 {=
+    auto msg = *sendMsg4_action2.get();
+    sendMsg4_action2.schedule(msg, 1ms);
+  =}
+}
+
+main reactor {
+  node0 = new Node()
+}

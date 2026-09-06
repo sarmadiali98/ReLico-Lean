@@ -1,0 +1,131 @@
+{ reactors := [{ name := { value := "Node" },
+                 parameters := [{ name := { value := "_id" }, declaredType := Relico.LF.GeneralType.int }],
+                 inputPorts := [{ name := { value := "rcvMsgToNextFromNode0" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "rcvMsgToNextFromNode1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "rcvMsgToNextFromNode2" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "rcvMsgToNextFromNode3" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "rcvMsgToNext" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "id" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "sendMsg_action1" },
+                                      parameters := [{ name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "sendMsg_action2" },
+                                      parameters := [{ name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "rcvMsg_action" },
+                                      parameters := [{ name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [{ value := "_id" }],
+                                      body := [Relico.LF.GeneralStmt.ifThenElse
+                                                 (Relico.LF.GeneralExpr.binary
+                                                   (Relico.LF.GeneralBinaryOp.eq)
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "_id" })
+                                                   (Relico.LF.GeneralExpr.intLiteral 0))
+                                                 [Relico.LF.GeneralStmt.schedule
+                                                    { value := "sendMsg_action1" }
+                                                    [Relico.LF.GeneralExpr.intLiteral 1]
+                                                    { value := 0 }]
+                                                 [],
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "id" }
+                                                 (Relico.LF.GeneralExpr.parameterVar { value := "_id" })],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "sendMsg_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sendMsg_action1" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToNext" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none },
+                                      { name := { value := "sendMsg_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sendMsg_action2" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToNext" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none },
+                                      { name := { value := "rcvMsg_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "rcvMsg_action" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "sendMsg_action2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]
+                                                   { value := 0 }],
+                                        priority := none },
+                                      { name := { value := "rcvMsgToNextFromNode0_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "rcvMsgToNextFromNode0" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "sendMsg_action2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]
+                                                   { value := 0 }],
+                                        priority := none },
+                                      { name := { value := "rcvMsgToNextFromNode1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "rcvMsgToNextFromNode1" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "sendMsg_action2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]
+                                                   { value := 0 }],
+                                        priority := none },
+                                      { name := { value := "rcvMsgToNextFromNode2_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "rcvMsgToNextFromNode2" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "sendMsg_action2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]
+                                                   { value := 0 }],
+                                        priority := none },
+                                      { name := { value := "rcvMsgToNextFromNode3_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "rcvMsgToNextFromNode3" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "sendMsg_action2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]
+                                                   { value := 0 }],
+                                        priority := none }] }],
+  instances := [{ name := { value := "node0" },
+                  reactorName := { value := "Node" },
+                  arguments := [Relico.LF.GeneralValue.int 0] },
+                { name := { value := "node1" },
+                  reactorName := { value := "Node" },
+                  arguments := [Relico.LF.GeneralValue.int 1] },
+                { name := { value := "node2" },
+                  reactorName := { value := "Node" },
+                  arguments := [Relico.LF.GeneralValue.int 2] },
+                { name := { value := "node3" },
+                  reactorName := { value := "Node" },
+                  arguments := [Relico.LF.GeneralValue.int 3] }],
+  connections := [{ sourceInstance := { value := "node0" },
+                    sourcePort := { value := "rcvMsgToNext" },
+                    targetInstance := { value := "node1" },
+                    targetPort := { value := "rcvMsgToNextFromNode0" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "node1" },
+                    sourcePort := { value := "rcvMsgToNext" },
+                    targetInstance := { value := "node2" },
+                    targetPort := { value := "rcvMsgToNextFromNode1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "node2" },
+                    sourcePort := { value := "rcvMsgToNext" },
+                    targetInstance := { value := "node3" },
+                    targetPort := { value := "rcvMsgToNextFromNode2" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "node3" },
+                    sourcePort := { value := "rcvMsgToNext" },
+                    targetInstance := { value := "node0" },
+                    targetPort := { value := "rcvMsgToNextFromNode3" },
+                    delay := { value := 0 } }] }

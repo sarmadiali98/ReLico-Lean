@@ -1,0 +1,321 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 13,
+            "target": "isfirst",
+            "value": {
+              "kind": "variable",
+              "line": 13,
+              "name": "_isfirst"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 14,
+            "target": "islast",
+            "value": {
+              "kind": "variable",
+              "line": 14,
+              "name": "_islast"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 15,
+            "target": "id",
+            "value": {
+              "kind": "variable",
+              "line": 15,
+              "name": "_id"
+            }
+          },
+          {
+            "condition": {
+              "kind": "variable",
+              "line": 16,
+              "name": "isfirst"
+            },
+            "else": [],
+            "kind": "if",
+            "line": 16,
+            "then": [
+              {
+                "after": null,
+                "arguments": [
+                  {
+                    "kind": "intLiteral",
+                    "line": 17,
+                    "value": 1
+                  }
+                ],
+                "kind": "send",
+                "line": 17,
+                "messageServer": "sendMsg",
+                "target": {
+                  "kind": "self"
+                },
+                "targetClassName": "Node"
+              }
+            ]
+          }
+        ],
+        "line": 12,
+        "parameters": [
+          {
+            "line": 12,
+            "name": "_isfirst",
+            "type": "boolean"
+          },
+          {
+            "line": 12,
+            "name": "_islast",
+            "type": "boolean"
+          },
+          {
+            "line": 12,
+            "name": "_id",
+            "type": "int"
+          }
+        ]
+      },
+      "knownRebecs": [
+        {
+          "className": "Node",
+          "line": 5,
+          "name": "next"
+        }
+      ],
+      "line": 3,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 22,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 22,
+              "messageServer": "rcvMsg",
+              "target": {
+                "kind": "knownRebec",
+                "name": "next"
+              },
+              "targetClassName": "Node"
+            }
+          ],
+          "line": 21,
+          "name": "sendMsg",
+          "parameters": [
+            {
+              "line": 21,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "variable",
+                "line": 26,
+                "name": "islast"
+              },
+              "else": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 30,
+                      "value": 1
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 30,
+                  "messageServer": "sendMsg",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Node"
+                }
+              ],
+              "kind": "if",
+              "line": 26,
+              "then": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 27,
+                      "value": 1
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 27,
+                  "messageServer": "sendMsg",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Node"
+                }
+              ]
+            }
+          ],
+          "line": 25,
+          "name": "rcvMsg",
+          "parameters": [
+            {
+              "line": 25,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": 2
+        }
+      ],
+      "name": "Node",
+      "queueBound": 100,
+      "stateVariables": [
+        {
+          "line": 8,
+          "name": "isfirst",
+          "type": "boolean"
+        },
+        {
+          "line": 9,
+          "name": "islast",
+          "type": "boolean"
+        },
+        {
+          "line": 10,
+          "name": "id",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [
+        {
+          "kind": "boolLiteral",
+          "value": true
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Node",
+          "instance": "node1",
+          "knownRebec": "next"
+        }
+      ],
+      "className": "Node",
+      "line": 35,
+      "name": "node0",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 1
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Node",
+          "instance": "node2",
+          "knownRebec": "next"
+        }
+      ],
+      "className": "Node",
+      "line": 36,
+      "name": "node1",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 2
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Node",
+          "instance": "node3",
+          "knownRebec": "next"
+        }
+      ],
+      "className": "Node",
+      "line": 37,
+      "name": "node2",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "boolLiteral",
+          "value": true
+        },
+        {
+          "kind": "intLiteral",
+          "value": 3
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Node",
+          "instance": "node3",
+          "knownRebec": "next"
+        }
+      ],
+      "className": "Node",
+      "line": 38,
+      "name": "node3",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

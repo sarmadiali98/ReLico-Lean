@@ -1,0 +1,191 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "condition": {
+              "kind": "binary",
+              "left": {
+                "kind": "variable",
+                "line": 11,
+                "name": "_id"
+              },
+              "line": 11,
+              "operator": "==",
+              "right": {
+                "kind": "intLiteral",
+                "line": 11,
+                "value": 0
+              }
+            },
+            "else": [],
+            "kind": "if",
+            "line": 11,
+            "then": [
+              {
+                "after": null,
+                "arguments": [
+                  {
+                    "kind": "intLiteral",
+                    "line": 12,
+                    "value": 1
+                  }
+                ],
+                "kind": "send",
+                "line": 12,
+                "messageServer": "sendMsg",
+                "target": {
+                  "kind": "self"
+                },
+                "targetClassName": "Node"
+              }
+            ]
+          },
+          {
+            "kind": "assign",
+            "line": 14,
+            "target": "id",
+            "value": {
+              "kind": "variable",
+              "line": 14,
+              "name": "_id"
+            }
+          }
+        ],
+        "line": 10,
+        "parameters": [
+          {
+            "line": 10,
+            "name": "_id",
+            "type": "int"
+          }
+        ]
+      },
+      "knownRebecs": [
+        {
+          "className": "Node",
+          "line": 5,
+          "name": "next"
+        }
+      ],
+      "line": 3,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 17,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 17,
+              "messageServer": "rcvMsg",
+              "target": {
+                "kind": "knownRebec",
+                "name": "next"
+              },
+              "targetClassName": "Node"
+            }
+          ],
+          "line": 16,
+          "name": "sendMsg",
+          "parameters": [
+            {
+              "line": 16,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 20,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 20,
+              "messageServer": "sendMsg",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Node"
+            }
+          ],
+          "line": 19,
+          "name": "rcvMsg",
+          "parameters": [
+            {
+              "line": 19,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Node",
+      "queueBound": 100,
+      "stateVariables": [
+        {
+          "line": 8,
+          "name": "id",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Node",
+          "instance": "node1",
+          "knownRebec": "next"
+        }
+      ],
+      "className": "Node",
+      "line": 24,
+      "name": "node0",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 1
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Node",
+          "instance": "node0",
+          "knownRebec": "next"
+        }
+      ],
+      "className": "Node",
+      "line": 25,
+      "name": "node1",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

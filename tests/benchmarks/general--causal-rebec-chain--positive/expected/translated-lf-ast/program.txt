@@ -1,0 +1,98 @@
+{ reactors := [{ name := { value := "Receiver" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "rcvMsgToReceiverFromSwitch_" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [],
+                 stateVariables := [],
+                 logicalActions := [{ name := { value := "rcvMsg_action" },
+                                      parameters := [{ name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "rcvMsg_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "rcvMsg_action" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "rcvMsg_action" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]
+                                                   { value := 0 }],
+                                        priority := none },
+                                      { name := { value := "rcvMsgToReceiverFromSwitch__reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "rcvMsgToReceiverFromSwitch_" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "rcvMsg_action" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]
+                                                   { value := 0 }],
+                                        priority := none }] },
+               { name := { value := "Switch" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "rcvMsgToSwitch_FromSender_" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "rcvMsgToReceiver" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [],
+                 logicalActions := [{ name := { value := "rcvMsg_action" },
+                                      parameters := [{ name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "rcvMsg_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "rcvMsg_action" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToReceiver" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none },
+                                      { name := { value := "rcvMsgToSwitch_FromSender__reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "rcvMsgToSwitch_FromSender_" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToReceiver" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none }] },
+               { name := { value := "Sender" },
+                 parameters := [],
+                 inputPorts := [],
+                 outputPorts := [{ name := { value := "rcvMsgToSwitch_" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [],
+                 logicalActions := [{ name := { value := "sendMsg_action" },
+                                      parameters := [{ name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.schedule
+                                                 { value := "sendMsg_action" }
+                                                 [Relico.LF.GeneralExpr.intLiteral 0]
+                                                 { value := 0 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "sendMsg_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "sendMsg_action" },
+                                        parameters := [{ value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "rcvMsgToSwitch_" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none }] }],
+  instances := [{ name := { value := "receiver" }, reactorName := { value := "Receiver" }, arguments := [] },
+                { name := { value := "switch_" }, reactorName := { value := "Switch" }, arguments := [] },
+                { name := { value := "sender_" }, reactorName := { value := "Sender" }, arguments := [] }],
+  connections := [{ sourceInstance := { value := "switch_" },
+                    sourcePort := { value := "rcvMsgToReceiver" },
+                    targetInstance := { value := "receiver" },
+                    targetPort := { value := "rcvMsgToReceiverFromSwitch_" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "sender_" },
+                    sourcePort := { value := "rcvMsgToSwitch_" },
+                    targetInstance := { value := "switch_" },
+                    targetPort := { value := "rcvMsgToSwitch_FromSender_" },
+                    delay := { value := 0 } }] }

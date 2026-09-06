@@ -1,0 +1,32 @@
+{ classes := [{ name := { value := "Node" },
+                knownRebecs := [],
+                stateVariables := [],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "sendMsg1" }
+                                            [Relico.DTR.GeneralExpr.intLiteral 1]
+                                            { value := 0 }] },
+                messageServers := [{ name := { value := "sendMsg1" },
+                                     parameters := [{ name := { value := "msg" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "sendMsg2" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "msg" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "sendMsg2" },
+                                     parameters := [{ name := { value := "msg2" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "sendMsg2" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "msg2" }]
+                                                { value := 0 }],
+                                     priority := none }] }],
+  instances := [{ name := { value := "node0" },
+                  className := { value := "Node" },
+                  bindings := [],
+                  arguments := [],
+                  priority := none }] }

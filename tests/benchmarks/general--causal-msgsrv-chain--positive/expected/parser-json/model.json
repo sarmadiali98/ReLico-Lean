@@ -1,0 +1,110 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "after": null,
+            "arguments": [
+              {
+                "kind": "intLiteral",
+                "line": 5,
+                "value": 1
+              }
+            ],
+            "kind": "send",
+            "line": 5,
+            "messageServer": "sendMsg1",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Node"
+          }
+        ],
+        "line": 4,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 3,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 8,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 8,
+              "messageServer": "sendMsg2",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Node"
+            }
+          ],
+          "line": 7,
+          "name": "sendMsg1",
+          "parameters": [
+            {
+              "line": 7,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 11,
+                  "name": "msg2"
+                }
+              ],
+              "kind": "send",
+              "line": 11,
+              "messageServer": "sendMsg2",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Node"
+            }
+          ],
+          "line": 10,
+          "name": "sendMsg2",
+          "parameters": [
+            {
+              "line": 10,
+              "name": "msg2",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Node",
+      "queueBound": 100,
+      "stateVariables": []
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Node",
+      "line": 15,
+      "name": "node0",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

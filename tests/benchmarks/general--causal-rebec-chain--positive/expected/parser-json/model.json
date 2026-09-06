@@ -1,0 +1,223 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [],
+        "line": null,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Switch",
+          "line": 5,
+          "name": "switch_"
+        }
+      ],
+      "line": 3,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 8,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 8,
+              "messageServer": "rcvMsg",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Receiver"
+            }
+          ],
+          "line": 7,
+          "name": "rcvMsg",
+          "parameters": [
+            {
+              "line": 7,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Receiver",
+      "queueBound": 100,
+      "stateVariables": []
+    },
+    {
+      "constructor": {
+        "body": [],
+        "line": null,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Receiver",
+          "line": 13,
+          "name": "receiver"
+        }
+      ],
+      "line": 11,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 16,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 16,
+              "messageServer": "rcvMsg",
+              "target": {
+                "kind": "knownRebec",
+                "name": "receiver"
+              },
+              "targetClassName": "Receiver"
+            }
+          ],
+          "line": 15,
+          "name": "rcvMsg",
+          "parameters": [
+            {
+              "line": 15,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Switch",
+      "queueBound": 100,
+      "stateVariables": []
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "after": null,
+            "arguments": [
+              {
+                "kind": "intLiteral",
+                "line": 24,
+                "value": 0
+              }
+            ],
+            "kind": "send",
+            "line": 24,
+            "messageServer": "sendMsg",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Sender"
+          }
+        ],
+        "line": 23,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Switch",
+          "line": 21,
+          "name": "switch_"
+        }
+      ],
+      "line": 19,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 27,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 27,
+              "messageServer": "rcvMsg",
+              "target": {
+                "kind": "knownRebec",
+                "name": "switch_"
+              },
+              "targetClassName": "Switch"
+            }
+          ],
+          "line": 26,
+          "name": "sendMsg",
+          "parameters": [
+            {
+              "line": 26,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Sender",
+      "queueBound": 100,
+      "stateVariables": []
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Switch",
+          "instance": "switch_",
+          "knownRebec": "switch_"
+        }
+      ],
+      "className": "Receiver",
+      "line": 31,
+      "name": "receiver",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Receiver",
+          "instance": "receiver",
+          "knownRebec": "receiver"
+        }
+      ],
+      "className": "Switch",
+      "line": 32,
+      "name": "switch_",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Switch",
+          "instance": "switch_",
+          "knownRebec": "switch_"
+        }
+      ],
+      "className": "Sender",
+      "line": 33,
+      "name": "sender_",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

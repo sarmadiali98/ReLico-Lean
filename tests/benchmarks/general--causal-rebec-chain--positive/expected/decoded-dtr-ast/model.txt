@@ -1,0 +1,59 @@
+{ classes := [{ name := { value := "Receiver" },
+                knownRebecs := [{ name := { value := "switch_" }, className := { value := "Switch" } }],
+                stateVariables := [],
+                constructor := { parameters := [], body := [] },
+                messageServers := [{ name := { value := "rcvMsg" },
+                                     parameters := [{ name := { value := "msg" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "rcvMsg" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "msg" }]
+                                                { value := 0 }],
+                                     priority := none }] },
+              { name := { value := "Switch" },
+                knownRebecs := [{ name := { value := "receiver" }, className := { value := "Receiver" } }],
+                stateVariables := [],
+                constructor := { parameters := [], body := [] },
+                messageServers := [{ name := { value := "rcvMsg" },
+                                     parameters := [{ name := { value := "msg" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "receiver" })
+                                                { value := "rcvMsg" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "msg" }]
+                                                { value := 0 }],
+                                     priority := none }] },
+              { name := { value := "Sender" },
+                knownRebecs := [{ name := { value := "switch_" }, className := { value := "Switch" } }],
+                stateVariables := [],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "sendMsg" }
+                                            [Relico.DTR.GeneralExpr.intLiteral 0]
+                                            { value := 0 }] },
+                messageServers := [{ name := { value := "sendMsg" },
+                                     parameters := [{ name := { value := "msg" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "switch_" })
+                                                { value := "rcvMsg" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "msg" }]
+                                                { value := 0 }],
+                                     priority := none }] }],
+  instances := [{ name := { value := "receiver" },
+                  className := { value := "Receiver" },
+                  bindings := [({ value := "switch_" }, { value := "switch_" })],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "switch_" },
+                  className := { value := "Switch" },
+                  bindings := [({ value := "receiver" }, { value := "receiver" })],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "sender_" },
+                  className := { value := "Sender" },
+                  bindings := [({ value := "switch_" }, { value := "switch_" })],
+                  arguments := [],
+                  priority := none }] }

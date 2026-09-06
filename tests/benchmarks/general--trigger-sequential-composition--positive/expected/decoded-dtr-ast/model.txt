@@ -1,0 +1,81 @@
+{ classes := [{ name := { value := "Node" },
+                knownRebecs := [{ name := { value := "next" }, className := { value := "Node" } }],
+                stateVariables := [{ name := { value := "isfirst" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "islast" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "id" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [{ name := { value := "_isfirst" },
+                                                  declaredType := Relico.DTR.GeneralType.boolean },
+                                                { name := { value := "_islast" },
+                                                  declaredType := Relico.DTR.GeneralType.boolean },
+                                                { name := { value := "_id" },
+                                                  declaredType := Relico.DTR.GeneralType.int }],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "isfirst" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "_isfirst" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "islast" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "_islast" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "id" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "_id" }),
+                                          Relico.DTR.GeneralStmt.ifThenElse
+                                            (Relico.DTR.GeneralExpr.stateVar { value := "isfirst" })
+                                            [Relico.DTR.GeneralStmt.send
+                                               (Relico.DTR.GeneralSendTarget.selfTarget)
+                                               { value := "sendMsg" }
+                                               [Relico.DTR.GeneralExpr.intLiteral 1]
+                                               { value := 0 }]
+                                            []] },
+                messageServers := [{ name := { value := "sendMsg" },
+                                     parameters := [{ name := { value := "msg" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "next" })
+                                                { value := "rcvMsg" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "msg" }]
+                                                { value := 0 }],
+                                     priority := some 1 },
+                                   { name := { value := "rcvMsg" },
+                                     parameters := [{ name := { value := "msg" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.stateVar { value := "islast" })
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "sendMsg" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 1]
+                                                   { value := 0 }]
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "sendMsg" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 1]
+                                                   { value := 0 }]],
+                                     priority := some 2 }] }],
+  instances := [{ name := { value := "node0" },
+                  className := { value := "Node" },
+                  bindings := [({ value := "next" }, { value := "node1" })],
+                  arguments := [Relico.DTR.GeneralValue.bool true,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "node1" },
+                  className := { value := "Node" },
+                  bindings := [({ value := "next" }, { value := "node2" })],
+                  arguments := [Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 1],
+                  priority := none },
+                { name := { value := "node2" },
+                  className := { value := "Node" },
+                  bindings := [({ value := "next" }, { value := "node3" })],
+                  arguments := [Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 2],
+                  priority := none },
+                { name := { value := "node3" },
+                  className := { value := "Node" },
+                  bindings := [({ value := "next" }, { value := "node3" })],
+                  arguments := [Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.bool true,
+                                Relico.DTR.GeneralValue.int 3],
+                  priority := none }] }

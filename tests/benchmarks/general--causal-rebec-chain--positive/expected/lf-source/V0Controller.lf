@@ -1,0 +1,54 @@
+target Cpp
+
+reactor Receiver {
+  input rcvMsgToReceiverFromSwitch_: int
+  logical action rcvMsg_action: int
+
+  reaction(rcvMsg_action) -> rcvMsg_action {=
+    auto msg = *rcvMsg_action.get();
+    rcvMsg_action.schedule(msg, 0ms);
+  =}
+
+  reaction(rcvMsgToReceiverFromSwitch_) -> rcvMsg_action {=
+    auto msg = *rcvMsgToReceiverFromSwitch_.get();
+    rcvMsg_action.schedule(msg, 0ms);
+  =}
+}
+
+reactor Switch {
+  input rcvMsgToSwitch_FromSender_: int
+  output rcvMsgToReceiver: int
+  logical action rcvMsg_action: int
+
+  reaction(rcvMsg_action) -> rcvMsgToReceiver {=
+    auto msg = *rcvMsg_action.get();
+    rcvMsgToReceiver.set(msg);
+  =}
+
+  reaction(rcvMsgToSwitch_FromSender_) -> rcvMsgToReceiver {=
+    auto msg = *rcvMsgToSwitch_FromSender_.get();
+    rcvMsgToReceiver.set(msg);
+  =}
+}
+
+reactor Sender {
+  output rcvMsgToSwitch_: int
+  logical action sendMsg_action: int
+
+  reaction(startup) -> sendMsg_action {=
+    sendMsg_action.schedule(0, 0ms);
+  =}
+
+  reaction(sendMsg_action) -> rcvMsgToSwitch_ {=
+    auto msg = *sendMsg_action.get();
+    rcvMsgToSwitch_.set(msg);
+  =}
+}
+
+main reactor {
+  receiver = new Receiver()
+  switch_ = new Switch()
+  sender_ = new Sender()
+  switch_.rcvMsgToReceiver -> receiver.rcvMsgToReceiverFromSwitch_ after 0 msec
+  sender_.rcvMsgToSwitch_ -> switch_.rcvMsgToSwitch_FromSender_ after 0 msec
+}

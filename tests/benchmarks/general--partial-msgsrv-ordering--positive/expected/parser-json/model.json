@@ -1,0 +1,195 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "after": null,
+            "arguments": [
+              {
+                "kind": "intLiteral",
+                "line": 5,
+                "value": 1
+              }
+            ],
+            "kind": "send",
+            "line": 5,
+            "messageServer": "sendMsg1",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Node"
+          },
+          {
+            "after": null,
+            "arguments": [
+              {
+                "kind": "intLiteral",
+                "line": 6,
+                "value": 1
+              }
+            ],
+            "kind": "send",
+            "line": 6,
+            "messageServer": "sendMsg2",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Node"
+          }
+        ],
+        "line": 4,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 3,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 9,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 9,
+              "messageServer": "sendMsg3",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Node"
+            }
+          ],
+          "line": 8,
+          "name": "sendMsg1",
+          "parameters": [
+            {
+              "line": 8,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 12,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 12,
+              "messageServer": "sendMsg4",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Node"
+            }
+          ],
+          "line": 11,
+          "name": "sendMsg2",
+          "parameters": [
+            {
+              "line": 11,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 15,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 15,
+              "messageServer": "sendMsg3",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Node"
+            }
+          ],
+          "line": 14,
+          "name": "sendMsg3",
+          "parameters": [
+            {
+              "line": 14,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 18,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 18,
+              "messageServer": "sendMsg4",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Node"
+            }
+          ],
+          "line": 17,
+          "name": "sendMsg4",
+          "parameters": [
+            {
+              "line": 17,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Node",
+      "queueBound": 100,
+      "stateVariables": []
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Node",
+      "line": 22,
+      "name": "node0",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

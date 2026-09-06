@@ -10,8 +10,8 @@ The registry currently contains:
 
 - 183 accepted Lean test modules
 - 2,468 mapped test obligations
-- 61 planned source benchmarks
-- 60 positive benchmarks
+- 78 planned source benchmarks
+- 77 positive benchmarks
 - 1 negative benchmark
 - zero unresolved modules
 - zero unmapped obligations
@@ -101,3 +101,17 @@ were removed, their 240 obligations re-homed onto same-family, same-capability
 positive rows. `core--well-formedness--negative` remains the one genuine
 negative: upstream Timed Rebeca itself refuses its source. The rule going
 forward is recorded as F95 in `docs/STAGE_K_FINDINGS.md`.
+
+## The examples2 corpus
+
+`examples2.zip` contributes 17 candidate models -- ordering and composition
+patterns from the paper's own themes, each ordering case supplied at both the
+rebec and the message-server level. All 17 clear the exporter, the Lean
+decoder, the verified translation and `lfc` with zero adaptation; nine also
+report `satisfied` under the model checker and are implemented now. The other
+eight overflow the model checker's queue and stay planned until redesigned
+under the stage K policy: the overflow is an uncoupled periodic producer, not
+a defect in the pattern under test. These rows own no Lean obligations -- they
+are source-evidence rows, so they carry no formal-witness stage. Two corpus
+entries are byte-identical; only one is implemented, and its twin stays
+planned pending a differentiating source.
