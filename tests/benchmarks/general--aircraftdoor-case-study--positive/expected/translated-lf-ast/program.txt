@@ -1,0 +1,317 @@
+{ reactors := [{ name := { value := "Monitor" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "observeDoorToMFromDoor" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [],
+                 stateVariables := [{ name := { value := "violation" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "observeDoor_action" },
+                                      parameters := [{ name := { value := "doorValue" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "violation" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "observeDoor_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "observeDoor_action" },
+                                        parameters := [{ value := "doorValue" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.ne)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "doorValue" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "observeDoorToMFromDoor_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "observeDoorToMFromDoor" },
+                                        parameters := [{ value := "doorValue" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.ne)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "doorValue" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   []],
+                                        priority := none }] },
+               { name := { value := "Door" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "setDoorToDoor1FromVision" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "setDoorToDoor2FromVision" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "observeDoorToM" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "doorOpen" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "setDoor_action" },
+                                      parameters := [{ name := { value := "v" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "doorOpen" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "setDoor_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "setDoor_action" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "v" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "doorOpen" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "v" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 0))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "doorOpen" }
+                                                         (Relico.LF.GeneralExpr.intLiteral 0)]
+                                                      []],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "observeDoorToM" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "doorOpen" }]],
+                                        priority := none },
+                                      { name := { value := "setDoorToDoor1FromVision_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "setDoorToDoor1FromVision" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "v" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "doorOpen" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "v" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 0))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "doorOpen" }
+                                                         (Relico.LF.GeneralExpr.intLiteral 0)]
+                                                      []],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "observeDoorToM" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "doorOpen" }]],
+                                        priority := none },
+                                      { name := { value := "setDoorToDoor2FromVision_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "setDoorToDoor2FromVision" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "v" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "doorOpen" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "v" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 0))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "doorOpen" }
+                                                         (Relico.LF.GeneralExpr.intLiteral 0)]
+                                                      []],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "observeDoorToM" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "doorOpen" }]],
+                                        priority := none }] },
+               { name := { value := "Vision" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "inputToVisionFromController" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "setDoorToDoor1" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "setDoorToDoor2" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "ramp" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "input_action" },
+                                      parameters := [{ name := { value := "v" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "ramp" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "input_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "input_action" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "ramp" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "setDoorToDoor1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "setDoorToDoor2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]]],
+                                        priority := none },
+                                      { name := { value := "inputToVisionFromController_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "inputToVisionFromController" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "ramp" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "setDoorToDoor1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "setDoorToDoor2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]]],
+                                        priority := none }] },
+               { name := { value := "KeepAlive" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "kickToKaFromController" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [],
+                 stateVariables := [{ name := { value := "phase" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "kick_action" },
+                                      parameters := [{ name := { value := "unit" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "tick_action1" }, parameters := [] },
+                                    { name := { value := "tick_action2" }, parameters := [] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "phase" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "kick_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "kick_action" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "tick_action1" }
+                                                   []
+                                                   { value := 1000 }],
+                                        priority := none },
+                                      { name := { value := "kickToKaFromController_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "kickToKaFromController" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "tick_action1" }
+                                                   []
+                                                   { value := 1000 }],
+                                        priority := none },
+                                      { name := { value := "tick_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "tick_action1" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "phase" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "phase" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "phase" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0)],
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "tick_action2" }
+                                                   []
+                                                   { value := 1000 }],
+                                        priority := none },
+                                      { name := { value := "tick_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "tick_action2" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "phase" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "phase" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "phase" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0)],
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "tick_action2" }
+                                                   []
+                                                   { value := 1000 }],
+                                        priority := none }] },
+               { name := { value := "Controller" },
+                 parameters := [],
+                 inputPorts := [],
+                 outputPorts := [{ name := { value := "inputToVision" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "kickToKa" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [],
+                 logicalActions := [{ name := { value := "start_action" }, parameters := [] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.schedule
+                                                 { value := "start_action" }
+                                                 []
+                                                 { value := 0 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "start_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "start_action" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "inputToVision" }
+                                                   [Relico.LF.GeneralExpr.intLiteral 1],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "kickToKa" }
+                                                   [Relico.LF.GeneralExpr.intLiteral 0]],
+                                        priority := none }] }],
+  instances := [{ name := { value := "controller" }, reactorName := { value := "Controller" }, arguments := [] },
+                { name := { value := "vision" }, reactorName := { value := "Vision" }, arguments := [] },
+                { name := { value := "door" }, reactorName := { value := "Door" }, arguments := [] },
+                { name := { value := "m" }, reactorName := { value := "Monitor" }, arguments := [] },
+                { name := { value := "ka" }, reactorName := { value := "KeepAlive" }, arguments := [] }],
+  connections := [{ sourceInstance := { value := "controller" },
+                    sourcePort := { value := "inputToVision" },
+                    targetInstance := { value := "vision" },
+                    targetPort := { value := "inputToVisionFromController" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "controller" },
+                    sourcePort := { value := "kickToKa" },
+                    targetInstance := { value := "ka" },
+                    targetPort := { value := "kickToKaFromController" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "vision" },
+                    sourcePort := { value := "setDoorToDoor1" },
+                    targetInstance := { value := "door" },
+                    targetPort := { value := "setDoorToDoor1FromVision" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "vision" },
+                    sourcePort := { value := "setDoorToDoor2" },
+                    targetInstance := { value := "door" },
+                    targetPort := { value := "setDoorToDoor2FromVision" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "door" },
+                    sourcePort := { value := "observeDoorToM" },
+                    targetInstance := { value := "m" },
+                    targetPort := { value := "observeDoorToMFromDoor" },
+                    delay := { value := 0 } }] }

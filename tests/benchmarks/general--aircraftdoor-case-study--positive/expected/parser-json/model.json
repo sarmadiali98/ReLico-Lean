@@ -1,0 +1,597 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 11,
+            "target": "violation",
+            "value": {
+              "kind": "intLiteral",
+              "line": 11,
+              "value": 0
+            }
+          }
+        ],
+        "line": 10,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 5,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 16,
+                  "name": "doorValue"
+                },
+                "line": 16,
+                "operator": "!=",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 16,
+                  "value": 1
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 16,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 17,
+                  "target": "violation",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 17,
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          ],
+          "line": 15,
+          "name": "observeDoor",
+          "parameters": [
+            {
+              "line": 15,
+              "name": "doorValue",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        }
+      ],
+      "name": "Monitor",
+      "queueBound": 2,
+      "stateVariables": [
+        {
+          "line": 7,
+          "name": "violation",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 31,
+            "target": "doorOpen",
+            "value": {
+              "kind": "intLiteral",
+              "line": 31,
+              "value": 0
+            }
+          }
+        ],
+        "line": 30,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Monitor",
+          "line": 24,
+          "name": "m"
+        }
+      ],
+      "line": 22,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 36,
+                  "name": "v"
+                },
+                "line": 36,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 36,
+                  "value": 1
+                }
+              },
+              "else": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 38,
+                      "name": "v"
+                    },
+                    "line": 38,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 38,
+                      "value": 0
+                    }
+                  },
+                  "else": [],
+                  "kind": "if",
+                  "line": 38,
+                  "then": [
+                    {
+                      "kind": "assign",
+                      "line": 39,
+                      "target": "doorOpen",
+                      "value": {
+                        "kind": "intLiteral",
+                        "line": 39,
+                        "value": 0
+                      }
+                    }
+                  ]
+                }
+              ],
+              "kind": "if",
+              "line": 36,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 37,
+                  "target": "doorOpen",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 37,
+                    "value": 1
+                  }
+                }
+              ]
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 41,
+                  "name": "doorOpen"
+                }
+              ],
+              "kind": "send",
+              "line": 41,
+              "messageServer": "observeDoor",
+              "target": {
+                "kind": "knownRebec",
+                "name": "m"
+              },
+              "targetClassName": "Monitor"
+            }
+          ],
+          "line": 35,
+          "name": "setDoor",
+          "parameters": [
+            {
+              "line": 35,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        }
+      ],
+      "name": "Door",
+      "queueBound": 2,
+      "stateVariables": [
+        {
+          "line": 27,
+          "name": "doorOpen",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 54,
+            "target": "ramp",
+            "value": {
+              "kind": "intLiteral",
+              "line": 54,
+              "value": 0
+            }
+          }
+        ],
+        "line": 53,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Door",
+          "line": 47,
+          "name": "door"
+        }
+      ],
+      "line": 45,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 59,
+                  "name": "ramp"
+                },
+                "line": 59,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 59,
+                  "value": 1
+                }
+              },
+              "else": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 62,
+                      "value": 1
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 62,
+                  "messageServer": "setDoor",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "door"
+                  },
+                  "targetClassName": "Door"
+                }
+              ],
+              "kind": "if",
+              "line": 59,
+              "then": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 60,
+                      "value": 0
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 60,
+                  "messageServer": "setDoor",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "door"
+                  },
+                  "targetClassName": "Door"
+                }
+              ]
+            }
+          ],
+          "line": 58,
+          "name": "input",
+          "parameters": [
+            {
+              "line": 58,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        }
+      ],
+      "name": "Vision",
+      "queueBound": 2,
+      "stateVariables": [
+        {
+          "line": 50,
+          "name": "ramp",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 73,
+            "target": "phase",
+            "value": {
+              "kind": "intLiteral",
+              "line": 73,
+              "value": 0
+            }
+          }
+        ],
+        "line": 72,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 67,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1000
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 78,
+              "messageServer": "tick",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "KeepAlive"
+            }
+          ],
+          "line": 77,
+          "name": "kick",
+          "parameters": [
+            {
+              "line": 77,
+              "name": "unit",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 83,
+                  "name": "phase"
+                },
+                "line": 83,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 83,
+                  "value": 0
+                }
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 86,
+                  "target": "phase",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 86,
+                    "value": 0
+                  }
+                }
+              ],
+              "kind": "if",
+              "line": 83,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 84,
+                  "target": "phase",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 84,
+                    "value": 1
+                  }
+                }
+              ]
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1000
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 88,
+              "messageServer": "tick",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "KeepAlive"
+            }
+          ],
+          "line": 82,
+          "name": "tick",
+          "parameters": [],
+          "priority": 2
+        }
+      ],
+      "name": "KeepAlive",
+      "queueBound": 2,
+      "stateVariables": [
+        {
+          "line": 69,
+          "name": "phase",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 99,
+            "messageServer": "start",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Controller"
+          }
+        ],
+        "line": 98,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Vision",
+          "line": 94,
+          "name": "vision"
+        },
+        {
+          "className": "KeepAlive",
+          "line": 95,
+          "name": "ka"
+        }
+      ],
+      "line": 92,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "intLiteral",
+                  "line": 104,
+                  "value": 1
+                }
+              ],
+              "kind": "send",
+              "line": 104,
+              "messageServer": "input",
+              "target": {
+                "kind": "knownRebec",
+                "name": "vision"
+              },
+              "targetClassName": "Vision"
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "intLiteral",
+                  "line": 105,
+                  "value": 0
+                }
+              ],
+              "kind": "send",
+              "line": 105,
+              "messageServer": "kick",
+              "target": {
+                "kind": "knownRebec",
+                "name": "ka"
+              },
+              "targetClassName": "KeepAlive"
+            }
+          ],
+          "line": 103,
+          "name": "start",
+          "parameters": [],
+          "priority": 1
+        }
+      ],
+      "name": "Controller",
+      "queueBound": 2,
+      "stateVariables": []
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Vision",
+          "instance": "vision",
+          "knownRebec": "vision"
+        },
+        {
+          "className": "KeepAlive",
+          "instance": "ka",
+          "knownRebec": "ka"
+        }
+      ],
+      "className": "Controller",
+      "line": 110,
+      "name": "controller",
+      "priority": 1
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Door",
+          "instance": "door",
+          "knownRebec": "door"
+        }
+      ],
+      "className": "Vision",
+      "line": 111,
+      "name": "vision",
+      "priority": 2
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Monitor",
+          "instance": "m",
+          "knownRebec": "m"
+        }
+      ],
+      "className": "Door",
+      "line": 112,
+      "name": "door",
+      "priority": 3
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Monitor",
+      "line": 113,
+      "name": "m",
+      "priority": 4
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "KeepAlive",
+      "line": 114,
+      "name": "ka",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

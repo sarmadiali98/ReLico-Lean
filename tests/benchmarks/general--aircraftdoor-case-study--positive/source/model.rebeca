@@ -1,0 +1,115 @@
+// Benchmark: general--aircraftdoor-case-study--positive
+// The paper's RQ1 AircraftDoor model, unmodified except one marker
+// parameter on KeepAlive.kick (the translator refuses a parameterless
+// external-send target); see ADAPTATION.md.
+reactiveclass Monitor(2) {
+    statevars {
+        int violation;
+    }
+
+    Monitor() {
+        violation = 0;
+    }
+
+    @priority(1)
+    msgsrv observeDoor(int doorValue) {
+        if (doorValue != 1) {
+            violation = 1;
+        }
+    }
+}
+
+reactiveclass Door(2) {
+    knownrebecs {
+        Monitor m;
+    }
+    statevars {
+        int doorOpen;
+    }
+
+    Door() {
+        doorOpen = 0;
+    }
+
+    @priority(1)
+    msgsrv setDoor(int v) {
+        if (v == 1) {
+            doorOpen = 1;
+        } else if (v == 0) {
+            doorOpen = 0;
+        }
+        m.observeDoor(doorOpen);
+    }
+}
+
+reactiveclass Vision(2) {
+    knownrebecs {
+        Door door;
+    }
+    statevars {
+        int ramp;
+    }
+
+    Vision() {
+        ramp = 0;
+    }
+
+    @priority(1)
+    msgsrv input(int v) {
+        if (ramp == 1) {
+            door.setDoor(0);
+        } else {
+            door.setDoor(1);
+        }
+    }
+}
+
+reactiveclass KeepAlive(2) {
+    statevars {
+        int phase;
+    }
+
+    KeepAlive() {
+        phase = 0;
+    }
+
+    @priority(1)
+    msgsrv kick(int unit) {
+        self.tick() after(1000);
+    }
+
+    @priority(2)
+    msgsrv tick() {
+        if (phase == 0) {
+            phase = 1;
+        } else {
+            phase = 0;
+        }
+        self.tick() after(1000);
+    }
+}
+
+reactiveclass Controller(2) {
+    knownrebecs {
+        Vision vision;
+        KeepAlive ka;
+    }
+
+    Controller() {
+        self.start();
+    }
+
+    @priority(1)
+    msgsrv start() {
+        vision.input(1);
+        ka.kick(0);
+    }
+}
+
+main {
+    @priority(1) Controller controller(vision, ka):();
+    @priority(2) Vision vision(door):();
+    @priority(3) Door door(m):();
+    @priority(4) Monitor m():();
+    KeepAlive ka():();
+}
