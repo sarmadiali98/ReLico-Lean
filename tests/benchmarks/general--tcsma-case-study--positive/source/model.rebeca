@@ -1,0 +1,192 @@
+// Benchmark: general--tcsma-case-study--positive
+// The paper-named TCSMA model, adapted: (1) two marker parameters on
+// the parameterless external-send targets User.sendData and
+// Interface.getAckFromUser; (2) the controller's poll gated on round
+// completion -- the next poll fires only after both broadcast copies
+// of the previous round (the ENQ echo and the data response) have
+// been consumed, the re-arm issued by whichever is consumed second;
+// (3) the never-read bookkeeping layer removed (ctrlSend, passMessage,
+// interfaceSent, speak, received and their five message servers --
+// each flag is written and never read). See ADAPTATION.md.
+reactiveclass Controller(10) 
+{ 
+      knownrebecs
+      { 
+            Medium medium;               
+      } 
+            
+      statevars 
+      {     
+            int next;
+			int n;	 /*number of stations*/		 
+			boolean enqPending;
+			boolean dataPending;
+      } 
+      
+      Controller() 
+      { 
+      		n = 2;
+            next = 1;
+			enqPending = false;
+			dataPending = false;
+			self.sendENQ();              
+      } 
+  
+      @priority(1)
+      msgsrv sendENQ()
+      {
+		if (!enqPending && !dataPending) {
+			enqPending = true;
+			dataPending = true;
+			medium.passMsg(0, next, 3);
+
+			next = next % 2 + 1;
+		}
+      }
+
+      @priority(3)
+	  msgsrv receiveData(int senderr, int receiver, int msg)
+	  {
+		if (msg == 3) {
+			enqPending = false;
+			if (!dataPending) {
+				self.sendENQ() after(2);
+			}
+		} else {
+			dataPending = false;
+			if (!enqPending) {
+				self.sendENQ() after(2);
+			}
+		}
+	  }
+}
+
+
+reactiveclass Medium(10)
+{
+      knownrebecs
+      {
+			Controller controller;
+			Interface interface1;
+			Interface interface2;
+      }
+
+      statevars
+      {
+      }
+
+
+      Medium()
+      {
+      }
+
+      @priority(1)
+      msgsrv passMsg(int senderr, int receiver, int msg)
+      {
+			controller.receiveData(senderr, receiver, msg);
+            interface1.getFromMedium(senderr, receiver, msg);
+			interface2.getFromMedium(senderr, receiver, msg);
+      }
+
+}
+
+reactiveclass Interface(10)
+{
+
+      knownrebecs
+      {
+            Medium medium;
+            User user;
+      }
+
+      statevars
+      {
+			int id;
+      }
+
+
+      Interface(int myId)
+      {
+			id = myId;
+
+      }
+
+      @priority(1)
+      msgsrv getFromMedium(int senderr, int receiver, int msg)
+      {
+            if(receiver == id)
+			{
+				if(msg == 3)
+				{
+					user.sendData(0);
+				}
+				else
+				{
+					user.receiveData(senderr, msg);
+				}
+			}
+      }
+
+      @priority(2)
+	  msgsrv getFromUser(int receiver, int data)
+	  {
+			medium.passMsg(id, receiver, data);
+
+	  }
+
+
+}
+
+reactiveclass User(10)
+{
+      knownrebecs
+      {
+			Interface interface1;
+      }
+
+      statevars
+      {
+      	int myId;
+		int data;
+		int receiver;
+      }
+
+      User(int id)
+      {
+      	myId = id;
+
+      }
+
+      @priority(1)
+	  msgsrv receiveData(int senderr, int msg)
+	  {
+	  }
+
+      @priority(2)
+	  msgsrv sendData(int unit)
+	  {
+	  	data = 1;
+		if(data != 0)
+		{
+			if(myId == 1)
+				receiver = 2;
+
+			else if (myId == 2)
+				receiver = 1;
+
+		interface1.getFromUser(receiver,data);
+		}
+
+
+	  }
+
+}
+
+main{
+      Controller controller (medium):();
+      Medium medium(controller, interface1 , interface2):();
+      Interface interface1(medium, user1):(1);
+	  Interface interface2(medium, user2):(2);
+	  User user1(interface1):(1);
+	  User user2(interface2):(2);
+}

@@ -1,0 +1,825 @@
+{ reactors := [{ name := { value := "Controller" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "receiveDataToControllerFromMedium" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "Controller" }
+                                               { value := "receiveData_action" }
+                                               [{ name := { value := "senderr" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "receiver" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "msg" },
+                                                  declaredType := Relico.LF.GeneralType.int }] }],
+                 outputPorts := [{ name := { value := "passMsgToMedium" },
+                                   payload := Relico.LF.GeneralPortPayload.struct
+                                                { value := "Medium" }
+                                                { value := "passMsg_action" }
+                                                [{ name := { value := "senderr" },
+                                                   declaredType := Relico.LF.GeneralType.int },
+                                                 { name := { value := "receiver" },
+                                                   declaredType := Relico.LF.GeneralType.int },
+                                                 { name := { value := "msg" },
+                                                   declaredType := Relico.LF.GeneralType.int }] }],
+                 stateVariables := [{ name := { value := "next" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "n" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "enqPending" },
+                                      declaredType := Relico.LF.GeneralType.boolean },
+                                    { name := { value := "dataPending" },
+                                      declaredType := Relico.LF.GeneralType.boolean }],
+                 logicalActions := [{ name := { value := "sendENQ_action1" }, parameters := [] },
+                                    { name := { value := "sendENQ_action2" }, parameters := [] },
+                                    { name := { value := "sendENQ_action3" }, parameters := [] },
+                                    { name := { value := "receiveData_action" },
+                                      parameters := [{ name := { value := "senderr" },
+                                                       declaredType := Relico.LF.GeneralType.int },
+                                                     { name := { value := "receiver" },
+                                                       declaredType := Relico.LF.GeneralType.int },
+                                                     { name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "n" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 2),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "next" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 1),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "enqPending" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "dataPending" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false),
+                                               Relico.LF.GeneralStmt.schedule
+                                                 { value := "sendENQ_action1" }
+                                                 []
+                                                 { value := 0 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "sendENQ_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sendENQ_action1" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.unary
+                                                       (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                       (Relico.LF.GeneralExpr.stateVar { value := "enqPending" }))
+                                                     (Relico.LF.GeneralExpr.unary
+                                                       (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                       (Relico.LF.GeneralExpr.stateVar { value := "dataPending" })))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "enqPending" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "dataPending" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "passMsgToMedium" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0,
+                                                       Relico.LF.GeneralExpr.stateVar { value := "next" },
+                                                       Relico.LF.GeneralExpr.intLiteral 3],
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "next" }
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.add)
+                                                        (Relico.LF.GeneralExpr.binary
+                                                          (Relico.LF.GeneralBinaryOp.mod)
+                                                          (Relico.LF.GeneralExpr.stateVar { value := "next" })
+                                                          (Relico.LF.GeneralExpr.intLiteral 2))
+                                                        (Relico.LF.GeneralExpr.intLiteral 1))]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "sendENQ_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sendENQ_action2" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.unary
+                                                       (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                       (Relico.LF.GeneralExpr.stateVar { value := "enqPending" }))
+                                                     (Relico.LF.GeneralExpr.unary
+                                                       (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                       (Relico.LF.GeneralExpr.stateVar { value := "dataPending" })))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "enqPending" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "dataPending" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "passMsgToMedium" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0,
+                                                       Relico.LF.GeneralExpr.stateVar { value := "next" },
+                                                       Relico.LF.GeneralExpr.intLiteral 3],
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "next" }
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.add)
+                                                        (Relico.LF.GeneralExpr.binary
+                                                          (Relico.LF.GeneralBinaryOp.mod)
+                                                          (Relico.LF.GeneralExpr.stateVar { value := "next" })
+                                                          (Relico.LF.GeneralExpr.intLiteral 2))
+                                                        (Relico.LF.GeneralExpr.intLiteral 1))]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "sendENQ_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sendENQ_action3" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.unary
+                                                       (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                       (Relico.LF.GeneralExpr.stateVar { value := "enqPending" }))
+                                                     (Relico.LF.GeneralExpr.unary
+                                                       (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                       (Relico.LF.GeneralExpr.stateVar { value := "dataPending" })))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "enqPending" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "dataPending" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "passMsgToMedium" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0,
+                                                       Relico.LF.GeneralExpr.stateVar { value := "next" },
+                                                       Relico.LF.GeneralExpr.intLiteral 3],
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "next" }
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.add)
+                                                        (Relico.LF.GeneralExpr.binary
+                                                          (Relico.LF.GeneralBinaryOp.mod)
+                                                          (Relico.LF.GeneralExpr.stateVar { value := "next" })
+                                                          (Relico.LF.GeneralExpr.intLiteral 2))
+                                                        (Relico.LF.GeneralExpr.intLiteral 1))]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "receiveData_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "receiveData_action" },
+                                        parameters := [{ value := "senderr" },
+                                                       { value := "receiver" },
+                                                       { value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "msg" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 3))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "enqPending" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.unary
+                                                        (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "dataPending" }))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "sendENQ_action2" }
+                                                         []
+                                                         { value := 2 }]
+                                                      []]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "dataPending" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.unary
+                                                        (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "enqPending" }))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "sendENQ_action3" }
+                                                         []
+                                                         { value := 2 }]
+                                                      []]],
+                                        priority := none },
+                                      { name := { value := "receiveDataToControllerFromMedium_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "receiveDataToControllerFromMedium" },
+                                        parameters := [{ value := "senderr" },
+                                                       { value := "receiver" },
+                                                       { value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "msg" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 3))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "enqPending" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.unary
+                                                        (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "dataPending" }))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "sendENQ_action2" }
+                                                         []
+                                                         { value := 2 }]
+                                                      []]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "dataPending" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.unary
+                                                        (Relico.LF.GeneralUnaryOp.logicalNot)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "enqPending" }))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "sendENQ_action3" }
+                                                         []
+                                                         { value := 2 }]
+                                                      []]],
+                                        priority := none }] },
+               { name := { value := "Medium" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "passMsgToMediumFromController" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "Medium" }
+                                               { value := "passMsg_action" }
+                                               [{ name := { value := "senderr" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "receiver" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "msg" },
+                                                  declaredType := Relico.LF.GeneralType.int }] },
+                                { name := { value := "passMsgToMediumFromInterface1" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "Medium" }
+                                               { value := "passMsg_action" }
+                                               [{ name := { value := "senderr" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "receiver" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "msg" },
+                                                  declaredType := Relico.LF.GeneralType.int }] },
+                                { name := { value := "passMsgToMediumFromInterface2" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "Medium" }
+                                               { value := "passMsg_action" }
+                                               [{ name := { value := "senderr" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "receiver" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "msg" },
+                                                  declaredType := Relico.LF.GeneralType.int }] }],
+                 outputPorts := [{ name := { value := "receiveDataToController" },
+                                   payload := Relico.LF.GeneralPortPayload.struct
+                                                { value := "Controller" }
+                                                { value := "receiveData_action" }
+                                                [{ name := { value := "senderr" },
+                                                   declaredType := Relico.LF.GeneralType.int },
+                                                 { name := { value := "receiver" },
+                                                   declaredType := Relico.LF.GeneralType.int },
+                                                 { name := { value := "msg" },
+                                                   declaredType := Relico.LF.GeneralType.int }] },
+                                 { name := { value := "getFromMediumToInterface1" },
+                                   payload := Relico.LF.GeneralPortPayload.struct
+                                                { value := "Interface" }
+                                                { value := "getFromMedium_action" }
+                                                [{ name := { value := "senderr" },
+                                                   declaredType := Relico.LF.GeneralType.int },
+                                                 { name := { value := "receiver" },
+                                                   declaredType := Relico.LF.GeneralType.int },
+                                                 { name := { value := "msg" },
+                                                   declaredType := Relico.LF.GeneralType.int }] },
+                                 { name := { value := "getFromMediumToInterface2" },
+                                   payload := Relico.LF.GeneralPortPayload.struct
+                                                { value := "Interface" }
+                                                { value := "getFromMedium_action" }
+                                                [{ name := { value := "senderr" },
+                                                   declaredType := Relico.LF.GeneralType.int },
+                                                 { name := { value := "receiver" },
+                                                   declaredType := Relico.LF.GeneralType.int },
+                                                 { name := { value := "msg" },
+                                                   declaredType := Relico.LF.GeneralType.int }] }],
+                 stateVariables := [],
+                 logicalActions := [{ name := { value := "passMsg_action" },
+                                      parameters := [{ name := { value := "senderr" },
+                                                       declaredType := Relico.LF.GeneralType.int },
+                                                     { name := { value := "receiver" },
+                                                       declaredType := Relico.LF.GeneralType.int },
+                                                     { name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "passMsg_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "passMsg_action" },
+                                        parameters := [{ value := "senderr" },
+                                                       { value := "receiver" },
+                                                       { value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "receiveDataToController" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "senderr" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "receiver" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "msg" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "getFromMediumToInterface1" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "senderr" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "receiver" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "msg" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "getFromMediumToInterface2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "senderr" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "receiver" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none },
+                                      { name := { value := "passMsgToMediumFromController_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "passMsgToMediumFromController" },
+                                        parameters := [{ value := "senderr" },
+                                                       { value := "receiver" },
+                                                       { value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "receiveDataToController" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "senderr" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "receiver" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "msg" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "getFromMediumToInterface1" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "senderr" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "receiver" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "msg" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "getFromMediumToInterface2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "senderr" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "receiver" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none },
+                                      { name := { value := "passMsgToMediumFromInterface1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "passMsgToMediumFromInterface1" },
+                                        parameters := [{ value := "senderr" },
+                                                       { value := "receiver" },
+                                                       { value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "receiveDataToController" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "senderr" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "receiver" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "msg" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "getFromMediumToInterface1" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "senderr" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "receiver" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "msg" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "getFromMediumToInterface2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "senderr" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "receiver" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none },
+                                      { name := { value := "passMsgToMediumFromInterface2_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "passMsgToMediumFromInterface2" },
+                                        parameters := [{ value := "senderr" },
+                                                       { value := "receiver" },
+                                                       { value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "receiveDataToController" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "senderr" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "receiver" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "msg" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "getFromMediumToInterface1" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "senderr" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "receiver" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "msg" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "getFromMediumToInterface2" }
+                                                   [Relico.LF.GeneralExpr.parameterVar { value := "senderr" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "receiver" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "msg" }]],
+                                        priority := none }] },
+               { name := { value := "Interface" },
+                 parameters := [{ name := { value := "myId" }, declaredType := Relico.LF.GeneralType.int }],
+                 inputPorts := [{ name := { value := "getFromMediumToInterface1FromMedium" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "Interface" }
+                                               { value := "getFromMedium_action" }
+                                               [{ name := { value := "senderr" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "receiver" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "msg" },
+                                                  declaredType := Relico.LF.GeneralType.int }] },
+                                { name := { value := "getFromMediumToInterface2FromMedium" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "Interface" }
+                                               { value := "getFromMedium_action" }
+                                               [{ name := { value := "senderr" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "receiver" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "msg" },
+                                                  declaredType := Relico.LF.GeneralType.int }] },
+                                { name := { value := "getFromUserToInterface1FromUser1" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "Interface" }
+                                               { value := "getFromUser_action" }
+                                               [{ name := { value := "receiver" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "data" },
+                                                  declaredType := Relico.LF.GeneralType.int }] },
+                                { name := { value := "getFromUserToInterface1FromUser2" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "Interface" }
+                                               { value := "getFromUser_action" }
+                                               [{ name := { value := "receiver" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "data" },
+                                                  declaredType := Relico.LF.GeneralType.int }] }],
+                 outputPorts := [{ name := { value := "sendDataToUser" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "receiveDataToUser" },
+                                   payload := Relico.LF.GeneralPortPayload.struct
+                                                { value := "User" }
+                                                { value := "receiveData_action" }
+                                                [{ name := { value := "senderr" },
+                                                   declaredType := Relico.LF.GeneralType.int },
+                                                 { name := { value := "msg" },
+                                                   declaredType := Relico.LF.GeneralType.int }] },
+                                 { name := { value := "passMsgToMedium" },
+                                   payload := Relico.LF.GeneralPortPayload.struct
+                                                { value := "Medium" }
+                                                { value := "passMsg_action" }
+                                                [{ name := { value := "senderr" },
+                                                   declaredType := Relico.LF.GeneralType.int },
+                                                 { name := { value := "receiver" },
+                                                   declaredType := Relico.LF.GeneralType.int },
+                                                 { name := { value := "msg" },
+                                                   declaredType := Relico.LF.GeneralType.int }] }],
+                 stateVariables := [{ name := { value := "id" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "getFromMedium_action" },
+                                      parameters := [{ name := { value := "senderr" },
+                                                       declaredType := Relico.LF.GeneralType.int },
+                                                     { name := { value := "receiver" },
+                                                       declaredType := Relico.LF.GeneralType.int },
+                                                     { name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "getFromUser_action" },
+                                      parameters := [{ name := { value := "receiver" },
+                                                       declaredType := Relico.LF.GeneralType.int },
+                                                     { name := { value := "data" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [{ value := "myId" }],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "id" }
+                                                 (Relico.LF.GeneralExpr.parameterVar { value := "myId" })],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "getFromMedium_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "getFromMedium_action" },
+                                        parameters := [{ value := "senderr" },
+                                                       { value := "receiver" },
+                                                       { value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "receiver" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "id" }))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "msg" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 3))
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "sendDataToUser" }
+                                                         [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveDataToUser" }
+                                                         [Relico.LF.GeneralExpr.parameterVar { value := "senderr" },
+                                                          Relico.LF.GeneralExpr.parameterVar { value := "msg" }]]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "getFromMediumToInterface1FromMedium_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "getFromMediumToInterface1FromMedium" },
+                                        parameters := [{ value := "senderr" },
+                                                       { value := "receiver" },
+                                                       { value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "receiver" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "id" }))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "msg" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 3))
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "sendDataToUser" }
+                                                         [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveDataToUser" }
+                                                         [Relico.LF.GeneralExpr.parameterVar { value := "senderr" },
+                                                          Relico.LF.GeneralExpr.parameterVar { value := "msg" }]]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "getFromMediumToInterface2FromMedium_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "getFromMediumToInterface2FromMedium" },
+                                        parameters := [{ value := "senderr" },
+                                                       { value := "receiver" },
+                                                       { value := "msg" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "receiver" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "id" }))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "msg" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 3))
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "sendDataToUser" }
+                                                         [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveDataToUser" }
+                                                         [Relico.LF.GeneralExpr.parameterVar { value := "senderr" },
+                                                          Relico.LF.GeneralExpr.parameterVar { value := "msg" }]]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "getFromUser_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "getFromUser_action" },
+                                        parameters := [{ value := "receiver" }, { value := "data" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "passMsgToMedium" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "receiver" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "data" }]],
+                                        priority := none },
+                                      { name := { value := "getFromUserToInterface1FromUser1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "getFromUserToInterface1FromUser1" },
+                                        parameters := [{ value := "receiver" }, { value := "data" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "passMsgToMedium" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "receiver" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "data" }]],
+                                        priority := none },
+                                      { name := { value := "getFromUserToInterface1FromUser2_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "getFromUserToInterface1FromUser2" },
+                                        parameters := [{ value := "receiver" }, { value := "data" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "passMsgToMedium" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "receiver" },
+                                                    Relico.LF.GeneralExpr.parameterVar { value := "data" }]],
+                                        priority := none }] },
+               { name := { value := "User" },
+                 parameters := [{ name := { value := "id" }, declaredType := Relico.LF.GeneralType.int }],
+                 inputPorts := [{ name := { value := "sendDataToUserFromInterface1" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "receiveDataToUserFromInterface1" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "User" }
+                                               { value := "receiveData_action" }
+                                               [{ name := { value := "senderr" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "msg" },
+                                                  declaredType := Relico.LF.GeneralType.int }] },
+                                { name := { value := "sendDataToUserFromInterface2" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "receiveDataToUserFromInterface2" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "User" }
+                                               { value := "receiveData_action" }
+                                               [{ name := { value := "senderr" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "msg" },
+                                                  declaredType := Relico.LF.GeneralType.int }] }],
+                 outputPorts := [{ name := { value := "getFromUserToInterface1" },
+                                   payload := Relico.LF.GeneralPortPayload.struct
+                                                { value := "Interface" }
+                                                { value := "getFromUser_action" }
+                                                [{ name := { value := "receiver" },
+                                                   declaredType := Relico.LF.GeneralType.int },
+                                                 { name := { value := "data" },
+                                                   declaredType := Relico.LF.GeneralType.int }] }],
+                 stateVariables := [{ name := { value := "myId" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "data" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "receiver" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "receiveData_action" },
+                                      parameters := [{ name := { value := "senderr" },
+                                                       declaredType := Relico.LF.GeneralType.int },
+                                                     { name := { value := "msg" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "sendData_action" },
+                                      parameters := [{ name := { value := "unit" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [{ value := "id" }],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "myId" }
+                                                 (Relico.LF.GeneralExpr.parameterVar { value := "id" })],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "receiveData_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "receiveData_action" },
+                                        parameters := [{ value := "senderr" }, { value := "msg" }],
+                                        body := [],
+                                        priority := none },
+                                      { name := { value := "receiveDataToUserFromInterface1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "receiveDataToUserFromInterface1" },
+                                        parameters := [{ value := "senderr" }, { value := "msg" }],
+                                        body := [],
+                                        priority := none },
+                                      { name := { value := "receiveDataToUserFromInterface2_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "receiveDataToUserFromInterface2" },
+                                        parameters := [{ value := "senderr" }, { value := "msg" }],
+                                        body := [],
+                                        priority := none },
+                                      { name := { value := "sendData_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sendData_action" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "data" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 1),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.ne)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "data" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "myId" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 1))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "receiver" }
+                                                         (Relico.LF.GeneralExpr.intLiteral 2)]
+                                                      [Relico.LF.GeneralStmt.ifThenElse
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.eq)
+                                                           (Relico.LF.GeneralExpr.stateVar { value := "myId" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 2))
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "receiver" }
+                                                            (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                         []],
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "getFromUserToInterface1" }
+                                                      [Relico.LF.GeneralExpr.stateVar { value := "receiver" },
+                                                       Relico.LF.GeneralExpr.stateVar { value := "data" }]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "sendDataToUserFromInterface1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "sendDataToUserFromInterface1" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "data" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 1),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.ne)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "data" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "myId" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 1))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "receiver" }
+                                                         (Relico.LF.GeneralExpr.intLiteral 2)]
+                                                      [Relico.LF.GeneralStmt.ifThenElse
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.eq)
+                                                           (Relico.LF.GeneralExpr.stateVar { value := "myId" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 2))
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "receiver" }
+                                                            (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                         []],
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "getFromUserToInterface1" }
+                                                      [Relico.LF.GeneralExpr.stateVar { value := "receiver" },
+                                                       Relico.LF.GeneralExpr.stateVar { value := "data" }]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "sendDataToUserFromInterface2_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "sendDataToUserFromInterface2" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "data" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 1),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.ne)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "data" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "myId" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 1))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "receiver" }
+                                                         (Relico.LF.GeneralExpr.intLiteral 2)]
+                                                      [Relico.LF.GeneralStmt.ifThenElse
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.eq)
+                                                           (Relico.LF.GeneralExpr.stateVar { value := "myId" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 2))
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "receiver" }
+                                                            (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                         []],
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "getFromUserToInterface1" }
+                                                      [Relico.LF.GeneralExpr.stateVar { value := "receiver" },
+                                                       Relico.LF.GeneralExpr.stateVar { value := "data" }]]
+                                                   []],
+                                        priority := none }] }],
+  instances := [{ name := { value := "controller" }, reactorName := { value := "Controller" }, arguments := [] },
+                { name := { value := "medium" }, reactorName := { value := "Medium" }, arguments := [] },
+                { name := { value := "interface1" },
+                  reactorName := { value := "Interface" },
+                  arguments := [Relico.LF.GeneralValue.int 1] },
+                { name := { value := "interface2" },
+                  reactorName := { value := "Interface" },
+                  arguments := [Relico.LF.GeneralValue.int 2] },
+                { name := { value := "user1" },
+                  reactorName := { value := "User" },
+                  arguments := [Relico.LF.GeneralValue.int 1] },
+                { name := { value := "user2" },
+                  reactorName := { value := "User" },
+                  arguments := [Relico.LF.GeneralValue.int 2] }],
+  connections := [{ sourceInstance := { value := "controller" },
+                    sourcePort := { value := "passMsgToMedium" },
+                    targetInstance := { value := "medium" },
+                    targetPort := { value := "passMsgToMediumFromController" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "medium" },
+                    sourcePort := { value := "receiveDataToController" },
+                    targetInstance := { value := "controller" },
+                    targetPort := { value := "receiveDataToControllerFromMedium" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "medium" },
+                    sourcePort := { value := "getFromMediumToInterface1" },
+                    targetInstance := { value := "interface1" },
+                    targetPort := { value := "getFromMediumToInterface1FromMedium" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "medium" },
+                    sourcePort := { value := "getFromMediumToInterface2" },
+                    targetInstance := { value := "interface2" },
+                    targetPort := { value := "getFromMediumToInterface2FromMedium" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "interface1" },
+                    sourcePort := { value := "sendDataToUser" },
+                    targetInstance := { value := "user1" },
+                    targetPort := { value := "sendDataToUserFromInterface1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "interface1" },
+                    sourcePort := { value := "receiveDataToUser" },
+                    targetInstance := { value := "user1" },
+                    targetPort := { value := "receiveDataToUserFromInterface1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "interface1" },
+                    sourcePort := { value := "passMsgToMedium" },
+                    targetInstance := { value := "medium" },
+                    targetPort := { value := "passMsgToMediumFromInterface1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "interface2" },
+                    sourcePort := { value := "sendDataToUser" },
+                    targetInstance := { value := "user2" },
+                    targetPort := { value := "sendDataToUserFromInterface2" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "interface2" },
+                    sourcePort := { value := "receiveDataToUser" },
+                    targetInstance := { value := "user2" },
+                    targetPort := { value := "receiveDataToUserFromInterface2" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "interface2" },
+                    sourcePort := { value := "passMsgToMedium" },
+                    targetInstance := { value := "medium" },
+                    targetPort := { value := "passMsgToMediumFromInterface2" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "user1" },
+                    sourcePort := { value := "getFromUserToInterface1" },
+                    targetInstance := { value := "interface1" },
+                    targetPort := { value := "getFromUserToInterface1FromUser1" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "user2" },
+                    sourcePort := { value := "getFromUserToInterface1" },
+                    targetInstance := { value := "interface2" },
+                    targetPort := { value := "getFromUserToInterface1FromUser2" },
+                    delay := { value := 0 } }] }

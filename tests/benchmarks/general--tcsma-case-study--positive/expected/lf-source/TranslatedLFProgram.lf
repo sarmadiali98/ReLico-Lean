@@ -1,0 +1,244 @@
+target Cpp
+
+public preamble {=
+  struct Controller_receiveData_action_Args { int senderr; int receiver; int msg; };
+  struct Medium_passMsg_action_Args { int senderr; int receiver; int msg; };
+  struct Interface_getFromMedium_action_Args { int senderr; int receiver; int msg; };
+  struct Interface_getFromUser_action_Args { int receiver; int data; };
+  struct User_receiveData_action_Args { int senderr; int msg; };
+=}
+
+reactor Controller {
+  input receiveDataToControllerFromMedium: Controller_receiveData_action_Args
+  output passMsgToMedium: Medium_passMsg_action_Args
+  state next: int = 0
+  state n: int = 0
+  state enqPending: bool = false
+  state dataPending: bool = false
+  logical action sendENQ_action1: void
+  logical action sendENQ_action2: void
+  logical action sendENQ_action3: void
+  logical action receiveData_action: Controller_receiveData_action_Args
+
+  reaction(startup) -> sendENQ_action1 {=
+    n = 2;
+    next = 1;
+    enqPending = false;
+    dataPending = false;
+    sendENQ_action1.schedule(0ms);
+  =}
+
+  reaction(sendENQ_action1) -> passMsgToMedium {=
+    if (((!enqPending) && (!dataPending))) { enqPending = true; dataPending = true; passMsgToMedium.set(Medium_passMsg_action_Args{0, next, 3}); next = ((next % 2) + 1); } else {}
+  =}
+
+  reaction(sendENQ_action2) -> passMsgToMedium {=
+    if (((!enqPending) && (!dataPending))) { enqPending = true; dataPending = true; passMsgToMedium.set(Medium_passMsg_action_Args{0, next, 3}); next = ((next % 2) + 1); } else {}
+  =}
+
+  reaction(sendENQ_action3) -> passMsgToMedium {=
+    if (((!enqPending) && (!dataPending))) { enqPending = true; dataPending = true; passMsgToMedium.set(Medium_passMsg_action_Args{0, next, 3}); next = ((next % 2) + 1); } else {}
+  =}
+
+  reaction(receiveData_action) -> sendENQ_action2, sendENQ_action3 {=
+    auto receiveData_action_payload = *receiveData_action.get();
+    auto senderr = receiveData_action_payload.senderr;
+    auto receiver = receiveData_action_payload.receiver;
+    auto msg = receiveData_action_payload.msg;
+    if ((msg == 3)) { enqPending = false; if ((!dataPending)) { sendENQ_action2.schedule(2ms); } else {} } else { dataPending = false; if ((!enqPending)) { sendENQ_action3.schedule(2ms); } else {} }
+  =}
+
+  reaction(receiveDataToControllerFromMedium) -> sendENQ_action2, sendENQ_action3 {=
+    auto receiveDataToControllerFromMedium_payload = *receiveDataToControllerFromMedium.get();
+    auto senderr = receiveDataToControllerFromMedium_payload.senderr;
+    auto receiver = receiveDataToControllerFromMedium_payload.receiver;
+    auto msg = receiveDataToControllerFromMedium_payload.msg;
+    if ((msg == 3)) { enqPending = false; if ((!dataPending)) { sendENQ_action2.schedule(2ms); } else {} } else { dataPending = false; if ((!enqPending)) { sendENQ_action3.schedule(2ms); } else {} }
+  =}
+}
+
+reactor Medium {
+  input passMsgToMediumFromController: Medium_passMsg_action_Args
+  input passMsgToMediumFromInterface1: Medium_passMsg_action_Args
+  input passMsgToMediumFromInterface2: Medium_passMsg_action_Args
+  output receiveDataToController: Controller_receiveData_action_Args
+  output getFromMediumToInterface1: Interface_getFromMedium_action_Args
+  output getFromMediumToInterface2: Interface_getFromMedium_action_Args
+  logical action passMsg_action: Medium_passMsg_action_Args
+
+  reaction(passMsg_action) -> receiveDataToController, getFromMediumToInterface1, getFromMediumToInterface2 {=
+    auto passMsg_action_payload = *passMsg_action.get();
+    auto senderr = passMsg_action_payload.senderr;
+    auto receiver = passMsg_action_payload.receiver;
+    auto msg = passMsg_action_payload.msg;
+    receiveDataToController.set(Controller_receiveData_action_Args{senderr, receiver, msg});
+    getFromMediumToInterface1.set(Interface_getFromMedium_action_Args{senderr, receiver, msg});
+    getFromMediumToInterface2.set(Interface_getFromMedium_action_Args{senderr, receiver, msg});
+  =}
+
+  reaction(passMsgToMediumFromController) -> receiveDataToController, getFromMediumToInterface1, getFromMediumToInterface2 {=
+    auto passMsgToMediumFromController_payload = *passMsgToMediumFromController.get();
+    auto senderr = passMsgToMediumFromController_payload.senderr;
+    auto receiver = passMsgToMediumFromController_payload.receiver;
+    auto msg = passMsgToMediumFromController_payload.msg;
+    receiveDataToController.set(Controller_receiveData_action_Args{senderr, receiver, msg});
+    getFromMediumToInterface1.set(Interface_getFromMedium_action_Args{senderr, receiver, msg});
+    getFromMediumToInterface2.set(Interface_getFromMedium_action_Args{senderr, receiver, msg});
+  =}
+
+  reaction(passMsgToMediumFromInterface1) -> receiveDataToController, getFromMediumToInterface1, getFromMediumToInterface2 {=
+    auto passMsgToMediumFromInterface1_payload = *passMsgToMediumFromInterface1.get();
+    auto senderr = passMsgToMediumFromInterface1_payload.senderr;
+    auto receiver = passMsgToMediumFromInterface1_payload.receiver;
+    auto msg = passMsgToMediumFromInterface1_payload.msg;
+    receiveDataToController.set(Controller_receiveData_action_Args{senderr, receiver, msg});
+    getFromMediumToInterface1.set(Interface_getFromMedium_action_Args{senderr, receiver, msg});
+    getFromMediumToInterface2.set(Interface_getFromMedium_action_Args{senderr, receiver, msg});
+  =}
+
+  reaction(passMsgToMediumFromInterface2) -> receiveDataToController, getFromMediumToInterface1, getFromMediumToInterface2 {=
+    auto passMsgToMediumFromInterface2_payload = *passMsgToMediumFromInterface2.get();
+    auto senderr = passMsgToMediumFromInterface2_payload.senderr;
+    auto receiver = passMsgToMediumFromInterface2_payload.receiver;
+    auto msg = passMsgToMediumFromInterface2_payload.msg;
+    receiveDataToController.set(Controller_receiveData_action_Args{senderr, receiver, msg});
+    getFromMediumToInterface1.set(Interface_getFromMedium_action_Args{senderr, receiver, msg});
+    getFromMediumToInterface2.set(Interface_getFromMedium_action_Args{senderr, receiver, msg});
+  =}
+}
+
+reactor Interface(myId: int = 0) {
+  input getFromMediumToInterface1FromMedium: Interface_getFromMedium_action_Args
+  input getFromMediumToInterface2FromMedium: Interface_getFromMedium_action_Args
+  input getFromUserToInterface1FromUser1: Interface_getFromUser_action_Args
+  input getFromUserToInterface1FromUser2: Interface_getFromUser_action_Args
+  output sendDataToUser: int
+  output receiveDataToUser: User_receiveData_action_Args
+  output passMsgToMedium: Medium_passMsg_action_Args
+  state id: int = 0
+  logical action getFromMedium_action: Interface_getFromMedium_action_Args
+  logical action getFromUser_action: Interface_getFromUser_action_Args
+
+  reaction(startup) {=
+    id = myId;
+  =}
+
+  reaction(getFromMedium_action) -> sendDataToUser, receiveDataToUser {=
+    auto getFromMedium_action_payload = *getFromMedium_action.get();
+    auto senderr = getFromMedium_action_payload.senderr;
+    auto receiver = getFromMedium_action_payload.receiver;
+    auto msg = getFromMedium_action_payload.msg;
+    if ((receiver == id)) { if ((msg == 3)) { sendDataToUser.set(0); } else { receiveDataToUser.set(User_receiveData_action_Args{senderr, msg}); } } else {}
+  =}
+
+  reaction(getFromMediumToInterface1FromMedium) -> sendDataToUser, receiveDataToUser {=
+    auto getFromMediumToInterface1FromMedium_payload = *getFromMediumToInterface1FromMedium.get();
+    auto senderr = getFromMediumToInterface1FromMedium_payload.senderr;
+    auto receiver = getFromMediumToInterface1FromMedium_payload.receiver;
+    auto msg = getFromMediumToInterface1FromMedium_payload.msg;
+    if ((receiver == id)) { if ((msg == 3)) { sendDataToUser.set(0); } else { receiveDataToUser.set(User_receiveData_action_Args{senderr, msg}); } } else {}
+  =}
+
+  reaction(getFromMediumToInterface2FromMedium) -> sendDataToUser, receiveDataToUser {=
+    auto getFromMediumToInterface2FromMedium_payload = *getFromMediumToInterface2FromMedium.get();
+    auto senderr = getFromMediumToInterface2FromMedium_payload.senderr;
+    auto receiver = getFromMediumToInterface2FromMedium_payload.receiver;
+    auto msg = getFromMediumToInterface2FromMedium_payload.msg;
+    if ((receiver == id)) { if ((msg == 3)) { sendDataToUser.set(0); } else { receiveDataToUser.set(User_receiveData_action_Args{senderr, msg}); } } else {}
+  =}
+
+  reaction(getFromUser_action) -> passMsgToMedium {=
+    auto getFromUser_action_payload = *getFromUser_action.get();
+    auto receiver = getFromUser_action_payload.receiver;
+    auto data = getFromUser_action_payload.data;
+    passMsgToMedium.set(Medium_passMsg_action_Args{id, receiver, data});
+  =}
+
+  reaction(getFromUserToInterface1FromUser1) -> passMsgToMedium {=
+    auto getFromUserToInterface1FromUser1_payload = *getFromUserToInterface1FromUser1.get();
+    auto receiver = getFromUserToInterface1FromUser1_payload.receiver;
+    auto data = getFromUserToInterface1FromUser1_payload.data;
+    passMsgToMedium.set(Medium_passMsg_action_Args{id, receiver, data});
+  =}
+
+  reaction(getFromUserToInterface1FromUser2) -> passMsgToMedium {=
+    auto getFromUserToInterface1FromUser2_payload = *getFromUserToInterface1FromUser2.get();
+    auto receiver = getFromUserToInterface1FromUser2_payload.receiver;
+    auto data = getFromUserToInterface1FromUser2_payload.data;
+    passMsgToMedium.set(Medium_passMsg_action_Args{id, receiver, data});
+  =}
+}
+
+reactor User(id: int = 0) {
+  input sendDataToUserFromInterface1: int
+  input receiveDataToUserFromInterface1: User_receiveData_action_Args
+  input sendDataToUserFromInterface2: int
+  input receiveDataToUserFromInterface2: User_receiveData_action_Args
+  output getFromUserToInterface1: Interface_getFromUser_action_Args
+  state myId: int = 0
+  state data: int = 0
+  state receiver: int = 0
+  logical action receiveData_action: User_receiveData_action_Args
+  logical action sendData_action: int
+
+  reaction(startup) {=
+    myId = id;
+  =}
+
+  reaction(receiveData_action) {=
+    auto receiveData_action_payload = *receiveData_action.get();
+    auto senderr = receiveData_action_payload.senderr;
+    auto msg = receiveData_action_payload.msg;
+  =}
+
+  reaction(receiveDataToUserFromInterface1) {=
+    auto receiveDataToUserFromInterface1_payload = *receiveDataToUserFromInterface1.get();
+    auto senderr = receiveDataToUserFromInterface1_payload.senderr;
+    auto msg = receiveDataToUserFromInterface1_payload.msg;
+  =}
+
+  reaction(receiveDataToUserFromInterface2) {=
+    auto receiveDataToUserFromInterface2_payload = *receiveDataToUserFromInterface2.get();
+    auto senderr = receiveDataToUserFromInterface2_payload.senderr;
+    auto msg = receiveDataToUserFromInterface2_payload.msg;
+  =}
+
+  reaction(sendData_action) -> getFromUserToInterface1 {=
+    auto unit = *sendData_action.get();
+    data = 1;
+    if ((data != 0)) { if ((myId == 1)) { receiver = 2; } else { if ((myId == 2)) { receiver = 1; } else {} } getFromUserToInterface1.set(Interface_getFromUser_action_Args{receiver, data}); } else {}
+  =}
+
+  reaction(sendDataToUserFromInterface1) -> getFromUserToInterface1 {=
+    auto unit = *sendDataToUserFromInterface1.get();
+    data = 1;
+    if ((data != 0)) { if ((myId == 1)) { receiver = 2; } else { if ((myId == 2)) { receiver = 1; } else {} } getFromUserToInterface1.set(Interface_getFromUser_action_Args{receiver, data}); } else {}
+  =}
+
+  reaction(sendDataToUserFromInterface2) -> getFromUserToInterface1 {=
+    auto unit = *sendDataToUserFromInterface2.get();
+    data = 1;
+    if ((data != 0)) { if ((myId == 1)) { receiver = 2; } else { if ((myId == 2)) { receiver = 1; } else {} } getFromUserToInterface1.set(Interface_getFromUser_action_Args{receiver, data}); } else {}
+  =}
+}
+
+main reactor {
+  controller = new Controller()
+  medium = new Medium()
+  interface1 = new Interface(myId=1)
+  interface2 = new Interface(myId=2)
+  user1 = new User(id=1)
+  user2 = new User(id=2)
+  controller.passMsgToMedium -> medium.passMsgToMediumFromController after 0 msec
+  medium.receiveDataToController -> controller.receiveDataToControllerFromMedium after 0 msec
+  medium.getFromMediumToInterface1 -> interface1.getFromMediumToInterface1FromMedium after 0 msec
+  medium.getFromMediumToInterface2 -> interface2.getFromMediumToInterface2FromMedium after 0 msec
+  interface1.sendDataToUser -> user1.sendDataToUserFromInterface1 after 0 msec
+  interface1.receiveDataToUser -> user1.receiveDataToUserFromInterface1 after 0 msec
+  interface1.passMsgToMedium -> medium.passMsgToMediumFromInterface1 after 0 msec
+  interface2.sendDataToUser -> user2.sendDataToUserFromInterface2 after 0 msec
+  interface2.receiveDataToUser -> user2.receiveDataToUserFromInterface2 after 0 msec
+  interface2.passMsgToMedium -> medium.passMsgToMediumFromInterface2 after 0 msec
+  user1.getFromUserToInterface1 -> interface1.getFromUserToInterface1FromUser1 after 0 msec
+  user2.getFromUserToInterface1 -> interface2.getFromUserToInterface1FromUser2 after 0 msec
+}

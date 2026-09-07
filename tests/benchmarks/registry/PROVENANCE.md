@@ -10,8 +10,8 @@ The registry currently contains:
 
 - 183 accepted Lean test modules
 - 2,468 mapped test obligations
-- 85 planned source benchmarks
-- 84 positive benchmarks
+- 86 planned source benchmarks
+- 85 positive benchmarks
 - 1 negative benchmark
 - zero unresolved modules
 - zero unmapped obligations

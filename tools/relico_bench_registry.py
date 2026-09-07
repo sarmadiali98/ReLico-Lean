@@ -13,8 +13,8 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_ROOT = REPOSITORY_ROOT / "tests" / "benchmarks" / "registry"
 BENCHMARK_ROOT = REPOSITORY_ROOT / "tests" / "benchmarks"
 
-EXPECTED_BENCHMARKS = 85
-EXPECTED_POSITIVE = 84
+EXPECTED_BENCHMARKS = 86
+EXPECTED_POSITIVE = 85
 # One genuine negative remains: core--well-formedness--negative, whose source is
 # refused by upstream Timed Rebeca itself (an undefined message server). Every
 # other former negative encoded a family bridge limit that the verified general

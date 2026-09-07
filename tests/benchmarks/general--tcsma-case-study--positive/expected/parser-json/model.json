@@ -1,0 +1,1020 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 28,
+            "target": "n",
+            "value": {
+              "kind": "intLiteral",
+              "line": 28,
+              "value": 2
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 29,
+            "target": "next",
+            "value": {
+              "kind": "intLiteral",
+              "line": 29,
+              "value": 1
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 30,
+            "target": "enqPending",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 30,
+              "value": false
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 31,
+            "target": "dataPending",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 31,
+              "value": false
+            }
+          },
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 32,
+            "messageServer": "sendENQ",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Controller"
+          }
+        ],
+        "line": 26,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Medium",
+          "line": 15,
+          "name": "medium"
+        }
+      ],
+      "line": 11,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "unary",
+                  "line": 38,
+                  "operand": {
+                    "kind": "variable",
+                    "line": 38,
+                    "name": "enqPending"
+                  },
+                  "operator": "!"
+                },
+                "line": 38,
+                "operator": "&&",
+                "right": {
+                  "kind": "unary",
+                  "line": 38,
+                  "operand": {
+                    "kind": "variable",
+                    "line": 38,
+                    "name": "dataPending"
+                  },
+                  "operator": "!"
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 38,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 39,
+                  "target": "enqPending",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 39,
+                    "value": true
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 40,
+                  "target": "dataPending",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 40,
+                    "value": true
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 41,
+                      "value": 0
+                    },
+                    {
+                      "kind": "variable",
+                      "line": 41,
+                      "name": "next"
+                    },
+                    {
+                      "kind": "intLiteral",
+                      "line": 41,
+                      "value": 3
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 41,
+                  "messageServer": "passMsg",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "medium"
+                  },
+                  "targetClassName": "Medium"
+                },
+                {
+                  "kind": "assign",
+                  "line": 43,
+                  "target": "next",
+                  "value": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "binary",
+                      "left": {
+                        "kind": "variable",
+                        "line": 43,
+                        "name": "next"
+                      },
+                      "line": 43,
+                      "operator": "%",
+                      "right": {
+                        "kind": "intLiteral",
+                        "line": 43,
+                        "value": 2
+                      }
+                    },
+                    "line": 43,
+                    "operator": "+",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 43,
+                      "value": 1
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "line": 36,
+          "name": "sendENQ",
+          "parameters": [],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 50,
+                  "name": "msg"
+                },
+                "line": 50,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 50,
+                  "value": 3
+                }
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 56,
+                  "target": "dataPending",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 56,
+                    "value": false
+                  }
+                },
+                {
+                  "condition": {
+                    "kind": "unary",
+                    "line": 57,
+                    "operand": {
+                      "kind": "variable",
+                      "line": 57,
+                      "name": "enqPending"
+                    },
+                    "operator": "!"
+                  },
+                  "else": [],
+                  "kind": "if",
+                  "line": 57,
+                  "then": [
+                    {
+                      "after": {
+                        "kind": "intLiteral",
+                        "value": 2
+                      },
+                      "arguments": [],
+                      "kind": "send",
+                      "line": 58,
+                      "messageServer": "sendENQ",
+                      "target": {
+                        "kind": "self"
+                      },
+                      "targetClassName": "Controller"
+                    }
+                  ]
+                }
+              ],
+              "kind": "if",
+              "line": 50,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 51,
+                  "target": "enqPending",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 51,
+                    "value": false
+                  }
+                },
+                {
+                  "condition": {
+                    "kind": "unary",
+                    "line": 52,
+                    "operand": {
+                      "kind": "variable",
+                      "line": 52,
+                      "name": "dataPending"
+                    },
+                    "operator": "!"
+                  },
+                  "else": [],
+                  "kind": "if",
+                  "line": 52,
+                  "then": [
+                    {
+                      "after": {
+                        "kind": "intLiteral",
+                        "value": 2
+                      },
+                      "arguments": [],
+                      "kind": "send",
+                      "line": 53,
+                      "messageServer": "sendENQ",
+                      "target": {
+                        "kind": "self"
+                      },
+                      "targetClassName": "Controller"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "line": 48,
+          "name": "receiveData",
+          "parameters": [
+            {
+              "line": 48,
+              "name": "senderr",
+              "type": "int"
+            },
+            {
+              "line": 48,
+              "name": "receiver",
+              "type": "int"
+            },
+            {
+              "line": 48,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": 3
+        }
+      ],
+      "name": "Controller",
+      "queueBound": 10,
+      "stateVariables": [
+        {
+          "line": 20,
+          "name": "next",
+          "type": "int"
+        },
+        {
+          "line": 21,
+          "name": "n",
+          "type": "int"
+        },
+        {
+          "line": 22,
+          "name": "enqPending",
+          "type": "boolean"
+        },
+        {
+          "line": 23,
+          "name": "dataPending",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [],
+        "line": 79,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Controller",
+          "line": 69,
+          "name": "controller"
+        },
+        {
+          "className": "Interface",
+          "line": 70,
+          "name": "interface1"
+        },
+        {
+          "className": "Interface",
+          "line": 71,
+          "name": "interface2"
+        }
+      ],
+      "line": 65,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 86,
+                  "name": "senderr"
+                },
+                {
+                  "kind": "variable",
+                  "line": 86,
+                  "name": "receiver"
+                },
+                {
+                  "kind": "variable",
+                  "line": 86,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 86,
+              "messageServer": "receiveData",
+              "target": {
+                "kind": "knownRebec",
+                "name": "controller"
+              },
+              "targetClassName": "Controller"
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 87,
+                  "name": "senderr"
+                },
+                {
+                  "kind": "variable",
+                  "line": 87,
+                  "name": "receiver"
+                },
+                {
+                  "kind": "variable",
+                  "line": 87,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 87,
+              "messageServer": "getFromMedium",
+              "target": {
+                "kind": "knownRebec",
+                "name": "interface1"
+              },
+              "targetClassName": "Interface"
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 88,
+                  "name": "senderr"
+                },
+                {
+                  "kind": "variable",
+                  "line": 88,
+                  "name": "receiver"
+                },
+                {
+                  "kind": "variable",
+                  "line": 88,
+                  "name": "msg"
+                }
+              ],
+              "kind": "send",
+              "line": 88,
+              "messageServer": "getFromMedium",
+              "target": {
+                "kind": "knownRebec",
+                "name": "interface2"
+              },
+              "targetClassName": "Interface"
+            }
+          ],
+          "line": 84,
+          "name": "passMsg",
+          "parameters": [
+            {
+              "line": 84,
+              "name": "senderr",
+              "type": "int"
+            },
+            {
+              "line": 84,
+              "name": "receiver",
+              "type": "int"
+            },
+            {
+              "line": 84,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        }
+      ],
+      "name": "Medium",
+      "queueBound": 10,
+      "stateVariables": []
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 110,
+            "target": "id",
+            "value": {
+              "kind": "variable",
+              "line": 110,
+              "name": "myId"
+            }
+          }
+        ],
+        "line": 108,
+        "parameters": [
+          {
+            "line": 108,
+            "name": "myId",
+            "type": "int"
+          }
+        ]
+      },
+      "knownRebecs": [
+        {
+          "className": "Medium",
+          "line": 98,
+          "name": "medium"
+        },
+        {
+          "className": "User",
+          "line": 99,
+          "name": "user"
+        }
+      ],
+      "line": 93,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 117,
+                  "name": "receiver"
+                },
+                "line": 117,
+                "operator": "==",
+                "right": {
+                  "kind": "variable",
+                  "line": 117,
+                  "name": "id"
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 117,
+              "then": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 119,
+                      "name": "msg"
+                    },
+                    "line": 119,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 119,
+                      "value": 3
+                    }
+                  },
+                  "else": [
+                    {
+                      "after": null,
+                      "arguments": [
+                        {
+                          "kind": "variable",
+                          "line": 125,
+                          "name": "senderr"
+                        },
+                        {
+                          "kind": "variable",
+                          "line": 125,
+                          "name": "msg"
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 125,
+                      "messageServer": "receiveData",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "user"
+                      },
+                      "targetClassName": "User"
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 119,
+                  "then": [
+                    {
+                      "after": null,
+                      "arguments": [
+                        {
+                          "kind": "intLiteral",
+                          "line": 121,
+                          "value": 0
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 121,
+                      "messageServer": "sendData",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "user"
+                      },
+                      "targetClassName": "User"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "line": 115,
+          "name": "getFromMedium",
+          "parameters": [
+            {
+              "line": 115,
+              "name": "senderr",
+              "type": "int"
+            },
+            {
+              "line": 115,
+              "name": "receiver",
+              "type": "int"
+            },
+            {
+              "line": 115,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 133,
+                  "name": "id"
+                },
+                {
+                  "kind": "variable",
+                  "line": 133,
+                  "name": "receiver"
+                },
+                {
+                  "kind": "variable",
+                  "line": 133,
+                  "name": "data"
+                }
+              ],
+              "kind": "send",
+              "line": 133,
+              "messageServer": "passMsg",
+              "target": {
+                "kind": "knownRebec",
+                "name": "medium"
+              },
+              "targetClassName": "Medium"
+            }
+          ],
+          "line": 131,
+          "name": "getFromUser",
+          "parameters": [
+            {
+              "line": 131,
+              "name": "receiver",
+              "type": "int"
+            },
+            {
+              "line": 131,
+              "name": "data",
+              "type": "int"
+            }
+          ],
+          "priority": 2
+        }
+      ],
+      "name": "Interface",
+      "queueBound": 10,
+      "stateVariables": [
+        {
+          "line": 104,
+          "name": "id",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 156,
+            "target": "myId",
+            "value": {
+              "kind": "variable",
+              "line": 156,
+              "name": "id"
+            }
+          }
+        ],
+        "line": 154,
+        "parameters": [
+          {
+            "line": 154,
+            "name": "id",
+            "type": "int"
+          }
+        ]
+      },
+      "knownRebecs": [
+        {
+          "className": "Interface",
+          "line": 144,
+          "name": "interface1"
+        }
+      ],
+      "line": 140,
+      "messageServers": [
+        {
+          "body": [],
+          "line": 161,
+          "name": "receiveData",
+          "parameters": [
+            {
+              "line": 161,
+              "name": "senderr",
+              "type": "int"
+            },
+            {
+              "line": 161,
+              "name": "msg",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 168,
+              "target": "data",
+              "value": {
+                "kind": "intLiteral",
+                "line": 168,
+                "value": 1
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 169,
+                  "name": "data"
+                },
+                "line": 169,
+                "operator": "!=",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 169,
+                  "value": 0
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 169,
+              "then": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 171,
+                      "name": "myId"
+                    },
+                    "line": 171,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 171,
+                      "value": 1
+                    }
+                  },
+                  "else": [
+                    {
+                      "condition": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 174,
+                          "name": "myId"
+                        },
+                        "line": 174,
+                        "operator": "==",
+                        "right": {
+                          "kind": "intLiteral",
+                          "line": 174,
+                          "value": 2
+                        }
+                      },
+                      "else": [],
+                      "kind": "if",
+                      "line": 174,
+                      "then": [
+                        {
+                          "kind": "assign",
+                          "line": 175,
+                          "target": "receiver",
+                          "value": {
+                            "kind": "intLiteral",
+                            "line": 175,
+                            "value": 1
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 171,
+                  "then": [
+                    {
+                      "kind": "assign",
+                      "line": 172,
+                      "target": "receiver",
+                      "value": {
+                        "kind": "intLiteral",
+                        "line": 172,
+                        "value": 2
+                      }
+                    }
+                  ]
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 177,
+                      "name": "receiver"
+                    },
+                    {
+                      "kind": "variable",
+                      "line": 177,
+                      "name": "data"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 177,
+                  "messageServer": "getFromUser",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "interface1"
+                  },
+                  "targetClassName": "Interface"
+                }
+              ]
+            }
+          ],
+          "line": 166,
+          "name": "sendData",
+          "parameters": [
+            {
+              "line": 166,
+              "name": "unit",
+              "type": "int"
+            }
+          ],
+          "priority": 2
+        }
+      ],
+      "name": "User",
+      "queueBound": 10,
+      "stateVariables": [
+        {
+          "line": 149,
+          "name": "myId",
+          "type": "int"
+        },
+        {
+          "line": 150,
+          "name": "data",
+          "type": "int"
+        },
+        {
+          "line": 151,
+          "name": "receiver",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Medium",
+          "instance": "medium",
+          "knownRebec": "medium"
+        }
+      ],
+      "className": "Controller",
+      "line": 186,
+      "name": "controller",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Controller",
+          "instance": "controller",
+          "knownRebec": "controller"
+        },
+        {
+          "className": "Interface",
+          "instance": "interface1",
+          "knownRebec": "interface1"
+        },
+        {
+          "className": "Interface",
+          "instance": "interface2",
+          "knownRebec": "interface2"
+        }
+      ],
+      "className": "Medium",
+      "line": 187,
+      "name": "medium",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 1
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Medium",
+          "instance": "medium",
+          "knownRebec": "medium"
+        },
+        {
+          "className": "User",
+          "instance": "user1",
+          "knownRebec": "user"
+        }
+      ],
+      "className": "Interface",
+      "line": 188,
+      "name": "interface1",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 2
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Medium",
+          "instance": "medium",
+          "knownRebec": "medium"
+        },
+        {
+          "className": "User",
+          "instance": "user2",
+          "knownRebec": "user"
+        }
+      ],
+      "className": "Interface",
+      "line": 189,
+      "name": "interface2",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 1
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Interface",
+          "instance": "interface1",
+          "knownRebec": "interface1"
+        }
+      ],
+      "className": "User",
+      "line": 190,
+      "name": "user1",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 2
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Interface",
+          "instance": "interface2",
+          "knownRebec": "interface1"
+        }
+      ],
+      "className": "User",
+      "line": 191,
+      "name": "user2",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}
