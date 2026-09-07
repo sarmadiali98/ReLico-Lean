@@ -1,0 +1,92 @@
+// Benchmark: general--unsafesend-case-study--positive
+// The paper's RQ1 UnsafeSend model, unmodified except one marker
+// parameter on Checker.errorIn (the translator refuses a parameterless
+// external-send target); see ADAPTATION.md.
+reactiveclass Checker(5) {
+    statevars {
+        int violation;
+    }
+
+    Checker() {
+        violation = 0;
+    }
+
+    @priority(1)
+    msgsrv errorIn(int unit) {
+        self.latch() after(1);
+    }
+
+    @priority(2)
+    msgsrv latch() {
+        violation = 1;
+    }
+}
+
+reactiveclass Client(5) {
+    knownrebecs {
+        Server s;
+    }
+
+    Client() {
+        self.start();
+    }
+
+    @priority(1)
+    msgsrv start() {
+        s.in(0) after(10);
+    }
+
+    @priority(2)
+    msgsrv in(int v) {
+    }
+}
+
+reactiveclass Server(5) {
+    knownrebecs {
+        Checker chk;
+    }
+
+    Server() {
+    }
+
+    @priority(1)
+    msgsrv in(int v) {
+        if (v == 0) {
+            self.err() after(10);
+        }
+    }
+
+    @priority(2)
+    msgsrv err() {
+        chk.errorIn(0);
+    }
+}
+
+reactiveclass KeepAlive(2) {
+    statevars {
+        int phase;
+    }
+
+    KeepAlive() {
+        phase = 0;
+        self.kick();
+    }
+
+    @priority(1)
+    msgsrv kick() {
+        self.tick() after(100);
+    }
+
+    @priority(2)
+    msgsrv tick() {
+        phase = 1 - phase;
+        self.tick() after(100);
+    }
+}
+
+main {
+    @priority(1) Server s(chk):();
+    @priority(2) Checker chk():();
+    Client c(s):();
+    KeepAlive ka():();
+}

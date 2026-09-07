@@ -1,0 +1,100 @@
+target Cpp
+
+reactor Checker {
+  input errorInToChkFromS: int
+  state violation: int = 0
+  logical action errorIn_action: int
+  logical action latch_action: void
+
+  reaction(startup) {=
+    violation = 0;
+  =}
+
+  reaction(errorIn_action) -> latch_action {=
+    auto unit = *errorIn_action.get();
+    latch_action.schedule(1ms);
+  =}
+
+  reaction(errorInToChkFromS) -> latch_action {=
+    auto unit = *errorInToChkFromS.get();
+    latch_action.schedule(1ms);
+  =}
+
+  reaction(latch_action) {=
+    violation = 1;
+  =}
+}
+
+reactor Client {
+  output inToS: int
+  logical action start_action: void
+  logical action in_action: int
+
+  reaction(startup) -> start_action {=
+    start_action.schedule(0ms);
+  =}
+
+  reaction(start_action) -> inToS {=
+    inToS.set(0);
+  =}
+
+  reaction(in_action) {=
+    auto v = *in_action.get();
+  =}
+}
+
+reactor Server {
+  input inToSFromC: int
+  output errorInToChk: int
+  logical action in_action: int
+  logical action err_action: void
+
+  reaction(in_action) -> err_action {=
+    auto v = *in_action.get();
+    if ((v == 0)) { err_action.schedule(10ms); } else {}
+  =}
+
+  reaction(inToSFromC) -> err_action {=
+    auto v = *inToSFromC.get();
+    if ((v == 0)) { err_action.schedule(10ms); } else {}
+  =}
+
+  reaction(err_action) -> errorInToChk {=
+    errorInToChk.set(0);
+  =}
+}
+
+reactor KeepAlive {
+  state phase: int = 0
+  logical action kick_action: void
+  logical action tick_action1: void
+  logical action tick_action2: void
+
+  reaction(startup) -> kick_action {=
+    phase = 0;
+    kick_action.schedule(0ms);
+  =}
+
+  reaction(kick_action) -> tick_action1 {=
+    tick_action1.schedule(100ms);
+  =}
+
+  reaction(tick_action1) -> tick_action2 {=
+    phase = (1 - phase);
+    tick_action2.schedule(100ms);
+  =}
+
+  reaction(tick_action2) -> tick_action2 {=
+    phase = (1 - phase);
+    tick_action2.schedule(100ms);
+  =}
+}
+
+main reactor {
+  s = new Server()
+  chk = new Checker()
+  c = new Client()
+  ka = new KeepAlive()
+  s.errorInToChk -> chk.errorInToChkFromS after 0 msec
+  c.inToS -> s.inToSFromC after 10 msec
+}
