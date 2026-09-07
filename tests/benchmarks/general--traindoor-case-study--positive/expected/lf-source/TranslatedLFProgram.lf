@@ -1,0 +1,120 @@
+target Cpp
+
+reactor Checker {
+  input trainEvtToChkFromT: int
+  input doorEvtToChkFromD: int
+  state doorClosed: int = 0
+  state violation: int = 0
+  logical action trainEvt_action: int
+  logical action doorEvt_action: int
+
+  reaction(startup) {=
+    doorClosed = 0;
+    violation = 0;
+  =}
+
+  reaction(trainEvt_action) {=
+    auto unit = *trainEvt_action.get();
+    if ((doorClosed == 0)) { violation = 1; } else {}
+  =}
+
+  reaction(trainEvtToChkFromT) {=
+    auto unit = *trainEvtToChkFromT.get();
+    if ((doorClosed == 0)) { violation = 1; } else {}
+  =}
+
+  reaction(doorEvt_action) {=
+    auto unit = *doorEvt_action.get();
+    doorClosed = 1;
+  =}
+
+  reaction(doorEvtToChkFromD) {=
+    auto unit = *doorEvtToChkFromD.get();
+    doorClosed = 1;
+  =}
+}
+
+reactor Train {
+  input moveToTFromC: int
+  output trainEvtToChk: int
+  logical action move_action: int
+
+  reaction(move_action) -> trainEvtToChk {=
+    auto unit = *move_action.get();
+    trainEvtToChk.set(0);
+  =}
+
+  reaction(moveToTFromC) -> trainEvtToChk {=
+    auto unit = *moveToTFromC.get();
+    trainEvtToChk.set(0);
+  =}
+}
+
+reactor Door {
+  input closeToDFromC: int
+  output doorEvtToChk: int
+  logical action close_action: int
+  logical action finishClose_action: void
+
+  reaction(close_action) -> finishClose_action {=
+    auto unit = *close_action.get();
+    finishClose_action.schedule(1ms);
+  =}
+
+  reaction(closeToDFromC) -> finishClose_action {=
+    auto unit = *closeToDFromC.get();
+    finishClose_action.schedule(1ms);
+  =}
+
+  reaction(finishClose_action) -> doorEvtToChk {=
+    doorEvtToChk.set(0);
+  =}
+}
+
+reactor Controller {
+  output moveToT: int
+  output closeToD: int
+  logical action start_action: void
+
+  reaction(startup) -> start_action {=
+    start_action.schedule(0ms);
+  =}
+
+  reaction(start_action) -> moveToT, closeToD {=
+    moveToT.set(0);
+    closeToD.set(0);
+  =}
+}
+
+reactor KeepAlive {
+  state phase: int = 0
+  logical action tick_action1: void
+  logical action tick_action2: void
+
+  reaction(startup) -> tick_action1 {=
+    phase = 0;
+    tick_action1.schedule(100ms);
+  =}
+
+  reaction(tick_action1) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+
+  reaction(tick_action2) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+}
+
+main reactor {
+  t = new Train()
+  d = new Door()
+  chk = new Checker()
+  c = new Controller()
+  ka = new KeepAlive()
+  t.trainEvtToChk -> chk.trainEvtToChkFromT after 0 msec
+  d.doorEvtToChk -> chk.doorEvtToChkFromD after 0 msec
+  c.moveToT -> t.moveToTFromC after 1 msec
+  c.closeToD -> d.closeToDFromC after 1 msec
+}

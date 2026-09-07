@@ -1,0 +1,107 @@
+// Benchmark: general--traindoor-case-study--positive
+// The paper's RQ1 TrainDoor model, unmodified except four marker
+// parameters on the parameterless external-send targets Checker.trainEvt,
+// Checker.doorEvt, Train.move and Door.close (the translator refuses a
+// parameterless external-send target); see ADAPTATION.md.
+reactiveclass Checker(5) {
+    statevars {
+        int doorClosed;
+        int violation;
+    }
+
+    Checker() {
+        doorClosed = 0;
+        violation = 0;
+    }
+
+    @priority(1)
+    msgsrv trainEvt(int unit) {
+        if (doorClosed == 0) {
+            violation = 1;
+        }
+    }
+
+    @priority(2)
+    msgsrv doorEvt(int unit) {
+        doorClosed = 1;
+    }
+}
+
+reactiveclass Train(5) {
+    knownrebecs {
+        Checker chk;
+    }
+
+    Train() {
+    }
+
+    @priority(1)
+    msgsrv move(int unit) {
+        chk.trainEvt(0);
+    }
+}
+
+reactiveclass Door(5) {
+    knownrebecs {
+        Checker chk;
+    }
+
+    Door() {
+    }
+
+    @priority(1)
+    msgsrv close(int unit) {
+        self.finishClose() after(1);
+    }
+
+    @priority(2)
+    msgsrv finishClose() {
+        chk.doorEvt(0);
+    }
+}
+
+reactiveclass Controller(5) {
+    knownrebecs {
+        Train t;
+        Door d;
+    }
+
+    Controller() {
+        self.start();
+    }
+
+    @priority(1)
+    msgsrv start() {
+        t.move(0) after(1);
+        d.close(0) after(1);
+    }
+}
+
+reactiveclass KeepAlive(2) {
+    statevars {
+        int phase;
+    }
+
+    KeepAlive() {
+        phase = 0;
+        self.tick() after(100);
+    }
+
+    @priority(1)
+    msgsrv tick() {
+        if (phase == 0) {
+            phase = 1;
+        } else {
+            phase = 0;
+        }
+        self.tick() after(100);
+    }
+}
+
+main {
+    @priority(1) Train t(chk):();
+    @priority(1) Door d(chk):();
+    @priority(2) Checker chk():();
+    Controller c(t, d):();
+    KeepAlive ka():();
+}
