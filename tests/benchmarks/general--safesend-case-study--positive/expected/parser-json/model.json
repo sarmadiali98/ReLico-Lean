@@ -1,0 +1,517 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 11,
+            "target": "violation",
+            "value": {
+              "kind": "intLiteral",
+              "line": 11,
+              "value": 0
+            }
+          }
+        ],
+        "line": 10,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 5,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 16,
+                  "name": "v"
+                },
+                "line": 16,
+                "operator": "!=",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 16,
+                  "value": 1
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 16,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 17,
+                  "target": "violation",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 17,
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          ],
+          "line": 15,
+          "name": "replySeen",
+          "parameters": [
+            {
+              "line": 15,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 23,
+              "target": "violation",
+              "value": {
+                "kind": "intLiteral",
+                "line": 23,
+                "value": 1
+              }
+            }
+          ],
+          "line": 22,
+          "name": "errorIn",
+          "parameters": [
+            {
+              "line": 22,
+              "name": "unit",
+              "type": "int"
+            }
+          ],
+          "priority": 2
+        }
+      ],
+      "name": "Checker",
+      "queueBound": 5,
+      "stateVariables": [
+        {
+          "line": 7,
+          "name": "violation",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 38,
+            "target": "req",
+            "value": {
+              "kind": "intLiteral",
+              "line": 38,
+              "value": 0
+            }
+          },
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 39,
+            "messageServer": "start",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Client"
+          }
+        ],
+        "line": 37,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Server",
+          "line": 29,
+          "name": "s"
+        },
+        {
+          "className": "Checker",
+          "line": 30,
+          "name": "chk"
+        }
+      ],
+      "line": 27,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 44,
+              "target": "req",
+              "value": {
+                "kind": "intLiteral",
+                "line": 44,
+                "value": 1
+              }
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 10
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 45,
+                  "name": "req"
+                }
+              ],
+              "kind": "send",
+              "line": 45,
+              "messageServer": "in",
+              "target": {
+                "kind": "knownRebec",
+                "name": "s"
+              },
+              "targetClassName": "Server"
+            }
+          ],
+          "line": 43,
+          "name": "start",
+          "parameters": [],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 50,
+                  "name": "v"
+                }
+              ],
+              "kind": "send",
+              "line": 50,
+              "messageServer": "replySeen",
+              "target": {
+                "kind": "knownRebec",
+                "name": "chk"
+              },
+              "targetClassName": "Checker"
+            }
+          ],
+          "line": 49,
+          "name": "in",
+          "parameters": [
+            {
+              "line": 49,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 2
+        }
+      ],
+      "name": "Client",
+      "queueBound": 5,
+      "stateVariables": [
+        {
+          "line": 34,
+          "name": "req",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [],
+        "line": 60,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Client",
+          "line": 56,
+          "name": "c"
+        },
+        {
+          "className": "Checker",
+          "line": 57,
+          "name": "chk"
+        }
+      ],
+      "line": 54,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 65,
+                  "name": "v"
+                },
+                "line": 65,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 65,
+                  "value": 0
+                }
+              },
+              "else": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 68,
+                      "name": "v"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 68,
+                  "messageServer": "in",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "c"
+                  },
+                  "targetClassName": "Client"
+                }
+              ],
+              "kind": "if",
+              "line": 65,
+              "then": [
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 10
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 66,
+                  "messageServer": "err",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Server"
+                }
+              ]
+            }
+          ],
+          "line": 64,
+          "name": "in",
+          "parameters": [
+            {
+              "line": 64,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "intLiteral",
+                  "line": 74,
+                  "value": 0
+                }
+              ],
+              "kind": "send",
+              "line": 74,
+              "messageServer": "errorIn",
+              "target": {
+                "kind": "knownRebec",
+                "name": "chk"
+              },
+              "targetClassName": "Checker"
+            }
+          ],
+          "line": 73,
+          "name": "err",
+          "parameters": [],
+          "priority": 2
+        }
+      ],
+      "name": "Server",
+      "queueBound": 5,
+      "stateVariables": []
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 84,
+            "target": "phase",
+            "value": {
+              "kind": "intLiteral",
+              "line": 84,
+              "value": 0
+            }
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 100
+            },
+            "arguments": [],
+            "kind": "send",
+            "line": 85,
+            "messageServer": "tick",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "KeepAlive"
+          }
+        ],
+        "line": 83,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 78,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 90,
+                  "name": "phase"
+                },
+                "line": 90,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 90,
+                  "value": 0
+                }
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 93,
+                  "target": "phase",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 93,
+                    "value": 0
+                  }
+                }
+              ],
+              "kind": "if",
+              "line": 90,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 91,
+                  "target": "phase",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 91,
+                    "value": 1
+                  }
+                }
+              ]
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 100
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 95,
+              "messageServer": "tick",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "KeepAlive"
+            }
+          ],
+          "line": 89,
+          "name": "tick",
+          "parameters": [],
+          "priority": 1
+        }
+      ],
+      "name": "KeepAlive",
+      "queueBound": 2,
+      "stateVariables": [
+        {
+          "line": 80,
+          "name": "phase",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Client",
+          "instance": "c",
+          "knownRebec": "c"
+        },
+        {
+          "className": "Checker",
+          "instance": "chk",
+          "knownRebec": "chk"
+        }
+      ],
+      "className": "Server",
+      "line": 100,
+      "name": "s",
+      "priority": 1
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Server",
+          "instance": "s",
+          "knownRebec": "s"
+        },
+        {
+          "className": "Checker",
+          "instance": "chk",
+          "knownRebec": "chk"
+        }
+      ],
+      "className": "Client",
+      "line": 101,
+      "name": "c",
+      "priority": 2
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Checker",
+      "line": 102,
+      "name": "chk",
+      "priority": 3
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "KeepAlive",
+      "line": 103,
+      "name": "ka",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

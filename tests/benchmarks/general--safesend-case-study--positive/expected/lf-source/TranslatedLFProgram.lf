@@ -1,0 +1,116 @@
+target Cpp
+
+reactor Checker {
+  input errorInToChkFromS: int
+  input replySeenToChkFromC: int
+  state violation: int = 0
+  logical action replySeen_action: int
+  logical action errorIn_action: int
+
+  reaction(startup) {=
+    violation = 0;
+  =}
+
+  reaction(replySeen_action) {=
+    auto v = *replySeen_action.get();
+    if ((v != 1)) { violation = 1; } else {}
+  =}
+
+  reaction(replySeenToChkFromC) {=
+    auto v = *replySeenToChkFromC.get();
+    if ((v != 1)) { violation = 1; } else {}
+  =}
+
+  reaction(errorIn_action) {=
+    auto unit = *errorIn_action.get();
+    violation = 1;
+  =}
+
+  reaction(errorInToChkFromS) {=
+    auto unit = *errorInToChkFromS.get();
+    violation = 1;
+  =}
+}
+
+reactor Client {
+  input inToCFromS: int
+  output inToS: int
+  output replySeenToChk: int
+  state req: int = 0
+  logical action start_action: void
+  logical action in_action: int
+
+  reaction(startup) -> start_action {=
+    req = 0;
+    start_action.schedule(0ms);
+  =}
+
+  reaction(start_action) -> inToS {=
+    req = 1;
+    inToS.set(req);
+  =}
+
+  reaction(in_action) -> replySeenToChk {=
+    auto v = *in_action.get();
+    replySeenToChk.set(v);
+  =}
+
+  reaction(inToCFromS) -> replySeenToChk {=
+    auto v = *inToCFromS.get();
+    replySeenToChk.set(v);
+  =}
+}
+
+reactor Server {
+  input inToSFromC: int
+  output inToC: int
+  output errorInToChk: int
+  logical action in_action: int
+  logical action err_action: void
+
+  reaction(in_action) -> err_action, inToC {=
+    auto v = *in_action.get();
+    if ((v == 0)) { err_action.schedule(10ms); } else { inToC.set(v); }
+  =}
+
+  reaction(inToSFromC) -> err_action, inToC {=
+    auto v = *inToSFromC.get();
+    if ((v == 0)) { err_action.schedule(10ms); } else { inToC.set(v); }
+  =}
+
+  reaction(err_action) -> errorInToChk {=
+    errorInToChk.set(0);
+  =}
+}
+
+reactor KeepAlive {
+  state phase: int = 0
+  logical action tick_action1: void
+  logical action tick_action2: void
+
+  reaction(startup) -> tick_action1 {=
+    phase = 0;
+    tick_action1.schedule(100ms);
+  =}
+
+  reaction(tick_action1) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+
+  reaction(tick_action2) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+}
+
+main reactor {
+  s = new Server()
+  c = new Client()
+  chk = new Checker()
+  ka = new KeepAlive()
+  s.inToC -> c.inToCFromS after 0 msec
+  s.errorInToChk -> chk.errorInToChkFromS after 0 msec
+  c.inToS -> s.inToSFromC after 10 msec
+  c.replySeenToChk -> chk.replySeenToChkFromC after 0 msec
+}
