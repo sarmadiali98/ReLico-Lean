@@ -1,0 +1,409 @@
+// Benchmark: general--autonomousvehicles-case-study--positive
+// The paper-named AutonomousVehicles model, redesigned for the DTR
+// fragment: rebec-typed routing state became knownrebec bindings plus
+// kind tags, sender-reply became tag-parameterised static dispatch, the
+// null-terminated segment topology became nextKind tags over full
+// bindings, the CrossController round-trip became a two-binding tag
+// dispatch, computed delays became literal branches over the two
+// speeds, and the all-vehicles-arrived assertion became an
+// allVehiclesReached latch. See ADAPTATION.md for the full mapping.
+
+reactiveclass CrossController(10) {
+    knownrebecs {
+        Segment segA;
+        Segment segB;
+    }
+    statevars {
+        boolean crossIsFree;
+    }
+    CrossController() {
+        crossIsFree = true;
+    }
+    msgsrv giveCrossPermission(int vehicleId, int senderTag) {
+        if (crossIsFree) {
+            crossIsFree = false;
+            if (senderTag == 0) {
+                segA.getCrossPermission(vehicleId);
+            } else {
+                segB.getCrossPermission(vehicleId);
+            }
+        } else {
+            if (senderTag == 0) {
+                segA.crossNotAvailable(vehicleId);
+            } else {
+                segB.crossNotAvailable(vehicleId);
+            }
+        }
+    }
+    msgsrv freeCross(int vehicleId) {
+        crossIsFree = true;
+    }
+}
+
+reactiveclass PrimaryCrusher (14) {
+    knownrebecs {
+        Segment firstSubSegPcToSc;
+        Segment requester;
+    }
+    statevars {
+        boolean isLoading;
+    }
+    PrimaryCrusher() {
+        isLoading = false;
+    }
+    msgsrv givePermisionForVehicle(int vehicleId) {
+        if (isLoading == false) {
+            isLoading = true;
+            requester.getPermision(vehicleId);
+        } else {
+            requester.segmentNotFree(vehicleId);
+        }
+    }
+    msgsrv vehicleEntered(int vehicleId){
+        self.startSendingToNext(vehicleId) after(60);
+    }
+    msgsrv startSendingToNext(int vehicleId){
+        firstSubSegPcToSc.givePermisionForVehicle(vehicleId, -1, 0);
+    }
+    msgsrv getPermision (int vehicleId){
+        isLoading = false;
+        requester.vehicleEntered(vehicleId);
+    }
+    msgsrv segmentNotFree (int vehicleId){
+        self.startSendingToNext(vehicleId) after(25);
+    }
+}
+
+reactiveclass SecondaryCrusher (14) {
+    knownrebecs {
+        Segment firstSubSegScToPrepoint;
+        Segment requester;
+    }
+    statevars {
+        boolean isUnloading;
+    }
+    SecondaryCrusher() {
+        isUnloading = false;
+    }
+    msgsrv givePermisionForVehicle(int vehicleId) {
+        if (isUnloading == false) {
+            isUnloading = true;
+            requester.getPermision(vehicleId);
+        } else {
+            requester.segmentNotFree(vehicleId);
+        }
+    }
+    msgsrv vehicleEntered(int vehicleId){
+        self.startSendingToNext(vehicleId) after(30);
+    }
+    msgsrv startSendingToNext(int vehicleId){
+        firstSubSegScToPrepoint.givePermisionForVehicle(vehicleId, -1, 0);
+    }
+    msgsrv getPermision (int vehicleId){
+        isUnloading = false;
+        requester.vehicleEntered(vehicleId);
+    }
+    msgsrv segmentNotFree (int vehicleId){
+        self.startSendingToNext(vehicleId) after(25);
+    }
+}
+
+reactiveclass WheelLoader (14) {
+    knownrebecs {
+        Segment firstSubSegWlToSc;
+        Segment requester;
+    }
+    statevars {
+        boolean isLoading;
+    }
+    WheelLoader() {
+        isLoading = false;
+    }
+    msgsrv givePermisionForVehicle(int vehicleId) {
+        if (isLoading == false) {
+            isLoading = true;
+            requester.getPermision(vehicleId);
+        } else {
+            requester.segmentNotFree(vehicleId);
+        }
+    }
+    msgsrv vehicleEntered(int vehicleId){
+        self.startSendingToNext(vehicleId) after(60);
+    }
+    msgsrv startSendingToNext(int vehicleId){
+        firstSubSegWlToSc.givePermisionForVehicle(vehicleId, -1, 0);
+    }
+    msgsrv getPermision (int vehicleId){
+        isLoading = false;
+        requester.vehicleEntered(vehicleId);
+    }
+    msgsrv segmentNotFree (int vehicleId){
+        self.startSendingToNext(vehicleId) after(25);
+    }
+}
+
+reactiveclass PrePoint (14) {
+    knownrebecs {
+        Segment firstSubSegPreToE1;
+        Segment firstSubSegPreToE2;
+        Segment requester;
+    }
+    statevars {
+        boolean isBusy;
+        boolean toE1;
+        int count;
+    }
+    PrePoint() {
+        isBusy = false;
+        toE1 = true;
+        count = 0;
+    }
+    msgsrv givePermisionForVehicle(int vehicleId) {
+        if (isBusy == false) {
+            isBusy = true;
+            requester.getPermision(vehicleId);
+        } else {
+            requester.segmentNotFree(vehicleId);
+        }
+    }
+    msgsrv vehicleEntered(int vehicleId) {
+        self.startSendingToNext(vehicleId);
+    }
+    msgsrv startSendingToNext(int vehicleId) {
+        if (toE1) {
+            firstSubSegPreToE1.givePermisionForVehicle(vehicleId, -1, 0);
+        }
+    }
+    msgsrv getPermision (int vehicleId) {
+        isBusy = false;
+        requester.vehicleEntered(vehicleId);
+    }
+    msgsrv segmentNotFree (int vehicleId) {
+        if (toE1) {
+            toE1 = false;
+            firstSubSegPreToE2.givePermisionForVehicle(vehicleId, -1, 0);
+        } else {
+            toE1 = true;
+            self.startSendingToNext(vehicleId) after(25);
+        }
+    }
+}
+
+reactiveclass DecisionStation (14) {
+    knownrebecs {
+        Segment firstSubSegDsToPc;
+        Segment requester;
+    }
+    statevars {
+        boolean vehicle1Reached;
+        boolean vehicle2Reached;
+        boolean allVehiclesReached;
+    }
+    DecisionStation() {
+        self.leaveParkingSlots();
+    }
+    msgsrv leaveParkingSlots() {
+        self.startSendingToNext(1) after(1);
+        self.startSendingToNext(2) after(4);
+    }
+    msgsrv getPermision(int vehicleId) {
+        firstSubSegDsToPc.vehicleEntered(vehicleId);
+    }
+    msgsrv segmentNotFree(int vehicleId, int segmentDes) {
+        self.startSendingToNext(vehicleId) after(25);
+    }
+    msgsrv startSendingToNext(int vehicleId) {
+        firstSubSegDsToPc.givePermisionForVehicle(vehicleId, 1, 2);
+    }
+    msgsrv givePermisionForVehicle(int vehicleId) {
+        requester.getPermision(vehicleId);
+    }
+    msgsrv vehicleEntered(int vehicleId) {
+        if (vehicleId == 1) {
+            vehicle1Reached = true;
+        } else if (vehicleId == 2) {
+            vehicle2Reached = true;
+        }
+        if (vehicle1Reached && vehicle2Reached) {
+            allVehiclesReached = true;
+        }
+    }
+}
+
+reactiveclass Segment(14) {
+    knownrebecs {
+        Segment nextSeg;
+        Segment prevSeg1;
+        Segment prevSeg2;
+        DecisionStation dsS;
+        PrimaryCrusher pcS;
+        SecondaryCrusher scS;
+        WheelLoader wlS;
+        PrePoint preS;
+        CrossController crossCtrl;
+    }
+    statevars {
+        boolean isFree;
+        boolean stoppedVehicle;
+        int vehicleSpeed;
+        int segmentLength;
+        int nextKind;
+        int myNextTag;
+        int crossTag;
+        boolean hasCross;
+    }
+    Segment(int nKind, int spd, int len, boolean hc, int nTag, int cTag) {
+        nextKind = nKind;
+        vehicleSpeed = spd;
+        segmentLength = len;
+        hasCross = hc;
+        myNextTag = nTag;
+        crossTag = cTag;
+        isFree = true;
+        stoppedVehicle = false;
+    }
+    msgsrv givePermisionForVehicle(int vehicleId, int segmentDes, int prevTag) {
+        if (isFree) {
+            isFree = false;
+            if (hasCross) {
+                crossCtrl.giveCrossPermission(vehicleId, crossTag);
+            } else {
+                if (prevTag == 0) {
+                    prevSeg1.getPermision(vehicleId);
+                } else if (prevTag == 1) {
+                    prevSeg2.getPermision(vehicleId);
+                } else if (prevTag == 2) {
+                    dsS.getPermision(vehicleId);
+                } else if (prevTag == 3) {
+                    pcS.getPermision(vehicleId);
+                } else if (prevTag == 4) {
+                    wlS.getPermision(vehicleId);
+                } else if (prevTag == 5) {
+                    scS.getPermision(vehicleId);
+                } else if (prevTag == 6) {
+                    preS.getPermision(vehicleId);
+                }
+            }
+        } else {
+            if (prevTag == 0) {
+                prevSeg1.segmentNotFree(vehicleId);
+            } else if (prevTag == 1) {
+                prevSeg2.segmentNotFree(vehicleId);
+            } else if (prevTag == 2) {
+                dsS.segmentNotFree(vehicleId, segmentDes);
+            } else if (prevTag == 3) {
+                pcS.segmentNotFree(vehicleId);
+            } else if (prevTag == 4) {
+                wlS.segmentNotFree(vehicleId);
+            } else if (prevTag == 5) {
+                scS.segmentNotFree(vehicleId);
+            } else if (prevTag == 6) {
+                preS.segmentNotFree(vehicleId);
+            }
+        }
+    }
+    msgsrv getCrossPermission(int vehicleId) {
+        self.getPermision(vehicleId);
+    }
+    msgsrv vehicleEntered (int vehicleId) {
+        if (vehicleSpeed == 15) {
+            self.startSendingToNext(vehicleId) after(12);
+        } else {
+            self.startSendingToNext(vehicleId) after(25);
+        }
+    }
+    msgsrv crossNotAvailable(int vehicleId) {
+        isFree = true;
+        self.segmentNotFree(vehicleId);
+    }
+    msgsrv startSendingToNext(int vehicleId) {
+        if (nextKind == 0) {
+            nextSeg.givePermisionForVehicle(vehicleId, -1, myNextTag);
+        } else if (nextKind == 1) {
+            pcS.givePermisionForVehicle(vehicleId);
+        } else if (nextKind == 2) {
+            wlS.givePermisionForVehicle(vehicleId);
+        } else if (nextKind == 3) {
+            scS.givePermisionForVehicle(vehicleId);
+        } else if (nextKind == 4) {
+            dsS.givePermisionForVehicle(vehicleId);
+        } else if (nextKind == 5) {
+            preS.givePermisionForVehicle(vehicleId);
+        }
+    }
+    msgsrv getPermision (int vehicleId) {
+        stoppedVehicle = false;
+        if (vehicleSpeed == 15) {
+            self.postPermision(vehicleId) after(1);
+        } else {
+            self.postPermision(vehicleId) after(2);
+        }
+    }
+    msgsrv postPermision(int vehicleId) {
+        isFree = true;
+        if (hasCross) {
+            crossCtrl.freeCross(vehicleId);
+            self.vehicleEntered(vehicleId);
+        } else {
+            if (nextKind == 0) {
+                nextSeg.vehicleEntered(vehicleId);
+            } else if (nextKind == 1) {
+                dsS.vehicleEntered(vehicleId);
+            } else if (nextKind == 2) {
+                pcS.vehicleEntered(vehicleId);
+            } else if (nextKind == 3) {
+                scS.vehicleEntered(vehicleId);
+            } else if (nextKind == 4) {
+                wlS.vehicleEntered(vehicleId);
+            } else if (nextKind == 5) {
+                preS.vehicleEntered(vehicleId);
+            }
+        }
+    }
+    msgsrv segmentNotFree(int vehicleId) {
+        stoppedVehicle = true;
+        self.startSendingToNext(vehicleId) after(25);
+    }
+}
+
+main {
+    PrimaryCrusher pc(subSeg1E2ToS2, subSeg5S6ToE2):();
+    SecondaryCrusher sc(subSeg1E3ToE4, subSeg5S2ToE3):();
+    WheelLoader wl(subSeg1E1ToS2, subSeg3S5ToE1):();
+    DecisionStation ds(subSeg1S4ToPre, subSeg5E3ToE4):();
+    CrossController controller(subSeg2E1ToS2, subSeg3S6ToE2):();
+    PrePoint prePoint(subSeg1S5ToE1, subSeg1S6ToE2, subSeg5S4ToPre):();
+    Segment subSeg1S4ToPre(subSeg2S4ToPre, subSeg2S4ToPre, subSeg2S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 15, 200, false, 0, 0);
+    Segment subSeg2S4ToPre(subSeg3S4ToPre, subSeg1S4ToPre, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 15, 200, false, 0, 0);
+    Segment subSeg3S4ToPre(subSeg4S4ToPre, subSeg2S4ToPre, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 15, 200, false, 0, 0);
+    Segment subSeg4S4ToPre(subSeg5S4ToPre, subSeg3S4ToPre, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 15, 200, false, 0, 0);
+    Segment subSeg5S4ToPre(subSeg1S4ToPre, subSeg4S4ToPre, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(5, 15, 200, false, 0, 0);
+    Segment subSeg1S5ToE1(subSeg2S5ToE1, subSeg1S4ToPre, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 7, 200, false, 0, 0);
+    Segment subSeg2S5ToE1(subSeg3S5ToE1, subSeg1S5ToE1, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 7, 200, false, 0, 0);
+    Segment subSeg3S5ToE1(subSeg1S4ToPre, subSeg2S5ToE1, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(2, 7, 200, false, 0, 0);
+    Segment subSeg1E1ToS2(subSeg2E1ToS2, subSeg1S4ToPre, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 7, 200, false, 0, 0);
+    Segment subSeg2E1ToS2(subSeg3E1ToS2, subSeg1E1ToS2, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 7, 200, true, 0, 0);
+    Segment subSeg3E1ToS2(subSeg4E1ToS2, subSeg2E1ToS2, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 7, 200, false, 0, 0);
+    Segment subSeg4E1ToS2(subSeg5E1ToS2, subSeg3E1ToS2, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 7, 200, false, 0, 0);
+    Segment subSeg5E1ToS2(subSeg1S2ToE3, subSeg4E1ToS2, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 7, 200, false, 0, 0);
+    Segment subSeg1S2ToE3(subSeg2S2ToE3, subSeg5E1ToS2, subSeg5E2ToS2, ds, pc, sc, wl, prePoint, controller):(0, 15, 200, false, 0, 0);
+    Segment subSeg2S2ToE3(subSeg3S2ToE3, subSeg1S2ToE3, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 15, 200, false, 0, 0);
+    Segment subSeg3S2ToE3(subSeg4S2ToE3, subSeg2S2ToE3, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 15, 200, false, 0, 0);
+    Segment subSeg4S2ToE3(subSeg5S2ToE3, subSeg3S2ToE3, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 15, 200, false, 0, 0);
+    Segment subSeg5S2ToE3(subSeg1S4ToPre, subSeg4S2ToE3, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(3, 15, 200, false, 0, 0);
+    Segment subSeg1E2ToS2(subSeg2E2ToS2, subSeg1S4ToPre, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 7, 200, false, 0, 0);
+    Segment subSeg2E2ToS2(subSeg3E2ToS2, subSeg1E2ToS2, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 7, 200, false, 0, 0);
+    Segment subSeg3E2ToS2(subSeg4E2ToS2, subSeg2E2ToS2, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 7, 200, false, 0, 0);
+    Segment subSeg4E2ToS2(subSeg5E2ToS2, subSeg3E2ToS2, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 7, 200, false, 0, 0);
+    Segment subSeg5E2ToS2(subSeg1S2ToE3, subSeg4E2ToS2, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 7, 200, false, 1, 0);
+    Segment subSeg1S6ToE2(subSeg2S6ToE2, subSeg1S4ToPre, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 7, 200, false, 0, 0);
+    Segment subSeg2S6ToE2(subSeg3S6ToE2, subSeg1S6ToE2, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 7, 200, false, 0, 0);
+    Segment subSeg3S6ToE2(subSeg4S6ToE2, subSeg2S6ToE2, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 7, 200, true, 0, 1);
+    Segment subSeg4S6ToE2(subSeg5S6ToE2, subSeg3S6ToE2, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 7, 200, false, 0, 0);
+    Segment subSeg5S6ToE2(subSeg1S4ToPre, subSeg4S6ToE2, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(1, 7, 200, false, 0, 0);
+    Segment subSeg1E3ToE4(subSeg2E3ToE4, subSeg1S4ToPre, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 15, 200, false, 0, 0);
+    Segment subSeg2E3ToE4(subSeg3E3ToE4, subSeg1E3ToE4, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 15, 200, false, 0, 0);
+    Segment subSeg3E3ToE4(subSeg4E3ToE4, subSeg2E3ToE4, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 15, 200, false, 0, 0);
+    Segment subSeg4E3ToE4(subSeg5E3ToE4, subSeg3E3ToE4, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(0, 15, 200, false, 0, 0);
+    Segment subSeg5E3ToE4(subSeg1S4ToPre, subSeg4E3ToE4, subSeg1S4ToPre, ds, pc, sc, wl, prePoint, controller):(4, 15, 200, false, 0, 0);
+}

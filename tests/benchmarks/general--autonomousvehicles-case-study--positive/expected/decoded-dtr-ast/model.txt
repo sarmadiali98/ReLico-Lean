@@ -1,0 +1,1607 @@
+{ classes := [{ name := { value := "CrossController" },
+                knownRebecs := [{ name := { value := "segA" }, className := { value := "Segment" } },
+                                { name := { value := "segB" }, className := { value := "Segment" } }],
+                stateVariables := [{ name := { value := "crossIsFree" },
+                                     declaredType := Relico.DTR.GeneralType.boolean }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "crossIsFree" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral true)] },
+                messageServers := [{ name := { value := "giveCrossPermission" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "senderTag" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.stateVar { value := "crossIsFree" })
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "crossIsFree" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                 Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.parameterVar { value := "senderTag" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "segA" })
+                                                      { value := "getCrossPermission" }
+                                                      [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                      { value := 0 }]
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "segB" })
+                                                      { value := "getCrossPermission" }
+                                                      [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                      { value := 0 }]]
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.parameterVar { value := "senderTag" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "segA" })
+                                                      { value := "crossNotAvailable" }
+                                                      [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                      { value := 0 }]
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "segB" })
+                                                      { value := "crossNotAvailable" }
+                                                      [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                      { value := 0 }]]],
+                                     priority := none },
+                                   { name := { value := "freeCross" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "crossIsFree" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral true)],
+                                     priority := none }] },
+              { name := { value := "PrimaryCrusher" },
+                knownRebecs := [{ name := { value := "firstSubSegPcToSc" }, className := { value := "Segment" } },
+                                { name := { value := "requester" }, className := { value := "Segment" } }],
+                stateVariables := [{ name := { value := "isLoading" },
+                                     declaredType := Relico.DTR.GeneralType.boolean }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "isLoading" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false)] },
+                messageServers := [{ name := { value := "givePermisionForVehicle" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "isLoading" })
+                                                  (Relico.DTR.GeneralExpr.boolLiteral false))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "isLoading" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "requester" })
+                                                   { value := "getPermision" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                   { value := 0 }]
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "requester" })
+                                                   { value := "segmentNotFree" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                   { value := 0 }]],
+                                     priority := none },
+                                   { name := { value := "vehicleEntered" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "startSendingToNext" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                { value := 60 }],
+                                     priority := none },
+                                   { name := { value := "startSendingToNext" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec
+                                                  { value := "firstSubSegPcToSc" })
+                                                { value := "givePermisionForVehicle" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" },
+                                                 Relico.DTR.GeneralExpr.unary
+                                                   (Relico.DTR.GeneralUnaryOp.negate)
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1),
+                                                 Relico.DTR.GeneralExpr.intLiteral 0]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "getPermision" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "isLoading" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral false),
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "requester" })
+                                                { value := "vehicleEntered" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "segmentNotFree" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "startSendingToNext" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                { value := 25 }],
+                                     priority := none }] },
+              { name := { value := "SecondaryCrusher" },
+                knownRebecs := [{ name := { value := "firstSubSegScToPrepoint" }, className := { value := "Segment" } },
+                                { name := { value := "requester" }, className := { value := "Segment" } }],
+                stateVariables := [{ name := { value := "isUnloading" },
+                                     declaredType := Relico.DTR.GeneralType.boolean }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "isUnloading" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false)] },
+                messageServers := [{ name := { value := "givePermisionForVehicle" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "isUnloading" })
+                                                  (Relico.DTR.GeneralExpr.boolLiteral false))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "isUnloading" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "requester" })
+                                                   { value := "getPermision" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                   { value := 0 }]
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "requester" })
+                                                   { value := "segmentNotFree" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                   { value := 0 }]],
+                                     priority := none },
+                                   { name := { value := "vehicleEntered" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "startSendingToNext" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                { value := 30 }],
+                                     priority := none },
+                                   { name := { value := "startSendingToNext" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec
+                                                  { value := "firstSubSegScToPrepoint" })
+                                                { value := "givePermisionForVehicle" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" },
+                                                 Relico.DTR.GeneralExpr.unary
+                                                   (Relico.DTR.GeneralUnaryOp.negate)
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1),
+                                                 Relico.DTR.GeneralExpr.intLiteral 0]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "getPermision" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "isUnloading" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral false),
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "requester" })
+                                                { value := "vehicleEntered" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "segmentNotFree" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "startSendingToNext" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                { value := 25 }],
+                                     priority := none }] },
+              { name := { value := "WheelLoader" },
+                knownRebecs := [{ name := { value := "firstSubSegWlToSc" }, className := { value := "Segment" } },
+                                { name := { value := "requester" }, className := { value := "Segment" } }],
+                stateVariables := [{ name := { value := "isLoading" },
+                                     declaredType := Relico.DTR.GeneralType.boolean }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "isLoading" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false)] },
+                messageServers := [{ name := { value := "givePermisionForVehicle" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "isLoading" })
+                                                  (Relico.DTR.GeneralExpr.boolLiteral false))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "isLoading" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "requester" })
+                                                   { value := "getPermision" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                   { value := 0 }]
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "requester" })
+                                                   { value := "segmentNotFree" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                   { value := 0 }]],
+                                     priority := none },
+                                   { name := { value := "vehicleEntered" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "startSendingToNext" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                { value := 60 }],
+                                     priority := none },
+                                   { name := { value := "startSendingToNext" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec
+                                                  { value := "firstSubSegWlToSc" })
+                                                { value := "givePermisionForVehicle" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" },
+                                                 Relico.DTR.GeneralExpr.unary
+                                                   (Relico.DTR.GeneralUnaryOp.negate)
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1),
+                                                 Relico.DTR.GeneralExpr.intLiteral 0]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "getPermision" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "isLoading" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral false),
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "requester" })
+                                                { value := "vehicleEntered" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "segmentNotFree" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "startSendingToNext" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                { value := 25 }],
+                                     priority := none }] },
+              { name := { value := "PrePoint" },
+                knownRebecs := [{ name := { value := "firstSubSegPreToE1" }, className := { value := "Segment" } },
+                                { name := { value := "firstSubSegPreToE2" }, className := { value := "Segment" } },
+                                { name := { value := "requester" }, className := { value := "Segment" } }],
+                stateVariables := [{ name := { value := "isBusy" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "toE1" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "count" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "isBusy" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "toE1" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral true),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "count" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0)] },
+                messageServers := [{ name := { value := "givePermisionForVehicle" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "isBusy" })
+                                                  (Relico.DTR.GeneralExpr.boolLiteral false))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "isBusy" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "requester" })
+                                                   { value := "getPermision" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                   { value := 0 }]
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "requester" })
+                                                   { value := "segmentNotFree" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                   { value := 0 }]],
+                                     priority := none },
+                                   { name := { value := "vehicleEntered" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "startSendingToNext" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "startSendingToNext" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.stateVar { value := "toE1" })
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec
+                                                     { value := "firstSubSegPreToE1" })
+                                                   { value := "givePermisionForVehicle" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" },
+                                                    Relico.DTR.GeneralExpr.unary
+                                                      (Relico.DTR.GeneralUnaryOp.negate)
+                                                      (Relico.DTR.GeneralExpr.intLiteral 1),
+                                                    Relico.DTR.GeneralExpr.intLiteral 0]
+                                                   { value := 0 }]
+                                                []],
+                                     priority := none },
+                                   { name := { value := "getPermision" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "isBusy" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral false),
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "requester" })
+                                                { value := "vehicleEntered" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "segmentNotFree" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.stateVar { value := "toE1" })
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "toE1" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec
+                                                     { value := "firstSubSegPreToE2" })
+                                                   { value := "givePermisionForVehicle" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" },
+                                                    Relico.DTR.GeneralExpr.unary
+                                                      (Relico.DTR.GeneralUnaryOp.negate)
+                                                      (Relico.DTR.GeneralExpr.intLiteral 1),
+                                                    Relico.DTR.GeneralExpr.intLiteral 0]
+                                                   { value := 0 }]
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "toE1" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "startSendingToNext" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                   { value := 25 }]],
+                                     priority := none }] },
+              { name := { value := "DecisionStation" },
+                knownRebecs := [{ name := { value := "firstSubSegDsToPc" }, className := { value := "Segment" } },
+                                { name := { value := "requester" }, className := { value := "Segment" } }],
+                stateVariables := [{ name := { value := "vehicle1Reached" },
+                                     declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "vehicle2Reached" },
+                                     declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "allVehiclesReached" },
+                                     declaredType := Relico.DTR.GeneralType.boolean }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "leaveParkingSlots" }
+                                            []
+                                            { value := 0 }] },
+                messageServers := [{ name := { value := "leaveParkingSlots" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "startSendingToNext" }
+                                                [Relico.DTR.GeneralExpr.intLiteral 1]
+                                                { value := 1 },
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "startSendingToNext" }
+                                                [Relico.DTR.GeneralExpr.intLiteral 2]
+                                                { value := 4 }],
+                                     priority := none },
+                                   { name := { value := "getPermision" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec
+                                                  { value := "firstSubSegDsToPc" })
+                                                { value := "vehicleEntered" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "segmentNotFree" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "segmentDes" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "startSendingToNext" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                { value := 25 }],
+                                     priority := none },
+                                   { name := { value := "startSendingToNext" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec
+                                                  { value := "firstSubSegDsToPc" })
+                                                { value := "givePermisionForVehicle" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" },
+                                                 Relico.DTR.GeneralExpr.intLiteral 1,
+                                                 Relico.DTR.GeneralExpr.intLiteral 2]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "givePermisionForVehicle" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "requester" })
+                                                { value := "getPermision" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "vehicleEntered" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "vehicle1Reached" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "vehicle2Reached" }
+                                                      (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                   []],
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "vehicle1Reached" })
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "vehicle2Reached" }))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "allVehiclesReached" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                []],
+                                     priority := none }] },
+              { name := { value := "Segment" },
+                knownRebecs := [{ name := { value := "nextSeg" }, className := { value := "Segment" } },
+                                { name := { value := "prevSeg1" }, className := { value := "Segment" } },
+                                { name := { value := "prevSeg2" }, className := { value := "Segment" } },
+                                { name := { value := "dsS" }, className := { value := "DecisionStation" } },
+                                { name := { value := "pcS" }, className := { value := "PrimaryCrusher" } },
+                                { name := { value := "scS" }, className := { value := "SecondaryCrusher" } },
+                                { name := { value := "wlS" }, className := { value := "WheelLoader" } },
+                                { name := { value := "preS" }, className := { value := "PrePoint" } },
+                                { name := { value := "crossCtrl" }, className := { value := "CrossController" } }],
+                stateVariables := [{ name := { value := "isFree" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "stoppedVehicle" },
+                                     declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "vehicleSpeed" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "segmentLength" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "nextKind" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "myNextTag" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "crossTag" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "hasCross" }, declaredType := Relico.DTR.GeneralType.boolean }],
+                constructor := { parameters := [{ name := { value := "nKind" },
+                                                  declaredType := Relico.DTR.GeneralType.int },
+                                                { name := { value := "spd" },
+                                                  declaredType := Relico.DTR.GeneralType.int },
+                                                { name := { value := "len" },
+                                                  declaredType := Relico.DTR.GeneralType.int },
+                                                { name := { value := "hc" },
+                                                  declaredType := Relico.DTR.GeneralType.boolean },
+                                                { name := { value := "nTag" },
+                                                  declaredType := Relico.DTR.GeneralType.int },
+                                                { name := { value := "cTag" },
+                                                  declaredType := Relico.DTR.GeneralType.int }],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "nextKind" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "nKind" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "vehicleSpeed" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "spd" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "segmentLength" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "len" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "hasCross" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "hc" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "myNextTag" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "nTag" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "crossTag" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "cTag" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "isFree" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral true),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "stoppedVehicle" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false)] },
+                messageServers := [{ name := { value := "givePermisionForVehicle" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "segmentDes" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "prevTag" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.stateVar { value := "isFree" })
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "isFree" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                 Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.stateVar { value := "hasCross" })
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "crossCtrl" })
+                                                      { value := "giveCrossPermission" }
+                                                      [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" },
+                                                       Relico.DTR.GeneralExpr.stateVar { value := "crossTag" }]
+                                                      { value := 0 }]
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.eq)
+                                                        (Relico.DTR.GeneralExpr.parameterVar { value := "prevTag" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec
+                                                           { value := "prevSeg1" })
+                                                         { value := "getPermision" }
+                                                         [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                         { value := 0 }]
+                                                      [Relico.DTR.GeneralStmt.ifThenElse
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.eq)
+                                                           (Relico.DTR.GeneralExpr.parameterVar { value := "prevTag" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                         [Relico.DTR.GeneralStmt.send
+                                                            (Relico.DTR.GeneralSendTarget.knownRebec
+                                                              { value := "prevSeg2" })
+                                                            { value := "getPermision" }
+                                                            [Relico.DTR.GeneralExpr.parameterVar
+                                                               { value := "vehicleId" }]
+                                                            { value := 0 }]
+                                                         [Relico.DTR.GeneralStmt.ifThenElse
+                                                            (Relico.DTR.GeneralExpr.binary
+                                                              (Relico.DTR.GeneralBinaryOp.eq)
+                                                              (Relico.DTR.GeneralExpr.parameterVar
+                                                                { value := "prevTag" })
+                                                              (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                            [Relico.DTR.GeneralStmt.send
+                                                               (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                 { value := "dsS" })
+                                                               { value := "getPermision" }
+                                                               [Relico.DTR.GeneralExpr.parameterVar
+                                                                  { value := "vehicleId" }]
+                                                               { value := 0 }]
+                                                            [Relico.DTR.GeneralStmt.ifThenElse
+                                                               (Relico.DTR.GeneralExpr.binary
+                                                                 (Relico.DTR.GeneralBinaryOp.eq)
+                                                                 (Relico.DTR.GeneralExpr.parameterVar
+                                                                   { value := "prevTag" })
+                                                                 (Relico.DTR.GeneralExpr.intLiteral 3))
+                                                               [Relico.DTR.GeneralStmt.send
+                                                                  (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                    { value := "pcS" })
+                                                                  { value := "getPermision" }
+                                                                  [Relico.DTR.GeneralExpr.parameterVar
+                                                                     { value := "vehicleId" }]
+                                                                  { value := 0 }]
+                                                               [Relico.DTR.GeneralStmt.ifThenElse
+                                                                  (Relico.DTR.GeneralExpr.binary
+                                                                    (Relico.DTR.GeneralBinaryOp.eq)
+                                                                    (Relico.DTR.GeneralExpr.parameterVar
+                                                                      { value := "prevTag" })
+                                                                    (Relico.DTR.GeneralExpr.intLiteral 4))
+                                                                  [Relico.DTR.GeneralStmt.send
+                                                                     (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                       { value := "wlS" })
+                                                                     { value := "getPermision" }
+                                                                     [Relico.DTR.GeneralExpr.parameterVar
+                                                                        { value := "vehicleId" }]
+                                                                     { value := 0 }]
+                                                                  [Relico.DTR.GeneralStmt.ifThenElse
+                                                                     (Relico.DTR.GeneralExpr.binary
+                                                                       (Relico.DTR.GeneralBinaryOp.eq)
+                                                                       (Relico.DTR.GeneralExpr.parameterVar
+                                                                         { value := "prevTag" })
+                                                                       (Relico.DTR.GeneralExpr.intLiteral 5))
+                                                                     [Relico.DTR.GeneralStmt.send
+                                                                        (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                          { value := "scS" })
+                                                                        { value := "getPermision" }
+                                                                        [Relico.DTR.GeneralExpr.parameterVar
+                                                                           { value := "vehicleId" }]
+                                                                        { value := 0 }]
+                                                                     [Relico.DTR.GeneralStmt.ifThenElse
+                                                                        (Relico.DTR.GeneralExpr.binary
+                                                                          (Relico.DTR.GeneralBinaryOp.eq)
+                                                                          (Relico.DTR.GeneralExpr.parameterVar
+                                                                            { value := "prevTag" })
+                                                                          (Relico.DTR.GeneralExpr.intLiteral 6))
+                                                                        [Relico.DTR.GeneralStmt.send
+                                                                           (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                             { value := "preS" })
+                                                                           { value := "getPermision" }
+                                                                           [Relico.DTR.GeneralExpr.parameterVar
+                                                                              { value := "vehicleId" }]
+                                                                           { value := 0 }]
+                                                                        []]]]]]]]]
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.parameterVar { value := "prevTag" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "prevSeg1" })
+                                                      { value := "segmentNotFree" }
+                                                      [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                      { value := 0 }]
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.eq)
+                                                        (Relico.DTR.GeneralExpr.parameterVar { value := "prevTag" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec
+                                                           { value := "prevSeg2" })
+                                                         { value := "segmentNotFree" }
+                                                         [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                         { value := 0 }]
+                                                      [Relico.DTR.GeneralStmt.ifThenElse
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.eq)
+                                                           (Relico.DTR.GeneralExpr.parameterVar { value := "prevTag" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                         [Relico.DTR.GeneralStmt.send
+                                                            (Relico.DTR.GeneralSendTarget.knownRebec { value := "dsS" })
+                                                            { value := "segmentNotFree" }
+                                                            [Relico.DTR.GeneralExpr.parameterVar
+                                                               { value := "vehicleId" },
+                                                             Relico.DTR.GeneralExpr.parameterVar
+                                                               { value := "segmentDes" }]
+                                                            { value := 0 }]
+                                                         [Relico.DTR.GeneralStmt.ifThenElse
+                                                            (Relico.DTR.GeneralExpr.binary
+                                                              (Relico.DTR.GeneralBinaryOp.eq)
+                                                              (Relico.DTR.GeneralExpr.parameterVar
+                                                                { value := "prevTag" })
+                                                              (Relico.DTR.GeneralExpr.intLiteral 3))
+                                                            [Relico.DTR.GeneralStmt.send
+                                                               (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                 { value := "pcS" })
+                                                               { value := "segmentNotFree" }
+                                                               [Relico.DTR.GeneralExpr.parameterVar
+                                                                  { value := "vehicleId" }]
+                                                               { value := 0 }]
+                                                            [Relico.DTR.GeneralStmt.ifThenElse
+                                                               (Relico.DTR.GeneralExpr.binary
+                                                                 (Relico.DTR.GeneralBinaryOp.eq)
+                                                                 (Relico.DTR.GeneralExpr.parameterVar
+                                                                   { value := "prevTag" })
+                                                                 (Relico.DTR.GeneralExpr.intLiteral 4))
+                                                               [Relico.DTR.GeneralStmt.send
+                                                                  (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                    { value := "wlS" })
+                                                                  { value := "segmentNotFree" }
+                                                                  [Relico.DTR.GeneralExpr.parameterVar
+                                                                     { value := "vehicleId" }]
+                                                                  { value := 0 }]
+                                                               [Relico.DTR.GeneralStmt.ifThenElse
+                                                                  (Relico.DTR.GeneralExpr.binary
+                                                                    (Relico.DTR.GeneralBinaryOp.eq)
+                                                                    (Relico.DTR.GeneralExpr.parameterVar
+                                                                      { value := "prevTag" })
+                                                                    (Relico.DTR.GeneralExpr.intLiteral 5))
+                                                                  [Relico.DTR.GeneralStmt.send
+                                                                     (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                       { value := "scS" })
+                                                                     { value := "segmentNotFree" }
+                                                                     [Relico.DTR.GeneralExpr.parameterVar
+                                                                        { value := "vehicleId" }]
+                                                                     { value := 0 }]
+                                                                  [Relico.DTR.GeneralStmt.ifThenElse
+                                                                     (Relico.DTR.GeneralExpr.binary
+                                                                       (Relico.DTR.GeneralBinaryOp.eq)
+                                                                       (Relico.DTR.GeneralExpr.parameterVar
+                                                                         { value := "prevTag" })
+                                                                       (Relico.DTR.GeneralExpr.intLiteral 6))
+                                                                     [Relico.DTR.GeneralStmt.send
+                                                                        (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                          { value := "preS" })
+                                                                        { value := "segmentNotFree" }
+                                                                        [Relico.DTR.GeneralExpr.parameterVar
+                                                                           { value := "vehicleId" }]
+                                                                        { value := 0 }]
+                                                                     []]]]]]]]],
+                                     priority := none },
+                                   { name := { value := "getCrossPermission" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "getPermision" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "vehicleEntered" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "vehicleSpeed" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 15))
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "startSendingToNext" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                   { value := 12 }]
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "startSendingToNext" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                   { value := 25 }]],
+                                     priority := none },
+                                   { name := { value := "crossNotAvailable" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "isFree" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral true),
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "segmentNotFree" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "startSendingToNext" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "nextKind" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "nextSeg" })
+                                                   { value := "givePermisionForVehicle" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" },
+                                                    Relico.DTR.GeneralExpr.unary
+                                                      (Relico.DTR.GeneralUnaryOp.negate)
+                                                      (Relico.DTR.GeneralExpr.intLiteral 1),
+                                                    Relico.DTR.GeneralExpr.stateVar { value := "myNextTag" }]
+                                                   { value := 0 }]
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.stateVar { value := "nextKind" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "pcS" })
+                                                      { value := "givePermisionForVehicle" }
+                                                      [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                      { value := 0 }]
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.eq)
+                                                        (Relico.DTR.GeneralExpr.stateVar { value := "nextKind" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec { value := "wlS" })
+                                                         { value := "givePermisionForVehicle" }
+                                                         [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                         { value := 0 }]
+                                                      [Relico.DTR.GeneralStmt.ifThenElse
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.eq)
+                                                           (Relico.DTR.GeneralExpr.stateVar { value := "nextKind" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 3))
+                                                         [Relico.DTR.GeneralStmt.send
+                                                            (Relico.DTR.GeneralSendTarget.knownRebec { value := "scS" })
+                                                            { value := "givePermisionForVehicle" }
+                                                            [Relico.DTR.GeneralExpr.parameterVar
+                                                               { value := "vehicleId" }]
+                                                            { value := 0 }]
+                                                         [Relico.DTR.GeneralStmt.ifThenElse
+                                                            (Relico.DTR.GeneralExpr.binary
+                                                              (Relico.DTR.GeneralBinaryOp.eq)
+                                                              (Relico.DTR.GeneralExpr.stateVar { value := "nextKind" })
+                                                              (Relico.DTR.GeneralExpr.intLiteral 4))
+                                                            [Relico.DTR.GeneralStmt.send
+                                                               (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                 { value := "dsS" })
+                                                               { value := "givePermisionForVehicle" }
+                                                               [Relico.DTR.GeneralExpr.parameterVar
+                                                                  { value := "vehicleId" }]
+                                                               { value := 0 }]
+                                                            [Relico.DTR.GeneralStmt.ifThenElse
+                                                               (Relico.DTR.GeneralExpr.binary
+                                                                 (Relico.DTR.GeneralBinaryOp.eq)
+                                                                 (Relico.DTR.GeneralExpr.stateVar
+                                                                   { value := "nextKind" })
+                                                                 (Relico.DTR.GeneralExpr.intLiteral 5))
+                                                               [Relico.DTR.GeneralStmt.send
+                                                                  (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                    { value := "preS" })
+                                                                  { value := "givePermisionForVehicle" }
+                                                                  [Relico.DTR.GeneralExpr.parameterVar
+                                                                     { value := "vehicleId" }]
+                                                                  { value := 0 }]
+                                                               []]]]]]],
+                                     priority := none },
+                                   { name := { value := "getPermision" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "stoppedVehicle" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral false),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "vehicleSpeed" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 15))
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "postPermision" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                   { value := 1 }]
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "postPermision" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                   { value := 2 }]],
+                                     priority := none },
+                                   { name := { value := "postPermision" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "isFree" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral true),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.stateVar { value := "hasCross" })
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "crossCtrl" })
+                                                   { value := "freeCross" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                   { value := 0 },
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "vehicleEntered" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                   { value := 0 }]
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.stateVar { value := "nextKind" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "nextSeg" })
+                                                      { value := "vehicleEntered" }
+                                                      [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                      { value := 0 }]
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.eq)
+                                                        (Relico.DTR.GeneralExpr.stateVar { value := "nextKind" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec { value := "dsS" })
+                                                         { value := "vehicleEntered" }
+                                                         [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                         { value := 0 }]
+                                                      [Relico.DTR.GeneralStmt.ifThenElse
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.eq)
+                                                           (Relico.DTR.GeneralExpr.stateVar { value := "nextKind" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                         [Relico.DTR.GeneralStmt.send
+                                                            (Relico.DTR.GeneralSendTarget.knownRebec { value := "pcS" })
+                                                            { value := "vehicleEntered" }
+                                                            [Relico.DTR.GeneralExpr.parameterVar
+                                                               { value := "vehicleId" }]
+                                                            { value := 0 }]
+                                                         [Relico.DTR.GeneralStmt.ifThenElse
+                                                            (Relico.DTR.GeneralExpr.binary
+                                                              (Relico.DTR.GeneralBinaryOp.eq)
+                                                              (Relico.DTR.GeneralExpr.stateVar { value := "nextKind" })
+                                                              (Relico.DTR.GeneralExpr.intLiteral 3))
+                                                            [Relico.DTR.GeneralStmt.send
+                                                               (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                 { value := "scS" })
+                                                               { value := "vehicleEntered" }
+                                                               [Relico.DTR.GeneralExpr.parameterVar
+                                                                  { value := "vehicleId" }]
+                                                               { value := 0 }]
+                                                            [Relico.DTR.GeneralStmt.ifThenElse
+                                                               (Relico.DTR.GeneralExpr.binary
+                                                                 (Relico.DTR.GeneralBinaryOp.eq)
+                                                                 (Relico.DTR.GeneralExpr.stateVar
+                                                                   { value := "nextKind" })
+                                                                 (Relico.DTR.GeneralExpr.intLiteral 4))
+                                                               [Relico.DTR.GeneralStmt.send
+                                                                  (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                    { value := "wlS" })
+                                                                  { value := "vehicleEntered" }
+                                                                  [Relico.DTR.GeneralExpr.parameterVar
+                                                                     { value := "vehicleId" }]
+                                                                  { value := 0 }]
+                                                               [Relico.DTR.GeneralStmt.ifThenElse
+                                                                  (Relico.DTR.GeneralExpr.binary
+                                                                    (Relico.DTR.GeneralBinaryOp.eq)
+                                                                    (Relico.DTR.GeneralExpr.stateVar
+                                                                      { value := "nextKind" })
+                                                                    (Relico.DTR.GeneralExpr.intLiteral 5))
+                                                                  [Relico.DTR.GeneralStmt.send
+                                                                     (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                       { value := "preS" })
+                                                                     { value := "vehicleEntered" }
+                                                                     [Relico.DTR.GeneralExpr.parameterVar
+                                                                        { value := "vehicleId" }]
+                                                                     { value := 0 }]
+                                                                  []]]]]]]],
+                                     priority := none },
+                                   { name := { value := "segmentNotFree" },
+                                     parameters := [{ name := { value := "vehicleId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "stoppedVehicle" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral true),
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "startSendingToNext" }
+                                                [Relico.DTR.GeneralExpr.parameterVar { value := "vehicleId" }]
+                                                { value := 25 }],
+                                     priority := none }] }],
+  instances := [{ name := { value := "pc" },
+                  className := { value := "PrimaryCrusher" },
+                  bindings := [({ value := "firstSubSegPcToSc" }, { value := "subSeg1E2ToS2" }),
+                               ({ value := "requester" }, { value := "subSeg5S6ToE2" })],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "sc" },
+                  className := { value := "SecondaryCrusher" },
+                  bindings := [({ value := "firstSubSegScToPrepoint" }, { value := "subSeg1E3ToE4" }),
+                               ({ value := "requester" }, { value := "subSeg5S2ToE3" })],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "wl" },
+                  className := { value := "WheelLoader" },
+                  bindings := [({ value := "firstSubSegWlToSc" }, { value := "subSeg1E1ToS2" }),
+                               ({ value := "requester" }, { value := "subSeg3S5ToE1" })],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "ds" },
+                  className := { value := "DecisionStation" },
+                  bindings := [({ value := "firstSubSegDsToPc" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "requester" }, { value := "subSeg5E3ToE4" })],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "controller" },
+                  className := { value := "CrossController" },
+                  bindings := [({ value := "segA" }, { value := "subSeg2E1ToS2" }),
+                               ({ value := "segB" }, { value := "subSeg3S6ToE2" })],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "prePoint" },
+                  className := { value := "PrePoint" },
+                  bindings := [({ value := "firstSubSegPreToE1" }, { value := "subSeg1S5ToE1" }),
+                               ({ value := "firstSubSegPreToE2" }, { value := "subSeg1S6ToE2" }),
+                               ({ value := "requester" }, { value := "subSeg5S4ToPre" })],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "subSeg1S4ToPre" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg2S4ToPre" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg2S4ToPre" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg2S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 15,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg2S4ToPre" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg3S4ToPre" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 15,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg3S4ToPre" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg4S4ToPre" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg2S4ToPre" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 15,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg4S4ToPre" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg5S4ToPre" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg3S4ToPre" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 15,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg5S4ToPre" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg4S4ToPre" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 5,
+                                Relico.DTR.GeneralValue.int 15,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg1S5ToE1" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg2S5ToE1" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 7,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg2S5ToE1" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg3S5ToE1" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg1S5ToE1" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 7,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg3S5ToE1" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg2S5ToE1" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 2,
+                                Relico.DTR.GeneralValue.int 7,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg1E1ToS2" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg2E1ToS2" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 7,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg2E1ToS2" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg3E1ToS2" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg1E1ToS2" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 7,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool true,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg3E1ToS2" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg4E1ToS2" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg2E1ToS2" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 7,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg4E1ToS2" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg5E1ToS2" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg3E1ToS2" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 7,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg5E1ToS2" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg1S2ToE3" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg4E1ToS2" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 7,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg1S2ToE3" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg2S2ToE3" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg5E1ToS2" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg5E2ToS2" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 15,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg2S2ToE3" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg3S2ToE3" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg1S2ToE3" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 15,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg3S2ToE3" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg4S2ToE3" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg2S2ToE3" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 15,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg4S2ToE3" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg5S2ToE3" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg3S2ToE3" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 15,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg5S2ToE3" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg4S2ToE3" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 3,
+                                Relico.DTR.GeneralValue.int 15,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg1E2ToS2" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg2E2ToS2" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 7,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg2E2ToS2" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg3E2ToS2" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg1E2ToS2" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 7,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg3E2ToS2" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg4E2ToS2" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg2E2ToS2" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 7,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg4E2ToS2" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg5E2ToS2" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg3E2ToS2" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 7,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg5E2ToS2" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg1S2ToE3" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg4E2ToS2" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 7,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 1,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg1S6ToE2" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg2S6ToE2" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 7,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg2S6ToE2" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg3S6ToE2" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg1S6ToE2" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 7,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg3S6ToE2" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg4S6ToE2" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg2S6ToE2" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 7,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool true,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 1],
+                  priority := none },
+                { name := { value := "subSeg4S6ToE2" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg5S6ToE2" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg3S6ToE2" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 7,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg5S6ToE2" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg4S6ToE2" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 1,
+                                Relico.DTR.GeneralValue.int 7,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg1E3ToE4" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg2E3ToE4" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 15,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg2E3ToE4" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg3E3ToE4" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg1E3ToE4" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 15,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg3E3ToE4" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg4E3ToE4" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg2E3ToE4" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 15,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg4E3ToE4" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg5E3ToE4" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg3E3ToE4" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 15,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "subSeg5E3ToE4" },
+                  className := { value := "Segment" },
+                  bindings := [({ value := "nextSeg" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "prevSeg1" }, { value := "subSeg4E3ToE4" }),
+                               ({ value := "prevSeg2" }, { value := "subSeg1S4ToPre" }),
+                               ({ value := "dsS" }, { value := "ds" }),
+                               ({ value := "pcS" }, { value := "pc" }),
+                               ({ value := "scS" }, { value := "sc" }),
+                               ({ value := "wlS" }, { value := "wl" }),
+                               ({ value := "preS" }, { value := "prePoint" }),
+                               ({ value := "crossCtrl" }, { value := "controller" })],
+                  arguments := [Relico.DTR.GeneralValue.int 4,
+                                Relico.DTR.GeneralValue.int 15,
+                                Relico.DTR.GeneralValue.int 200,
+                                Relico.DTR.GeneralValue.bool false,
+                                Relico.DTR.GeneralValue.int 0,
+                                Relico.DTR.GeneralValue.int 0],
+                  priority := none }] }

@@ -1,0 +1,6299 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 20,
+            "target": "crossIsFree",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 20,
+              "value": true
+            }
+          }
+        ],
+        "line": 19,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Segment",
+          "line": 13,
+          "name": "segA"
+        },
+        {
+          "className": "Segment",
+          "line": 14,
+          "name": "segB"
+        }
+      ],
+      "line": 11,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "variable",
+                "line": 23,
+                "name": "crossIsFree"
+              },
+              "else": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 31,
+                      "name": "senderTag"
+                    },
+                    "line": 31,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 31,
+                      "value": 0
+                    }
+                  },
+                  "else": [
+                    {
+                      "after": null,
+                      "arguments": [
+                        {
+                          "kind": "variable",
+                          "line": 34,
+                          "name": "vehicleId"
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 34,
+                      "messageServer": "crossNotAvailable",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "segB"
+                      },
+                      "targetClassName": "Segment"
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 31,
+                  "then": [
+                    {
+                      "after": null,
+                      "arguments": [
+                        {
+                          "kind": "variable",
+                          "line": 32,
+                          "name": "vehicleId"
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 32,
+                      "messageServer": "crossNotAvailable",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "segA"
+                      },
+                      "targetClassName": "Segment"
+                    }
+                  ]
+                }
+              ],
+              "kind": "if",
+              "line": 23,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 24,
+                  "target": "crossIsFree",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 24,
+                    "value": false
+                  }
+                },
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 25,
+                      "name": "senderTag"
+                    },
+                    "line": 25,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 25,
+                      "value": 0
+                    }
+                  },
+                  "else": [
+                    {
+                      "after": null,
+                      "arguments": [
+                        {
+                          "kind": "variable",
+                          "line": 28,
+                          "name": "vehicleId"
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 28,
+                      "messageServer": "getCrossPermission",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "segB"
+                      },
+                      "targetClassName": "Segment"
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 25,
+                  "then": [
+                    {
+                      "after": null,
+                      "arguments": [
+                        {
+                          "kind": "variable",
+                          "line": 26,
+                          "name": "vehicleId"
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 26,
+                      "messageServer": "getCrossPermission",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "segA"
+                      },
+                      "targetClassName": "Segment"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "line": 22,
+          "name": "giveCrossPermission",
+          "parameters": [
+            {
+              "line": 22,
+              "name": "vehicleId",
+              "type": "int"
+            },
+            {
+              "line": 22,
+              "name": "senderTag",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 39,
+              "target": "crossIsFree",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 39,
+                "value": true
+              }
+            }
+          ],
+          "line": 38,
+          "name": "freeCross",
+          "parameters": [
+            {
+              "line": 38,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "CrossController",
+      "queueBound": 10,
+      "stateVariables": [
+        {
+          "line": 17,
+          "name": "crossIsFree",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 52,
+            "target": "isLoading",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 52,
+              "value": false
+            }
+          }
+        ],
+        "line": 51,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Segment",
+          "line": 45,
+          "name": "firstSubSegPcToSc"
+        },
+        {
+          "className": "Segment",
+          "line": 46,
+          "name": "requester"
+        }
+      ],
+      "line": 43,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 55,
+                  "name": "isLoading"
+                },
+                "line": 55,
+                "operator": "==",
+                "right": {
+                  "kind": "boolLiteral",
+                  "line": 55,
+                  "value": false
+                }
+              },
+              "else": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 59,
+                      "name": "vehicleId"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 59,
+                  "messageServer": "segmentNotFree",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "requester"
+                  },
+                  "targetClassName": "Segment"
+                }
+              ],
+              "kind": "if",
+              "line": 55,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 56,
+                  "target": "isLoading",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 56,
+                    "value": true
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 57,
+                      "name": "vehicleId"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 57,
+                  "messageServer": "getPermision",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "requester"
+                  },
+                  "targetClassName": "Segment"
+                }
+              ]
+            }
+          ],
+          "line": 54,
+          "name": "givePermisionForVehicle",
+          "parameters": [
+            {
+              "line": 54,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 60
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 63,
+                  "name": "vehicleId"
+                }
+              ],
+              "kind": "send",
+              "line": 63,
+              "messageServer": "startSendingToNext",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "PrimaryCrusher"
+            }
+          ],
+          "line": 62,
+          "name": "vehicleEntered",
+          "parameters": [
+            {
+              "line": 62,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 66,
+                  "name": "vehicleId"
+                },
+                {
+                  "kind": "unary",
+                  "line": 66,
+                  "operand": {
+                    "kind": "intLiteral",
+                    "line": 66,
+                    "value": 1
+                  },
+                  "operator": "-"
+                },
+                {
+                  "kind": "intLiteral",
+                  "line": 66,
+                  "value": 0
+                }
+              ],
+              "kind": "send",
+              "line": 66,
+              "messageServer": "givePermisionForVehicle",
+              "target": {
+                "kind": "knownRebec",
+                "name": "firstSubSegPcToSc"
+              },
+              "targetClassName": "Segment"
+            }
+          ],
+          "line": 65,
+          "name": "startSendingToNext",
+          "parameters": [
+            {
+              "line": 65,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 69,
+              "target": "isLoading",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 69,
+                "value": false
+              }
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 70,
+                  "name": "vehicleId"
+                }
+              ],
+              "kind": "send",
+              "line": 70,
+              "messageServer": "vehicleEntered",
+              "target": {
+                "kind": "knownRebec",
+                "name": "requester"
+              },
+              "targetClassName": "Segment"
+            }
+          ],
+          "line": 68,
+          "name": "getPermision",
+          "parameters": [
+            {
+              "line": 68,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 25
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 73,
+                  "name": "vehicleId"
+                }
+              ],
+              "kind": "send",
+              "line": 73,
+              "messageServer": "startSendingToNext",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "PrimaryCrusher"
+            }
+          ],
+          "line": 72,
+          "name": "segmentNotFree",
+          "parameters": [
+            {
+              "line": 72,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "PrimaryCrusher",
+      "queueBound": 14,
+      "stateVariables": [
+        {
+          "line": 49,
+          "name": "isLoading",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 86,
+            "target": "isUnloading",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 86,
+              "value": false
+            }
+          }
+        ],
+        "line": 85,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Segment",
+          "line": 79,
+          "name": "firstSubSegScToPrepoint"
+        },
+        {
+          "className": "Segment",
+          "line": 80,
+          "name": "requester"
+        }
+      ],
+      "line": 77,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 89,
+                  "name": "isUnloading"
+                },
+                "line": 89,
+                "operator": "==",
+                "right": {
+                  "kind": "boolLiteral",
+                  "line": 89,
+                  "value": false
+                }
+              },
+              "else": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 93,
+                      "name": "vehicleId"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 93,
+                  "messageServer": "segmentNotFree",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "requester"
+                  },
+                  "targetClassName": "Segment"
+                }
+              ],
+              "kind": "if",
+              "line": 89,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 90,
+                  "target": "isUnloading",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 90,
+                    "value": true
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 91,
+                      "name": "vehicleId"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 91,
+                  "messageServer": "getPermision",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "requester"
+                  },
+                  "targetClassName": "Segment"
+                }
+              ]
+            }
+          ],
+          "line": 88,
+          "name": "givePermisionForVehicle",
+          "parameters": [
+            {
+              "line": 88,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 30
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 97,
+                  "name": "vehicleId"
+                }
+              ],
+              "kind": "send",
+              "line": 97,
+              "messageServer": "startSendingToNext",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "SecondaryCrusher"
+            }
+          ],
+          "line": 96,
+          "name": "vehicleEntered",
+          "parameters": [
+            {
+              "line": 96,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 100,
+                  "name": "vehicleId"
+                },
+                {
+                  "kind": "unary",
+                  "line": 100,
+                  "operand": {
+                    "kind": "intLiteral",
+                    "line": 100,
+                    "value": 1
+                  },
+                  "operator": "-"
+                },
+                {
+                  "kind": "intLiteral",
+                  "line": 100,
+                  "value": 0
+                }
+              ],
+              "kind": "send",
+              "line": 100,
+              "messageServer": "givePermisionForVehicle",
+              "target": {
+                "kind": "knownRebec",
+                "name": "firstSubSegScToPrepoint"
+              },
+              "targetClassName": "Segment"
+            }
+          ],
+          "line": 99,
+          "name": "startSendingToNext",
+          "parameters": [
+            {
+              "line": 99,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 103,
+              "target": "isUnloading",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 103,
+                "value": false
+              }
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 104,
+                  "name": "vehicleId"
+                }
+              ],
+              "kind": "send",
+              "line": 104,
+              "messageServer": "vehicleEntered",
+              "target": {
+                "kind": "knownRebec",
+                "name": "requester"
+              },
+              "targetClassName": "Segment"
+            }
+          ],
+          "line": 102,
+          "name": "getPermision",
+          "parameters": [
+            {
+              "line": 102,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 25
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 107,
+                  "name": "vehicleId"
+                }
+              ],
+              "kind": "send",
+              "line": 107,
+              "messageServer": "startSendingToNext",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "SecondaryCrusher"
+            }
+          ],
+          "line": 106,
+          "name": "segmentNotFree",
+          "parameters": [
+            {
+              "line": 106,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "SecondaryCrusher",
+      "queueBound": 14,
+      "stateVariables": [
+        {
+          "line": 83,
+          "name": "isUnloading",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 120,
+            "target": "isLoading",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 120,
+              "value": false
+            }
+          }
+        ],
+        "line": 119,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Segment",
+          "line": 113,
+          "name": "firstSubSegWlToSc"
+        },
+        {
+          "className": "Segment",
+          "line": 114,
+          "name": "requester"
+        }
+      ],
+      "line": 111,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 123,
+                  "name": "isLoading"
+                },
+                "line": 123,
+                "operator": "==",
+                "right": {
+                  "kind": "boolLiteral",
+                  "line": 123,
+                  "value": false
+                }
+              },
+              "else": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 127,
+                      "name": "vehicleId"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 127,
+                  "messageServer": "segmentNotFree",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "requester"
+                  },
+                  "targetClassName": "Segment"
+                }
+              ],
+              "kind": "if",
+              "line": 123,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 124,
+                  "target": "isLoading",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 124,
+                    "value": true
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 125,
+                      "name": "vehicleId"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 125,
+                  "messageServer": "getPermision",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "requester"
+                  },
+                  "targetClassName": "Segment"
+                }
+              ]
+            }
+          ],
+          "line": 122,
+          "name": "givePermisionForVehicle",
+          "parameters": [
+            {
+              "line": 122,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 60
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 131,
+                  "name": "vehicleId"
+                }
+              ],
+              "kind": "send",
+              "line": 131,
+              "messageServer": "startSendingToNext",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "WheelLoader"
+            }
+          ],
+          "line": 130,
+          "name": "vehicleEntered",
+          "parameters": [
+            {
+              "line": 130,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 134,
+                  "name": "vehicleId"
+                },
+                {
+                  "kind": "unary",
+                  "line": 134,
+                  "operand": {
+                    "kind": "intLiteral",
+                    "line": 134,
+                    "value": 1
+                  },
+                  "operator": "-"
+                },
+                {
+                  "kind": "intLiteral",
+                  "line": 134,
+                  "value": 0
+                }
+              ],
+              "kind": "send",
+              "line": 134,
+              "messageServer": "givePermisionForVehicle",
+              "target": {
+                "kind": "knownRebec",
+                "name": "firstSubSegWlToSc"
+              },
+              "targetClassName": "Segment"
+            }
+          ],
+          "line": 133,
+          "name": "startSendingToNext",
+          "parameters": [
+            {
+              "line": 133,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 137,
+              "target": "isLoading",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 137,
+                "value": false
+              }
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 138,
+                  "name": "vehicleId"
+                }
+              ],
+              "kind": "send",
+              "line": 138,
+              "messageServer": "vehicleEntered",
+              "target": {
+                "kind": "knownRebec",
+                "name": "requester"
+              },
+              "targetClassName": "Segment"
+            }
+          ],
+          "line": 136,
+          "name": "getPermision",
+          "parameters": [
+            {
+              "line": 136,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 25
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 141,
+                  "name": "vehicleId"
+                }
+              ],
+              "kind": "send",
+              "line": 141,
+              "messageServer": "startSendingToNext",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "WheelLoader"
+            }
+          ],
+          "line": 140,
+          "name": "segmentNotFree",
+          "parameters": [
+            {
+              "line": 140,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "WheelLoader",
+      "queueBound": 14,
+      "stateVariables": [
+        {
+          "line": 117,
+          "name": "isLoading",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 157,
+            "target": "isBusy",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 157,
+              "value": false
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 158,
+            "target": "toE1",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 158,
+              "value": true
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 159,
+            "target": "count",
+            "value": {
+              "kind": "intLiteral",
+              "line": 159,
+              "value": 0
+            }
+          }
+        ],
+        "line": 156,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Segment",
+          "line": 147,
+          "name": "firstSubSegPreToE1"
+        },
+        {
+          "className": "Segment",
+          "line": 148,
+          "name": "firstSubSegPreToE2"
+        },
+        {
+          "className": "Segment",
+          "line": 149,
+          "name": "requester"
+        }
+      ],
+      "line": 145,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 162,
+                  "name": "isBusy"
+                },
+                "line": 162,
+                "operator": "==",
+                "right": {
+                  "kind": "boolLiteral",
+                  "line": 162,
+                  "value": false
+                }
+              },
+              "else": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 166,
+                      "name": "vehicleId"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 166,
+                  "messageServer": "segmentNotFree",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "requester"
+                  },
+                  "targetClassName": "Segment"
+                }
+              ],
+              "kind": "if",
+              "line": 162,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 163,
+                  "target": "isBusy",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 163,
+                    "value": true
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 164,
+                      "name": "vehicleId"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 164,
+                  "messageServer": "getPermision",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "requester"
+                  },
+                  "targetClassName": "Segment"
+                }
+              ]
+            }
+          ],
+          "line": 161,
+          "name": "givePermisionForVehicle",
+          "parameters": [
+            {
+              "line": 161,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 170,
+                  "name": "vehicleId"
+                }
+              ],
+              "kind": "send",
+              "line": 170,
+              "messageServer": "startSendingToNext",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "PrePoint"
+            }
+          ],
+          "line": 169,
+          "name": "vehicleEntered",
+          "parameters": [
+            {
+              "line": 169,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "variable",
+                "line": 173,
+                "name": "toE1"
+              },
+              "else": [],
+              "kind": "if",
+              "line": 173,
+              "then": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 174,
+                      "name": "vehicleId"
+                    },
+                    {
+                      "kind": "unary",
+                      "line": 174,
+                      "operand": {
+                        "kind": "intLiteral",
+                        "line": 174,
+                        "value": 1
+                      },
+                      "operator": "-"
+                    },
+                    {
+                      "kind": "intLiteral",
+                      "line": 174,
+                      "value": 0
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 174,
+                  "messageServer": "givePermisionForVehicle",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "firstSubSegPreToE1"
+                  },
+                  "targetClassName": "Segment"
+                }
+              ]
+            }
+          ],
+          "line": 172,
+          "name": "startSendingToNext",
+          "parameters": [
+            {
+              "line": 172,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 178,
+              "target": "isBusy",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 178,
+                "value": false
+              }
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 179,
+                  "name": "vehicleId"
+                }
+              ],
+              "kind": "send",
+              "line": 179,
+              "messageServer": "vehicleEntered",
+              "target": {
+                "kind": "knownRebec",
+                "name": "requester"
+              },
+              "targetClassName": "Segment"
+            }
+          ],
+          "line": 177,
+          "name": "getPermision",
+          "parameters": [
+            {
+              "line": 177,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "variable",
+                "line": 182,
+                "name": "toE1"
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 186,
+                  "target": "toE1",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 186,
+                    "value": true
+                  }
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 25
+                  },
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 187,
+                      "name": "vehicleId"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 187,
+                  "messageServer": "startSendingToNext",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "PrePoint"
+                }
+              ],
+              "kind": "if",
+              "line": 182,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 183,
+                  "target": "toE1",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 183,
+                    "value": false
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 184,
+                      "name": "vehicleId"
+                    },
+                    {
+                      "kind": "unary",
+                      "line": 184,
+                      "operand": {
+                        "kind": "intLiteral",
+                        "line": 184,
+                        "value": 1
+                      },
+                      "operator": "-"
+                    },
+                    {
+                      "kind": "intLiteral",
+                      "line": 184,
+                      "value": 0
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 184,
+                  "messageServer": "givePermisionForVehicle",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "firstSubSegPreToE2"
+                  },
+                  "targetClassName": "Segment"
+                }
+              ]
+            }
+          ],
+          "line": 181,
+          "name": "segmentNotFree",
+          "parameters": [
+            {
+              "line": 181,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "PrePoint",
+      "queueBound": 14,
+      "stateVariables": [
+        {
+          "line": 152,
+          "name": "isBusy",
+          "type": "boolean"
+        },
+        {
+          "line": 153,
+          "name": "toE1",
+          "type": "boolean"
+        },
+        {
+          "line": 154,
+          "name": "count",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 203,
+            "messageServer": "leaveParkingSlots",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "DecisionStation"
+          }
+        ],
+        "line": 202,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Segment",
+          "line": 194,
+          "name": "firstSubSegDsToPc"
+        },
+        {
+          "className": "Segment",
+          "line": 195,
+          "name": "requester"
+        }
+      ],
+      "line": 192,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1
+              },
+              "arguments": [
+                {
+                  "kind": "intLiteral",
+                  "line": 206,
+                  "value": 1
+                }
+              ],
+              "kind": "send",
+              "line": 206,
+              "messageServer": "startSendingToNext",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "DecisionStation"
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 4
+              },
+              "arguments": [
+                {
+                  "kind": "intLiteral",
+                  "line": 207,
+                  "value": 2
+                }
+              ],
+              "kind": "send",
+              "line": 207,
+              "messageServer": "startSendingToNext",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "DecisionStation"
+            }
+          ],
+          "line": 205,
+          "name": "leaveParkingSlots",
+          "parameters": [],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 210,
+                  "name": "vehicleId"
+                }
+              ],
+              "kind": "send",
+              "line": 210,
+              "messageServer": "vehicleEntered",
+              "target": {
+                "kind": "knownRebec",
+                "name": "firstSubSegDsToPc"
+              },
+              "targetClassName": "Segment"
+            }
+          ],
+          "line": 209,
+          "name": "getPermision",
+          "parameters": [
+            {
+              "line": 209,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 25
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 213,
+                  "name": "vehicleId"
+                }
+              ],
+              "kind": "send",
+              "line": 213,
+              "messageServer": "startSendingToNext",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "DecisionStation"
+            }
+          ],
+          "line": 212,
+          "name": "segmentNotFree",
+          "parameters": [
+            {
+              "line": 212,
+              "name": "vehicleId",
+              "type": "int"
+            },
+            {
+              "line": 212,
+              "name": "segmentDes",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 216,
+                  "name": "vehicleId"
+                },
+                {
+                  "kind": "intLiteral",
+                  "line": 216,
+                  "value": 1
+                },
+                {
+                  "kind": "intLiteral",
+                  "line": 216,
+                  "value": 2
+                }
+              ],
+              "kind": "send",
+              "line": 216,
+              "messageServer": "givePermisionForVehicle",
+              "target": {
+                "kind": "knownRebec",
+                "name": "firstSubSegDsToPc"
+              },
+              "targetClassName": "Segment"
+            }
+          ],
+          "line": 215,
+          "name": "startSendingToNext",
+          "parameters": [
+            {
+              "line": 215,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 219,
+                  "name": "vehicleId"
+                }
+              ],
+              "kind": "send",
+              "line": 219,
+              "messageServer": "getPermision",
+              "target": {
+                "kind": "knownRebec",
+                "name": "requester"
+              },
+              "targetClassName": "Segment"
+            }
+          ],
+          "line": 218,
+          "name": "givePermisionForVehicle",
+          "parameters": [
+            {
+              "line": 218,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 222,
+                  "name": "vehicleId"
+                },
+                "line": 222,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 222,
+                  "value": 1
+                }
+              },
+              "else": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 224,
+                      "name": "vehicleId"
+                    },
+                    "line": 224,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 224,
+                      "value": 2
+                    }
+                  },
+                  "else": [],
+                  "kind": "if",
+                  "line": 224,
+                  "then": [
+                    {
+                      "kind": "assign",
+                      "line": 225,
+                      "target": "vehicle2Reached",
+                      "value": {
+                        "kind": "boolLiteral",
+                        "line": 225,
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              ],
+              "kind": "if",
+              "line": 222,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 223,
+                  "target": "vehicle1Reached",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 223,
+                    "value": true
+                  }
+                }
+              ]
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 227,
+                  "name": "vehicle1Reached"
+                },
+                "line": 227,
+                "operator": "&&",
+                "right": {
+                  "kind": "variable",
+                  "line": 227,
+                  "name": "vehicle2Reached"
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 227,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 228,
+                  "target": "allVehiclesReached",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 228,
+                    "value": true
+                  }
+                }
+              ]
+            }
+          ],
+          "line": 221,
+          "name": "vehicleEntered",
+          "parameters": [
+            {
+              "line": 221,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "DecisionStation",
+      "queueBound": 14,
+      "stateVariables": [
+        {
+          "line": 198,
+          "name": "vehicle1Reached",
+          "type": "boolean"
+        },
+        {
+          "line": 199,
+          "name": "vehicle2Reached",
+          "type": "boolean"
+        },
+        {
+          "line": 200,
+          "name": "allVehiclesReached",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 256,
+            "target": "nextKind",
+            "value": {
+              "kind": "variable",
+              "line": 256,
+              "name": "nKind"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 257,
+            "target": "vehicleSpeed",
+            "value": {
+              "kind": "variable",
+              "line": 257,
+              "name": "spd"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 258,
+            "target": "segmentLength",
+            "value": {
+              "kind": "variable",
+              "line": 258,
+              "name": "len"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 259,
+            "target": "hasCross",
+            "value": {
+              "kind": "variable",
+              "line": 259,
+              "name": "hc"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 260,
+            "target": "myNextTag",
+            "value": {
+              "kind": "variable",
+              "line": 260,
+              "name": "nTag"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 261,
+            "target": "crossTag",
+            "value": {
+              "kind": "variable",
+              "line": 261,
+              "name": "cTag"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 262,
+            "target": "isFree",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 262,
+              "value": true
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 263,
+            "target": "stoppedVehicle",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 263,
+              "value": false
+            }
+          }
+        ],
+        "line": 255,
+        "parameters": [
+          {
+            "line": 255,
+            "name": "nKind",
+            "type": "int"
+          },
+          {
+            "line": 255,
+            "name": "spd",
+            "type": "int"
+          },
+          {
+            "line": 255,
+            "name": "len",
+            "type": "int"
+          },
+          {
+            "line": 255,
+            "name": "hc",
+            "type": "boolean"
+          },
+          {
+            "line": 255,
+            "name": "nTag",
+            "type": "int"
+          },
+          {
+            "line": 255,
+            "name": "cTag",
+            "type": "int"
+          }
+        ]
+      },
+      "knownRebecs": [
+        {
+          "className": "Segment",
+          "line": 235,
+          "name": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "line": 236,
+          "name": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "line": 237,
+          "name": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "line": 238,
+          "name": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "line": 239,
+          "name": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "line": 240,
+          "name": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "line": 241,
+          "name": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "line": 242,
+          "name": "preS"
+        },
+        {
+          "className": "CrossController",
+          "line": 243,
+          "name": "crossCtrl"
+        }
+      ],
+      "line": 233,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "variable",
+                "line": 266,
+                "name": "isFree"
+              },
+              "else": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 288,
+                      "name": "prevTag"
+                    },
+                    "line": 288,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 288,
+                      "value": 0
+                    }
+                  },
+                  "else": [
+                    {
+                      "condition": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 290,
+                          "name": "prevTag"
+                        },
+                        "line": 290,
+                        "operator": "==",
+                        "right": {
+                          "kind": "intLiteral",
+                          "line": 290,
+                          "value": 1
+                        }
+                      },
+                      "else": [
+                        {
+                          "condition": {
+                            "kind": "binary",
+                            "left": {
+                              "kind": "variable",
+                              "line": 292,
+                              "name": "prevTag"
+                            },
+                            "line": 292,
+                            "operator": "==",
+                            "right": {
+                              "kind": "intLiteral",
+                              "line": 292,
+                              "value": 2
+                            }
+                          },
+                          "else": [
+                            {
+                              "condition": {
+                                "kind": "binary",
+                                "left": {
+                                  "kind": "variable",
+                                  "line": 294,
+                                  "name": "prevTag"
+                                },
+                                "line": 294,
+                                "operator": "==",
+                                "right": {
+                                  "kind": "intLiteral",
+                                  "line": 294,
+                                  "value": 3
+                                }
+                              },
+                              "else": [
+                                {
+                                  "condition": {
+                                    "kind": "binary",
+                                    "left": {
+                                      "kind": "variable",
+                                      "line": 296,
+                                      "name": "prevTag"
+                                    },
+                                    "line": 296,
+                                    "operator": "==",
+                                    "right": {
+                                      "kind": "intLiteral",
+                                      "line": 296,
+                                      "value": 4
+                                    }
+                                  },
+                                  "else": [
+                                    {
+                                      "condition": {
+                                        "kind": "binary",
+                                        "left": {
+                                          "kind": "variable",
+                                          "line": 298,
+                                          "name": "prevTag"
+                                        },
+                                        "line": 298,
+                                        "operator": "==",
+                                        "right": {
+                                          "kind": "intLiteral",
+                                          "line": 298,
+                                          "value": 5
+                                        }
+                                      },
+                                      "else": [
+                                        {
+                                          "condition": {
+                                            "kind": "binary",
+                                            "left": {
+                                              "kind": "variable",
+                                              "line": 300,
+                                              "name": "prevTag"
+                                            },
+                                            "line": 300,
+                                            "operator": "==",
+                                            "right": {
+                                              "kind": "intLiteral",
+                                              "line": 300,
+                                              "value": 6
+                                            }
+                                          },
+                                          "else": [],
+                                          "kind": "if",
+                                          "line": 300,
+                                          "then": [
+                                            {
+                                              "after": null,
+                                              "arguments": [
+                                                {
+                                                  "kind": "variable",
+                                                  "line": 301,
+                                                  "name": "vehicleId"
+                                                }
+                                              ],
+                                              "kind": "send",
+                                              "line": 301,
+                                              "messageServer": "segmentNotFree",
+                                              "target": {
+                                                "kind": "knownRebec",
+                                                "name": "preS"
+                                              },
+                                              "targetClassName": "PrePoint"
+                                            }
+                                          ]
+                                        }
+                                      ],
+                                      "kind": "if",
+                                      "line": 298,
+                                      "then": [
+                                        {
+                                          "after": null,
+                                          "arguments": [
+                                            {
+                                              "kind": "variable",
+                                              "line": 299,
+                                              "name": "vehicleId"
+                                            }
+                                          ],
+                                          "kind": "send",
+                                          "line": 299,
+                                          "messageServer": "segmentNotFree",
+                                          "target": {
+                                            "kind": "knownRebec",
+                                            "name": "scS"
+                                          },
+                                          "targetClassName": "SecondaryCrusher"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "kind": "if",
+                                  "line": 296,
+                                  "then": [
+                                    {
+                                      "after": null,
+                                      "arguments": [
+                                        {
+                                          "kind": "variable",
+                                          "line": 297,
+                                          "name": "vehicleId"
+                                        }
+                                      ],
+                                      "kind": "send",
+                                      "line": 297,
+                                      "messageServer": "segmentNotFree",
+                                      "target": {
+                                        "kind": "knownRebec",
+                                        "name": "wlS"
+                                      },
+                                      "targetClassName": "WheelLoader"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "kind": "if",
+                              "line": 294,
+                              "then": [
+                                {
+                                  "after": null,
+                                  "arguments": [
+                                    {
+                                      "kind": "variable",
+                                      "line": 295,
+                                      "name": "vehicleId"
+                                    }
+                                  ],
+                                  "kind": "send",
+                                  "line": 295,
+                                  "messageServer": "segmentNotFree",
+                                  "target": {
+                                    "kind": "knownRebec",
+                                    "name": "pcS"
+                                  },
+                                  "targetClassName": "PrimaryCrusher"
+                                }
+                              ]
+                            }
+                          ],
+                          "kind": "if",
+                          "line": 292,
+                          "then": [
+                            {
+                              "after": null,
+                              "arguments": [
+                                {
+                                  "kind": "variable",
+                                  "line": 293,
+                                  "name": "vehicleId"
+                                },
+                                {
+                                  "kind": "variable",
+                                  "line": 293,
+                                  "name": "segmentDes"
+                                }
+                              ],
+                              "kind": "send",
+                              "line": 293,
+                              "messageServer": "segmentNotFree",
+                              "target": {
+                                "kind": "knownRebec",
+                                "name": "dsS"
+                              },
+                              "targetClassName": "DecisionStation"
+                            }
+                          ]
+                        }
+                      ],
+                      "kind": "if",
+                      "line": 290,
+                      "then": [
+                        {
+                          "after": null,
+                          "arguments": [
+                            {
+                              "kind": "variable",
+                              "line": 291,
+                              "name": "vehicleId"
+                            }
+                          ],
+                          "kind": "send",
+                          "line": 291,
+                          "messageServer": "segmentNotFree",
+                          "target": {
+                            "kind": "knownRebec",
+                            "name": "prevSeg2"
+                          },
+                          "targetClassName": "Segment"
+                        }
+                      ]
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 288,
+                  "then": [
+                    {
+                      "after": null,
+                      "arguments": [
+                        {
+                          "kind": "variable",
+                          "line": 289,
+                          "name": "vehicleId"
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 289,
+                      "messageServer": "segmentNotFree",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "prevSeg1"
+                      },
+                      "targetClassName": "Segment"
+                    }
+                  ]
+                }
+              ],
+              "kind": "if",
+              "line": 266,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 267,
+                  "target": "isFree",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 267,
+                    "value": false
+                  }
+                },
+                {
+                  "condition": {
+                    "kind": "variable",
+                    "line": 268,
+                    "name": "hasCross"
+                  },
+                  "else": [
+                    {
+                      "condition": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 271,
+                          "name": "prevTag"
+                        },
+                        "line": 271,
+                        "operator": "==",
+                        "right": {
+                          "kind": "intLiteral",
+                          "line": 271,
+                          "value": 0
+                        }
+                      },
+                      "else": [
+                        {
+                          "condition": {
+                            "kind": "binary",
+                            "left": {
+                              "kind": "variable",
+                              "line": 273,
+                              "name": "prevTag"
+                            },
+                            "line": 273,
+                            "operator": "==",
+                            "right": {
+                              "kind": "intLiteral",
+                              "line": 273,
+                              "value": 1
+                            }
+                          },
+                          "else": [
+                            {
+                              "condition": {
+                                "kind": "binary",
+                                "left": {
+                                  "kind": "variable",
+                                  "line": 275,
+                                  "name": "prevTag"
+                                },
+                                "line": 275,
+                                "operator": "==",
+                                "right": {
+                                  "kind": "intLiteral",
+                                  "line": 275,
+                                  "value": 2
+                                }
+                              },
+                              "else": [
+                                {
+                                  "condition": {
+                                    "kind": "binary",
+                                    "left": {
+                                      "kind": "variable",
+                                      "line": 277,
+                                      "name": "prevTag"
+                                    },
+                                    "line": 277,
+                                    "operator": "==",
+                                    "right": {
+                                      "kind": "intLiteral",
+                                      "line": 277,
+                                      "value": 3
+                                    }
+                                  },
+                                  "else": [
+                                    {
+                                      "condition": {
+                                        "kind": "binary",
+                                        "left": {
+                                          "kind": "variable",
+                                          "line": 279,
+                                          "name": "prevTag"
+                                        },
+                                        "line": 279,
+                                        "operator": "==",
+                                        "right": {
+                                          "kind": "intLiteral",
+                                          "line": 279,
+                                          "value": 4
+                                        }
+                                      },
+                                      "else": [
+                                        {
+                                          "condition": {
+                                            "kind": "binary",
+                                            "left": {
+                                              "kind": "variable",
+                                              "line": 281,
+                                              "name": "prevTag"
+                                            },
+                                            "line": 281,
+                                            "operator": "==",
+                                            "right": {
+                                              "kind": "intLiteral",
+                                              "line": 281,
+                                              "value": 5
+                                            }
+                                          },
+                                          "else": [
+                                            {
+                                              "condition": {
+                                                "kind": "binary",
+                                                "left": {
+                                                  "kind": "variable",
+                                                  "line": 283,
+                                                  "name": "prevTag"
+                                                },
+                                                "line": 283,
+                                                "operator": "==",
+                                                "right": {
+                                                  "kind": "intLiteral",
+                                                  "line": 283,
+                                                  "value": 6
+                                                }
+                                              },
+                                              "else": [],
+                                              "kind": "if",
+                                              "line": 283,
+                                              "then": [
+                                                {
+                                                  "after": null,
+                                                  "arguments": [
+                                                    {
+                                                      "kind": "variable",
+                                                      "line": 284,
+                                                      "name": "vehicleId"
+                                                    }
+                                                  ],
+                                                  "kind": "send",
+                                                  "line": 284,
+                                                  "messageServer": "getPermision",
+                                                  "target": {
+                                                    "kind": "knownRebec",
+                                                    "name": "preS"
+                                                  },
+                                                  "targetClassName": "PrePoint"
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "kind": "if",
+                                          "line": 281,
+                                          "then": [
+                                            {
+                                              "after": null,
+                                              "arguments": [
+                                                {
+                                                  "kind": "variable",
+                                                  "line": 282,
+                                                  "name": "vehicleId"
+                                                }
+                                              ],
+                                              "kind": "send",
+                                              "line": 282,
+                                              "messageServer": "getPermision",
+                                              "target": {
+                                                "kind": "knownRebec",
+                                                "name": "scS"
+                                              },
+                                              "targetClassName": "SecondaryCrusher"
+                                            }
+                                          ]
+                                        }
+                                      ],
+                                      "kind": "if",
+                                      "line": 279,
+                                      "then": [
+                                        {
+                                          "after": null,
+                                          "arguments": [
+                                            {
+                                              "kind": "variable",
+                                              "line": 280,
+                                              "name": "vehicleId"
+                                            }
+                                          ],
+                                          "kind": "send",
+                                          "line": 280,
+                                          "messageServer": "getPermision",
+                                          "target": {
+                                            "kind": "knownRebec",
+                                            "name": "wlS"
+                                          },
+                                          "targetClassName": "WheelLoader"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "kind": "if",
+                                  "line": 277,
+                                  "then": [
+                                    {
+                                      "after": null,
+                                      "arguments": [
+                                        {
+                                          "kind": "variable",
+                                          "line": 278,
+                                          "name": "vehicleId"
+                                        }
+                                      ],
+                                      "kind": "send",
+                                      "line": 278,
+                                      "messageServer": "getPermision",
+                                      "target": {
+                                        "kind": "knownRebec",
+                                        "name": "pcS"
+                                      },
+                                      "targetClassName": "PrimaryCrusher"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "kind": "if",
+                              "line": 275,
+                              "then": [
+                                {
+                                  "after": null,
+                                  "arguments": [
+                                    {
+                                      "kind": "variable",
+                                      "line": 276,
+                                      "name": "vehicleId"
+                                    }
+                                  ],
+                                  "kind": "send",
+                                  "line": 276,
+                                  "messageServer": "getPermision",
+                                  "target": {
+                                    "kind": "knownRebec",
+                                    "name": "dsS"
+                                  },
+                                  "targetClassName": "DecisionStation"
+                                }
+                              ]
+                            }
+                          ],
+                          "kind": "if",
+                          "line": 273,
+                          "then": [
+                            {
+                              "after": null,
+                              "arguments": [
+                                {
+                                  "kind": "variable",
+                                  "line": 274,
+                                  "name": "vehicleId"
+                                }
+                              ],
+                              "kind": "send",
+                              "line": 274,
+                              "messageServer": "getPermision",
+                              "target": {
+                                "kind": "knownRebec",
+                                "name": "prevSeg2"
+                              },
+                              "targetClassName": "Segment"
+                            }
+                          ]
+                        }
+                      ],
+                      "kind": "if",
+                      "line": 271,
+                      "then": [
+                        {
+                          "after": null,
+                          "arguments": [
+                            {
+                              "kind": "variable",
+                              "line": 272,
+                              "name": "vehicleId"
+                            }
+                          ],
+                          "kind": "send",
+                          "line": 272,
+                          "messageServer": "getPermision",
+                          "target": {
+                            "kind": "knownRebec",
+                            "name": "prevSeg1"
+                          },
+                          "targetClassName": "Segment"
+                        }
+                      ]
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 268,
+                  "then": [
+                    {
+                      "after": null,
+                      "arguments": [
+                        {
+                          "kind": "variable",
+                          "line": 269,
+                          "name": "vehicleId"
+                        },
+                        {
+                          "kind": "variable",
+                          "line": 269,
+                          "name": "crossTag"
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 269,
+                      "messageServer": "giveCrossPermission",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "crossCtrl"
+                      },
+                      "targetClassName": "CrossController"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "line": 265,
+          "name": "givePermisionForVehicle",
+          "parameters": [
+            {
+              "line": 265,
+              "name": "vehicleId",
+              "type": "int"
+            },
+            {
+              "line": 265,
+              "name": "segmentDes",
+              "type": "int"
+            },
+            {
+              "line": 265,
+              "name": "prevTag",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 306,
+                  "name": "vehicleId"
+                }
+              ],
+              "kind": "send",
+              "line": 306,
+              "messageServer": "getPermision",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Segment"
+            }
+          ],
+          "line": 305,
+          "name": "getCrossPermission",
+          "parameters": [
+            {
+              "line": 305,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 309,
+                  "name": "vehicleSpeed"
+                },
+                "line": 309,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 309,
+                  "value": 15
+                }
+              },
+              "else": [
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 25
+                  },
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 312,
+                      "name": "vehicleId"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 312,
+                  "messageServer": "startSendingToNext",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Segment"
+                }
+              ],
+              "kind": "if",
+              "line": 309,
+              "then": [
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 12
+                  },
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 310,
+                      "name": "vehicleId"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 310,
+                  "messageServer": "startSendingToNext",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Segment"
+                }
+              ]
+            }
+          ],
+          "line": 308,
+          "name": "vehicleEntered",
+          "parameters": [
+            {
+              "line": 308,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 316,
+              "target": "isFree",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 316,
+                "value": true
+              }
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 317,
+                  "name": "vehicleId"
+                }
+              ],
+              "kind": "send",
+              "line": 317,
+              "messageServer": "segmentNotFree",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Segment"
+            }
+          ],
+          "line": 315,
+          "name": "crossNotAvailable",
+          "parameters": [
+            {
+              "line": 315,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 320,
+                  "name": "nextKind"
+                },
+                "line": 320,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 320,
+                  "value": 0
+                }
+              },
+              "else": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 322,
+                      "name": "nextKind"
+                    },
+                    "line": 322,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 322,
+                      "value": 1
+                    }
+                  },
+                  "else": [
+                    {
+                      "condition": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 324,
+                          "name": "nextKind"
+                        },
+                        "line": 324,
+                        "operator": "==",
+                        "right": {
+                          "kind": "intLiteral",
+                          "line": 324,
+                          "value": 2
+                        }
+                      },
+                      "else": [
+                        {
+                          "condition": {
+                            "kind": "binary",
+                            "left": {
+                              "kind": "variable",
+                              "line": 326,
+                              "name": "nextKind"
+                            },
+                            "line": 326,
+                            "operator": "==",
+                            "right": {
+                              "kind": "intLiteral",
+                              "line": 326,
+                              "value": 3
+                            }
+                          },
+                          "else": [
+                            {
+                              "condition": {
+                                "kind": "binary",
+                                "left": {
+                                  "kind": "variable",
+                                  "line": 328,
+                                  "name": "nextKind"
+                                },
+                                "line": 328,
+                                "operator": "==",
+                                "right": {
+                                  "kind": "intLiteral",
+                                  "line": 328,
+                                  "value": 4
+                                }
+                              },
+                              "else": [
+                                {
+                                  "condition": {
+                                    "kind": "binary",
+                                    "left": {
+                                      "kind": "variable",
+                                      "line": 330,
+                                      "name": "nextKind"
+                                    },
+                                    "line": 330,
+                                    "operator": "==",
+                                    "right": {
+                                      "kind": "intLiteral",
+                                      "line": 330,
+                                      "value": 5
+                                    }
+                                  },
+                                  "else": [],
+                                  "kind": "if",
+                                  "line": 330,
+                                  "then": [
+                                    {
+                                      "after": null,
+                                      "arguments": [
+                                        {
+                                          "kind": "variable",
+                                          "line": 331,
+                                          "name": "vehicleId"
+                                        }
+                                      ],
+                                      "kind": "send",
+                                      "line": 331,
+                                      "messageServer": "givePermisionForVehicle",
+                                      "target": {
+                                        "kind": "knownRebec",
+                                        "name": "preS"
+                                      },
+                                      "targetClassName": "PrePoint"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "kind": "if",
+                              "line": 328,
+                              "then": [
+                                {
+                                  "after": null,
+                                  "arguments": [
+                                    {
+                                      "kind": "variable",
+                                      "line": 329,
+                                      "name": "vehicleId"
+                                    }
+                                  ],
+                                  "kind": "send",
+                                  "line": 329,
+                                  "messageServer": "givePermisionForVehicle",
+                                  "target": {
+                                    "kind": "knownRebec",
+                                    "name": "dsS"
+                                  },
+                                  "targetClassName": "DecisionStation"
+                                }
+                              ]
+                            }
+                          ],
+                          "kind": "if",
+                          "line": 326,
+                          "then": [
+                            {
+                              "after": null,
+                              "arguments": [
+                                {
+                                  "kind": "variable",
+                                  "line": 327,
+                                  "name": "vehicleId"
+                                }
+                              ],
+                              "kind": "send",
+                              "line": 327,
+                              "messageServer": "givePermisionForVehicle",
+                              "target": {
+                                "kind": "knownRebec",
+                                "name": "scS"
+                              },
+                              "targetClassName": "SecondaryCrusher"
+                            }
+                          ]
+                        }
+                      ],
+                      "kind": "if",
+                      "line": 324,
+                      "then": [
+                        {
+                          "after": null,
+                          "arguments": [
+                            {
+                              "kind": "variable",
+                              "line": 325,
+                              "name": "vehicleId"
+                            }
+                          ],
+                          "kind": "send",
+                          "line": 325,
+                          "messageServer": "givePermisionForVehicle",
+                          "target": {
+                            "kind": "knownRebec",
+                            "name": "wlS"
+                          },
+                          "targetClassName": "WheelLoader"
+                        }
+                      ]
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 322,
+                  "then": [
+                    {
+                      "after": null,
+                      "arguments": [
+                        {
+                          "kind": "variable",
+                          "line": 323,
+                          "name": "vehicleId"
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 323,
+                      "messageServer": "givePermisionForVehicle",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "pcS"
+                      },
+                      "targetClassName": "PrimaryCrusher"
+                    }
+                  ]
+                }
+              ],
+              "kind": "if",
+              "line": 320,
+              "then": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 321,
+                      "name": "vehicleId"
+                    },
+                    {
+                      "kind": "unary",
+                      "line": 321,
+                      "operand": {
+                        "kind": "intLiteral",
+                        "line": 321,
+                        "value": 1
+                      },
+                      "operator": "-"
+                    },
+                    {
+                      "kind": "variable",
+                      "line": 321,
+                      "name": "myNextTag"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 321,
+                  "messageServer": "givePermisionForVehicle",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "nextSeg"
+                  },
+                  "targetClassName": "Segment"
+                }
+              ]
+            }
+          ],
+          "line": 319,
+          "name": "startSendingToNext",
+          "parameters": [
+            {
+              "line": 319,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 335,
+              "target": "stoppedVehicle",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 335,
+                "value": false
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 336,
+                  "name": "vehicleSpeed"
+                },
+                "line": 336,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 336,
+                  "value": 15
+                }
+              },
+              "else": [
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 2
+                  },
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 339,
+                      "name": "vehicleId"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 339,
+                  "messageServer": "postPermision",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Segment"
+                }
+              ],
+              "kind": "if",
+              "line": 336,
+              "then": [
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 337,
+                      "name": "vehicleId"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 337,
+                  "messageServer": "postPermision",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Segment"
+                }
+              ]
+            }
+          ],
+          "line": 334,
+          "name": "getPermision",
+          "parameters": [
+            {
+              "line": 334,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 343,
+              "target": "isFree",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 343,
+                "value": true
+              }
+            },
+            {
+              "condition": {
+                "kind": "variable",
+                "line": 344,
+                "name": "hasCross"
+              },
+              "else": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 348,
+                      "name": "nextKind"
+                    },
+                    "line": 348,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 348,
+                      "value": 0
+                    }
+                  },
+                  "else": [
+                    {
+                      "condition": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 350,
+                          "name": "nextKind"
+                        },
+                        "line": 350,
+                        "operator": "==",
+                        "right": {
+                          "kind": "intLiteral",
+                          "line": 350,
+                          "value": 1
+                        }
+                      },
+                      "else": [
+                        {
+                          "condition": {
+                            "kind": "binary",
+                            "left": {
+                              "kind": "variable",
+                              "line": 352,
+                              "name": "nextKind"
+                            },
+                            "line": 352,
+                            "operator": "==",
+                            "right": {
+                              "kind": "intLiteral",
+                              "line": 352,
+                              "value": 2
+                            }
+                          },
+                          "else": [
+                            {
+                              "condition": {
+                                "kind": "binary",
+                                "left": {
+                                  "kind": "variable",
+                                  "line": 354,
+                                  "name": "nextKind"
+                                },
+                                "line": 354,
+                                "operator": "==",
+                                "right": {
+                                  "kind": "intLiteral",
+                                  "line": 354,
+                                  "value": 3
+                                }
+                              },
+                              "else": [
+                                {
+                                  "condition": {
+                                    "kind": "binary",
+                                    "left": {
+                                      "kind": "variable",
+                                      "line": 356,
+                                      "name": "nextKind"
+                                    },
+                                    "line": 356,
+                                    "operator": "==",
+                                    "right": {
+                                      "kind": "intLiteral",
+                                      "line": 356,
+                                      "value": 4
+                                    }
+                                  },
+                                  "else": [
+                                    {
+                                      "condition": {
+                                        "kind": "binary",
+                                        "left": {
+                                          "kind": "variable",
+                                          "line": 358,
+                                          "name": "nextKind"
+                                        },
+                                        "line": 358,
+                                        "operator": "==",
+                                        "right": {
+                                          "kind": "intLiteral",
+                                          "line": 358,
+                                          "value": 5
+                                        }
+                                      },
+                                      "else": [],
+                                      "kind": "if",
+                                      "line": 358,
+                                      "then": [
+                                        {
+                                          "after": null,
+                                          "arguments": [
+                                            {
+                                              "kind": "variable",
+                                              "line": 359,
+                                              "name": "vehicleId"
+                                            }
+                                          ],
+                                          "kind": "send",
+                                          "line": 359,
+                                          "messageServer": "vehicleEntered",
+                                          "target": {
+                                            "kind": "knownRebec",
+                                            "name": "preS"
+                                          },
+                                          "targetClassName": "PrePoint"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "kind": "if",
+                                  "line": 356,
+                                  "then": [
+                                    {
+                                      "after": null,
+                                      "arguments": [
+                                        {
+                                          "kind": "variable",
+                                          "line": 357,
+                                          "name": "vehicleId"
+                                        }
+                                      ],
+                                      "kind": "send",
+                                      "line": 357,
+                                      "messageServer": "vehicleEntered",
+                                      "target": {
+                                        "kind": "knownRebec",
+                                        "name": "wlS"
+                                      },
+                                      "targetClassName": "WheelLoader"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "kind": "if",
+                              "line": 354,
+                              "then": [
+                                {
+                                  "after": null,
+                                  "arguments": [
+                                    {
+                                      "kind": "variable",
+                                      "line": 355,
+                                      "name": "vehicleId"
+                                    }
+                                  ],
+                                  "kind": "send",
+                                  "line": 355,
+                                  "messageServer": "vehicleEntered",
+                                  "target": {
+                                    "kind": "knownRebec",
+                                    "name": "scS"
+                                  },
+                                  "targetClassName": "SecondaryCrusher"
+                                }
+                              ]
+                            }
+                          ],
+                          "kind": "if",
+                          "line": 352,
+                          "then": [
+                            {
+                              "after": null,
+                              "arguments": [
+                                {
+                                  "kind": "variable",
+                                  "line": 353,
+                                  "name": "vehicleId"
+                                }
+                              ],
+                              "kind": "send",
+                              "line": 353,
+                              "messageServer": "vehicleEntered",
+                              "target": {
+                                "kind": "knownRebec",
+                                "name": "pcS"
+                              },
+                              "targetClassName": "PrimaryCrusher"
+                            }
+                          ]
+                        }
+                      ],
+                      "kind": "if",
+                      "line": 350,
+                      "then": [
+                        {
+                          "after": null,
+                          "arguments": [
+                            {
+                              "kind": "variable",
+                              "line": 351,
+                              "name": "vehicleId"
+                            }
+                          ],
+                          "kind": "send",
+                          "line": 351,
+                          "messageServer": "vehicleEntered",
+                          "target": {
+                            "kind": "knownRebec",
+                            "name": "dsS"
+                          },
+                          "targetClassName": "DecisionStation"
+                        }
+                      ]
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 348,
+                  "then": [
+                    {
+                      "after": null,
+                      "arguments": [
+                        {
+                          "kind": "variable",
+                          "line": 349,
+                          "name": "vehicleId"
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 349,
+                      "messageServer": "vehicleEntered",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "nextSeg"
+                      },
+                      "targetClassName": "Segment"
+                    }
+                  ]
+                }
+              ],
+              "kind": "if",
+              "line": 344,
+              "then": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 345,
+                      "name": "vehicleId"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 345,
+                  "messageServer": "freeCross",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "crossCtrl"
+                  },
+                  "targetClassName": "CrossController"
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 346,
+                      "name": "vehicleId"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 346,
+                  "messageServer": "vehicleEntered",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Segment"
+                }
+              ]
+            }
+          ],
+          "line": 342,
+          "name": "postPermision",
+          "parameters": [
+            {
+              "line": 342,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 364,
+              "target": "stoppedVehicle",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 364,
+                "value": true
+              }
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 25
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 365,
+                  "name": "vehicleId"
+                }
+              ],
+              "kind": "send",
+              "line": 365,
+              "messageServer": "startSendingToNext",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Segment"
+            }
+          ],
+          "line": 363,
+          "name": "segmentNotFree",
+          "parameters": [
+            {
+              "line": 363,
+              "name": "vehicleId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Segment",
+      "queueBound": 14,
+      "stateVariables": [
+        {
+          "line": 246,
+          "name": "isFree",
+          "type": "boolean"
+        },
+        {
+          "line": 247,
+          "name": "stoppedVehicle",
+          "type": "boolean"
+        },
+        {
+          "line": 248,
+          "name": "vehicleSpeed",
+          "type": "int"
+        },
+        {
+          "line": 249,
+          "name": "segmentLength",
+          "type": "int"
+        },
+        {
+          "line": 250,
+          "name": "nextKind",
+          "type": "int"
+        },
+        {
+          "line": 251,
+          "name": "myNextTag",
+          "type": "int"
+        },
+        {
+          "line": 252,
+          "name": "crossTag",
+          "type": "int"
+        },
+        {
+          "line": 253,
+          "name": "hasCross",
+          "type": "boolean"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg1E2ToS2",
+          "knownRebec": "firstSubSegPcToSc"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg5S6ToE2",
+          "knownRebec": "requester"
+        }
+      ],
+      "className": "PrimaryCrusher",
+      "line": 370,
+      "name": "pc",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg1E3ToE4",
+          "knownRebec": "firstSubSegScToPrepoint"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg5S2ToE3",
+          "knownRebec": "requester"
+        }
+      ],
+      "className": "SecondaryCrusher",
+      "line": 371,
+      "name": "sc",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg1E1ToS2",
+          "knownRebec": "firstSubSegWlToSc"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg3S5ToE1",
+          "knownRebec": "requester"
+        }
+      ],
+      "className": "WheelLoader",
+      "line": 372,
+      "name": "wl",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "firstSubSegDsToPc"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg5E3ToE4",
+          "knownRebec": "requester"
+        }
+      ],
+      "className": "DecisionStation",
+      "line": 373,
+      "name": "ds",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg2E1ToS2",
+          "knownRebec": "segA"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg3S6ToE2",
+          "knownRebec": "segB"
+        }
+      ],
+      "className": "CrossController",
+      "line": 374,
+      "name": "controller",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg1S5ToE1",
+          "knownRebec": "firstSubSegPreToE1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S6ToE2",
+          "knownRebec": "firstSubSegPreToE2"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg5S4ToPre",
+          "knownRebec": "requester"
+        }
+      ],
+      "className": "PrePoint",
+      "line": 375,
+      "name": "prePoint",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 15
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg2S4ToPre",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg2S4ToPre",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg2S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 376,
+      "name": "subSeg1S4ToPre",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 15
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg3S4ToPre",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 377,
+      "name": "subSeg2S4ToPre",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 15
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg4S4ToPre",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg2S4ToPre",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 378,
+      "name": "subSeg3S4ToPre",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 15
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg5S4ToPre",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg3S4ToPre",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 379,
+      "name": "subSeg4S4ToPre",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 5
+        },
+        {
+          "kind": "intLiteral",
+          "value": 15
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg4S4ToPre",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 380,
+      "name": "subSeg5S4ToPre",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 7
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg2S5ToE1",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 381,
+      "name": "subSeg1S5ToE1",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 7
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg3S5ToE1",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S5ToE1",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 382,
+      "name": "subSeg2S5ToE1",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 2
+        },
+        {
+          "kind": "intLiteral",
+          "value": 7
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg2S5ToE1",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 383,
+      "name": "subSeg3S5ToE1",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 7
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg2E1ToS2",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 384,
+      "name": "subSeg1E1ToS2",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 7
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": true
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg3E1ToS2",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1E1ToS2",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 385,
+      "name": "subSeg2E1ToS2",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 7
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg4E1ToS2",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg2E1ToS2",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 386,
+      "name": "subSeg3E1ToS2",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 7
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg5E1ToS2",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg3E1ToS2",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 387,
+      "name": "subSeg4E1ToS2",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 7
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg1S2ToE3",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg4E1ToS2",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 388,
+      "name": "subSeg5E1ToS2",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 15
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg2S2ToE3",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg5E1ToS2",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg5E2ToS2",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 389,
+      "name": "subSeg1S2ToE3",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 15
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg3S2ToE3",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S2ToE3",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 390,
+      "name": "subSeg2S2ToE3",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 15
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg4S2ToE3",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg2S2ToE3",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 391,
+      "name": "subSeg3S2ToE3",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 15
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg5S2ToE3",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg3S2ToE3",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 392,
+      "name": "subSeg4S2ToE3",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 3
+        },
+        {
+          "kind": "intLiteral",
+          "value": 15
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg4S2ToE3",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 393,
+      "name": "subSeg5S2ToE3",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 7
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg2E2ToS2",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 394,
+      "name": "subSeg1E2ToS2",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 7
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg3E2ToS2",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1E2ToS2",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 395,
+      "name": "subSeg2E2ToS2",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 7
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg4E2ToS2",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg2E2ToS2",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 396,
+      "name": "subSeg3E2ToS2",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 7
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg5E2ToS2",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg3E2ToS2",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 397,
+      "name": "subSeg4E2ToS2",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 7
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 1
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg1S2ToE3",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg4E2ToS2",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 398,
+      "name": "subSeg5E2ToS2",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 7
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg2S6ToE2",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 399,
+      "name": "subSeg1S6ToE2",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 7
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg3S6ToE2",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S6ToE2",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 400,
+      "name": "subSeg2S6ToE2",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 7
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": true
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 1
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg4S6ToE2",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg2S6ToE2",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 401,
+      "name": "subSeg3S6ToE2",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 7
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg5S6ToE2",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg3S6ToE2",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 402,
+      "name": "subSeg4S6ToE2",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 1
+        },
+        {
+          "kind": "intLiteral",
+          "value": 7
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg4S6ToE2",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 403,
+      "name": "subSeg5S6ToE2",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 15
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg2E3ToE4",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 404,
+      "name": "subSeg1E3ToE4",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 15
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg3E3ToE4",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1E3ToE4",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 405,
+      "name": "subSeg2E3ToE4",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 15
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg4E3ToE4",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg2E3ToE4",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 406,
+      "name": "subSeg3E3ToE4",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 15
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg5E3ToE4",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg3E3ToE4",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 407,
+      "name": "subSeg4E3ToE4",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 4
+        },
+        {
+          "kind": "intLiteral",
+          "value": 15
+        },
+        {
+          "kind": "intLiteral",
+          "value": 200
+        },
+        {
+          "kind": "boolLiteral",
+          "value": false
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        },
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "nextSeg"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg4E3ToE4",
+          "knownRebec": "prevSeg1"
+        },
+        {
+          "className": "Segment",
+          "instance": "subSeg1S4ToPre",
+          "knownRebec": "prevSeg2"
+        },
+        {
+          "className": "DecisionStation",
+          "instance": "ds",
+          "knownRebec": "dsS"
+        },
+        {
+          "className": "PrimaryCrusher",
+          "instance": "pc",
+          "knownRebec": "pcS"
+        },
+        {
+          "className": "SecondaryCrusher",
+          "instance": "sc",
+          "knownRebec": "scS"
+        },
+        {
+          "className": "WheelLoader",
+          "instance": "wl",
+          "knownRebec": "wlS"
+        },
+        {
+          "className": "PrePoint",
+          "instance": "prePoint",
+          "knownRebec": "preS"
+        },
+        {
+          "className": "CrossController",
+          "instance": "controller",
+          "knownRebec": "crossCtrl"
+        }
+      ],
+      "className": "Segment",
+      "line": 408,
+      "name": "subSeg5E3ToE4",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}
