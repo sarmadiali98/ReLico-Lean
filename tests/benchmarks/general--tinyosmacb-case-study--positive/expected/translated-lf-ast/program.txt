@@ -1,0 +1,1318 @@
+{ reactors := [{ name := { value := "CPU" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "sensorEventToCpuFromSensor" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "miscEventToCpuFromMisc" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "radioCycleDoneToCpu1FromSensorNodeSenderDevice" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "radioCycleDoneToCpu2FromSensorNodeSenderDevice" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "radioDataDeliveredToCpuFromSensorNodeSenderDevice" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "radioCycleDoneToCpu1FromReceiver" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "radioCycleDoneToCpu2FromReceiver" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "radioDataDeliveredToCpuFromReceiver" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "sendToSenderDevice" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "sampleTakenToSensor1" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "sampleTakenToSensor2" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "miscDoneToMisc" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "collectedSamplesCounter" },
+                                      declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "resultArrived" },
+                                      declaredType := Relico.LF.GeneralType.boolean },
+                                    { name := { value := "dataDelivered" },
+                                      declaredType := Relico.LF.GeneralType.boolean }],
+                 logicalActions := [{ name := { value := "sensorEvent_action" },
+                                      parameters := [{ name := { value := "unit" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "sensorTask_action" }, parameters := [] },
+                                    { name := { value := "radioCycleDone_action" },
+                                      parameters := [{ name := { value := "ok" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "radioDataDelivered_action" },
+                                      parameters := [{ name := { value := "unit" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "miscEvent_action" },
+                                      parameters := [{ name := { value := "unit" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "miscTaskComplete_action" }, parameters := [] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "collectedSamplesCounter" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "resultArrived" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "dataDelivered" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "sensorEvent_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sensorEvent_action" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "sensorTask_action" }
+                                                   []
+                                                   { value := 2 }],
+                                        priority := none },
+                                      { name := { value := "sensorEventToCpuFromSensor_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "sensorEventToCpuFromSensor" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "sensorTask_action" }
+                                                   []
+                                                   { value := 2 }],
+                                        priority := none },
+                                      { name := { value := "sensorTask_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sensorTask_action" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "collectedSamplesCounter" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar
+                                                       { value := "collectedSamplesCounter" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar
+                                                       { value := "collectedSamplesCounter" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "sendToSenderDevice" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "radioCycleDone_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "radioCycleDone_action" },
+                                        parameters := [{ value := "ok" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "resultArrived" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral true),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "ok" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "dataDelivered" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resultArrived" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "dataDelivered" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resultArrived" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "dataDelivered" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "collectedSamplesCounter" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "sampleTakenToSensor1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "radioCycleDoneToCpu1FromSensorNodeSenderDevice_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "radioCycleDoneToCpu1FromSensorNodeSenderDevice" },
+                                        parameters := [{ value := "ok" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "resultArrived" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral true),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "ok" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "dataDelivered" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resultArrived" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "dataDelivered" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resultArrived" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "dataDelivered" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "collectedSamplesCounter" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "sampleTakenToSensor1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "radioCycleDoneToCpu2FromSensorNodeSenderDevice_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "radioCycleDoneToCpu2FromSensorNodeSenderDevice" },
+                                        parameters := [{ value := "ok" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "resultArrived" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral true),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "ok" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "dataDelivered" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resultArrived" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "dataDelivered" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resultArrived" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "dataDelivered" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "collectedSamplesCounter" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "sampleTakenToSensor1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "radioCycleDoneToCpu1FromReceiver_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "radioCycleDoneToCpu1FromReceiver" },
+                                        parameters := [{ value := "ok" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "resultArrived" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral true),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "ok" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "dataDelivered" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resultArrived" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "dataDelivered" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resultArrived" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "dataDelivered" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "collectedSamplesCounter" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "sampleTakenToSensor1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "radioCycleDoneToCpu2FromReceiver_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "radioCycleDoneToCpu2FromReceiver" },
+                                        parameters := [{ value := "ok" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "resultArrived" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral true),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "ok" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "dataDelivered" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resultArrived" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "dataDelivered" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resultArrived" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "dataDelivered" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "collectedSamplesCounter" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "sampleTakenToSensor1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "radioDataDelivered_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "radioDataDelivered_action" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "dataDelivered" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral true),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resultArrived" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "dataDelivered" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resultArrived" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "dataDelivered" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "collectedSamplesCounter" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "sampleTakenToSensor2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "radioDataDeliveredToCpuFromSensorNodeSenderDevice_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "radioDataDeliveredToCpuFromSensorNodeSenderDevice" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "dataDelivered" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral true),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resultArrived" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "dataDelivered" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resultArrived" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "dataDelivered" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "collectedSamplesCounter" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "sampleTakenToSensor2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "radioDataDeliveredToCpuFromReceiver_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "radioDataDeliveredToCpuFromReceiver" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "dataDelivered" }
+                                                   (Relico.LF.GeneralExpr.boolLiteral true),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.logicalAnd)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resultArrived" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "dataDelivered" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "resultArrived" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "dataDelivered" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "collectedSamplesCounter" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "sampleTakenToSensor2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "miscEvent_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "miscEvent_action" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "miscTaskComplete_action" }
+                                                   []
+                                                   { value := 10 }],
+                                        priority := none },
+                                      { name := { value := "miscEventToCpuFromMisc_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "miscEventToCpuFromMisc" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "miscTaskComplete_action" }
+                                                   []
+                                                   { value := 10 }],
+                                        priority := none },
+                                      { name := { value := "miscTaskComplete_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "miscTaskComplete_action" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "miscDoneToMisc" }
+                                                   [Relico.LF.GeneralExpr.intLiteral 0]],
+                                        priority := none }] },
+               { name := { value := "Sensor" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "sampleTakenToSensor1FromCpu" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "sampleTakenToSensor2FromCpu" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "sensorEventToCpu" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [],
+                 logicalActions := [{ name := { value := "sensorFirst_action" }, parameters := [] },
+                                    { name := { value := "sensorLoop_action1" }, parameters := [] },
+                                    { name := { value := "sensorLoop_action2" }, parameters := [] },
+                                    { name := { value := "sampleTaken_action" },
+                                      parameters := [{ name := { value := "unit" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.schedule
+                                                 { value := "sensorFirst_action" }
+                                                 []
+                                                 { value := 0 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "sensorFirst_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sensorFirst_action" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "sensorLoop_action1" }
+                                                   []
+                                                   { value := 10 }],
+                                        priority := none },
+                                      { name := { value := "sensorLoop_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sensorLoop_action1" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "sensorEventToCpu" }
+                                                   [Relico.LF.GeneralExpr.intLiteral 0]],
+                                        priority := none },
+                                      { name := { value := "sensorLoop_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sensorLoop_action2" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "sensorEventToCpu" }
+                                                   [Relico.LF.GeneralExpr.intLiteral 0]],
+                                        priority := none },
+                                      { name := { value := "sampleTaken_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "sampleTaken_action" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "sensorLoop_action2" }
+                                                   []
+                                                   { value := 40 }],
+                                        priority := none },
+                                      { name := { value := "sampleTakenToSensor1FromCpu_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "sampleTakenToSensor1FromCpu" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "sensorLoop_action2" }
+                                                   []
+                                                   { value := 40 }],
+                                        priority := none },
+                                      { name := { value := "sampleTakenToSensor2FromCpu_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "sampleTakenToSensor2FromCpu" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "sensorLoop_action2" }
+                                                   []
+                                                   { value := 40 }],
+                                        priority := none }] },
+               { name := { value := "Misc" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "miscDoneToMiscFromCpu" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "miscEventToCpu" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [],
+                 logicalActions := [{ name := { value := "miscFirst_action" }, parameters := [] },
+                                    { name := { value := "miscLoop_action1" }, parameters := [] },
+                                    { name := { value := "miscLoop_action2" }, parameters := [] },
+                                    { name := { value := "miscDone_action" },
+                                      parameters := [{ name := { value := "unit" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.schedule
+                                                 { value := "miscFirst_action" }
+                                                 []
+                                                 { value := 0 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "miscFirst_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "miscFirst_action" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "miscLoop_action1" }
+                                                   []
+                                                   { value := 10 }],
+                                        priority := none },
+                                      { name := { value := "miscLoop_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "miscLoop_action1" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "miscEventToCpu" }
+                                                   [Relico.LF.GeneralExpr.intLiteral 0]],
+                                        priority := none },
+                                      { name := { value := "miscLoop_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "miscLoop_action2" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "miscEventToCpu" }
+                                                   [Relico.LF.GeneralExpr.intLiteral 0]],
+                                        priority := none },
+                                      { name := { value := "miscDone_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "miscDone_action" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "miscLoop_action2" }
+                                                   []
+                                                   { value := 120 }],
+                                        priority := none },
+                                      { name := { value := "miscDoneToMiscFromCpu_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "miscDoneToMiscFromCpu" },
+                                        parameters := [{ value := "unit" }],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "miscLoop_action2" }
+                                                   []
+                                                   { value := 120 }],
+                                        priority := none }] },
+               { name := { value := "WirelessMedium" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "getStatusToMediumFromSensorNodeSenderDevice" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "broadcastToMediumFromSensorNodeSenderDevice" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "WirelessMedium" }
+                                               { value := "broadcast_action" }
+                                               [{ name := { value := "receiverTag" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "senderTag" },
+                                                  declaredType := Relico.LF.GeneralType.int }] },
+                                { name := { value := "getStatusToMediumFromReceiver" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "broadcastToMediumFromReceiver" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "WirelessMedium" }
+                                               { value := "broadcast_action" }
+                                               [{ name := { value := "receiverTag" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "senderTag" },
+                                                  declaredType := Relico.LF.GeneralType.int }] }],
+                 outputPorts := [{ name := { value := "receiveStatusToCd0" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.boolean) },
+                                 { name := { value := "receiveStatusToCd1" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.boolean) },
+                                 { name := { value := "receiveResultToCd01" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.boolean) },
+                                 { name := { value := "receiveResultToCd11" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.boolean) },
+                                 { name := { value := "receiveDataToCd0" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "receiveDataToCd1" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "receiveResultToCd02" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.boolean) },
+                                 { name := { value := "receiveResultToCd12" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.boolean) }],
+                 stateVariables := [{ name := { value := "senderDevice" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "receiverDevice" },
+                                      declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "getStatus_action" },
+                                      parameters := [{ name := { value := "senderTag" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "broadcast_action" },
+                                      parameters := [{ name := { value := "receiverTag" },
+                                                       declaredType := Relico.LF.GeneralType.int },
+                                                     { name := { value := "senderTag" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "broadcastingIsCompleted_action" }, parameters := [] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "senderDevice" }
+                                                 (Relico.LF.GeneralExpr.unary
+                                                   (Relico.LF.GeneralUnaryOp.negate)
+                                                   (Relico.LF.GeneralExpr.intLiteral 1)),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "receiverDevice" }
+                                                 (Relico.LF.GeneralExpr.unary
+                                                   (Relico.LF.GeneralUnaryOp.negate)
+                                                   (Relico.LF.GeneralExpr.intLiteral 1))],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "getStatus_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "getStatus_action" },
+                                        parameters := [{ value := "senderTag" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "senderTag" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "receiveStatusToCd0" }
+                                                      [Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.ne)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "senderDevice" })
+                                                         (Relico.LF.GeneralExpr.unary
+                                                           (Relico.LF.GeneralUnaryOp.negate)
+                                                           (Relico.LF.GeneralExpr.intLiteral 1))]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "receiveStatusToCd1" }
+                                                      [Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.ne)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "senderDevice" })
+                                                         (Relico.LF.GeneralExpr.unary
+                                                           (Relico.LF.GeneralUnaryOp.negate)
+                                                           (Relico.LF.GeneralExpr.intLiteral 1))]]],
+                                        priority := none },
+                                      { name := { value := "getStatusToMediumFromSensorNodeSenderDevice_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "getStatusToMediumFromSensorNodeSenderDevice" },
+                                        parameters := [{ value := "senderTag" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "senderTag" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "receiveStatusToCd0" }
+                                                      [Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.ne)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "senderDevice" })
+                                                         (Relico.LF.GeneralExpr.unary
+                                                           (Relico.LF.GeneralUnaryOp.negate)
+                                                           (Relico.LF.GeneralExpr.intLiteral 1))]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "receiveStatusToCd1" }
+                                                      [Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.ne)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "senderDevice" })
+                                                         (Relico.LF.GeneralExpr.unary
+                                                           (Relico.LF.GeneralUnaryOp.negate)
+                                                           (Relico.LF.GeneralExpr.intLiteral 1))]]],
+                                        priority := none },
+                                      { name := { value := "getStatusToMediumFromReceiver_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "getStatusToMediumFromReceiver" },
+                                        parameters := [{ value := "senderTag" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "senderTag" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "receiveStatusToCd0" }
+                                                      [Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.ne)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "senderDevice" })
+                                                         (Relico.LF.GeneralExpr.unary
+                                                           (Relico.LF.GeneralUnaryOp.negate)
+                                                           (Relico.LF.GeneralExpr.intLiteral 1))]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "receiveStatusToCd1" }
+                                                      [Relico.LF.GeneralExpr.binary
+                                                         (Relico.LF.GeneralBinaryOp.ne)
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "senderDevice" })
+                                                         (Relico.LF.GeneralExpr.unary
+                                                           (Relico.LF.GeneralUnaryOp.negate)
+                                                           (Relico.LF.GeneralExpr.intLiteral 1))]]],
+                                        priority := none },
+                                      { name := { value := "broadcast_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "broadcast_action" },
+                                        parameters := [{ value := "receiverTag" }, { value := "senderTag" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "senderDevice" })
+                                                     (Relico.LF.GeneralExpr.unary
+                                                       (Relico.LF.GeneralUnaryOp.negate)
+                                                       (Relico.LF.GeneralExpr.intLiteral 1)))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "senderDevice" }
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "senderTag" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "receiverDevice" }
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "receiverTag" }),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "broadcastingIsCompleted_action" }
+                                                      []
+                                                      { value := 7 },
+                                                    Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "senderTag" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 0))
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveResultToCd01" }
+                                                         [Relico.LF.GeneralExpr.boolLiteral true]]
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveResultToCd11" }
+                                                         [Relico.LF.GeneralExpr.boolLiteral true]],
+                                                    Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "receiverTag" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 0))
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveDataToCd0" }
+                                                         [Relico.LF.GeneralExpr.parameterVar
+                                                            { value := "receiverTag" }]]
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveDataToCd1" }
+                                                         [Relico.LF.GeneralExpr.parameterVar
+                                                            { value := "receiverTag" }]]]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "senderTag" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 0))
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveResultToCd02" }
+                                                         [Relico.LF.GeneralExpr.boolLiteral false]]
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveResultToCd12" }
+                                                         [Relico.LF.GeneralExpr.boolLiteral false]]]],
+                                        priority := none },
+                                      { name := { value := "broadcastToMediumFromSensorNodeSenderDevice_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "broadcastToMediumFromSensorNodeSenderDevice" },
+                                        parameters := [{ value := "receiverTag" }, { value := "senderTag" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "senderDevice" })
+                                                     (Relico.LF.GeneralExpr.unary
+                                                       (Relico.LF.GeneralUnaryOp.negate)
+                                                       (Relico.LF.GeneralExpr.intLiteral 1)))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "senderDevice" }
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "senderTag" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "receiverDevice" }
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "receiverTag" }),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "broadcastingIsCompleted_action" }
+                                                      []
+                                                      { value := 7 },
+                                                    Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "senderTag" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 0))
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveResultToCd01" }
+                                                         [Relico.LF.GeneralExpr.boolLiteral true]]
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveResultToCd11" }
+                                                         [Relico.LF.GeneralExpr.boolLiteral true]],
+                                                    Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "receiverTag" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 0))
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveDataToCd0" }
+                                                         [Relico.LF.GeneralExpr.parameterVar
+                                                            { value := "receiverTag" }]]
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveDataToCd1" }
+                                                         [Relico.LF.GeneralExpr.parameterVar
+                                                            { value := "receiverTag" }]]]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "senderTag" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 0))
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveResultToCd02" }
+                                                         [Relico.LF.GeneralExpr.boolLiteral false]]
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveResultToCd12" }
+                                                         [Relico.LF.GeneralExpr.boolLiteral false]]]],
+                                        priority := none },
+                                      { name := { value := "broadcastToMediumFromReceiver_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "broadcastToMediumFromReceiver" },
+                                        parameters := [{ value := "receiverTag" }, { value := "senderTag" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "senderDevice" })
+                                                     (Relico.LF.GeneralExpr.unary
+                                                       (Relico.LF.GeneralUnaryOp.negate)
+                                                       (Relico.LF.GeneralExpr.intLiteral 1)))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "senderDevice" }
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "senderTag" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "receiverDevice" }
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "receiverTag" }),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "broadcastingIsCompleted_action" }
+                                                      []
+                                                      { value := 7 },
+                                                    Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "senderTag" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 0))
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveResultToCd01" }
+                                                         [Relico.LF.GeneralExpr.boolLiteral true]]
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveResultToCd11" }
+                                                         [Relico.LF.GeneralExpr.boolLiteral true]],
+                                                    Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "receiverTag" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 0))
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveDataToCd0" }
+                                                         [Relico.LF.GeneralExpr.parameterVar
+                                                            { value := "receiverTag" }]]
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveDataToCd1" }
+                                                         [Relico.LF.GeneralExpr.parameterVar
+                                                            { value := "receiverTag" }]]]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "senderTag" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 0))
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveResultToCd02" }
+                                                         [Relico.LF.GeneralExpr.boolLiteral false]]
+                                                      [Relico.LF.GeneralStmt.setPort
+                                                         { value := "receiveResultToCd12" }
+                                                         [Relico.LF.GeneralExpr.boolLiteral false]]]],
+                                        priority := none },
+                                      { name := { value := "broadcastingIsCompleted_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "broadcastingIsCompleted_action" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "senderDevice" }
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.negate)
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "receiverDevice" }
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.negate)
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))],
+                                        priority := none }] },
+               { name := { value := "CommunicationDevice" },
+                 parameters := [{ name := { value := "myId" }, declaredType := Relico.LF.GeneralType.int }],
+                 inputPorts := [{ name := { value := "receiveStatusToCd0FromMedium" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.boolean) },
+                                { name := { value := "receiveStatusToCd1FromMedium" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.boolean) },
+                                { name := { value := "receiveResultToCd01FromMedium" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.boolean) },
+                                { name := { value := "receiveResultToCd11FromMedium" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.boolean) },
+                                { name := { value := "receiveDataToCd0FromMedium" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "receiveDataToCd1FromMedium" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "receiveResultToCd02FromMedium" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.boolean) },
+                                { name := { value := "receiveResultToCd12FromMedium" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.boolean) },
+                                { name := { value := "sendToSenderDeviceFromCpu" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "getStatusToMedium" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "broadcastToMedium" },
+                                   payload := Relico.LF.GeneralPortPayload.struct
+                                                { value := "WirelessMedium" }
+                                                { value := "broadcast_action" }
+                                                [{ name := { value := "receiverTag" },
+                                                   declaredType := Relico.LF.GeneralType.int },
+                                                 { name := { value := "senderTag" },
+                                                   declaredType := Relico.LF.GeneralType.int }] },
+                                 { name := { value := "radioCycleDoneToCpu1" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "radioCycleDoneToCpu2" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "radioDataDeliveredToCpu" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "id" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "receiverDevice" },
+                                      declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "sendWhileBusy" },
+                                      declaredType := Relico.LF.GeneralType.boolean },
+                                    { name := { value := "mediumBusyAtStatusCheck" },
+                                      declaredType := Relico.LF.GeneralType.boolean },
+                                    { name := { value := "failedTransmission" },
+                                      declaredType := Relico.LF.GeneralType.boolean }],
+                 logicalActions := [{ name := { value := "send_action" },
+                                      parameters := [{ name := { value := "receiverTag" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "receiveStatus_action" },
+                                      parameters := [{ name := { value := "result" },
+                                                       declaredType := Relico.LF.GeneralType.boolean }] },
+                                    { name := { value := "receiveResult_action" },
+                                      parameters := [{ name := { value := "result" },
+                                                       declaredType := Relico.LF.GeneralType.boolean }] },
+                                    { name := { value := "receiveData_action" },
+                                      parameters := [{ name := { value := "receiverTag" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [{ value := "myId" }],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "id" }
+                                                 (Relico.LF.GeneralExpr.parameterVar { value := "myId" }),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "receiverDevice" }
+                                                 (Relico.LF.GeneralExpr.unary
+                                                   (Relico.LF.GeneralUnaryOp.negate)
+                                                   (Relico.LF.GeneralExpr.intLiteral 1)),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "sendWhileBusy" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "mediumBusyAtStatusCheck" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "failedTransmission" }
+                                                 (Relico.LF.GeneralExpr.boolLiteral false)],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "send_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "send_action" },
+                                        parameters := [{ value := "receiverTag" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.ne)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "receiverDevice" })
+                                                     (Relico.LF.GeneralExpr.unary
+                                                       (Relico.LF.GeneralUnaryOp.negate)
+                                                       (Relico.LF.GeneralExpr.intLiteral 1)))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "sendWhileBusy" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "receiverDevice" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "receiverTag" }),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "getStatusToMedium" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none },
+                                      { name := { value := "sendToSenderDeviceFromCpu_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "sendToSenderDeviceFromCpu" },
+                                        parameters := [{ value := "receiverTag" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.ne)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "receiverDevice" })
+                                                     (Relico.LF.GeneralExpr.unary
+                                                       (Relico.LF.GeneralUnaryOp.negate)
+                                                       (Relico.LF.GeneralExpr.intLiteral 1)))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "sendWhileBusy" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "receiverDevice" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "receiverTag" }),
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "getStatusToMedium" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none },
+                                      { name := { value := "receiveStatus_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "receiveStatus_action" },
+                                        parameters := [{ value := "result" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "result" })
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "mediumBusyAtStatusCheck" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "broadcastToMedium" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "receiverDevice" },
+                                                    Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none },
+                                      { name := { value := "receiveStatusToCd0FromMedium_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "receiveStatusToCd0FromMedium" },
+                                        parameters := [{ value := "result" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "result" })
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "mediumBusyAtStatusCheck" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "broadcastToMedium" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "receiverDevice" },
+                                                    Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none },
+                                      { name := { value := "receiveStatusToCd1FromMedium_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "receiveStatusToCd1FromMedium" },
+                                        parameters := [{ value := "result" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "result" })
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "mediumBusyAtStatusCheck" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "broadcastToMedium" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "receiverDevice" },
+                                                    Relico.LF.GeneralExpr.stateVar { value := "id" }]],
+                                        priority := none },
+                                      { name := { value := "receiveResult_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "receiveResult_action" },
+                                        parameters := [{ value := "result" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "result" })
+                                                     (Relico.LF.GeneralExpr.boolLiteral false))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "failedTransmission" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "receiverDevice" }
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.negate)
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "result" })
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "radioCycleDoneToCpu1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "radioCycleDoneToCpu2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]],
+                                        priority := none },
+                                      { name := { value := "receiveResultToCd01FromMedium_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "receiveResultToCd01FromMedium" },
+                                        parameters := [{ value := "result" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "result" })
+                                                     (Relico.LF.GeneralExpr.boolLiteral false))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "failedTransmission" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "receiverDevice" }
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.negate)
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "result" })
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "radioCycleDoneToCpu1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "radioCycleDoneToCpu2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]],
+                                        priority := none },
+                                      { name := { value := "receiveResultToCd11FromMedium_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "receiveResultToCd11FromMedium" },
+                                        parameters := [{ value := "result" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "result" })
+                                                     (Relico.LF.GeneralExpr.boolLiteral false))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "failedTransmission" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "receiverDevice" }
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.negate)
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "result" })
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "radioCycleDoneToCpu1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "radioCycleDoneToCpu2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]],
+                                        priority := none },
+                                      { name := { value := "receiveResultToCd02FromMedium_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "receiveResultToCd02FromMedium" },
+                                        parameters := [{ value := "result" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "result" })
+                                                     (Relico.LF.GeneralExpr.boolLiteral false))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "failedTransmission" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "receiverDevice" }
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.negate)
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "result" })
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "radioCycleDoneToCpu1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "radioCycleDoneToCpu2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]],
+                                        priority := none },
+                                      { name := { value := "receiveResultToCd12FromMedium_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "receiveResultToCd12FromMedium" },
+                                        parameters := [{ value := "result" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "result" })
+                                                     (Relico.LF.GeneralExpr.boolLiteral false))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "failedTransmission" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "receiverDevice" }
+                                                   (Relico.LF.GeneralExpr.unary
+                                                     (Relico.LF.GeneralUnaryOp.negate)
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "result" })
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "radioCycleDoneToCpu1" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 1]]
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "radioCycleDoneToCpu2" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]],
+                                        priority := none },
+                                      { name := { value := "receiveData_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "receiveData_action" },
+                                        parameters := [{ value := "receiverTag" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "receiverTag" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "id" }))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "radioDataDeliveredToCpu" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "receiveDataToCd0FromMedium_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "receiveDataToCd0FromMedium" },
+                                        parameters := [{ value := "receiverTag" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "receiverTag" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "id" }))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "radioDataDeliveredToCpu" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "receiveDataToCd1FromMedium_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "receiveDataToCd1FromMedium" },
+                                        parameters := [{ value := "receiverTag" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "receiverTag" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "id" }))
+                                                   [Relico.LF.GeneralStmt.setPort
+                                                      { value := "radioDataDeliveredToCpu" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 0]]
+                                                   []],
+                                        priority := none }] }],
+  instances := [{ name := { value := "medium" }, reactorName := { value := "WirelessMedium" }, arguments := [] },
+                { name := { value := "cpu" }, reactorName := { value := "CPU" }, arguments := [] },
+                { name := { value := "sensor" }, reactorName := { value := "Sensor" }, arguments := [] },
+                { name := { value := "misc" }, reactorName := { value := "Misc" }, arguments := [] },
+                { name := { value := "sensorNodeSenderDevice" },
+                  reactorName := { value := "CommunicationDevice" },
+                  arguments := [Relico.LF.GeneralValue.int 1] },
+                { name := { value := "receiver" },
+                  reactorName := { value := "CommunicationDevice" },
+                  arguments := [Relico.LF.GeneralValue.int 0] }],
+  connections := [{ sourceInstance := { value := "medium" },
+                    sourcePort := { value := "receiveStatusToCd0" },
+                    targetInstance := { value := "receiver" },
+                    targetPort := { value := "receiveStatusToCd0FromMedium" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "medium" },
+                    sourcePort := { value := "receiveStatusToCd1" },
+                    targetInstance := { value := "sensorNodeSenderDevice" },
+                    targetPort := { value := "receiveStatusToCd1FromMedium" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "medium" },
+                    sourcePort := { value := "receiveResultToCd01" },
+                    targetInstance := { value := "receiver" },
+                    targetPort := { value := "receiveResultToCd01FromMedium" },
+                    delay := { value := 7 } },
+                  { sourceInstance := { value := "medium" },
+                    sourcePort := { value := "receiveResultToCd11" },
+                    targetInstance := { value := "sensorNodeSenderDevice" },
+                    targetPort := { value := "receiveResultToCd11FromMedium" },
+                    delay := { value := 7 } },
+                  { sourceInstance := { value := "medium" },
+                    sourcePort := { value := "receiveDataToCd0" },
+                    targetInstance := { value := "receiver" },
+                    targetPort := { value := "receiveDataToCd0FromMedium" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "medium" },
+                    sourcePort := { value := "receiveDataToCd1" },
+                    targetInstance := { value := "sensorNodeSenderDevice" },
+                    targetPort := { value := "receiveDataToCd1FromMedium" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "medium" },
+                    sourcePort := { value := "receiveResultToCd02" },
+                    targetInstance := { value := "receiver" },
+                    targetPort := { value := "receiveResultToCd02FromMedium" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "medium" },
+                    sourcePort := { value := "receiveResultToCd12" },
+                    targetInstance := { value := "sensorNodeSenderDevice" },
+                    targetPort := { value := "receiveResultToCd12FromMedium" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "cpu" },
+                    sourcePort := { value := "sendToSenderDevice" },
+                    targetInstance := { value := "sensorNodeSenderDevice" },
+                    targetPort := { value := "sendToSenderDeviceFromCpu" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "cpu" },
+                    sourcePort := { value := "sampleTakenToSensor1" },
+                    targetInstance := { value := "sensor" },
+                    targetPort := { value := "sampleTakenToSensor1FromCpu" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "cpu" },
+                    sourcePort := { value := "sampleTakenToSensor2" },
+                    targetInstance := { value := "sensor" },
+                    targetPort := { value := "sampleTakenToSensor2FromCpu" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "cpu" },
+                    sourcePort := { value := "miscDoneToMisc" },
+                    targetInstance := { value := "misc" },
+                    targetPort := { value := "miscDoneToMiscFromCpu" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "sensor" },
+                    sourcePort := { value := "sensorEventToCpu" },
+                    targetInstance := { value := "cpu" },
+                    targetPort := { value := "sensorEventToCpuFromSensor" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "misc" },
+                    sourcePort := { value := "miscEventToCpu" },
+                    targetInstance := { value := "cpu" },
+                    targetPort := { value := "miscEventToCpuFromMisc" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "sensorNodeSenderDevice" },
+                    sourcePort := { value := "getStatusToMedium" },
+                    targetInstance := { value := "medium" },
+                    targetPort := { value := "getStatusToMediumFromSensorNodeSenderDevice" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "sensorNodeSenderDevice" },
+                    sourcePort := { value := "broadcastToMedium" },
+                    targetInstance := { value := "medium" },
+                    targetPort := { value := "broadcastToMediumFromSensorNodeSenderDevice" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "sensorNodeSenderDevice" },
+                    sourcePort := { value := "radioCycleDoneToCpu1" },
+                    targetInstance := { value := "cpu" },
+                    targetPort := { value := "radioCycleDoneToCpu1FromSensorNodeSenderDevice" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "sensorNodeSenderDevice" },
+                    sourcePort := { value := "radioCycleDoneToCpu2" },
+                    targetInstance := { value := "cpu" },
+                    targetPort := { value := "radioCycleDoneToCpu2FromSensorNodeSenderDevice" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "sensorNodeSenderDevice" },
+                    sourcePort := { value := "radioDataDeliveredToCpu" },
+                    targetInstance := { value := "cpu" },
+                    targetPort := { value := "radioDataDeliveredToCpuFromSensorNodeSenderDevice" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "receiver" },
+                    sourcePort := { value := "getStatusToMedium" },
+                    targetInstance := { value := "medium" },
+                    targetPort := { value := "getStatusToMediumFromReceiver" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "receiver" },
+                    sourcePort := { value := "broadcastToMedium" },
+                    targetInstance := { value := "medium" },
+                    targetPort := { value := "broadcastToMediumFromReceiver" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "receiver" },
+                    sourcePort := { value := "radioCycleDoneToCpu1" },
+                    targetInstance := { value := "cpu" },
+                    targetPort := { value := "radioCycleDoneToCpu1FromReceiver" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "receiver" },
+                    sourcePort := { value := "radioCycleDoneToCpu2" },
+                    targetInstance := { value := "cpu" },
+                    targetPort := { value := "radioCycleDoneToCpu2FromReceiver" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "receiver" },
+                    sourcePort := { value := "radioDataDeliveredToCpu" },
+                    targetInstance := { value := "cpu" },
+                    targetPort := { value := "radioDataDeliveredToCpuFromReceiver" },
+                    delay := { value := 0 } }] }

@@ -1,0 +1,478 @@
+{ classes := [{ name := { value := "CPU" },
+                knownRebecs := [{ name := { value := "senderDevice" },
+                                  className := { value := "CommunicationDevice" } },
+                                { name := { value := "sensor" }, className := { value := "Sensor" } },
+                                { name := { value := "misc" }, className := { value := "Misc" } }],
+                stateVariables := [{ name := { value := "collectedSamplesCounter" },
+                                     declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "resultArrived" },
+                                     declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "dataDelivered" },
+                                     declaredType := Relico.DTR.GeneralType.boolean }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "collectedSamplesCounter" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "resultArrived" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "dataDelivered" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false)] },
+                messageServers := [{ name := { value := "sensorEvent" },
+                                     parameters := [{ name := { value := "unit" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "sensorTask" }
+                                                []
+                                                { value := 2 }],
+                                     priority := none },
+                                   { name := { value := "sensorTask" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "collectedSamplesCounter" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.add)
+                                                  (Relico.DTR.GeneralExpr.stateVar
+                                                    { value := "collectedSamplesCounter" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar
+                                                    { value := "collectedSamplesCounter" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "senderDevice" })
+                                                   { value := "send" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                   { value := 0 }]
+                                                []],
+                                     priority := none },
+                                   { name := { value := "radioCycleDone" },
+                                     parameters := [{ name := { value := "ok" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "resultArrived" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral true),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "ok" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "dataDelivered" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                [],
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "resultArrived" })
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "dataDelivered" }))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "resultArrived" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "dataDelivered" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "collectedSamplesCounter" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 0),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "sensor" })
+                                                   { value := "sampleTaken" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                   { value := 0 }]
+                                                []],
+                                     priority := none },
+                                   { name := { value := "radioDataDelivered" },
+                                     parameters := [{ name := { value := "unit" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "dataDelivered" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral true),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "resultArrived" })
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "dataDelivered" }))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "resultArrived" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "dataDelivered" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "collectedSamplesCounter" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 0),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "sensor" })
+                                                   { value := "sampleTaken" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                   { value := 0 }]
+                                                []],
+                                     priority := none },
+                                   { name := { value := "miscEvent" },
+                                     parameters := [{ name := { value := "unit" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "miscTaskComplete" }
+                                                []
+                                                { value := 10 }],
+                                     priority := none },
+                                   { name := { value := "miscTaskComplete" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "misc" })
+                                                { value := "miscDone" }
+                                                [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                { value := 0 }],
+                                     priority := none }] },
+              { name := { value := "Sensor" },
+                knownRebecs := [{ name := { value := "cpu" }, className := { value := "CPU" } }],
+                stateVariables := [],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "sensorFirst" }
+                                            []
+                                            { value := 0 }] },
+                messageServers := [{ name := { value := "sensorFirst" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "sensorLoop" }
+                                                []
+                                                { value := 10 }],
+                                     priority := none },
+                                   { name := { value := "sensorLoop" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "cpu" })
+                                                { value := "sensorEvent" }
+                                                [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "sampleTaken" },
+                                     parameters := [{ name := { value := "unit" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "sensorLoop" }
+                                                []
+                                                { value := 40 }],
+                                     priority := none }] },
+              { name := { value := "Misc" },
+                knownRebecs := [{ name := { value := "cpu" }, className := { value := "CPU" } }],
+                stateVariables := [],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "miscFirst" }
+                                            []
+                                            { value := 0 }] },
+                messageServers := [{ name := { value := "miscFirst" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "miscLoop" }
+                                                []
+                                                { value := 10 }],
+                                     priority := none },
+                                   { name := { value := "miscLoop" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "cpu" })
+                                                { value := "miscEvent" }
+                                                [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "miscDone" },
+                                     parameters := [{ name := { value := "unit" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "miscLoop" }
+                                                []
+                                                { value := 120 }],
+                                     priority := none }] },
+              { name := { value := "WirelessMedium" },
+                knownRebecs := [{ name := { value := "cd0" }, className := { value := "CommunicationDevice" } },
+                                { name := { value := "cd1" }, className := { value := "CommunicationDevice" } }],
+                stateVariables := [{ name := { value := "senderDevice" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "receiverDevice" },
+                                     declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "senderDevice" }
+                                            (Relico.DTR.GeneralExpr.unary
+                                              (Relico.DTR.GeneralUnaryOp.negate)
+                                              (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "receiverDevice" }
+                                            (Relico.DTR.GeneralExpr.unary
+                                              (Relico.DTR.GeneralUnaryOp.negate)
+                                              (Relico.DTR.GeneralExpr.intLiteral 1))] },
+                messageServers := [{ name := { value := "getStatus" },
+                                     parameters := [{ name := { value := "senderTag" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "senderTag" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "cd0" })
+                                                   { value := "receiveStatus" }
+                                                   [Relico.DTR.GeneralExpr.binary
+                                                      (Relico.DTR.GeneralBinaryOp.ne)
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "senderDevice" })
+                                                      (Relico.DTR.GeneralExpr.unary
+                                                        (Relico.DTR.GeneralUnaryOp.negate)
+                                                        (Relico.DTR.GeneralExpr.intLiteral 1))]
+                                                   { value := 0 }]
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "cd1" })
+                                                   { value := "receiveStatus" }
+                                                   [Relico.DTR.GeneralExpr.binary
+                                                      (Relico.DTR.GeneralBinaryOp.ne)
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "senderDevice" })
+                                                      (Relico.DTR.GeneralExpr.unary
+                                                        (Relico.DTR.GeneralUnaryOp.negate)
+                                                        (Relico.DTR.GeneralExpr.intLiteral 1))]
+                                                   { value := 0 }]],
+                                     priority := none },
+                                   { name := { value := "broadcast" },
+                                     parameters := [{ name := { value := "receiverTag" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "senderTag" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "senderDevice" })
+                                                  (Relico.DTR.GeneralExpr.unary
+                                                    (Relico.DTR.GeneralUnaryOp.negate)
+                                                    (Relico.DTR.GeneralExpr.intLiteral 1)))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "senderDevice" }
+                                                   (Relico.DTR.GeneralExpr.parameterVar { value := "senderTag" }),
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "receiverDevice" }
+                                                   (Relico.DTR.GeneralExpr.parameterVar { value := "receiverTag" }),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "broadcastingIsCompleted" }
+                                                   []
+                                                   { value := 7 },
+                                                 Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.parameterVar { value := "senderTag" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "cd0" })
+                                                      { value := "receiveResult" }
+                                                      [Relico.DTR.GeneralExpr.boolLiteral true]
+                                                      { value := 7 }]
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "cd1" })
+                                                      { value := "receiveResult" }
+                                                      [Relico.DTR.GeneralExpr.boolLiteral true]
+                                                      { value := 7 }],
+                                                 Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.parameterVar { value := "receiverTag" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "cd0" })
+                                                      { value := "receiveData" }
+                                                      [Relico.DTR.GeneralExpr.parameterVar { value := "receiverTag" }]
+                                                      { value := 0 }]
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "cd1" })
+                                                      { value := "receiveData" }
+                                                      [Relico.DTR.GeneralExpr.parameterVar { value := "receiverTag" }]
+                                                      { value := 0 }]]
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.parameterVar { value := "senderTag" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "cd0" })
+                                                      { value := "receiveResult" }
+                                                      [Relico.DTR.GeneralExpr.boolLiteral false]
+                                                      { value := 0 }]
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "cd1" })
+                                                      { value := "receiveResult" }
+                                                      [Relico.DTR.GeneralExpr.boolLiteral false]
+                                                      { value := 0 }]]],
+                                     priority := none },
+                                   { name := { value := "broadcastingIsCompleted" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "senderDevice" }
+                                                (Relico.DTR.GeneralExpr.unary
+                                                  (Relico.DTR.GeneralUnaryOp.negate)
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "receiverDevice" }
+                                                (Relico.DTR.GeneralExpr.unary
+                                                  (Relico.DTR.GeneralUnaryOp.negate)
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1))],
+                                     priority := none }] },
+              { name := { value := "CommunicationDevice" },
+                knownRebecs := [{ name := { value := "medium" }, className := { value := "WirelessMedium" } },
+                                { name := { value := "cpu" }, className := { value := "CPU" } }],
+                stateVariables := [{ name := { value := "id" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "receiverDevice" },
+                                     declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "sendWhileBusy" },
+                                     declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "mediumBusyAtStatusCheck" },
+                                     declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "failedTransmission" },
+                                     declaredType := Relico.DTR.GeneralType.boolean }],
+                constructor := { parameters := [{ name := { value := "myId" },
+                                                  declaredType := Relico.DTR.GeneralType.int }],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "id" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "myId" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "receiverDevice" }
+                                            (Relico.DTR.GeneralExpr.unary
+                                              (Relico.DTR.GeneralUnaryOp.negate)
+                                              (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "sendWhileBusy" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "mediumBusyAtStatusCheck" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "failedTransmission" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false)] },
+                messageServers := [{ name := { value := "send" },
+                                     parameters := [{ name := { value := "receiverTag" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.ne)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "receiverDevice" })
+                                                  (Relico.DTR.GeneralExpr.unary
+                                                    (Relico.DTR.GeneralUnaryOp.negate)
+                                                    (Relico.DTR.GeneralExpr.intLiteral 1)))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "sendWhileBusy" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                [],
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "receiverDevice" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "receiverTag" }),
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "medium" })
+                                                { value := "getStatus" }
+                                                [Relico.DTR.GeneralExpr.stateVar { value := "id" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "receiveStatus" },
+                                     parameters := [{ name := { value := "result" },
+                                                      declaredType := Relico.DTR.GeneralType.boolean }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "result" })
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "mediumBusyAtStatusCheck" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                [],
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "medium" })
+                                                { value := "broadcast" }
+                                                [Relico.DTR.GeneralExpr.stateVar { value := "receiverDevice" },
+                                                 Relico.DTR.GeneralExpr.stateVar { value := "id" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "receiveResult" },
+                                     parameters := [{ name := { value := "result" },
+                                                      declaredType := Relico.DTR.GeneralType.boolean }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "result" })
+                                                  (Relico.DTR.GeneralExpr.boolLiteral false))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "failedTransmission" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                [],
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "receiverDevice" }
+                                                (Relico.DTR.GeneralExpr.unary
+                                                  (Relico.DTR.GeneralUnaryOp.negate)
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "result" })
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "cpu" })
+                                                   { value := "radioCycleDone" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 1]
+                                                   { value := 0 }]
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "cpu" })
+                                                   { value := "radioCycleDone" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                   { value := 0 }]],
+                                     priority := none },
+                                   { name := { value := "receiveData" },
+                                     parameters := [{ name := { value := "receiverTag" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "receiverTag" })
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "id" }))
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.knownRebec { value := "cpu" })
+                                                   { value := "radioDataDelivered" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                   { value := 0 }]
+                                                []],
+                                     priority := none }] }],
+  instances := [{ name := { value := "medium" },
+                  className := { value := "WirelessMedium" },
+                  bindings := [({ value := "cd0" }, { value := "receiver" }),
+                               ({ value := "cd1" }, { value := "sensorNodeSenderDevice" })],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "cpu" },
+                  className := { value := "CPU" },
+                  bindings := [({ value := "senderDevice" }, { value := "sensorNodeSenderDevice" }),
+                               ({ value := "sensor" }, { value := "sensor" }),
+                               ({ value := "misc" }, { value := "misc" })],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "sensor" },
+                  className := { value := "Sensor" },
+                  bindings := [({ value := "cpu" }, { value := "cpu" })],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "misc" },
+                  className := { value := "Misc" },
+                  bindings := [({ value := "cpu" }, { value := "cpu" })],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "sensorNodeSenderDevice" },
+                  className := { value := "CommunicationDevice" },
+                  bindings := [({ value := "medium" }, { value := "medium" }),
+                               ({ value := "cpu" }, { value := "cpu" })],
+                  arguments := [Relico.DTR.GeneralValue.int 1],
+                  priority := none },
+                { name := { value := "receiver" },
+                  className := { value := "CommunicationDevice" },
+                  bindings := [({ value := "medium" }, { value := "medium" }),
+                               ({ value := "cpu" }, { value := "cpu" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0],
+                  priority := none }] }
