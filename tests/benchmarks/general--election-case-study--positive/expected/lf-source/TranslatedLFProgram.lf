@@ -1,0 +1,165 @@
+target Cpp
+
+reactor Checker {
+  input elected0ToChkFromI0: int
+  input elected1ToChk1FromI1: int
+  input elected1ToChk2FromI1: int
+  state seen1: int = 0
+  state violation: int = 0
+  logical action elected0_action: int
+  logical action elected1_action: int
+
+  reaction(startup) {=
+    seen1 = 0;
+    violation = 0;
+  =}
+
+  reaction(elected0_action) {=
+    auto v = *elected0_action.get();
+    violation = 1;
+  =}
+
+  reaction(elected0ToChkFromI0) {=
+    auto v = *elected0ToChkFromI0.get();
+    violation = 1;
+  =}
+
+  reaction(elected1_action) {=
+    auto v = *elected1_action.get();
+    seen1 = 1;
+  =}
+
+  reaction(elected1ToChk1FromI1) {=
+    auto v = *elected1ToChk1FromI1.get();
+    seen1 = 1;
+  =}
+
+  reaction(elected1ToChk2FromI1) {=
+    auto v = *elected1ToChk2FromI1.get();
+    seen1 = 1;
+  =}
+}
+
+reactor Node1 {
+  input fromSrcToN1FromSrc: int
+  input fromRouterToN1FromR: int
+  output elected1ToChk1: int
+  output elected1ToChk2: int
+  state elected: int = 0
+  logical action fromSrc_action: int
+  logical action fromRouter_action: int
+
+  reaction(startup) {=
+    elected = 0;
+  =}
+
+  reaction(fromSrc_action) -> elected1ToChk1 {=
+    auto v = *fromSrc_action.get();
+    if ((v == 1)) { elected = 1; elected1ToChk1.set(1); } else {}
+  =}
+
+  reaction(fromSrcToN1FromSrc) -> elected1ToChk1 {=
+    auto v = *fromSrcToN1FromSrc.get();
+    if ((v == 1)) { elected = 1; elected1ToChk1.set(1); } else {}
+  =}
+
+  reaction(fromRouter_action) -> elected1ToChk2 {=
+    auto v = *fromRouter_action.get();
+    if ((v == 1)) { elected = 1; elected1ToChk2.set(1); } else {}
+  =}
+
+  reaction(fromRouterToN1FromR) -> elected1ToChk2 {=
+    auto v = *fromRouterToN1FromR.get();
+    if ((v == 1)) { elected = 1; elected1ToChk2.set(1); } else {}
+  =}
+}
+
+reactor Router {
+  input routeTo1ToRFromI0: int
+  output fromRouterToN1: int
+  logical action routeTo1_action: int
+
+  reaction(routeTo1_action) -> fromRouterToN1 {=
+    auto v = *routeTo1_action.get();
+    fromRouterToN1.set(v);
+  =}
+
+  reaction(routeTo1ToRFromI0) -> fromRouterToN1 {=
+    auto v = *routeTo1ToRFromI0.get();
+    fromRouterToN1.set(v);
+  =}
+}
+
+reactor Node0 {
+  input inToN0FromSrc: int
+  output routeTo1ToR: int
+  output elected0ToChk: int
+  state elected: int = 0
+  logical action in_action: int
+
+  reaction(startup) {=
+    elected = 0;
+  =}
+
+  reaction(in_action) -> routeTo1ToR, elected0ToChk {=
+    auto v = *in_action.get();
+    if ((v > 0)) { routeTo1ToR.set(v); } else { if ((v == 0)) { elected = 1; elected0ToChk.set(1); } else {} }
+  =}
+
+  reaction(inToN0FromSrc) -> routeTo1ToR, elected0ToChk {=
+    auto v = *inToN0FromSrc.get();
+    if ((v > 0)) { routeTo1ToR.set(v); } else { if ((v == 0)) { elected = 1; elected0ToChk.set(1); } else {} }
+  =}
+}
+
+reactor Source {
+  output inToN0: int
+  output fromSrcToN1: int
+  logical action start_action: void
+
+  reaction(startup) -> start_action {=
+    start_action.schedule(0ms);
+  =}
+
+  reaction(start_action) -> inToN0, fromSrcToN1 {=
+    inToN0.set(1);
+    fromSrcToN1.set(0);
+  =}
+}
+
+reactor KeepAlive {
+  state phase: int = 0
+  logical action tick_action1: void
+  logical action tick_action2: void
+
+  reaction(startup) -> tick_action1 {=
+    phase = 0;
+    tick_action1.schedule(0ms);
+  =}
+
+  reaction(tick_action1) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+
+  reaction(tick_action2) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+}
+
+main reactor {
+  src = new Source()
+  i0 = new Node0()
+  r = new Router()
+  i1 = new Node1()
+  chk = new Checker()
+  ka = new KeepAlive()
+  src.inToN0 -> i0.inToN0FromSrc after 0 msec
+  src.fromSrcToN1 -> i1.fromSrcToN1FromSrc after 0 msec
+  i0.routeTo1ToR -> r.routeTo1ToRFromI0 after 0 msec
+  i0.elected0ToChk -> chk.elected0ToChkFromI0 after 0 msec
+  r.fromRouterToN1 -> i1.fromRouterToN1FromR after 0 msec
+  i1.elected1ToChk1 -> chk.elected1ToChk1FromI1 after 0 msec
+  i1.elected1ToChk2 -> chk.elected1ToChk2FromI1 after 0 msec
+}

@@ -1,0 +1,92 @@
+target Cpp
+
+reactor Source {
+  output inputNToFib: int
+  logical action start_action: void
+
+  reaction(startup) -> start_action {=
+    start_action.schedule(0ms);
+  =}
+
+  reaction(start_action) -> inputNToFib {=
+    inputNToFib.set(10);
+  =}
+}
+
+reactor FibCore {
+  input inputNToFibFromSrc: int
+  output completeToChk: int
+  logical action inputN_action: int
+  logical action complete_action1: int
+  logical action complete_action2: int
+
+  reaction(inputN_action) -> complete_action1, complete_action2 {=
+    auto n = *inputN_action.get();
+    if ((n == 10)) { complete_action1.schedule(89, 10ms); } else { complete_action2.schedule(0, 10ms); }
+  =}
+
+  reaction(inputNToFibFromSrc) -> complete_action1, complete_action2 {=
+    auto n = *inputNToFibFromSrc.get();
+    if ((n == 10)) { complete_action1.schedule(89, 10ms); } else { complete_action2.schedule(0, 10ms); }
+  =}
+
+  reaction(complete_action1) -> completeToChk {=
+    auto v = *complete_action1.get();
+    completeToChk.set(v);
+  =}
+
+  reaction(complete_action2) -> completeToChk {=
+    auto v = *complete_action2.get();
+    completeToChk.set(v);
+  =}
+}
+
+reactor Checker {
+  input completeToChkFromFib: int
+  state violation: int = 0
+  logical action complete_action: int
+
+  reaction(startup) {=
+    violation = 0;
+  =}
+
+  reaction(complete_action) {=
+    auto v = *complete_action.get();
+    if ((v != 89)) { violation = 1; } else {}
+  =}
+
+  reaction(completeToChkFromFib) {=
+    auto v = *completeToChkFromFib.get();
+    if ((v != 89)) { violation = 1; } else {}
+  =}
+}
+
+reactor KeepAlive {
+  state phase: int = 0
+  logical action tick_action1: void
+  logical action tick_action2: void
+
+  reaction(startup) -> tick_action1 {=
+    phase = 0;
+    tick_action1.schedule(100ms);
+  =}
+
+  reaction(tick_action1) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+
+  reaction(tick_action2) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+}
+
+main reactor {
+  src = new Source()
+  fib = new FibCore()
+  chk = new Checker()
+  ka = new KeepAlive()
+  src.inputNToFib -> fib.inputNToFibFromSrc after 0 msec
+  fib.completeToChk -> chk.completeToChkFromFib after 0 msec
+}

@@ -1,0 +1,74 @@
+target Cpp
+
+reactor Coordinator {
+  state epoch: int = 0
+  state seen: int = 0
+  state violation: int = 0
+  logical action start_action: void
+  logical action dispatch_action1: void
+  logical action dispatch_action2: void
+  logical action arrive_action1: void
+  logical action arrive_action2: void
+
+  reaction(startup) -> start_action {=
+    epoch = 0;
+    seen = 0;
+    violation = 0;
+    start_action.schedule(0ms);
+  =}
+
+  reaction(start_action) -> dispatch_action1 {=
+    dispatch_action1.schedule(0ms);
+  =}
+
+  reaction(dispatch_action1) -> arrive_action1, arrive_action2 {=
+    if ((epoch < 8)) { epoch = (epoch + 1); seen = 0; arrive_action1.schedule(2ms); arrive_action2.schedule(2ms); } else {}
+  =}
+
+  reaction(dispatch_action2) -> arrive_action1, arrive_action2 {=
+    if ((epoch < 8)) { epoch = (epoch + 1); seen = 0; arrive_action1.schedule(2ms); arrive_action2.schedule(2ms); } else {}
+  =}
+
+  reaction(arrive_action1) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 2)) { violation = 1; } else {}
+    if ((seen == 2)) { if ((epoch < 8)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(arrive_action2) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 2)) { violation = 1; } else {}
+    if ((seen == 2)) { if ((epoch < 8)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+}
+
+reactor KeepAlive {
+  state phase: int = 0
+  logical action kick_action: void
+  logical action tick_action1: void
+  logical action tick_action2: void
+
+  reaction(startup) -> kick_action {=
+    phase = 0;
+    kick_action.schedule(0ms);
+  =}
+
+  reaction(kick_action) -> tick_action1 {=
+    tick_action1.schedule(100000ms);
+  =}
+
+  reaction(tick_action1) -> tick_action2 {=
+    phase = (1 - phase);
+    tick_action2.schedule(100000ms);
+  =}
+
+  reaction(tick_action2) -> tick_action2 {=
+    phase = (1 - phase);
+    tick_action2.schedule(100000ms);
+  =}
+}
+
+main reactor {
+  coord = new Coordinator()
+  ka = new KeepAlive()
+}

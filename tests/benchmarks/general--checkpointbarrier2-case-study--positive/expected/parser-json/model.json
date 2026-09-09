@@ -1,0 +1,427 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 12,
+            "target": "epoch",
+            "value": {
+              "kind": "intLiteral",
+              "line": 12,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 13,
+            "target": "seen",
+            "value": {
+              "kind": "intLiteral",
+              "line": 13,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 14,
+            "target": "violation",
+            "value": {
+              "kind": "intLiteral",
+              "line": 14,
+              "value": 0
+            }
+          },
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 15,
+            "messageServer": "start",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Coordinator"
+          }
+        ],
+        "line": 11,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 4,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [],
+              "kind": "send",
+              "line": 20,
+              "messageServer": "dispatch",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Coordinator"
+            }
+          ],
+          "line": 19,
+          "name": "start",
+          "parameters": [],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 25,
+                  "name": "epoch"
+                },
+                "line": 25,
+                "operator": "<",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 25,
+                  "value": 8
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 25,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 26,
+                  "target": "epoch",
+                  "value": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 26,
+                      "name": "epoch"
+                    },
+                    "line": 26,
+                    "operator": "+",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 26,
+                      "value": 1
+                    }
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 27,
+                  "target": "seen",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 27,
+                    "value": 0
+                  }
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 2
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 29,
+                  "messageServer": "arrive",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 2
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 30,
+                  "messageServer": "arrive",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                }
+              ]
+            }
+          ],
+          "line": 24,
+          "name": "dispatch",
+          "parameters": [],
+          "priority": 2
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 36,
+              "target": "seen",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 36,
+                  "name": "seen"
+                },
+                "line": 36,
+                "operator": "+",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 36,
+                  "value": 1
+                }
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 38,
+                  "name": "seen"
+                },
+                "line": 38,
+                "operator": ">",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 38,
+                  "value": 2
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 38,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 39,
+                  "target": "violation",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 39,
+                    "value": 1
+                  }
+                }
+              ]
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 42,
+                  "name": "seen"
+                },
+                "line": 42,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 42,
+                  "value": 2
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 42,
+              "then": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 43,
+                      "name": "epoch"
+                    },
+                    "line": 43,
+                    "operator": "<",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 43,
+                      "value": 8
+                    }
+                  },
+                  "else": [],
+                  "kind": "if",
+                  "line": 43,
+                  "then": [
+                    {
+                      "after": {
+                        "kind": "intLiteral",
+                        "value": 1
+                      },
+                      "arguments": [],
+                      "kind": "send",
+                      "line": 44,
+                      "messageServer": "dispatch",
+                      "target": {
+                        "kind": "self"
+                      },
+                      "targetClassName": "Coordinator"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "line": 35,
+          "name": "arrive",
+          "parameters": [],
+          "priority": 3
+        }
+      ],
+      "name": "Coordinator",
+      "queueBound": 20,
+      "stateVariables": [
+        {
+          "line": 6,
+          "name": "epoch",
+          "type": "int"
+        },
+        {
+          "line": 7,
+          "name": "seen",
+          "type": "int"
+        },
+        {
+          "line": 8,
+          "name": "violation",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 56,
+            "target": "phase",
+            "value": {
+              "kind": "intLiteral",
+              "line": 56,
+              "value": 0
+            }
+          },
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 57,
+            "messageServer": "kick",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "KeepAlive"
+          }
+        ],
+        "line": 55,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 50,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 100000
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 62,
+              "messageServer": "tick",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "KeepAlive"
+            }
+          ],
+          "line": 61,
+          "name": "kick",
+          "parameters": [],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 67,
+              "target": "phase",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "intLiteral",
+                  "line": 67,
+                  "value": 1
+                },
+                "line": 67,
+                "operator": "-",
+                "right": {
+                  "kind": "variable",
+                  "line": 67,
+                  "name": "phase"
+                }
+              }
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 100000
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 68,
+              "messageServer": "tick",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "KeepAlive"
+            }
+          ],
+          "line": 66,
+          "name": "tick",
+          "parameters": [],
+          "priority": 2
+        }
+      ],
+      "name": "KeepAlive",
+      "queueBound": 2,
+      "stateVariables": [
+        {
+          "line": 52,
+          "name": "phase",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Coordinator",
+      "line": 73,
+      "name": "coord",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "KeepAlive",
+      "line": 74,
+      "name": "ka",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

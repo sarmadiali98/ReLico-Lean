@@ -1,0 +1,75 @@
+// Benchmark: general--checkpointbarrier2-case-study--positive
+// Source: examples.zip/ReLico-main/CheckpointBarrier2/CheckpointBarrier2.rebeca.
+// The original property file is excluded; translation and runtime behavior only.
+reactiveclass Coordinator(20) {
+    statevars {
+        int epoch;
+        int seen;
+        int violation;
+    }
+
+    Coordinator() {
+        epoch = 0;
+        seen = 0;
+        violation = 0;
+        self.start();
+    }
+
+    @priority(1)
+    msgsrv start() {
+        self.dispatch();
+    }
+
+    @priority(2)
+    msgsrv dispatch() {
+        if (epoch < 8) {
+            epoch = epoch + 1;
+            seen = 0;
+
+            self.arrive() after(2);
+            self.arrive() after(2);
+        }
+    }
+
+    @priority(3)
+    msgsrv arrive() {
+        seen = seen + 1;
+
+        if (seen > 2) {
+            violation = 1;
+        }
+
+        if (seen == 2) {
+            if (epoch < 8) {
+                self.dispatch() after(1);
+            }
+        }
+    }
+}
+
+reactiveclass KeepAlive(2) {
+    statevars {
+        int phase;
+    }
+
+    KeepAlive() {
+        phase = 0;
+        self.kick();
+    }
+
+    @priority(1)
+    msgsrv kick() {
+        self.tick() after(100000);
+    }
+
+    @priority(2)
+    msgsrv tick() {
+        phase = 1 - phase;
+        self.tick() after(100000);
+    }
+}
+
+main {
+    Coordinator coord():();
+    KeepAlive ka():();
+}

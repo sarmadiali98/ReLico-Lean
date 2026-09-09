@@ -1,0 +1,135 @@
+{ classes := [{ name := { value := "Coordinator" },
+                knownRebecs := [],
+                stateVariables := [{ name := { value := "epoch" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "seen" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "violation" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "epoch" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "seen" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "violation" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "start" }
+                                            []
+                                            { value := 0 }] },
+                messageServers := [{ name := { value := "start" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "dispatch" }
+                                                []
+                                                { value := 0 }],
+                                     priority := some 1 },
+                                   { name := { value := "dispatch" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.lt)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "epoch" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 8))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "epoch" }
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.add)
+                                                     (Relico.DTR.GeneralExpr.stateVar { value := "epoch" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 0),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "arrive" }
+                                                   []
+                                                   { value := 2 },
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "arrive" }
+                                                   []
+                                                   { value := 2 }]
+                                                []],
+                                     priority := some 2 },
+                                   { name := { value := "arrive" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "seen" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.add)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "seen" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.gt)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "seen" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "violation" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1)]
+                                                [],
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "seen" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.lt)
+                                                     (Relico.DTR.GeneralExpr.stateVar { value := "epoch" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 8))
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                      { value := "dispatch" }
+                                                      []
+                                                      { value := 1 }]
+                                                   []]
+                                                []],
+                                     priority := some 3 }] },
+              { name := { value := "KeepAlive" },
+                knownRebecs := [],
+                stateVariables := [{ name := { value := "phase" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "phase" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "kick" }
+                                            []
+                                            { value := 0 }] },
+                messageServers := [{ name := { value := "kick" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "tick" }
+                                                []
+                                                { value := 100000 }],
+                                     priority := some 1 },
+                                   { name := { value := "tick" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "phase" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.sub)
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "phase" })),
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "tick" }
+                                                []
+                                                { value := 100000 }],
+                                     priority := some 2 }] }],
+  instances := [{ name := { value := "coord" },
+                  className := { value := "Coordinator" },
+                  bindings := [],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "ka" },
+                  className := { value := "KeepAlive" },
+                  bindings := [],
+                  arguments := [],
+                  priority := none }] }
