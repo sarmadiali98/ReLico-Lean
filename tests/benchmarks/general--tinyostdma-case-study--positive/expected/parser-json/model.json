@@ -1,0 +1,1960 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 29,
+            "target": "collectedSamplesCounter",
+            "value": {
+              "kind": "intLiteral",
+              "line": 29,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 30,
+            "target": "resultArrived",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 30,
+              "value": false
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 31,
+            "target": "dataDelivered",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 31,
+              "value": false
+            }
+          }
+        ],
+        "line": 28,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "CommunicationDevice",
+          "line": 19,
+          "name": "senderDevice"
+        },
+        {
+          "className": "Sensor",
+          "line": 20,
+          "name": "sensor"
+        },
+        {
+          "className": "Misc",
+          "line": 21,
+          "name": "misc"
+        }
+      ],
+      "line": 17,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 2
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 34,
+              "messageServer": "sensorTask",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "CPU"
+            }
+          ],
+          "line": 33,
+          "name": "sensorEvent",
+          "parameters": [
+            {
+              "line": 33,
+              "name": "unit",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 37,
+              "target": "collectedSamplesCounter",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 37,
+                  "name": "collectedSamplesCounter"
+                },
+                "line": 37,
+                "operator": "+",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 37,
+                  "value": 1
+                }
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 38,
+                  "name": "collectedSamplesCounter"
+                },
+                "line": 38,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 38,
+                  "value": 1
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 38,
+              "then": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 39,
+                      "value": 0
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 39,
+                  "messageServer": "send",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "senderDevice"
+                  },
+                  "targetClassName": "CommunicationDevice"
+                }
+              ]
+            }
+          ],
+          "line": 36,
+          "name": "sensorTask",
+          "parameters": [],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 43,
+              "target": "resultArrived",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 43,
+                "value": true
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 44,
+                  "name": "ok"
+                },
+                "line": 44,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 44,
+                  "value": 0
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 44,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 45,
+                  "target": "dataDelivered",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 45,
+                    "value": true
+                  }
+                }
+              ]
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 47,
+                  "name": "resultArrived"
+                },
+                "line": 47,
+                "operator": "&&",
+                "right": {
+                  "kind": "variable",
+                  "line": 47,
+                  "name": "dataDelivered"
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 47,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 48,
+                  "target": "resultArrived",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 48,
+                    "value": false
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 49,
+                  "target": "dataDelivered",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 49,
+                    "value": false
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 50,
+                  "target": "collectedSamplesCounter",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 50,
+                    "value": 0
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 51,
+                      "value": 0
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 51,
+                  "messageServer": "sampleTaken",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "sensor"
+                  },
+                  "targetClassName": "Sensor"
+                }
+              ]
+            }
+          ],
+          "line": 42,
+          "name": "radioCycleDone",
+          "parameters": [
+            {
+              "line": 42,
+              "name": "ok",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 55,
+              "target": "dataDelivered",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 55,
+                "value": true
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 56,
+                  "name": "resultArrived"
+                },
+                "line": 56,
+                "operator": "&&",
+                "right": {
+                  "kind": "variable",
+                  "line": 56,
+                  "name": "dataDelivered"
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 56,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 57,
+                  "target": "resultArrived",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 57,
+                    "value": false
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 58,
+                  "target": "dataDelivered",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 58,
+                    "value": false
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 59,
+                  "target": "collectedSamplesCounter",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 59,
+                    "value": 0
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 60,
+                      "value": 0
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 60,
+                  "messageServer": "sampleTaken",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "sensor"
+                  },
+                  "targetClassName": "Sensor"
+                }
+              ]
+            }
+          ],
+          "line": 54,
+          "name": "radioDataDelivered",
+          "parameters": [
+            {
+              "line": 54,
+              "name": "unit",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 10
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 64,
+              "messageServer": "miscTaskComplete",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "CPU"
+            }
+          ],
+          "line": 63,
+          "name": "miscEvent",
+          "parameters": [
+            {
+              "line": 63,
+              "name": "unit",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "intLiteral",
+                  "line": 67,
+                  "value": 0
+                }
+              ],
+              "kind": "send",
+              "line": 67,
+              "messageServer": "miscDone",
+              "target": {
+                "kind": "knownRebec",
+                "name": "misc"
+              },
+              "targetClassName": "Misc"
+            }
+          ],
+          "line": 66,
+          "name": "miscTaskComplete",
+          "parameters": [],
+          "priority": null
+        }
+      ],
+      "name": "CPU",
+      "queueBound": 10,
+      "stateVariables": [
+        {
+          "line": 24,
+          "name": "collectedSamplesCounter",
+          "type": "int"
+        },
+        {
+          "line": 25,
+          "name": "resultArrived",
+          "type": "boolean"
+        },
+        {
+          "line": 26,
+          "name": "dataDelivered",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 76,
+            "messageServer": "sensorFirst",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Sensor"
+          }
+        ],
+        "line": 75,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "CPU",
+          "line": 73,
+          "name": "cpu"
+        }
+      ],
+      "line": 71,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 10
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 79,
+              "messageServer": "sensorLoop",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Sensor"
+            }
+          ],
+          "line": 78,
+          "name": "sensorFirst",
+          "parameters": [],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "intLiteral",
+                  "line": 82,
+                  "value": 0
+                }
+              ],
+              "kind": "send",
+              "line": 82,
+              "messageServer": "sensorEvent",
+              "target": {
+                "kind": "knownRebec",
+                "name": "cpu"
+              },
+              "targetClassName": "CPU"
+            }
+          ],
+          "line": 81,
+          "name": "sensorLoop",
+          "parameters": [],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 40
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 85,
+              "messageServer": "sensorLoop",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Sensor"
+            }
+          ],
+          "line": 84,
+          "name": "sampleTaken",
+          "parameters": [
+            {
+              "line": 84,
+              "name": "unit",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Sensor",
+      "queueBound": 10,
+      "stateVariables": []
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 94,
+            "messageServer": "miscFirst",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Misc"
+          }
+        ],
+        "line": 93,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "CPU",
+          "line": 91,
+          "name": "cpu"
+        }
+      ],
+      "line": 89,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 10
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 97,
+              "messageServer": "miscLoop",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Misc"
+            }
+          ],
+          "line": 96,
+          "name": "miscFirst",
+          "parameters": [],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "intLiteral",
+                  "line": 100,
+                  "value": 0
+                }
+              ],
+              "kind": "send",
+              "line": 100,
+              "messageServer": "miscEvent",
+              "target": {
+                "kind": "knownRebec",
+                "name": "cpu"
+              },
+              "targetClassName": "CPU"
+            }
+          ],
+          "line": 99,
+          "name": "miscLoop",
+          "parameters": [],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 120
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 103,
+              "messageServer": "miscLoop",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Misc"
+            }
+          ],
+          "line": 102,
+          "name": "miscDone",
+          "parameters": [
+            {
+              "line": 102,
+              "name": "unit",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Misc",
+      "queueBound": 10,
+      "stateVariables": []
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 117,
+            "target": "senderDevice",
+            "value": {
+              "kind": "unary",
+              "line": 117,
+              "operand": {
+                "kind": "intLiteral",
+                "line": 117,
+                "value": 1
+              },
+              "operator": "-"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 118,
+            "target": "receiverDevice",
+            "value": {
+              "kind": "unary",
+              "line": 118,
+              "operand": {
+                "kind": "intLiteral",
+                "line": 118,
+                "value": 1
+              },
+              "operator": "-"
+            }
+          }
+        ],
+        "line": 116,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "CommunicationDevice",
+          "line": 109,
+          "name": "cd0"
+        },
+        {
+          "className": "CommunicationDevice",
+          "line": 110,
+          "name": "cd1"
+        }
+      ],
+      "line": 107,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 121,
+                  "name": "senderTag"
+                },
+                "line": 121,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 121,
+                  "value": 0
+                }
+              },
+              "else": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "binary",
+                      "left": {
+                        "kind": "variable",
+                        "line": 124,
+                        "name": "senderDevice"
+                      },
+                      "line": 124,
+                      "operator": "!=",
+                      "right": {
+                        "kind": "unary",
+                        "line": 124,
+                        "operand": {
+                          "kind": "intLiteral",
+                          "line": 124,
+                          "value": 1
+                        },
+                        "operator": "-"
+                      }
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 124,
+                  "messageServer": "receiveStatus",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "cd1"
+                  },
+                  "targetClassName": "CommunicationDevice"
+                }
+              ],
+              "kind": "if",
+              "line": 121,
+              "then": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "binary",
+                      "left": {
+                        "kind": "variable",
+                        "line": 122,
+                        "name": "senderDevice"
+                      },
+                      "line": 122,
+                      "operator": "!=",
+                      "right": {
+                        "kind": "unary",
+                        "line": 122,
+                        "operand": {
+                          "kind": "intLiteral",
+                          "line": 122,
+                          "value": 1
+                        },
+                        "operator": "-"
+                      }
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 122,
+                  "messageServer": "receiveStatus",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "cd0"
+                  },
+                  "targetClassName": "CommunicationDevice"
+                }
+              ]
+            }
+          ],
+          "line": 120,
+          "name": "getStatus",
+          "parameters": [
+            {
+              "line": 120,
+              "name": "senderTag",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 128,
+                  "name": "senderDevice"
+                },
+                "line": 128,
+                "operator": "==",
+                "right": {
+                  "kind": "unary",
+                  "line": 128,
+                  "operand": {
+                    "kind": "intLiteral",
+                    "line": 128,
+                    "value": 1
+                  },
+                  "operator": "-"
+                }
+              },
+              "else": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 143,
+                      "name": "senderTag"
+                    },
+                    "line": 143,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 143,
+                      "value": 0
+                    }
+                  },
+                  "else": [
+                    {
+                      "after": null,
+                      "arguments": [
+                        {
+                          "kind": "boolLiteral",
+                          "line": 146,
+                          "value": false
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 146,
+                      "messageServer": "receiveResult",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "cd1"
+                      },
+                      "targetClassName": "CommunicationDevice"
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 143,
+                  "then": [
+                    {
+                      "after": null,
+                      "arguments": [
+                        {
+                          "kind": "boolLiteral",
+                          "line": 144,
+                          "value": false
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 144,
+                      "messageServer": "receiveResult",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "cd0"
+                      },
+                      "targetClassName": "CommunicationDevice"
+                    }
+                  ]
+                }
+              ],
+              "kind": "if",
+              "line": 128,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 129,
+                  "target": "senderDevice",
+                  "value": {
+                    "kind": "variable",
+                    "line": 129,
+                    "name": "senderTag"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 130,
+                  "target": "receiverDevice",
+                  "value": {
+                    "kind": "variable",
+                    "line": 130,
+                    "name": "receiverTag"
+                  }
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 7
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 131,
+                  "messageServer": "broadcastingIsCompleted",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "WirelessMedium"
+                },
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 132,
+                      "name": "senderTag"
+                    },
+                    "line": 132,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 132,
+                      "value": 0
+                    }
+                  },
+                  "else": [
+                    {
+                      "after": {
+                        "kind": "intLiteral",
+                        "value": 7
+                      },
+                      "arguments": [
+                        {
+                          "kind": "boolLiteral",
+                          "line": 135,
+                          "value": true
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 135,
+                      "messageServer": "receiveResult",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "cd1"
+                      },
+                      "targetClassName": "CommunicationDevice"
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 132,
+                  "then": [
+                    {
+                      "after": {
+                        "kind": "intLiteral",
+                        "value": 7
+                      },
+                      "arguments": [
+                        {
+                          "kind": "boolLiteral",
+                          "line": 133,
+                          "value": true
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 133,
+                      "messageServer": "receiveResult",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "cd0"
+                      },
+                      "targetClassName": "CommunicationDevice"
+                    }
+                  ]
+                },
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 137,
+                      "name": "receiverTag"
+                    },
+                    "line": 137,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 137,
+                      "value": 0
+                    }
+                  },
+                  "else": [
+                    {
+                      "after": null,
+                      "arguments": [
+                        {
+                          "kind": "variable",
+                          "line": 140,
+                          "name": "receiverTag"
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 140,
+                      "messageServer": "receiveData",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "cd1"
+                      },
+                      "targetClassName": "CommunicationDevice"
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 137,
+                  "then": [
+                    {
+                      "after": null,
+                      "arguments": [
+                        {
+                          "kind": "variable",
+                          "line": 138,
+                          "name": "receiverTag"
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 138,
+                      "messageServer": "receiveData",
+                      "target": {
+                        "kind": "knownRebec",
+                        "name": "cd0"
+                      },
+                      "targetClassName": "CommunicationDevice"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "line": 127,
+          "name": "broadcast",
+          "parameters": [
+            {
+              "line": 127,
+              "name": "receiverTag",
+              "type": "int"
+            },
+            {
+              "line": 127,
+              "name": "senderTag",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 151,
+              "target": "senderDevice",
+              "value": {
+                "kind": "unary",
+                "line": 151,
+                "operand": {
+                  "kind": "intLiteral",
+                  "line": 151,
+                  "value": 1
+                },
+                "operator": "-"
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 152,
+              "target": "receiverDevice",
+              "value": {
+                "kind": "unary",
+                "line": 152,
+                "operand": {
+                  "kind": "intLiteral",
+                  "line": 152,
+                  "value": 1
+                },
+                "operator": "-"
+              }
+            }
+          ],
+          "line": 150,
+          "name": "broadcastingIsCompleted",
+          "parameters": [],
+          "priority": null
+        }
+      ],
+      "name": "WirelessMedium",
+      "queueBound": 5,
+      "stateVariables": [
+        {
+          "line": 113,
+          "name": "senderDevice",
+          "type": "int"
+        },
+        {
+          "line": 114,
+          "name": "receiverDevice",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 170,
+            "target": "id",
+            "value": {
+              "kind": "variable",
+              "line": 170,
+              "name": "myId"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 171,
+            "target": "receiverDevice",
+            "value": {
+              "kind": "unary",
+              "line": 171,
+              "operand": {
+                "kind": "intLiteral",
+                "line": 171,
+                "value": 1
+              },
+              "operator": "-"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 172,
+            "target": "inActivePeriod",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 172,
+              "value": false
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 173,
+            "target": "slotClockRunning",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 173,
+              "value": false
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 174,
+            "target": "busyWithSending",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 174,
+              "value": false
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 175,
+            "target": "sendWhileBusy",
+            "value": {
+              "kind": "boolLiteral",
+              "line": 175,
+              "value": false
+            }
+          }
+        ],
+        "line": 169,
+        "parameters": [
+          {
+            "line": 169,
+            "name": "myId",
+            "type": "int"
+          }
+        ]
+      },
+      "knownRebecs": [
+        {
+          "className": "WirelessMedium",
+          "line": 158,
+          "name": "medium"
+        },
+        {
+          "className": "CPU",
+          "line": 159,
+          "name": "cpu"
+        }
+      ],
+      "line": 156,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 178,
+                  "name": "receiverDevice"
+                },
+                "line": 178,
+                "operator": "!=",
+                "right": {
+                  "kind": "unary",
+                  "line": 178,
+                  "operand": {
+                    "kind": "intLiteral",
+                    "line": 178,
+                    "value": 1
+                  },
+                  "operator": "-"
+                }
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 181,
+                  "target": "receiverDevice",
+                  "value": {
+                    "kind": "variable",
+                    "line": 181,
+                    "name": "receiverTag"
+                  }
+                },
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 182,
+                      "name": "slotClockRunning"
+                    },
+                    "line": 182,
+                    "operator": "==",
+                    "right": {
+                      "kind": "boolLiteral",
+                      "line": 182,
+                      "value": false
+                    }
+                  },
+                  "else": [],
+                  "kind": "if",
+                  "line": 182,
+                  "then": [
+                    {
+                      "kind": "assign",
+                      "line": 183,
+                      "target": "slotClockRunning",
+                      "value": {
+                        "kind": "boolLiteral",
+                        "line": 183,
+                        "value": true
+                      }
+                    },
+                    {
+                      "after": null,
+                      "arguments": [],
+                      "kind": "send",
+                      "line": 184,
+                      "messageServer": "handleTDMASlot",
+                      "target": {
+                        "kind": "self"
+                      },
+                      "targetClassName": "CommunicationDevice"
+                    }
+                  ]
+                }
+              ],
+              "kind": "if",
+              "line": 178,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 179,
+                  "target": "sendWhileBusy",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 179,
+                    "value": true
+                  }
+                }
+              ]
+            }
+          ],
+          "line": 177,
+          "name": "send",
+          "parameters": [
+            {
+              "line": 177,
+              "name": "receiverTag",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "variable",
+                    "line": 189,
+                    "name": "receiverDevice"
+                  },
+                  "line": 189,
+                  "operator": "!=",
+                  "right": {
+                    "kind": "unary",
+                    "line": 189,
+                    "operand": {
+                      "kind": "intLiteral",
+                      "line": 189,
+                      "value": 1
+                    },
+                    "operator": "-"
+                  }
+                },
+                "line": 189,
+                "operator": "&&",
+                "right": {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "variable",
+                    "line": 189,
+                    "name": "busyWithSending"
+                  },
+                  "line": 189,
+                  "operator": "==",
+                  "right": {
+                    "kind": "boolLiteral",
+                    "line": 189,
+                    "value": false
+                  }
+                }
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 193,
+                  "target": "slotClockRunning",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 193,
+                    "value": false
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 194,
+                  "target": "inActivePeriod",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 194,
+                    "value": false
+                  }
+                }
+              ],
+              "kind": "if",
+              "line": 189,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 190,
+                  "target": "inActivePeriod",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 190,
+                    "value": true
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 191,
+                  "messageServer": "checkPendingData",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "CommunicationDevice"
+                }
+              ]
+            }
+          ],
+          "line": 188,
+          "name": "handleTDMASlot",
+          "parameters": [],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "variable",
+                    "line": 198,
+                    "name": "inActivePeriod"
+                  },
+                  "line": 198,
+                  "operator": "&&",
+                  "right": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 198,
+                      "name": "receiverDevice"
+                    },
+                    "line": 198,
+                    "operator": "!=",
+                    "right": {
+                      "kind": "unary",
+                      "line": 198,
+                      "operand": {
+                        "kind": "intLiteral",
+                        "line": 198,
+                        "value": 1
+                      },
+                      "operator": "-"
+                    }
+                  }
+                },
+                "line": 198,
+                "operator": "&&",
+                "right": {
+                  "kind": "binary",
+                  "left": {
+                    "kind": "variable",
+                    "line": 198,
+                    "name": "busyWithSending"
+                  },
+                  "line": 198,
+                  "operator": "==",
+                  "right": {
+                    "kind": "boolLiteral",
+                    "line": 198,
+                    "value": false
+                  }
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 198,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 199,
+                  "target": "busyWithSending",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 199,
+                    "value": true
+                  }
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 10
+                  },
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 200,
+                      "name": "id"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 200,
+                  "messageServer": "getStatus",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "medium"
+                  },
+                  "targetClassName": "WirelessMedium"
+                }
+              ]
+            }
+          ],
+          "line": 197,
+          "name": "checkPendingData",
+          "parameters": [],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 204,
+                  "name": "result"
+                },
+                "line": 204,
+                "operator": "==",
+                "right": {
+                  "kind": "boolLiteral",
+                  "line": 204,
+                  "value": false
+                }
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 207,
+                  "target": "busyWithSending",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 207,
+                    "value": false
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 208,
+                  "target": "inActivePeriod",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 208,
+                    "value": false
+                  }
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 50
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 209,
+                  "messageServer": "handleTDMASlot",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "CommunicationDevice"
+                }
+              ],
+              "kind": "if",
+              "line": 204,
+              "then": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 205,
+                      "name": "receiverDevice"
+                    },
+                    {
+                      "kind": "variable",
+                      "line": 205,
+                      "name": "id"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 205,
+                  "messageServer": "broadcast",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "medium"
+                  },
+                  "targetClassName": "WirelessMedium"
+                }
+              ]
+            }
+          ],
+          "line": 203,
+          "name": "receiveStatus",
+          "parameters": [
+            {
+              "line": 203,
+              "name": "result",
+              "type": "boolean"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "variable",
+                "line": 213,
+                "name": "result"
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 220,
+                  "target": "busyWithSending",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 220,
+                    "value": false
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 221,
+                  "target": "inActivePeriod",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 221,
+                    "value": false
+                  }
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 50
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 222,
+                  "messageServer": "handleTDMASlot",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "CommunicationDevice"
+                }
+              ],
+              "kind": "if",
+              "line": 213,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 214,
+                  "target": "receiverDevice",
+                  "value": {
+                    "kind": "unary",
+                    "line": 214,
+                    "operand": {
+                      "kind": "intLiteral",
+                      "line": 214,
+                      "value": 1
+                    },
+                    "operator": "-"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 215,
+                  "target": "busyWithSending",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 215,
+                    "value": false
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 216,
+                  "target": "inActivePeriod",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 216,
+                    "value": false
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 217,
+                  "target": "slotClockRunning",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 217,
+                    "value": false
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 218,
+                      "value": 1
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 218,
+                  "messageServer": "radioCycleDone",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "cpu"
+                  },
+                  "targetClassName": "CPU"
+                }
+              ]
+            }
+          ],
+          "line": 212,
+          "name": "receiveResult",
+          "parameters": [
+            {
+              "line": 212,
+              "name": "result",
+              "type": "boolean"
+            }
+          ],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 229,
+                  "name": "receiverTag"
+                },
+                "line": 229,
+                "operator": "==",
+                "right": {
+                  "kind": "variable",
+                  "line": 229,
+                  "name": "id"
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 229,
+              "then": [
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 230,
+                      "value": 0
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 230,
+                  "messageServer": "radioDataDelivered",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "cpu"
+                  },
+                  "targetClassName": "CPU"
+                }
+              ]
+            }
+          ],
+          "line": 225,
+          "name": "receiveData",
+          "parameters": [
+            {
+              "line": 225,
+              "name": "receiverTag",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "CommunicationDevice",
+      "queueBound": 10,
+      "stateVariables": [
+        {
+          "line": 162,
+          "name": "id",
+          "type": "int"
+        },
+        {
+          "line": 163,
+          "name": "receiverDevice",
+          "type": "int"
+        },
+        {
+          "line": 164,
+          "name": "inActivePeriod",
+          "type": "boolean"
+        },
+        {
+          "line": 165,
+          "name": "slotClockRunning",
+          "type": "boolean"
+        },
+        {
+          "line": 166,
+          "name": "busyWithSending",
+          "type": "boolean"
+        },
+        {
+          "line": 167,
+          "name": "sendWhileBusy",
+          "type": "boolean"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "CommunicationDevice",
+          "instance": "receiver",
+          "knownRebec": "cd0"
+        },
+        {
+          "className": "CommunicationDevice",
+          "instance": "sensorNodeSenderDevice",
+          "knownRebec": "cd1"
+        }
+      ],
+      "className": "WirelessMedium",
+      "line": 236,
+      "name": "medium",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "CommunicationDevice",
+          "instance": "sensorNodeSenderDevice",
+          "knownRebec": "senderDevice"
+        },
+        {
+          "className": "Sensor",
+          "instance": "sensor",
+          "knownRebec": "sensor"
+        },
+        {
+          "className": "Misc",
+          "instance": "misc",
+          "knownRebec": "misc"
+        }
+      ],
+      "className": "CPU",
+      "line": 237,
+      "name": "cpu",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "CPU",
+          "instance": "cpu",
+          "knownRebec": "cpu"
+        }
+      ],
+      "className": "Sensor",
+      "line": 238,
+      "name": "sensor",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "CPU",
+          "instance": "cpu",
+          "knownRebec": "cpu"
+        }
+      ],
+      "className": "Misc",
+      "line": 239,
+      "name": "misc",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 1
+        }
+      ],
+      "bindings": [
+        {
+          "className": "WirelessMedium",
+          "instance": "medium",
+          "knownRebec": "medium"
+        },
+        {
+          "className": "CPU",
+          "instance": "cpu",
+          "knownRebec": "cpu"
+        }
+      ],
+      "className": "CommunicationDevice",
+      "line": 240,
+      "name": "sensorNodeSenderDevice",
+      "priority": null
+    },
+    {
+      "arguments": [
+        {
+          "kind": "intLiteral",
+          "value": 0
+        }
+      ],
+      "bindings": [
+        {
+          "className": "WirelessMedium",
+          "instance": "medium",
+          "knownRebec": "medium"
+        },
+        {
+          "className": "CPU",
+          "instance": "cpu",
+          "knownRebec": "cpu"
+        }
+      ],
+      "className": "CommunicationDevice",
+      "line": 241,
+      "name": "receiver",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

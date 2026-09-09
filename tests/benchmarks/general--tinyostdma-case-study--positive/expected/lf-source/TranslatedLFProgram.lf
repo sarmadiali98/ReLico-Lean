@@ -1,0 +1,394 @@
+target Cpp
+
+public preamble {=
+  struct WirelessMedium_broadcast_action_Args { int receiverTag; int senderTag; };
+=}
+
+reactor CPU {
+  input sensorEventToCpuFromSensor: int
+  input miscEventToCpuFromMisc: int
+  input radioCycleDoneToCpuFromSensorNodeSenderDevice: int
+  input radioDataDeliveredToCpuFromSensorNodeSenderDevice: int
+  input radioCycleDoneToCpuFromReceiver: int
+  input radioDataDeliveredToCpuFromReceiver: int
+  output sendToSenderDevice: int
+  output sampleTakenToSensor1: int
+  output sampleTakenToSensor2: int
+  output miscDoneToMisc: int
+  state collectedSamplesCounter: int = 0
+  state resultArrived: bool = false
+  state dataDelivered: bool = false
+  logical action sensorEvent_action: int
+  logical action sensorTask_action: void
+  logical action radioCycleDone_action: int
+  logical action radioDataDelivered_action: int
+  logical action miscEvent_action: int
+  logical action miscTaskComplete_action: void
+
+  reaction(startup) {=
+    collectedSamplesCounter = 0;
+    resultArrived = false;
+    dataDelivered = false;
+  =}
+
+  reaction(sensorEvent_action) -> sensorTask_action {=
+    auto unit = *sensorEvent_action.get();
+    sensorTask_action.schedule(2ms);
+  =}
+
+  reaction(sensorEventToCpuFromSensor) -> sensorTask_action {=
+    auto unit = *sensorEventToCpuFromSensor.get();
+    sensorTask_action.schedule(2ms);
+  =}
+
+  reaction(sensorTask_action) -> sendToSenderDevice {=
+    collectedSamplesCounter = (collectedSamplesCounter + 1);
+    if ((collectedSamplesCounter == 1)) { sendToSenderDevice.set(0); } else {}
+  =}
+
+  reaction(radioCycleDone_action) -> sampleTakenToSensor1 {=
+    auto ok = *radioCycleDone_action.get();
+    resultArrived = true;
+    if ((ok == 0)) { dataDelivered = true; } else {}
+    if ((resultArrived && dataDelivered)) { resultArrived = false; dataDelivered = false; collectedSamplesCounter = 0; sampleTakenToSensor1.set(0); } else {}
+  =}
+
+  reaction(radioCycleDoneToCpuFromSensorNodeSenderDevice) -> sampleTakenToSensor1 {=
+    auto ok = *radioCycleDoneToCpuFromSensorNodeSenderDevice.get();
+    resultArrived = true;
+    if ((ok == 0)) { dataDelivered = true; } else {}
+    if ((resultArrived && dataDelivered)) { resultArrived = false; dataDelivered = false; collectedSamplesCounter = 0; sampleTakenToSensor1.set(0); } else {}
+  =}
+
+  reaction(radioCycleDoneToCpuFromReceiver) -> sampleTakenToSensor1 {=
+    auto ok = *radioCycleDoneToCpuFromReceiver.get();
+    resultArrived = true;
+    if ((ok == 0)) { dataDelivered = true; } else {}
+    if ((resultArrived && dataDelivered)) { resultArrived = false; dataDelivered = false; collectedSamplesCounter = 0; sampleTakenToSensor1.set(0); } else {}
+  =}
+
+  reaction(radioDataDelivered_action) -> sampleTakenToSensor2 {=
+    auto unit = *radioDataDelivered_action.get();
+    dataDelivered = true;
+    if ((resultArrived && dataDelivered)) { resultArrived = false; dataDelivered = false; collectedSamplesCounter = 0; sampleTakenToSensor2.set(0); } else {}
+  =}
+
+  reaction(radioDataDeliveredToCpuFromSensorNodeSenderDevice) -> sampleTakenToSensor2 {=
+    auto unit = *radioDataDeliveredToCpuFromSensorNodeSenderDevice.get();
+    dataDelivered = true;
+    if ((resultArrived && dataDelivered)) { resultArrived = false; dataDelivered = false; collectedSamplesCounter = 0; sampleTakenToSensor2.set(0); } else {}
+  =}
+
+  reaction(radioDataDeliveredToCpuFromReceiver) -> sampleTakenToSensor2 {=
+    auto unit = *radioDataDeliveredToCpuFromReceiver.get();
+    dataDelivered = true;
+    if ((resultArrived && dataDelivered)) { resultArrived = false; dataDelivered = false; collectedSamplesCounter = 0; sampleTakenToSensor2.set(0); } else {}
+  =}
+
+  reaction(miscEvent_action) -> miscTaskComplete_action {=
+    auto unit = *miscEvent_action.get();
+    miscTaskComplete_action.schedule(10ms);
+  =}
+
+  reaction(miscEventToCpuFromMisc) -> miscTaskComplete_action {=
+    auto unit = *miscEventToCpuFromMisc.get();
+    miscTaskComplete_action.schedule(10ms);
+  =}
+
+  reaction(miscTaskComplete_action) -> miscDoneToMisc {=
+    miscDoneToMisc.set(0);
+  =}
+}
+
+reactor Sensor {
+  input sampleTakenToSensor1FromCpu: int
+  input sampleTakenToSensor2FromCpu: int
+  output sensorEventToCpu: int
+  logical action sensorFirst_action: void
+  logical action sensorLoop_action1: void
+  logical action sensorLoop_action2: void
+  logical action sampleTaken_action: int
+
+  reaction(startup) -> sensorFirst_action {=
+    sensorFirst_action.schedule(0ms);
+  =}
+
+  reaction(sensorFirst_action) -> sensorLoop_action1 {=
+    sensorLoop_action1.schedule(10ms);
+  =}
+
+  reaction(sensorLoop_action1) -> sensorEventToCpu {=
+    sensorEventToCpu.set(0);
+  =}
+
+  reaction(sensorLoop_action2) -> sensorEventToCpu {=
+    sensorEventToCpu.set(0);
+  =}
+
+  reaction(sampleTaken_action) -> sensorLoop_action2 {=
+    auto unit = *sampleTaken_action.get();
+    sensorLoop_action2.schedule(40ms);
+  =}
+
+  reaction(sampleTakenToSensor1FromCpu) -> sensorLoop_action2 {=
+    auto unit = *sampleTakenToSensor1FromCpu.get();
+    sensorLoop_action2.schedule(40ms);
+  =}
+
+  reaction(sampleTakenToSensor2FromCpu) -> sensorLoop_action2 {=
+    auto unit = *sampleTakenToSensor2FromCpu.get();
+    sensorLoop_action2.schedule(40ms);
+  =}
+}
+
+reactor Misc {
+  input miscDoneToMiscFromCpu: int
+  output miscEventToCpu: int
+  logical action miscFirst_action: void
+  logical action miscLoop_action1: void
+  logical action miscLoop_action2: void
+  logical action miscDone_action: int
+
+  reaction(startup) -> miscFirst_action {=
+    miscFirst_action.schedule(0ms);
+  =}
+
+  reaction(miscFirst_action) -> miscLoop_action1 {=
+    miscLoop_action1.schedule(10ms);
+  =}
+
+  reaction(miscLoop_action1) -> miscEventToCpu {=
+    miscEventToCpu.set(0);
+  =}
+
+  reaction(miscLoop_action2) -> miscEventToCpu {=
+    miscEventToCpu.set(0);
+  =}
+
+  reaction(miscDone_action) -> miscLoop_action2 {=
+    auto unit = *miscDone_action.get();
+    miscLoop_action2.schedule(120ms);
+  =}
+
+  reaction(miscDoneToMiscFromCpu) -> miscLoop_action2 {=
+    auto unit = *miscDoneToMiscFromCpu.get();
+    miscLoop_action2.schedule(120ms);
+  =}
+}
+
+reactor WirelessMedium {
+  input getStatusToMediumFromSensorNodeSenderDevice: int
+  input broadcastToMediumFromSensorNodeSenderDevice: WirelessMedium_broadcast_action_Args
+  input getStatusToMediumFromReceiver: int
+  input broadcastToMediumFromReceiver: WirelessMedium_broadcast_action_Args
+  output receiveStatusToCd0: bool
+  output receiveStatusToCd1: bool
+  output receiveResultToCd01: bool
+  output receiveResultToCd11: bool
+  output receiveDataToCd0: int
+  output receiveDataToCd1: int
+  output receiveResultToCd02: bool
+  output receiveResultToCd12: bool
+  state senderDevice: int = 0
+  state receiverDevice: int = 0
+  logical action getStatus_action: int
+  logical action broadcast_action: WirelessMedium_broadcast_action_Args
+  logical action broadcastingIsCompleted_action: void
+
+  reaction(startup) {=
+    senderDevice = (-1);
+    receiverDevice = (-1);
+  =}
+
+  reaction(getStatus_action) -> receiveStatusToCd0, receiveStatusToCd1 {=
+    auto senderTag = *getStatus_action.get();
+    if ((senderTag == 0)) { receiveStatusToCd0.set((senderDevice != (-1))); } else { receiveStatusToCd1.set((senderDevice != (-1))); }
+  =}
+
+  reaction(getStatusToMediumFromSensorNodeSenderDevice) -> receiveStatusToCd0, receiveStatusToCd1 {=
+    auto senderTag = *getStatusToMediumFromSensorNodeSenderDevice.get();
+    if ((senderTag == 0)) { receiveStatusToCd0.set((senderDevice != (-1))); } else { receiveStatusToCd1.set((senderDevice != (-1))); }
+  =}
+
+  reaction(getStatusToMediumFromReceiver) -> receiveStatusToCd0, receiveStatusToCd1 {=
+    auto senderTag = *getStatusToMediumFromReceiver.get();
+    if ((senderTag == 0)) { receiveStatusToCd0.set((senderDevice != (-1))); } else { receiveStatusToCd1.set((senderDevice != (-1))); }
+  =}
+
+  reaction(broadcast_action) -> broadcastingIsCompleted_action, receiveResultToCd01, receiveResultToCd11, receiveDataToCd0, receiveDataToCd1, receiveResultToCd02, receiveResultToCd12 {=
+    auto broadcast_action_payload = *broadcast_action.get();
+    auto receiverTag = broadcast_action_payload.receiverTag;
+    auto senderTag = broadcast_action_payload.senderTag;
+    if ((senderDevice == (-1))) { senderDevice = senderTag; receiverDevice = receiverTag; broadcastingIsCompleted_action.schedule(7ms); if ((senderTag == 0)) { receiveResultToCd01.set(true); } else { receiveResultToCd11.set(true); } if ((receiverTag == 0)) { receiveDataToCd0.set(receiverTag); } else { receiveDataToCd1.set(receiverTag); } } else { if ((senderTag == 0)) { receiveResultToCd02.set(false); } else { receiveResultToCd12.set(false); } }
+  =}
+
+  reaction(broadcastToMediumFromSensorNodeSenderDevice) -> broadcastingIsCompleted_action, receiveResultToCd01, receiveResultToCd11, receiveDataToCd0, receiveDataToCd1, receiveResultToCd02, receiveResultToCd12 {=
+    auto broadcastToMediumFromSensorNodeSenderDevice_payload = *broadcastToMediumFromSensorNodeSenderDevice.get();
+    auto receiverTag = broadcastToMediumFromSensorNodeSenderDevice_payload.receiverTag;
+    auto senderTag = broadcastToMediumFromSensorNodeSenderDevice_payload.senderTag;
+    if ((senderDevice == (-1))) { senderDevice = senderTag; receiverDevice = receiverTag; broadcastingIsCompleted_action.schedule(7ms); if ((senderTag == 0)) { receiveResultToCd01.set(true); } else { receiveResultToCd11.set(true); } if ((receiverTag == 0)) { receiveDataToCd0.set(receiverTag); } else { receiveDataToCd1.set(receiverTag); } } else { if ((senderTag == 0)) { receiveResultToCd02.set(false); } else { receiveResultToCd12.set(false); } }
+  =}
+
+  reaction(broadcastToMediumFromReceiver) -> broadcastingIsCompleted_action, receiveResultToCd01, receiveResultToCd11, receiveDataToCd0, receiveDataToCd1, receiveResultToCd02, receiveResultToCd12 {=
+    auto broadcastToMediumFromReceiver_payload = *broadcastToMediumFromReceiver.get();
+    auto receiverTag = broadcastToMediumFromReceiver_payload.receiverTag;
+    auto senderTag = broadcastToMediumFromReceiver_payload.senderTag;
+    if ((senderDevice == (-1))) { senderDevice = senderTag; receiverDevice = receiverTag; broadcastingIsCompleted_action.schedule(7ms); if ((senderTag == 0)) { receiveResultToCd01.set(true); } else { receiveResultToCd11.set(true); } if ((receiverTag == 0)) { receiveDataToCd0.set(receiverTag); } else { receiveDataToCd1.set(receiverTag); } } else { if ((senderTag == 0)) { receiveResultToCd02.set(false); } else { receiveResultToCd12.set(false); } }
+  =}
+
+  reaction(broadcastingIsCompleted_action) {=
+    senderDevice = (-1);
+    receiverDevice = (-1);
+  =}
+}
+
+reactor CommunicationDevice(myId: int = 0) {
+  input receiveStatusToCd0FromMedium: bool
+  input receiveStatusToCd1FromMedium: bool
+  input receiveResultToCd01FromMedium: bool
+  input receiveResultToCd11FromMedium: bool
+  input receiveDataToCd0FromMedium: int
+  input receiveDataToCd1FromMedium: int
+  input receiveResultToCd02FromMedium: bool
+  input receiveResultToCd12FromMedium: bool
+  input sendToSenderDeviceFromCpu: int
+  output getStatusToMedium: int
+  output broadcastToMedium: WirelessMedium_broadcast_action_Args
+  output radioCycleDoneToCpu: int
+  output radioDataDeliveredToCpu: int
+  state id: int = 0
+  state receiverDevice: int = 0
+  state inActivePeriod: bool = false
+  state slotClockRunning: bool = false
+  state busyWithSending: bool = false
+  state sendWhileBusy: bool = false
+  logical action send_action: int
+  logical action handleTDMASlot_action1: void
+  logical action handleTDMASlot_action2: void
+  logical action handleTDMASlot_action3: void
+  logical action checkPendingData_action: void
+  logical action receiveStatus_action: bool
+  logical action receiveResult_action: bool
+  logical action receiveData_action: int
+
+  reaction(startup) {=
+    id = myId;
+    receiverDevice = (-1);
+    inActivePeriod = false;
+    slotClockRunning = false;
+    busyWithSending = false;
+    sendWhileBusy = false;
+  =}
+
+  reaction(send_action) -> handleTDMASlot_action1 {=
+    auto receiverTag = *send_action.get();
+    if ((receiverDevice != (-1))) { sendWhileBusy = true; } else { receiverDevice = receiverTag; if ((slotClockRunning == false)) { slotClockRunning = true; handleTDMASlot_action1.schedule(0ms); } else {} }
+  =}
+
+  reaction(sendToSenderDeviceFromCpu) -> handleTDMASlot_action1 {=
+    auto receiverTag = *sendToSenderDeviceFromCpu.get();
+    if ((receiverDevice != (-1))) { sendWhileBusy = true; } else { receiverDevice = receiverTag; if ((slotClockRunning == false)) { slotClockRunning = true; handleTDMASlot_action1.schedule(0ms); } else {} }
+  =}
+
+  reaction(handleTDMASlot_action1) -> checkPendingData_action {=
+    if (((receiverDevice != (-1)) && (busyWithSending == false))) { inActivePeriod = true; checkPendingData_action.schedule(0ms); } else { slotClockRunning = false; inActivePeriod = false; }
+  =}
+
+  reaction(handleTDMASlot_action2) -> checkPendingData_action {=
+    if (((receiverDevice != (-1)) && (busyWithSending == false))) { inActivePeriod = true; checkPendingData_action.schedule(0ms); } else { slotClockRunning = false; inActivePeriod = false; }
+  =}
+
+  reaction(handleTDMASlot_action3) -> checkPendingData_action {=
+    if (((receiverDevice != (-1)) && (busyWithSending == false))) { inActivePeriod = true; checkPendingData_action.schedule(0ms); } else { slotClockRunning = false; inActivePeriod = false; }
+  =}
+
+  reaction(checkPendingData_action) -> getStatusToMedium {=
+    if (((inActivePeriod && (receiverDevice != (-1))) && (busyWithSending == false))) { busyWithSending = true; getStatusToMedium.set(id); } else {}
+  =}
+
+  reaction(receiveStatus_action) -> broadcastToMedium, handleTDMASlot_action2 {=
+    auto result = *receiveStatus_action.get();
+    if ((result == false)) { broadcastToMedium.set(WirelessMedium_broadcast_action_Args{receiverDevice, id}); } else { busyWithSending = false; inActivePeriod = false; handleTDMASlot_action2.schedule(50ms); }
+  =}
+
+  reaction(receiveStatusToCd0FromMedium) -> broadcastToMedium, handleTDMASlot_action2 {=
+    auto result = *receiveStatusToCd0FromMedium.get();
+    if ((result == false)) { broadcastToMedium.set(WirelessMedium_broadcast_action_Args{receiverDevice, id}); } else { busyWithSending = false; inActivePeriod = false; handleTDMASlot_action2.schedule(50ms); }
+  =}
+
+  reaction(receiveStatusToCd1FromMedium) -> broadcastToMedium, handleTDMASlot_action2 {=
+    auto result = *receiveStatusToCd1FromMedium.get();
+    if ((result == false)) { broadcastToMedium.set(WirelessMedium_broadcast_action_Args{receiverDevice, id}); } else { busyWithSending = false; inActivePeriod = false; handleTDMASlot_action2.schedule(50ms); }
+  =}
+
+  reaction(receiveResult_action) -> radioCycleDoneToCpu, handleTDMASlot_action3 {=
+    auto result = *receiveResult_action.get();
+    if (result) { receiverDevice = (-1); busyWithSending = false; inActivePeriod = false; slotClockRunning = false; radioCycleDoneToCpu.set(1); } else { busyWithSending = false; inActivePeriod = false; handleTDMASlot_action3.schedule(50ms); }
+  =}
+
+  reaction(receiveResultToCd01FromMedium) -> radioCycleDoneToCpu, handleTDMASlot_action3 {=
+    auto result = *receiveResultToCd01FromMedium.get();
+    if (result) { receiverDevice = (-1); busyWithSending = false; inActivePeriod = false; slotClockRunning = false; radioCycleDoneToCpu.set(1); } else { busyWithSending = false; inActivePeriod = false; handleTDMASlot_action3.schedule(50ms); }
+  =}
+
+  reaction(receiveResultToCd11FromMedium) -> radioCycleDoneToCpu, handleTDMASlot_action3 {=
+    auto result = *receiveResultToCd11FromMedium.get();
+    if (result) { receiverDevice = (-1); busyWithSending = false; inActivePeriod = false; slotClockRunning = false; radioCycleDoneToCpu.set(1); } else { busyWithSending = false; inActivePeriod = false; handleTDMASlot_action3.schedule(50ms); }
+  =}
+
+  reaction(receiveResultToCd02FromMedium) -> radioCycleDoneToCpu, handleTDMASlot_action3 {=
+    auto result = *receiveResultToCd02FromMedium.get();
+    if (result) { receiverDevice = (-1); busyWithSending = false; inActivePeriod = false; slotClockRunning = false; radioCycleDoneToCpu.set(1); } else { busyWithSending = false; inActivePeriod = false; handleTDMASlot_action3.schedule(50ms); }
+  =}
+
+  reaction(receiveResultToCd12FromMedium) -> radioCycleDoneToCpu, handleTDMASlot_action3 {=
+    auto result = *receiveResultToCd12FromMedium.get();
+    if (result) { receiverDevice = (-1); busyWithSending = false; inActivePeriod = false; slotClockRunning = false; radioCycleDoneToCpu.set(1); } else { busyWithSending = false; inActivePeriod = false; handleTDMASlot_action3.schedule(50ms); }
+  =}
+
+  reaction(receiveData_action) -> radioDataDeliveredToCpu {=
+    auto receiverTag = *receiveData_action.get();
+    if ((receiverTag == id)) { radioDataDeliveredToCpu.set(0); } else {}
+  =}
+
+  reaction(receiveDataToCd0FromMedium) -> radioDataDeliveredToCpu {=
+    auto receiverTag = *receiveDataToCd0FromMedium.get();
+    if ((receiverTag == id)) { radioDataDeliveredToCpu.set(0); } else {}
+  =}
+
+  reaction(receiveDataToCd1FromMedium) -> radioDataDeliveredToCpu {=
+    auto receiverTag = *receiveDataToCd1FromMedium.get();
+    if ((receiverTag == id)) { radioDataDeliveredToCpu.set(0); } else {}
+  =}
+}
+
+main reactor {
+  medium = new WirelessMedium()
+  cpu = new CPU()
+  sensor = new Sensor()
+  misc = new Misc()
+  sensorNodeSenderDevice = new CommunicationDevice(myId=1)
+  receiver = new CommunicationDevice(myId=0)
+  medium.receiveStatusToCd0 -> receiver.receiveStatusToCd0FromMedium after 0 msec
+  medium.receiveStatusToCd1 -> sensorNodeSenderDevice.receiveStatusToCd1FromMedium after 0 msec
+  medium.receiveResultToCd01 -> receiver.receiveResultToCd01FromMedium after 7 msec
+  medium.receiveResultToCd11 -> sensorNodeSenderDevice.receiveResultToCd11FromMedium after 7 msec
+  medium.receiveDataToCd0 -> receiver.receiveDataToCd0FromMedium after 0 msec
+  medium.receiveDataToCd1 -> sensorNodeSenderDevice.receiveDataToCd1FromMedium after 0 msec
+  medium.receiveResultToCd02 -> receiver.receiveResultToCd02FromMedium after 0 msec
+  medium.receiveResultToCd12 -> sensorNodeSenderDevice.receiveResultToCd12FromMedium after 0 msec
+  cpu.sendToSenderDevice -> sensorNodeSenderDevice.sendToSenderDeviceFromCpu after 0 msec
+  cpu.sampleTakenToSensor1 -> sensor.sampleTakenToSensor1FromCpu after 0 msec
+  cpu.sampleTakenToSensor2 -> sensor.sampleTakenToSensor2FromCpu after 0 msec
+  cpu.miscDoneToMisc -> misc.miscDoneToMiscFromCpu after 0 msec
+  sensor.sensorEventToCpu -> cpu.sensorEventToCpuFromSensor after 0 msec
+  misc.miscEventToCpu -> cpu.miscEventToCpuFromMisc after 0 msec
+  sensorNodeSenderDevice.getStatusToMedium -> medium.getStatusToMediumFromSensorNodeSenderDevice after 10 msec
+  sensorNodeSenderDevice.broadcastToMedium -> medium.broadcastToMediumFromSensorNodeSenderDevice after 0 msec
+  sensorNodeSenderDevice.radioCycleDoneToCpu -> cpu.radioCycleDoneToCpuFromSensorNodeSenderDevice after 0 msec
+  sensorNodeSenderDevice.radioDataDeliveredToCpu -> cpu.radioDataDeliveredToCpuFromSensorNodeSenderDevice after 0 msec
+  receiver.getStatusToMedium -> medium.getStatusToMediumFromReceiver after 10 msec
+  receiver.broadcastToMedium -> medium.broadcastToMediumFromReceiver after 0 msec
+  receiver.radioCycleDoneToCpu -> cpu.radioCycleDoneToCpuFromReceiver after 0 msec
+  receiver.radioDataDeliveredToCpu -> cpu.radioDataDeliveredToCpuFromReceiver after 0 msec
+}

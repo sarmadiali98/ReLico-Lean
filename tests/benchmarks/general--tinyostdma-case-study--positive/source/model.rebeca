@@ -1,0 +1,242 @@
+// Benchmark: general--tinyostdma-case-study--positive
+// The paper-named TinyOSPV6-TDMA model, redesigned for the DTR fragment on the
+// approved MACB template: rebec-typed message parameters and state variables
+// became int device tags, medium sender-capture became tag-parameterised
+// dispatch over two static bindings, the nondeterministic first-tick delays
+// became fixed literals, and the periodic drivers are completion-coupled (each
+// loop re-arms on consumption; the radio round closes on the sender's result
+// and the receiver's delivery ack). The demand-driven TDMA lifecycle uses a
+// 10-unit active-slot attempt and a 50-unit future-slot retry — the original
+// anchored each boundary with the Rebeca built-in
+// currentMessageWaitingTime, which has no DTR counterpart. The demand-driven
+// clock preserves the 10-unit active slot and 50-unit inactive interval while
+// leaving the global slot phase quiescent when no transmission is pending.
+// Transmission is deferred to the sender's own active slot, the send-while-
+// pending condition is preserved as an observable latch, and a busy medium is retried. See
+// ADAPTATION.md.
+reactiveclass CPU(10) {
+    knownrebecs {
+        CommunicationDevice senderDevice;
+        Sensor sensor;
+        Misc misc;
+    }
+    statevars {
+        int collectedSamplesCounter;
+        boolean resultArrived;
+        boolean dataDelivered;
+    }
+    CPU() {
+        collectedSamplesCounter = 0;
+        resultArrived = false;
+        dataDelivered = false;
+    }
+    msgsrv sensorEvent(int unit) {
+        self.sensorTask() after(2);
+    }
+    msgsrv sensorTask() {
+        collectedSamplesCounter = collectedSamplesCounter + 1;
+        if (collectedSamplesCounter == 1) {
+            senderDevice.send(0);
+        }
+    }
+    msgsrv radioCycleDone(int ok) {
+        resultArrived = true;
+        if (ok == 0) {
+            dataDelivered = true;
+        }
+        if (resultArrived && dataDelivered) {
+            resultArrived = false;
+            dataDelivered = false;
+            collectedSamplesCounter = 0;
+            sensor.sampleTaken(0);
+        }
+    }
+    msgsrv radioDataDelivered(int unit) {
+        dataDelivered = true;
+        if (resultArrived && dataDelivered) {
+            resultArrived = false;
+            dataDelivered = false;
+            collectedSamplesCounter = 0;
+            sensor.sampleTaken(0);
+        }
+    }
+    msgsrv miscEvent(int unit) {
+        self.miscTaskComplete() after(10);
+    }
+    msgsrv miscTaskComplete() {
+        misc.miscDone(0);
+    }
+}
+
+reactiveclass Sensor(10) {
+    knownrebecs {
+        CPU cpu;
+    }
+    Sensor() {
+        self.sensorFirst();
+    }
+    msgsrv sensorFirst() {
+        self.sensorLoop() after(10);
+    }
+    msgsrv sensorLoop() {
+        cpu.sensorEvent(0);
+    }
+    msgsrv sampleTaken(int unit) {
+        self.sensorLoop() after(40);
+    }
+}
+
+reactiveclass Misc(10) {
+    knownrebecs {
+        CPU cpu;
+    }
+    Misc() {
+        self.miscFirst();
+    }
+    msgsrv miscFirst() {
+        self.miscLoop() after(10);
+    }
+    msgsrv miscLoop() {
+        cpu.miscEvent(0);
+    }
+    msgsrv miscDone(int unit) {
+        self.miscLoop() after(120);
+    }
+}
+
+reactiveclass WirelessMedium(5) {
+    knownrebecs {
+        CommunicationDevice cd0;
+        CommunicationDevice cd1;
+    }
+    statevars {
+        int senderDevice;
+        int receiverDevice;
+    }
+    WirelessMedium() {
+        senderDevice = -1;
+        receiverDevice = -1;
+    }
+    msgsrv getStatus(int senderTag) {
+        if (senderTag == 0) {
+            cd0.receiveStatus(senderDevice != -1);
+        } else {
+            cd1.receiveStatus(senderDevice != -1);
+        }
+    }
+    msgsrv broadcast(int receiverTag, int senderTag) {
+        if (senderDevice == -1) {
+            senderDevice = senderTag;
+            receiverDevice = receiverTag;
+            self.broadcastingIsCompleted() after(7);
+            if (senderTag == 0) {
+                cd0.receiveResult(true) after(7);
+            } else {
+                cd1.receiveResult(true) after(7);
+            }
+            if (receiverTag == 0) {
+                cd0.receiveData(receiverTag);
+            } else {
+                cd1.receiveData(receiverTag);
+            }
+        } else {
+            if (senderTag == 0) {
+                cd0.receiveResult(false);
+            } else {
+                cd1.receiveResult(false);
+            }
+        }
+    }
+    msgsrv broadcastingIsCompleted() {
+        senderDevice = -1;
+        receiverDevice = -1;
+    }
+}
+
+reactiveclass CommunicationDevice(10) {
+    knownrebecs {
+        WirelessMedium medium;
+        CPU cpu;
+    }
+    statevars {
+        int id;
+        int receiverDevice;
+        boolean inActivePeriod;
+        boolean slotClockRunning;
+        boolean busyWithSending;
+        boolean sendWhileBusy;
+    }
+    CommunicationDevice(int myId) {
+        id = myId;
+        receiverDevice = -1;
+        inActivePeriod = false;
+        slotClockRunning = false;
+        busyWithSending = false;
+        sendWhileBusy = false;
+    }
+    msgsrv send(int receiverTag) {
+        if (receiverDevice != -1) {
+            sendWhileBusy = true;
+        } else {
+            receiverDevice = receiverTag;
+            if (slotClockRunning == false) {
+                slotClockRunning = true;
+                self.handleTDMASlot();
+            }
+        }
+    }
+    msgsrv handleTDMASlot() {
+        if (receiverDevice != -1 && busyWithSending == false) {
+            inActivePeriod = true;
+            self.checkPendingData();
+        } else {
+            slotClockRunning = false;
+            inActivePeriod = false;
+        }
+    }
+    msgsrv checkPendingData() {
+        if (inActivePeriod && receiverDevice != -1 && busyWithSending == false) {
+            busyWithSending = true;
+            medium.getStatus(id) after(10);
+        }
+    }
+    msgsrv receiveStatus(boolean result) {
+        if (result == false) {
+            medium.broadcast(receiverDevice, id);
+        } else {
+            busyWithSending = false;
+            inActivePeriod = false;
+            self.handleTDMASlot() after(50);
+        }
+    }
+    msgsrv receiveResult(boolean result) {
+        if (result) {
+            receiverDevice = -1;
+            busyWithSending = false;
+            inActivePeriod = false;
+            slotClockRunning = false;
+            cpu.radioCycleDone(1);
+        } else {
+            busyWithSending = false;
+            inActivePeriod = false;
+            self.handleTDMASlot() after(50);
+        }
+    }
+    msgsrv receiveData(int receiverTag) {
+        // The original's receive-time delay is a timing-only statement with
+        // an empty resumed body that nothing observes; the receive itself is
+        // the observable, and consuming it acks delivery to the CPU.
+        if (receiverTag == id) {
+            cpu.radioDataDelivered(0);
+        }
+    }
+}
+
+main {
+    WirelessMedium medium(receiver, sensorNodeSenderDevice):();
+    CPU cpu(sensorNodeSenderDevice, sensor, misc):();
+    Sensor sensor(cpu):();
+    Misc misc(cpu):();
+    CommunicationDevice sensorNodeSenderDevice(medium, cpu):(1);
+    CommunicationDevice receiver(medium, cpu):(0);
+}
