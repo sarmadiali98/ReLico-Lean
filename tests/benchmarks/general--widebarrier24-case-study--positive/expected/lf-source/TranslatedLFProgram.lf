@@ -1,0 +1,228 @@
+target Cpp
+
+reactor Coordinator {
+  state round: int = 0
+  state seen: int = 0
+  state violation: int = 0
+  logical action start_action: void
+  logical action dispatch_action1: void
+  logical action dispatch_action2: void
+  logical action token_action1: void
+  logical action token_action2: void
+  logical action token_action3: void
+  logical action token_action4: void
+  logical action token_action5: void
+  logical action token_action6: void
+  logical action token_action7: void
+  logical action token_action8: void
+  logical action token_action9: void
+  logical action token_action10: void
+  logical action token_action11: void
+  logical action token_action12: void
+  logical action token_action13: void
+  logical action token_action14: void
+  logical action token_action15: void
+  logical action token_action16: void
+  logical action token_action17: void
+  logical action token_action18: void
+  logical action token_action19: void
+  logical action token_action20: void
+  logical action token_action21: void
+  logical action token_action22: void
+  logical action token_action23: void
+  logical action token_action24: void
+
+  reaction(startup) -> start_action {=
+    round = 0;
+    seen = 0;
+    violation = 0;
+    start_action.schedule(0ms);
+  =}
+
+  reaction(start_action) -> dispatch_action1 {=
+    dispatch_action1.schedule(0ms);
+  =}
+
+  reaction(dispatch_action1) -> token_action1, token_action2, token_action3, token_action4, token_action5, token_action6, token_action7, token_action8, token_action9, token_action10, token_action11, token_action12, token_action13, token_action14, token_action15, token_action16, token_action17, token_action18, token_action19, token_action20, token_action21, token_action22, token_action23, token_action24 {=
+    if ((round < 40)) { round = (round + 1); seen = 0; token_action1.schedule(1ms); token_action2.schedule(1ms); token_action3.schedule(1ms); token_action4.schedule(1ms); token_action5.schedule(1ms); token_action6.schedule(1ms); token_action7.schedule(1ms); token_action8.schedule(1ms); token_action9.schedule(1ms); token_action10.schedule(1ms); token_action11.schedule(1ms); token_action12.schedule(1ms); token_action13.schedule(1ms); token_action14.schedule(1ms); token_action15.schedule(1ms); token_action16.schedule(1ms); token_action17.schedule(1ms); token_action18.schedule(1ms); token_action19.schedule(1ms); token_action20.schedule(1ms); token_action21.schedule(1ms); token_action22.schedule(1ms); token_action23.schedule(1ms); token_action24.schedule(1ms); } else {}
+  =}
+
+  reaction(dispatch_action2) -> token_action1, token_action2, token_action3, token_action4, token_action5, token_action6, token_action7, token_action8, token_action9, token_action10, token_action11, token_action12, token_action13, token_action14, token_action15, token_action16, token_action17, token_action18, token_action19, token_action20, token_action21, token_action22, token_action23, token_action24 {=
+    if ((round < 40)) { round = (round + 1); seen = 0; token_action1.schedule(1ms); token_action2.schedule(1ms); token_action3.schedule(1ms); token_action4.schedule(1ms); token_action5.schedule(1ms); token_action6.schedule(1ms); token_action7.schedule(1ms); token_action8.schedule(1ms); token_action9.schedule(1ms); token_action10.schedule(1ms); token_action11.schedule(1ms); token_action12.schedule(1ms); token_action13.schedule(1ms); token_action14.schedule(1ms); token_action15.schedule(1ms); token_action16.schedule(1ms); token_action17.schedule(1ms); token_action18.schedule(1ms); token_action19.schedule(1ms); token_action20.schedule(1ms); token_action21.schedule(1ms); token_action22.schedule(1ms); token_action23.schedule(1ms); token_action24.schedule(1ms); } else {}
+  =}
+
+  reaction(token_action1) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action2) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action3) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action4) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action5) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action6) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action7) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action8) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action9) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action10) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action11) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action12) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action13) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action14) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action15) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action16) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action17) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action18) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action19) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action20) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action21) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action22) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action23) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+
+  reaction(token_action24) -> dispatch_action2 {=
+    seen = (seen + 1);
+    if ((seen > 24)) { violation = 1; } else {}
+    if ((seen == 24)) { if ((round < 40)) { dispatch_action2.schedule(1ms); } else {} } else {}
+  =}
+}
+
+reactor KeepAlive {
+  state phase: int = 0
+  logical action kick_action: void
+  logical action tick_action1: void
+  logical action tick_action2: void
+
+  reaction(startup) -> kick_action {=
+    phase = 0;
+    kick_action.schedule(0ms);
+  =}
+
+  reaction(kick_action) -> tick_action1 {=
+    tick_action1.schedule(100000ms);
+  =}
+
+  reaction(tick_action1) -> tick_action2 {=
+    phase = (1 - phase);
+    tick_action2.schedule(100000ms);
+  =}
+
+  reaction(tick_action2) -> tick_action2 {=
+    phase = (1 - phase);
+    tick_action2.schedule(100000ms);
+  =}
+}
+
+main reactor {
+  coord = new Coordinator()
+  ka = new KeepAlive()
+}

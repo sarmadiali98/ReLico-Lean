@@ -1,0 +1,94 @@
+reactiveclass Coordinator(50) {
+    statevars {
+        int round;
+        int seen;
+        int violation;
+    }
+
+    Coordinator() {
+        round = 0;
+        seen = 0;
+        violation = 0;
+        self.start();
+    }
+
+    @priority(1)
+    msgsrv start() {
+        self.dispatch();
+    }
+
+    @priority(2)
+    msgsrv dispatch() {
+        if (round < 40) {
+            round = round + 1;
+            seen = 0;
+
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+            self.token() after(1);
+        }
+    }
+
+    @priority(3)
+    msgsrv token() {
+        seen = seen + 1;
+
+        if (seen > 24) {
+            violation = 1;
+        }
+
+        if (seen == 24) {
+            if (round < 40) {
+                self.dispatch() after(1);
+            }
+        }
+    }
+}
+
+reactiveclass KeepAlive(2) {
+    statevars {
+        int phase;
+    }
+
+    KeepAlive() {
+        phase = 0;
+        self.kick();
+    }
+
+    @priority(1)
+    msgsrv kick() {
+        self.tick() after(100000);
+    }
+
+    @priority(2)
+    msgsrv tick() {
+        phase = 1 - phase;
+        self.tick() after(100000);
+    }
+}
+
+main {
+    Coordinator coord():();
+    KeepAlive ka():();
+}

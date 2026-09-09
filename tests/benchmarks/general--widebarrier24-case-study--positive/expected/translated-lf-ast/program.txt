@@ -1,0 +1,1189 @@
+{ reactors := [{ name := { value := "Coordinator" },
+                 parameters := [],
+                 inputPorts := [],
+                 outputPorts := [],
+                 stateVariables := [{ name := { value := "round" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "seen" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "violation" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "start_action" }, parameters := [] },
+                                    { name := { value := "dispatch_action1" }, parameters := [] },
+                                    { name := { value := "dispatch_action2" }, parameters := [] },
+                                    { name := { value := "token_action1" }, parameters := [] },
+                                    { name := { value := "token_action2" }, parameters := [] },
+                                    { name := { value := "token_action3" }, parameters := [] },
+                                    { name := { value := "token_action4" }, parameters := [] },
+                                    { name := { value := "token_action5" }, parameters := [] },
+                                    { name := { value := "token_action6" }, parameters := [] },
+                                    { name := { value := "token_action7" }, parameters := [] },
+                                    { name := { value := "token_action8" }, parameters := [] },
+                                    { name := { value := "token_action9" }, parameters := [] },
+                                    { name := { value := "token_action10" }, parameters := [] },
+                                    { name := { value := "token_action11" }, parameters := [] },
+                                    { name := { value := "token_action12" }, parameters := [] },
+                                    { name := { value := "token_action13" }, parameters := [] },
+                                    { name := { value := "token_action14" }, parameters := [] },
+                                    { name := { value := "token_action15" }, parameters := [] },
+                                    { name := { value := "token_action16" }, parameters := [] },
+                                    { name := { value := "token_action17" }, parameters := [] },
+                                    { name := { value := "token_action18" }, parameters := [] },
+                                    { name := { value := "token_action19" }, parameters := [] },
+                                    { name := { value := "token_action20" }, parameters := [] },
+                                    { name := { value := "token_action21" }, parameters := [] },
+                                    { name := { value := "token_action22" }, parameters := [] },
+                                    { name := { value := "token_action23" }, parameters := [] },
+                                    { name := { value := "token_action24" }, parameters := [] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "round" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "seen" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "violation" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.schedule
+                                                 { value := "start_action" }
+                                                 []
+                                                 { value := 0 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "start_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "start_action" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "dispatch_action1" }
+                                                   []
+                                                   { value := 0 }],
+                                        priority := none },
+                                      { name := { value := "dispatch_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "dispatch_action1" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.lt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 40))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "round" }
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.add)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "seen" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action1" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action2" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action3" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action4" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action5" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action6" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action7" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action8" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action9" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action10" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action11" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action12" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action13" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action14" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action15" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action16" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action17" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action18" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action19" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action20" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action21" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action22" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action23" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action24" }
+                                                      []
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "dispatch_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "dispatch_action2" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.lt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 40))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "round" }
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.add)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "seen" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action1" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action2" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action3" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action4" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action5" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action6" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action7" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action8" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action9" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action10" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action11" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action12" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action13" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action14" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action15" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action16" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action17" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action18" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action19" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action20" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action21" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action22" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action23" }
+                                                      []
+                                                      { value := 1 },
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "token_action24" }
+                                                      []
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action1" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action2" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action3" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action4" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action5" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action6" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action7" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action8" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action9" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action10" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action11" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action12" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action13" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action14" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action15" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action16" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action17" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action18" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action19" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action20" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action21" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action22" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action23" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "token_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "token_action24" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "seen" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "violation" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "seen" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 24))
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.lt)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 40))
+                                                      [Relico.LF.GeneralStmt.schedule
+                                                         { value := "dispatch_action2" }
+                                                         []
+                                                         { value := 1 }]
+                                                      []]
+                                                   []],
+                                        priority := none }] },
+               { name := { value := "KeepAlive" },
+                 parameters := [],
+                 inputPorts := [],
+                 outputPorts := [],
+                 stateVariables := [{ name := { value := "phase" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "kick_action" }, parameters := [] },
+                                    { name := { value := "tick_action1" }, parameters := [] },
+                                    { name := { value := "tick_action2" }, parameters := [] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "phase" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.schedule
+                                                 { value := "kick_action" }
+                                                 []
+                                                 { value := 0 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "kick_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "kick_action" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.schedule
+                                                   { value := "tick_action1" }
+                                                   []
+                                                   { value := 100000 }],
+                                        priority := none },
+                                      { name := { value := "tick_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "tick_action1" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "phase" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.sub)
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "phase" })),
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "tick_action2" }
+                                                   []
+                                                   { value := 100000 }],
+                                        priority := none },
+                                      { name := { value := "tick_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "tick_action2" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "phase" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.sub)
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "phase" })),
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "tick_action2" }
+                                                   []
+                                                   { value := 100000 }],
+                                        priority := none }] }],
+  instances := [{ name := { value := "coord" }, reactorName := { value := "Coordinator" }, arguments := [] },
+                { name := { value := "ka" }, reactorName := { value := "KeepAlive" }, arguments := [] }],
+  connections := [] }

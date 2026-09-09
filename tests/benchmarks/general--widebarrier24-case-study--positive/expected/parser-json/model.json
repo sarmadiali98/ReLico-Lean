@@ -1,0 +1,735 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 9,
+            "target": "round",
+            "value": {
+              "kind": "intLiteral",
+              "line": 9,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 10,
+            "target": "seen",
+            "value": {
+              "kind": "intLiteral",
+              "line": 10,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 11,
+            "target": "violation",
+            "value": {
+              "kind": "intLiteral",
+              "line": 11,
+              "value": 0
+            }
+          },
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 12,
+            "messageServer": "start",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Coordinator"
+          }
+        ],
+        "line": 8,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 1,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [],
+              "kind": "send",
+              "line": 17,
+              "messageServer": "dispatch",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Coordinator"
+            }
+          ],
+          "line": 16,
+          "name": "start",
+          "parameters": [],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 22,
+                  "name": "round"
+                },
+                "line": 22,
+                "operator": "<",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 22,
+                  "value": 40
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 22,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 23,
+                  "target": "round",
+                  "value": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 23,
+                      "name": "round"
+                    },
+                    "line": 23,
+                    "operator": "+",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 23,
+                      "value": 1
+                    }
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 24,
+                  "target": "seen",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 24,
+                    "value": 0
+                  }
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 26,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 27,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 28,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 29,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 30,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 31,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 32,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 33,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 34,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 35,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 36,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 37,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 38,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 39,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 40,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 41,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 42,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 43,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 44,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 45,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 46,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 47,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 48,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [],
+                  "kind": "send",
+                  "line": 49,
+                  "messageServer": "token",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Coordinator"
+                }
+              ]
+            }
+          ],
+          "line": 21,
+          "name": "dispatch",
+          "parameters": [],
+          "priority": 2
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 55,
+              "target": "seen",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 55,
+                  "name": "seen"
+                },
+                "line": 55,
+                "operator": "+",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 55,
+                  "value": 1
+                }
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 57,
+                  "name": "seen"
+                },
+                "line": 57,
+                "operator": ">",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 57,
+                  "value": 24
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 57,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 58,
+                  "target": "violation",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 58,
+                    "value": 1
+                  }
+                }
+              ]
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 61,
+                  "name": "seen"
+                },
+                "line": 61,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 61,
+                  "value": 24
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 61,
+              "then": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 62,
+                      "name": "round"
+                    },
+                    "line": 62,
+                    "operator": "<",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 62,
+                      "value": 40
+                    }
+                  },
+                  "else": [],
+                  "kind": "if",
+                  "line": 62,
+                  "then": [
+                    {
+                      "after": {
+                        "kind": "intLiteral",
+                        "value": 1
+                      },
+                      "arguments": [],
+                      "kind": "send",
+                      "line": 63,
+                      "messageServer": "dispatch",
+                      "target": {
+                        "kind": "self"
+                      },
+                      "targetClassName": "Coordinator"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "line": 54,
+          "name": "token",
+          "parameters": [],
+          "priority": 3
+        }
+      ],
+      "name": "Coordinator",
+      "queueBound": 50,
+      "stateVariables": [
+        {
+          "line": 3,
+          "name": "round",
+          "type": "int"
+        },
+        {
+          "line": 4,
+          "name": "seen",
+          "type": "int"
+        },
+        {
+          "line": 5,
+          "name": "violation",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 75,
+            "target": "phase",
+            "value": {
+              "kind": "intLiteral",
+              "line": 75,
+              "value": 0
+            }
+          },
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 76,
+            "messageServer": "kick",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "KeepAlive"
+          }
+        ],
+        "line": 74,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 69,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 100000
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 81,
+              "messageServer": "tick",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "KeepAlive"
+            }
+          ],
+          "line": 80,
+          "name": "kick",
+          "parameters": [],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 86,
+              "target": "phase",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "intLiteral",
+                  "line": 86,
+                  "value": 1
+                },
+                "line": 86,
+                "operator": "-",
+                "right": {
+                  "kind": "variable",
+                  "line": 86,
+                  "name": "phase"
+                }
+              }
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 100000
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 87,
+              "messageServer": "tick",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "KeepAlive"
+            }
+          ],
+          "line": 85,
+          "name": "tick",
+          "parameters": [],
+          "priority": 2
+        }
+      ],
+      "name": "KeepAlive",
+      "queueBound": 2,
+      "stateVariables": [
+        {
+          "line": 71,
+          "name": "phase",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Coordinator",
+      "line": 92,
+      "name": "coord",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "KeepAlive",
+      "line": 93,
+      "name": "ka",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}
