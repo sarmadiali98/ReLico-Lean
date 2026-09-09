@@ -1,0 +1,72 @@
+target Cpp
+
+reactor Checker {
+  input observeStopResultToChkFromC: int
+  state violation: int = 0
+  logical action observeStopResult_action: int
+
+  reaction(startup) {=
+    violation = 0;
+  =}
+
+  reaction(observeStopResult_action) {=
+    auto v = *observeStopResult_action.get();
+    if ((v != 0)) { violation = 1; } else {}
+  =}
+
+  reaction(observeStopResultToChkFromC) {=
+    auto v = *observeStopResultToChkFromC.get();
+    if ((v != 0)) { violation = 1; } else {}
+  =}
+}
+
+reactor Controller {
+  output observeStopResultToChk: int
+  state fault: int = 0
+  logical action start_action: void
+  logical action turnOff_action: int
+
+  reaction(startup) -> start_action {=
+    fault = 0;
+    start_action.schedule(0ms);
+  =}
+
+  reaction(start_action) -> turnOff_action {=
+    fault = 1;
+    turnOff_action.schedule(0, 1000ms);
+  =}
+
+  reaction(turnOff_action) -> observeStopResultToChk {=
+    auto v = *turnOff_action.get();
+    if ((v == 1)) { fault = 0; } else {}
+    observeStopResultToChk.set(fault);
+  =}
+}
+
+reactor KeepAlive {
+  state phase: int = 0
+  logical action tick_action1: void
+  logical action tick_action2: void
+
+  reaction(startup) -> tick_action1 {=
+    phase = 0;
+    tick_action1.schedule(2000ms);
+  =}
+
+  reaction(tick_action1) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(2000ms);
+  =}
+
+  reaction(tick_action2) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(2000ms);
+  =}
+}
+
+main reactor {
+  c = new Controller()
+  chk = new Checker()
+  ka = new KeepAlive()
+  c.observeStopResultToChk -> chk.observeStopResultToChkFromC after 0 msec
+}

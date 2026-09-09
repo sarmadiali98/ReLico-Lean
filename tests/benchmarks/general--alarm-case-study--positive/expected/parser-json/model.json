@@ -1,0 +1,375 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 12,
+            "target": "violation",
+            "value": {
+              "kind": "intLiteral",
+              "line": 12,
+              "value": 0
+            }
+          }
+        ],
+        "line": 11,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 6,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 17,
+                  "name": "v"
+                },
+                "line": 17,
+                "operator": "!=",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 17,
+                  "value": 0
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 17,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 18,
+                  "target": "violation",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 18,
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          ],
+          "line": 16,
+          "name": "observeStopResult",
+          "parameters": [
+            {
+              "line": 16,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        }
+      ],
+      "name": "Checker",
+      "queueBound": 2,
+      "stateVariables": [
+        {
+          "line": 8,
+          "name": "violation",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 32,
+            "target": "fault",
+            "value": {
+              "kind": "intLiteral",
+              "line": 32,
+              "value": 0
+            }
+          },
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 33,
+            "messageServer": "start",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Controller"
+          }
+        ],
+        "line": 31,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Checker",
+          "line": 25,
+          "name": "chk"
+        }
+      ],
+      "line": 23,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 38,
+              "target": "fault",
+              "value": {
+                "kind": "intLiteral",
+                "line": 38,
+                "value": 1
+              }
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1000
+              },
+              "arguments": [
+                {
+                  "kind": "intLiteral",
+                  "line": 39,
+                  "value": 0
+                }
+              ],
+              "kind": "send",
+              "line": 39,
+              "messageServer": "turnOff",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Controller"
+            }
+          ],
+          "line": 37,
+          "name": "start",
+          "parameters": [],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 44,
+                  "name": "v"
+                },
+                "line": 44,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 44,
+                  "value": 1
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 44,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 45,
+                  "target": "fault",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 45,
+                    "value": 0
+                  }
+                }
+              ]
+            },
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 47,
+                  "name": "fault"
+                }
+              ],
+              "kind": "send",
+              "line": 47,
+              "messageServer": "observeStopResult",
+              "target": {
+                "kind": "knownRebec",
+                "name": "chk"
+              },
+              "targetClassName": "Checker"
+            }
+          ],
+          "line": 43,
+          "name": "turnOff",
+          "parameters": [
+            {
+              "line": 43,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 2
+        }
+      ],
+      "name": "Controller",
+      "queueBound": 3,
+      "stateVariables": [
+        {
+          "line": 28,
+          "name": "fault",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 57,
+            "target": "phase",
+            "value": {
+              "kind": "intLiteral",
+              "line": 57,
+              "value": 0
+            }
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 2000
+            },
+            "arguments": [],
+            "kind": "send",
+            "line": 58,
+            "messageServer": "tick",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "KeepAlive"
+          }
+        ],
+        "line": 56,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 51,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 63,
+                  "name": "phase"
+                },
+                "line": 63,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 63,
+                  "value": 0
+                }
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 66,
+                  "target": "phase",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 66,
+                    "value": 0
+                  }
+                }
+              ],
+              "kind": "if",
+              "line": 63,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 64,
+                  "target": "phase",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 64,
+                    "value": 1
+                  }
+                }
+              ]
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 2000
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 68,
+              "messageServer": "tick",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "KeepAlive"
+            }
+          ],
+          "line": 62,
+          "name": "tick",
+          "parameters": [],
+          "priority": 1
+        }
+      ],
+      "name": "KeepAlive",
+      "queueBound": 2,
+      "stateVariables": [
+        {
+          "line": 53,
+          "name": "phase",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Checker",
+          "instance": "chk",
+          "knownRebec": "chk"
+        }
+      ],
+      "className": "Controller",
+      "line": 73,
+      "name": "c",
+      "priority": 1
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Checker",
+      "line": 74,
+      "name": "chk",
+      "priority": 2
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "KeepAlive",
+      "line": 75,
+      "name": "ka",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

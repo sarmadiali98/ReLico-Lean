@@ -1,0 +1,76 @@
+// Benchmark: general--alarm-case-study--positive
+// Source: examples.zip/ReLico-main/Alarm/Alarm.rebeca. The Alarm.property
+// file is intentionally excluded; this benchmark checks translation and
+// runtime behavior only. The model semantics, priorities, and delays remain
+// unchanged.
+reactiveclass Checker(2) {
+    statevars {
+        int violation;
+    }
+
+    Checker() {
+        violation = 0;
+    }
+
+    @priority(1)
+    msgsrv observeStopResult(int v) {
+        if (v != 0) {
+            violation = 1;
+        }
+    }
+}
+
+reactiveclass Controller(3) {
+    knownrebecs {
+        Checker chk;
+    }
+    statevars {
+        int fault;
+    }
+
+    Controller() {
+        fault = 0;
+        self.start();
+    }
+
+    @priority(1)
+    msgsrv start() {
+        fault = 1;
+        self.turnOff(0) after(1000);
+    }
+
+    @priority(2)
+    msgsrv turnOff(int v) {
+        if (v == 1) {
+            fault = 0;
+        }
+        chk.observeStopResult(fault);
+    }
+}
+
+reactiveclass KeepAlive(2) {
+    statevars {
+        int phase;
+    }
+
+    KeepAlive() {
+        phase = 0;
+        self.tick() after(2000);
+    }
+
+    @priority(1)
+    msgsrv tick() {
+        if (phase == 0) {
+            phase = 1;
+        } else {
+            phase = 0;
+        }
+        self.tick() after(2000);
+    }
+}
+
+main {
+    @priority(1) Controller c(chk):();
+    @priority(2) Checker chk():();
+    KeepAlive ka():();
+}
