@@ -1,0 +1,533 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 7,
+            "target": "violation",
+            "value": {
+              "kind": "intLiteral",
+              "line": 7,
+              "value": 0
+            }
+          }
+        ],
+        "line": 6,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 1,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 12,
+                  "name": "v"
+                },
+                "line": 12,
+                "operator": "!=",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 12,
+                  "value": 3
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 12,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 13,
+                  "target": "violation",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 13,
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          ],
+          "line": 11,
+          "name": "pongSeen",
+          "parameters": [
+            {
+              "line": 11,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 19,
+                  "name": "v"
+                },
+                "line": 19,
+                "operator": "!=",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 19,
+                  "value": 3
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 19,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 20,
+                  "target": "violation",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 20,
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          ],
+          "line": 18,
+          "name": "pingSeen",
+          "parameters": [
+            {
+              "line": 18,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 2
+        }
+      ],
+      "name": "Checker",
+      "queueBound": 5,
+      "stateVariables": [
+        {
+          "line": 3,
+          "name": "violation",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 32,
+            "messageServer": "start",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Ping"
+          }
+        ],
+        "line": 31,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Pong",
+          "line": 27,
+          "name": "pong"
+        },
+        {
+          "className": "Checker",
+          "line": 28,
+          "name": "chk"
+        }
+      ],
+      "line": 25,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 10
+              },
+              "arguments": [
+                {
+                  "kind": "intLiteral",
+                  "line": 37,
+                  "value": 3
+                }
+              ],
+              "kind": "send",
+              "line": 37,
+              "messageServer": "serve",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Ping"
+            }
+          ],
+          "line": 36,
+          "name": "start",
+          "parameters": [],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 42,
+                  "name": "v"
+                }
+              ],
+              "kind": "send",
+              "line": 42,
+              "messageServer": "receive",
+              "target": {
+                "kind": "knownRebec",
+                "name": "pong"
+              },
+              "targetClassName": "Pong"
+            }
+          ],
+          "line": 41,
+          "name": "serve",
+          "parameters": [
+            {
+              "line": 41,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 2
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 47,
+                  "name": "v"
+                }
+              ],
+              "kind": "send",
+              "line": 47,
+              "messageServer": "pingSeen",
+              "target": {
+                "kind": "knownRebec",
+                "name": "chk"
+              },
+              "targetClassName": "Checker"
+            }
+          ],
+          "line": 46,
+          "name": "receive",
+          "parameters": [
+            {
+              "line": 46,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 3
+        }
+      ],
+      "name": "Ping",
+      "queueBound": 5,
+      "stateVariables": []
+    },
+    {
+      "constructor": {
+        "body": [],
+        "line": 57,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "Ping",
+          "line": 53,
+          "name": "ping"
+        },
+        {
+          "className": "Checker",
+          "line": 54,
+          "name": "chk"
+        }
+      ],
+      "line": 51,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 62,
+                  "name": "v"
+                }
+              ],
+              "kind": "send",
+              "line": 62,
+              "messageServer": "pongSeen",
+              "target": {
+                "kind": "knownRebec",
+                "name": "chk"
+              },
+              "targetClassName": "Checker"
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 10
+              },
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 63,
+                  "name": "v"
+                }
+              ],
+              "kind": "send",
+              "line": 63,
+              "messageServer": "reply",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Pong"
+            }
+          ],
+          "line": 61,
+          "name": "receive",
+          "parameters": [
+            {
+              "line": 61,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 1
+        },
+        {
+          "body": [
+            {
+              "after": null,
+              "arguments": [
+                {
+                  "kind": "variable",
+                  "line": 68,
+                  "name": "v"
+                }
+              ],
+              "kind": "send",
+              "line": 68,
+              "messageServer": "receive",
+              "target": {
+                "kind": "knownRebec",
+                "name": "ping"
+              },
+              "targetClassName": "Ping"
+            }
+          ],
+          "line": 67,
+          "name": "reply",
+          "parameters": [
+            {
+              "line": 67,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": 2
+        }
+      ],
+      "name": "Pong",
+      "queueBound": 5,
+      "stateVariables": []
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 78,
+            "target": "phase",
+            "value": {
+              "kind": "intLiteral",
+              "line": 78,
+              "value": 0
+            }
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 100
+            },
+            "arguments": [],
+            "kind": "send",
+            "line": 79,
+            "messageServer": "tick",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "KeepAlive"
+          }
+        ],
+        "line": 77,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 72,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 84,
+                  "name": "phase"
+                },
+                "line": 84,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 84,
+                  "value": 0
+                }
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 87,
+                  "target": "phase",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 87,
+                    "value": 0
+                  }
+                }
+              ],
+              "kind": "if",
+              "line": 84,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 85,
+                  "target": "phase",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 85,
+                    "value": 1
+                  }
+                }
+              ]
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 100
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 89,
+              "messageServer": "tick",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "KeepAlive"
+            }
+          ],
+          "line": 83,
+          "name": "tick",
+          "parameters": [],
+          "priority": 1
+        }
+      ],
+      "name": "KeepAlive",
+      "queueBound": 2,
+      "stateVariables": [
+        {
+          "line": 74,
+          "name": "phase",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Pong",
+          "instance": "pong",
+          "knownRebec": "pong"
+        },
+        {
+          "className": "Checker",
+          "instance": "chk",
+          "knownRebec": "chk"
+        }
+      ],
+      "className": "Ping",
+      "line": 94,
+      "name": "ping",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "Ping",
+          "instance": "ping",
+          "knownRebec": "ping"
+        },
+        {
+          "className": "Checker",
+          "instance": "chk",
+          "knownRebec": "chk"
+        }
+      ],
+      "className": "Pong",
+      "line": 95,
+      "name": "pong",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Checker",
+      "line": 96,
+      "name": "chk",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "KeepAlive",
+      "line": 97,
+      "name": "ka",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

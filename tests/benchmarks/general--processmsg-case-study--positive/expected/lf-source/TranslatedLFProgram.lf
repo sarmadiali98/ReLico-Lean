@@ -1,0 +1,95 @@
+target Cpp
+
+reactor Source {
+  output msgToTask: int
+  logical action start_action: void
+
+  reaction(startup) -> start_action {=
+    start_action.schedule(0ms);
+  =}
+
+  reaction(start_action) -> msgToTask {=
+    msgToTask.set(0);
+  =}
+}
+
+reactor Task {
+  input msgToTaskFromSrc: int
+  output completeToChk: int
+  state lastMsg: int = 0
+  state ok: int = 0
+  logical action msg_action: int
+  logical action process_action: int
+
+  reaction(startup) {=
+    lastMsg = 0;
+    ok = 0;
+  =}
+
+  reaction(msg_action) -> process_action {=
+    auto v = *msg_action.get();
+    process_action.schedule(v, 10ms);
+  =}
+
+  reaction(msgToTaskFromSrc) -> process_action {=
+    auto v = *msgToTaskFromSrc.get();
+    process_action.schedule(v, 10ms);
+  =}
+
+  reaction(process_action) -> completeToChk {=
+    auto v = *process_action.get();
+    lastMsg = v;
+    if ((lastMsg == 0)) { ok = 1; } else { ok = 0; }
+    completeToChk.set(ok);
+  =}
+}
+
+reactor Checker {
+  input completeToChkFromTask: int
+  state violation: int = 0
+  logical action complete_action: int
+
+  reaction(startup) {=
+    violation = 0;
+  =}
+
+  reaction(complete_action) {=
+    auto v = *complete_action.get();
+    if ((v != 1)) { violation = 1; } else {}
+  =}
+
+  reaction(completeToChkFromTask) {=
+    auto v = *completeToChkFromTask.get();
+    if ((v != 1)) { violation = 1; } else {}
+  =}
+}
+
+reactor KeepAlive {
+  state phase: int = 0
+  logical action tick_action1: void
+  logical action tick_action2: void
+
+  reaction(startup) -> tick_action1 {=
+    phase = 0;
+    tick_action1.schedule(100ms);
+  =}
+
+  reaction(tick_action1) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+
+  reaction(tick_action2) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+}
+
+main reactor {
+  src = new Source()
+  task = new Task()
+  chk = new Checker()
+  ka = new KeepAlive()
+  src.msgToTask -> task.msgToTaskFromSrc after 0 msec
+  task.completeToChk -> chk.completeToChkFromTask after 0 msec
+}

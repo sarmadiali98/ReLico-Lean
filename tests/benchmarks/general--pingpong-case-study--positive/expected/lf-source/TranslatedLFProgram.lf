@@ -1,0 +1,122 @@
+target Cpp
+
+reactor Checker {
+  input pingSeenToChkFromPing: int
+  input pongSeenToChkFromPong: int
+  state violation: int = 0
+  logical action pongSeen_action: int
+  logical action pingSeen_action: int
+
+  reaction(startup) {=
+    violation = 0;
+  =}
+
+  reaction(pongSeen_action) {=
+    auto v = *pongSeen_action.get();
+    if ((v != 3)) { violation = 1; } else {}
+  =}
+
+  reaction(pongSeenToChkFromPong) {=
+    auto v = *pongSeenToChkFromPong.get();
+    if ((v != 3)) { violation = 1; } else {}
+  =}
+
+  reaction(pingSeen_action) {=
+    auto v = *pingSeen_action.get();
+    if ((v != 3)) { violation = 1; } else {}
+  =}
+
+  reaction(pingSeenToChkFromPing) {=
+    auto v = *pingSeenToChkFromPing.get();
+    if ((v != 3)) { violation = 1; } else {}
+  =}
+}
+
+reactor Ping {
+  input receiveToPingFromPong: int
+  output receiveToPong: int
+  output pingSeenToChk: int
+  logical action start_action: void
+  logical action serve_action: int
+  logical action receive_action: int
+
+  reaction(startup) -> start_action {=
+    start_action.schedule(0ms);
+  =}
+
+  reaction(start_action) -> serve_action {=
+    serve_action.schedule(3, 10ms);
+  =}
+
+  reaction(serve_action) -> receiveToPong {=
+    auto v = *serve_action.get();
+    receiveToPong.set(v);
+  =}
+
+  reaction(receive_action) -> pingSeenToChk {=
+    auto v = *receive_action.get();
+    pingSeenToChk.set(v);
+  =}
+
+  reaction(receiveToPingFromPong) -> pingSeenToChk {=
+    auto v = *receiveToPingFromPong.get();
+    pingSeenToChk.set(v);
+  =}
+}
+
+reactor Pong {
+  input receiveToPongFromPing: int
+  output pongSeenToChk: int
+  output receiveToPing: int
+  logical action receive_action: int
+  logical action reply_action: int
+
+  reaction(receive_action) -> pongSeenToChk, reply_action {=
+    auto v = *receive_action.get();
+    pongSeenToChk.set(v);
+    reply_action.schedule(v, 10ms);
+  =}
+
+  reaction(receiveToPongFromPing) -> pongSeenToChk, reply_action {=
+    auto v = *receiveToPongFromPing.get();
+    pongSeenToChk.set(v);
+    reply_action.schedule(v, 10ms);
+  =}
+
+  reaction(reply_action) -> receiveToPing {=
+    auto v = *reply_action.get();
+    receiveToPing.set(v);
+  =}
+}
+
+reactor KeepAlive {
+  state phase: int = 0
+  logical action tick_action1: void
+  logical action tick_action2: void
+
+  reaction(startup) -> tick_action1 {=
+    phase = 0;
+    tick_action1.schedule(100ms);
+  =}
+
+  reaction(tick_action1) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+
+  reaction(tick_action2) -> tick_action2 {=
+    if ((phase == 0)) { phase = 1; } else { phase = 0; }
+    tick_action2.schedule(100ms);
+  =}
+}
+
+main reactor {
+  ping = new Ping()
+  pong = new Pong()
+  chk = new Checker()
+  ka = new KeepAlive()
+  ping.receiveToPong -> pong.receiveToPongFromPing after 0 msec
+  ping.pingSeenToChk -> chk.pingSeenToChkFromPing after 0 msec
+  pong.pongSeenToChk -> chk.pongSeenToChkFromPong after 0 msec
+  pong.receiveToPing -> ping.receiveToPingFromPong after 0 msec
+}
