@@ -1,0 +1,1071 @@
+{ classes := [{ name := { value := "Manager" },
+                knownRebecs := [{ name := { value := "r00" }, className := { value := "Router" } },
+                                { name := { value := "r10" }, className := { value := "Router" } },
+                                { name := { value := "r20" }, className := { value := "Router" } },
+                                { name := { value := "r30" }, className := { value := "Router" } },
+                                { name := { value := "r01" }, className := { value := "Router" } },
+                                { name := { value := "r11" }, className := { value := "Router" } },
+                                { name := { value := "r21" }, className := { value := "Router" } },
+                                { name := { value := "r31" }, className := { value := "Router" } },
+                                { name := { value := "r02" }, className := { value := "Router" } },
+                                { name := { value := "r12" }, className := { value := "Router" } },
+                                { name := { value := "r22" }, className := { value := "Router" } },
+                                { name := { value := "r32" }, className := { value := "Router" } },
+                                { name := { value := "r03" }, className := { value := "Router" } },
+                                { name := { value := "r13" }, className := { value := "Router" } },
+                                { name := { value := "r23" }, className := { value := "Router" } },
+                                { name := { value := "r33" }, className := { value := "Router" } }],
+                stateVariables := [],
+                constructor := { parameters := [], body := [] },
+                messageServers := [{ name := { value := "reset" },
+                                     parameters := [{ name := { value := "unit" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "r01" })
+                                                { value := "reStart" }
+                                                [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                { value := 700 }],
+                                     priority := none }] },
+              { name := { value := "Router" },
+                knownRebecs := [{ name := { value := "manager" }, className := { value := "Manager" } },
+                                { name := { value := "N" }, className := { value := "Router" } },
+                                { name := { value := "E" }, className := { value := "Router" } },
+                                { name := { value := "S" }, className := { value := "Router" } },
+                                { name := { value := "W" }, className := { value := "Router" } }],
+                stateVariables := [{ name := { value := "bufSize" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "maxTime" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "recieved" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "bufNum0" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "bufNum1" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "bufNum2" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "bufNum3" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "full0" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "full1" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "full2" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "full3" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "enable0" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "enable1" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "enable2" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "enable3" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "outMutex0" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "outMutex1" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "outMutex2" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "outMutex3" }, declaredType := Relico.DTR.GeneralType.boolean },
+                                   { name := { value := "Xid" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "Yid" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "deadlineViolation" },
+                                     declaredType := Relico.DTR.GeneralType.boolean }],
+                constructor := { parameters := [{ name := { value := "X" },
+                                                  declaredType := Relico.DTR.GeneralType.int },
+                                                { name := { value := "Y" },
+                                                  declaredType := Relico.DTR.GeneralType.int }],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "Xid" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "X" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "Yid" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "Y" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "bufSize" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 2),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "maxTime" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 250),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "recieved" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "deadlineViolation" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "enable0" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral true),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "enable1" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral true),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "enable2" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral true),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "enable3" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral true),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "outMutex0" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral true),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "outMutex1" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral true),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "outMutex2" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral true),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "outMutex3" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral true),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "bufNum0" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "bufNum1" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "bufNum2" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "bufNum3" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "full0" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "full1" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "full2" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "full3" }
+                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                          Relico.DTR.GeneralStmt.ifThenElse
+                                            (Relico.DTR.GeneralExpr.binary
+                                              (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                              (Relico.DTR.GeneralExpr.binary
+                                                (Relico.DTR.GeneralBinaryOp.eq)
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "X" })
+                                                (Relico.DTR.GeneralExpr.intLiteral 0))
+                                              (Relico.DTR.GeneralExpr.binary
+                                                (Relico.DTR.GeneralBinaryOp.eq)
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "Y" })
+                                                (Relico.DTR.GeneralExpr.intLiteral 0)))
+                                            [Relico.DTR.GeneralStmt.send
+                                               (Relico.DTR.GeneralSendTarget.selfTarget)
+                                               { value := "reqSend" }
+                                               [Relico.DTR.GeneralExpr.intLiteral 2,
+                                                Relico.DTR.GeneralExpr.intLiteral 3,
+                                                Relico.DTR.GeneralExpr.intLiteral 1,
+                                                Relico.DTR.GeneralExpr.intLiteral 5]
+                                               { value := 10 }]
+                                            [],
+                                          Relico.DTR.GeneralStmt.ifThenElse
+                                            (Relico.DTR.GeneralExpr.binary
+                                              (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                              (Relico.DTR.GeneralExpr.binary
+                                                (Relico.DTR.GeneralBinaryOp.eq)
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "X" })
+                                                (Relico.DTR.GeneralExpr.intLiteral 0))
+                                              (Relico.DTR.GeneralExpr.binary
+                                                (Relico.DTR.GeneralBinaryOp.eq)
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "Y" })
+                                                (Relico.DTR.GeneralExpr.intLiteral 1)))
+                                            [Relico.DTR.GeneralStmt.send
+                                               (Relico.DTR.GeneralSendTarget.selfTarget)
+                                               { value := "reStart" }
+                                               [Relico.DTR.GeneralExpr.intLiteral 0]
+                                               { value := 700 }]
+                                            [],
+                                          Relico.DTR.GeneralStmt.ifThenElse
+                                            (Relico.DTR.GeneralExpr.binary
+                                              (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                              (Relico.DTR.GeneralExpr.binary
+                                                (Relico.DTR.GeneralBinaryOp.eq)
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "X" })
+                                                (Relico.DTR.GeneralExpr.intLiteral 2))
+                                              (Relico.DTR.GeneralExpr.binary
+                                                (Relico.DTR.GeneralBinaryOp.eq)
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "Y" })
+                                                (Relico.DTR.GeneralExpr.intLiteral 3)))
+                                            [Relico.DTR.GeneralStmt.send
+                                               (Relico.DTR.GeneralSendTarget.selfTarget)
+                                               { value := "checkRecieved" }
+                                               []
+                                               { value := 250 }]
+                                            []] },
+                messageServers := [{ name := { value := "reqSend" },
+                                     parameters := [{ name := { value := "Xtarget" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "Ytarget" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "directionS" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "packId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.localDecl
+                                                { value := "enabled" }
+                                                (Relico.DTR.GeneralType.boolean)
+                                                (Relico.DTR.GeneralExpr.boolLiteral false),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "directionS" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "enabled" }
+                                                   (Relico.DTR.GeneralExpr.stateVar { value := "enable0" })]
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.parameterVar { value := "directionS" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "enabled" }
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "enable1" })]
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.eq)
+                                                        (Relico.DTR.GeneralExpr.parameterVar { value := "directionS" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                      [Relico.DTR.GeneralStmt.assign
+                                                         { value := "enabled" }
+                                                         (Relico.DTR.GeneralExpr.stateVar { value := "enable2" })]
+                                                      [Relico.DTR.GeneralStmt.assign
+                                                         { value := "enabled" }
+                                                         (Relico.DTR.GeneralExpr.stateVar { value := "enable3" })]]],
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "enabled" })
+                                                  (Relico.DTR.GeneralExpr.boolLiteral true))
+                                                [Relico.DTR.GeneralStmt.localDecl
+                                                   { value := "sent" }
+                                                   (Relico.DTR.GeneralType.boolean)
+                                                   (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                 Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.gt)
+                                                     (Relico.DTR.GeneralExpr.parameterVar { value := "Xtarget" })
+                                                     (Relico.DTR.GeneralExpr.stateVar { value := "Xid" }))
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.eq)
+                                                        (Relico.DTR.GeneralExpr.stateVar { value := "outMutex1" })
+                                                        (Relico.DTR.GeneralExpr.boolLiteral true))
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec { value := "E" })
+                                                         { value := "give_Ack" }
+                                                         [Relico.DTR.GeneralExpr.parameterVar { value := "Xtarget" },
+                                                          Relico.DTR.GeneralExpr.parameterVar { value := "Ytarget" },
+                                                          Relico.DTR.GeneralExpr.parameterVar { value := "directionS" },
+                                                          Relico.DTR.GeneralExpr.intLiteral 3,
+                                                          Relico.DTR.GeneralExpr.intLiteral 3,
+                                                          Relico.DTR.GeneralExpr.parameterVar { value := "packId" }]
+                                                         { value := 26 },
+                                                       Relico.DTR.GeneralStmt.assign
+                                                         { value := "outMutex1" }
+                                                         (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                       Relico.DTR.GeneralStmt.ifThenElse
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.eq)
+                                                           (Relico.DTR.GeneralExpr.parameterVar
+                                                             { value := "directionS" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                         [Relico.DTR.GeneralStmt.assign
+                                                            { value := "enable0" }
+                                                            (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                         [Relico.DTR.GeneralStmt.ifThenElse
+                                                            (Relico.DTR.GeneralExpr.binary
+                                                              (Relico.DTR.GeneralBinaryOp.eq)
+                                                              (Relico.DTR.GeneralExpr.parameterVar
+                                                                { value := "directionS" })
+                                                              (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                            [Relico.DTR.GeneralStmt.assign
+                                                               { value := "enable1" }
+                                                               (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                            [Relico.DTR.GeneralStmt.ifThenElse
+                                                               (Relico.DTR.GeneralExpr.binary
+                                                                 (Relico.DTR.GeneralBinaryOp.eq)
+                                                                 (Relico.DTR.GeneralExpr.parameterVar
+                                                                   { value := "directionS" })
+                                                                 (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                               [Relico.DTR.GeneralStmt.assign
+                                                                  { value := "enable2" }
+                                                                  (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                               [Relico.DTR.GeneralStmt.assign
+                                                                  { value := "enable3" }
+                                                                  (Relico.DTR.GeneralExpr.boolLiteral false)]]],
+                                                       Relico.DTR.GeneralStmt.assign
+                                                         { value := "sent" }
+                                                         (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                         { value := "reqSend" }
+                                                         [Relico.DTR.GeneralExpr.parameterVar { value := "Xtarget" },
+                                                          Relico.DTR.GeneralExpr.parameterVar { value := "Ytarget" },
+                                                          Relico.DTR.GeneralExpr.parameterVar { value := "directionS" },
+                                                          Relico.DTR.GeneralExpr.parameterVar { value := "packId" }]
+                                                         { value := 1 }]]
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.lt)
+                                                        (Relico.DTR.GeneralExpr.parameterVar { value := "Xtarget" })
+                                                        (Relico.DTR.GeneralExpr.stateVar { value := "Xid" }))
+                                                      [Relico.DTR.GeneralStmt.ifThenElse
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.eq)
+                                                           (Relico.DTR.GeneralExpr.stateVar { value := "outMutex3" })
+                                                           (Relico.DTR.GeneralExpr.boolLiteral true))
+                                                         [Relico.DTR.GeneralStmt.send
+                                                            (Relico.DTR.GeneralSendTarget.knownRebec { value := "W" })
+                                                            { value := "give_Ack" }
+                                                            [Relico.DTR.GeneralExpr.parameterVar { value := "Xtarget" },
+                                                             Relico.DTR.GeneralExpr.parameterVar { value := "Ytarget" },
+                                                             Relico.DTR.GeneralExpr.parameterVar
+                                                               { value := "directionS" },
+                                                             Relico.DTR.GeneralExpr.intLiteral 1,
+                                                             Relico.DTR.GeneralExpr.intLiteral 1,
+                                                             Relico.DTR.GeneralExpr.parameterVar { value := "packId" }]
+                                                            { value := 26 },
+                                                          Relico.DTR.GeneralStmt.assign
+                                                            { value := "outMutex3" }
+                                                            (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                          Relico.DTR.GeneralStmt.ifThenElse
+                                                            (Relico.DTR.GeneralExpr.binary
+                                                              (Relico.DTR.GeneralBinaryOp.eq)
+                                                              (Relico.DTR.GeneralExpr.parameterVar
+                                                                { value := "directionS" })
+                                                              (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                            [Relico.DTR.GeneralStmt.assign
+                                                               { value := "enable0" }
+                                                               (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                            [Relico.DTR.GeneralStmt.ifThenElse
+                                                               (Relico.DTR.GeneralExpr.binary
+                                                                 (Relico.DTR.GeneralBinaryOp.eq)
+                                                                 (Relico.DTR.GeneralExpr.parameterVar
+                                                                   { value := "directionS" })
+                                                                 (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                               [Relico.DTR.GeneralStmt.assign
+                                                                  { value := "enable1" }
+                                                                  (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                               [Relico.DTR.GeneralStmt.ifThenElse
+                                                                  (Relico.DTR.GeneralExpr.binary
+                                                                    (Relico.DTR.GeneralBinaryOp.eq)
+                                                                    (Relico.DTR.GeneralExpr.parameterVar
+                                                                      { value := "directionS" })
+                                                                    (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                                  [Relico.DTR.GeneralStmt.assign
+                                                                     { value := "enable2" }
+                                                                     (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                                  [Relico.DTR.GeneralStmt.assign
+                                                                     { value := "enable3" }
+                                                                     (Relico.DTR.GeneralExpr.boolLiteral false)]]],
+                                                          Relico.DTR.GeneralStmt.assign
+                                                            { value := "sent" }
+                                                            (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                         [Relico.DTR.GeneralStmt.send
+                                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                            { value := "reqSend" }
+                                                            [Relico.DTR.GeneralExpr.parameterVar { value := "Xtarget" },
+                                                             Relico.DTR.GeneralExpr.parameterVar { value := "Ytarget" },
+                                                             Relico.DTR.GeneralExpr.parameterVar
+                                                               { value := "directionS" },
+                                                             Relico.DTR.GeneralExpr.parameterVar { value := "packId" }]
+                                                            { value := 1 }]]
+                                                      [Relico.DTR.GeneralStmt.ifThenElse
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.gt)
+                                                           (Relico.DTR.GeneralExpr.parameterVar { value := "Ytarget" })
+                                                           (Relico.DTR.GeneralExpr.stateVar { value := "Yid" }))
+                                                         [Relico.DTR.GeneralStmt.ifThenElse
+                                                            (Relico.DTR.GeneralExpr.binary
+                                                              (Relico.DTR.GeneralBinaryOp.eq)
+                                                              (Relico.DTR.GeneralExpr.stateVar { value := "outMutex2" })
+                                                              (Relico.DTR.GeneralExpr.boolLiteral true))
+                                                            [Relico.DTR.GeneralStmt.send
+                                                               (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                 { value := "S" })
+                                                               { value := "give_Ack" }
+                                                               [Relico.DTR.GeneralExpr.parameterVar
+                                                                  { value := "Xtarget" },
+                                                                Relico.DTR.GeneralExpr.parameterVar
+                                                                  { value := "Ytarget" },
+                                                                Relico.DTR.GeneralExpr.parameterVar
+                                                                  { value := "directionS" },
+                                                                Relico.DTR.GeneralExpr.intLiteral 0,
+                                                                Relico.DTR.GeneralExpr.intLiteral 0,
+                                                                Relico.DTR.GeneralExpr.parameterVar
+                                                                  { value := "packId" }]
+                                                               { value := 26 },
+                                                             Relico.DTR.GeneralStmt.assign
+                                                               { value := "outMutex2" }
+                                                               (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                             Relico.DTR.GeneralStmt.ifThenElse
+                                                               (Relico.DTR.GeneralExpr.binary
+                                                                 (Relico.DTR.GeneralBinaryOp.eq)
+                                                                 (Relico.DTR.GeneralExpr.parameterVar
+                                                                   { value := "directionS" })
+                                                                 (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                               [Relico.DTR.GeneralStmt.assign
+                                                                  { value := "enable0" }
+                                                                  (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                               [Relico.DTR.GeneralStmt.ifThenElse
+                                                                  (Relico.DTR.GeneralExpr.binary
+                                                                    (Relico.DTR.GeneralBinaryOp.eq)
+                                                                    (Relico.DTR.GeneralExpr.parameterVar
+                                                                      { value := "directionS" })
+                                                                    (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                                  [Relico.DTR.GeneralStmt.assign
+                                                                     { value := "enable1" }
+                                                                     (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                                  [Relico.DTR.GeneralStmt.ifThenElse
+                                                                     (Relico.DTR.GeneralExpr.binary
+                                                                       (Relico.DTR.GeneralBinaryOp.eq)
+                                                                       (Relico.DTR.GeneralExpr.parameterVar
+                                                                         { value := "directionS" })
+                                                                       (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                                     [Relico.DTR.GeneralStmt.assign
+                                                                        { value := "enable2" }
+                                                                        (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                                     [Relico.DTR.GeneralStmt.assign
+                                                                        { value := "enable3" }
+                                                                        (Relico.DTR.GeneralExpr.boolLiteral false)]]],
+                                                             Relico.DTR.GeneralStmt.assign
+                                                               { value := "sent" }
+                                                               (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                            [Relico.DTR.GeneralStmt.send
+                                                               (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                               { value := "reqSend" }
+                                                               [Relico.DTR.GeneralExpr.parameterVar
+                                                                  { value := "Xtarget" },
+                                                                Relico.DTR.GeneralExpr.parameterVar
+                                                                  { value := "Ytarget" },
+                                                                Relico.DTR.GeneralExpr.parameterVar
+                                                                  { value := "directionS" },
+                                                                Relico.DTR.GeneralExpr.parameterVar
+                                                                  { value := "packId" }]
+                                                               { value := 1 }]]
+                                                         [Relico.DTR.GeneralStmt.ifThenElse
+                                                            (Relico.DTR.GeneralExpr.binary
+                                                              (Relico.DTR.GeneralBinaryOp.lt)
+                                                              (Relico.DTR.GeneralExpr.parameterVar
+                                                                { value := "Ytarget" })
+                                                              (Relico.DTR.GeneralExpr.stateVar { value := "Yid" }))
+                                                            [Relico.DTR.GeneralStmt.ifThenElse
+                                                               (Relico.DTR.GeneralExpr.binary
+                                                                 (Relico.DTR.GeneralBinaryOp.eq)
+                                                                 (Relico.DTR.GeneralExpr.stateVar
+                                                                   { value := "outMutex0" })
+                                                                 (Relico.DTR.GeneralExpr.boolLiteral true))
+                                                               [Relico.DTR.GeneralStmt.send
+                                                                  (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                    { value := "N" })
+                                                                  { value := "give_Ack" }
+                                                                  [Relico.DTR.GeneralExpr.parameterVar
+                                                                     { value := "Xtarget" },
+                                                                   Relico.DTR.GeneralExpr.parameterVar
+                                                                     { value := "Ytarget" },
+                                                                   Relico.DTR.GeneralExpr.parameterVar
+                                                                     { value := "directionS" },
+                                                                   Relico.DTR.GeneralExpr.intLiteral 2,
+                                                                   Relico.DTR.GeneralExpr.intLiteral 2,
+                                                                   Relico.DTR.GeneralExpr.parameterVar
+                                                                     { value := "packId" }]
+                                                                  { value := 26 },
+                                                                Relico.DTR.GeneralStmt.assign
+                                                                  { value := "outMutex0" }
+                                                                  (Relico.DTR.GeneralExpr.boolLiteral false),
+                                                                Relico.DTR.GeneralStmt.ifThenElse
+                                                                  (Relico.DTR.GeneralExpr.binary
+                                                                    (Relico.DTR.GeneralBinaryOp.eq)
+                                                                    (Relico.DTR.GeneralExpr.parameterVar
+                                                                      { value := "directionS" })
+                                                                    (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                                  [Relico.DTR.GeneralStmt.assign
+                                                                     { value := "enable0" }
+                                                                     (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                                  [Relico.DTR.GeneralStmt.ifThenElse
+                                                                     (Relico.DTR.GeneralExpr.binary
+                                                                       (Relico.DTR.GeneralBinaryOp.eq)
+                                                                       (Relico.DTR.GeneralExpr.parameterVar
+                                                                         { value := "directionS" })
+                                                                       (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                                     [Relico.DTR.GeneralStmt.assign
+                                                                        { value := "enable1" }
+                                                                        (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                                     [Relico.DTR.GeneralStmt.ifThenElse
+                                                                        (Relico.DTR.GeneralExpr.binary
+                                                                          (Relico.DTR.GeneralBinaryOp.eq)
+                                                                          (Relico.DTR.GeneralExpr.parameterVar
+                                                                            { value := "directionS" })
+                                                                          (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                                        [Relico.DTR.GeneralStmt.assign
+                                                                           { value := "enable2" }
+                                                                           (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                                        [Relico.DTR.GeneralStmt.assign
+                                                                           { value := "enable3" }
+                                                                           (Relico.DTR.GeneralExpr.boolLiteral
+                                                                             false)]]],
+                                                                Relico.DTR.GeneralStmt.assign
+                                                                  { value := "sent" }
+                                                                  (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                               [Relico.DTR.GeneralStmt.send
+                                                                  (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                                  { value := "reqSend" }
+                                                                  [Relico.DTR.GeneralExpr.parameterVar
+                                                                     { value := "Xtarget" },
+                                                                   Relico.DTR.GeneralExpr.parameterVar
+                                                                     { value := "Ytarget" },
+                                                                   Relico.DTR.GeneralExpr.parameterVar
+                                                                     { value := "directionS" },
+                                                                   Relico.DTR.GeneralExpr.parameterVar
+                                                                     { value := "packId" }]
+                                                                  { value := 1 }]]
+                                                            []]]],
+                                                 Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.parameterVar { value := "sent" })
+                                                     (Relico.DTR.GeneralExpr.boolLiteral true))
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.eq)
+                                                        (Relico.DTR.GeneralExpr.parameterVar { value := "directionS" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                      [Relico.DTR.GeneralStmt.assign
+                                                         { value := "bufNum0" }
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.add)
+                                                           (Relico.DTR.GeneralExpr.stateVar { value := "bufNum0" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                                       Relico.DTR.GeneralStmt.ifThenElse
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.eq)
+                                                           (Relico.DTR.GeneralExpr.stateVar { value := "bufNum0" })
+                                                           (Relico.DTR.GeneralExpr.stateVar { value := "bufSize" }))
+                                                         [Relico.DTR.GeneralStmt.assign
+                                                            { value := "full0" }
+                                                            (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                         []]
+                                                      [Relico.DTR.GeneralStmt.ifThenElse
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.eq)
+                                                           (Relico.DTR.GeneralExpr.parameterVar
+                                                             { value := "directionS" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                         [Relico.DTR.GeneralStmt.assign
+                                                            { value := "bufNum1" }
+                                                            (Relico.DTR.GeneralExpr.binary
+                                                              (Relico.DTR.GeneralBinaryOp.add)
+                                                              (Relico.DTR.GeneralExpr.stateVar { value := "bufNum1" })
+                                                              (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                                          Relico.DTR.GeneralStmt.ifThenElse
+                                                            (Relico.DTR.GeneralExpr.binary
+                                                              (Relico.DTR.GeneralBinaryOp.eq)
+                                                              (Relico.DTR.GeneralExpr.stateVar { value := "bufNum1" })
+                                                              (Relico.DTR.GeneralExpr.stateVar { value := "bufSize" }))
+                                                            [Relico.DTR.GeneralStmt.assign
+                                                               { value := "full1" }
+                                                               (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                            []]
+                                                         [Relico.DTR.GeneralStmt.ifThenElse
+                                                            (Relico.DTR.GeneralExpr.binary
+                                                              (Relico.DTR.GeneralBinaryOp.eq)
+                                                              (Relico.DTR.GeneralExpr.parameterVar
+                                                                { value := "directionS" })
+                                                              (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                            [Relico.DTR.GeneralStmt.assign
+                                                               { value := "bufNum2" }
+                                                               (Relico.DTR.GeneralExpr.binary
+                                                                 (Relico.DTR.GeneralBinaryOp.add)
+                                                                 (Relico.DTR.GeneralExpr.stateVar
+                                                                   { value := "bufNum2" })
+                                                                 (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                                             Relico.DTR.GeneralStmt.ifThenElse
+                                                               (Relico.DTR.GeneralExpr.binary
+                                                                 (Relico.DTR.GeneralBinaryOp.eq)
+                                                                 (Relico.DTR.GeneralExpr.stateVar
+                                                                   { value := "bufNum2" })
+                                                                 (Relico.DTR.GeneralExpr.stateVar
+                                                                   { value := "bufSize" }))
+                                                               [Relico.DTR.GeneralStmt.assign
+                                                                  { value := "full2" }
+                                                                  (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                               []]
+                                                            [Relico.DTR.GeneralStmt.assign
+                                                               { value := "bufNum3" }
+                                                               (Relico.DTR.GeneralExpr.binary
+                                                                 (Relico.DTR.GeneralBinaryOp.add)
+                                                                 (Relico.DTR.GeneralExpr.stateVar
+                                                                   { value := "bufNum3" })
+                                                                 (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                                             Relico.DTR.GeneralStmt.ifThenElse
+                                                               (Relico.DTR.GeneralExpr.binary
+                                                                 (Relico.DTR.GeneralBinaryOp.eq)
+                                                                 (Relico.DTR.GeneralExpr.stateVar
+                                                                   { value := "bufNum3" })
+                                                                 (Relico.DTR.GeneralExpr.stateVar
+                                                                   { value := "bufSize" }))
+                                                               [Relico.DTR.GeneralStmt.assign
+                                                                  { value := "full3" }
+                                                                  (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                               []]]]]
+                                                   []]
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "reqSend" }
+                                                   [Relico.DTR.GeneralExpr.parameterVar { value := "Xtarget" },
+                                                    Relico.DTR.GeneralExpr.parameterVar { value := "Ytarget" },
+                                                    Relico.DTR.GeneralExpr.parameterVar { value := "directionS" },
+                                                    Relico.DTR.GeneralExpr.parameterVar { value := "packId" }]
+                                                   { value := 1 }]],
+                                     priority := none },
+                                   { name := { value := "get_Ack" },
+                                     parameters := [{ name := { value := "directionS" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "senderDirection" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "directionS" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "enable0" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "bufNum0" }
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.sub)
+                                                     (Relico.DTR.GeneralExpr.stateVar { value := "bufNum0" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "full0" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.parameterVar { value := "directionS" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "enable1" }
+                                                      (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                    Relico.DTR.GeneralStmt.assign
+                                                      { value := "bufNum1" }
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.sub)
+                                                        (Relico.DTR.GeneralExpr.stateVar { value := "bufNum1" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                                    Relico.DTR.GeneralStmt.assign
+                                                      { value := "full1" }
+                                                      (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.eq)
+                                                        (Relico.DTR.GeneralExpr.parameterVar { value := "directionS" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                      [Relico.DTR.GeneralStmt.assign
+                                                         { value := "enable2" }
+                                                         (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                       Relico.DTR.GeneralStmt.assign
+                                                         { value := "bufNum2" }
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.sub)
+                                                           (Relico.DTR.GeneralExpr.stateVar { value := "bufNum2" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                                       Relico.DTR.GeneralStmt.assign
+                                                         { value := "full2" }
+                                                         (Relico.DTR.GeneralExpr.boolLiteral false)]
+                                                      [Relico.DTR.GeneralStmt.assign
+                                                         { value := "enable3" }
+                                                         (Relico.DTR.GeneralExpr.boolLiteral true),
+                                                       Relico.DTR.GeneralStmt.assign
+                                                         { value := "bufNum3" }
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.sub)
+                                                           (Relico.DTR.GeneralExpr.stateVar { value := "bufNum3" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                                       Relico.DTR.GeneralStmt.assign
+                                                         { value := "full3" }
+                                                         (Relico.DTR.GeneralExpr.boolLiteral false)]]],
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "senderDirection" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "outMutex0" }
+                                                   (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.parameterVar
+                                                       { value := "senderDirection" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "outMutex1" }
+                                                      (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.eq)
+                                                        (Relico.DTR.GeneralExpr.parameterVar
+                                                          { value := "senderDirection" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                      [Relico.DTR.GeneralStmt.assign
+                                                         { value := "outMutex2" }
+                                                         (Relico.DTR.GeneralExpr.boolLiteral true)]
+                                                      [Relico.DTR.GeneralStmt.assign
+                                                         { value := "outMutex3" }
+                                                         (Relico.DTR.GeneralExpr.boolLiteral true)]]]],
+                                     priority := none },
+                                   { name := { value := "give_Ack" },
+                                     parameters := [{ name := { value := "Xtarget" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "Ytarget" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "directionS" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "directionD" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "msgSender" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "packId" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.localDecl
+                                                { value := "bufferFull" }
+                                                (Relico.DTR.GeneralType.boolean)
+                                                (Relico.DTR.GeneralExpr.boolLiteral false),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "directionD" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "bufferFull" }
+                                                   (Relico.DTR.GeneralExpr.stateVar { value := "full0" })]
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.parameterVar { value := "directionD" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "bufferFull" }
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "full1" })]
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.eq)
+                                                        (Relico.DTR.GeneralExpr.parameterVar { value := "directionD" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                      [Relico.DTR.GeneralStmt.assign
+                                                         { value := "bufferFull" }
+                                                         (Relico.DTR.GeneralExpr.stateVar { value := "full2" })]
+                                                      [Relico.DTR.GeneralStmt.assign
+                                                         { value := "bufferFull" }
+                                                         (Relico.DTR.GeneralExpr.stateVar { value := "full3" })]]],
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.unary
+                                                  (Relico.DTR.GeneralUnaryOp.logicalNot)
+                                                  (Relico.DTR.GeneralExpr.binary
+                                                    (Relico.DTR.GeneralBinaryOp.logicalAnd)
+                                                    (Relico.DTR.GeneralExpr.binary
+                                                      (Relico.DTR.GeneralBinaryOp.eq)
+                                                      (Relico.DTR.GeneralExpr.parameterVar { value := "Xtarget" })
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "Xid" }))
+                                                    (Relico.DTR.GeneralExpr.binary
+                                                      (Relico.DTR.GeneralBinaryOp.eq)
+                                                      (Relico.DTR.GeneralExpr.parameterVar { value := "Ytarget" })
+                                                      (Relico.DTR.GeneralExpr.stateVar { value := "Yid" }))))
+                                                [Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.parameterVar { value := "bufferFull" })
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                      { value := "give_Ack" }
+                                                      [Relico.DTR.GeneralExpr.parameterVar { value := "Xtarget" },
+                                                       Relico.DTR.GeneralExpr.parameterVar { value := "Ytarget" },
+                                                       Relico.DTR.GeneralExpr.parameterVar { value := "directionS" },
+                                                       Relico.DTR.GeneralExpr.parameterVar { value := "directionD" },
+                                                       Relico.DTR.GeneralExpr.parameterVar { value := "msgSender" },
+                                                       Relico.DTR.GeneralExpr.parameterVar { value := "packId" }]
+                                                      { value := 2 }]
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                      { value := "reqSend" }
+                                                      [Relico.DTR.GeneralExpr.parameterVar { value := "Xtarget" },
+                                                       Relico.DTR.GeneralExpr.parameterVar { value := "Ytarget" },
+                                                       Relico.DTR.GeneralExpr.parameterVar { value := "directionD" },
+                                                       Relico.DTR.GeneralExpr.parameterVar { value := "packId" }]
+                                                      { value := 0 },
+                                                    Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.eq)
+                                                        (Relico.DTR.GeneralExpr.parameterVar { value := "msgSender" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec { value := "N" })
+                                                         { value := "get_Ack" }
+                                                         [Relico.DTR.GeneralExpr.parameterVar { value := "directionS" },
+                                                          Relico.DTR.GeneralExpr.intLiteral 2]
+                                                         { value := 0 }]
+                                                      [Relico.DTR.GeneralStmt.ifThenElse
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.eq)
+                                                           (Relico.DTR.GeneralExpr.parameterVar
+                                                             { value := "msgSender" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                         [Relico.DTR.GeneralStmt.send
+                                                            (Relico.DTR.GeneralSendTarget.knownRebec { value := "E" })
+                                                            { value := "get_Ack" }
+                                                            [Relico.DTR.GeneralExpr.parameterVar
+                                                               { value := "directionS" },
+                                                             Relico.DTR.GeneralExpr.intLiteral 3]
+                                                            { value := 0 }]
+                                                         [Relico.DTR.GeneralStmt.ifThenElse
+                                                            (Relico.DTR.GeneralExpr.binary
+                                                              (Relico.DTR.GeneralBinaryOp.eq)
+                                                              (Relico.DTR.GeneralExpr.parameterVar
+                                                                { value := "msgSender" })
+                                                              (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                            [Relico.DTR.GeneralStmt.send
+                                                               (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                 { value := "S" })
+                                                               { value := "get_Ack" }
+                                                               [Relico.DTR.GeneralExpr.parameterVar
+                                                                  { value := "directionS" },
+                                                                Relico.DTR.GeneralExpr.intLiteral 0]
+                                                               { value := 0 }]
+                                                            [Relico.DTR.GeneralStmt.send
+                                                               (Relico.DTR.GeneralSendTarget.knownRebec
+                                                                 { value := "W" })
+                                                               { value := "get_Ack" }
+                                                               [Relico.DTR.GeneralExpr.parameterVar
+                                                                  { value := "directionS" },
+                                                                Relico.DTR.GeneralExpr.intLiteral 1]
+                                                               { value := 0 }]]]]]
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "recieved" }
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.add)
+                                                     (Relico.DTR.GeneralExpr.stateVar { value := "recieved" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                                 Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.eq)
+                                                     (Relico.DTR.GeneralExpr.parameterVar { value := "msgSender" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                   [Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.knownRebec { value := "N" })
+                                                      { value := "get_Ack" }
+                                                      [Relico.DTR.GeneralExpr.parameterVar { value := "directionS" },
+                                                       Relico.DTR.GeneralExpr.intLiteral 2]
+                                                      { value := 0 }]
+                                                   [Relico.DTR.GeneralStmt.ifThenElse
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.eq)
+                                                        (Relico.DTR.GeneralExpr.parameterVar { value := "msgSender" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 1))
+                                                      [Relico.DTR.GeneralStmt.send
+                                                         (Relico.DTR.GeneralSendTarget.knownRebec { value := "E" })
+                                                         { value := "get_Ack" }
+                                                         [Relico.DTR.GeneralExpr.parameterVar { value := "directionS" },
+                                                          Relico.DTR.GeneralExpr.intLiteral 3]
+                                                         { value := 0 }]
+                                                      [Relico.DTR.GeneralStmt.ifThenElse
+                                                         (Relico.DTR.GeneralExpr.binary
+                                                           (Relico.DTR.GeneralBinaryOp.eq)
+                                                           (Relico.DTR.GeneralExpr.parameterVar
+                                                             { value := "msgSender" })
+                                                           (Relico.DTR.GeneralExpr.intLiteral 2))
+                                                         [Relico.DTR.GeneralStmt.send
+                                                            (Relico.DTR.GeneralSendTarget.knownRebec { value := "S" })
+                                                            { value := "get_Ack" }
+                                                            [Relico.DTR.GeneralExpr.parameterVar
+                                                               { value := "directionS" },
+                                                             Relico.DTR.GeneralExpr.intLiteral 0]
+                                                            { value := 0 }]
+                                                         [Relico.DTR.GeneralStmt.send
+                                                            (Relico.DTR.GeneralSendTarget.knownRebec { value := "W" })
+                                                            { value := "get_Ack" }
+                                                            [Relico.DTR.GeneralExpr.parameterVar
+                                                               { value := "directionS" },
+                                                             Relico.DTR.GeneralExpr.intLiteral 1]
+                                                            { value := 0 }]]]]],
+                                     priority := none },
+                                   { name := { value := "reStart" },
+                                     parameters := [{ name := { value := "unit" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "manager" })
+                                                { value := "reset" }
+                                                [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "checkPoint" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "deadlineViolation" }
+                                                (Relico.DTR.GeneralExpr.boolLiteral true)],
+                                     priority := none },
+                                   { name := { value := "checkRecieved" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "recieved" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "checkPoint" }
+                                                   []
+                                                   { value := 0 }]
+                                                []],
+                                     priority := none }] }],
+  instances := [{ name := { value := "m" },
+                  className := { value := "Manager" },
+                  bindings := [({ value := "r00" }, { value := "r00" }),
+                               ({ value := "r10" }, { value := "r10" }),
+                               ({ value := "r20" }, { value := "r20" }),
+                               ({ value := "r30" }, { value := "r30" }),
+                               ({ value := "r01" }, { value := "r01" }),
+                               ({ value := "r11" }, { value := "r11" }),
+                               ({ value := "r21" }, { value := "r21" }),
+                               ({ value := "r31" }, { value := "r31" }),
+                               ({ value := "r02" }, { value := "r02" }),
+                               ({ value := "r12" }, { value := "r12" }),
+                               ({ value := "r22" }, { value := "r22" }),
+                               ({ value := "r32" }, { value := "r32" }),
+                               ({ value := "r03" }, { value := "r03" }),
+                               ({ value := "r13" }, { value := "r13" }),
+                               ({ value := "r23" }, { value := "r23" }),
+                               ({ value := "r33" }, { value := "r33" })],
+                  arguments := [],
+                  priority := none },
+                { name := { value := "r00" },
+                  className := { value := "Router" },
+                  bindings := [({ value := "manager" }, { value := "m" }),
+                               ({ value := "N" }, { value := "r03" }),
+                               ({ value := "E" }, { value := "r10" }),
+                               ({ value := "S" }, { value := "r01" }),
+                               ({ value := "W" }, { value := "r30" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0, Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "r10" },
+                  className := { value := "Router" },
+                  bindings := [({ value := "manager" }, { value := "m" }),
+                               ({ value := "N" }, { value := "r13" }),
+                               ({ value := "E" }, { value := "r20" }),
+                               ({ value := "S" }, { value := "r11" }),
+                               ({ value := "W" }, { value := "r00" })],
+                  arguments := [Relico.DTR.GeneralValue.int 1, Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "r20" },
+                  className := { value := "Router" },
+                  bindings := [({ value := "manager" }, { value := "m" }),
+                               ({ value := "N" }, { value := "r23" }),
+                               ({ value := "E" }, { value := "r30" }),
+                               ({ value := "S" }, { value := "r21" }),
+                               ({ value := "W" }, { value := "r10" })],
+                  arguments := [Relico.DTR.GeneralValue.int 2, Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "r30" },
+                  className := { value := "Router" },
+                  bindings := [({ value := "manager" }, { value := "m" }),
+                               ({ value := "N" }, { value := "r33" }),
+                               ({ value := "E" }, { value := "r00" }),
+                               ({ value := "S" }, { value := "r31" }),
+                               ({ value := "W" }, { value := "r20" })],
+                  arguments := [Relico.DTR.GeneralValue.int 3, Relico.DTR.GeneralValue.int 0],
+                  priority := none },
+                { name := { value := "r01" },
+                  className := { value := "Router" },
+                  bindings := [({ value := "manager" }, { value := "m" }),
+                               ({ value := "N" }, { value := "r00" }),
+                               ({ value := "E" }, { value := "r11" }),
+                               ({ value := "S" }, { value := "r02" }),
+                               ({ value := "W" }, { value := "r31" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0, Relico.DTR.GeneralValue.int 1],
+                  priority := none },
+                { name := { value := "r11" },
+                  className := { value := "Router" },
+                  bindings := [({ value := "manager" }, { value := "m" }),
+                               ({ value := "N" }, { value := "r10" }),
+                               ({ value := "E" }, { value := "r21" }),
+                               ({ value := "S" }, { value := "r12" }),
+                               ({ value := "W" }, { value := "r01" })],
+                  arguments := [Relico.DTR.GeneralValue.int 1, Relico.DTR.GeneralValue.int 1],
+                  priority := none },
+                { name := { value := "r21" },
+                  className := { value := "Router" },
+                  bindings := [({ value := "manager" }, { value := "m" }),
+                               ({ value := "N" }, { value := "r20" }),
+                               ({ value := "E" }, { value := "r31" }),
+                               ({ value := "S" }, { value := "r22" }),
+                               ({ value := "W" }, { value := "r11" })],
+                  arguments := [Relico.DTR.GeneralValue.int 2, Relico.DTR.GeneralValue.int 1],
+                  priority := none },
+                { name := { value := "r31" },
+                  className := { value := "Router" },
+                  bindings := [({ value := "manager" }, { value := "m" }),
+                               ({ value := "N" }, { value := "r30" }),
+                               ({ value := "E" }, { value := "r01" }),
+                               ({ value := "S" }, { value := "r32" }),
+                               ({ value := "W" }, { value := "r21" })],
+                  arguments := [Relico.DTR.GeneralValue.int 3, Relico.DTR.GeneralValue.int 1],
+                  priority := none },
+                { name := { value := "r02" },
+                  className := { value := "Router" },
+                  bindings := [({ value := "manager" }, { value := "m" }),
+                               ({ value := "N" }, { value := "r01" }),
+                               ({ value := "E" }, { value := "r12" }),
+                               ({ value := "S" }, { value := "r03" }),
+                               ({ value := "W" }, { value := "r32" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0, Relico.DTR.GeneralValue.int 2],
+                  priority := none },
+                { name := { value := "r12" },
+                  className := { value := "Router" },
+                  bindings := [({ value := "manager" }, { value := "m" }),
+                               ({ value := "N" }, { value := "r11" }),
+                               ({ value := "E" }, { value := "r22" }),
+                               ({ value := "S" }, { value := "r13" }),
+                               ({ value := "W" }, { value := "r02" })],
+                  arguments := [Relico.DTR.GeneralValue.int 1, Relico.DTR.GeneralValue.int 2],
+                  priority := none },
+                { name := { value := "r22" },
+                  className := { value := "Router" },
+                  bindings := [({ value := "manager" }, { value := "m" }),
+                               ({ value := "N" }, { value := "r21" }),
+                               ({ value := "E" }, { value := "r32" }),
+                               ({ value := "S" }, { value := "r23" }),
+                               ({ value := "W" }, { value := "r12" })],
+                  arguments := [Relico.DTR.GeneralValue.int 2, Relico.DTR.GeneralValue.int 2],
+                  priority := none },
+                { name := { value := "r32" },
+                  className := { value := "Router" },
+                  bindings := [({ value := "manager" }, { value := "m" }),
+                               ({ value := "N" }, { value := "r31" }),
+                               ({ value := "E" }, { value := "r02" }),
+                               ({ value := "S" }, { value := "r33" }),
+                               ({ value := "W" }, { value := "r22" })],
+                  arguments := [Relico.DTR.GeneralValue.int 3, Relico.DTR.GeneralValue.int 2],
+                  priority := none },
+                { name := { value := "r03" },
+                  className := { value := "Router" },
+                  bindings := [({ value := "manager" }, { value := "m" }),
+                               ({ value := "N" }, { value := "r02" }),
+                               ({ value := "E" }, { value := "r13" }),
+                               ({ value := "S" }, { value := "r00" }),
+                               ({ value := "W" }, { value := "r33" })],
+                  arguments := [Relico.DTR.GeneralValue.int 0, Relico.DTR.GeneralValue.int 3],
+                  priority := none },
+                { name := { value := "r13" },
+                  className := { value := "Router" },
+                  bindings := [({ value := "manager" }, { value := "m" }),
+                               ({ value := "N" }, { value := "r12" }),
+                               ({ value := "E" }, { value := "r23" }),
+                               ({ value := "S" }, { value := "r10" }),
+                               ({ value := "W" }, { value := "r03" })],
+                  arguments := [Relico.DTR.GeneralValue.int 1, Relico.DTR.GeneralValue.int 3],
+                  priority := none },
+                { name := { value := "r23" },
+                  className := { value := "Router" },
+                  bindings := [({ value := "manager" }, { value := "m" }),
+                               ({ value := "N" }, { value := "r22" }),
+                               ({ value := "E" }, { value := "r33" }),
+                               ({ value := "S" }, { value := "r20" }),
+                               ({ value := "W" }, { value := "r13" })],
+                  arguments := [Relico.DTR.GeneralValue.int 2, Relico.DTR.GeneralValue.int 3],
+                  priority := none },
+                { name := { value := "r33" },
+                  className := { value := "Router" },
+                  bindings := [({ value := "manager" }, { value := "m" }),
+                               ({ value := "N" }, { value := "r32" }),
+                               ({ value := "E" }, { value := "r03" }),
+                               ({ value := "S" }, { value := "r30" }),
+                               ({ value := "W" }, { value := "r23" })],
+                  arguments := [Relico.DTR.GeneralValue.int 3, Relico.DTR.GeneralValue.int 3],
+                  priority := none }] }
