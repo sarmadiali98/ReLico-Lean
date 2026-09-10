@@ -1,0 +1,1405 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 30,
+            "target": "FREE",
+            "value": {
+              "kind": "intLiteral",
+              "line": 30,
+              "value": 1
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 31,
+            "target": "BUSY",
+            "value": {
+              "kind": "intLiteral",
+              "line": 31,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 32,
+            "target": "appMaster1",
+            "value": {
+              "kind": "variable",
+              "line": 32,
+              "name": "FREE"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 33,
+            "target": "appMaster2",
+            "value": {
+              "kind": "variable",
+              "line": 33,
+              "name": "FREE"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 34,
+            "target": "appMaster3",
+            "value": {
+              "kind": "variable",
+              "line": 34,
+              "name": "FREE"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 35,
+            "target": "m_queue_misses",
+            "value": {
+              "kind": "intLiteral",
+              "line": 35,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 36,
+            "target": "m_update_miss",
+            "value": {
+              "kind": "intLiteral",
+              "line": 36,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 37,
+            "target": "m_job_complete",
+            "value": {
+              "kind": "intLiteral",
+              "line": 37,
+              "value": 0
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 38,
+            "target": "DEFAULT_DEADLINE",
+            "value": {
+              "kind": "intLiteral",
+              "line": 38,
+              "value": 3
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 39,
+            "target": "fifo0",
+            "value": {
+              "kind": "variable",
+              "line": 39,
+              "name": "DEFAULT_DEADLINE"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 40,
+            "target": "fifo1",
+            "value": {
+              "kind": "variable",
+              "line": 40,
+              "name": "DEFAULT_DEADLINE"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 41,
+            "target": "fifo2",
+            "value": {
+              "kind": "variable",
+              "line": 41,
+              "name": "DEFAULT_DEADLINE"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 42,
+            "target": "fifo3",
+            "value": {
+              "kind": "variable",
+              "line": 42,
+              "name": "DEFAULT_DEADLINE"
+            }
+          },
+          {
+            "kind": "assign",
+            "line": 43,
+            "target": "QUEUE_SIZE",
+            "value": {
+              "kind": "intLiteral",
+              "line": 43,
+              "value": 4
+            }
+          },
+          {
+            "after": null,
+            "arguments": [],
+            "kind": "send",
+            "line": 44,
+            "messageServer": "checkQueue",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "ResourceManager"
+          }
+        ],
+        "line": 28,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "AppMaster",
+          "line": 5,
+          "name": "am1"
+        },
+        {
+          "className": "AppMaster",
+          "line": 6,
+          "name": "am2"
+        },
+        {
+          "className": "AppMaster",
+          "line": 7,
+          "name": "am3"
+        }
+      ],
+      "line": 1,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 49,
+              "target": "m_queue_misses",
+              "value": {
+                "kind": "intLiteral",
+                "line": 49,
+                "value": 0
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 50,
+              "target": "m_update_miss",
+              "value": {
+                "kind": "intLiteral",
+                "line": 50,
+                "value": 0
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 51,
+              "target": "m_job_complete",
+              "value": {
+                "kind": "intLiteral",
+                "line": 51,
+                "value": 0
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 52,
+                  "name": "appMaster1"
+                },
+                "line": 52,
+                "operator": "==",
+                "right": {
+                  "kind": "variable",
+                  "line": 52,
+                  "name": "FREE"
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 52,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 54,
+                  "target": "appMaster1",
+                  "value": {
+                    "kind": "variable",
+                    "line": 54,
+                    "name": "BUSY"
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 55,
+                      "name": "fifo0"
+                    },
+                    {
+                      "kind": "intLiteral",
+                      "line": 55,
+                      "value": 1
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 55,
+                  "messageServer": "runJob",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "am1"
+                  },
+                  "targetClassName": "AppMaster"
+                },
+                {
+                  "kind": "assign",
+                  "line": 56,
+                  "target": "fifo0",
+                  "value": {
+                    "kind": "variable",
+                    "line": 56,
+                    "name": "fifo1"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 57,
+                  "target": "fifo1",
+                  "value": {
+                    "kind": "variable",
+                    "line": 57,
+                    "name": "fifo2"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 58,
+                  "target": "fifo2",
+                  "value": {
+                    "kind": "variable",
+                    "line": 58,
+                    "name": "fifo3"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 59,
+                  "target": "fifo3",
+                  "value": {
+                    "kind": "variable",
+                    "line": 59,
+                    "name": "DEFAULT_DEADLINE"
+                  }
+                }
+              ]
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 61,
+                  "name": "appMaster2"
+                },
+                "line": 61,
+                "operator": "==",
+                "right": {
+                  "kind": "variable",
+                  "line": 61,
+                  "name": "FREE"
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 61,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 63,
+                  "target": "appMaster2",
+                  "value": {
+                    "kind": "variable",
+                    "line": 63,
+                    "name": "BUSY"
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 64,
+                      "name": "fifo0"
+                    },
+                    {
+                      "kind": "intLiteral",
+                      "line": 64,
+                      "value": 2
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 64,
+                  "messageServer": "runJob",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "am2"
+                  },
+                  "targetClassName": "AppMaster"
+                },
+                {
+                  "kind": "assign",
+                  "line": 65,
+                  "target": "fifo0",
+                  "value": {
+                    "kind": "variable",
+                    "line": 65,
+                    "name": "fifo1"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 66,
+                  "target": "fifo1",
+                  "value": {
+                    "kind": "variable",
+                    "line": 66,
+                    "name": "fifo2"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 67,
+                  "target": "fifo2",
+                  "value": {
+                    "kind": "variable",
+                    "line": 67,
+                    "name": "fifo3"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 68,
+                  "target": "fifo3",
+                  "value": {
+                    "kind": "variable",
+                    "line": 68,
+                    "name": "DEFAULT_DEADLINE"
+                  }
+                }
+              ]
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 70,
+                  "name": "appMaster3"
+                },
+                "line": 70,
+                "operator": "==",
+                "right": {
+                  "kind": "variable",
+                  "line": 70,
+                  "name": "FREE"
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 70,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 72,
+                  "target": "appMaster3",
+                  "value": {
+                    "kind": "variable",
+                    "line": 72,
+                    "name": "BUSY"
+                  }
+                },
+                {
+                  "after": null,
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 73,
+                      "name": "fifo0"
+                    },
+                    {
+                      "kind": "intLiteral",
+                      "line": 73,
+                      "value": 3
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 73,
+                  "messageServer": "runJob",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "am3"
+                  },
+                  "targetClassName": "AppMaster"
+                },
+                {
+                  "kind": "assign",
+                  "line": 74,
+                  "target": "fifo0",
+                  "value": {
+                    "kind": "variable",
+                    "line": 74,
+                    "name": "fifo1"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 75,
+                  "target": "fifo1",
+                  "value": {
+                    "kind": "variable",
+                    "line": 75,
+                    "name": "fifo2"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 76,
+                  "target": "fifo2",
+                  "value": {
+                    "kind": "variable",
+                    "line": 76,
+                    "name": "fifo3"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 77,
+                  "target": "fifo3",
+                  "value": {
+                    "kind": "variable",
+                    "line": 77,
+                    "name": "DEFAULT_DEADLINE"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "assign",
+              "line": 80,
+              "target": "fifo0",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 80,
+                  "name": "fifo0"
+                },
+                "line": 80,
+                "operator": "-",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 80,
+                  "value": 1
+                }
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 81,
+                  "name": "fifo0"
+                },
+                "line": 81,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 81,
+                  "value": 0
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 81,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 83,
+                  "target": "m_queue_misses",
+                  "value": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 83,
+                      "name": "m_queue_misses"
+                    },
+                    "line": 83,
+                    "operator": "+",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 83,
+                      "value": 1
+                    }
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 84,
+                  "target": "fifo0",
+                  "value": {
+                    "kind": "variable",
+                    "line": 84,
+                    "name": "fifo1"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 85,
+                  "target": "fifo1",
+                  "value": {
+                    "kind": "variable",
+                    "line": 85,
+                    "name": "fifo2"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 86,
+                  "target": "fifo2",
+                  "value": {
+                    "kind": "variable",
+                    "line": 86,
+                    "name": "fifo3"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 87,
+                  "target": "fifo3",
+                  "value": {
+                    "kind": "variable",
+                    "line": 87,
+                    "name": "DEFAULT_DEADLINE"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "assign",
+              "line": 90,
+              "target": "fifo1",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 90,
+                  "name": "fifo1"
+                },
+                "line": 90,
+                "operator": "-",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 90,
+                  "value": 1
+                }
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 91,
+                  "name": "fifo1"
+                },
+                "line": 91,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 91,
+                  "value": 0
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 91,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 93,
+                  "target": "m_queue_misses",
+                  "value": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 93,
+                      "name": "m_queue_misses"
+                    },
+                    "line": 93,
+                    "operator": "+",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 93,
+                      "value": 1
+                    }
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 94,
+                  "target": "fifo1",
+                  "value": {
+                    "kind": "variable",
+                    "line": 94,
+                    "name": "fifo2"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 95,
+                  "target": "fifo2",
+                  "value": {
+                    "kind": "variable",
+                    "line": 95,
+                    "name": "fifo3"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 96,
+                  "target": "fifo3",
+                  "value": {
+                    "kind": "variable",
+                    "line": 96,
+                    "name": "DEFAULT_DEADLINE"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "assign",
+              "line": 99,
+              "target": "fifo2",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 99,
+                  "name": "fifo2"
+                },
+                "line": 99,
+                "operator": "-",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 99,
+                  "value": 1
+                }
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 100,
+                  "name": "fifo2"
+                },
+                "line": 100,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 100,
+                  "value": 0
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 100,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 102,
+                  "target": "m_queue_misses",
+                  "value": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 102,
+                      "name": "m_queue_misses"
+                    },
+                    "line": 102,
+                    "operator": "+",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 102,
+                      "value": 1
+                    }
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 103,
+                  "target": "fifo2",
+                  "value": {
+                    "kind": "variable",
+                    "line": 103,
+                    "name": "fifo3"
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 104,
+                  "target": "fifo3",
+                  "value": {
+                    "kind": "variable",
+                    "line": 104,
+                    "name": "DEFAULT_DEADLINE"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "assign",
+              "line": 107,
+              "target": "fifo3",
+              "value": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 107,
+                  "name": "fifo3"
+                },
+                "line": 107,
+                "operator": "-",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 107,
+                  "value": 1
+                }
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 108,
+                  "name": "fifo3"
+                },
+                "line": 108,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 108,
+                  "value": 0
+                }
+              },
+              "else": [],
+              "kind": "if",
+              "line": 108,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 110,
+                  "target": "m_queue_misses",
+                  "value": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 110,
+                      "name": "m_queue_misses"
+                    },
+                    "line": 110,
+                    "operator": "+",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 110,
+                      "value": 1
+                    }
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 111,
+                  "target": "fifo3",
+                  "value": {
+                    "kind": "variable",
+                    "line": 111,
+                    "name": "DEFAULT_DEADLINE"
+                  }
+                }
+              ]
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 114,
+              "messageServer": "checkQueue",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "ResourceManager"
+            }
+          ],
+          "line": 47,
+          "name": "checkQueue",
+          "parameters": [],
+          "priority": null
+        },
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 119,
+              "target": "m_queue_misses",
+              "value": {
+                "kind": "intLiteral",
+                "line": 119,
+                "value": 0
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 120,
+              "target": "m_update_miss",
+              "value": {
+                "kind": "intLiteral",
+                "line": 120,
+                "value": 0
+              }
+            },
+            {
+              "kind": "assign",
+              "line": 121,
+              "target": "m_job_complete",
+              "value": {
+                "kind": "intLiteral",
+                "line": 121,
+                "value": 0
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 122,
+                  "name": "deadline_miss"
+                },
+                "line": 122,
+                "operator": "==",
+                "right": {
+                  "kind": "boolLiteral",
+                  "line": 122,
+                  "value": true
+                }
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 128,
+                  "target": "m_job_complete",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 128,
+                    "value": 1
+                  }
+                }
+              ],
+              "kind": "if",
+              "line": 122,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 124,
+                  "target": "m_update_miss",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 124,
+                    "value": 1
+                  }
+                }
+              ]
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 130,
+                  "name": "masterId"
+                },
+                "line": 130,
+                "operator": "==",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 130,
+                  "value": 1
+                }
+              },
+              "else": [
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 134,
+                      "name": "masterId"
+                    },
+                    "line": 134,
+                    "operator": "==",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 134,
+                      "value": 2
+                    }
+                  },
+                  "else": [
+                    {
+                      "kind": "assign",
+                      "line": 140,
+                      "target": "appMaster3",
+                      "value": {
+                        "kind": "variable",
+                        "line": 140,
+                        "name": "FREE"
+                      }
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 134,
+                  "then": [
+                    {
+                      "kind": "assign",
+                      "line": 136,
+                      "target": "appMaster2",
+                      "value": {
+                        "kind": "variable",
+                        "line": 136,
+                        "name": "FREE"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "kind": "if",
+              "line": 130,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 132,
+                  "target": "appMaster1",
+                  "value": {
+                    "kind": "variable",
+                    "line": 132,
+                    "name": "FREE"
+                  }
+                }
+              ]
+            }
+          ],
+          "line": 117,
+          "name": "update",
+          "parameters": [
+            {
+              "line": 117,
+              "name": "deadline_miss",
+              "type": "boolean"
+            },
+            {
+              "line": 117,
+              "name": "masterId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "ResourceManager",
+      "queueBound": 5,
+      "stateVariables": [
+        {
+          "line": 12,
+          "name": "FREE",
+          "type": "int"
+        },
+        {
+          "line": 13,
+          "name": "BUSY",
+          "type": "int"
+        },
+        {
+          "line": 14,
+          "name": "appMaster1",
+          "type": "int"
+        },
+        {
+          "line": 15,
+          "name": "appMaster2",
+          "type": "int"
+        },
+        {
+          "line": 16,
+          "name": "appMaster3",
+          "type": "int"
+        },
+        {
+          "line": 17,
+          "name": "m_queue_misses",
+          "type": "int"
+        },
+        {
+          "line": 18,
+          "name": "m_update_miss",
+          "type": "int"
+        },
+        {
+          "line": 19,
+          "name": "m_job_complete",
+          "type": "int"
+        },
+        {
+          "line": 20,
+          "name": "fifo0",
+          "type": "int"
+        },
+        {
+          "line": 21,
+          "name": "fifo1",
+          "type": "int"
+        },
+        {
+          "line": 22,
+          "name": "fifo2",
+          "type": "int"
+        },
+        {
+          "line": 23,
+          "name": "fifo3",
+          "type": "int"
+        },
+        {
+          "line": 24,
+          "name": "DEFAULT_DEADLINE",
+          "type": "int"
+        },
+        {
+          "line": 25,
+          "name": "QUEUE_SIZE",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 159,
+            "target": "doneJobs",
+            "value": {
+              "kind": "intLiteral",
+              "line": 159,
+              "value": 0
+            }
+          }
+        ],
+        "line": 157,
+        "parameters": []
+      },
+      "knownRebecs": [
+        {
+          "className": "ResourceManager",
+          "line": 149,
+          "name": "rm"
+        }
+      ],
+      "line": 145,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "declare",
+              "line": 164,
+              "name": "completion",
+              "type": "int",
+              "value": {
+                "kind": "intLiteral",
+                "line": 164,
+                "value": 2
+              }
+            },
+            {
+              "kind": "declare",
+              "line": 165,
+              "name": "deadline_miss",
+              "type": "boolean",
+              "value": {
+                "kind": "boolLiteral",
+                "line": 165,
+                "value": false
+              }
+            },
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 166,
+                  "name": "completion"
+                },
+                "line": 166,
+                "operator": ">",
+                "right": {
+                  "kind": "variable",
+                  "line": 166,
+                  "name": "dline"
+                }
+              },
+              "else": [
+                {
+                  "kind": "assign",
+                  "line": 173,
+                  "target": "deadline_miss",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 173,
+                    "value": false
+                  }
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 2
+                  },
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 174,
+                      "name": "deadline_miss"
+                    },
+                    {
+                      "kind": "variable",
+                      "line": 174,
+                      "name": "masterId"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 174,
+                  "messageServer": "update",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "rm"
+                  },
+                  "targetClassName": "ResourceManager"
+                },
+                {
+                  "kind": "assign",
+                  "line": 175,
+                  "target": "doneJobs",
+                  "value": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 175,
+                      "name": "doneJobs"
+                    },
+                    "line": 175,
+                    "operator": "+",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 175,
+                      "value": 1
+                    }
+                  }
+                },
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 176,
+                      "name": "doneJobs"
+                    },
+                    "line": 176,
+                    "operator": ">",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 176,
+                      "value": 5
+                    }
+                  },
+                  "else": [],
+                  "kind": "if",
+                  "line": 176,
+                  "then": [
+                    {
+                      "kind": "assign",
+                      "line": 177,
+                      "target": "doneJobs",
+                      "value": {
+                        "kind": "intLiteral",
+                        "line": 177,
+                        "value": 1
+                      }
+                    }
+                  ]
+                }
+              ],
+              "kind": "if",
+              "line": 166,
+              "then": [
+                {
+                  "kind": "assign",
+                  "line": 168,
+                  "target": "deadline_miss",
+                  "value": {
+                    "kind": "boolLiteral",
+                    "line": 168,
+                    "value": true
+                  }
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [
+                    {
+                      "kind": "variable",
+                      "line": 169,
+                      "name": "deadline_miss"
+                    },
+                    {
+                      "kind": "variable",
+                      "line": 169,
+                      "name": "masterId"
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 169,
+                  "messageServer": "update",
+                  "target": {
+                    "kind": "knownRebec",
+                    "name": "rm"
+                  },
+                  "targetClassName": "ResourceManager"
+                }
+              ]
+            }
+          ],
+          "line": 162,
+          "name": "runJob",
+          "parameters": [
+            {
+              "line": 162,
+              "name": "dline",
+              "type": "int"
+            },
+            {
+              "line": 162,
+              "name": "masterId",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "AppMaster",
+      "queueBound": 5,
+      "stateVariables": [
+        {
+          "line": 154,
+          "name": "doneJobs",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "AppMaster",
+          "instance": "am1",
+          "knownRebec": "am1"
+        },
+        {
+          "className": "AppMaster",
+          "instance": "am2",
+          "knownRebec": "am2"
+        },
+        {
+          "className": "AppMaster",
+          "instance": "am3",
+          "knownRebec": "am3"
+        }
+      ],
+      "className": "ResourceManager",
+      "line": 184,
+      "name": "rm",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "ResourceManager",
+          "instance": "rm",
+          "knownRebec": "rm"
+        }
+      ],
+      "className": "AppMaster",
+      "line": 185,
+      "name": "am1",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "ResourceManager",
+          "instance": "rm",
+          "knownRebec": "rm"
+        }
+      ],
+      "className": "AppMaster",
+      "line": 186,
+      "name": "am2",
+      "priority": null
+    },
+    {
+      "arguments": [],
+      "bindings": [
+        {
+          "className": "ResourceManager",
+          "instance": "rm",
+          "knownRebec": "rm"
+        }
+      ],
+      "className": "AppMaster",
+      "line": 187,
+      "name": "am3",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}
