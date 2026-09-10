@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "general--yarn-deadline-fifo-2am-case-study--positive",
+  "description": "General-family benchmark for the normalized YARN deadline FIFO model with two application masters; translation and runtime behavior only.",
+  "expected_artifacts": [
+    {"path": "source/result.json", "required": true, "sha256": "2ec768227439863f144d2dfbc8f19f48e662769b4f76a1df85137fd7fad8f5b9"},
+    {"path": "rmc/verdict.json", "required": true, "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"},
+    {"path": "parser-json/model.json", "required": true, "sha256": "e7f42e785cc478812ae0ba9ef8dd50790a5abf71a4063e21f70e94abc4cb5ced"},
+    {"path": "decoded-dtr-ast/model.txt", "required": true, "sha256": "9686548d996d1ef100aa073d8ae1977c38fd7fd4f1a24aab0a9e1a4587eb7434"},
+    {"path": "translated-lf-ast/program.txt", "required": true, "sha256": "6332552059d470d7a1c313583fbdef02415836e1e6b3ae82b06d2ebf896eb4c5"},
+    {"path": "lf-source/TranslatedLFProgram.lf", "required": true, "sha256": "a903d62c6afa4e2381fa5a65126239e8b9cf696db78dcfa085330b1a81ba94f0"},
+    {"path": "lfc/result.json", "required": true, "sha256": "fb7581ee97c62580ef11bd0d765aed50c289ee1ca958df37ea6035aa72ef676d"},
+    {"path": "runtime/result.json", "required": true, "sha256": "98f94a1bb91705b98b1e45db395a59bc02ce8c115d7f2226c32fa551ed5e591a"}
+  ],
+  "expected_terminal_stage": "runtime",
+  "polarity": "positive",
+  "schema_version": 1,
+  "source_files": ["source/model.rebeca"],
+  "stages": [
+    {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "source", "--benchmark-id", "general--yarn-deadline-fifo-2am-case-study--positive", "--source", "{source}", "--output", "{actual}/source/result.json"], "name": "source"},
+    {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "rmc", "--source", "{source}", "--actual", "{actual}", "--rmc-jar", "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar", "--java", "/usr/bin/java", "--cxx", "/usr/bin/clang++", "--output", "{actual}/rmc/verdict.json"], "name": "rmc", "timeout_seconds": 600},
+    {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "parser-json", "--family", "general", "--repo", "{repo}", "--source", "{source}", "--actual", "{actual}", "--artifact-zip", "/Users/ali/Desktop/LFStructuringNonDeterminism/ReLico-fmcad-2026-artifact-v1.zip", "--maven", "/opt/homebrew/Cellar/maven/3.9.16/bin/mvn", "--output", "{actual}/parser-json/model.json"], "name": "parser-json", "timeout_seconds": 600},
+    {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "lean-export", "--family", "general", "--mode", "decoded-dtr-ast", "--repo", "{repo}", "--lake", "/Users/ali/.elan/bin/lake", "--input", "{actual}/parser-json/model.json", "--output", "{actual}/decoded-dtr-ast/model.txt"], "name": "decoded-dtr-ast", "timeout_seconds": 600},
+    {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "lean-export", "--family", "general", "--mode", "translated-lf-ast", "--repo", "{repo}", "--lake", "/Users/ali/.elan/bin/lake", "--input", "{actual}/parser-json/model.json", "--output", "{actual}/translated-lf-ast/program.txt"], "name": "translated-lf-ast", "timeout_seconds": 600},
+    {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "lean-export", "--family", "general", "--mode", "lf-source", "--repo", "{repo}", "--lake", "/Users/ali/.elan/bin/lake", "--input", "{actual}/parser-json/model.json", "--output", "{actual}/lf-source/TranslatedLFProgram.lf"], "name": "lf-source", "timeout_seconds": 600},
+    {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "lfc", "--lf-source", "{actual}/lf-source/TranslatedLFProgram.lf", "--work-directory", "{actual}/work/lfc", "--lfc", "/Users/ali/.local/share/lingua-franca/cli/bin/lfc", "--output", "{actual}/lfc/result.json"], "name": "lfc", "timeout_seconds": 1200},
+    {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "runtime", "--executable", "{actual}/work/lfc/bin/TranslatedLFProgram", "--output", "{actual}/runtime/result.json"], "name": "runtime", "timeout_seconds": 600}
+  ]
+}
