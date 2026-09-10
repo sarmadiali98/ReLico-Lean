@@ -1,0 +1,119 @@
+target Cpp
+
+reactor ResourceManager {
+  input updateToRm1FromAm1: bool
+  input updateToRm2FromAm1: bool
+  output runJobToAm1: int
+  state FREE: int = 0
+  state BUSY: int = 0
+  state appMaster1: int = 0
+  state m_queue_misses: int = 0
+  state m_update_miss: int = 0
+  state m_job_complete: int = 0
+  state fifo0: int = 0
+  state fifo1: int = 0
+  state DEFAULT_DEADLINE: int = 0
+  state QUEUE_SIZE: int = 0
+  logical action checkQueue_action1: void
+  logical action checkQueue_action2: void
+  logical action update_action: bool
+
+  reaction(startup) -> checkQueue_action1 {=
+    FREE = 1;
+    BUSY = 0;
+    appMaster1 = FREE;
+    m_queue_misses = 0;
+    m_update_miss = 0;
+    m_job_complete = 0;
+    DEFAULT_DEADLINE = 3;
+    fifo0 = DEFAULT_DEADLINE;
+    fifo1 = DEFAULT_DEADLINE;
+    QUEUE_SIZE = 2;
+    checkQueue_action1.schedule(0ms);
+  =}
+
+  reaction(checkQueue_action1) -> runJobToAm1, checkQueue_action2 {=
+    m_queue_misses = 0;
+    m_update_miss = 0;
+    m_job_complete = 0;
+    if ((appMaster1 == FREE)) { appMaster1 = BUSY; runJobToAm1.set(fifo0); fifo0 = fifo1; fifo1 = DEFAULT_DEADLINE; } else {}
+    fifo0 = (fifo0 - 1);
+    if ((fifo0 == 0)) { m_queue_misses = (m_queue_misses + 1); fifo0 = fifo1; fifo1 = DEFAULT_DEADLINE; } else {}
+    fifo1 = (fifo1 - 1);
+    if ((fifo1 == 0)) { m_queue_misses = (m_queue_misses + 1); fifo1 = DEFAULT_DEADLINE; } else {}
+    checkQueue_action2.schedule(1ms);
+  =}
+
+  reaction(checkQueue_action2) -> runJobToAm1, checkQueue_action2 {=
+    m_queue_misses = 0;
+    m_update_miss = 0;
+    m_job_complete = 0;
+    if ((appMaster1 == FREE)) { appMaster1 = BUSY; runJobToAm1.set(fifo0); fifo0 = fifo1; fifo1 = DEFAULT_DEADLINE; } else {}
+    fifo0 = (fifo0 - 1);
+    if ((fifo0 == 0)) { m_queue_misses = (m_queue_misses + 1); fifo0 = fifo1; fifo1 = DEFAULT_DEADLINE; } else {}
+    fifo1 = (fifo1 - 1);
+    if ((fifo1 == 0)) { m_queue_misses = (m_queue_misses + 1); fifo1 = DEFAULT_DEADLINE; } else {}
+    checkQueue_action2.schedule(1ms);
+  =}
+
+  reaction(update_action) {=
+    auto deadline_miss = *update_action.get();
+    m_queue_misses = 0;
+    m_update_miss = 0;
+    m_job_complete = 0;
+    if ((deadline_miss == true)) { m_update_miss = 1; } else { m_job_complete = 1; }
+    appMaster1 = FREE;
+  =}
+
+  reaction(updateToRm1FromAm1) {=
+    auto deadline_miss = *updateToRm1FromAm1.get();
+    m_queue_misses = 0;
+    m_update_miss = 0;
+    m_job_complete = 0;
+    if ((deadline_miss == true)) { m_update_miss = 1; } else { m_job_complete = 1; }
+    appMaster1 = FREE;
+  =}
+
+  reaction(updateToRm2FromAm1) {=
+    auto deadline_miss = *updateToRm2FromAm1.get();
+    m_queue_misses = 0;
+    m_update_miss = 0;
+    m_job_complete = 0;
+    if ((deadline_miss == true)) { m_update_miss = 1; } else { m_job_complete = 1; }
+    appMaster1 = FREE;
+  =}
+}
+
+reactor AppMaster {
+  input runJobToAm1FromRm: int
+  output updateToRm1: bool
+  output updateToRm2: bool
+  state doneJobs: int = 0
+  logical action runJob_action: int
+
+  reaction(startup) {=
+    doneJobs = 0;
+  =}
+
+  reaction(runJob_action) -> updateToRm1, updateToRm2 {=
+    auto dline = *runJob_action.get();
+    int completion = 2;
+    bool deadline_miss = false;
+    if ((completion > dline)) { deadline_miss = true; updateToRm1.set(deadline_miss); } else { deadline_miss = false; updateToRm2.set(deadline_miss); doneJobs = (doneJobs + 1); if ((doneJobs > 5)) { doneJobs = 1; } else {} }
+  =}
+
+  reaction(runJobToAm1FromRm) -> updateToRm1, updateToRm2 {=
+    auto dline = *runJobToAm1FromRm.get();
+    int completion = 2;
+    bool deadline_miss = false;
+    if ((completion > dline)) { deadline_miss = true; updateToRm1.set(deadline_miss); } else { deadline_miss = false; updateToRm2.set(deadline_miss); doneJobs = (doneJobs + 1); if ((doneJobs > 5)) { doneJobs = 1; } else {} }
+  =}
+}
+
+main reactor {
+  rm = new ResourceManager()
+  am1 = new AppMaster()
+  rm.runJobToAm1 -> am1.runJobToAm1FromRm after 0 msec
+  am1.updateToRm1 -> rm.updateToRm1FromAm1 after 1 msec
+  am1.updateToRm2 -> rm.updateToRm2FromAm1 after 2 msec
+}

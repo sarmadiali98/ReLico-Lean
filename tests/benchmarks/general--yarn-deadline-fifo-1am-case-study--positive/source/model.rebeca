@@ -1,0 +1,126 @@
+reactiveclass ResourceManager(5)
+{
+    knownrebecs
+    {
+        AppMaster am1;
+    }
+
+    statevars
+    {
+        int FREE;
+        int BUSY;
+        int appMaster1;
+        int m_queue_misses;
+        int m_update_miss;
+        int m_job_complete;
+        int fifo0;
+        int fifo1;
+        int DEFAULT_DEADLINE;
+        int QUEUE_SIZE;
+    }
+
+    ResourceManager()
+    {
+        FREE = 1;
+        BUSY = 0;
+        appMaster1 = FREE;
+        m_queue_misses = 0;
+        m_update_miss = 0;
+        m_job_complete = 0;
+        DEFAULT_DEADLINE = 3;
+        fifo0 = DEFAULT_DEADLINE;
+        fifo1 = DEFAULT_DEADLINE;
+        QUEUE_SIZE = 2;
+        self.checkQueue();
+    }
+
+    msgsrv checkQueue()
+    {
+        m_queue_misses = 0;
+        m_update_miss = 0;
+        m_job_complete = 0;
+        if(appMaster1 == FREE)
+        {
+            appMaster1 = BUSY;
+            am1.runJob(fifo0);
+            fifo0 = fifo1;
+            fifo1 = DEFAULT_DEADLINE;
+        }
+
+        fifo0 = fifo0 - 1;
+        if(fifo0 == 0)
+        {
+            m_queue_misses = m_queue_misses + 1;
+            fifo0 = fifo1;
+            fifo1 = DEFAULT_DEADLINE;
+        }
+
+        fifo1 = fifo1 - 1;
+        if(fifo1 == 0)
+        {
+            m_queue_misses = m_queue_misses + 1;
+            fifo1 = DEFAULT_DEADLINE;
+        }
+
+        self.checkQueue() after(1);
+    }
+
+    msgsrv update(boolean deadline_miss)
+    {
+        m_queue_misses = 0;
+        m_update_miss = 0;
+        m_job_complete = 0;
+        if(deadline_miss == true)
+        {
+            m_update_miss = 1;
+        }
+        else
+        {
+            m_job_complete = 1;
+        }
+        appMaster1 = FREE;
+    }
+}
+
+reactiveclass AppMaster(5)
+{
+    knownrebecs
+    {
+        ResourceManager rm;
+    }
+
+    statevars
+    {
+        int doneJobs;
+    }
+
+    AppMaster()
+    {
+        doneJobs = 0;
+    }
+
+    msgsrv runJob(int dline)
+    {
+        int completion = 2;
+        boolean deadline_miss = false;
+        if(completion > dline)
+        {
+            deadline_miss = true;
+            rm.update(deadline_miss) after(1);
+        }
+        else
+        {
+            deadline_miss = false;
+            rm.update(deadline_miss) after(2);
+            doneJobs = doneJobs + 1;
+            if(doneJobs > 5)
+                doneJobs = 1;
+        }
+    }
+}
+
+main
+{
+    ResourceManager rm(am1):();
+    AppMaster am1(rm):();
+}
