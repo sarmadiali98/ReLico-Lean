@@ -1,0 +1,213 @@
+reactiveclass ResourceManager(6)
+{
+    knownrebecs
+    {
+        AppMaster am1;
+        AppMaster am2;
+        AppMaster am3;
+        AppMaster am4;
+    }
+
+    statevars
+    {
+        int FREE;
+        int BUSY;
+        int appMaster1;
+        int appMaster2;
+        int appMaster3;
+        int appMaster4;
+        int m_queue_misses;
+        int m_update_miss;
+        int m_job_complete;
+        int fifo0;
+        int fifo1;
+        int fifo2;
+        int fifo3;
+        int fifo4;
+        int DEFAULT_DEADLINE;
+        int QUEUE_SIZE;
+    }
+
+    ResourceManager()
+    {
+        FREE = 1;
+        BUSY = 0;
+        appMaster1 = FREE;
+        appMaster2 = FREE;
+        appMaster3 = FREE;
+        appMaster4 = FREE;
+        m_queue_misses = 0;
+        m_update_miss = 0;
+        m_job_complete = 0;
+        DEFAULT_DEADLINE = 5;
+        fifo0 = DEFAULT_DEADLINE;
+        fifo1 = DEFAULT_DEADLINE;
+        fifo2 = DEFAULT_DEADLINE;
+        fifo3 = DEFAULT_DEADLINE;
+        fifo4 = DEFAULT_DEADLINE;
+        QUEUE_SIZE = 5;
+        self.checkQueue();
+    }
+
+    msgsrv checkQueue()
+    {
+        m_queue_misses = 0;
+        m_update_miss = 0;
+        m_job_complete = 0;
+        if(appMaster1 == FREE)
+        {
+            appMaster1 = BUSY;
+            am1.runJob(fifo0, 1);
+            fifo0 = fifo1;
+            fifo1 = fifo2;
+            fifo2 = fifo3;
+            fifo3 = fifo4;
+            fifo4 = DEFAULT_DEADLINE;
+        }
+        if(appMaster2 == FREE)
+        {
+            appMaster2 = BUSY;
+            am2.runJob(fifo0, 2);
+            fifo0 = fifo1;
+            fifo1 = fifo2;
+            fifo2 = fifo3;
+            fifo3 = fifo4;
+            fifo4 = DEFAULT_DEADLINE;
+        }
+        if(appMaster3 == FREE)
+        {
+            appMaster3 = BUSY;
+            am3.runJob(fifo0, 3);
+            fifo0 = fifo1;
+            fifo1 = fifo2;
+            fifo2 = fifo3;
+            fifo3 = fifo4;
+            fifo4 = DEFAULT_DEADLINE;
+        }
+        if(appMaster4 == FREE)
+        {
+            appMaster4 = BUSY;
+            am4.runJob(fifo0, 4);
+            fifo0 = fifo1;
+            fifo1 = fifo2;
+            fifo2 = fifo3;
+            fifo3 = fifo4;
+            fifo4 = DEFAULT_DEADLINE;
+        }
+
+        fifo0 = fifo0 - 1;
+        if(fifo0 == 0)
+        {
+            m_queue_misses = m_queue_misses + 1;
+            fifo0 = fifo1;
+            fifo1 = fifo2;
+            fifo2 = fifo3;
+            fifo3 = fifo4;
+            fifo4 = DEFAULT_DEADLINE;
+        }
+
+        fifo1 = fifo1 - 1;
+        if(fifo1 == 0)
+        {
+            m_queue_misses = m_queue_misses + 1;
+            fifo1 = fifo2;
+            fifo2 = fifo3;
+            fifo3 = fifo4;
+            fifo4 = DEFAULT_DEADLINE;
+        }
+
+        fifo2 = fifo2 - 1;
+        if(fifo2 == 0)
+        {
+            m_queue_misses = m_queue_misses + 1;
+            fifo2 = fifo3;
+            fifo3 = fifo4;
+            fifo4 = DEFAULT_DEADLINE;
+        }
+
+        fifo3 = fifo3 - 1;
+        if(fifo3 == 0)
+        {
+            m_queue_misses = m_queue_misses + 1;
+            fifo3 = fifo4;
+            fifo4 = DEFAULT_DEADLINE;
+        }
+
+        fifo4 = fifo4 - 1;
+        if(fifo4 == 0)
+        {
+            m_queue_misses = m_queue_misses + 1;
+            fifo4 = DEFAULT_DEADLINE;
+        }
+
+        self.checkQueue() after(1);
+    }
+
+    msgsrv update(boolean deadline_miss, int masterId)
+    {
+        m_queue_misses = 0;
+        m_update_miss = 0;
+        m_job_complete = 0;
+        if(deadline_miss == true)
+        {
+            m_update_miss = 1;
+        }
+        else
+        {
+            m_job_complete = 1;
+        }
+        if(masterId == 1)
+        {
+            appMaster1 = FREE;
+        }
+        else if(masterId == 2)
+        {
+            appMaster2 = FREE;
+        }
+        else if(masterId == 3)
+        {
+            appMaster3 = FREE;
+        }
+        else
+        {
+            appMaster4 = FREE;
+        }
+    }
+}
+
+reactiveclass AppMaster(5)
+{
+    knownrebecs
+    {
+        ResourceManager rm;
+    }
+
+    AppMaster()
+    {
+    }
+
+    msgsrv runJob(int dline, int masterId)
+    {
+        int completion = 2;
+        boolean deadline_miss = false;
+        if(completion > dline)
+        {
+            deadline_miss = true;
+            rm.update(deadline_miss, masterId) after(1);
+        }
+        else
+        {
+            deadline_miss = false;
+            rm.update(deadline_miss, masterId) after(2);
+        }
+    }
+}
+
+main
+{
+    ResourceManager rm(am1, am2, am3, am4):();
+    AppMaster am1(rm):();
+    AppMaster am2(rm):();
+    AppMaster am3(rm):();
+    AppMaster am4(rm):();
+}

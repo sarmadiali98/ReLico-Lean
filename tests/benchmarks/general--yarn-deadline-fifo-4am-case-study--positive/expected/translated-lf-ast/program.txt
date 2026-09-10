@@ -1,0 +1,1450 @@
+{ reactors := [{ name := { value := "ResourceManager" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "updateToRm1FromAm1" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "ResourceManager" }
+                                               { value := "update_action" }
+                                               [{ name := { value := "deadline_miss" },
+                                                  declaredType := Relico.LF.GeneralType.boolean },
+                                                { name := { value := "masterId" },
+                                                  declaredType := Relico.LF.GeneralType.int }] },
+                                { name := { value := "updateToRm2FromAm1" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "ResourceManager" }
+                                               { value := "update_action" }
+                                               [{ name := { value := "deadline_miss" },
+                                                  declaredType := Relico.LF.GeneralType.boolean },
+                                                { name := { value := "masterId" },
+                                                  declaredType := Relico.LF.GeneralType.int }] },
+                                { name := { value := "updateToRm1FromAm2" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "ResourceManager" }
+                                               { value := "update_action" }
+                                               [{ name := { value := "deadline_miss" },
+                                                  declaredType := Relico.LF.GeneralType.boolean },
+                                                { name := { value := "masterId" },
+                                                  declaredType := Relico.LF.GeneralType.int }] },
+                                { name := { value := "updateToRm2FromAm2" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "ResourceManager" }
+                                               { value := "update_action" }
+                                               [{ name := { value := "deadline_miss" },
+                                                  declaredType := Relico.LF.GeneralType.boolean },
+                                                { name := { value := "masterId" },
+                                                  declaredType := Relico.LF.GeneralType.int }] },
+                                { name := { value := "updateToRm1FromAm3" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "ResourceManager" }
+                                               { value := "update_action" }
+                                               [{ name := { value := "deadline_miss" },
+                                                  declaredType := Relico.LF.GeneralType.boolean },
+                                                { name := { value := "masterId" },
+                                                  declaredType := Relico.LF.GeneralType.int }] },
+                                { name := { value := "updateToRm2FromAm3" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "ResourceManager" }
+                                               { value := "update_action" }
+                                               [{ name := { value := "deadline_miss" },
+                                                  declaredType := Relico.LF.GeneralType.boolean },
+                                                { name := { value := "masterId" },
+                                                  declaredType := Relico.LF.GeneralType.int }] },
+                                { name := { value := "updateToRm1FromAm4" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "ResourceManager" }
+                                               { value := "update_action" }
+                                               [{ name := { value := "deadline_miss" },
+                                                  declaredType := Relico.LF.GeneralType.boolean },
+                                                { name := { value := "masterId" },
+                                                  declaredType := Relico.LF.GeneralType.int }] },
+                                { name := { value := "updateToRm2FromAm4" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "ResourceManager" }
+                                               { value := "update_action" }
+                                               [{ name := { value := "deadline_miss" },
+                                                  declaredType := Relico.LF.GeneralType.boolean },
+                                                { name := { value := "masterId" },
+                                                  declaredType := Relico.LF.GeneralType.int }] }],
+                 outputPorts := [{ name := { value := "runJobToAm1" },
+                                   payload := Relico.LF.GeneralPortPayload.struct
+                                                { value := "AppMaster" }
+                                                { value := "runJob_action" }
+                                                [{ name := { value := "dline" },
+                                                   declaredType := Relico.LF.GeneralType.int },
+                                                 { name := { value := "masterId" },
+                                                   declaredType := Relico.LF.GeneralType.int }] },
+                                 { name := { value := "runJobToAm2" },
+                                   payload := Relico.LF.GeneralPortPayload.struct
+                                                { value := "AppMaster" }
+                                                { value := "runJob_action" }
+                                                [{ name := { value := "dline" },
+                                                   declaredType := Relico.LF.GeneralType.int },
+                                                 { name := { value := "masterId" },
+                                                   declaredType := Relico.LF.GeneralType.int }] },
+                                 { name := { value := "runJobToAm3" },
+                                   payload := Relico.LF.GeneralPortPayload.struct
+                                                { value := "AppMaster" }
+                                                { value := "runJob_action" }
+                                                [{ name := { value := "dline" },
+                                                   declaredType := Relico.LF.GeneralType.int },
+                                                 { name := { value := "masterId" },
+                                                   declaredType := Relico.LF.GeneralType.int }] },
+                                 { name := { value := "runJobToAm4" },
+                                   payload := Relico.LF.GeneralPortPayload.struct
+                                                { value := "AppMaster" }
+                                                { value := "runJob_action" }
+                                                [{ name := { value := "dline" },
+                                                   declaredType := Relico.LF.GeneralType.int },
+                                                 { name := { value := "masterId" },
+                                                   declaredType := Relico.LF.GeneralType.int }] }],
+                 stateVariables := [{ name := { value := "FREE" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "BUSY" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "appMaster1" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "appMaster2" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "appMaster3" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "appMaster4" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "m_queue_misses" },
+                                      declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "m_update_miss" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "m_job_complete" },
+                                      declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "fifo0" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "fifo1" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "fifo2" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "fifo3" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "fifo4" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "DEFAULT_DEADLINE" },
+                                      declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "QUEUE_SIZE" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "checkQueue_action1" }, parameters := [] },
+                                    { name := { value := "checkQueue_action2" }, parameters := [] },
+                                    { name := { value := "update_action" },
+                                      parameters := [{ name := { value := "deadline_miss" },
+                                                       declaredType := Relico.LF.GeneralType.boolean },
+                                                     { name := { value := "masterId" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "FREE" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 1),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "BUSY" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "appMaster1" }
+                                                 (Relico.LF.GeneralExpr.stateVar { value := "FREE" }),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "appMaster2" }
+                                                 (Relico.LF.GeneralExpr.stateVar { value := "FREE" }),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "appMaster3" }
+                                                 (Relico.LF.GeneralExpr.stateVar { value := "FREE" }),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "appMaster4" }
+                                                 (Relico.LF.GeneralExpr.stateVar { value := "FREE" }),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "m_queue_misses" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "m_update_miss" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "m_job_complete" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "DEFAULT_DEADLINE" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 5),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "fifo0" }
+                                                 (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" }),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "fifo1" }
+                                                 (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" }),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "fifo2" }
+                                                 (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" }),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "fifo3" }
+                                                 (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" }),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "fifo4" }
+                                                 (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" }),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "QUEUE_SIZE" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 5),
+                                               Relico.LF.GeneralStmt.schedule
+                                                 { value := "checkQueue_action1" }
+                                                 []
+                                                 { value := 0 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "checkQueue_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "checkQueue_action1" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "m_queue_misses" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_update_miss" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_job_complete" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "appMaster1" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "FREE" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "appMaster1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "BUSY" }),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "runJobToAm1" }
+                                                      [Relico.LF.GeneralExpr.stateVar { value := "fifo0" },
+                                                       Relico.LF.GeneralExpr.intLiteral 1],
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo0" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo1" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo2" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo2" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo3" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo3" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo4" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" })]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "appMaster2" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "FREE" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "appMaster2" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "BUSY" }),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "runJobToAm2" }
+                                                      [Relico.LF.GeneralExpr.stateVar { value := "fifo0" },
+                                                       Relico.LF.GeneralExpr.intLiteral 2],
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo0" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo1" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo2" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo2" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo3" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo3" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo4" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" })]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "appMaster3" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "FREE" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "appMaster3" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "BUSY" }),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "runJobToAm3" }
+                                                      [Relico.LF.GeneralExpr.stateVar { value := "fifo0" },
+                                                       Relico.LF.GeneralExpr.intLiteral 3],
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo0" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo1" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo2" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo2" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo3" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo3" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo4" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" })]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "appMaster4" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "FREE" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "appMaster4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "BUSY" }),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "runJobToAm4" }
+                                                      [Relico.LF.GeneralExpr.stateVar { value := "fifo0" },
+                                                       Relico.LF.GeneralExpr.intLiteral 4],
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo0" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo1" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo2" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo2" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo3" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo3" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo4" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" })]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "fifo0" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.sub)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo0" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo0" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_queue_misses" }
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.add)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "m_queue_misses" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo0" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo1" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo2" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo2" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo3" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo3" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo4" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" })]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "fifo1" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.sub)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo1" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo1" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_queue_misses" }
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.add)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "m_queue_misses" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo2" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo2" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo3" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo3" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo4" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" })]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "fifo2" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.sub)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo2" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo2" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_queue_misses" }
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.add)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "m_queue_misses" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo2" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo3" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo3" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo4" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" })]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "fifo3" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.sub)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo3" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo3" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_queue_misses" }
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.add)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "m_queue_misses" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo3" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo4" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" })]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "fifo4" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.sub)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo4" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo4" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_queue_misses" }
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.add)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "m_queue_misses" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" })]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "checkQueue_action2" }
+                                                   []
+                                                   { value := 1 }],
+                                        priority := none },
+                                      { name := { value := "checkQueue_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "checkQueue_action2" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "m_queue_misses" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_update_miss" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_job_complete" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "appMaster1" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "FREE" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "appMaster1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "BUSY" }),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "runJobToAm1" }
+                                                      [Relico.LF.GeneralExpr.stateVar { value := "fifo0" },
+                                                       Relico.LF.GeneralExpr.intLiteral 1],
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo0" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo1" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo2" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo2" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo3" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo3" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo4" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" })]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "appMaster2" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "FREE" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "appMaster2" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "BUSY" }),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "runJobToAm2" }
+                                                      [Relico.LF.GeneralExpr.stateVar { value := "fifo0" },
+                                                       Relico.LF.GeneralExpr.intLiteral 2],
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo0" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo1" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo2" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo2" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo3" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo3" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo4" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" })]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "appMaster3" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "FREE" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "appMaster3" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "BUSY" }),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "runJobToAm3" }
+                                                      [Relico.LF.GeneralExpr.stateVar { value := "fifo0" },
+                                                       Relico.LF.GeneralExpr.intLiteral 3],
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo0" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo1" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo2" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo2" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo3" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo3" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo4" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" })]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "appMaster4" })
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "FREE" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "appMaster4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "BUSY" }),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "runJobToAm4" }
+                                                      [Relico.LF.GeneralExpr.stateVar { value := "fifo0" },
+                                                       Relico.LF.GeneralExpr.intLiteral 4],
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo0" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo1" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo2" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo2" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo3" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo3" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo4" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" })]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "fifo0" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.sub)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo0" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo0" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_queue_misses" }
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.add)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "m_queue_misses" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo0" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo1" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo2" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo2" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo3" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo3" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo4" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" })]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "fifo1" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.sub)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo1" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo1" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_queue_misses" }
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.add)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "m_queue_misses" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo2" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo2" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo3" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo3" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo4" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" })]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "fifo2" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.sub)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo2" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo2" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_queue_misses" }
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.add)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "m_queue_misses" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo2" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo3" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo3" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo4" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" })]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "fifo3" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.sub)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo3" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo3" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_queue_misses" }
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.add)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "m_queue_misses" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo3" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "fifo4" }),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" })]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "fifo4" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.sub)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo4" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "fifo4" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_queue_misses" }
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.add)
+                                                        (Relico.LF.GeneralExpr.stateVar { value := "m_queue_misses" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "fifo4" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "DEFAULT_DEADLINE" })]
+                                                   [],
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "checkQueue_action2" }
+                                                   []
+                                                   { value := 1 }],
+                                        priority := none },
+                                      { name := { value := "update_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "update_action" },
+                                        parameters := [{ value := "deadline_miss" }, { value := "masterId" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "m_queue_misses" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_update_miss" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_job_complete" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "deadline_miss" })
+                                                     (Relico.LF.GeneralExpr.boolLiteral true))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_update_miss" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_job_complete" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "appMaster1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 2))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "appMaster2" }
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                      [Relico.LF.GeneralStmt.ifThenElse
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.eq)
+                                                           (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 3))
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "appMaster3" }
+                                                            (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "appMaster4" }
+                                                            (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]]]],
+                                        priority := none },
+                                      { name := { value := "updateToRm1FromAm1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "updateToRm1FromAm1" },
+                                        parameters := [{ value := "deadline_miss" }, { value := "masterId" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "m_queue_misses" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_update_miss" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_job_complete" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "deadline_miss" })
+                                                     (Relico.LF.GeneralExpr.boolLiteral true))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_update_miss" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_job_complete" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "appMaster1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 2))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "appMaster2" }
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                      [Relico.LF.GeneralStmt.ifThenElse
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.eq)
+                                                           (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 3))
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "appMaster3" }
+                                                            (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "appMaster4" }
+                                                            (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]]]],
+                                        priority := none },
+                                      { name := { value := "updateToRm2FromAm1_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "updateToRm2FromAm1" },
+                                        parameters := [{ value := "deadline_miss" }, { value := "masterId" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "m_queue_misses" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_update_miss" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_job_complete" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "deadline_miss" })
+                                                     (Relico.LF.GeneralExpr.boolLiteral true))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_update_miss" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_job_complete" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "appMaster1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 2))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "appMaster2" }
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                      [Relico.LF.GeneralStmt.ifThenElse
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.eq)
+                                                           (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 3))
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "appMaster3" }
+                                                            (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "appMaster4" }
+                                                            (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]]]],
+                                        priority := none },
+                                      { name := { value := "updateToRm1FromAm2_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "updateToRm1FromAm2" },
+                                        parameters := [{ value := "deadline_miss" }, { value := "masterId" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "m_queue_misses" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_update_miss" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_job_complete" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "deadline_miss" })
+                                                     (Relico.LF.GeneralExpr.boolLiteral true))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_update_miss" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_job_complete" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "appMaster1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 2))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "appMaster2" }
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                      [Relico.LF.GeneralStmt.ifThenElse
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.eq)
+                                                           (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 3))
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "appMaster3" }
+                                                            (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "appMaster4" }
+                                                            (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]]]],
+                                        priority := none },
+                                      { name := { value := "updateToRm2FromAm2_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "updateToRm2FromAm2" },
+                                        parameters := [{ value := "deadline_miss" }, { value := "masterId" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "m_queue_misses" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_update_miss" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_job_complete" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "deadline_miss" })
+                                                     (Relico.LF.GeneralExpr.boolLiteral true))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_update_miss" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_job_complete" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "appMaster1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 2))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "appMaster2" }
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                      [Relico.LF.GeneralStmt.ifThenElse
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.eq)
+                                                           (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 3))
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "appMaster3" }
+                                                            (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "appMaster4" }
+                                                            (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]]]],
+                                        priority := none },
+                                      { name := { value := "updateToRm1FromAm3_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "updateToRm1FromAm3" },
+                                        parameters := [{ value := "deadline_miss" }, { value := "masterId" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "m_queue_misses" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_update_miss" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_job_complete" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "deadline_miss" })
+                                                     (Relico.LF.GeneralExpr.boolLiteral true))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_update_miss" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_job_complete" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "appMaster1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 2))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "appMaster2" }
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                      [Relico.LF.GeneralStmt.ifThenElse
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.eq)
+                                                           (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 3))
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "appMaster3" }
+                                                            (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "appMaster4" }
+                                                            (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]]]],
+                                        priority := none },
+                                      { name := { value := "updateToRm2FromAm3_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "updateToRm2FromAm3" },
+                                        parameters := [{ value := "deadline_miss" }, { value := "masterId" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "m_queue_misses" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_update_miss" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_job_complete" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "deadline_miss" })
+                                                     (Relico.LF.GeneralExpr.boolLiteral true))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_update_miss" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_job_complete" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "appMaster1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 2))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "appMaster2" }
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                      [Relico.LF.GeneralStmt.ifThenElse
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.eq)
+                                                           (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 3))
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "appMaster3" }
+                                                            (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "appMaster4" }
+                                                            (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]]]],
+                                        priority := none },
+                                      { name := { value := "updateToRm1FromAm4_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "updateToRm1FromAm4" },
+                                        parameters := [{ value := "deadline_miss" }, { value := "masterId" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "m_queue_misses" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_update_miss" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_job_complete" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "deadline_miss" })
+                                                     (Relico.LF.GeneralExpr.boolLiteral true))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_update_miss" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_job_complete" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "appMaster1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 2))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "appMaster2" }
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                      [Relico.LF.GeneralStmt.ifThenElse
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.eq)
+                                                           (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 3))
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "appMaster3" }
+                                                            (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "appMaster4" }
+                                                            (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]]]],
+                                        priority := none },
+                                      { name := { value := "updateToRm2FromAm4_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "updateToRm2FromAm4" },
+                                        parameters := [{ value := "deadline_miss" }, { value := "masterId" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "m_queue_misses" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_update_miss" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "m_job_complete" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "deadline_miss" })
+                                                     (Relico.LF.GeneralExpr.boolLiteral true))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_update_miss" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "m_job_complete" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)],
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "appMaster1" }
+                                                      (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                   [Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.eq)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 2))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "appMaster2" }
+                                                         (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                      [Relico.LF.GeneralStmt.ifThenElse
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.eq)
+                                                           (Relico.LF.GeneralExpr.parameterVar { value := "masterId" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 3))
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "appMaster3" }
+                                                            (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]
+                                                         [Relico.LF.GeneralStmt.assign
+                                                            { value := "appMaster4" }
+                                                            (Relico.LF.GeneralExpr.stateVar { value := "FREE" })]]]],
+                                        priority := none }] },
+               { name := { value := "AppMaster" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "runJobToAm1FromRm" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "AppMaster" }
+                                               { value := "runJob_action" }
+                                               [{ name := { value := "dline" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "masterId" },
+                                                  declaredType := Relico.LF.GeneralType.int }] },
+                                { name := { value := "runJobToAm2FromRm" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "AppMaster" }
+                                               { value := "runJob_action" }
+                                               [{ name := { value := "dline" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "masterId" },
+                                                  declaredType := Relico.LF.GeneralType.int }] },
+                                { name := { value := "runJobToAm3FromRm" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "AppMaster" }
+                                               { value := "runJob_action" }
+                                               [{ name := { value := "dline" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "masterId" },
+                                                  declaredType := Relico.LF.GeneralType.int }] },
+                                { name := { value := "runJobToAm4FromRm" },
+                                  payload := Relico.LF.GeneralPortPayload.struct
+                                               { value := "AppMaster" }
+                                               { value := "runJob_action" }
+                                               [{ name := { value := "dline" },
+                                                  declaredType := Relico.LF.GeneralType.int },
+                                                { name := { value := "masterId" },
+                                                  declaredType := Relico.LF.GeneralType.int }] }],
+                 outputPorts := [{ name := { value := "updateToRm1" },
+                                   payload := Relico.LF.GeneralPortPayload.struct
+                                                { value := "ResourceManager" }
+                                                { value := "update_action" }
+                                                [{ name := { value := "deadline_miss" },
+                                                   declaredType := Relico.LF.GeneralType.boolean },
+                                                 { name := { value := "masterId" },
+                                                   declaredType := Relico.LF.GeneralType.int }] },
+                                 { name := { value := "updateToRm2" },
+                                   payload := Relico.LF.GeneralPortPayload.struct
+                                                { value := "ResourceManager" }
+                                                { value := "update_action" }
+                                                [{ name := { value := "deadline_miss" },
+                                                   declaredType := Relico.LF.GeneralType.boolean },
+                                                 { name := { value := "masterId" },
+                                                   declaredType := Relico.LF.GeneralType.int }] }],
+                 stateVariables := [],
+                 logicalActions := [{ name := { value := "runJob_action" },
+                                      parameters := [{ name := { value := "dline" },
+                                                       declaredType := Relico.LF.GeneralType.int },
+                                                     { name := { value := "masterId" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "runJob_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "runJob_action" },
+                                        parameters := [{ value := "dline" }, { value := "masterId" }],
+                                        body := [Relico.LF.GeneralStmt.localDecl
+                                                   { value := "completion" }
+                                                   (Relico.LF.GeneralType.int)
+                                                   (Relico.LF.GeneralExpr.intLiteral 2),
+                                                 Relico.LF.GeneralStmt.localDecl
+                                                   { value := "deadline_miss" }
+                                                   (Relico.LF.GeneralType.boolean)
+                                                   (Relico.LF.GeneralExpr.boolLiteral false),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "completion" })
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "dline" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "deadline_miss" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "updateToRm1" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "deadline_miss" },
+                                                       Relico.LF.GeneralExpr.parameterVar { value := "masterId" }]]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "deadline_miss" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "updateToRm2" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "deadline_miss" },
+                                                       Relico.LF.GeneralExpr.parameterVar { value := "masterId" }]]],
+                                        priority := none },
+                                      { name := { value := "runJobToAm1FromRm_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "runJobToAm1FromRm" },
+                                        parameters := [{ value := "dline" }, { value := "masterId" }],
+                                        body := [Relico.LF.GeneralStmt.localDecl
+                                                   { value := "completion" }
+                                                   (Relico.LF.GeneralType.int)
+                                                   (Relico.LF.GeneralExpr.intLiteral 2),
+                                                 Relico.LF.GeneralStmt.localDecl
+                                                   { value := "deadline_miss" }
+                                                   (Relico.LF.GeneralType.boolean)
+                                                   (Relico.LF.GeneralExpr.boolLiteral false),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "completion" })
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "dline" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "deadline_miss" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "updateToRm1" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "deadline_miss" },
+                                                       Relico.LF.GeneralExpr.parameterVar { value := "masterId" }]]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "deadline_miss" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "updateToRm2" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "deadline_miss" },
+                                                       Relico.LF.GeneralExpr.parameterVar { value := "masterId" }]]],
+                                        priority := none },
+                                      { name := { value := "runJobToAm2FromRm_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "runJobToAm2FromRm" },
+                                        parameters := [{ value := "dline" }, { value := "masterId" }],
+                                        body := [Relico.LF.GeneralStmt.localDecl
+                                                   { value := "completion" }
+                                                   (Relico.LF.GeneralType.int)
+                                                   (Relico.LF.GeneralExpr.intLiteral 2),
+                                                 Relico.LF.GeneralStmt.localDecl
+                                                   { value := "deadline_miss" }
+                                                   (Relico.LF.GeneralType.boolean)
+                                                   (Relico.LF.GeneralExpr.boolLiteral false),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "completion" })
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "dline" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "deadline_miss" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "updateToRm1" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "deadline_miss" },
+                                                       Relico.LF.GeneralExpr.parameterVar { value := "masterId" }]]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "deadline_miss" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "updateToRm2" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "deadline_miss" },
+                                                       Relico.LF.GeneralExpr.parameterVar { value := "masterId" }]]],
+                                        priority := none },
+                                      { name := { value := "runJobToAm3FromRm_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "runJobToAm3FromRm" },
+                                        parameters := [{ value := "dline" }, { value := "masterId" }],
+                                        body := [Relico.LF.GeneralStmt.localDecl
+                                                   { value := "completion" }
+                                                   (Relico.LF.GeneralType.int)
+                                                   (Relico.LF.GeneralExpr.intLiteral 2),
+                                                 Relico.LF.GeneralStmt.localDecl
+                                                   { value := "deadline_miss" }
+                                                   (Relico.LF.GeneralType.boolean)
+                                                   (Relico.LF.GeneralExpr.boolLiteral false),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "completion" })
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "dline" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "deadline_miss" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "updateToRm1" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "deadline_miss" },
+                                                       Relico.LF.GeneralExpr.parameterVar { value := "masterId" }]]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "deadline_miss" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "updateToRm2" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "deadline_miss" },
+                                                       Relico.LF.GeneralExpr.parameterVar { value := "masterId" }]]],
+                                        priority := none },
+                                      { name := { value := "runJobToAm4FromRm_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort { value := "runJobToAm4FromRm" },
+                                        parameters := [{ value := "dline" }, { value := "masterId" }],
+                                        body := [Relico.LF.GeneralStmt.localDecl
+                                                   { value := "completion" }
+                                                   (Relico.LF.GeneralType.int)
+                                                   (Relico.LF.GeneralExpr.intLiteral 2),
+                                                 Relico.LF.GeneralStmt.localDecl
+                                                   { value := "deadline_miss" }
+                                                   (Relico.LF.GeneralType.boolean)
+                                                   (Relico.LF.GeneralExpr.boolLiteral false),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "completion" })
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "dline" }))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "deadline_miss" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral true),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "updateToRm1" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "deadline_miss" },
+                                                       Relico.LF.GeneralExpr.parameterVar { value := "masterId" }]]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "deadline_miss" }
+                                                      (Relico.LF.GeneralExpr.boolLiteral false),
+                                                    Relico.LF.GeneralStmt.setPort
+                                                      { value := "updateToRm2" }
+                                                      [Relico.LF.GeneralExpr.parameterVar { value := "deadline_miss" },
+                                                       Relico.LF.GeneralExpr.parameterVar { value := "masterId" }]]],
+                                        priority := none }] }],
+  instances := [{ name := { value := "rm" }, reactorName := { value := "ResourceManager" }, arguments := [] },
+                { name := { value := "am1" }, reactorName := { value := "AppMaster" }, arguments := [] },
+                { name := { value := "am2" }, reactorName := { value := "AppMaster" }, arguments := [] },
+                { name := { value := "am3" }, reactorName := { value := "AppMaster" }, arguments := [] },
+                { name := { value := "am4" }, reactorName := { value := "AppMaster" }, arguments := [] }],
+  connections := [{ sourceInstance := { value := "rm" },
+                    sourcePort := { value := "runJobToAm1" },
+                    targetInstance := { value := "am1" },
+                    targetPort := { value := "runJobToAm1FromRm" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "rm" },
+                    sourcePort := { value := "runJobToAm2" },
+                    targetInstance := { value := "am2" },
+                    targetPort := { value := "runJobToAm2FromRm" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "rm" },
+                    sourcePort := { value := "runJobToAm3" },
+                    targetInstance := { value := "am3" },
+                    targetPort := { value := "runJobToAm3FromRm" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "rm" },
+                    sourcePort := { value := "runJobToAm4" },
+                    targetInstance := { value := "am4" },
+                    targetPort := { value := "runJobToAm4FromRm" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "am1" },
+                    sourcePort := { value := "updateToRm1" },
+                    targetInstance := { value := "rm" },
+                    targetPort := { value := "updateToRm1FromAm1" },
+                    delay := { value := 1 } },
+                  { sourceInstance := { value := "am1" },
+                    sourcePort := { value := "updateToRm2" },
+                    targetInstance := { value := "rm" },
+                    targetPort := { value := "updateToRm2FromAm1" },
+                    delay := { value := 2 } },
+                  { sourceInstance := { value := "am2" },
+                    sourcePort := { value := "updateToRm1" },
+                    targetInstance := { value := "rm" },
+                    targetPort := { value := "updateToRm1FromAm2" },
+                    delay := { value := 1 } },
+                  { sourceInstance := { value := "am2" },
+                    sourcePort := { value := "updateToRm2" },
+                    targetInstance := { value := "rm" },
+                    targetPort := { value := "updateToRm2FromAm2" },
+                    delay := { value := 2 } },
+                  { sourceInstance := { value := "am3" },
+                    sourcePort := { value := "updateToRm1" },
+                    targetInstance := { value := "rm" },
+                    targetPort := { value := "updateToRm1FromAm3" },
+                    delay := { value := 1 } },
+                  { sourceInstance := { value := "am3" },
+                    sourcePort := { value := "updateToRm2" },
+                    targetInstance := { value := "rm" },
+                    targetPort := { value := "updateToRm2FromAm3" },
+                    delay := { value := 2 } },
+                  { sourceInstance := { value := "am4" },
+                    sourcePort := { value := "updateToRm1" },
+                    targetInstance := { value := "rm" },
+                    targetPort := { value := "updateToRm1FromAm4" },
+                    delay := { value := 1 } },
+                  { sourceInstance := { value := "am4" },
+                    sourcePort := { value := "updateToRm2" },
+                    targetInstance := { value := "rm" },
+                    targetPort := { value := "updateToRm2FromAm4" },
+                    delay := { value := 2 } }] }

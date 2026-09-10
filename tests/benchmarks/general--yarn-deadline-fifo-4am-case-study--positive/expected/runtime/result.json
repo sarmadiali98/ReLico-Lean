@@ -1,0 +1,11 @@
+{
+  "arguments": [
+    "--timeout",
+    "5 msec",
+    "--fast"
+  ],
+  "exit_code": 0,
+  "external_timeout": false,
+  "schema_version": 1,
+  "status": "pass"
+}
