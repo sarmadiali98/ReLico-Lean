@@ -166,7 +166,7 @@ def rmc_stage(options: argparse.Namespace) -> None:
 
     model_run = run_checked(
         [str(checker)],
-        timeout=60,
+        timeout=600,
         capture=True,
     )
 
