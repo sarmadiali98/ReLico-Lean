@@ -178,10 +178,27 @@ The integration tests exercise these components but do not formally verify them.
 - `Relico/Correctness`: structural and semantic proofs
 - `Relico/Frontend`: bridge schemas, decoders, and executable bridge checks
 - `Relico/Tests`: Lean regression tests
+- `tests/translator`: executable translator conformance and rejection fixtures
+- `benchmarks`: externally sourced application and source-evidence benchmarks
+- `evaluation`: shared registries and artifact schemas for both suites
 - `frontend/fixtures`: checked Timed Rebeca and JSON fixtures
 - `frontend/java-bridge`: trusted adapters around the existing Java parser
 - `frontend/lean-bridge`: Lean entry points the integration checks run
 - `docs`: decisions, scope, claims, proof boundaries, the paper-corrections ledger, and per-stage design and findings records
+
+## Tests
+
+Run the portable software-test suites with:
+
+```text
+tools/relico_test.sh --junit
+```
+
+The runner discovers named Python tests, the separate `RelicoTests` Lean target, and translator
+integration fixtures. Use `--list` to inspect test IDs and `--suite`, `--family`, `--layer`,
+`--polarity`, `--tag`, or `--case` to select cases. External-toolchain fixtures are excluded from the
+default run and can be selected with `--suite integration`. Results are isolated under
+`.test-results/`.
 
 ## Reproducible fixtures
 

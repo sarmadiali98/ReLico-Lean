@@ -1,4 +1,4 @@
-# Benchmark registry provenance
+# Evaluation registry provenance
 
 This registry was frozen from the reviewed benchmark plan at repository
 checkpoint a4201d942d7d30c00f34f135dfe024d9ae30c82c, and has been amended
@@ -6,7 +6,7 @@ since. The counts below are the CURRENT registry contents, not the
 checkpoint's; `tools/relico_bench_registry.py --validate` enforces them
 against benchmarks.tsv and obligations.tsv on every run.
 
-The registry currently contains:
+The registry currently contains 61 translator tests and 41 application benchmarks:
 
 - 183 accepted Lean test modules
 - 2,468 mapped test obligations

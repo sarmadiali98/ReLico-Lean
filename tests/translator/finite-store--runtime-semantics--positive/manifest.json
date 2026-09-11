@@ -243,7 +243,7 @@
         "--coverage",
         "{benchmark}/coverage.json",
         "--shared-formal-registry",
-        "{repo}/tests/benchmarks/registry/shared-formal-evidence.tsv",
+        "{repo}/evaluation/registry/shared-formal-evidence.tsv",
         "--output",
         "{actual}/coverage-manifest/result.json"
       ],
@@ -260,7 +260,7 @@
         "--coverage",
         "{benchmark}/coverage.json",
         "--shared-formal-registry",
-        "{repo}/tests/benchmarks/registry/shared-formal-evidence.tsv",
+        "{repo}/evaluation/registry/shared-formal-evidence.tsv",
         "--lake",
         "/Users/ali/.elan/bin/lake",
         "--output",

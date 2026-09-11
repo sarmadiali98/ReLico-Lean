@@ -144,6 +144,9 @@ class FamilySelectorTests(unittest.TestCase):
             [
                 "v0",
                 "multi-store-payload",
+                "multi-store",
+                "payload",
+                "general",
             ],
         )
 
@@ -167,6 +170,9 @@ class FamilySelectorTests(unittest.TestCase):
             [
                 "v0",
                 "multi-store-payload",
+                "multi-store",
+                "payload",
+                "general",
             ],
         )
 
@@ -187,6 +193,21 @@ class FamilySelectorTests(unittest.TestCase):
                 "run-multistore-payload-"
                 "from-zip.sh"
             ),
+            source,
+        )
+
+        self.assertIn(
+            "run-multistore-from-zip.sh",
+            source,
+        )
+
+        self.assertIn(
+            "run-store-from-zip.sh",
+            source,
+        )
+
+        self.assertIn(
+            "run-general-from-zip.sh",
             source,
         )
 
@@ -211,6 +232,16 @@ class FamilySelectorTests(unittest.TestCase):
                 "MultiStorePayload"
                 "ArtifactExporter.lean"
             ),
+            source,
+        )
+
+        self.assertIn(
+            "Relico/Benchmark/MultiStoreArtifactExporter.lean",
+            source,
+        )
+
+        self.assertIn(
+            "Relico/Benchmark/GeneralArtifactExporter.lean",
             source,
         )
 
@@ -239,6 +270,22 @@ class FamilySelectorTests(unittest.TestCase):
                 '"Relico/Benchmark/'
                 'MultiStorePayload'
                 'ArtifactExporter.lean"'
+            ),
+            1,
+        )
+
+        self.assertEqual(
+            source.count(
+                '"Relico/Benchmark/'
+                'MultiStoreArtifactExporter.lean"'
+            ),
+            1,
+        )
+
+        self.assertEqual(
+            source.count(
+                '"Relico/Benchmark/'
+                'GeneralArtifactExporter.lean"'
             ),
             1,
         )

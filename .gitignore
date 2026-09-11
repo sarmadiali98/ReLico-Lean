@@ -11,6 +11,7 @@
 
 # Generated output
 generated/
+.test-results/
 *.log
 *.out
 
@@ -19,8 +20,10 @@ tmp/
 .temp/
 
 # Benchmark execution evidence
-tests/benchmarks/*/actual/
-tests/benchmarks/*/.expected-regeneration/
+tests/translator/*/actual/
+tests/translator/*/.expected-regeneration/
+benchmarks/*/actual/
+benchmarks/*/.expected-regeneration/
 
 # Python bytecode
 __pycache__/

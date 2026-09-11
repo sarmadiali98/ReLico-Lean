@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "stages": [
+    {
+      "id": "source",
+      "kind": "input-integrity",
+      "success": "source artifact accepted and hashed"
+    },
+    {
+      "id": "rmc",
+      "kind": "source-model-check",
+      "success": "RMC accepts and executes the source model"
+    },
+    {
+      "id": "parser-json",
+      "kind": "frontend",
+      "success": "frontend emits the expected parser JSON or expected rejection evidence"
+    },
+    {
+      "id": "decoded-dtr-ast",
+      "kind": "frontend-decoding",
+      "success": "Lean decoder emits the expected DTR AST or expected rejection evidence"
+    },
+    {
+      "id": "formal-witness",
+      "kind": "formal-evidence",
+      "success": "fixture obligations are witnessed by the declared Lean modules"
+    },
+    {
+      "id": "translated-lf-ast",
+      "kind": "translation",
+      "success": "translator emits the expected LF AST"
+    },
+    {
+      "id": "lf-source",
+      "kind": "printing",
+      "success": "printer emits the expected LF source"
+    },
+    {
+      "id": "lfc",
+      "kind": "target-compilation",
+      "success": "LF compiler accepts the translated program"
+    },
+    {
+      "id": "runtime",
+      "kind": "target-execution",
+      "success": "compiled target exhibits the declared runtime observation"
+    },
+    {
+      "id": "expected-boundary-stage",
+      "kind": "negative-boundary",
+      "success": "the declared boundary rejects and later artifacts remain absent"
+    },
+    {
+      "id": "diagnostics",
+      "kind": "negative-diagnostic",
+      "success": "the expected diagnostic is preserved"
+    },
+    {
+      "id": "coverage-manifest",
+      "kind": "coverage-evidence",
+      "success": "declared fixture coverage is internally consistent"
+    },
+    {
+      "id": "trust-report",
+      "kind": "trust-evidence",
+      "success": "the declared evidence chain satisfies the trust contract"
+    }
+  ]
+}

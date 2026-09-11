@@ -4,7 +4,25 @@ defaultTargets = ["Relico"]
 
 [[lean_lib]]
 name = "Relico"
+globs = [
+  "Relico.Common.+",
+  "Relico.DTR.+",
+  "Relico.LF.+",
+  "Relico.Translation.+",
+  "Relico.Correctness.+",
+  "Relico.Frontend.+",
+  "Relico.Investigation.+",
+  "Relico.Benchmark.+",
+]
+
+[[lean_lib]]
+name = "RelicoTests"
+roots = ["Relico.Tests"]
 
 [[lean_exe]]
 name = "relico-bench"
 root = "Relico.Benchmark.Main"
+
+[[lean_exe]]
+name = "relico-translator-test"
+root = "Relico.Tests.TranslatorSoftwareMain"

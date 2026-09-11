@@ -53,17 +53,11 @@ class ExecutionContractTest(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            original_root = execution.BENCHMARK_ROOT
-            execution.BENCHMARK_ROOT = root
-
-            try:
-                with self.assertRaisesRegex(
-                    execution.ExecutionError,
-                    "must be the final declared stage",
-                ):
-                    execution.load_manifest("probe")
-            finally:
-                execution.BENCHMARK_ROOT = original_root
+            with self.assertRaisesRegex(
+                execution.ExecutionError,
+                "must be the final declared stage",
+            ):
+                execution.load_manifest("probe", benchmark)
 
     def test_successful_terminal_stage_is_recorded(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -101,25 +95,25 @@ class ExecutionContractTest(unittest.TestCase):
                 "benchmarks": [
                     {
                         "benchmark_id": "probe",
+                        "suite": "test",
+                        "semantic_layer": "core",
                         "polarity": "positive",
                         "implementation_status": "implemented",
                     }
                 ]
             }
 
-            original_root = execution.BENCHMARK_ROOT
-            execution.BENCHMARK_ROOT = root
-
-            try:
+            with patch.object(
+                execution,
+                "benchmark_directory",
+                return_value=benchmark,
+            ):
                 result = execution.run_benchmark(
                     registry=registry,
                     benchmark_id="probe",
                     dry_run=False,
                     regenerate=False,
                 )
-            finally:
-                execution.BENCHMARK_ROOT = original_root
-
             self.assertEqual(result.exit_code, 0)
 
             summary = json.loads(
@@ -197,6 +191,7 @@ class ExecutionImplementationStatusTest(unittest.TestCase):
             "benchmarks": [
                 {
                     "benchmark_id": "probe",
+                    "suite": "test",
                     "polarity": "positive",
                     "implementation_status": "planned",
                 }
@@ -220,20 +215,24 @@ class RegistryImplementationStatusTest(unittest.TestCase):
         self,
     ) -> None:
         with tempfile.TemporaryDirectory() as temporary:
-            original_root = registry_module.BENCHMARK_ROOT
-            registry_module.BENCHMARK_ROOT = Path(temporary)
-
-            try:
+            row = {
+                "benchmark_id": "probe",
+                "suite": "test",
+                "semantic_layer": "core",
+            }
+            with patch.object(
+                registry_module,
+                "benchmark_directory",
+                return_value=Path(temporary) / "probe",
+            ):
                 with self.assertRaisesRegex(
                     registry_module.RegistryError,
                     "manifest.json is absent",
                 ):
                     registry_module.validate_implementation_status(
-                        "probe",
+                        row,
                         "implemented",
                     )
-            finally:
-                registry_module.BENCHMARK_ROOT = original_root
 
     def test_planned_with_manifest_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -245,20 +244,24 @@ class RegistryImplementationStatusTest(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            original_root = registry_module.BENCHMARK_ROOT
-            registry_module.BENCHMARK_ROOT = root
-
-            try:
+            row = {
+                "benchmark_id": "probe",
+                "suite": "test",
+                "semantic_layer": "core",
+            }
+            with patch.object(
+                registry_module,
+                "benchmark_directory",
+                return_value=root / "probe",
+            ):
                 with self.assertRaisesRegex(
                     registry_module.RegistryError,
                     "registry status is planned",
                 ):
                     registry_module.validate_implementation_status(
-                        "probe",
+                        row,
                         "planned",
                     )
-            finally:
-                registry_module.BENCHMARK_ROOT = original_root
 
 
 class CliImplementationStatusTest(unittest.TestCase):

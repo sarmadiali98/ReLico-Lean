@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "claims": [
+    {
+      "id": "translator.frontend.contract",
+      "statement": "Accepted bridge documents decode to the expected DTR model and rejected documents preserve the expected frontend diagnostic.",
+      "evidence": ["lean-software-case", "translator-fixture"],
+      "stages": ["parser-json", "decoded-dtr-ast", "diagnostics"]
+    },
+    {
+      "id": "translator.executable.mapping",
+      "statement": "Supported DTR expressions, statements, bodies, reactions, instances, and complete core models translate to the expected LF structures.",
+      "evidence": ["lean-software-case", "translator-fixture"],
+      "stages": ["translated-lf-ast"]
+    },
+    {
+      "id": "translator.formal.correspondence",
+      "statement": "The declared Lean modules establish the mapped translation and semantic correspondence obligations inside the verified boundary.",
+      "evidence": ["lean-aggregate-gate", "formal-witness"],
+      "stages": ["formal-witness", "coverage-manifest", "trust-report"]
+    },
+    {
+      "id": "translator.pipeline.integration",
+      "statement": "Registered translator fixtures traverse their declared source-to-target stages and reproduce committed artifacts.",
+      "evidence": ["translator-fixture"],
+      "stages": ["source", "parser-json", "decoded-dtr-ast", "translated-lf-ast", "lf-source"]
+    },
+    {
+      "id": "translator.target.acceptance",
+      "statement": "Generated LF accepted by the pinned LF compiler provides target-compilation evidence; successful execution provides only the declared runtime observation.",
+      "evidence": ["translator-fixture"],
+      "stages": ["lfc", "runtime"]
+    },
+    {
+      "id": "translator.rejection.ownership",
+      "statement": "Negative cases identify the component that rejects the input, preserve its diagnostic, and prohibit downstream artifacts.",
+      "evidence": ["lean-software-case", "translator-fixture", "external-translator-case"],
+      "stages": ["expected-boundary-stage", "diagnostics"]
+    },
+    {
+      "id": "source.independent.model-check",
+      "statement": "RMC results are independent source-model evidence and are not evidence that the ReLico translation is correct.",
+      "evidence": ["translator-fixture", "application-benchmark"],
+      "stages": ["rmc"]
+    },
+    {
+      "id": "evaluation.application.scope",
+      "statement": "Application benchmarks demonstrate corpus applicability and remain separate from translator conformance cases and formal obligations.",
+      "evidence": ["application-benchmark"],
+      "stages": ["source", "parser-json", "decoded-dtr-ast", "translated-lf-ast", "lf-source", "lfc", "runtime"]
+    }
+  ],
+  "reporting_rules": [
+    "A passing stage supports only the observation stated for that stage and claim.",
+    "Target compilation and process exit do not by themselves establish source-target behavioral equivalence.",
+    "Trusted-component integration evidence does not extend the verified Lean boundary.",
+    "Claims, logical cases, formal obligations, and application benchmarks are non-additive populations."
+  ]
+}

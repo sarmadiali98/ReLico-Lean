@@ -15,6 +15,7 @@ from relico_bench_registry import (
     RegistryError,
     find_benchmark,
     load_registry,
+    public_benchmark_row,
     validate,
 )
 
@@ -65,6 +66,12 @@ def parse_arguments(
     )
 
     parser.add_argument(
+        "--suite",
+        choices=("test", "benchmark"),
+        help="limit --list or --all to one semantic suite",
+    )
+
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="record commands without executing stages",
@@ -92,7 +99,7 @@ def print_benchmark_list(
     benchmarks: list[dict[str, str]],
 ) -> None:
     print(
-        "benchmark_id\tpolarity\tsemantic_layer\t"
+        "benchmark_id\tsuite\tpolarity\tsemantic_layer\t"
         "primary_capability\timplementation_status"
     )
 
@@ -100,6 +107,7 @@ def print_benchmark_list(
         print(
             "\t".join([
                 row["benchmark_id"],
+                row["suite"],
                 row["polarity"],
                 row["semantic_layer"],
                 row["primary_capability"],
@@ -114,11 +122,14 @@ def run_all(
     dry_run: bool,
     regenerate: bool,
     keep_going: bool,
+    suite: str | None = None,
 ) -> int:
     results: list[BenchmarkResult] = []
     not_implemented_count = 0
 
     for row in registry["benchmarks"]:
+        if suite is not None and row["suite"] != suite:
+            continue
         benchmark_id = row["benchmark_id"]
 
         implementation_status = row[
@@ -221,8 +232,13 @@ def main(arguments: list[str]) -> int:
         return 0
 
     if options.list:
+        rows = [
+            row
+            for row in registry["benchmarks"]
+            if options.suite is None or row["suite"] == options.suite
+        ]
         print_benchmark_list(
-            registry["benchmarks"]
+            rows
         )
 
         return 0
@@ -230,10 +246,10 @@ def main(arguments: list[str]) -> int:
     if options.show:
         print(
             json.dumps(
-                find_benchmark(
+                public_benchmark_row(find_benchmark(
                     registry,
                     options.show,
-                ),
+                )),
                 indent=2,
                 sort_keys=True,
             )
@@ -268,6 +284,7 @@ def main(arguments: list[str]) -> int:
         dry_run=options.dry_run,
         regenerate=options.regenerate,
         keep_going=options.keep_going,
+        suite=options.suite,
     )
 
 

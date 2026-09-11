@@ -14,14 +14,8 @@ import time
 from relico_bench_registry import (
     REPOSITORY_ROOT,
     RegistryError,
+    benchmark_directory,
     find_benchmark,
-)
-
-
-BENCHMARK_ROOT = (
-    REPOSITORY_ROOT
-    / "tests"
-    / "benchmarks"
 )
 
 
@@ -199,12 +193,8 @@ def write_artifact_index(actual_root: Path) -> None:
 
 def load_manifest(
     benchmark_id: str,
+    benchmark_directory: Path,
 ) -> tuple[Path, dict[str, Any]]:
-    benchmark_directory = (
-        BENCHMARK_ROOT
-        / benchmark_id
-    )
-
     manifest_path = (
         benchmark_directory
         / "manifest.json"
@@ -929,8 +919,10 @@ def run_benchmark(
             "'implemented'"
         )
 
-    benchmark_directory, manifest = load_manifest(
-        benchmark_id
+    directory = benchmark_directory(registry_row)
+    benchmark_directory_path, manifest = load_manifest(
+        benchmark_id,
+        directory,
     )
 
     if manifest["polarity"] != registry_row["polarity"]:
@@ -940,7 +932,7 @@ def run_benchmark(
         )
 
     actual_root = (
-        benchmark_directory
+        benchmark_directory_path
         / "actual"
     )
 
@@ -956,14 +948,14 @@ def run_benchmark(
 
     variables = {
         "repo": str(REPOSITORY_ROOT),
-        "benchmark": str(benchmark_directory),
+        "benchmark": str(benchmark_directory_path),
         "actual": str(actual_root),
         "expected": str(
-            benchmark_directory
+            benchmark_directory_path
             / "expected"
         ),
         "source": str(
-            benchmark_directory
+            benchmark_directory_path
             / manifest["source_files"][0]
         ),
     }
@@ -980,7 +972,7 @@ def run_benchmark(
 
         status, exit_code = run_stage(
             benchmark_id=benchmark_id,
-            benchmark_directory=benchmark_directory,
+            benchmark_directory=benchmark_directory_path,
             actual_root=actual_root,
             stage=stage,
             index=index,
@@ -1103,7 +1095,7 @@ def run_benchmark(
     ):
         regenerate_expected_artifacts(
             benchmark_id=benchmark_id,
-            benchmark_directory=benchmark_directory,
+            benchmark_directory=benchmark_directory_path,
             manifest=manifest,
             actual_root=actual_root,
         )

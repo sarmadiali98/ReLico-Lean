@@ -1,7 +1,7 @@
 # `general--initialization--positive`
 
 This positive benchmark belongs to the **general** family and its source is the corpus candidate `minimal-class`, selected in the stage K
-pilot wave by measured construct profile from `tests/benchmarks/registry/general-corpus-selection.tsv`
+pilot wave by measured construct profile from `evaluation/registry/general-corpus-selection.tsv`
 and by the mandatory RMC gate, which reports `satisfied` for it.
 
 ## Stages

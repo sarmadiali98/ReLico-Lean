@@ -16,7 +16,7 @@ and keeps a thin `main` here. That is deliberately not copied, for a bookkeeping
 reason rather than a technical one. Every module under `Relico/Tests/` is scanned
 by the obligation registry, and every obligation it produces must carry a
 `final_benchmark_id` drawn from the 58 benchmarks in
-`tests/benchmarks/registry/benchmarks.tsv`. The general family has no benchmark
+`evaluation/registry/benchmarks.tsv`. The general family has no benchmark
 yet — it cannot translate anything until stage D — so every row this module
 generated would have to be mapped to some *other* family's benchmark, and the
 registry would then assert that these obligations are evidence for a benchmark

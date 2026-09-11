@@ -13,7 +13,7 @@ set -euo pipefail
 #
 # The gap was not hypothetical. When this script was written, `*in.get()` --
 # reading a value off an input port -- had ZERO occurrences across the 24
-# committed `lfc`-accepted fixtures under tests/benchmarks/*/expected/lf-source,
+# committed `lfc`-accepted fixtures under tests/translator/*/expected/lf-source,
 # and `reaction(in) -> deliver`, a port-triggered reaction carrying a logical
 # action as its effect, had no exact precedent either. The printer emits both.
 # Every other construct in the emitted program did have precedent: `target Cpp`,

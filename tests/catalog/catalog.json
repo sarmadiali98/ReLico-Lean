@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "authority": {
+    "scope": "translator-tests",
+    "control_plane": "tests/catalog",
+    "logical_count_field": "logical_cases",
+    "evidence_count_field": "evidence"
+  },
+  "population_contract": {
+    "application_benchmarks": {
+      "count": 41,
+      "discovery": "benchmarks/*/manifest.json",
+      "included_in_translator_logical_total": false
+    },
+    "translator_fixtures": {
+      "count": 61,
+      "discovery": "tests/translator/*/manifest.json",
+      "included_in_translator_logical_total": true
+    }
+  },
+  "stage_catalog": "tests/catalog/stages.json",
+  "claim_catalog": "tests/catalog/claims.json",
+  "accepted_fragment_matrix": "tests/catalog/general-accepted-fragment.tsv",
+  "logical_case_sources": [
+    {
+      "kind": "translator-fixture",
+      "id_template": "translator.fixture::{directory_name}",
+      "discover": "tests/translator/*/manifest.json",
+      "metadata": {
+        "registry": "evaluation/registry/benchmarks.tsv",
+        "registry_id_column": "benchmark_id",
+        "registry_predicate": {
+          "implementation_status": "implemented",
+          "suite": "test"
+        }
+      },
+      "evidence": [
+        {
+          "id_template": "fixture-run::{directory_name}",
+          "runner_id_template": "fixture::{directory_name}",
+          "type": "pipeline-execution"
+        }
+      ]
+    },
+    {
+      "kind": "lean-software-case",
+      "id_column": "case_id",
+      "discover": "tests/translator/*--software/cases.tsv",
+      "metadata": {
+        "behavioral_coverage": "evaluation/registry/behavioral-coverage.tsv",
+        "behavioral_id_column": "feature_id"
+      },
+      "evidence": [
+        {
+          "id_template": "lean-focused::{case_id}",
+          "runner_id_template": "lean-case::{case_id}",
+          "type": "focused-execution"
+        },
+        {
+          "id_template": "lean-aggregate::RelicoTests::{case_id}",
+          "runner_id": "lean::RelicoTests",
+          "type": "aggregate-execution"
+        }
+      ]
+    },
+    {
+      "kind": "external-translator-case",
+      "id_template": "translator.fixture::{directory_name}",
+      "discover": "tests/translator/*/case.json",
+      "exclude_if_manifest_exists": true,
+      "evidence": [
+        {
+          "availability": {
+            "environment": "RELICO_PARSER_ARTIFACT"
+          },
+          "id_template": "external-run::{directory_name}",
+          "runner_id_template": "fixture::{directory_name}",
+          "type": "conditional-external-execution"
+        }
+      ]
+    },
+    {
+      "kind": "python-software-case",
+      "discover": [
+        "tools/test_*.py",
+        "tests/test_*.py",
+        "frontend/test_*.py"
+      ],
+      "id_template": "python::{module_path}::{class_name}::{method_name}",
+      "evidence": [
+        {
+          "id_template": "python-run::{module_path}::{class_name}::{method_name}",
+          "runner_id_template": "python::{module_path}::{class_name}::{method_name}",
+          "type": "unit-execution"
+        }
+      ]
+    }
+  ],
+  "non_case_evidence": [
+    {
+      "covers": "all lean-software-case logical IDs and formal modules imported by Relico/Tests.lean",
+      "id": "lean-aggregate::RelicoTests",
+      "runner_id": "lean::RelicoTests",
+      "type": "aggregate-execution"
+    }
+  ],
+  "counting_rules": [
+    "Count each logical case ID once, independent of the number of evidence records that execute or support it.",
+    "The RelicoTests aggregate build is evidence, not an additional logical case.",
+    "A focused Lean execution and the RelicoTests aggregate build may support the same logical case without increasing the logical total.",
+    "Pipeline stages are evidence attached to one translator fixture; they are not separate logical cases.",
+    "Application benchmarks are source-evidence experiments and are never included in the translator-test total."
+  ]
+}

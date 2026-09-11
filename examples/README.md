@@ -2,7 +2,7 @@
 
 This directory holds the real-example demonstration runs of the ReLico
 pipeline: the paper's own evaluation corpus, translated and compiled as
-programs, separate from the benchmark suite under `tests/benchmarks/`.
+programs, separate from the application benchmark suite under `benchmarks/`.
 
 Nothing here adds to the benchmark registry. The registry is an
 infrastructure validation layer; this area exists to demonstrate
@@ -16,7 +16,7 @@ themselves. Property and specification files are out of scope.
   `RESULTS.tsv`.
 - `tier3/` — **relocated.** The paper-named case studies now live in the
   benchmark suite itself, as `general--<name>-case-study--positive` rows
-  under `tests/benchmarks/` with the full benchmark layout plus an
+  under `benchmarks/` with the full benchmark layout plus an
   `ADAPTATION.md` before/after record. First entry:
   `general--smarthome-case-study--positive`, the RQ2 ESP32 case study.
 

@@ -10,8 +10,9 @@ import sys
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
-REGISTRY_ROOT = REPOSITORY_ROOT / "tests" / "benchmarks" / "registry"
-BENCHMARK_ROOT = REPOSITORY_ROOT / "tests" / "benchmarks"
+REGISTRY_ROOT = REPOSITORY_ROOT / "evaluation" / "registry"
+TRANSLATOR_TEST_ROOT = REPOSITORY_ROOT / "tests" / "translator"
+APPLICATION_BENCHMARK_ROOT = REPOSITORY_ROOT / "benchmarks"
 
 EXPECTED_BENCHMARKS = 102
 EXPECTED_POSITIVE = 101
@@ -67,10 +68,26 @@ def require_columns(
         )
 
 
+def benchmark_directory(row: dict[str, str]) -> Path:
+    suite = row.get("suite")
+
+    if suite == "test":
+        root = TRANSLATOR_TEST_ROOT
+    elif suite == "benchmark":
+        root = APPLICATION_BENCHMARK_ROOT
+    else:
+        raise RegistryError(
+            f"{row.get('benchmark_id', '<unknown>')}: invalid suite {suite!r}"
+        )
+
+    return root / row["benchmark_id"]
+
+
 def validate_implementation_status(
-    benchmark_id: str,
+    row: dict[str, str],
     implementation_status: str,
 ) -> None:
+    benchmark_id = row["benchmark_id"]
     if implementation_status not in {
         "planned",
         "implemented",
@@ -80,11 +97,7 @@ def validate_implementation_status(
             f"{implementation_status!r}"
         )
 
-    manifest_path = (
-        BENCHMARK_ROOT
-        / benchmark_id
-        / "manifest.json"
-    )
+    manifest_path = benchmark_directory(row) / "manifest.json"
 
     manifest_present = manifest_path.is_file()
 
@@ -117,47 +130,47 @@ def validate_implementation_status(
 # NOTE "planned source benchmarks" is historical phrasing for "benchmarks in the
 # plan", i.e. ALL rows -- not the subset with implementation_status 'planned'.
 NARRATIVE_COUNTER_CHECKS = (
-    ("tests/benchmarks/registry/PROVENANCE.md",
+    ("evaluation/registry/PROVENANCE.md",
      r"^- (\S+) accepted Lean test modules$", "modules"),
-    ("tests/benchmarks/registry/PROVENANCE.md",
+    ("evaluation/registry/PROVENANCE.md",
      r"^- (\S+) mapped test obligations$", "obligations"),
-    ("tests/benchmarks/registry/PROVENANCE.md",
+    ("evaluation/registry/PROVENANCE.md",
      r"^- (\S+) planned source benchmarks$", "benchmarks"),
-    ("tests/benchmarks/registry/PROVENANCE.md",
+    ("evaluation/registry/PROVENANCE.md",
      r"^- (\S+) positive benchmarks$", "positive"),
-    ("tests/benchmarks/registry/PROVENANCE.md",
+    ("evaluation/registry/PROVENANCE.md",
      # Singular: exactly one genuine negative remains after the stage K
      # re-polarization, and the sentence should not claim a plural.
      r"^- (\S+) negative benchmarks?$", "negative"),
-    ("tests/benchmarks/README.md",
+    ("evaluation/README.md",
      r"records the (\S+) planned source benchmarks", "benchmarks"),
-    ("tests/benchmarks/README.md",
+    ("evaluation/README.md",
      r"maps all (\S+) Lean test obligations", "obligations"),
-    ("tests/benchmarks/registry/coverage-audit.txt",
+    ("evaluation/registry/coverage-audit.txt",
      r"^TEST_FILE_COUNT=(\d+)$", "modules"),
-    ("tests/benchmarks/registry/coverage-audit.txt",
+    ("evaluation/registry/coverage-audit.txt",
      r"^TEST_OBLIGATION_COUNT=(\d+)$", "obligations"),
-    ("tests/benchmarks/registry/coverage-audit.txt",
+    ("evaluation/registry/coverage-audit.txt",
      r"^ACCEPTED_TEST_FILE_COUNT=(\d+)$", "modules"),
-    ("tests/benchmarks/registry/coverage-audit.txt",
+    ("evaluation/registry/coverage-audit.txt",
      r"^ACCEPTED_OBLIGATION_COUNT=(\d+)$", "obligations"),
-    ("tests/benchmarks/registry/coverage-audit.txt",
+    ("evaluation/registry/coverage-audit.txt",
      r"^FINAL_SOURCE_BENCHMARK_COUNT=(\d+)$", "benchmarks"),
-    ("tests/benchmarks/registry/coverage-audit.txt",
+    ("evaluation/registry/coverage-audit.txt",
      r"^POSITIVE_BENCHMARK_COUNT=(\d+)$", "positive"),
-    ("tests/benchmarks/registry/coverage-audit.txt",
+    ("evaluation/registry/coverage-audit.txt",
      r"^NEGATIVE_BENCHMARK_COUNT=(\d+)$", "negative"),
-    ("tests/benchmarks/registry/coverage-audit.txt",
+    ("evaluation/registry/coverage-audit.txt",
      r"^CORPUS_CANDIDATE_COUNT=(\d+)$", "corpus"),
-    ("tests/benchmarks/registry/final-b1-summary.txt",
+    ("evaluation/registry/final-b1-summary.txt",
      r"^INPUT_TEST_FILE_COUNT=(\d+)$", "modules"),
-    ("tests/benchmarks/registry/final-b1-summary.txt",
+    ("evaluation/registry/final-b1-summary.txt",
      r"^INPUT_TEST_OBLIGATION_COUNT=(\d+)$", "obligations"),
-    ("tests/benchmarks/registry/final-b1-summary.txt",
+    ("evaluation/registry/final-b1-summary.txt",
      r"^FINAL_SOURCE_BENCHMARK_COUNT=(\d+)$", "benchmarks"),
-    ("tests/benchmarks/registry/final-b1-summary.txt",
+    ("evaluation/registry/final-b1-summary.txt",
      r"^FINAL_POSITIVE_BENCHMARK_COUNT=(\d+)$", "positive"),
-    ("tests/benchmarks/registry/final-b1-summary.txt",
+    ("evaluation/registry/final-b1-summary.txt",
      r"^FINAL_NEGATIVE_BENCHMARK_COUNT=(\d+)$", "negative"),
 )
 
@@ -389,6 +402,7 @@ def validate(registry: dict[str, list[dict[str, str]]]) -> list[str]:
         benchmarks,
         {
             "benchmark_id",
+            "suite",
             "semantic_layer",
             "primary_capability",
             "polarity",
@@ -473,17 +487,19 @@ def validate(registry: dict[str, list[dict[str, str]]]) -> list[str]:
             )
 
         validate_implementation_status(
-            benchmark_id,
+            row,
             row["implementation_status"],
         )
 
-        expected_source = (
-            f"tests/benchmarks/{benchmark_id}/source/model.rebeca"
+        expected_source = str(
+            benchmark_directory(row).relative_to(REPOSITORY_ROOT)
+            / "source"
+            / "model.rebeca"
         )
 
         if row["source_path"] != expected_source:
             raise RegistryError(
-                f"{benchmark_id}: source path differs"
+                f"{benchmark_id}: source path differs from suite placement"
             )
 
         stages = {
@@ -593,6 +609,25 @@ def validate(registry: dict[str, list[dict[str, str]]]) -> list[str]:
         for row in benchmarks
     )
 
+    test_count = sum(row["suite"] == "test" for row in benchmarks)
+    application_count = sum(
+        row["suite"] == "benchmark" for row in benchmarks
+    )
+
+    if test_count != 61 or application_count != 41:
+        raise RegistryError(
+            "suite classification differs from the reviewed 61/41 split"
+        )
+
+    if any(
+        row["suite"] == "benchmark"
+        and int(row["obligation_count"]) != 0
+        for row in benchmarks
+    ):
+        raise RegistryError(
+            "application benchmarks must not own translator test obligations"
+        )
+
     narrative = validate_narrative_counters(registry)
     corpus = validate_corpus_candidates(registry)
 
@@ -600,6 +635,8 @@ def validate(registry: dict[str, list[dict[str, str]]]) -> list[str]:
         f"BENCHMARK_COUNT={len(benchmarks)}",
         f"IMPLEMENTED_BENCHMARK_COUNT={implemented_count}",
         f"PLANNED_BENCHMARK_COUNT={planned_count}",
+        f"TRANSLATOR_TEST_COUNT={test_count}",
+        f"APPLICATION_BENCHMARK_COUNT={application_count}",
         "IMPLEMENTATION_STATUS_AGREEMENT=yes",
         f"POSITIVE_COUNT={positive_count}",
         f"NEGATIVE_COUNT={negative_count}",
@@ -622,6 +659,10 @@ def find_benchmark(
             return row
 
     raise RegistryError(f"unknown benchmark: {benchmark_id}")
+
+
+def public_benchmark_row(row: dict[str, str]) -> dict[str, str]:
+    return dict(row)
 
 
 def parse_arguments(arguments: list[str]) -> argparse.Namespace:
@@ -649,7 +690,7 @@ def main(arguments: list[str]) -> int:
 
     if options.list:
         print(
-            "benchmark_id\tpolarity\tsemantic_layer\t"
+            "benchmark_id\tsuite\tpolarity\tsemantic_layer\t"
             "primary_capability\timplementation_status"
         )
 
@@ -657,6 +698,7 @@ def main(arguments: list[str]) -> int:
             print(
                 "\t".join([
                     row["benchmark_id"],
+                    row["suite"],
                     row["polarity"],
                     row["semantic_layer"],
                     row["primary_capability"],
@@ -668,7 +710,7 @@ def main(arguments: list[str]) -> int:
 
     print(
         json.dumps(
-            find_benchmark(registry, options.show),
+            public_benchmark_row(find_benchmark(registry, options.show)),
             indent=2,
             sort_keys=True,
         )
