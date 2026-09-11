@@ -1,5 +1,11 @@
 # Actor-Priority Investigation and Integration
 
+> **Historical development record.** This directory records the phased actor-priority investigation.
+> Status statements below describe their recorded phase and are not authoritative for the current
+> General-family tool. See [`docs/README.md`](../README.md),
+> [`supported-fragment-general.md`](../supported-fragment-general.md), and
+> [`claims/general-family-correctness.md`](../claims/general-family-correctness.md).
+
 This directory is the canonical record for the ReLico actor-priority
 investigation.
 

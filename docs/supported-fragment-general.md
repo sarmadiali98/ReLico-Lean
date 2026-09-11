@@ -1,5 +1,7 @@
 # The General Family's Accepted Fragment
 
+> **Current scope document.** This document defines the active General-family acceptance and theorem-eligibility boundaries. Dated stage references explain provenance; current behavior is determined by the production predicates and declarations named below.
+
 > **Status.** This is the authoritative declaration of what the general family's translator accepts,
 > landed 2026-08-27 as G6 document 1 (`docs/STAGE_G_DESIGN.md` §11 item 1; audit item C9 in
 > `RELICO_FORWARD_ROADMAP_AUDIT.md` §C). It exists because three sites quantify the project's claim
@@ -28,6 +30,32 @@ The predicates, in the order a model meets them:
 A model is **accepted** when all three pass. Everything else is refused with a diagnostic, or, for
 the two priority-distinctness predicates of §3, accepted but not eligible for every theorem.
 
+**Source-pipeline assumption:** the accepted Timed Rebeca fragment assumes successful parsing and
+type checking by the trusted upstream compiler before JSON export. The Lean General AST does not
+contain a complete expression typing judgment. The set of arbitrary JSON documents accepted by the
+Lean decoder must therefore not be described as identical to the set of well-typed accepted Timed
+Rebeca programs.
+
+## Status Summary
+
+| Feature | Status | Restrictions / Notes |
+|---|---|---|
+| Multiple classes and actor instances | Supported | Names, classes, constructor arguments, and known-rebec bindings must resolve |
+| Integer and Boolean state | Supported | These are the only declared value types admitted by the frontend |
+| Expressions | Supported | Literals, state/parameter/local reads, 13 binary operators, and 2 unary operators |
+| Assignment | Supported | Targets must be state variables or live locals; parameters are read-only |
+| Conditionals | Supported | Both branches are elaborated with branch-local scope |
+| Local declarations | Supported | Initializers are required or defaulted; shadowing declared names is refused |
+| Self sends | Supported | Message server, payload arity, and constant nonnegative delay must validate |
+| Known-rebec sends | Supported | Target route and receiving message server must resolve |
+| External send to a parameterless server | Partially supported | Intentionally refused because zero-value LF port behavior has not been established for the pinned target toolchain |
+| Actor and message-server priorities | Supported with theorem conditions | Ordering is generated; strict uniqueness theorems require the corresponding distinctness hypothesis |
+| Internal `trace` statement | Lean-only | Formal/runtime witness instrument; no Timed Rebeca or `general-v1` spelling |
+| Iteration | Unsupported | `for` is rejected as `iterationNotSupported` |
+| Arrays, inheritance, physical actions, environmental inputs, broadcast | Unsupported | Not represented by the active source AST |
+
+No wider source-language support should be inferred from syntax or historical planning documents.
+
 ## The source surface
 
 What a model **is**: `DTR.GeneralModel`, a list of `DTR.GeneralReactiveClass` declarations and a list
@@ -53,7 +81,8 @@ typing judgement anywhere in this family: the upstream Timed Rebeca typechecker 
 expressions before a document is emitted, so typing is upstream's obligation, not a restriction this
 fragment declares.
 
-**Statements** (`DTR.GeneralStmt`), five constructors:
+**Statements** (`DTR.GeneralStmt`), five constructors. Four are available from the source pipeline;
+`trace` is an internal witness instrument with no frontend spelling:
 
 - `assign`, target state variable **or a live local** (stage I), expression;
 - `trace`, a literal tag, the G5 observability instrument (§7);
@@ -113,13 +142,12 @@ the fragment*. The refusals that bound the fragment, beyond the name and arity c
 - **Expressions**: `unsupportedExpressionKind`, `missingField`, literal-type checks, and the
   operator-count refusals `unknownBinaryOperator` / `unknownUnaryOperator`, thirteen and two,
   exactly the constructors of §2.
-- **Statements**: `iterationNotSupported` (`for`) and `localDeclarationNotSupported` (`declare`), both
-  read faithfully by the schema and admitted by no stage so far; `assignmentTargetNotStateVariable`; a
-  write to a formal parameter has no state-semantics home; `nonConstantDelay` and `negativeDelay`.
-  `branchingNotSupported` (`if`) **is no longer raised**: stage I0 gave `elaborateStmt` an `if` arm
-  that elaborates `condition`, `then` and `else`, so a conditional is now inside the fragment. The
-  constructor is retained rather than deleted, because a document whose `if` node is missing its
-  `condition` or `then` is still refused, by `missingField`.
+- **Statements**: iteration remains refused as `iterationNotSupported`. Conditionals and local
+  declarations are accepted. `branchingNotSupported` and `localDeclarationNotSupported` remain in
+  the diagnostic vocabulary for historical/schema compatibility but are not raised for valid current
+  `if` and `declare` nodes. A document with missing required fields is still refused by `missingField`.
+  Assignment targets must resolve to state variables or live locals; writes to formal parameters are
+  refused. Delays must remain constant and nonnegative.
 - **Instances**: `nonLiteralInstanceArgument`.
 
 ## The translation guard: ten clauses on the target
@@ -188,18 +216,10 @@ restriction anyway, because refusing a literal `.intLiteral 0` divisor leaves `x
 `x / (1 - 1)` (a `.binary` node) and `x / y` (**F67** part 4's undecidable residue) all accepted. The
 restriction sentence above would survive a guard verbatim, which is why the guard was rejected.
 
-**Refused at the frontend, owed to later stages.** Iteration, with its refusal reason already in the
-vocabulary. Conditionals stood in this list until stage I0 and no longer do: `if` is accepted end to
-end, from `elaborateStmt` through `DTR.GeneralModel.statementResolves`'s recursion into both branch
-bodies, and `frontend/fixtures/general/branching.parser.json` is the positive that pins it. Local
-declarations stood in it until stage I and no longer do either: the elaborator's `"declare"` arm
-elaborates them, both DTR well-formedness clauses accept them, and
-`frontend/fixtures/general/locals.parser.json` is the positive that pins it. What stage I did not
-change is the *reason* `control-flow.parser.json` is refused — it opens with two `for` loops, so its
-expectation is still `iterationNotSupported` — and one layer outside this repository's Lean still
-refuses body locals: the Java exporter's R15 refusal, owed to widen in S-I6, which is also why
-`local-declaration.rebeca` in the reject corpus remains *correctly* refused, by that layer, for that
-reason.
+**Refused at the frontend.** Iteration remains excluded and is reported as
+`iterationNotSupported`; `control-flow.parser.json` begins with `for` loops and pins that refusal.
+Conditionals and local declarations are accepted end to end. The Java exporter, committed
+`general-v1` fixtures, Lean elaborator, translation, and target gate include witnesses for both.
 
 **Still excluded, no stage owner.** Arrays, inheritance, physical actions, environmental inputs,
 broadcast. None is refused by name (they simply have no constructor in the AST) so they are
@@ -227,7 +247,11 @@ worth stating because the decision's own prose blurs it: not every stage-F/G the
 guards, only the determinism-needing ones do, which is what the operative sentence says and what
 the landed corpus does.
 
-### The five tie fixtures, by name
+### Dated tie-fixture measurement
+
+The theorem-eligibility rules in this section are current. The named fixture census below is a
+dated 2026-08-28 measurement and is not an invariant of the current fixture corpus, which has grown
+since that measurement.
 
 The five fixtures of the committed corpus that elaborate and fail a distinctness guard, measured
 2026-08-28 against `frontend/fixtures/general/`:

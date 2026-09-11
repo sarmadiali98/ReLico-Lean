@@ -1,5 +1,9 @@
 # Finite-store correctness claim
 
+> **Historical compatibility-family claim.** This document describes the finite-store family and
+> its theorem stack. Its exclusions and limitations apply to that family, not to ReLico as a whole.
+> See [`general-family-correctness.md`](general-family-correctness.md) for the active General family.
+
 ## Supported source fragment
 
 The generalized executable fragment contains:

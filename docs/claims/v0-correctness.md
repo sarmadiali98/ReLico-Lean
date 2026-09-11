@@ -1,8 +1,8 @@
 # Vertical-slice v0 correctness claim
 
-This document records the original singleton milestone. The current
-generalized claim is documented in
-`docs/claims/finite-store-correctness.md`.
+> **Historical compatibility-family claim.** This document records the original singleton
+> milestone. It does not describe the active General family. See
+> [`general-family-correctness.md`](general-family-correctness.md) for the current active-family claim.
 
 ## Executable translation path
 

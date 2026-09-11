@@ -16,7 +16,10 @@ benchmarks so that the same assertion is not counted more than once.
   stage names, and the fixed 61 translator-fixture / 41 application-benchmark split.
 - `translator/` contains focused software catalogs and source-to-runtime translator fixtures.
 
-The verified object is the executable Lean translation from a DTR model to an LF model. Parser and
+The verified object is the executable Lean DTR-to-LF translation for each family's declared fragment
+and theorem hypotheses. For the active General family, the exact correspondence scope and remaining
+premises are recorded in
+[`docs/claims/general-family-correctness.md`](../docs/claims/general-family-correctness.md). Parser and
 JSON export, LF printing, `lfc`, generated C++, runtime, OS, and hardware remain trusted components;
 their tests provide integration evidence rather than extending the proof boundary.
 

@@ -1,6 +1,6 @@
 # Supported Fragment
 
-This document defines the first vertical slice of ReLico-Lean.
+This document defines the first vertical slice of the project under its former ReLico-Lean name.
 
 The initial fragment is intentionally small. We will complete an executable translator and an end-to-end correctness theorem for this fragment before adding more language features.
 

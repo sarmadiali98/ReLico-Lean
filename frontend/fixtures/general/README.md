@@ -1,10 +1,9 @@
 # `general-v1` frontend fixtures
 
 These models are the acceptance surface of the general family's two frontend
-layers. Between them the thirteen positives exercise every production
-`frontend/java-bridge/RebecaGeneralJsonExporter.java` admits, and the
-thirty-three negatives pin one rejection each — nineteen against the exporter
-and the Rebeca compiler upstream of it, fourteen against the Lean decoder.
+layers. Between them the thirteen positives exercise the production exporter surface, and the
+thirty-three negatives pin one rejection each: eleven against the exporter, eight against the Rebeca
+compiler upstream of it, and fourteen against the Lean decoder.
 
 Two gates read this directory, and they read different parts of it.
 `frontend/java-bridge/check-general.sh` owns the Rebeca-to-JSON boundary: it runs
@@ -15,7 +14,7 @@ produce. The documents in this directory are the contract between the two, which
 is why neither gate regenerates what the other one checks.
 
 The negatives are split across three directories by *which layer* rejects them:
-twelve in `reject/` that this exporter refuses, eight in `upstream-reject/`
+eleven in `reject/` that this exporter refuses, eight in `upstream-reject/`
 that the Rebeca parser and typechecker refuse before the exporter is handed an
 AST, and fourteen in `lean-reject/` that the Lean decoder refuses. That split was
 measured, not guessed, and the reason it is worth recording
@@ -51,13 +50,9 @@ Four are, and they are the anchors that make the others trustworthy:
 written by hand, from the source models, before the exporter had ever run — so
 when the exporter agrees with them, that agreement is evidence.
 
-A fifth is hand-authored for a different reason and is listed with the anchors
-rather than the recordings because the distinction that matters is the same one:
-`branching`, added by stage I0, was written by hand because the machine it was
-written on has no exporter run available to it at all (`docs/STAGE_I_FINDINGS.md`
-F90 records the gap). Its document is a prediction the Lean layer confirmed; it
-is not yet evidence about the exporter, and becomes evidence the first time a
-real run agrees with it.
+A fifth, `branching`, was initially hand-authored as a prediction because an exporter run was not
+available. Stage I S-I6 subsequently ran the real exporter and confirmed
+`branching.parser.json` byte-identically, closing the original provenance gap.
 
 A twelfth model, `locals`, added by stage I, was hand-authored under a third
 provenance — a prediction of the widened exporter, written against the `declare`
@@ -186,7 +181,7 @@ The two layers are distinguishable in the log, which is what lets the gate hold
 each corpus to its own claim rather than merely checking that *something*
 rejected the model:
 
-| | `reject/` (12) | `upstream-reject/` (8) |
+| | `reject/` (11) | `upstream-reject/` (8) |
 |---|---|---|
 | `unsupported by the ReLico general parser bridge` | required | forbidden |
 | `Timed Rebeca parsing or semantic checking failed` | forbidden | required |
@@ -282,7 +277,7 @@ because of that incident, and it is what caught this one, before the fixture had
 been anywhere near a JDK. A guard firing a second time, on an unrelated fixture,
 is the evidence that it earned its place.
 
-`reject/parameter-shadows-state.rebeca` is the twelfth source under `reject/`, and
+`reject/parameter-shadows-state.rebeca` is one of the eleven current sources under `reject/`, and
 it closes a gap `lean-reject/README.md` named and asked for a companion to: the
 exporter's parameter-shadowing branch had no source fixture reaching it by the
 *formal* path, only `local-declaration.rebeca` reaching `Scope.declare` by the

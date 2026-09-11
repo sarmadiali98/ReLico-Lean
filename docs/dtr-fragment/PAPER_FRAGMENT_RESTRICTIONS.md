@@ -1,5 +1,9 @@
 # The paper's DTR fragment, as restrictions a frontend can enforce
 
+> **Historical source-analysis record.** This document transcribes and analyzes the paper fragment;
+> it does not define the active accepted translation path. See
+> [`supported-fragment-general.md`](../supported-fragment-general.md) for current support.
+
 This document exists because the translator generalization needs a written-down specification to
 reject against. Before it existed, the phrase "R1-R19" was used in planning documents while the
 enumerated list lived nowhere, which made every rejection diagnostic unauditable.

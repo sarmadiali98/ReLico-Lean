@@ -1,9 +1,9 @@
 # Tier 2: real corpus models, unmodified
 
-Every model in the upstream corpus that the current verified fragment
-accepts, run through the pipeline exactly as it ships in the archive: no
-source edits, no registry entries, no wrappers. 21 models, on
-2026-09-07, at the tree of stage K's benchmark completion.
+These 21 unmodified upstream models passed the measured frontend screen and were run through the
+pipeline exactly as they ship in the archive: no source edits, registry entries, or wrappers. This
+is a dated empirical measurement from 2026-09-07, not a statement that every model is accepted by
+the complete translation path or covered by a formal theorem.
 
 ## Method
 

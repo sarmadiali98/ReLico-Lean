@@ -1,5 +1,10 @@
 # Evaluation registry provenance
 
+> **Registry provenance record.** This document explains how the registry was assembled and amended.
+> Current suite status and user-facing evaluation scope are documented in
+> [`evaluation/README.md`](../README.md). The VMCAI 2027 suite is under active development and is not
+> frozen for artifact submission.
+
 This registry was frozen from the reviewed benchmark plan at repository
 checkpoint a4201d942d7d30c00f34f135dfe024d9ae30c82c, and has been amended
 since. The counts below are the CURRENT registry contents, not the
@@ -10,7 +15,7 @@ The registry currently contains 61 translator tests and 41 application benchmark
 
 - 183 accepted Lean test modules
 - 2,468 mapped test obligations
-- 102 planned source benchmarks
+- 102 registered source cases, partitioned into 61 translator fixtures and 41 application benchmarks
 - 101 positive benchmarks
 - 1 negative benchmark
 - zero unresolved modules
@@ -66,8 +71,8 @@ The screen clears 28 of the 49 where the project's recorded I0 census put 31 of
 left standing rather than tuned away, and it belongs to the wave that runs the
 real frontend over the corpus.
 
-Registry inclusion does not mean that a benchmark is implemented,
-executable, or passing.
+Registry inclusion alone does not mean that a case is executable or passing. Current implementation
+status is recorded per row in `benchmarks.tsv` and checked against manifests.
 
 A benchmark becomes implemented only when its directory contains its
 manifest, coverage mapping, commented Timed Rebeca source, expected

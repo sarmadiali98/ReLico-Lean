@@ -1,5 +1,10 @@
 # Paper corrections found by building the tool
 
+> **Research ledger.** This document records dated findings about the paper and tool development. It
+> is not the current user-facing description of ReLico. See [`README.md`](../README.md),
+> [`docs/README.md`](README.md), and
+> [`supported-fragment-general.md`](supported-fragment-general.md) for current system scope.
+
 **Why this file exists.** User, 2026-08-17: *"we can change the paper. one of the goals of this lean
 thing is to find out these kinds of issues."* That reclassifies every divergence below. These are not
 obstacles to be worked around quietly in the translator — they are findings, and they are arguably the
@@ -1076,5 +1081,4 @@ corrects a proof whose theorem stands. It is not **P19**, which is about `Connec
 optional in Fig. 5 and mandatory in §III-E; that entry is about which connections may be emitted, this one
 about a case where no connection is emitted at all. It is not **P25**, which is about `ϕ` and the
 message-server-to-reaction multiplicity. All three neighbours were read before this number was opened.
-
 

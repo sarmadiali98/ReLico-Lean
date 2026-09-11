@@ -1,65 +1,59 @@
-# Trusted Boundary
+# Verification and Trusted Boundary
 
-## Verification goal
+## Verification Goal
 
-ReLico-Lean will implement the actual DTR-to-LF translation as an executable Lean function.
+ReLico implements the DTR-AST-to-LF-AST translation as executable Lean definitions. Correctness results refer to the same translation definitions used by the executable pipeline rather than to a separate handwritten translator.
 
-The correctness theorem will refer directly to that same executable function. The project will not use a separate handwritten translator whose connection to the Lean proof is assumed.
+The active General-family entry points are:
 
-The intended compiler interface is:
+```lean
+Relico.Frontend.decodeGeneralModelText
+Relico.Translation.compileGeneralModel
+```
 
-~~~lean
-def translate :
-    DTR.Model → Except TranslationError LF.Program
-~~~
+Earlier singleton, finite-store, and multi-store entry points remain in the repository as compatibility and regression families. Their theorems have family-specific scopes and must not be treated as General-family results.
 
-## Verified boundary
+## Verified Boundary
 
-The initial verified boundary is:
+```text
+well-formed supported Lean DTR model
+        -> executable Lean translator
+        -> generated Lean LF model
+        -> declared structural and operational-semantics results
+```
 
-~~~text
-well-formed supported DTR AST
-        ↓
-executable Lean translator
-        ↓
-well-formed generated LF AST
-~~~
+Within this boundary, the project has executable DTR and LF representations, executable translations, source and target operational semantics, structural preservation results, and semantic correspondence results. The exact accepted General fragment is declared in [supported-fragment-general.md](supported-fragment-general.md).
 
-For every well-formed source model in the supported fragment — declared for the general family in
-[`supported-fragment-general.md`](supported-fragment-general.md) — the project aims to prove that:
+For the General family, the formal development includes:
 
-1. translation succeeds;
-2. the generated LF model is well formed;
-3. source state variables are preserved;
-4. message occurrences and payloads are preserved;
-5. logical time and delays are preserved;
-6. source causality is preserved;
-7. designer-specified priorities are preserved;
-8. every permitted source execution has a corresponding target execution;
-9. every target execution corresponds to a permitted source execution.
+- successful translation and target well-formedness results for the declared accepted fragment;
+- preservation results for supported state, expressions, statements, communication, logical time, and generated priority order;
+- a source/target state correspondence;
+- forward and backward weak transfer results;
+- forward and backward observable-trace agreement derived from `GeneralLabelWeakBisimulation`.
 
-The correctness theorem must preserve the permitted source execution structure. It must not assume that every permitted schedule is observationally equivalent.
+These semantic results are qualified. They are stated over a partial within-tag quotient that permits reordering among distinct reactors at one tag while preserving order within each reactor. Three of the six fields of the General label-level weak-bisimulation interface retain explicit run-level premises: a forward consume representative package, backward per-step actor agreement, and a backward internal-step answer. The formal result is therefore not premise-free equivalence and is not the paper's source-level theorem verbatim.
 
-## Initially trusted components
+See [general-family-correctness.md](claims/general-family-correctness.md) for the theorem-by-theorem claim map and all residual premises.
 
-The initial proof does not cover:
+## Components Outside the Verified Boundary
 
-- parsing textual Timed Rebeca;
-- conversion from an external parser AST into the Lean DTR AST;
-- serialization of the LF AST into textual LF;
-- the LF compiler;
-- generated C or C++ code;
-- the C or C++ compiler;
-- the LF runtime;
-- the operating system;
-- hardware.
+The Lean proof does not cover:
 
-These components must be stated explicitly as being outside the verified boundary.
+- textual Timed Rebeca parsing and upstream type checking;
+- conversion from the external parser AST to `general-v1` JSON;
+- generic JSON parsing infrastructure;
+- LF source serialization;
+- `lfc` 0.11.0;
+- generated C++ and its compiler;
+- the LF C++ runtime;
+- the operating system and hardware;
+- source constructs outside the declared fragment.
 
-## Intended claim
+The repository contains focused tests, integration fixtures, and application benchmarks that exercise some of these components. This is testing or experimental evidence, not formal verification of those components.
 
-After the executable translator, correctness theorem, and tool integration are complete, the intended claim is:
+## Current Claim
 
-> The executable DTR-AST-to-LF-AST translation core implemented in ReLico-Lean is formally verified for the declared supported fragment — for the general family, the fragment declared in [`supported-fragment-general.md`](supported-fragment-general.md).
+> The executable DTR-AST-to-LF-AST translation core implemented in ReLico is formally verified in Lean for each family's declared fragment and theorem hypotheses. For the active General family, correspondence is conditional over the documented partial within-tag quotient.
 
-This does not mean that the complete Rebeca parser, LF toolchain, runtime, or deployed system is formally verified.
+This claim does not imply that the complete Timed Rebeca parser-to-native-runtime stack is formally verified, nor that all source programs or all LF programs are supported.
