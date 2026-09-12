@@ -1,11 +1,14 @@
 # ReLico translator tests
 
-This directory contains purpose-built conformance and regression fixtures for the ReLico
-translator. Each fixture isolates a supported capability, formal correspondence claim, runtime
-contract, or expected rejection boundary.
+This directory contains the ReLico translator capability fixtures: purpose-built, registry-backed
+source-to-runtime examples that demonstrate supported translator capabilities and expected
+rejection boundaries. General-family rows demonstrate the active fragment's capabilities;
+earlier-family rows are regression surfaces for their own declared fragments. Each fixture
+isolates a supported capability, formal correspondence claim, runtime contract, or expected
+rejection boundary.
 
-These are tests, not empirical benchmarks. Externally sourced application models live under the
-top-level `benchmarks/` directory.
+They are capability demonstrations with committed golden oracles, not empirical benchmarks.
+Externally sourced application models live under the top-level `benchmarks/` directory.
 
 The shared execution catalog is `evaluation/registry/benchmarks.tsv`. Test rows resolve their source and
 manifest beneath this directory, while application benchmark rows resolve beneath `benchmarks/`.
@@ -44,7 +47,7 @@ not as passes or omitted cases.
 
 The externally provisioned `general--main-actor-priority--negative` boundary case is always visible
 in the external tier. It executes when `RELICO_PARSER_ARTIFACT` names the required parser archive and
-otherwise reports `unavailable`. It remains separate from the 61 registry-backed fixtures.
+otherwise reports `unavailable`. It remains separate from the 65 registry-backed fixtures.
 
 Negative integration cases must name the boundary expected to reject the input, assert the expected
 exit and diagnostic, and forbid downstream artifacts. Formal obligation coverage and executable

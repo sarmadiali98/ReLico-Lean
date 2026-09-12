@@ -1,8 +1,9 @@
-# Real evaluation examples
+# External corpus validation
 
-This directory holds the real-example demonstration runs of the ReLico
-pipeline: the paper's own evaluation corpus, translated and compiled as
-programs, separate from the application benchmark suite under `benchmarks/`.
+This directory holds the external corpus validation runs of the ReLico pipeline: the paper's own
+evaluation corpus, translated and compiled as programs, separate from the application benchmark
+suite under `benchmarks/`. These runs measure pipeline acceptance on unsolicited upstream models;
+they are not included in the translator capability fixture or application benchmark counts.
 
 Nothing here adds to the benchmark registry. The registry is an
 infrastructure validation layer; this area exists to demonstrate

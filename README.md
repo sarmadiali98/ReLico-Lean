@@ -14,7 +14,7 @@ The active executable path is the **General family**. It supports multiple react
 
 The General JSON decoder, elaborator, DTR-to-LF translation, LF printer, focused test catalog, source-to-runtime fixtures, and registry-backed evaluation infrastructure are implemented. Earlier singleton, finite-store, and multi-store families remain as compatibility and regression surfaces with family-specific theorem stacks.
 
-The project is still under active development. The General semantic correspondence interface retains explicit run-level premises, some accepted-fragment decisions lack focused tests, parameterless externally routed messages remain intentionally refused, iteration and several wider Timed Rebeca constructs remain unsupported, and the VMCAI 2027 evaluation suite is not frozen.
+The project is still under active development. The General semantic correspondence interface retains explicit run-level premises; the capability ledger maps every declared fragment capability to executable or formal evidence, while refusal-side focused cases for some well-formedness clauses and the priority tie boundary remain deferred; parameterless externally routed messages remain intentionally refused, iteration and several wider Timed Rebeca constructs remain unsupported, and the VMCAI 2027 evaluation suite is not frozen.
 
 ## Architecture
 
@@ -79,7 +79,7 @@ The test system distinguishes logical software cases, aggregate Lean gates, tran
 
 ## Evaluation
 
-The registry-backed evaluation infrastructure separates 61 translator fixtures from 41 application and source-evidence benchmarks. Registry status and committed manifests describe what is currently implemented; the suite is not a frozen VMCAI artifact evaluation. See [ReLico executable evaluation catalog](evaluation/README.md) and [application benchmarks](benchmarks/README.md).
+The registry-backed evaluation catalog reports five non-additive evidence populations: formal verification evidence, component correctness tests, 65 translator capability fixtures, 41 application benchmarks, and artifact validation, with the upstream corpus screen under `examples/` reported separately as external corpus validation. Every declared General-fragment capability has mapped evidence in the capability ledger, whose rows record any gap as `uncovered` rather than omitting it. Registry status and committed manifests describe what is currently implemented; the suite is not a frozen VMCAI artifact evaluation. See [ReLico executable evaluation catalog](evaluation/README.md) and [application benchmarks](benchmarks/README.md).
 
 ## Repository Structure
 

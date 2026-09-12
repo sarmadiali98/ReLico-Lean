@@ -13,7 +13,7 @@ benchmarks so that the same assertion is not counted more than once.
 - `catalog/claims.json` states the paper-facing claims supported by each evidence class and the
   limitations of that support.
 - `catalog/validate_catalog.py` checks catalogs, registries, fixture manifests, executable discovery,
-  stage names, and the fixed 61 translator-fixture / 41 application-benchmark split.
+  stage names, and the fixed 65 translator-fixture / 41 application-benchmark split.
 - `translator/` contains focused software catalogs and source-to-runtime translator fixtures.
 
 The verified object is the executable Lean DTR-to-LF translation for each family's declared fragment
@@ -53,8 +53,14 @@ Generated evidence is written to `.test-results/` as `summary.json`, `cases.json
 
 ## Paper metrics
 
-Report translator logical cases, formal declarations/obligations, and application benchmarks as
-three non-additive populations. A logical case remains one case when it crosses multiple pipeline
-stages. The `RelicoTests` aggregate build is formal gate evidence and does not add another logical
-case. Missing external tools or artifacts are `unavailable`, never silently omitted or reported as
-passing.
+Report the evaluation as five non-additive populations: formal verification evidence (187 accepted
+Lean test modules and 2,579 mapped theorem obligations, with their residues), component
+correctness tests (59 focused Lean cases and 117 Python infrastructure and contract cases),
+translator capability fixtures (the 65 registry-backed source-to-runtime examples), application
+benchmarks (the 41 realistic-system models under `benchmarks/`), and artifact validation (catalog
+and registry self-checks). The upstream corpus runs under `examples/tier2/` are external corpus
+validation and are reported separately from every population above. The executable populations
+count 242 logical software cases in total; a logical case remains one
+case when it crosses multiple pipeline stages. The `RelicoTests` aggregate build is formal gate
+evidence and does not add another logical case. Missing external tools or artifacts are
+`unavailable`, never silently omitted or reported as passing.

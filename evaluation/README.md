@@ -2,23 +2,52 @@
 
 This directory contains the shared registry and schemas for two semantically distinct suites:
 
-- 61 translator conformance and regression tests under `tests/translator/`;
+- 65 translator capability fixtures under `tests/translator/`;
 - 41 source-evidence and application benchmarks under `benchmarks/`.
 
-Both suites use the same artifact-producing pipeline, but they are separated because translator
-correctness tests and empirical application benchmarks answer different questions.
+Both suites use the same artifact-producing pipeline, but they are separated because capability
+demonstration and empirical application benchmarks answer different questions.
+
+## Evaluation populations
+
+The artifact reports five non-additive evidence populations, plus one external screen:
+
+- **Formal verification evidence**: 187 accepted Lean test modules with 2,579 mapped theorem
+  obligations, and their residues.
+- **Component correctness tests**: 59 focused Lean cases plus 117 Python infrastructure and
+  contract tests, including parser/frontend contract tests.
+- **Translator capability fixtures**: the 65 registry-backed source-to-runtime examples under
+  `tests/translator/`, organized by semantic capability family; each demonstrates a supported
+  translator capability or an expected rejection boundary.
+- **Application benchmarks**: the 41 realistic-system benchmarks under `benchmarks/`, with
+  source-level RMC properties, evaluating corpus applicability.
+- **Artifact validation**: catalog, registry, and reproducibility self-checks.
+
+The upstream corpus runs under `examples/tier2/` are **external corpus validation**: an acceptance
+screen over unsolicited external models. They are reported separately and are not included in the
+capability-fixture or application-benchmark counts.
+
+The executable populations together count 242 logical software cases: 65 capability fixtures,
+59 focused Lean cases, 117 Python cases, and one external-parser-gated case. Formal obligations
+are not logical cases and are never added to that total.
+
+The capability ledger mapping every declared General-fragment capability to its evidence is
+[`tests/catalog/general-accepted-fragment.tsv`](../tests/catalog/general-accepted-fragment.tsv).
+As of the completed capability suite, every declared capability has mapped evidence and no row is
+`uncovered`; the `uncovered` marker remains the ledger's honest state for any future gap, rather
+than silent omission.
 
 ## Registry and Current Population
 
-The registry originated as a reviewed 102-row source plan. The current catalog partitions those
-rows into 61 translator fixtures and 41 application benchmarks. "Planned" describes the registry's
-provenance, not every row's current implementation status; `benchmarks.tsv` and the corresponding
-manifests determine current status.
+The registry originated as a reviewed 102-row source plan and has been amended since. The current
+catalog holds 106 rows: 65 translator capability fixtures and 41 application benchmarks. "Planned"
+describes the registry's provenance, not every row's current implementation status;
+`benchmarks.tsv` and the corresponding manifests determine current status.
 
 The registry directory contains:
 
-- `benchmarks.tsv` records suite placement, required stages, and implementation status for 102 rows
-- obligations.tsv maps all 2,468 Lean test obligations
+- `benchmarks.tsv` records suite placement, required stages, and implementation status for 106 rows
+- obligations.tsv maps all 2,579 Lean test obligations
 - shared-formal-evidence.tsv records formal evidence that shares a
   concrete source benchmark
 - source-model-plan.tsv records planned source locations
@@ -66,6 +95,24 @@ Applicable later stages include:
 
 Negative benchmarks must declare their expected terminal stage. No later
 artifact may be fabricated after an expected rejection.
+
+## Source-level assertion evidence
+
+The Stage 6 assertion inventory is in [`rmc-property-inventory.tsv`](rmc-property-inventory.tsv),
+with paper-ready summary and scaling tables in [`rmc-property-summary.md`](rmc-property-summary.md).
+These files consolidate benchmark manifests, benchmark-local `.property` files, README
+interpretations, and pinned `expected/rmc-properties/results.json` snapshots.
+
+All accepted semantic properties use RMC `Assertion` logic over the adapted Timed Rebeca source.
+`TRUE` means RMC found no reachable post-transition state violating the assertion; `FALSE` means
+RMC produced a counterexample. Expected-`FALSE` rows are intentional reachability or negative
+witnesses, not liveness claims or failed verification. A successful monitor-contract check only
+shows that the monitor did not reach its violation condition; it does not establish that the
+monitored event occurred. These source-level checks do not establish preservation through the
+Lean/LF translation pipeline, and no TCTL result is claimed.
+
+Election is reported separately as validation of the generic property infrastructure. It is not
+part of the semantic corpus and is excluded from its benchmark, verdict, and category totals.
 
 ## Runner Interfaces
 

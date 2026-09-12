@@ -11,22 +11,27 @@ since. The counts below are the CURRENT registry contents, not the
 checkpoint's; `tools/relico_bench_registry.py --validate` enforces them
 against benchmarks.tsv and obligations.tsv on every run.
 
-The registry currently contains 61 translator tests and 41 application benchmarks:
+The registry currently contains 65 translator capability fixtures and 41 application benchmarks:
 
-- 183 accepted Lean test modules
-- 2,468 mapped test obligations
-- 102 registered source cases, partitioned into 61 translator fixtures and 41 application benchmarks
-- 101 positive benchmarks
+- 187 accepted Lean test modules
+- 2,579 mapped test obligations
+- 106 registered source cases, partitioned into 65 translator capability fixtures and 41 application benchmarks
+- 105 positive benchmarks
 - 1 negative benchmark
 - zero unresolved modules
 - zero unmapped obligations
 
 ## The general family, and the obligation-extraction convention
 
-The general family's ten rows and 339 obligations were added after the freeze,
+The general family's first ten rows and 339 obligations were added after the freeze,
 from the eleven `Relico/Tests/General*.lean` modules that the frozen scan had
 never covered. `tools/relico_bench_registry.py --validate` enforces their counts
-with every other row's.
+with every other row's. A later amendment added four capability fixtures --
+`general--zero-delay-send--positive`, `general--nested-conditional--positive`,
+`general--constructor-arguments--positive`, and `general--fan-in--positive` --
+with their four dedicated pin modules and 111 obligations appended under the
+same recovered extraction convention, closing the accepted capabilities that
+the capability ledger recorded as uncovered.
 
 The scanner that produced the original 2,129 rows was never committed, so its
 convention had to be recovered from the frozen rows and falsified against them
@@ -53,7 +58,7 @@ marking the boundary:
   `class` declaration exists anywhere under `Relico/Tests`, which makes all 23
   `class` rows in the frozen half the same artifact.
 
-Repairing either would have to move all 2,468 rows in one pass, which is a
+Repairing either would have to move all 2,579 rows in one pass, which is a
 separate task from adding a family.
 
 ## Candidate source models
