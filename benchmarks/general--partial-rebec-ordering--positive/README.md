@@ -22,7 +22,7 @@ Two independent medium-receiver chains are armed together, ordered within a chai
 
 ## Stages
 
-8 stages, terminal `runtime`: source, rmc, parser-json, decoded-dtr-ast, translated-lf-ast, lf-source, lfc, runtime. This row owns no Lean obligations, so it carries no formal-witness stage; its evidence is the pipeline artifacts themselves.
+9 stages, terminal `runtime`: source, rmc, rmc-properties, parser-json, decoded-dtr-ast, translated-lf-ast, lf-source, lfc, runtime. The source-level assertion checks the observed two-chain acknowledgement count bound in the adapted Timed Rebeca source.
 
 ## Keep-alive
 

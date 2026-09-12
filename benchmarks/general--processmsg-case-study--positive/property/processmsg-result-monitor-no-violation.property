@@ -1,0 +1,9 @@
+property {
+    define {
+        NoCheckerViolation = (chk.violation == 0);
+    }
+
+    Assertion {
+        ProcessMsg_NoCheckerViolation : NoCheckerViolation;
+    }
+}

@@ -1,0 +1,11 @@
+property {
+    define {
+        CoordinationBounded = (coord.epoch >= 0) && (coord.epoch <= 8) &&
+                              (coord.seen >= 0) && (coord.seen <= 2) &&
+                              (coord.violation == 0);
+    }
+
+    Assertion {
+        CheckpointBarrier2_CoordinationBounded : CoordinationBounded;
+    }
+}

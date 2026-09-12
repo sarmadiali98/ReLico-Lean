@@ -13,6 +13,11 @@
       "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
     },
     {
+      "path": "rmc-properties/results.json",
+      "required": true,
+      "sha256": "e1ae9341a0a9aeb3890eb0f2c4c60df023b52552ca49050c3c6b7d366cf4b225"
+    },
+    {
       "path": "parser-json/model.json",
       "required": true,
       "sha256": "875aacac5abb68dbb0e0d2c0621cb10bc4d7d6975dc4b210e998a273e95ddab0"
@@ -49,6 +54,17 @@
   "source_files": [
     "source/model.rebeca"
   ],
+  "properties": [
+    {
+      "property_id": "partial-rebec-acknowledgement-bound-invariant",
+      "logic": "Assertion",
+      "rmc_name": "PartialRebec_ResolutionBounded",
+      "expected": "TRUE",
+      "source": "property/partial-rebec-acknowledgement-bound-invariant.property",
+      "required": true,
+      "description": "Source-level assertion that at most one ordered chain is resolved before the sender re-arms."
+    }
+  ],
   "stages": [
     {
       "command": [
@@ -84,6 +100,31 @@
       ],
       "name": "rmc",
       "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc-properties",
+        "--benchmark-id",
+        "general--partial-rebec-ordering--positive",
+        "--benchmark",
+        "{benchmark}",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc-properties/results.json"
+      ],
+      "name": "rmc-properties",
+      "timeout_seconds": 1800
     },
     {
       "command": [

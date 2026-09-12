@@ -10,6 +10,8 @@ import subprocess
 import sys
 import xml.etree.ElementTree as ET
 
+from relico_bench_properties import validate_properties
+
 RMC_SHA256 = "a39112046d99e0895cf47f890242ace21db896e609f7eef86751a0d416d477f5"
 PARSER_ZIP_SHA256 = "b58052952cb753d554696dd1c23dc4c43f43648228221a8ff2f494311dc41586"
 LFC_SHA256 = "a8e277076ef578a677fdf7731d95d3ee745e47266ea68d37a673f44bf069cf8a"
@@ -192,6 +194,248 @@ def rmc_stage(options: argparse.Namespace) -> None:
         },
     )
 
+
+def _capture_command(
+    command: list[str],
+    *,
+    timeout: int,
+) -> tuple[subprocess.CompletedProcess[str] | None, str | None]:
+    try:
+        return subprocess.run(
+            command,
+            text=True,
+            capture_output=True,
+            timeout=timeout,
+            check=False,
+        ), None
+    except subprocess.TimeoutExpired as error:
+        stdout = error.stdout or ""
+        stderr = error.stderr or ""
+        if isinstance(stdout, bytes):
+            stdout = stdout.decode(errors="replace")
+        if isinstance(stderr, bytes):
+            stderr = stderr.decode(errors="replace")
+        return None, f"command timed out after {timeout} seconds\n{stdout}{stderr}"
+    except OSError as error:
+        return None, f"command could not start: {error}"
+
+
+def _write_process_artifacts(
+    raw: Path,
+    prefix: str,
+    completed: subprocess.CompletedProcess[str] | None,
+    diagnostic: str | None,
+) -> None:
+    raw.mkdir(parents=True, exist_ok=True)
+    (raw / f"{prefix}.stdout").write_text(
+        completed.stdout if completed is not None else "", encoding="utf-8"
+    )
+    (raw / f"{prefix}.stderr").write_text(
+        completed.stderr if completed is not None else (diagnostic or ""),
+        encoding="utf-8",
+    )
+    (raw / f"{prefix}.exit-code").write_text(
+        f"{completed.returncode}\n" if completed is not None else "not-available\n",
+        encoding="utf-8",
+    )
+
+
+def _property_result(
+    metadata: dict[str, object],
+    *,
+    actual: str,
+    phase: str,
+    counterexample: dict[str, object] | None = None,
+    diagnostic: str | None = None,
+) -> dict[str, object]:
+    expected = str(metadata["expected"])
+    comparison = "MATCH" if actual in {"TRUE", "FALSE"} and actual == expected else "MISMATCH"
+    return {
+        "property_id": metadata["property_id"],
+        "logic": metadata["logic"],
+        "rmc_name": metadata["rmc_name"],
+        "required": metadata["required"],
+        "expected": expected,
+        "actual": actual,
+        "comparison": comparison,
+        "phase": phase,
+        "counterexample": counterexample,
+        "diagnostic": diagnostic,
+    }
+
+
+def normalize_generation(
+    completed: subprocess.CompletedProcess[str] | None,
+    *,
+    generated_cpp: bool,
+) -> tuple[str | None, str | None]:
+    if completed is None:
+        return "TIMEOUT", "RMC property generation timed out"
+    output = completed.stdout + completed.stderr
+    if not generated_cpp or "Errors:" in output or "Unexpected exception:" in output:
+        return "ERROR", "RMC property generation failed; see raw generation diagnostics"
+    return None, None
+
+
+def normalize_assertion_xml(
+    xml_text: str,
+    rmc_name: str,
+) -> tuple[str, str, str | None]:
+    try:
+        report = ET.fromstring(xml_text)
+    except ET.ParseError:
+        return "ERROR", "checker", "checker report is not valid XML"
+    raw_result = report.findtext("./checked-property/result")
+    message = report.findtext("./checked-property/message")
+    if raw_result is None:
+        return "ERROR", "checker", "checker report lacks a result"
+    if raw_result.strip() == "satisfied":
+        return "TRUE", "complete", None
+    if raw_result.strip() == "assertion failed" and (message or "").strip() == rmc_name:
+        return "FALSE", "checker", None
+    return (
+        "ERROR",
+        "checker",
+        f"unexpected checker result {raw_result!r} with message {message!r}",
+    )
+
+
+def required_property_mismatches(
+    results: list[dict[str, object]],
+) -> list[dict[str, object]]:
+    return [
+        result
+        for result in results
+        if result["required"] and result["comparison"] == "MISMATCH"
+    ]
+
+
+def rmc_properties_stage(options: argparse.Namespace) -> None:
+    source = Path(options.source).resolve()
+    benchmark = Path(options.benchmark).resolve()
+    actual = Path(options.actual).resolve()
+    jar = Path(options.rmc_jar).resolve()
+    java = Path(options.java).resolve()
+    cxx = Path(options.cxx).resolve()
+    output = Path(options.output).resolve()
+
+    require_file(source, "benchmark source")
+    require_hash(jar, RMC_SHA256, "RMC 2.14 JAR")
+    require_file(java, "Java executable")
+    require_file(cxx, "C++ compiler")
+    manifest = json.loads((benchmark / "manifest.json").read_text(encoding="utf-8"))
+    properties = validate_properties(
+        benchmark_id=options.benchmark_id,
+        benchmark_directory=benchmark,
+        properties=manifest.get("properties"),
+        error_type=StageError,
+    )
+    work_root = actual / "work" / "rmc-properties"
+    raw_root = actual / "rmc-properties" / "raw"
+    if work_root.exists():
+        shutil.rmtree(work_root)
+    if raw_root.exists():
+        shutil.rmtree(raw_root)
+    work_root.mkdir(parents=True)
+    results: list[dict[str, object]] = []
+
+    for metadata in properties:
+        property_id = str(metadata["property_id"])
+        raw = raw_root / property_id
+        if metadata["logic"] == "TCTL":
+            results.append(_property_result(
+                metadata,
+                actual="UNSUPPORTED",
+                phase="unsupported",
+                diagnostic="RMC 2.14 emits tctl.spec but does not evaluate named TCTL formulas",
+            ))
+            continue
+
+        workspace = work_root / property_id
+        generated = workspace / "generated"
+        checker = workspace / "rmc-model-checker"
+        generated.mkdir(parents=True)
+        generation, generation_error = _capture_command(
+            [
+                str(java), "-jar", str(jar), "-s", str(source),
+                "-p", str((benchmark / str(metadata["source"])).resolve()),
+                "-o", str(generated), "-v", "2.1", "-e", "TIMED_REBECA",
+            ],
+            timeout=options.generation_timeout,
+        )
+        _write_process_artifacts(raw, "generation", generation, generation_error)
+        cpp_files = sorted(generated.glob("*.cpp"))
+        generation_actual, generation_diagnostic = normalize_generation(
+            generation, generated_cpp=bool(cpp_files)
+        )
+        if generation_actual is not None:
+            results.append(_property_result(
+                metadata,
+                actual=generation_actual,
+                phase="generation",
+                diagnostic=generation_error or generation_diagnostic,
+            ))
+            continue
+
+        compilation, compilation_error = _capture_command(
+            [
+                str(cxx), "-std=c++17", "-O2", "-pthread", "-I", str(generated),
+                *[str(path) for path in cpp_files], "-o", str(checker),
+            ],
+            timeout=options.compilation_timeout,
+        )
+        _write_process_artifacts(raw, "checker-compilation", compilation, compilation_error)
+        if compilation is None:
+            results.append(_property_result(metadata, actual="TIMEOUT", phase="checker-compile", diagnostic=compilation_error))
+            continue
+        if compilation.returncode != 0 or not checker.is_file():
+            results.append(_property_result(metadata, actual="ERROR", phase="checker-compile", diagnostic="generated checker compilation failed"))
+            continue
+
+        xml_path = raw / "checker.xml"
+        checker_run, checker_error = _capture_command(
+            [str(checker), "-o", str(xml_path)], timeout=options.checker_timeout
+        )
+        _write_process_artifacts(raw, "checker", checker_run, checker_error)
+        if checker_run is None:
+            results.append(_property_result(metadata, actual="TIMEOUT", phase="checker", diagnostic=checker_error))
+            continue
+        if not xml_path.is_file():
+            results.append(_property_result(metadata, actual="ERROR", phase="checker", diagnostic="checker produced no XML report"))
+            continue
+        actual_value, phase, diagnostic = normalize_assertion_xml(
+            xml_path.read_text(encoding="utf-8"), str(metadata["rmc_name"])
+        )
+        # RMC assertion checks occur after transitions, not directly on the initial state.
+        counterexample = (
+            {"available": True, "path": f"rmc-properties/raw/{property_id}/checker.xml"}
+            if actual_value == "FALSE"
+            else None
+        )
+        results.append(_property_result(
+            metadata,
+            actual=actual_value,
+            phase=phase,
+            counterexample=counterexample,
+            diagnostic=diagnostic,
+        ))
+
+    matched = sum(result["comparison"] == "MATCH" for result in results)
+    value = {
+        "schema_version": 1,
+        "benchmark_id": options.benchmark_id,
+        "target": "adapted-timed-rebeca-source",
+        "rmc_version": "2.14",
+        "properties": results,
+        "summary": {"matched": matched, "mismatched": len(results) - matched},
+    }
+    write_json(output, value)
+    required_mismatches = required_property_mismatches(results)
+    if required_mismatches:
+        raise StageError(
+            "required RMC properties mismatched: "
+            + ", ".join(str(result["property_id"]) for result in required_mismatches)
+        )
 
 def parser_json_stage(options: argparse.Namespace) -> None:
     repo = Path(options.repo).resolve()
@@ -889,6 +1133,20 @@ def build_parser() -> argparse.ArgumentParser:
     rmc.add_argument("--output", required=True)
     rmc.set_defaults(handler=rmc_stage)
 
+    rmc_properties = subparsers.add_parser("rmc-properties")
+    rmc_properties.add_argument("--benchmark-id", required=True)
+    rmc_properties.add_argument("--benchmark", required=True)
+    rmc_properties.add_argument("--source", required=True)
+    rmc_properties.add_argument("--actual", required=True)
+    rmc_properties.add_argument("--rmc-jar", required=True)
+    rmc_properties.add_argument("--java", required=True)
+    rmc_properties.add_argument("--cxx", required=True)
+    rmc_properties.add_argument("--output", required=True)
+    rmc_properties.add_argument("--generation-timeout", type=int, default=180)
+    rmc_properties.add_argument("--compilation-timeout", type=int, default=180)
+    rmc_properties.add_argument("--checker-timeout", type=int, default=600)
+    rmc_properties.set_defaults(handler=rmc_properties_stage)
+
     parser_json = subparsers.add_parser("parser-json")
     parser_json.add_argument(
         "--family",
@@ -1312,9 +1570,15 @@ def _relico_extended_trust_report_main(argv):
         _args.shared_formal_registry
     ).resolve()
 
-    _repo = _shared_path.parents[
-        3
-    ]
+    # The repository root is derived from this tool's own location, not from
+    # the shared-formal registry path: the registry moved from
+    # tests/benchmarks/registry/ (four levels below the root) to
+    # evaluation/registry/ (three levels), and a path-depth derivation broke
+    # silently when it did. tools/relico_bench_stage.py always sits exactly
+    # one level below the root.
+    _repo = _Path(
+        __file__
+    ).resolve().parents[1]
 
     _formal_modules = []
 

@@ -1,0 +1,39 @@
+{
+  "benchmark_id": "general--tinyostdma-case-study--positive",
+  "properties": [
+    {
+      "actual": "TRUE",
+      "comparison": "MATCH",
+      "counterexample": null,
+      "diagnostic": null,
+      "expected": "TRUE",
+      "logic": "Assertion",
+      "phase": "complete",
+      "property_id": "tinyostdma-send-overlap-invariant",
+      "required": true,
+      "rmc_name": "TinyOSTDMA_NoOverlappingSend"
+    },
+    {
+      "actual": "FALSE",
+      "comparison": "MATCH",
+      "counterexample": {
+        "available": true,
+        "path": "rmc-properties/raw/tinyostdma-accepted-transmission-witness/checker.xml"
+      },
+      "diagnostic": null,
+      "expected": "FALSE",
+      "logic": "Assertion",
+      "phase": "checker",
+      "property_id": "tinyostdma-accepted-transmission-witness",
+      "required": true,
+      "rmc_name": "TinyOSTDMA_MediumNeverCarriesTransmission"
+    }
+  ],
+  "rmc_version": "2.14",
+  "schema_version": 1,
+  "summary": {
+    "matched": 2,
+    "mismatched": 0
+  },
+  "target": "adapted-timed-rebeca-source"
+}

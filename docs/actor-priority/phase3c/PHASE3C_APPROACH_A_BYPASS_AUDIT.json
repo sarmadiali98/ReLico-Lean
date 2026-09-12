@@ -390,7 +390,7 @@
   },
   "inputs": {
     "fixture_source": {
-      "path": "/Users/ali/Desktop/ReLico-Actor-Priority-Investigation/tests/actor-priority/approach-a-single-main-actor-payload-exclusion/source/model.rebeca",
+      "path": "tests/translator/general--main-actor-priority--negative/source/model.rebeca",
       "sha256": "61d84567aeb3b30461320839f68f4fc584e95584d359f0f9e1a2efd8321ae365"
     },
     "parser_artifact": {

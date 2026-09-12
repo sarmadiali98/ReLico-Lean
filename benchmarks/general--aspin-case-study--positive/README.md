@@ -14,8 +14,10 @@ from `r00` to `r23`; a manager restarts the designated source path after 700 tim
 
 ## Stages
 
-8 stages, terminal `runtime`: `source`, `rmc`, `parser-json`, `decoded-dtr-ast`,
+9 stages, terminal `runtime`: `source`, `rmc`, `rmc-properties`, `parser-json`, `decoded-dtr-ast`,
 `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm.
+The expected-`FALSE` source-level assertion provides a counterexample witness for an observed
+positive receipt count at `r23`; it does not identify a packet, route, or deadline outcome.
 
 ## Evidence
 

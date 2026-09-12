@@ -4,6 +4,7 @@
   "expected_artifacts": [
     {"path": "source/result.json", "required": true, "sha256": "996419af800dec480272684d86da8294a3c049bba2612fc1c066fdc75e583feb"},
     {"path": "rmc/verdict.json", "required": true, "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"},
+    {"path": "rmc-properties/results.json", "required": true, "sha256": "896881b58b13ac898e60e2f1113f504f41203e1be966444d4bec5d1fb0ec8f4d"},
     {"path": "parser-json/model.json", "required": true, "sha256": "b5bd4cd222c56e612548f33dbd7aa5666db95ba9d9aca14365b574704e94dd3c"},
     {"path": "decoded-dtr-ast/model.txt", "required": true, "sha256": "75cae7a17ac4662106ad08b56ad1cf64a4978db454ef285387585b2e5cb1cd5f"},
     {"path": "translated-lf-ast/program.txt", "required": true, "sha256": "372193ed258e0b5679e830eac18262dbc89e1c0a223b63e32a7c35e735987880"},
@@ -15,9 +16,13 @@
   "polarity": "positive",
   "schema_version": 1,
   "source_files": ["source/model.rebeca"],
+  "properties": [
+    {"property_id": "aspin-packet-receipt-witness", "logic": "Assertion", "rmc_name": "ASPIN_PacketNeverDelivered", "expected": "FALSE", "source": "property/aspin-packet-receipt-witness.property", "required": true, "description": "Expected-FALSE source-level assertion whose counterexample witnesses an observed positive receipt count at router r23."}
+  ],
   "stages": [
     {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "source", "--benchmark-id", "general--aspin-case-study--positive", "--source", "{source}", "--output", "{actual}/source/result.json"], "name": "source"},
     {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "rmc", "--source", "{source}", "--actual", "{actual}", "--rmc-jar", "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar", "--java", "/usr/bin/java", "--cxx", "/usr/bin/clang++", "--output", "{actual}/rmc/verdict.json"], "name": "rmc", "timeout_seconds": 600},
+    {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "rmc-properties", "--benchmark-id", "general--aspin-case-study--positive", "--benchmark", "{benchmark}", "--source", "{source}", "--actual", "{actual}", "--rmc-jar", "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar", "--java", "/usr/bin/java", "--cxx", "/usr/bin/clang++", "--output", "{actual}/rmc-properties/results.json"], "name": "rmc-properties", "timeout_seconds": 1800},
     {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "parser-json", "--family", "general", "--repo", "{repo}", "--source", "{source}", "--actual", "{actual}", "--artifact-zip", "/Users/ali/Desktop/LFStructuringNonDeterminism/ReLico-fmcad-2026-artifact-v1.zip", "--maven", "/opt/homebrew/Cellar/maven/3.9.16/bin/mvn", "--output", "{actual}/parser-json/model.json"], "name": "parser-json", "timeout_seconds": 600},
     {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "lean-export", "--family", "general", "--mode", "decoded-dtr-ast", "--repo", "{repo}", "--lake", "/Users/ali/.elan/bin/lake", "--input", "{actual}/parser-json/model.json", "--output", "{actual}/decoded-dtr-ast/model.txt"], "name": "decoded-dtr-ast", "timeout_seconds": 600},
     {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "lean-export", "--family", "general", "--mode", "translated-lf-ast", "--repo", "{repo}", "--lake", "/Users/ali/.elan/bin/lake", "--input", "{actual}/parser-json/model.json", "--output", "{actual}/translated-lf-ast/program.txt"], "name": "translated-lf-ast", "timeout_seconds": 600},

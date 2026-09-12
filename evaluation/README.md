@@ -92,6 +92,7 @@ Applicable later stages include:
 - LF source printing
 - lfc compilation
 - native runtime execution
+- source-level RMC assertion property checking (property-bearing benchmarks)
 
 Negative benchmarks must declare their expected terminal stage. No later
 artifact may be fabricated after an expected rejection.

@@ -12,6 +12,7 @@
       "required": true,
       "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
     },
+    {"path": "rmc-properties/results.json", "required": true, "sha256": "63bd2c22dff75c5c703c86452b74aeb1384087dce2e2f2371554a331968bad30"},
     {
       "path": "parser-json/model.json",
       "required": true,
@@ -49,6 +50,17 @@
   "source_files": [
     "source/model.rebeca"
   ],
+  "properties": [
+    {
+      "property_id": "autonomousvehicles-completion-coherence-invariant",
+      "logic": "Assertion",
+      "rmc_name": "AutonomousVehicles_CompletionCoherent",
+      "expected": "TRUE",
+      "source": "property/autonomousvehicles-completion-coherence-invariant.property",
+      "required": true,
+      "description": "Source-level assertion that the observed aggregate completion latch agrees with both per-vehicle traversal latches."
+    }
+  ],
   "stages": [
     {
       "command": [
@@ -84,6 +96,11 @@
       ],
       "name": "rmc",
       "timeout_seconds": 600
+    },
+    {
+      "command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "rmc-properties", "--benchmark-id", "general--autonomousvehicles-case-study--positive", "--benchmark", "{benchmark}", "--source", "{source}", "--actual", "{actual}", "--rmc-jar", "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar", "--java", "/usr/bin/java", "--cxx", "/usr/bin/clang++", "--output", "{actual}/rmc-properties/results.json"],
+      "name": "rmc-properties",
+      "timeout_seconds": 1800
     },
     {
       "command": [

@@ -17,6 +17,7 @@ from relico_bench_registry import (
     benchmark_directory,
     find_benchmark,
 )
+from relico_bench_properties import validate_properties
 
 
 class ExecutionError(RuntimeError):
@@ -445,6 +446,13 @@ def load_manifest(
                 f"{benchmark_id}: artifact SHA-256 is invalid"
             )
 
+    validate_properties(
+        benchmark_id=benchmark_id,
+        benchmark_directory=benchmark_directory,
+        properties=manifest.get("properties"),
+        error_type=ExecutionError,
+    )
+
     return benchmark_directory, manifest
 
 
@@ -738,6 +746,7 @@ def verify_expected_artifacts(
     benchmark_id: str,
     manifest: dict[str, Any],
     actual_root: Path,
+    expected_root: Path | None = None,
 ) -> list[str]:
     artifacts = manifest.get(
         "expected_artifacts",
@@ -765,6 +774,11 @@ def verify_expected_artifacts(
             )
 
         path = actual_root / relative
+        expected_path = (
+            expected_root / relative
+            if expected_root is not None
+            else None
+        )
         required = bool(
             artifact.get(
                 "required",
@@ -778,6 +792,26 @@ def verify_expected_artifacts(
             )
 
             continue
+
+        if (
+            required
+            and expected_path is not None
+            and not expected_path.is_file()
+        ):
+            failures.append(
+                f"missing committed expected artifact: {relative}"
+            )
+            continue
+
+        if (
+            path.is_file()
+            and expected_path is not None
+            and expected_path.is_file()
+            and path.read_bytes() != expected_path.read_bytes()
+        ):
+            failures.append(
+                f"artifact differs from committed expected file: {relative}"
+            )
 
         expected_sha256 = artifact.get(
             "sha256"
@@ -1040,6 +1074,7 @@ def run_benchmark(
             benchmark_id,
             manifest,
             actual_root,
+            benchmark_directory_path / "expected",
         )
     )
 

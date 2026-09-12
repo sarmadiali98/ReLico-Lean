@@ -22,7 +22,7 @@ One message is fanned out to four receivers armed together, in whatever order th
 
 ## Stages
 
-8 stages, terminal `runtime`: source, rmc, parser-json, decoded-dtr-ast, translated-lf-ast, lf-source, lfc, runtime. This row owns no Lean obligations, so it carries no formal-witness stage; its evidence is the pipeline artifacts themselves.
+9 stages, terminal `runtime`: source, rmc, rmc-properties, parser-json, decoded-dtr-ast, translated-lf-ast, lf-source, lfc, runtime. The source-level assertion checks the observed acknowledgement count bound in the adapted Timed Rebeca source.
 
 ## Keep-alive
 

@@ -1,0 +1,9 @@
+property {
+    define {
+        PayloadIntegrity = (chk.violation == 0);
+    }
+
+    Assertion {
+        PingPong_PayloadIntegrity : PayloadIntegrity;
+    }
+}

@@ -1,0 +1,9 @@
+property {
+    define {
+        BothStationsNeverRespond = (user1.data != 1) || (user2.data != 1);
+    }
+
+    Assertion {
+        TCSMA_BothStationsNeverRespond : BothStationsNeverRespond;
+    }
+}

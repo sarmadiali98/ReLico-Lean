@@ -1,0 +1,9 @@
+property {
+    define {
+        HeaterNeverTurnsOn = (heater1.on == false);
+    }
+
+    Assertion {
+        SmartHome_HeaterNeverTurnsOn : HeaterNeverTurnsOn;
+    }
+}

@@ -34,25 +34,25 @@
   "installed_artifacts": [
     {
       "executable": false,
-      "path": "tests/actor-priority/approach-a-single-main-actor-payload-exclusion/source/model.rebeca",
+      "path": "tests/translator/general--main-actor-priority--negative/source/model.rebeca",
       "role": "fixture-source",
       "sha256": "61d84567aeb3b30461320839f68f4fc584e95584d359f0f9e1a2efd8321ae365"
     },
     {
       "executable": false,
-      "path": "tests/actor-priority/approach-a-single-main-actor-payload-exclusion/manifest.json",
+      "path": "tests/translator/general--main-actor-priority--negative/case.json",
       "role": "fixture-manifest",
       "sha256": "f7233ea1731715febaf6dd8e0b38de4964380d956e2f4a9654b77a1cee2c284a"
     },
     {
       "executable": false,
-      "path": "tests/actor-priority/approach-a-single-main-actor-payload-exclusion/expected/frontend-output-required-substring.txt",
+      "path": "tests/translator/general--main-actor-priority--negative/expected/frontend-output-required-substring.txt",
       "role": "expected-diagnostic",
       "sha256": "ff89c0804608c13a3f2ab786caeff862e8d43d898b7d0b84260dbdf93ce2a7db"
     },
     {
       "executable": true,
-      "path": "tests/actor-priority/approach-a-single-main-actor-payload-exclusion/run-approach-a-exclusion.sh",
+      "path": "tests/translator/general--main-actor-priority--negative/run-test.sh",
       "role": "permanent-runner",
       "sha256": "594286bcca32d4c63df36aeeb449385230af8c26fbc276ec867e93b8f8f2d073"
     }
@@ -142,7 +142,7 @@
     "multi_actor_obligation_deferred_to": "Approach B",
     "multi_actor_registry_obligation": "global-multi-actor-payload--priority-selection--negative",
     "multi_actor_registry_status": "planned",
-    "permanent_fixture": "tests/actor-priority/approach-a-single-main-actor-payload-exclusion"
+    "permanent_fixture": "tests/translator/general--main-actor-priority--negative"
   },
   "validation": {
     "boundary_direct_elaboration_passed": true,

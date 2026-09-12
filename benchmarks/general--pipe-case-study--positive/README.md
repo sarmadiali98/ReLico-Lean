@@ -15,7 +15,7 @@ five instances.
 
 ## Stages
 
-8 stages, terminal `runtime`: `source`, `rmc`, `parser-json`, `decoded-dtr-ast`,
+9 stages, terminal `runtime`: `source`, `rmc`, `rmc-properties`, `parser-json`, `decoded-dtr-ast`,
 `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm.
 
 ## Evidence
@@ -27,3 +27,8 @@ five instances.
 - `lfc 0.11.0` compiles the generated C++ target;
 - the generated runtime exits successfully under the 5 msec logical-time budget;
 - all eight pipeline artifacts are preserved and SHA-256-pinned in `manifest.json`.
+
+## Semantic property
+
+The benchmark-local RMC assertion checks the endpoint monitor for corruption of the pipeline value.
+It is a monitor-safety property, not independent evidence that the endpoint is reached.

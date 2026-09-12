@@ -13,6 +13,11 @@
       "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
     },
     {
+      "path": "rmc-properties/results.json",
+      "required": true,
+      "sha256": "0532d33fa8c77b70741df2a95e121b67a302c66fb0515891cde0913ff0d77fc3"
+    },
+    {
       "path": "parser-json/model.json",
       "required": true,
       "sha256": "b5dd051951255ffabf005458143ab3b347e8375feeefcdf3183342f1a922c948"
@@ -49,6 +54,17 @@
   "source_files": [
     "source/model.rebeca"
   ],
+  "properties": [
+    {
+      "property_id": "alarm-shutdown-failure-witness",
+      "logic": "Assertion",
+      "rmc_name": "Alarm_NoStopFailure",
+      "expected": "FALSE",
+      "source": "property/alarm-shutdown-failure-witness.property",
+      "required": true,
+      "description": "Expected-FALSE source-level assertion whose counterexample witnesses the shutdown failure."
+    }
+  ],
   "stages": [
     {
       "command": [
@@ -84,6 +100,31 @@
       ],
       "name": "rmc",
       "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc-properties",
+        "--benchmark-id",
+        "general--alarm-case-study--positive",
+        "--benchmark",
+        "{benchmark}",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc-properties/results.json"
+      ],
+      "name": "rmc-properties",
+      "timeout_seconds": 1200
     },
     {
       "command": [

@@ -1,0 +1,39 @@
+{
+  "benchmark_id": "general--election-case-study--positive",
+  "properties": [
+    {
+      "actual": "TRUE",
+      "comparison": "MATCH",
+      "counterexample": null,
+      "diagnostic": null,
+      "expected": "TRUE",
+      "logic": "Assertion",
+      "phase": "complete",
+      "property_id": "election-no-wrong-winner",
+      "required": true,
+      "rmc_name": "Election_NoWrongWinner"
+    },
+    {
+      "actual": "FALSE",
+      "comparison": "MATCH",
+      "counterexample": {
+        "available": true,
+        "path": "rmc-properties/raw/election-node1-not-elected/checker.xml"
+      },
+      "diagnostic": null,
+      "expected": "FALSE",
+      "logic": "Assertion",
+      "phase": "checker",
+      "property_id": "election-node1-not-elected",
+      "required": true,
+      "rmc_name": "Election_Node1NotElected"
+    }
+  ],
+  "rmc_version": "2.14",
+  "schema_version": 1,
+  "summary": {
+    "matched": 2,
+    "mismatched": 0
+  },
+  "target": "adapted-timed-rebeca-source"
+}

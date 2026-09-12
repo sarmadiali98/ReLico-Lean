@@ -1,0 +1,12 @@
+property {
+    define {
+        CompletionCoherent = ((ds.allVehiclesReached == false) ||
+                              ((ds.vehicle1Reached == true) && (ds.vehicle2Reached == true))) &&
+                             ((ds.vehicle1Reached == false) || (ds.vehicle2Reached == false) ||
+                              (ds.allVehiclesReached == true));
+    }
+
+    Assertion {
+        AutonomousVehicles_CompletionCoherent : CompletionCoherent;
+    }
+}

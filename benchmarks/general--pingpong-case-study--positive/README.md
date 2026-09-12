@@ -18,7 +18,7 @@ is a finite four-actor checked exchange rather than a recurring two-node composi
 
 ## Stages
 
-8 stages, terminal `runtime`: `source`, `rmc`, `parser-json`, `decoded-dtr-ast`,
+9 stages, terminal `runtime`: `source`, `rmc`, `rmc-properties`, `parser-json`, `decoded-dtr-ast`,
 `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm.
 
 ## Evidence
@@ -30,3 +30,8 @@ is a finite four-actor checked exchange rather than a recurring two-node composi
 - `lfc 0.11.0` compiles the generated C++ target;
 - the generated runtime exits successfully under the 5 msec logical-time budget;
 - all eight pipeline artifacts are preserved and SHA-256-pinned in `manifest.json`.
+
+## Semantic property
+
+The benchmark-local RMC assertion checks the monitor for payload corruption on either round-trip
+leg. The monitor invariant does not independently prove that both legs complete.

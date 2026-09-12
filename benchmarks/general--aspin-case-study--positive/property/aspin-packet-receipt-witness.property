@@ -1,0 +1,9 @@
+property {
+    define {
+        PacketNeverDelivered = (r23.recieved == 0);
+    }
+
+    Assertion {
+        ASPIN_PacketNeverDelivered : PacketNeverDelivered;
+    }
+}

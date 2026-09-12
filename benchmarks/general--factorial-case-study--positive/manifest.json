@@ -13,6 +13,11 @@
       "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
     },
     {
+      "path": "rmc-properties/results.json",
+      "required": true,
+      "sha256": "b3cc72194332c3c57a6ec334ef91d6943774ea454d1dfc0ec400d3aa75387852"
+    },
+    {
       "path": "parser-json/model.json",
       "required": true,
       "sha256": "45c7691e14b8335b2ce8bf461e50340b970d733681746da70c96c78abe053d56"
@@ -49,6 +54,17 @@
   "source_files": [
     "source/model.rebeca"
   ],
+  "properties": [
+    {
+      "property_id": "factorial-result-monitor-no-violation",
+      "logic": "Assertion",
+      "rmc_name": "Factorial_CorrectResult",
+      "expected": "TRUE",
+      "source": "property/factorial-result-monitor-no-violation.property",
+      "required": true,
+      "description": "Source-level monitor-contract check: no observed result differs from 24."
+    }
+  ],
   "stages": [
     {
       "command": [
@@ -84,6 +100,31 @@
       ],
       "name": "rmc",
       "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc-properties",
+        "--benchmark-id",
+        "general--factorial-case-study--positive",
+        "--benchmark",
+        "{benchmark}",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc-properties/results.json"
+      ],
+      "name": "rmc-properties",
+      "timeout_seconds": 1200
     },
     {
       "command": [

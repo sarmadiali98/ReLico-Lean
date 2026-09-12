@@ -1,0 +1,10 @@
+property {
+    define {
+        PayloadBounded = (node0.seen >= 0) && (node0.seen <= 1) &&
+                         (node1.seen >= 0) && (node1.seen <= 1);
+    }
+
+    Assertion {
+        MessageCirculation_PayloadBounded : PayloadBounded;
+    }
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ReLico normalized RMC property results",
+  "type": "object",
+  "required": ["schema_version", "benchmark_id", "target", "rmc_version", "properties", "summary"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "benchmark_id": {"type": "string", "minLength": 1},
+    "target": {"const": "adapted-timed-rebeca-source"},
+    "rmc_version": {"const": "2.14"},
+    "properties": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/propertyResult"}
+    },
+    "summary": {
+      "type": "object",
+      "required": ["matched", "mismatched"],
+      "properties": {
+        "matched": {"type": "integer", "minimum": 0},
+        "mismatched": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "propertyResult": {
+      "type": "object",
+      "required": ["property_id", "logic", "rmc_name", "required", "expected", "actual", "comparison", "phase", "counterexample", "diagnostic"],
+      "properties": {
+        "property_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+        "logic": {"enum": ["Assertion", "TCTL"]},
+        "rmc_name": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
+        "required": {"type": "boolean"},
+        "expected": {"enum": ["TRUE", "FALSE"]},
+        "actual": {"enum": ["TRUE", "FALSE", "ERROR", "TIMEOUT", "UNSUPPORTED"]},
+        "comparison": {"enum": ["MATCH", "MISMATCH"]},
+        "phase": {"enum": ["generation", "checker-compile", "checker", "complete", "unsupported"]},
+        "counterexample": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "required": ["available", "path"],
+              "properties": {
+                "available": {"const": true},
+                "path": {"type": "string", "minLength": 1}
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "diagnostic": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    }
+  }
+}

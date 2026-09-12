@@ -13,7 +13,7 @@ examined.
 
 Approach A uses:
 
-`tests/actor-priority/approach-a-single-main-actor-payload-exclusion`
+`tests/translator/general--main-actor-priority--negative`
 
 It tests the actual current frontend profile.
 

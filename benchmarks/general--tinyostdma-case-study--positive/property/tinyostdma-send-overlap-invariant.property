@@ -1,0 +1,10 @@
+property {
+    define {
+        NoOverlappingSend = (sensorNodeSenderDevice.sendWhileBusy == false) &&
+                            (receiver.sendWhileBusy == false);
+    }
+
+    Assertion {
+        TinyOSTDMA_NoOverlappingSend : NoOverlappingSend;
+    }
+}

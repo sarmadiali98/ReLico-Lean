@@ -7,11 +7,12 @@ actor toggles phase on a long periodic self-loop. Two reactive classes, two inst
 ## Provenance
 
 - **Original source:** `examples.zip:ReLico-main/CheckpointBarrier2/CheckpointBarrier2.rebeca`.
-- **Original property:** `CheckpointBarrier2.property` is excluded; this fixture evaluates
-  translation and runtime behavior only.
+- **Original property:** `CheckpointBarrier2.property` remains excluded. Benchmark-local source-level
+  assertions check observed coordination bounds and provide a final-barrier counterexample witness.
 - **Adaptation:** no semantic correction or timing redesign; see [`ADAPTATION.md`](ADAPTATION.md).
 
 ## Stages
 
-8 stages, terminal `runtime`: `source`, `rmc`, `parser-json`, `decoded-dtr-ast`,
-`translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm.
+9 stages, terminal `runtime`: `source`, `rmc`, `rmc-properties`, `parser-json`, `decoded-dtr-ast`,
+`translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm. The
+expected-`FALSE` assertion provides a counterexample witness for both arrivals at the eighth epoch.

@@ -13,6 +13,11 @@
       "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
     },
     {
+      "path": "rmc-properties/results.json",
+      "required": true,
+      "sha256": "d799dc9c8eaa47affd3d866d4864c7de9346292eab2f64dbdcbed1562787ad12"
+    },
+    {
       "path": "parser-json/model.json",
       "required": true,
       "sha256": "678e29247e70ad4e5057891d4619d61c21d69f6751411daa06cee399e17a5fb9"
@@ -49,6 +54,26 @@
   "source_files": [
     "source/model.rebeca"
   ],
+  "properties": [
+    {
+      "property_id": "trigger-circular-ring-order-invariant",
+      "logic": "Assertion",
+      "rmc_name": "TriggerCircular_ObservableOrder",
+      "expected": "TRUE",
+      "source": "property/trigger-circular-ring-order-invariant.property",
+      "required": true,
+      "description": "Source-level assertion that an observed later ring node does not record a round before its predecessor."
+    },
+    {
+      "property_id": "trigger-circular-full-circulation-witness",
+      "logic": "Assertion",
+      "rmc_name": "TriggerCircular_RingNeverCompletes",
+      "expected": "FALSE",
+      "source": "property/trigger-circular-full-circulation-witness.property",
+      "required": true,
+      "description": "Expected-FALSE source-level assertion whose counterexample witnesses an observed full trigger-activated circulation."
+    }
+  ],
   "stages": [
     {
       "command": [
@@ -84,6 +109,31 @@
       ],
       "name": "rmc",
       "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc-properties",
+        "--benchmark-id",
+        "general--trigger-circular-composition--positive",
+        "--benchmark",
+        "{benchmark}",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc-properties/results.json"
+      ],
+      "name": "rmc-properties",
+      "timeout_seconds": 1800
     },
     {
       "command": [

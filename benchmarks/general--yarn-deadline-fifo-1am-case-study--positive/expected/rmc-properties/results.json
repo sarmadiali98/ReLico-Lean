@@ -1,0 +1,39 @@
+{
+  "benchmark_id": "general--yarn-deadline-fifo-1am-case-study--positive",
+  "properties": [
+    {
+      "actual": "TRUE",
+      "comparison": "MATCH",
+      "counterexample": null,
+      "diagnostic": null,
+      "expected": "TRUE",
+      "logic": "Assertion",
+      "phase": "complete",
+      "property_id": "yarn-deadline-fifo-1am-marker-coherence-invariant",
+      "required": true,
+      "rmc_name": "YARN1AM_MarkerCoherence"
+    },
+    {
+      "actual": "FALSE",
+      "comparison": "MATCH",
+      "counterexample": {
+        "available": true,
+        "path": "rmc-properties/raw/yarn-deadline-fifo-1am-job-completion-witness/checker.xml"
+      },
+      "diagnostic": null,
+      "expected": "FALSE",
+      "logic": "Assertion",
+      "phase": "checker",
+      "property_id": "yarn-deadline-fifo-1am-job-completion-witness",
+      "required": true,
+      "rmc_name": "YARN1AM_JobCompletionNeverObserved"
+    }
+  ],
+  "rmc_version": "2.14",
+  "schema_version": 1,
+  "summary": {
+    "matched": 2,
+    "mismatched": 0
+  },
+  "target": "adapted-timed-rebeca-source"
+}

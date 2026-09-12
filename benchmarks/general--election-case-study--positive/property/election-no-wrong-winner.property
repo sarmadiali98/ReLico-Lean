@@ -1,0 +1,9 @@
+property {
+    define {
+        NoWrongWinner = (chk.violation == 0);
+    }
+
+    Assertion {
+        Election_NoWrongWinner : NoWrongWinner;
+    }
+}

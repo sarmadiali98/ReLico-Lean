@@ -1,0 +1,9 @@
+property {
+    define {
+        ResolutionBounded = (sender1.resolved >= 0) && (sender1.resolved < 4);
+    }
+
+    Assertion {
+        ArbitraryRebec_ResolutionBounded : ResolutionBounded;
+    }
+}

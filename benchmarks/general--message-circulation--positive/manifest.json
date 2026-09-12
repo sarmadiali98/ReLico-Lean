@@ -13,6 +13,11 @@
       "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
     },
     {
+      "path": "rmc-properties/results.json",
+      "required": true,
+      "sha256": "b1b2c1035e12e2f9ba351c951a67026d10cee87400a3aa9c343792e2dce8fce8"
+    },
+    {
       "path": "parser-json/model.json",
       "required": true,
       "sha256": "4e19bdb58087c74e75ea957d7ac7a1f9632b0c74159bd07b9f77ee5072099369"
@@ -49,6 +54,26 @@
   "source_files": [
     "source/model.rebeca"
   ],
+  "properties": [
+    {
+      "property_id": "message-circulation-payload-bounds-invariant",
+      "logic": "Assertion",
+      "rmc_name": "MessageCirculation_PayloadBounded",
+      "expected": "TRUE",
+      "source": "property/message-circulation-payload-bounds-invariant.property",
+      "required": true,
+      "description": "Source-level assertion that each observed node value is zero or the circulating unit payload."
+    },
+    {
+      "property_id": "message-circulation-delivery-witness",
+      "logic": "Assertion",
+      "rmc_name": "MessageCirculation_BothNodesNeverReceive",
+      "expected": "FALSE",
+      "source": "property/message-circulation-delivery-witness.property",
+      "required": true,
+      "description": "Expected-FALSE source-level assertion whose counterexample witnesses both nodes observing the circulating payload."
+    }
+  ],
   "stages": [
     {
       "command": [
@@ -84,6 +109,31 @@
       ],
       "name": "rmc",
       "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc-properties",
+        "--benchmark-id",
+        "general--message-circulation--positive",
+        "--benchmark",
+        "{benchmark}",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc-properties/results.json"
+      ],
+      "name": "rmc-properties",
+      "timeout_seconds": 1800
     },
     {
       "command": [

@@ -1,0 +1,10 @@
+property {
+    define {
+        PrimaryIdentityValid = ((DCN1.nodeMode != 1) || (DCN1.primary == DCN1.id)) &&
+                               ((DCN2.nodeMode != 1) || (DCN2.primary == DCN2.id));
+    }
+
+    Assertion {
+        LeasingNRPFD_PrimaryIdentityValid : PrimaryIdentityValid;
+    }
+}

@@ -10,7 +10,7 @@ A **general**-family positive benchmark: the paper-named TCSMA model — a `Cont
 
 ## Stages
 
-8 stages, terminal `runtime`: `source`, `rmc`, `parser-json`, `decoded-dtr-ast`, `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm.
+9 stages, terminal `runtime`: `source`, `rmc`, `rmc-properties`, `parser-json`, `decoded-dtr-ast`, `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm. Source-level assertions check observed response targets and use an expected-`FALSE` counterexample to witness both stations executing a response send; they do not establish end-to-end delivery.
 
 ## Evidence
 

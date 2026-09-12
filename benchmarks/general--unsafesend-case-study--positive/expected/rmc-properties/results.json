@@ -1,0 +1,27 @@
+{
+  "benchmark_id": "general--unsafesend-case-study--positive",
+  "properties": [
+    {
+      "actual": "FALSE",
+      "comparison": "MATCH",
+      "counterexample": {
+        "available": true,
+        "path": "rmc-properties/raw/unsafesend-error-path-witness/checker.xml"
+      },
+      "diagnostic": null,
+      "expected": "FALSE",
+      "logic": "Assertion",
+      "phase": "checker",
+      "property_id": "unsafesend-error-path-witness",
+      "required": true,
+      "rmc_name": "UnsafeSend_NoViolation"
+    }
+  ],
+  "rmc_version": "2.14",
+  "schema_version": 1,
+  "summary": {
+    "matched": 1,
+    "mismatched": 0
+  },
+  "target": "adapted-timed-rebeca-source"
+}

@@ -1,0 +1,27 @@
+{
+  "benchmark_id": "general--aspin-case-study--positive",
+  "properties": [
+    {
+      "actual": "FALSE",
+      "comparison": "MATCH",
+      "counterexample": {
+        "available": true,
+        "path": "rmc-properties/raw/aspin-packet-receipt-witness/checker.xml"
+      },
+      "diagnostic": null,
+      "expected": "FALSE",
+      "logic": "Assertion",
+      "phase": "checker",
+      "property_id": "aspin-packet-receipt-witness",
+      "required": true,
+      "rmc_name": "ASPIN_PacketNeverDelivered"
+    }
+  ],
+  "rmc_version": "2.14",
+  "schema_version": 1,
+  "summary": {
+    "matched": 1,
+    "mismatched": 0
+  },
+  "target": "adapted-timed-rebeca-source"
+}

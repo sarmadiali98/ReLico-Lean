@@ -1,0 +1,9 @@
+property {
+    define {
+        CorrectResult = (chk.violation == 0);
+    }
+
+    Assertion {
+        Factorial_CorrectResult : CorrectResult;
+    }
+}

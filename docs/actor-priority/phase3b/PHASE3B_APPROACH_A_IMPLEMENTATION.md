@@ -24,7 +24,7 @@ The permanent exclusion regression targets that profile.
 
 ## Permanent fixture
 
-`tests/actor-priority/approach-a-single-main-actor-payload-exclusion`
+`tests/translator/general--main-actor-priority--negative`
 
 ## Test result
 

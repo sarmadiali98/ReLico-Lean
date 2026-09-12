@@ -53,6 +53,12 @@
       "items": {
         "$ref": "#/$defs/artifact"
       }
+    },
+    "properties": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/property"
+      }
     }
   },
   "additionalProperties": false,
@@ -147,6 +153,45 @@
         "sha256": {
           "type": "string",
           "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "property": {
+      "type": "object",
+      "required": [
+        "property_id",
+        "logic",
+        "rmc_name",
+        "expected",
+        "source",
+        "required"
+      ],
+      "properties": {
+        "property_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "logic": {
+          "enum": ["Assertion", "TCTL"]
+        },
+        "rmc_name": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "expected": {
+          "enum": ["TRUE", "FALSE"]
+        },
+        "source": {
+          "type": "string",
+          "pattern": "^property/[A-Za-z0-9][A-Za-z0-9._/-]*\\.property$"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
         }
       },
       "additionalProperties": false

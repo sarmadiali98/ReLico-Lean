@@ -13,6 +13,11 @@
       "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
     },
     {
+      "path": "rmc-properties/results.json",
+      "required": true,
+      "sha256": "5860fa47856def5f26900915d5f2163d8134fce7f8c72abbd0ab64ef4b2ea1f6"
+    },
+    {
       "path": "parser-json/model.json",
       "required": true,
       "sha256": "b8701b5ea0b43900f0d400ef9b920949d3678cce2790416e5e51e541756c9b1a"
@@ -49,6 +54,26 @@
   "source_files": [
     "source/model.rebeca"
   ],
+  "properties": [
+    {
+      "property_id": "aircraftdoor-door-monitor-no-violation",
+      "logic": "Assertion",
+      "rmc_name": "AircraftDoor_NoMonitorViolation",
+      "expected": "TRUE",
+      "source": "property/aircraftdoor-door-monitor-no-violation.property",
+      "required": true,
+      "description": "Source-level monitor-contract check: no observed door value violates the monitor contract."
+    },
+    {
+      "property_id": "aircraftdoor-door-open-witness",
+      "logic": "Assertion",
+      "rmc_name": "AircraftDoor_DoorNeverOpened",
+      "expected": "FALSE",
+      "source": "property/aircraftdoor-door-open-witness.property",
+      "required": true,
+      "description": "Expected-FALSE source-level assertion whose counterexample witnesses an observed open-door state."
+    }
+  ],
   "stages": [
     {
       "command": [
@@ -84,6 +109,31 @@
       ],
       "name": "rmc",
       "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc-properties",
+        "--benchmark-id",
+        "general--aircraftdoor-case-study--positive",
+        "--benchmark",
+        "{benchmark}",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc-properties/results.json"
+      ],
+      "name": "rmc-properties",
+      "timeout_seconds": 1200
     },
     {
       "command": [

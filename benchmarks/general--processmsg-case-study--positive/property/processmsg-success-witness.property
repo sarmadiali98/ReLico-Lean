@@ -1,0 +1,9 @@
+property {
+    define {
+        SuccessNeverReached = (task.ok != 1);
+    }
+
+    Assertion {
+        ProcessMsg_SuccessNeverReached : SuccessNeverReached;
+    }
+}

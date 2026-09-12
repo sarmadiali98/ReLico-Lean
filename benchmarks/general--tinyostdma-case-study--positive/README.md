@@ -14,7 +14,7 @@ The autonomous constructor-started clock is removed because RMC 2.14 collapses d
 
 ## Stages
 
-8 stages, terminal `runtime`: `source`, `rmc`, `parser-json`, `decoded-dtr-ast`, `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm.
+9 stages, terminal `runtime`: `source`, `rmc`, `rmc-properties`, `parser-json`, `decoded-dtr-ast`, `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm. Source-level assertions check the observed send-while-pending latch and use an expected-`FALSE` counterexample to witness an accepted medium transmission.
 
 ## Evidence
 

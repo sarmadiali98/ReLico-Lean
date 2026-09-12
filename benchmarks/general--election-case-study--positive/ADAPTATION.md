@@ -7,9 +7,12 @@ Source: `examples.zip:ReLico-main/Election/Election.rebeca`, with six reactive c
 
 ## Property boundary
 
-The original `Election.property` file is intentionally excluded. This benchmark checks translation
-and runtime behavior only; the `Election_NoViolation` property is not translated or encoded as an
-assertion. No semantic correction was applied to make the property hold.
+The original `Election.property` file remains excluded and no semantic correction was applied to
+the source. The benchmark-local `rmc-properties` stage independently evaluates two assertions over
+the adapted Timed Rebeca source: node 0 is never accepted, and an intentionally false invariant
+witnesses election of node 1. These checks do not target the decoded Lean DTR or translated LF
+artifacts, and RMC assertions are evaluated after transitions rather than directly on the initial
+state.
 
 ## Applied adaptation
 

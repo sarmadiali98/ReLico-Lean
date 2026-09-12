@@ -1,0 +1,9 @@
+property {
+    define {
+        Node1NotElected = (chk.seen1 == 0);
+    }
+
+    Assertion {
+        Election_Node1NotElected : Node1NotElected;
+    }
+}

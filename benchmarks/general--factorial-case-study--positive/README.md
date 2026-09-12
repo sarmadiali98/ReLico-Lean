@@ -10,7 +10,7 @@ A **general**-family positive benchmark: the paper's RQ1 Factorial model — a `
 
 ## Stages
 
-8 stages, terminal `runtime`: `source`, `rmc`, `parser-json`, `decoded-dtr-ast`, `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm.
+9 stages, terminal `runtime`: `source`, `rmc`, `rmc-properties`, `parser-json`, `decoded-dtr-ast`, `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm.
 
 ## Evidence
 
@@ -21,3 +21,8 @@ A **general**-family positive benchmark: the paper's RQ1 Factorial model — a `
 ## Keep-alive
 
 The `KeepAlive` heartbeat recurs on a 100-time-unit delayed self-send with one bounded state variable, so logical time advances and the runtime terminates within its budget.
+
+## Semantic property
+
+The benchmark-local RMC assertion checks that the monitor never observes a result other than 24.
+It validates the benchmark monitor, but does not independently prove result delivery.

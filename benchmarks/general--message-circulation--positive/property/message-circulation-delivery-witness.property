@@ -1,0 +1,9 @@
+property {
+    define {
+        BothNodesNeverReceive = (node0.seen != 1) || (node1.seen != 1);
+    }
+
+    Assertion {
+        MessageCirculation_BothNodesNeverReceive : BothNodesNeverReceive;
+    }
+}

@@ -1,0 +1,9 @@
+property {
+    define {
+        OkImpliesZeroMessage = (task.ok == 0) || (task.lastMsg == 0);
+    }
+
+    Assertion {
+        ProcessMsg_OkImpliesZeroMessage : OkImpliesZeroMessage;
+    }
+}

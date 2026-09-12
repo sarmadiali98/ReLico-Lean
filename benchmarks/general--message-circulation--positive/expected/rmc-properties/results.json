@@ -1,0 +1,39 @@
+{
+  "benchmark_id": "general--message-circulation--positive",
+  "properties": [
+    {
+      "actual": "TRUE",
+      "comparison": "MATCH",
+      "counterexample": null,
+      "diagnostic": null,
+      "expected": "TRUE",
+      "logic": "Assertion",
+      "phase": "complete",
+      "property_id": "message-circulation-payload-bounds-invariant",
+      "required": true,
+      "rmc_name": "MessageCirculation_PayloadBounded"
+    },
+    {
+      "actual": "FALSE",
+      "comparison": "MATCH",
+      "counterexample": {
+        "available": true,
+        "path": "rmc-properties/raw/message-circulation-delivery-witness/checker.xml"
+      },
+      "diagnostic": null,
+      "expected": "FALSE",
+      "logic": "Assertion",
+      "phase": "checker",
+      "property_id": "message-circulation-delivery-witness",
+      "required": true,
+      "rmc_name": "MessageCirculation_BothNodesNeverReceive"
+    }
+  ],
+  "rmc_version": "2.14",
+  "schema_version": 1,
+  "summary": {
+    "matched": 2,
+    "mismatched": 0
+  },
+  "target": "adapted-timed-rebeca-source"
+}

@@ -8,11 +8,12 @@ reactive classes, six instances.
 ## Provenance
 
 - **Original source:** `examples.zip:ReLico-main/Election/Election.rebeca`.
-- **Original property:** `Election.property` is excluded; this fixture evaluates translation and
-  runtime behavior only.
+- **Original property:** `Election.property` remains excluded. Two benchmark-local RMC assertions
+  now check the adapted Timed Rebeca source; they do not check or establish property preservation
+  for the translated LF program.
 - **Adaptation:** no semantic correction or timing redesign; see [`ADAPTATION.md`](ADAPTATION.md).
 
 ## Stages
 
-8 stages, terminal `runtime`: `source`, `rmc`, `parser-json`, `decoded-dtr-ast`,
+9 stages, terminal `runtime`: `source`, `rmc`, `rmc-properties`, `parser-json`, `decoded-dtr-ast`,
 `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm.

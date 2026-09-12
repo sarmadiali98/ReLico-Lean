@@ -10,7 +10,7 @@ A **general**-family positive benchmark: the paper's RQ1 AircraftDoor model — 
 
 ## Stages
 
-8 stages, terminal `runtime`: `source`, `rmc`, `parser-json`, `decoded-dtr-ast`, `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm.
+9 stages, terminal `runtime`: `source`, `rmc`, `rmc-properties`, `parser-json`, `decoded-dtr-ast`, `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm.
 
 ## Evidence
 
@@ -21,3 +21,10 @@ A **general**-family positive benchmark: the paper's RQ1 AircraftDoor model — 
 ## Keep-alive
 
 The `KeepAlive` heartbeat recurs on a 1000-time-unit delayed self-send with a single bounded state variable, so logical time advances and the runtime terminates within its budget.
+
+## Semantic properties
+
+The benchmark-local RMC source-level assertions check the adapted Timed Rebeca source. The
+monitor-contract check finds no observed invalid door value, but does not independently establish
+monitor activation. A separate expected-`FALSE` assertion provides a counterexample witness for an
+observed open-door state.

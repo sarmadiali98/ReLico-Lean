@@ -22,7 +22,7 @@ A ring activated by a trigger, circulating its message node to node in order.
 
 ## Stages
 
-8 stages, terminal `runtime`: `source`, `rmc`, `parser-json`, `decoded-dtr-ast`, `translated-lf-ast`, `lf-source`, `lfc`, `runtime`. This row owns no Lean obligations; its evidence is the pipeline artifacts.
+9 stages, terminal `runtime`: `source`, `rmc`, `rmc-properties`, `parser-json`, `decoded-dtr-ast`, `translated-lf-ast`, `lf-source`, `lfc`, `runtime`. Source-level assertions check observed ring order and use an expected-`FALSE` counterexample to witness one full trigger-activated circulation.
 
 ## Evidence
 

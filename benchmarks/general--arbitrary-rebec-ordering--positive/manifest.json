@@ -13,6 +13,11 @@
       "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
     },
     {
+      "path": "rmc-properties/results.json",
+      "required": true,
+      "sha256": "ae8bdff19c3aca3f9e74fe2075085b10d0540fc8f0637bb494e2889257e9d815"
+    },
+    {
       "path": "parser-json/model.json",
       "required": true,
       "sha256": "145f2f7b44bae4cd88ea54ec8f2d4190fd9edfccfb0b00ea03f88de5b0101643"
@@ -49,6 +54,17 @@
   "source_files": [
     "source/model.rebeca"
   ],
+  "properties": [
+    {
+      "property_id": "arbitrary-rebec-acknowledgement-bound-invariant",
+      "logic": "Assertion",
+      "rmc_name": "ArbitraryRebec_ResolutionBounded",
+      "expected": "TRUE",
+      "source": "property/arbitrary-rebec-acknowledgement-bound-invariant.property",
+      "required": true,
+      "description": "Source-level assertion that the sender acknowledgement count remains within one four-receiver round."
+    }
+  ],
   "stages": [
     {
       "command": [
@@ -84,6 +100,31 @@
       ],
       "name": "rmc",
       "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc-properties",
+        "--benchmark-id",
+        "general--arbitrary-rebec-ordering--positive",
+        "--benchmark",
+        "{benchmark}",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc-properties/results.json"
+      ],
+      "name": "rmc-properties",
+      "timeout_seconds": 1800
     },
     {
       "command": [

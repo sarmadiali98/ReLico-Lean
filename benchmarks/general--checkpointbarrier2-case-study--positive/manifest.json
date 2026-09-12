@@ -1,9 +1,10 @@
 {
   "benchmark_id": "general--checkpointbarrier2-case-study--positive",
-  "description": "General-family benchmark for CheckpointBarrier2 with the original property excluded; translation and runtime behavior only.",
+  "description": "General-family benchmark for CheckpointBarrier2 with bounded-coordination and final-barrier Assertion evidence.",
   "expected_artifacts": [
     {"path": "source/result.json", "required": true, "sha256": "7d7e70bedcd605f5e6a21e31fcda025cd1d4c15625193f8b21c3c5c907cbc390"},
     {"path": "rmc/verdict.json", "required": true, "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"},
+    {"path": "rmc-properties/results.json", "required": true, "sha256": "bbcd76e12afd74e288bd3040a645942051d4c1dfea64bc56e1c3c8a9450864fd"},
     {"path": "parser-json/model.json", "required": true, "sha256": "a2d6a0982864a386edcd7245f2d000508ff54df09b780dcdccb8a79f40f91d2e"},
     {"path": "decoded-dtr-ast/model.txt", "required": true, "sha256": "b2c39e09ed5e3a1a199242f3aa003f97b9bba210027c9dfd5b6377947a4cf33c"},
     {"path": "translated-lf-ast/program.txt", "required": true, "sha256": "a695524cbbe6382bd07a08e4b6a11c2a00ba8924661848be2b269320e84e2da3"},
@@ -15,6 +16,26 @@
   "polarity": "positive",
   "schema_version": 1,
   "source_files": ["source/model.rebeca"],
+  "properties": [
+    {
+      "property_id": "checkpointbarrier2-coordination-bounds-invariant",
+      "logic": "Assertion",
+      "rmc_name": "CheckpointBarrier2_CoordinationBounded",
+      "expected": "TRUE",
+      "source": "property/checkpointbarrier2-coordination-bounds-invariant.property",
+      "required": true,
+      "description": "Source-level assertion that observed epoch and arrival counters remain within their configured bounds."
+    },
+    {
+      "property_id": "checkpointbarrier2-final-barrier-witness",
+      "logic": "Assertion",
+      "rmc_name": "CheckpointBarrier2_FinalBarrierNeverCompletes",
+      "expected": "FALSE",
+      "source": "property/checkpointbarrier2-final-barrier-witness.property",
+      "required": true,
+      "description": "Expected-FALSE source-level assertion whose counterexample witnesses both arrivals at the eighth barrier epoch."
+    }
+  ],
   "stages": [
     {
       "command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "source", "--benchmark-id", "general--checkpointbarrier2-case-study--positive", "--source", "{source}", "--output", "{actual}/source/result.json"],
@@ -24,6 +45,11 @@
       "command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "rmc", "--source", "{source}", "--actual", "{actual}", "--rmc-jar", "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar", "--java", "/usr/bin/java", "--cxx", "/usr/bin/clang++", "--output", "{actual}/rmc/verdict.json"],
       "name": "rmc",
       "timeout_seconds": 600
+    },
+    {
+      "command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "rmc-properties", "--benchmark-id", "general--checkpointbarrier2-case-study--positive", "--benchmark", "{benchmark}", "--source", "{source}", "--actual", "{actual}", "--rmc-jar", "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar", "--java", "/usr/bin/java", "--cxx", "/usr/bin/clang++", "--output", "{actual}/rmc-properties/results.json"],
+      "name": "rmc-properties",
+      "timeout_seconds": 1800
     },
     {
       "command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "parser-json", "--family", "general", "--repo", "{repo}", "--source", "{source}", "--actual", "{actual}", "--artifact-zip", "/Users/ali/Desktop/LFStructuringNonDeterminism/ReLico-fmcad-2026-artifact-v1.zip", "--maven", "/opt/homebrew/Cellar/maven/3.9.16/bin/mvn", "--output", "{actual}/parser-json/model.json"],

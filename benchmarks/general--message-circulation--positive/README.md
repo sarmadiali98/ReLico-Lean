@@ -22,7 +22,7 @@ A message circulates between two nodes on a one-period delay, now with the deliv
 
 ## Stages
 
-8 stages, terminal `runtime`: source, rmc, parser-json, decoded-dtr-ast, translated-lf-ast, lf-source, lfc, runtime. This row owns no Lean obligations, so it carries no formal-witness stage; its evidence is the pipeline artifacts themselves.
+9 stages, terminal `runtime`: source, rmc, rmc-properties, parser-json, decoded-dtr-ast, translated-lf-ast, lf-source, lfc, runtime. Source-level assertions check observed payload bounds and use an expected-`FALSE` counterexample to witness both nodes observing the unit payload.
 
 ## Keep-alive
 

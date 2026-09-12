@@ -30,11 +30,11 @@ is the removed `env` block alone.
 
 ## Stages
 
-8 stages, terminal `runtime`: `source`, `rmc`, `parser-json`,
+9 stages, terminal `runtime`: `source`, `rmc`, `rmc-properties`, `parser-json`,
 `decoded-dtr-ast`, `translated-lf-ast`, `lf-source`, `lfc`, `runtime`,
-through the `--family general` arm. The five runtime properties from the
-paper are out of scope: this row demonstrates translation and compilation
-of the real case-study program, not property checking.
+through the `--family general` arm. Benchmark-local source-level assertions check the configured
+cold-scenario constraints. The expected-`FALSE` assertion provides a counterexample witness for
+observed heater actuation; these assertions do not establish behavior through the Lean/LF pipeline.
 
 ## Evidence
 

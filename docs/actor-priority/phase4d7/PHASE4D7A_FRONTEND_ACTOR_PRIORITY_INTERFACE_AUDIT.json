@@ -15,8 +15,8 @@
     "serialized_message_priority_property_present": true
   },
   "bound_files": {
-    "approach_a_manifest": "tests/actor-priority/approach-a-single-main-actor-payload-exclusion/manifest.json",
-    "approach_a_script": "tests/actor-priority/approach-a-single-main-actor-payload-exclusion/run-approach-a-exclusion.sh",
+    "approach_a_manifest": "tests/translator/general--main-actor-priority--negative/case.json",
+    "approach_a_script": "tests/translator/general--main-actor-priority--negative/run-test.sh",
     "frontend_decoder": "Relico/Frontend/MultiStorePayloadDecoder.lean",
     "frontend_json_schema": "frontend/schema/multi-store-payload-v1.schema.json",
     "frontend_schema": "Relico/Frontend/MultiStorePayloadSchema.lean",

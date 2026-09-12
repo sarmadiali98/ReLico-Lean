@@ -10,7 +10,7 @@ A **general**-family positive benchmark: the paper's RQ1 UnsafeSend model — th
 
 ## Stages
 
-8 stages, terminal `runtime`: `source`, `rmc`, `parser-json`, `decoded-dtr-ast`, `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm.
+9 stages, terminal `runtime`: `source`, `rmc`, `rmc-properties`, `parser-json`, `decoded-dtr-ast`, `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm.
 
 ## Evidence
 
@@ -21,3 +21,8 @@ A **general**-family positive benchmark: the paper's RQ1 UnsafeSend model — th
 ## Keep-alive
 
 The `KeepAlive` heartbeat recurs on a 100-time-unit delayed self-send; the send/error/latch chain resolves on 10- and 1-time-unit delays. Logical time advances and the runtime terminates within its budget.
+
+## Semantic property
+
+The benchmark-local RMC safety assertion is intentionally expected to be false. Its counterexample
+witnesses the error path setting `chk.violation`; this is the benchmark's documented outcome.

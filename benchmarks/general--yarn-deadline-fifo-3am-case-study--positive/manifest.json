@@ -4,6 +4,7 @@
   "expected_artifacts": [
     {"path": "source/result.json", "required": true, "sha256": "7546d3efaa7ab16342bc23c7b5370d5ad6c00c2d35d42d77898a43684d1275b1"},
     {"path": "rmc/verdict.json", "required": true, "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"},
+    {"path": "rmc-properties/results.json", "required": true, "sha256": "bfa61eee8d3dd07e4620f9a88107ff8b58474d08be0e49666ec9c5d08e5ab3cf"},
     {"path": "parser-json/model.json", "required": true, "sha256": "8e78abda09ae3a2df1f4d2c7461fe07e250ec7543fe43e90538e1cd647dbe333"},
     {"path": "decoded-dtr-ast/model.txt", "required": true, "sha256": "58bec8522cc87e18bf4560b2e60dc8c5a8afa5e670c3ac46b6a4aea77d01660f"},
     {"path": "translated-lf-ast/program.txt", "required": true, "sha256": "83502ac3349a42c7e02c6b9a71ad511a75afe47f9b6a38aa27ba7a5f77c29ee8"},
@@ -15,9 +16,14 @@
   "polarity": "positive",
   "schema_version": 1,
   "source_files": ["source/model.rebeca"],
+  "properties": [
+    {"property_id": "yarn-deadline-fifo-3am-marker-coherence-invariant", "logic": "Assertion", "rmc_name": "YARN3AM_MarkerCoherence", "expected": "TRUE", "source": "property/yarn-deadline-fifo-3am-marker-coherence-invariant.property", "required": true, "description": "Source-level assertion that queue-expiration and update outcome markers remain bounded, exclusive, and handler-coherent."},
+    {"property_id": "yarn-deadline-fifo-3am-job-completion-witness", "logic": "Assertion", "rmc_name": "YARN3AM_JobCompletionNeverObserved", "expected": "FALSE", "source": "property/yarn-deadline-fifo-3am-job-completion-witness.property", "required": true, "description": "Expected-FALSE source-level assertion whose counterexample witnesses an observed successful job update."}
+  ],
   "stages": [
     {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "source", "--benchmark-id", "general--yarn-deadline-fifo-3am-case-study--positive", "--source", "{source}", "--output", "{actual}/source/result.json"], "name": "source"},
     {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "rmc", "--source", "{source}", "--actual", "{actual}", "--rmc-jar", "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar", "--java", "/usr/bin/java", "--cxx", "/usr/bin/clang++", "--output", "{actual}/rmc/verdict.json"], "name": "rmc", "timeout_seconds": 1200},
+    {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "rmc-properties", "--benchmark-id", "general--yarn-deadline-fifo-3am-case-study--positive", "--benchmark", "{benchmark}", "--source", "{source}", "--actual", "{actual}", "--rmc-jar", "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar", "--java", "/usr/bin/java", "--cxx", "/usr/bin/clang++", "--output", "{actual}/rmc-properties/results.json"], "name": "rmc-properties", "timeout_seconds": 1800},
     {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "parser-json", "--family", "general", "--repo", "{repo}", "--source", "{source}", "--actual", "{actual}", "--artifact-zip", "/Users/ali/Desktop/LFStructuringNonDeterminism/ReLico-fmcad-2026-artifact-v1.zip", "--maven", "/opt/homebrew/Cellar/maven/3.9.16/bin/mvn", "--output", "{actual}/parser-json/model.json"], "name": "parser-json", "timeout_seconds": 600},
     {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "lean-export", "--family", "general", "--mode", "decoded-dtr-ast", "--repo", "{repo}", "--lake", "/Users/ali/.elan/bin/lake", "--input", "{actual}/parser-json/model.json", "--output", "{actual}/decoded-dtr-ast/model.txt"], "name": "decoded-dtr-ast", "timeout_seconds": 600},
     {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "lean-export", "--family", "general", "--mode", "translated-lf-ast", "--repo", "{repo}", "--lake", "/Users/ali/.elan/bin/lake", "--input", "{actual}/parser-json/model.json", "--output", "{actual}/translated-lf-ast/program.txt"], "name": "translated-lf-ast", "timeout_seconds": 600},

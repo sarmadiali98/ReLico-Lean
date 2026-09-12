@@ -1,0 +1,10 @@
+property {
+    define {
+        BranchPayloadsValid = ((fast.value == 0) || (fast.value == 2)) &&
+                              ((steady.value == 0) || (steady.value == 1));
+    }
+
+    Assertion {
+        PeriodicFork_BranchPayloadsValid : BranchPayloadsValid;
+    }
+}

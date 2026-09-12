@@ -14,7 +14,7 @@ three instances.
 
 ## Stages
 
-8 stages, terminal `runtime`: `source`, `rmc`, `parser-json`, `decoded-dtr-ast`,
+9 stages, terminal `runtime`: `source`, `rmc`, `rmc-properties`, `parser-json`, `decoded-dtr-ast`,
 `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm.
 
 ## Evidence
@@ -23,3 +23,8 @@ three instances.
 - RMC 2.14 reports `satisfied` for `Deadlock-Freedom and No Deadline Missed`;
 - the generated LF is preserved and SHA-256-pinned at `expected/lf-source/TranslatedLFProgram.lf`;
 - the generated runtime exits successfully under the benchmark runtime stage.
+
+## Semantic property
+
+The benchmark-local RMC assertion is expected to be false: the checker monitor records the
+documented failed shutdown. This is an intentional safety counterexample, not a failed benchmark.

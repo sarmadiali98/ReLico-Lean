@@ -12,6 +12,7 @@
       "required": true,
       "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
     },
+    {"path": "rmc-properties/results.json", "required": true, "sha256": "dbfd3bd717384f52913fca1e8289185e0953a3b426150975580d783b3cd43828"},
     {
       "path": "parser-json/model.json",
       "required": true,
@@ -49,6 +50,26 @@
   "source_files": [
     "source/model.rebeca"
   ],
+  "properties": [
+    {
+      "property_id": "tinyostdma-send-overlap-invariant",
+      "logic": "Assertion",
+      "rmc_name": "TinyOSTDMA_NoOverlappingSend",
+      "expected": "TRUE",
+      "source": "property/tinyostdma-send-overlap-invariant.property",
+      "required": true,
+      "description": "Source-level assertion that no observed communication device starts a second send while a destination is pending."
+    },
+    {
+      "property_id": "tinyostdma-accepted-transmission-witness",
+      "logic": "Assertion",
+      "rmc_name": "TinyOSTDMA_MediumNeverCarriesTransmission",
+      "expected": "FALSE",
+      "source": "property/tinyostdma-accepted-transmission-witness.property",
+      "required": true,
+      "description": "Expected-FALSE source-level assertion whose counterexample witnesses an observed accepted TDMA medium transmission."
+    }
+  ],
   "stages": [
     {
       "command": [
@@ -84,6 +105,11 @@
       ],
       "name": "rmc",
       "timeout_seconds": 600
+    },
+    {
+      "command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "rmc-properties", "--benchmark-id", "general--tinyostdma-case-study--positive", "--benchmark", "{benchmark}", "--source", "{source}", "--actual", "{actual}", "--rmc-jar", "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar", "--java", "/usr/bin/java", "--cxx", "/usr/bin/clang++", "--output", "{actual}/rmc-properties/results.json"],
+      "name": "rmc-properties",
+      "timeout_seconds": 1800
     },
     {
       "command": [

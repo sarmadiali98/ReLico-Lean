@@ -12,6 +12,7 @@
       "required": true,
       "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
     },
+    {"path": "rmc-properties/results.json", "required": true, "sha256": "e5e04630e29166d6d779acd7ac690555306a11ad6ddd669882d869636036e7cc"},
     {
       "path": "parser-json/model.json",
       "required": true,
@@ -49,6 +50,26 @@
   "source_files": [
     "source/model.rebeca"
   ],
+  "properties": [
+    {
+      "property_id": "smarthome-cold-scenario-invariant",
+      "logic": "Assertion",
+      "rmc_name": "SmartHome_ColdScenarioSafe",
+      "expected": "TRUE",
+      "source": "property/smarthome-cold-scenario-invariant.property",
+      "required": true,
+      "description": "Source-level assertion for the configured cold, bright, motion-free scenario: emergency and intrusion controls remain inactive."
+    },
+    {
+      "property_id": "smarthome-heater-actuation-witness",
+      "logic": "Assertion",
+      "rmc_name": "SmartHome_HeaterNeverTurnsOn",
+      "expected": "FALSE",
+      "source": "property/smarthome-heater-actuation-witness.property",
+      "required": true,
+      "description": "Expected-FALSE source-level assertion whose counterexample witnesses observed heater actuation after the cold reading."
+    }
+  ],
   "stages": [
     {
       "command": [
@@ -84,6 +105,11 @@
       ],
       "name": "rmc",
       "timeout_seconds": 600
+    },
+    {
+      "command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "rmc-properties", "--benchmark-id", "general--smarthome-case-study--positive", "--benchmark", "{benchmark}", "--source", "{source}", "--actual", "{actual}", "--rmc-jar", "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar", "--java", "/usr/bin/java", "--cxx", "/usr/bin/clang++", "--output", "{actual}/rmc-properties/results.json"],
+      "name": "rmc-properties",
+      "timeout_seconds": 1800
     },
     {
       "command": [

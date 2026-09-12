@@ -1,0 +1,24 @@
+{
+  "benchmark_id": "general--autonomousvehicles-case-study--positive",
+  "properties": [
+    {
+      "actual": "TRUE",
+      "comparison": "MATCH",
+      "counterexample": null,
+      "diagnostic": null,
+      "expected": "TRUE",
+      "logic": "Assertion",
+      "phase": "complete",
+      "property_id": "autonomousvehicles-completion-coherence-invariant",
+      "required": true,
+      "rmc_name": "AutonomousVehicles_CompletionCoherent"
+    }
+  ],
+  "rmc_version": "2.14",
+  "schema_version": 1,
+  "summary": {
+    "matched": 1,
+    "mismatched": 0
+  },
+  "target": "adapted-timed-rebeca-source"
+}

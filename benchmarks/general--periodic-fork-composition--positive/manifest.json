@@ -13,6 +13,11 @@
       "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
     },
     {
+      "path": "rmc-properties/results.json",
+      "required": true,
+      "sha256": "c15045f50c05e86805ebb61466917a16f9cdee1ed92e636aefca0f984361dc95"
+    },
+    {
       "path": "parser-json/model.json",
       "required": true,
       "sha256": "9b71f257ec351e8651791132ae695358f27f1c76d2134f078c869225d1c426bd"
@@ -49,6 +54,35 @@
   "source_files": [
     "source/model.rebeca"
   ],
+  "properties": [
+    {
+      "property_id": "periodic-fork-acknowledgement-bound-invariant",
+      "logic": "Assertion",
+      "rmc_name": "PeriodicFork_ResolutionBounded",
+      "expected": "TRUE",
+      "source": "property/periodic-fork-acknowledgement-bound-invariant.property",
+      "required": true,
+      "description": "Source-level assertion that the producer acknowledgement count remains within one three-branch round."
+    },
+    {
+      "property_id": "periodic-fork-branch-payload-invariant",
+      "logic": "Assertion",
+      "rmc_name": "PeriodicFork_BranchPayloadsValid",
+      "expected": "TRUE",
+      "source": "property/periodic-fork-branch-payload-invariant.property",
+      "required": true,
+      "description": "Source-level assertion that the two observed branch values are zero or their branch-specific payload."
+    },
+    {
+      "property_id": "periodic-fork-branch-delivery-witness",
+      "logic": "Assertion",
+      "rmc_name": "PeriodicFork_ForkNeverCompletes",
+      "expected": "FALSE",
+      "source": "property/periodic-fork-branch-delivery-witness.property",
+      "required": true,
+      "description": "Expected-FALSE source-level assertion whose counterexample witnesses both state-changing branches observing their payloads."
+    }
+  ],
   "stages": [
     {
       "command": [
@@ -84,6 +118,31 @@
       ],
       "name": "rmc",
       "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc-properties",
+        "--benchmark-id",
+        "general--periodic-fork-composition--positive",
+        "--benchmark",
+        "{benchmark}",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc-properties/results.json"
+      ],
+      "name": "rmc-properties",
+      "timeout_seconds": 1800
     },
     {
       "command": [

@@ -1,0 +1,9 @@
+property {
+    define {
+        JobCompletionNeverObserved = (rm.m_job_complete == 0);
+    }
+
+    Assertion {
+        YARN1AM_JobCompletionNeverObserved : JobCompletionNeverObserved;
+    }
+}

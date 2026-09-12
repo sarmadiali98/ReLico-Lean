@@ -1,0 +1,9 @@
+property {
+    define {
+        FinalBarrierNeverCompletes = (coord.epoch != 8) || (coord.seen != 2);
+    }
+
+    Assertion {
+        CheckpointBarrier2_FinalBarrierNeverCompletes : FinalBarrierNeverCompletes;
+    }
+}

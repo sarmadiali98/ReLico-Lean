@@ -1,0 +1,9 @@
+property {
+    define {
+        ForkNeverCompletes = (fast.value != 2) || (steady.value != 1);
+    }
+
+    Assertion {
+        PeriodicFork_ForkNeverCompletes : ForkNeverCompletes;
+    }
+}

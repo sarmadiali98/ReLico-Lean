@@ -1,0 +1,9 @@
+property {
+    define {
+        DoorNeverOpened = (door.doorOpen != 1);
+    }
+
+    Assertion {
+        AircraftDoor_DoorNeverOpened : DoorNeverOpened;
+    }
+}

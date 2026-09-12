@@ -14,5 +14,10 @@ instances.
 
 ## Stages
 
-8 stages, terminal `runtime`: `source`, `rmc`, `parser-json`, `decoded-dtr-ast`,
+9 stages, terminal `runtime`: `source`, `rmc`, `rmc-properties`, `parser-json`, `decoded-dtr-ast`,
 `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm.
+
+## Semantic property
+
+The benchmark-local RMC assertion checks that the monitor never observes a result other than 89.
+It validates the benchmark monitor, but does not independently prove result delivery.

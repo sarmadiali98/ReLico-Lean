@@ -13,6 +13,11 @@
       "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
     },
     {
+      "path": "rmc-properties/results.json",
+      "required": true,
+      "sha256": "94d8286c38ac9724a980fa68c68ed708b3e1f05d35dfc687183c5959d43abf0b"
+    },
+    {
       "path": "parser-json/model.json",
       "required": true,
       "sha256": "327b061e38e10f5f61f4c9b83a694dbb641c04de2e0f6141281c2a25f54e76c3"
@@ -49,6 +54,17 @@
   "source_files": [
     "source/model.rebeca"
   ],
+  "properties": [
+    {
+      "property_id": "safesend-reply-monitor-no-violation",
+      "logic": "Assertion",
+      "rmc_name": "SafeSend_NoViolation",
+      "expected": "TRUE",
+      "source": "property/safesend-reply-monitor-no-violation.property",
+      "required": true,
+      "description": "Source-level monitor-contract check: no observed event takes the error path or reports an invalid reply."
+    }
+  ],
   "stages": [
     {
       "command": [
@@ -84,6 +100,31 @@
       ],
       "name": "rmc",
       "timeout_seconds": 600
+    },
+    {
+      "command": [
+        "/opt/homebrew/bin/python3",
+        "{repo}/tools/relico_bench_stage.py",
+        "rmc-properties",
+        "--benchmark-id",
+        "general--safesend-case-study--positive",
+        "--benchmark",
+        "{benchmark}",
+        "--source",
+        "{source}",
+        "--actual",
+        "{actual}",
+        "--rmc-jar",
+        "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar",
+        "--java",
+        "/usr/bin/java",
+        "--cxx",
+        "/usr/bin/clang++",
+        "--output",
+        "{actual}/rmc-properties/results.json"
+      ],
+      "name": "rmc-properties",
+      "timeout_seconds": 1200
     },
     {
       "command": [

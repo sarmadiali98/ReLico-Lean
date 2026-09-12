@@ -10,7 +10,7 @@ A **general**-family positive benchmark: the paper-named AutonomousVehicles mode
 
 ## Stages
 
-8 stages, terminal `runtime`: `source`, `rmc`, `parser-json`, `decoded-dtr-ast`, `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm.
+9 stages, terminal `runtime`: `source`, `rmc`, `rmc-properties`, `parser-json`, `decoded-dtr-ast`, `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm. The Assertion checks coherence between the aggregate completion latch and the two vehicle latches. No completion reachability claim is recorded because the explored model did not reach `allVehiclesReached`.
 
 ## Evidence
 

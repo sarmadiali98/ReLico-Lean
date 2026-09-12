@@ -1,0 +1,9 @@
+property {
+    define {
+        MediumNeverCarriesTransmission = (medium.senderDevice == -1);
+    }
+
+    Assertion {
+        TinyOSTDMA_MediumNeverCarriesTransmission : MediumNeverCarriesTransmission;
+    }
+}

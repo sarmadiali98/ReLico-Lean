@@ -10,7 +10,7 @@ A **general**-family positive benchmark: the paper's RQ1 SafeSend model — a `C
 
 ## Stages
 
-8 stages, terminal `runtime`: `source`, `rmc`, `parser-json`, `decoded-dtr-ast`, `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm.
+9 stages, terminal `runtime`: `source`, `rmc`, `rmc-properties`, `parser-json`, `decoded-dtr-ast`, `translated-lf-ast`, `lf-source`, `lfc`, `runtime`, through the `--family general` arm.
 
 ## Evidence
 
@@ -21,3 +21,8 @@ A **general**-family positive benchmark: the paper's RQ1 SafeSend model — a `C
 ## Keep-alive
 
 The `KeepAlive` heartbeat recurs on a 100-time-unit delayed self-send with one bounded state variable; the client/server exchange resolves on 10-time-unit delays. Logical time advances and the runtime terminates within its budget.
+
+## Semantic property
+
+The benchmark-local RMC assertion checks that the monitor observes neither the explicit error path
+nor an invalid reply. It does not independently prove that the reply is delivered.

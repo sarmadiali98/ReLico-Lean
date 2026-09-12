@@ -18,9 +18,27 @@ if str(TOOLS) not in sys.path:
 import relico_bench as cli
 import relico_bench_execution as execution
 import relico_bench_registry as registry_module
+from relico_bench_properties import validate_properties
 
 
 class ExecutionContractTest(unittest.TestCase):
+    def test_manifest_without_properties_remains_valid(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            benchmark = Path(temporary) / "probe"
+            source = benchmark / "source/model.rebeca"
+            source.parent.mkdir(parents=True)
+            source.write_text("main {}\n", encoding="utf-8")
+            (benchmark / "manifest.json").write_text(json.dumps({
+                "schema_version": 1,
+                "benchmark_id": "probe",
+                "description": "probe",
+                "polarity": "positive",
+                "expected_terminal_stage": "rmc",
+                "source_files": ["source/model.rebeca"],
+                "stages": [{"name": "rmc", "command": ["/usr/bin/true"]}],
+            }), encoding="utf-8")
+            execution.load_manifest("probe", benchmark)
+
     def test_terminal_stage_must_be_final(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -46,7 +64,27 @@ class ExecutionContractTest(unittest.TestCase):
                         "command": ["/usr/bin/true"],
                     },
                 ],
+                "expected_artifacts": [
+                    {
+                        "path": "result.txt",
+                        "required": True,
+                    }
+                ],
             }
+
+            expected = benchmark / "expected/result.txt"
+            expected.parent.mkdir(parents=True)
+            expected.write_text("ok\n", encoding="utf-8")
+
+            manifest["stages"][1]["command"] = [
+                sys.executable,
+                "-c",
+                (
+                    "from pathlib import Path; "
+                    f"Path({str(benchmark / 'actual/result.txt')!r})"
+                    ".write_text('ok\\n', encoding='utf-8')"
+                ),
+            ]
 
             (benchmark / "manifest.json").write_text(
                 json.dumps(manifest),
@@ -184,6 +222,32 @@ class ExecutionContractTest(unittest.TestCase):
                 ).exists()
             )
 
+    def test_artifacts_are_compared_with_committed_goldens(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            actual = root / "actual"
+            expected = root / "expected"
+            actual.mkdir()
+            expected.mkdir()
+            (actual / "result.txt").write_text("actual\n", encoding="utf-8")
+            (expected / "result.txt").write_text("expected\n", encoding="utf-8")
+
+            failures = execution.verify_expected_artifacts(
+                "probe",
+                {
+                    "expected_artifacts": [
+                        {"path": "result.txt", "required": True}
+                    ]
+                },
+                actual,
+                expected,
+            )
+
+            self.assertEqual(
+                failures,
+                ["artifact differs from committed expected file: result.txt"],
+            )
+
 
 class ExecutionImplementationStatusTest(unittest.TestCase):
     def test_planned_benchmark_is_rejected(self) -> None:
@@ -208,6 +272,81 @@ class ExecutionImplementationStatusTest(unittest.TestCase):
                 dry_run=False,
                 regenerate=False,
             )
+
+
+class PropertyManifestValidationTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temporary = tempfile.TemporaryDirectory()
+        self.benchmark = Path(self.temporary.name) / "probe"
+        property_directory = self.benchmark / "property"
+        property_directory.mkdir(parents=True)
+        (property_directory / "probe.property").write_text(
+            "property { Assertion { Probe_Assertion : true; } }\n",
+            encoding="utf-8",
+        )
+
+    def tearDown(self) -> None:
+        self.temporary.cleanup()
+
+    def property(self) -> dict[str, object]:
+        return {
+            "property_id": "probe",
+            "logic": "Assertion",
+            "rmc_name": "Probe_Assertion",
+            "expected": "TRUE",
+            "source": "property/probe.property",
+            "required": True,
+        }
+
+    def validate(self, properties: list[dict[str, object]]) -> None:
+        validate_properties(
+            benchmark_id="probe",
+            benchmark_directory=self.benchmark,
+            properties=properties,
+            error_type=execution.ExecutionError,
+        )
+
+    def test_valid_single_assertion(self) -> None:
+        self.validate([self.property()])
+
+    def test_duplicate_property_ids_rejected(self) -> None:
+        other = self.property()
+        other["rmc_name"] = "Other_Assertion"
+        with self.assertRaisesRegex(execution.ExecutionError, "duplicate property_id"):
+            self.validate([self.property(), other])
+
+    def test_duplicate_rmc_names_rejected(self) -> None:
+        other = self.property()
+        other["property_id"] = "other"
+        with self.assertRaisesRegex(execution.ExecutionError, "duplicate rmc_name"):
+            self.validate([self.property(), other])
+
+    def test_unsafe_path_rejected(self) -> None:
+        value = self.property()
+        value["source"] = "../probe.property"
+        with self.assertRaisesRegex(execution.ExecutionError, "unsafe property source"):
+            self.validate([value])
+
+    def test_missing_source_rejected(self) -> None:
+        value = self.property()
+        value["source"] = "property/missing.property"
+        with self.assertRaisesRegex(execution.ExecutionError, "property source is missing"):
+            self.validate([value])
+
+    def test_wrong_logic_or_name_rejected(self) -> None:
+        value = self.property()
+        value["logic"] = "TCTL"
+        with self.assertRaisesRegex(execution.ExecutionError, "exactly one TCTL"):
+            self.validate([value])
+
+    def test_trailing_property_container_rejected(self) -> None:
+        path = self.benchmark / "property/probe.property"
+        path.write_text(
+            "property { Assertion { Probe_Assertion : true; } } property {}\n",
+            encoding="utf-8",
+        )
+        with self.assertRaisesRegex(execution.ExecutionError, "exactly one Assertion"):
+            self.validate([self.property()])
 
 
 class RegistryImplementationStatusTest(unittest.TestCase):

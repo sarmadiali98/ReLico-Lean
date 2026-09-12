@@ -1,0 +1,10 @@
+property {
+    define {
+        UserRoutingValid = ((user1.data == 0) || ((user1.data == 1) && (user1.receiver == 2))) &&
+                           ((user2.data == 0) || ((user2.data == 1) && (user2.receiver == 1)));
+    }
+
+    Assertion {
+        TCSMA_UserRoutingValid : UserRoutingValid;
+    }
+}

@@ -1,0 +1,10 @@
+property {
+    define {
+        RingNeverCompletes = (node0.seen != 1) || (node1.seen != 1) ||
+                             (node2.seen != 1) || (node3.seen != 1);
+    }
+
+    Assertion {
+        TriggerCircular_RingNeverCompletes : RingNeverCompletes;
+    }
+}

@@ -4,6 +4,7 @@
   "expected_artifacts": [
     {"path": "source/result.json", "required": true, "sha256": "54418cf749ef29b7f2c916299ab319aa71e033f0dac77073e97929b0807ecba5"},
     {"path": "rmc/verdict.json", "required": true, "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"},
+    {"path": "rmc-properties/results.json", "required": true, "sha256": "958eb7a8ffca4ca1c1333c63363bdd3efff815063bf1ccd6a026022284355630"},
     {"path": "parser-json/model.json", "required": true, "sha256": "2eb757e411298ee7ce9b73279ad190dddfdbe4bc77b8e80377bfbf2af701d4ad"},
     {"path": "decoded-dtr-ast/model.txt", "required": true, "sha256": "232c0e298e79790aa2e81da5f14243b80bcd8eec3007989d3a8e0aa904dc479c"},
     {"path": "translated-lf-ast/program.txt", "required": true, "sha256": "cbfa6a058c4132918f9e99a18928f1e23698a790c6c0ed0c3ec433c0d4136ef7"},
@@ -15,9 +16,30 @@
   "polarity": "positive",
   "schema_version": 1,
   "source_files": ["source/model.rebeca"],
+  "properties": [
+    {
+      "property_id": "election-no-wrong-winner",
+      "logic": "Assertion",
+      "rmc_name": "Election_NoWrongWinner",
+      "expected": "TRUE",
+      "source": "property/election-no-wrong-winner.property",
+      "required": true,
+      "description": "Node 0 must never be accepted as the elected node."
+    },
+    {
+      "property_id": "election-node1-not-elected",
+      "logic": "Assertion",
+      "rmc_name": "Election_Node1NotElected",
+      "expected": "FALSE",
+      "source": "property/election-node1-not-elected.property",
+      "required": true,
+      "description": "The intentionally false invariant witnesses election of node 1."
+    }
+  ],
   "stages": [
     {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "source", "--benchmark-id", "general--election-case-study--positive", "--source", "{source}", "--output", "{actual}/source/result.json"], "name": "source"},
     {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "rmc", "--source", "{source}", "--actual", "{actual}", "--rmc-jar", "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar", "--java", "/usr/bin/java", "--cxx", "/usr/bin/clang++", "--output", "{actual}/rmc/verdict.json"], "name": "rmc", "timeout_seconds": 600},
+    {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "rmc-properties", "--benchmark-id", "general--election-case-study--positive", "--benchmark", "{benchmark}", "--source", "{source}", "--actual", "{actual}", "--rmc-jar", "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar", "--java", "/usr/bin/java", "--cxx", "/usr/bin/clang++", "--output", "{actual}/rmc-properties/results.json"], "name": "rmc-properties", "timeout_seconds": 1200},
     {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "parser-json", "--family", "general", "--repo", "{repo}", "--source", "{source}", "--actual", "{actual}", "--artifact-zip", "/Users/ali/Desktop/LFStructuringNonDeterminism/ReLico-fmcad-2026-artifact-v1.zip", "--maven", "/opt/homebrew/Cellar/maven/3.9.16/bin/mvn", "--output", "{actual}/parser-json/model.json"], "name": "parser-json", "timeout_seconds": 600},
     {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "lean-export", "--family", "general", "--mode", "decoded-dtr-ast", "--repo", "{repo}", "--lake", "/Users/ali/.elan/bin/lake", "--input", "{actual}/parser-json/model.json", "--output", "{actual}/decoded-dtr-ast/model.txt"], "name": "decoded-dtr-ast", "timeout_seconds": 600},
     {"command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "lean-export", "--family", "general", "--mode", "translated-lf-ast", "--repo", "{repo}", "--lake", "/Users/ali/.elan/bin/lake", "--input", "{actual}/parser-json/model.json", "--output", "{actual}/translated-lf-ast/program.txt"], "name": "translated-lf-ast", "timeout_seconds": 600},

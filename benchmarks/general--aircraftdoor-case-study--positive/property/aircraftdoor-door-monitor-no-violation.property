@@ -1,0 +1,9 @@
+property {
+    define {
+        NoMonitorViolation = (m.violation == 0);
+    }
+
+    Assertion {
+        AircraftDoor_NoMonitorViolation : NoMonitorViolation;
+    }
+}

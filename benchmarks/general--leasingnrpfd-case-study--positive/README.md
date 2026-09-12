@@ -29,11 +29,12 @@ artifacts themselves.
 
 ## Stages
 
-8 stages, terminal `runtime`: `source`, `rmc`, `parser-json`,
+9 stages, terminal `runtime`: `source`, `rmc`, `rmc-properties`, `parser-json`,
 `decoded-dtr-ast`, `translated-lf-ast`, `lf-source`, `lfc`, `runtime`,
 through the `--family general` arm. The `rmc` stage reports
 **`satisfied`** after the ping-pending boundedness fix recorded in
-`ADAPTATION.md`.
+`ADAPTATION.md`. Assertions check primary identity and failed-switch NRP isolation on the adapted
+source; no failover reachability claim is made because RMC does not expose such a state here.
 
 ## Evidence
 

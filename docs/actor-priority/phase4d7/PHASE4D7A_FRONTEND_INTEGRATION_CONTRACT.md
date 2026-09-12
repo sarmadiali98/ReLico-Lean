@@ -11,8 +11,8 @@
 3. `frontend/schema/multi-store-payload-v1.schema.json` — Defines serialized message-priority properties but no actor-priority property.
 4. `frontend/java-bridge/RebecaMultiStorePayloadJsonExporter.java` — Exports payload frontend data, local priority metadata, and actor/class surfaces.
 5. `frontend/java-bridge/RebecaMultiStoreJsonExporter.java` — Exports multi-store frontend data and contains matching parser-bridge constraints.
-6. `tests/actor-priority/approach-a-single-main-actor-payload-exclusion/run-approach-a-exclusion.sh` — Mechanically tests the current exact single-main-actor payload profile.
-7. `tests/actor-priority/approach-a-single-main-actor-payload-exclusion/manifest.json` — Records the accepted current-profile frontend exclusion boundary.
+6. `tests/translator/general--main-actor-priority--negative/run-test.sh` — Mechanically tests the current exact single-main-actor payload profile.
+7. `tests/translator/general--main-actor-priority--negative/case.json` — Records the accepted current-profile frontend exclusion boundary.
 
 ## Established frontend facts
 

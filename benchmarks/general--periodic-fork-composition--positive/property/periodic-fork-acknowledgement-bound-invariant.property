@@ -1,0 +1,9 @@
+property {
+    define {
+        ResolutionBounded = (producer.resolved >= 0) && (producer.resolved < 3);
+    }
+
+    Assertion {
+        PeriodicFork_ResolutionBounded : ResolutionBounded;
+    }
+}

@@ -1,0 +1,39 @@
+{
+  "benchmark_id": "general--trigger-circular-composition--positive",
+  "properties": [
+    {
+      "actual": "TRUE",
+      "comparison": "MATCH",
+      "counterexample": null,
+      "diagnostic": null,
+      "expected": "TRUE",
+      "logic": "Assertion",
+      "phase": "complete",
+      "property_id": "trigger-circular-ring-order-invariant",
+      "required": true,
+      "rmc_name": "TriggerCircular_ObservableOrder"
+    },
+    {
+      "actual": "FALSE",
+      "comparison": "MATCH",
+      "counterexample": {
+        "available": true,
+        "path": "rmc-properties/raw/trigger-circular-full-circulation-witness/checker.xml"
+      },
+      "diagnostic": null,
+      "expected": "FALSE",
+      "logic": "Assertion",
+      "phase": "checker",
+      "property_id": "trigger-circular-full-circulation-witness",
+      "required": true,
+      "rmc_name": "TriggerCircular_RingNeverCompletes"
+    }
+  ],
+  "rmc_version": "2.14",
+  "schema_version": 1,
+  "summary": {
+    "matched": 2,
+    "mismatched": 0
+  },
+  "target": "adapted-timed-rebeca-source"
+}

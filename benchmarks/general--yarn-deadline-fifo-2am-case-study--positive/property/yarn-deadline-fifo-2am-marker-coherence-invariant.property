@@ -1,0 +1,15 @@
+property {
+    define {
+        MarkerCoherence = (rm.m_queue_misses >= 0) &&
+                          (rm.m_queue_misses <= rm.QUEUE_SIZE) &&
+                          ((rm.m_update_miss == 0) || (rm.m_update_miss == 1)) &&
+                          ((rm.m_job_complete == 0) || (rm.m_job_complete == 1)) &&
+                          ((rm.m_update_miss + rm.m_job_complete) <= 1) &&
+                          ((rm.m_queue_misses == 0) ||
+                           ((rm.m_update_miss == 0) && (rm.m_job_complete == 0)));
+    }
+
+    Assertion {
+        YARN2AM_MarkerCoherence : MarkerCoherence;
+    }
+}

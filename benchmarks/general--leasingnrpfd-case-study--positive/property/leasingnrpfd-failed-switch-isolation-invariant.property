@@ -1,0 +1,12 @@
+property {
+    define {
+        FailedSwitchesNotNRP = ((switchA1.failed == false) || (switchA1.amINRP == false)) &&
+                               ((switchA2.failed == false) || (switchA2.amINRP == false)) &&
+                               ((switchB1.failed == false) || (switchB1.amINRP == false)) &&
+                               ((switchB2.failed == false) || (switchB2.amINRP == false));
+    }
+
+    Assertion {
+        LeasingNRPFD_FailedSwitchesNotNRP : FailedSwitchesNotNRP;
+    }
+}

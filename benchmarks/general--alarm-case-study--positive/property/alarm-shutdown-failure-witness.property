@@ -1,0 +1,9 @@
+property {
+    define {
+        NoStopFailure = (chk.violation == 0);
+    }
+
+    Assertion {
+        Alarm_NoStopFailure : NoStopFailure;
+    }
+}

@@ -12,6 +12,7 @@
       "required": true,
       "sha256": "ae189ff84374614d3e92afffe21341c73591b3b0ed19f2469884c4e828be875f"
     },
+    {"path": "rmc-properties/results.json", "required": true, "sha256": "1f31267db59274f46c4018fb2fdd63f0a213ff548d7982e3c9c1ada8d12cb259"},
     {
       "path": "parser-json/model.json",
       "required": true,
@@ -49,6 +50,26 @@
   "source_files": [
     "source/model.rebeca"
   ],
+  "properties": [
+    {
+      "property_id": "leasingnrpfd-primary-identity-invariant",
+      "logic": "Assertion",
+      "rmc_name": "LeasingNRPFD_PrimaryIdentityValid",
+      "expected": "TRUE",
+      "source": "property/leasingnrpfd-primary-identity-invariant.property",
+      "required": true,
+      "description": "Source-level assertion that an observed node in primary mode stores its own identifier in primary."
+    },
+    {
+      "property_id": "leasingnrpfd-failed-switch-isolation-invariant",
+      "logic": "Assertion",
+      "rmc_name": "LeasingNRPFD_FailedSwitchesNotNRP",
+      "expected": "TRUE",
+      "source": "property/leasingnrpfd-failed-switch-isolation-invariant.property",
+      "required": true,
+      "description": "Source-level assertion that an observed failed switch is not selected as an NRP."
+    }
+  ],
   "stages": [
     {
       "command": [
@@ -84,6 +105,11 @@
       ],
       "name": "rmc",
       "timeout_seconds": 600
+    },
+    {
+      "command": ["/opt/homebrew/bin/python3", "{repo}/tools/relico_bench_stage.py", "rmc-properties", "--benchmark-id", "general--leasingnrpfd-case-study--positive", "--benchmark", "{benchmark}", "--source", "{source}", "--actual", "{actual}", "--rmc-jar", "/Users/ali/.cache/relico/rmc/2.14/rmc-2.14.jar", "--java", "/usr/bin/java", "--cxx", "/usr/bin/clang++", "--output", "{actual}/rmc-properties/results.json"],
+      "name": "rmc-properties",
+      "timeout_seconds": 1800
     },
     {
       "command": [

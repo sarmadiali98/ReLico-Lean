@@ -1,0 +1,13 @@
+property {
+    define {
+        ColdScenarioSafe = (central.fireAlarmActive == false) &&
+                           (central.intrusionAlarmActive == false) &&
+                           (central.emergencyModeActive == false) &&
+                           (central.doorCloseRequested == false) &&
+                           (rc1.lightOverrideActive == false);
+    }
+
+    Assertion {
+        SmartHome_ColdScenarioSafe : ColdScenarioSafe;
+    }
+}
