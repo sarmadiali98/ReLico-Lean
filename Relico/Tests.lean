@@ -181,3 +181,7 @@ import Relico.Tests.GeneralSemantics
 import Relico.Tests.GeneralInitialization
 import Relico.Tests.GeneralConditional
 import Relico.Tests.GeneralLocalDecl
+import Relico.Tests.GeneralZeroDelay
+import Relico.Tests.GeneralNestedConditional
+import Relico.Tests.GeneralConstructorArguments
+import Relico.Tests.GeneralFanIn

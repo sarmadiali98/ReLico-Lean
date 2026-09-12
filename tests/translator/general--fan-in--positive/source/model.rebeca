@@ -1,0 +1,86 @@
+// Benchmark: general--fan-in--positive
+// Exercises the general fragment's fan-in routing: three sender
+// instances of one class reach a single message server on another
+// actor, so the generated LF program carries three connections into
+// three per-site input ports on the receiving reactor. The senders
+// carry distinct instance priorities, so same-tag delivery order is
+// realized by the level-1 priority ordering and is deterministic.
+//
+// Two shapes here are forced by measurement rather than chosen,
+// matching the actor-priority fixture's precedent. The gateway, not
+// the sensors, drives the rounds, and the next poll fires only after
+// all three sensors have answered, counted in `resolved`: free-running
+// periodic senders overflow the receiving queue under some RMC
+// interleaving, because RMC collapses the self-rearm delay and lets a
+// sender enqueue faster than the receiver drains. And every externally
+// sent message server carries a parameter, because the translator
+// refuses a parameterless external target.
+//
+// Adapted from the frontend fixture frontend/fixtures/general/fan-in.rebeca,
+// preserving that fixture's objective -- several sender instances
+// reaching one receiver with a payload -- while making the model live
+// and finite-state for the mandatory RMC stage. The fan-in topology,
+// the payload routing, and the priority-ordered delivery are the
+// capability; the request/acknowledge pacing is the measurement-forced
+// scaffolding around it.
+reactiveclass Sensor(3) {
+    knownrebecs {
+        Gateway gateway;
+    }
+    statevars {
+        int reading;
+    }
+    Sensor(int seed) {
+        reading = seed;
+    }
+    msgsrv request(int round) {
+        gateway.collect(reading);
+    }
+}
+
+reactiveclass Gateway(12) {
+    knownrebecs {
+        Sensor sensorFirst;
+        Sensor sensorSecond;
+        Sensor sensorThird;
+    }
+    statevars {
+        int latest;
+        int resolved;
+        int round;
+    }
+    Gateway() {
+        latest = 0;
+        resolved = 0;
+        round = 0;
+        self.poll() after(1);
+    }
+    msgsrv poll() {
+        resolved = 0;
+        if (round == 0) {
+            round = 1;
+        } else {
+            round = 0;
+        }
+        sensorFirst.request(round);
+        sensorSecond.request(round);
+        sensorThird.request(round);
+    }
+    msgsrv collect(int value) {
+        latest = value;
+        resolved = resolved + 1;
+        if (resolved == 3) {
+            self.poll() after(1);
+        }
+    }
+}
+
+main {
+    @priority(1)
+    Sensor sensorFirst(gateway0):(10);
+    @priority(2)
+    Sensor sensorSecond(gateway0):(20);
+    @priority(3)
+    Sensor sensorThird(gateway0):(30);
+    Gateway gateway0(sensorFirst, sensorSecond, sensorThird):();
+}

@@ -1,0 +1,280 @@
+{ reactors := [{ name := { value := "Sensor" },
+                 parameters := [{ name := { value := "seed" }, declaredType := Relico.LF.GeneralType.int }],
+                 inputPorts := [{ name := { value := "requestToSensorFirstFromGateway0" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "requestToSensorSecondFromGateway0" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "requestToSensorThirdFromGateway0" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "collectToGateway" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "reading" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "request_action" },
+                                      parameters := [{ name := { value := "round" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [{ value := "seed" }],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "reading" }
+                                                 (Relico.LF.GeneralExpr.parameterVar { value := "seed" })],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "request_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "request_action" },
+                                        parameters := [{ value := "round" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "collectToGateway" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "reading" }]],
+                                        priority := none },
+                                      { name := { value := "requestToSensorFirstFromGateway0_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "requestToSensorFirstFromGateway0" },
+                                        parameters := [{ value := "round" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "collectToGateway" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "reading" }]],
+                                        priority := none },
+                                      { name := { value := "requestToSensorSecondFromGateway0_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "requestToSensorSecondFromGateway0" },
+                                        parameters := [{ value := "round" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "collectToGateway" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "reading" }]],
+                                        priority := none },
+                                      { name := { value := "requestToSensorThirdFromGateway0_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "requestToSensorThirdFromGateway0" },
+                                        parameters := [{ value := "round" }],
+                                        body := [Relico.LF.GeneralStmt.setPort
+                                                   { value := "collectToGateway" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "reading" }]],
+                                        priority := none }] },
+               { name := { value := "Gateway" },
+                 parameters := [],
+                 inputPorts := [{ name := { value := "collectToGatewayFromSensorFirst" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "collectToGatewayFromSensorSecond" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                { name := { value := "collectToGatewayFromSensorThird" },
+                                  payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 outputPorts := [{ name := { value := "requestToSensorFirst" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "requestToSensorSecond" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) },
+                                 { name := { value := "requestToSensorThird" },
+                                   payload := Relico.LF.GeneralPortPayload.scalar (Relico.LF.GeneralType.int) }],
+                 stateVariables := [{ name := { value := "latest" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "resolved" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "round" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "poll_action1" }, parameters := [] },
+                                    { name := { value := "poll_action2" }, parameters := [] },
+                                    { name := { value := "collect_action" },
+                                      parameters := [{ name := { value := "value" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "latest" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "resolved" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "round" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.schedule
+                                                 { value := "poll_action1" }
+                                                 []
+                                                 { value := 1 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "poll_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "poll_action1" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "round" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "round" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0)],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "requestToSensorFirst" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "round" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "requestToSensorSecond" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "round" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "requestToSensorThird" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "round" }]],
+                                        priority := none },
+                                      { name := { value := "poll_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "poll_action2" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 0),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "round" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "round" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 1)]
+                                                   [Relico.LF.GeneralStmt.assign
+                                                      { value := "round" }
+                                                      (Relico.LF.GeneralExpr.intLiteral 0)],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "requestToSensorFirst" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "round" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "requestToSensorSecond" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "round" }],
+                                                 Relico.LF.GeneralStmt.setPort
+                                                   { value := "requestToSensorThird" }
+                                                   [Relico.LF.GeneralExpr.stateVar { value := "round" }]],
+                                        priority := none },
+                                      { name := { value := "collect_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "collect_action" },
+                                        parameters := [{ value := "value" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "latest" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "value" }),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 3))
+                                                   [Relico.LF.GeneralStmt.schedule
+                                                      { value := "poll_action2" }
+                                                      []
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "collectToGatewayFromSensorFirst_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "collectToGatewayFromSensorFirst" },
+                                        parameters := [{ value := "value" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "latest" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "value" }),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 3))
+                                                   [Relico.LF.GeneralStmt.schedule
+                                                      { value := "poll_action2" }
+                                                      []
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "collectToGatewayFromSensorSecond_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "collectToGatewayFromSensorSecond" },
+                                        parameters := [{ value := "value" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "latest" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "value" }),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 3))
+                                                   [Relico.LF.GeneralStmt.schedule
+                                                      { value := "poll_action2" }
+                                                      []
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none },
+                                      { name := { value := "collectToGatewayFromSensorThird_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.inputPort
+                                                     { value := "collectToGatewayFromSensorThird" },
+                                        parameters := [{ value := "value" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "latest" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "value" }),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "resolved" }
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.add)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                 Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.eq)
+                                                     (Relico.LF.GeneralExpr.stateVar { value := "resolved" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 3))
+                                                   [Relico.LF.GeneralStmt.schedule
+                                                      { value := "poll_action2" }
+                                                      []
+                                                      { value := 1 }]
+                                                   []],
+                                        priority := none }] }],
+  instances := [{ name := { value := "sensorFirst" },
+                  reactorName := { value := "Sensor" },
+                  arguments := [Relico.LF.GeneralValue.int 10] },
+                { name := { value := "sensorSecond" },
+                  reactorName := { value := "Sensor" },
+                  arguments := [Relico.LF.GeneralValue.int 20] },
+                { name := { value := "sensorThird" },
+                  reactorName := { value := "Sensor" },
+                  arguments := [Relico.LF.GeneralValue.int 30] },
+                { name := { value := "gateway0" }, reactorName := { value := "Gateway" }, arguments := [] }],
+  connections := [{ sourceInstance := { value := "sensorFirst" },
+                    sourcePort := { value := "collectToGateway" },
+                    targetInstance := { value := "gateway0" },
+                    targetPort := { value := "collectToGatewayFromSensorFirst" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "sensorSecond" },
+                    sourcePort := { value := "collectToGateway" },
+                    targetInstance := { value := "gateway0" },
+                    targetPort := { value := "collectToGatewayFromSensorSecond" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "sensorThird" },
+                    sourcePort := { value := "collectToGateway" },
+                    targetInstance := { value := "gateway0" },
+                    targetPort := { value := "collectToGatewayFromSensorThird" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "gateway0" },
+                    sourcePort := { value := "requestToSensorFirst" },
+                    targetInstance := { value := "sensorFirst" },
+                    targetPort := { value := "requestToSensorFirstFromGateway0" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "gateway0" },
+                    sourcePort := { value := "requestToSensorSecond" },
+                    targetInstance := { value := "sensorSecond" },
+                    targetPort := { value := "requestToSensorSecondFromGateway0" },
+                    delay := { value := 0 } },
+                  { sourceInstance := { value := "gateway0" },
+                    sourcePort := { value := "requestToSensorThird" },
+                    targetInstance := { value := "sensorThird" },
+                    targetPort := { value := "requestToSensorThirdFromGateway0" },
+                    delay := { value := 0 } }] }

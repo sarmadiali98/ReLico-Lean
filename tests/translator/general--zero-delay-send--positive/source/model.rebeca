@@ -1,0 +1,35 @@
+// Benchmark: general--zero-delay-send--positive
+// Exercises the general fragment's zero-delay send: the
+// constructor's single after(0) self-send schedules one
+// instantaneous event at logical time 0, which fires before
+// any positive time passes. The capability is bounded by
+// construction: after(0) occurs exactly once, and the
+// re-arming send inside ping uses a positive delay, so the
+// model's instantaneous scheduling is a single event and
+// logical time advances by one every period thereafter. The
+// positive-delay re-arm exists because the mandatory RMC
+// stage requires deadlock-freedom: a model that sends one
+// message and then quiesces reaches an empty-queue state,
+// which RMC reports as a deadlock. This is the bounded
+// spelling of the accepted zero-delay capability, distinct
+// from the external corpus screen's Minimal failure, whose
+// after(0) recurrence never advances logical time past the
+// runtime wall-clock guard. No such instantaneous recurrence
+// exists here: only the constructor's single after(0) send.
+reactiveclass Pulse(3) {
+    statevars {
+        int fired;
+    }
+    Pulse() {
+        fired = 0;
+        self.ping() after(0);
+    }
+    msgsrv ping() {
+        fired = 1;
+        self.ping() after(1);
+    }
+}
+
+main {
+    Pulse pulse():();
+}

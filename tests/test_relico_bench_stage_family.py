@@ -33,6 +33,12 @@ def load_stage_tool():
             "could not load stage tool"
         )
 
+    # The stage tool imports sibling modules from tools/ (for example
+    # relico_bench_properties), so the tool's directory must be importable
+    # before exec_module runs it.
+    if str(STAGE_TOOL.parent) not in sys.path:
+        sys.path.insert(0, str(STAGE_TOOL.parent))
+
     module = importlib.util.module_from_spec(
         specification
     )

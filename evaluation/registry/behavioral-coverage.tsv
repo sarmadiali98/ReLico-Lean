@@ -46,11 +46,15 @@ general.frontend.reference.undeclared	general	general-elaborator	negative	fronte
 general.frontend.parameter.duplicate	general	general-elaborator	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	general.frontend.parameter.duplicate	implemented
 general.frontend.precedence.operator-before-operands	general	general-elaborator	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	general.frontend.precedence.operator-before-operands	implemented
 general.frontend.precedence.target-before-arguments-delay	general	general-elaborator	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	general.frontend.precedence.target-before-arguments-delay	implemented
+general.frontend.delay.non-constant	general	general-elaborator	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	general.frontend.delay.non-constant	implemented
 general.frontend.send.payload-arity	general	general-decoder	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	general.frontend.send.payload-arity	implemented
+general.frontend.constructor-argument-arity	general	general-decoder	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	general.frontend.constructor-argument-arity	implemented
+general.frontend.statement.iteration	general	general-elaborator	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	general.frontend.statement.iteration	implemented
 general.frontend.scope.local-threading	general	general-elaborator	positive	frontend/lean-bridge/GeneralFocusedTestMain.lean	general.frontend.scope.local-threading	implemented
 general.frontend.precedence.local-shadow-before-type-value	general	general-elaborator	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	general.frontend.precedence.local-shadow-before-type-value	implemented
 general.frontend.send-target.self	general	general-elaborator	positive	frontend/lean-bridge/GeneralFocusedTestMain.lean	general.frontend.send-target.self	implemented
 general.routing.external-zero-arity-refusal	general	general-routing	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	general.routing.external-zero-arity-refusal	implemented
+general.routing.generated-port-collision	general	general-routing	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	general.routing.generated-port-collision	implemented
 general.translation.statement.conditional	general	general-translation	positive	frontend/lean-bridge/GeneralFocusedTestMain.lean	general.translation.statement.conditional	implemented
 general.translation.statement.local-declaration	general	general-translation	positive	frontend/lean-bridge/GeneralFocusedTestMain.lean	general.translation.statement.local-declaration	implemented
 general.translation.statement.self-send	general	general-translation	positive	frontend/lean-bridge/GeneralFocusedTestMain.lean	general.translation.statement.self-send	implemented

@@ -1,0 +1,29 @@
+target Cpp
+
+public preamble {=
+  struct Configured_reconfigure_action_Args { int bound; bool active; };
+=}
+
+reactor Configured(bound: int = 0, active: bool = false) {
+  state limit: int = 0
+  state enabled: bool = false
+  logical action reconfigure_action: Configured_reconfigure_action_Args
+
+  reaction(startup) {=
+    limit = bound;
+    enabled = active;
+  =}
+
+  reaction(reconfigure_action) {=
+    auto reconfigure_action_payload = *reconfigure_action.get();
+    auto bound = reconfigure_action_payload.bound;
+    auto active = reconfigure_action_payload.active;
+    limit = bound;
+    enabled = active;
+  =}
+}
+
+main reactor {
+  configuredOn = new Configured(bound=7, active=true)
+  configuredOff = new Configured(bound=0, active=false)
+}

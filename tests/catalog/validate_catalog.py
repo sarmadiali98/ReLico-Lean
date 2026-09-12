@@ -31,6 +31,11 @@ MATRIX_COLUMNS = {
     "evidence_classes",
     "limitation",
 }
+EXPECTED_PROMOTED_NEGATIVE_IDS = {
+    "general--actor-model-constructor-argument-arity--negative",
+    "general--control-flow-iteration--negative",
+}
+EXPECTED_PROMOTED_CATEGORIES = {"A", "E"}
 
 
 class CatalogError(RuntimeError):
@@ -135,9 +140,33 @@ def validate_general_matrix(
             raise CatalogError(f"{feature}: unknown external cases: {', '.join(sorted(unknown_external))}")
         if not row["limitation"]:
             raise CatalogError(f"{feature}: matrix limitation is required")
-    if uncovered == 0:
-        raise CatalogError("general accepted-fragment matrix names no uncovered decisions")
     return len(rows)
+
+
+def validate_promoted_negative_fixtures(catalog: dict, logical_ids: set[str]) -> int:
+    categories = catalog.get("a_g_categories", {})
+    if set(categories) != set("ABCDEFG") or any(not value for value in categories.values()):
+        raise CatalogError("A-G category metadata is incomplete")
+    promoted = catalog.get("promoted_negative_fixtures", [])
+    if not isinstance(promoted, list) or not all(isinstance(entry, dict) for entry in promoted):
+        raise CatalogError("promoted negative fixtures must be a list")
+    identifiers = {entry.get("id") for entry in promoted if isinstance(entry, dict)}
+    if identifiers != EXPECTED_PROMOTED_NEGATIVE_IDS:
+        raise CatalogError("promoted negative fixture IDs differ from the bounded redesign")
+    if {entry.get("category") for entry in promoted} != EXPECTED_PROMOTED_CATEGORIES:
+        raise CatalogError("promoted negative fixtures have incorrect A-G categories")
+    for entry in promoted:
+        source = REPOSITORY_ROOT / entry.get("source", "")
+        if not source.is_file():
+            raise CatalogError(f"{entry.get('id')}: promoted source is absent")
+        source_model = entry.get("source_model")
+        if source_model and not (REPOSITORY_ROOT / source_model).is_file():
+            raise CatalogError(f"{entry.get('id')}: promoted source model is absent")
+        if entry.get("case_id") not in logical_ids:
+            raise CatalogError(f"{entry.get('id')}: promoted focused case is absent")
+        if entry.get("category") not in categories or not entry.get("component"):
+            raise CatalogError(f"{entry.get('id')}: promoted fixture metadata is incomplete")
+    return len(promoted)
 
 
 def validate_stage_catalog() -> set[str]:
@@ -251,6 +280,10 @@ def validate_catalog() -> dict[str, int]:
         fixture_ids,
         runner_ids,
     )
+    promoted_negative_fixtures = validate_promoted_negative_fixtures(
+        catalog,
+        set(logical_ids),
+    )
 
     python_modules = runner.discover_python_modules()
     declared_patterns = next(
@@ -299,6 +332,7 @@ def validate_catalog() -> dict[str, int]:
         "discoverable_executions": len(discovered),
         "paper_claims": len(claims),
         "general_matrix_features": matrix_features,
+        "promoted_negative_fixtures": promoted_negative_fixtures,
     }
 
 

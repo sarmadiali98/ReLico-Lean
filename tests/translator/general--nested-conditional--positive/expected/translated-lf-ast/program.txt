@@ -1,0 +1,238 @@
+{ reactors := [{ name := { value := "Selector" },
+                 parameters := [],
+                 inputPorts := [],
+                 outputPorts := [],
+                 stateVariables := [{ name := { value := "total" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "step_action1" },
+                                      parameters := [{ name := { value := "v" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "step_action2" },
+                                      parameters := [{ name := { value := "v" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "step_action3" },
+                                      parameters := [{ name := { value := "v" },
+                                                       declaredType := Relico.LF.GeneralType.int }] },
+                                    { name := { value := "step_action4" },
+                                      parameters := [{ name := { value := "v" },
+                                                       declaredType := Relico.LF.GeneralType.int }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "total" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.schedule
+                                                 { value := "step_action1" }
+                                                 [Relico.LF.GeneralExpr.intLiteral 50]
+                                                 { value := 1 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "step_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "step_action1" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "v" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.localDecl
+                                                      { value := "t" }
+                                                      (Relico.LF.GeneralType.int)
+                                                      (Relico.LF.GeneralExpr.intLiteral 1),
+                                                    Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.gt)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "v" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 10))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "t" }
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.add)
+                                                           (Relico.LF.GeneralExpr.parameterVar { value := "t" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                       Relico.LF.GeneralStmt.schedule
+                                                         { value := "step_action2" }
+                                                         [Relico.LF.GeneralExpr.intLiteral 5]
+                                                         { value := 1 }]
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "t" }
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.add)
+                                                           (Relico.LF.GeneralExpr.parameterVar { value := "t" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 2)),
+                                                       Relico.LF.GeneralStmt.schedule
+                                                         { value := "step_action3" }
+                                                         [Relico.LF.GeneralExpr.intLiteral 0]
+                                                         { value := 1 }],
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "total" }
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "t" })]
+                                                   [Relico.LF.GeneralStmt.localDecl
+                                                      { value := "t" }
+                                                      (Relico.LF.GeneralType.int)
+                                                      (Relico.LF.GeneralExpr.intLiteral 100),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "total" }
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "t" }),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "step_action4" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 50]
+                                                      { value := 1 }]],
+                                        priority := none },
+                                      { name := { value := "step_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "step_action2" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "v" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.localDecl
+                                                      { value := "t" }
+                                                      (Relico.LF.GeneralType.int)
+                                                      (Relico.LF.GeneralExpr.intLiteral 1),
+                                                    Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.gt)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "v" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 10))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "t" }
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.add)
+                                                           (Relico.LF.GeneralExpr.parameterVar { value := "t" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                       Relico.LF.GeneralStmt.schedule
+                                                         { value := "step_action2" }
+                                                         [Relico.LF.GeneralExpr.intLiteral 5]
+                                                         { value := 1 }]
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "t" }
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.add)
+                                                           (Relico.LF.GeneralExpr.parameterVar { value := "t" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 2)),
+                                                       Relico.LF.GeneralStmt.schedule
+                                                         { value := "step_action3" }
+                                                         [Relico.LF.GeneralExpr.intLiteral 0]
+                                                         { value := 1 }],
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "total" }
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "t" })]
+                                                   [Relico.LF.GeneralStmt.localDecl
+                                                      { value := "t" }
+                                                      (Relico.LF.GeneralType.int)
+                                                      (Relico.LF.GeneralExpr.intLiteral 100),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "total" }
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "t" }),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "step_action4" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 50]
+                                                      { value := 1 }]],
+                                        priority := none },
+                                      { name := { value := "step_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "step_action3" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "v" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.localDecl
+                                                      { value := "t" }
+                                                      (Relico.LF.GeneralType.int)
+                                                      (Relico.LF.GeneralExpr.intLiteral 1),
+                                                    Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.gt)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "v" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 10))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "t" }
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.add)
+                                                           (Relico.LF.GeneralExpr.parameterVar { value := "t" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                       Relico.LF.GeneralStmt.schedule
+                                                         { value := "step_action2" }
+                                                         [Relico.LF.GeneralExpr.intLiteral 5]
+                                                         { value := 1 }]
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "t" }
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.add)
+                                                           (Relico.LF.GeneralExpr.parameterVar { value := "t" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 2)),
+                                                       Relico.LF.GeneralStmt.schedule
+                                                         { value := "step_action3" }
+                                                         [Relico.LF.GeneralExpr.intLiteral 0]
+                                                         { value := 1 }],
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "total" }
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "t" })]
+                                                   [Relico.LF.GeneralStmt.localDecl
+                                                      { value := "t" }
+                                                      (Relico.LF.GeneralType.int)
+                                                      (Relico.LF.GeneralExpr.intLiteral 100),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "total" }
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "t" }),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "step_action4" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 50]
+                                                      { value := 1 }]],
+                                        priority := none },
+                                      { name := { value := "step_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "step_action4" },
+                                        parameters := [{ value := "v" }],
+                                        body := [Relico.LF.GeneralStmt.ifThenElse
+                                                   (Relico.LF.GeneralExpr.binary
+                                                     (Relico.LF.GeneralBinaryOp.gt)
+                                                     (Relico.LF.GeneralExpr.parameterVar { value := "v" })
+                                                     (Relico.LF.GeneralExpr.intLiteral 0))
+                                                   [Relico.LF.GeneralStmt.localDecl
+                                                      { value := "t" }
+                                                      (Relico.LF.GeneralType.int)
+                                                      (Relico.LF.GeneralExpr.intLiteral 1),
+                                                    Relico.LF.GeneralStmt.ifThenElse
+                                                      (Relico.LF.GeneralExpr.binary
+                                                        (Relico.LF.GeneralBinaryOp.gt)
+                                                        (Relico.LF.GeneralExpr.parameterVar { value := "v" })
+                                                        (Relico.LF.GeneralExpr.intLiteral 10))
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "t" }
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.add)
+                                                           (Relico.LF.GeneralExpr.parameterVar { value := "t" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 1)),
+                                                       Relico.LF.GeneralStmt.schedule
+                                                         { value := "step_action2" }
+                                                         [Relico.LF.GeneralExpr.intLiteral 5]
+                                                         { value := 1 }]
+                                                      [Relico.LF.GeneralStmt.assign
+                                                         { value := "t" }
+                                                         (Relico.LF.GeneralExpr.binary
+                                                           (Relico.LF.GeneralBinaryOp.add)
+                                                           (Relico.LF.GeneralExpr.parameterVar { value := "t" })
+                                                           (Relico.LF.GeneralExpr.intLiteral 2)),
+                                                       Relico.LF.GeneralStmt.schedule
+                                                         { value := "step_action3" }
+                                                         [Relico.LF.GeneralExpr.intLiteral 0]
+                                                         { value := 1 }],
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "total" }
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "t" })]
+                                                   [Relico.LF.GeneralStmt.localDecl
+                                                      { value := "t" }
+                                                      (Relico.LF.GeneralType.int)
+                                                      (Relico.LF.GeneralExpr.intLiteral 100),
+                                                    Relico.LF.GeneralStmt.assign
+                                                      { value := "total" }
+                                                      (Relico.LF.GeneralExpr.parameterVar { value := "t" }),
+                                                    Relico.LF.GeneralStmt.schedule
+                                                      { value := "step_action4" }
+                                                      [Relico.LF.GeneralExpr.intLiteral 50]
+                                                      { value := 1 }]],
+                                        priority := none }] }],
+  instances := [{ name := { value := "selector" }, reactorName := { value := "Selector" }, arguments := [] }],
+  connections := [] }

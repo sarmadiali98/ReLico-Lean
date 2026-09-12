@@ -1,0 +1,26 @@
+target Cpp
+
+reactor Pulse {
+  state fired: int = 0
+  logical action ping_action1: void
+  logical action ping_action2: void
+
+  reaction(startup) -> ping_action1 {=
+    fired = 0;
+    ping_action1.schedule(0ms);
+  =}
+
+  reaction(ping_action1) -> ping_action2 {=
+    fired = 1;
+    ping_action2.schedule(1ms);
+  =}
+
+  reaction(ping_action2) -> ping_action2 {=
+    fired = 1;
+    ping_action2.schedule(1ms);
+  =}
+}
+
+main reactor {
+  pulse = new Pulse()
+}

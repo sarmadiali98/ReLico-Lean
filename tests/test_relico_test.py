@@ -78,7 +78,7 @@ class DiscoveryTests(unittest.TestCase):
             for case in self.cases
             if case.provider == "translator-fixture"
         ]
-        self.assertEqual(len(fixtures), 61)
+        self.assertEqual(len(fixtures), 65)
 
     def test_external_fixture_is_stably_discovered(self) -> None:
         case = self.runner.discover_external_actor_priority_case()

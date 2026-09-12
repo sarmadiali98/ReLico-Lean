@@ -99,6 +99,24 @@ private def sendTargetPrecedenceCase : Bool :=
     .unsupportedSendTargetKind
     (Frontend.elaborateStmt emptyScope "Worker.run" statement)
 
+/-- The send's target is valid and its argument list is empty, so elaboration reaches the
+    delay field: a non-literal `after` is refused as `nonConstantDelay` before any value is
+    produced. No Rebeca source and no exporter document can carry this shape -- the exporter
+    refuses a non-literal after at its own boundary, which is why this diagnostic is pinned
+    here rather than by a registry fixture. -/
+private def nonConstantDelayCase : Bool :=
+  let statement : Frontend.RawGeneralStmt :=
+    {
+      kind := "send"
+      target := some (Json.mkObj [("kind", toJson "self")])
+      messageServer := some "tick"
+      after := some (variableRaw "late")
+      arguments := some []
+    }
+  reasonIs
+    .nonConstantDelay
+    (Frontend.elaborateStmt emptyScope "Worker.run" statement)
+
 private def messagePayloadArityCase : Bool :=
   let receiver : DTR.GeneralReactiveClass :=
     {
@@ -153,6 +171,97 @@ private def messagePayloadArityCase : Bool :=
     }
   Frontend.classifyGeneralWellFormedness model ==
     .sendsResolveToMessageServersFailed
+
+private def decodedReasonIs
+    (expected : Frontend.GeneralDiagnosticReason)
+    (text : String) : Bool :=
+  match Frontend.decodeGeneralModelText text with
+  | .error diagnostic => diagnostic.reason == expected
+  | .ok _ => false
+
+private def runPromotedFixtureCase?
+    (identifier : String) : IO (Option Bool) := do
+  if identifier == "general.frontend.constructor-argument-arity" then
+    let text ← IO.FS.readFile
+      "frontend/fixtures/general/lean-reject/invalid-argument-arity.json"
+    pure (some (decodedReasonIs .argumentsMatchConstructorFailed text))
+  else if identifier == "general.frontend.statement.iteration" then
+    let text ← IO.FS.readFile
+      "frontend/fixtures/general/control-flow.parser.json"
+    pure (some (decodedReasonIs .iterationNotSupported text))
+  else
+    pure none
+
+private def generatedPortCollisionCase : Bool :=
+  let startup : LF.GeneralReaction :=
+    {
+      name := ReactionName.mk "startup"
+      trigger := .startup
+      parameters := []
+      body := []
+    }
+  let senderReactorName := ReactorName.mk "Sender"
+  let receiverReactorName := ReactorName.mk "Receiver"
+  let senderInstanceName := ActorName.mk "sender"
+  let receiverInstanceName := ActorName.mk "receiver"
+  let firstOutput :=
+    Translation.outputPortNameFor
+      (MsgName.mk "reportTo")
+      (KnownRebecName.mk "hub")
+      ""
+  let secondOutput :=
+    Translation.outputPortNameFor
+      (MsgName.mk "report")
+      (KnownRebecName.mk "toHub")
+      ""
+  let firstInput := Translation.inputPortNameFor senderInstanceName firstOutput
+  let secondInput := Translation.inputPortNameFor senderInstanceName secondOutput
+  let sender : LF.GeneralReactor :=
+    {
+      name := senderReactorName
+      parameters := []
+      inputPorts := []
+      outputPorts := [{ name := firstOutput, payload := .scalar .int }]
+      stateVariables := []
+      logicalActions := []
+      startupReaction := startup
+      messageReactions := []
+    }
+  let receiver : LF.GeneralReactor :=
+    {
+      name := receiverReactorName
+      parameters := []
+      inputPorts := [{ name := firstInput, payload := .scalar .int }]
+      outputPorts := []
+      stateVariables := []
+      logicalActions := []
+      startupReaction := { startup with name := ReactionName.mk "receiverStartup" }
+      messageReactions := []
+    }
+  let connectionFrom (outputPort inputPort : PortName) : LF.GeneralConnection :=
+    {
+      sourceInstance := senderInstanceName
+      sourcePort := outputPort
+      targetInstance := receiverInstanceName
+      targetPort := inputPort
+      delay := { value := 0 }
+    }
+  let program : LF.GeneralProgram :=
+    {
+      reactors := [sender, receiver]
+      instances :=
+        [ { name := senderInstanceName, reactorName := senderReactorName, arguments := [] },
+          { name := receiverInstanceName, reactorName := receiverReactorName, arguments := [] } ]
+      connections :=
+        [ connectionFrom firstOutput firstInput,
+          connectionFrom secondOutput secondInput ]
+    }
+  firstOutput == secondOutput &&
+    firstInput == secondInput &&
+    !program.targetEndpointsUnique &&
+    match Translation.guardGeneralProgram program with
+    | .error diagnostic => diagnostic.contains "two connections target the same input port"
+    | .ok _ => false
 
 private def zeroArityExternalPortCase : Bool :=
   reasonIsString
@@ -288,11 +397,13 @@ def cases : List (String × Bool) :=
     ("general.frontend.parameter.duplicate", duplicateParameterCase),
     ("general.frontend.precedence.operator-before-operands", operatorPrecedenceCase),
     ("general.frontend.precedence.target-before-arguments-delay", sendTargetPrecedenceCase),
+    ("general.frontend.delay.non-constant", nonConstantDelayCase),
     ("general.frontend.send.payload-arity", messagePayloadArityCase),
     ("general.frontend.scope.local-threading", localScopeCase),
     ("general.frontend.precedence.local-shadow-before-type-value", localShadowingPrecedenceCase),
     ("general.frontend.send-target.self", selfTargetCase),
     ("general.routing.external-zero-arity-refusal", zeroArityExternalPortCase),
+    ("general.routing.generated-port-collision", generatedPortCollisionCase),
     ("general.translation.statement.conditional", conditionalTranslationCase),
     ("general.translation.statement.local-declaration", localTranslationCase),
     ("general.translation.statement.self-send", selfSendTranslationCase),
@@ -307,8 +418,7 @@ private def lookupCase (identifier : String) : List (String × Bool) → Option 
       else
         lookupCase identifier remaining
 
-def runCase (identifier : String) : IO UInt32 :=
-  match lookupCase identifier cases with
+private def finishCase (identifier : String) : Option Bool → IO UInt32
   | none => do
       IO.eprintln ("unknown focused general test: " ++ identifier)
       pure 2
@@ -318,6 +428,11 @@ def runCase (identifier : String) : IO UInt32 :=
   | some true => do
       IO.println ("PASS " ++ identifier)
       pure 0
+
+def runCase (identifier : String) : IO UInt32 := do
+  match ← runPromotedFixtureCase? identifier with
+  | some result => finishCase identifier (some result)
+  | none => finishCase identifier (lookupCase identifier cases)
 
 end GeneralFocusedTests
 end Relico

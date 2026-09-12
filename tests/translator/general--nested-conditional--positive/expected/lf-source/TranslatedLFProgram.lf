@@ -1,0 +1,38 @@
+target Cpp
+
+reactor Selector {
+  state total: int = 0
+  logical action step_action1: int
+  logical action step_action2: int
+  logical action step_action3: int
+  logical action step_action4: int
+
+  reaction(startup) -> step_action1 {=
+    total = 0;
+    step_action1.schedule(50, 1ms);
+  =}
+
+  reaction(step_action1) -> step_action2, step_action3, step_action4 {=
+    auto v = *step_action1.get();
+    if ((v > 0)) { int t = 1; if ((v > 10)) { t = (t + 1); step_action2.schedule(5, 1ms); } else { t = (t + 2); step_action3.schedule(0, 1ms); } total = t; } else { int t = 100; total = t; step_action4.schedule(50, 1ms); }
+  =}
+
+  reaction(step_action2) -> step_action2, step_action3, step_action4 {=
+    auto v = *step_action2.get();
+    if ((v > 0)) { int t = 1; if ((v > 10)) { t = (t + 1); step_action2.schedule(5, 1ms); } else { t = (t + 2); step_action3.schedule(0, 1ms); } total = t; } else { int t = 100; total = t; step_action4.schedule(50, 1ms); }
+  =}
+
+  reaction(step_action3) -> step_action2, step_action3, step_action4 {=
+    auto v = *step_action3.get();
+    if ((v > 0)) { int t = 1; if ((v > 10)) { t = (t + 1); step_action2.schedule(5, 1ms); } else { t = (t + 2); step_action3.schedule(0, 1ms); } total = t; } else { int t = 100; total = t; step_action4.schedule(50, 1ms); }
+  =}
+
+  reaction(step_action4) -> step_action2, step_action3, step_action4 {=
+    auto v = *step_action4.get();
+    if ((v > 0)) { int t = 1; if ((v > 10)) { t = (t + 1); step_action2.schedule(5, 1ms); } else { t = (t + 2); step_action3.schedule(0, 1ms); } total = t; } else { int t = 100; total = t; step_action4.schedule(50, 1ms); }
+  =}
+}
+
+main reactor {
+  selector = new Selector()
+}

@@ -3,11 +3,15 @@ general.frontend.reference.undeclared	negative	frontend/lean-bridge/GeneralFocus
 general.frontend.parameter.duplicate	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	generalFrontendFocusedCases
 general.frontend.precedence.operator-before-operands	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	generalFrontendFocusedCases
 general.frontend.precedence.target-before-arguments-delay	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	generalFrontendFocusedCases
+general.frontend.delay.non-constant	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	generalFrontendFocusedCases
 general.frontend.send.payload-arity	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	generalFrontendFocusedCases
+general.frontend.constructor-argument-arity	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	generalFrontendFocusedCases
+general.frontend.statement.iteration	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	generalFrontendFocusedCases
 general.frontend.scope.local-threading	positive	frontend/lean-bridge/GeneralFocusedTestMain.lean	generalFrontendFocusedCases
 general.frontend.precedence.local-shadow-before-type-value	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	generalFrontendFocusedCases
 general.frontend.send-target.self	positive	frontend/lean-bridge/GeneralFocusedTestMain.lean	generalFrontendFocusedCases
 general.routing.external-zero-arity-refusal	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	generalTranslationFocusedCases
+general.routing.generated-port-collision	negative	frontend/lean-bridge/GeneralFocusedTestMain.lean	generalTranslationFocusedCases
 general.translation.statement.conditional	positive	frontend/lean-bridge/GeneralFocusedTestMain.lean	generalTranslationFocusedCases
 general.translation.statement.local-declaration	positive	frontend/lean-bridge/GeneralFocusedTestMain.lean	generalTranslationFocusedCases
 general.translation.statement.self-send	positive	frontend/lean-bridge/GeneralFocusedTestMain.lean	generalTranslationFocusedCases

@@ -1,0 +1,93 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 24,
+            "target": "fired",
+            "value": {
+              "kind": "intLiteral",
+              "line": 24,
+              "value": 0
+            }
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 0
+            },
+            "arguments": [],
+            "kind": "send",
+            "line": 25,
+            "messageServer": "ping",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Pulse"
+          }
+        ],
+        "line": 23,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 19,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "kind": "assign",
+              "line": 28,
+              "target": "fired",
+              "value": {
+                "kind": "intLiteral",
+                "line": 28,
+                "value": 1
+              }
+            },
+            {
+              "after": {
+                "kind": "intLiteral",
+                "value": 1
+              },
+              "arguments": [],
+              "kind": "send",
+              "line": 29,
+              "messageServer": "ping",
+              "target": {
+                "kind": "self"
+              },
+              "targetClassName": "Pulse"
+            }
+          ],
+          "line": 27,
+          "name": "ping",
+          "parameters": [],
+          "priority": null
+        }
+      ],
+      "name": "Pulse",
+      "queueBound": 3,
+      "stateVariables": [
+        {
+          "line": 21,
+          "name": "fired",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Pulse",
+      "line": 34,
+      "name": "pulse",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

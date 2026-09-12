@@ -1,0 +1,32 @@
+{
+  "benchmark_id": "general--zero-delay-send--positive",
+  "elaborated_modules": [
+    "Relico/Tests/GeneralZeroDelay.lean"
+  ],
+  "obligation_count": 21,
+  "obligation_ids": [
+    "GeneralZeroDelay:0001",
+    "GeneralZeroDelay:0002",
+    "GeneralZeroDelay:0003",
+    "GeneralZeroDelay:0004",
+    "GeneralZeroDelay:0005",
+    "GeneralZeroDelay:0006",
+    "GeneralZeroDelay:0007",
+    "GeneralZeroDelay:0008",
+    "GeneralZeroDelay:0009",
+    "GeneralZeroDelay:0010",
+    "GeneralZeroDelay:0011",
+    "GeneralZeroDelay:0012",
+    "GeneralZeroDelay:0013",
+    "GeneralZeroDelay:0014",
+    "GeneralZeroDelay:0015",
+    "GeneralZeroDelay:0016",
+    "GeneralZeroDelay:0017",
+    "GeneralZeroDelay:0018",
+    "GeneralZeroDelay:0019",
+    "GeneralZeroDelay:0020",
+    "GeneralZeroDelay:0021"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

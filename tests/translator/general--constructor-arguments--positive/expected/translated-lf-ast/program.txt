@@ -1,0 +1,40 @@
+{ reactors := [{ name := { value := "Configured" },
+                 parameters := [{ name := { value := "bound" }, declaredType := Relico.LF.GeneralType.int },
+                                { name := { value := "active" }, declaredType := Relico.LF.GeneralType.boolean }],
+                 inputPorts := [],
+                 outputPorts := [],
+                 stateVariables := [{ name := { value := "limit" }, declaredType := Relico.LF.GeneralType.int },
+                                    { name := { value := "enabled" }, declaredType := Relico.LF.GeneralType.boolean }],
+                 logicalActions := [{ name := { value := "reconfigure_action" },
+                                      parameters := [{ name := { value := "bound" },
+                                                       declaredType := Relico.LF.GeneralType.int },
+                                                     { name := { value := "active" },
+                                                       declaredType := Relico.LF.GeneralType.boolean }] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [{ value := "bound" }, { value := "active" }],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "limit" }
+                                                 (Relico.LF.GeneralExpr.parameterVar { value := "bound" }),
+                                               Relico.LF.GeneralStmt.assign
+                                                 { value := "enabled" }
+                                                 (Relico.LF.GeneralExpr.parameterVar { value := "active" })],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "reconfigure_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction
+                                                     { value := "reconfigure_action" },
+                                        parameters := [{ value := "bound" }, { value := "active" }],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "limit" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "bound" }),
+                                                 Relico.LF.GeneralStmt.assign
+                                                   { value := "enabled" }
+                                                   (Relico.LF.GeneralExpr.parameterVar { value := "active" })],
+                                        priority := none }] }],
+  instances := [{ name := { value := "configuredOn" },
+                  reactorName := { value := "Configured" },
+                  arguments := [Relico.LF.GeneralValue.int 7, Relico.LF.GeneralValue.bool true] },
+                { name := { value := "configuredOff" },
+                  reactorName := { value := "Configured" },
+                  arguments := [Relico.LF.GeneralValue.int 0, Relico.LF.GeneralValue.bool false] }],
+  connections := [] }

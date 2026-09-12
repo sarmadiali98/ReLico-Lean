@@ -1,0 +1,6 @@
+{
+  "benchmark_id": "general--zero-delay-send--positive",
+  "schema_version": 1,
+  "sha256": "6810a3cca1ec19347be10e8085f37a3de0684d94bccc1994b74d654279dc164d",
+  "status": "pass"
+}

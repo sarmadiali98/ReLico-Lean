@@ -13,7 +13,7 @@
       "included_in_translator_logical_total": false
     },
     "translator_fixtures": {
-      "count": 61,
+      "count": 65,
       "discovery": "tests/translator/*/manifest.json",
       "included_in_translator_logical_total": true
     }
@@ -21,6 +21,32 @@
   "stage_catalog": "tests/catalog/stages.json",
   "claim_catalog": "tests/catalog/claims.json",
   "accepted_fragment_matrix": "tests/catalog/general-accepted-fragment.tsv",
+  "a_g_categories": {
+    "A": "Actor model",
+    "B": "Communication",
+    "C": "State",
+    "D": "Timing",
+    "E": "Control flow",
+    "F": "Language features",
+    "G": "Translation artifacts"
+  },
+  "promoted_negative_fixtures": [
+    {
+      "id": "general--actor-model-constructor-argument-arity--negative",
+      "category": "A",
+      "component": "general-decoder",
+      "source": "frontend/fixtures/general/lean-reject/invalid-argument-arity.json",
+      "case_id": "general.frontend.constructor-argument-arity"
+    },
+    {
+      "id": "general--control-flow-iteration--negative",
+      "category": "E",
+      "component": "general-elaborator",
+      "source": "frontend/fixtures/general/control-flow.parser.json",
+      "source_model": "frontend/fixtures/general/control-flow.rebeca",
+      "case_id": "general.frontend.statement.iteration"
+    }
+  ],
   "logical_case_sources": [
     {
       "kind": "translator-fixture",

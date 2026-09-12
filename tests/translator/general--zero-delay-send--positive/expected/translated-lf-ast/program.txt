@@ -1,0 +1,42 @@
+{ reactors := [{ name := { value := "Pulse" },
+                 parameters := [],
+                 inputPorts := [],
+                 outputPorts := [],
+                 stateVariables := [{ name := { value := "fired" }, declaredType := Relico.LF.GeneralType.int }],
+                 logicalActions := [{ name := { value := "ping_action1" }, parameters := [] },
+                                    { name := { value := "ping_action2" }, parameters := [] }],
+                 startupReaction := { name := { value := "startup" },
+                                      trigger := Relico.LF.GeneralTrigger.startup,
+                                      parameters := [],
+                                      body := [Relico.LF.GeneralStmt.assign
+                                                 { value := "fired" }
+                                                 (Relico.LF.GeneralExpr.intLiteral 0),
+                                               Relico.LF.GeneralStmt.schedule
+                                                 { value := "ping_action1" }
+                                                 []
+                                                 { value := 0 }],
+                                      priority := none },
+                 messageReactions := [{ name := { value := "ping_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "ping_action1" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "fired" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 1),
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "ping_action2" }
+                                                   []
+                                                   { value := 1 }],
+                                        priority := none },
+                                      { name := { value := "ping_reaction" },
+                                        trigger := Relico.LF.GeneralTrigger.logicalAction { value := "ping_action2" },
+                                        parameters := [],
+                                        body := [Relico.LF.GeneralStmt.assign
+                                                   { value := "fired" }
+                                                   (Relico.LF.GeneralExpr.intLiteral 1),
+                                                 Relico.LF.GeneralStmt.schedule
+                                                   { value := "ping_action2" }
+                                                   []
+                                                   { value := 1 }],
+                                        priority := none }] }],
+  instances := [{ name := { value := "pulse" }, reactorName := { value := "Pulse" }, arguments := [] }],
+  connections := [] }

@@ -1,0 +1,43 @@
+// Benchmark: general--nested-conditional--positive
+// Exercises the general fragment's nested conditionals with
+// branch-local scope lifetime: a local declared in the outer
+// then-arm is read after the inner conditional closes, the
+// outer else-arm redeclares the same name -- legal only
+// because the then-arm's local died with its branch -- and
+// sends appear inside every branch kind (inner then, inner
+// else, outer else). The message parameter cycles through
+// 50, 5, and 0 so RMC explores all three paths: outer then
+// with inner then, outer then with inner else, and outer
+// else. The positive-delay re-arms keep the model live, which
+// the mandatory RMC stage requires, and the state space stays
+// finite because total and v range over fixed value sets.
+reactiveclass Selector(5) {
+    statevars {
+        int total;
+    }
+    Selector() {
+        total = 0;
+        self.step(50) after(1);
+    }
+    msgsrv step(int v) {
+        if (v > 0) {
+            int t = 1;
+            if (v > 10) {
+                t = t + 1;
+                self.step(5) after(1);
+            } else {
+                t = t + 2;
+                self.step(0) after(1);
+            }
+            total = t;
+        } else {
+            int t = 100;
+            total = t;
+            self.step(50) after(1);
+        }
+    }
+}
+
+main {
+    Selector selector():();
+}

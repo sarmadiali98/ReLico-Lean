@@ -1,0 +1,35 @@
+{
+  "benchmark_id": "general--constructor-arguments--positive",
+  "elaborated_modules": [
+    "Relico/Tests/GeneralConstructorArguments.lean"
+  ],
+  "obligation_count": 24,
+  "obligation_ids": [
+    "GeneralConstructorArguments:0001",
+    "GeneralConstructorArguments:0002",
+    "GeneralConstructorArguments:0003",
+    "GeneralConstructorArguments:0004",
+    "GeneralConstructorArguments:0005",
+    "GeneralConstructorArguments:0006",
+    "GeneralConstructorArguments:0007",
+    "GeneralConstructorArguments:0008",
+    "GeneralConstructorArguments:0009",
+    "GeneralConstructorArguments:0010",
+    "GeneralConstructorArguments:0011",
+    "GeneralConstructorArguments:0012",
+    "GeneralConstructorArguments:0013",
+    "GeneralConstructorArguments:0014",
+    "GeneralConstructorArguments:0015",
+    "GeneralConstructorArguments:0016",
+    "GeneralConstructorArguments:0017",
+    "GeneralConstructorArguments:0018",
+    "GeneralConstructorArguments:0019",
+    "GeneralConstructorArguments:0020",
+    "GeneralConstructorArguments:0021",
+    "GeneralConstructorArguments:0022",
+    "GeneralConstructorArguments:0023",
+    "GeneralConstructorArguments:0024"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

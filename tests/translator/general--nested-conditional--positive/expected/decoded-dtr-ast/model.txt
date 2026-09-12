@@ -1,0 +1,72 @@
+{ classes := [{ name := { value := "Selector" },
+                knownRebecs := [],
+                stateVariables := [{ name := { value := "total" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "total" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "step" }
+                                            [Relico.DTR.GeneralExpr.intLiteral 50]
+                                            { value := 1 }] },
+                messageServers := [{ name := { value := "step" },
+                                     parameters := [{ name := { value := "v" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.gt)
+                                                  (Relico.DTR.GeneralExpr.parameterVar { value := "v" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                [Relico.DTR.GeneralStmt.localDecl
+                                                   { value := "t" }
+                                                   (Relico.DTR.GeneralType.int)
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1),
+                                                 Relico.DTR.GeneralStmt.ifThenElse
+                                                   (Relico.DTR.GeneralExpr.binary
+                                                     (Relico.DTR.GeneralBinaryOp.gt)
+                                                     (Relico.DTR.GeneralExpr.parameterVar { value := "v" })
+                                                     (Relico.DTR.GeneralExpr.intLiteral 10))
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "t" }
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.add)
+                                                        (Relico.DTR.GeneralExpr.parameterVar { value := "t" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                                    Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                      { value := "step" }
+                                                      [Relico.DTR.GeneralExpr.intLiteral 5]
+                                                      { value := 1 }]
+                                                   [Relico.DTR.GeneralStmt.assign
+                                                      { value := "t" }
+                                                      (Relico.DTR.GeneralExpr.binary
+                                                        (Relico.DTR.GeneralBinaryOp.add)
+                                                        (Relico.DTR.GeneralExpr.parameterVar { value := "t" })
+                                                        (Relico.DTR.GeneralExpr.intLiteral 2)),
+                                                    Relico.DTR.GeneralStmt.send
+                                                      (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                      { value := "step" }
+                                                      [Relico.DTR.GeneralExpr.intLiteral 0]
+                                                      { value := 1 }],
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "total" }
+                                                   (Relico.DTR.GeneralExpr.parameterVar { value := "t" })]
+                                                [Relico.DTR.GeneralStmt.localDecl
+                                                   { value := "t" }
+                                                   (Relico.DTR.GeneralType.int)
+                                                   (Relico.DTR.GeneralExpr.intLiteral 100),
+                                                 Relico.DTR.GeneralStmt.assign
+                                                   { value := "total" }
+                                                   (Relico.DTR.GeneralExpr.parameterVar { value := "t" }),
+                                                 Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "step" }
+                                                   [Relico.DTR.GeneralExpr.intLiteral 50]
+                                                   { value := 1 }]],
+                                     priority := none }] }],
+  instances := [{ name := { value := "selector" },
+                  className := { value := "Selector" },
+                  bindings := [],
+                  arguments := [],
+                  priority := none }] }

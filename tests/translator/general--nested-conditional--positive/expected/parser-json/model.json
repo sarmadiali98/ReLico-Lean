@@ -1,0 +1,269 @@
+{
+  "classes": [
+    {
+      "constructor": {
+        "body": [
+          {
+            "kind": "assign",
+            "line": 19,
+            "target": "total",
+            "value": {
+              "kind": "intLiteral",
+              "line": 19,
+              "value": 0
+            }
+          },
+          {
+            "after": {
+              "kind": "intLiteral",
+              "value": 1
+            },
+            "arguments": [
+              {
+                "kind": "intLiteral",
+                "line": 20,
+                "value": 50
+              }
+            ],
+            "kind": "send",
+            "line": 20,
+            "messageServer": "step",
+            "target": {
+              "kind": "self"
+            },
+            "targetClassName": "Selector"
+          }
+        ],
+        "line": 18,
+        "parameters": []
+      },
+      "knownRebecs": [],
+      "line": 14,
+      "messageServers": [
+        {
+          "body": [
+            {
+              "condition": {
+                "kind": "binary",
+                "left": {
+                  "kind": "variable",
+                  "line": 23,
+                  "name": "v"
+                },
+                "line": 23,
+                "operator": ">",
+                "right": {
+                  "kind": "intLiteral",
+                  "line": 23,
+                  "value": 0
+                }
+              },
+              "else": [
+                {
+                  "kind": "declare",
+                  "line": 34,
+                  "name": "t",
+                  "type": "int",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 34,
+                    "value": 100
+                  }
+                },
+                {
+                  "kind": "assign",
+                  "line": 35,
+                  "target": "total",
+                  "value": {
+                    "kind": "variable",
+                    "line": 35,
+                    "name": "t"
+                  }
+                },
+                {
+                  "after": {
+                    "kind": "intLiteral",
+                    "value": 1
+                  },
+                  "arguments": [
+                    {
+                      "kind": "intLiteral",
+                      "line": 36,
+                      "value": 50
+                    }
+                  ],
+                  "kind": "send",
+                  "line": 36,
+                  "messageServer": "step",
+                  "target": {
+                    "kind": "self"
+                  },
+                  "targetClassName": "Selector"
+                }
+              ],
+              "kind": "if",
+              "line": 23,
+              "then": [
+                {
+                  "kind": "declare",
+                  "line": 24,
+                  "name": "t",
+                  "type": "int",
+                  "value": {
+                    "kind": "intLiteral",
+                    "line": 24,
+                    "value": 1
+                  }
+                },
+                {
+                  "condition": {
+                    "kind": "binary",
+                    "left": {
+                      "kind": "variable",
+                      "line": 25,
+                      "name": "v"
+                    },
+                    "line": 25,
+                    "operator": ">",
+                    "right": {
+                      "kind": "intLiteral",
+                      "line": 25,
+                      "value": 10
+                    }
+                  },
+                  "else": [
+                    {
+                      "kind": "assign",
+                      "line": 29,
+                      "target": "t",
+                      "value": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 29,
+                          "name": "t"
+                        },
+                        "line": 29,
+                        "operator": "+",
+                        "right": {
+                          "kind": "intLiteral",
+                          "line": 29,
+                          "value": 2
+                        }
+                      }
+                    },
+                    {
+                      "after": {
+                        "kind": "intLiteral",
+                        "value": 1
+                      },
+                      "arguments": [
+                        {
+                          "kind": "intLiteral",
+                          "line": 30,
+                          "value": 0
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 30,
+                      "messageServer": "step",
+                      "target": {
+                        "kind": "self"
+                      },
+                      "targetClassName": "Selector"
+                    }
+                  ],
+                  "kind": "if",
+                  "line": 25,
+                  "then": [
+                    {
+                      "kind": "assign",
+                      "line": 26,
+                      "target": "t",
+                      "value": {
+                        "kind": "binary",
+                        "left": {
+                          "kind": "variable",
+                          "line": 26,
+                          "name": "t"
+                        },
+                        "line": 26,
+                        "operator": "+",
+                        "right": {
+                          "kind": "intLiteral",
+                          "line": 26,
+                          "value": 1
+                        }
+                      }
+                    },
+                    {
+                      "after": {
+                        "kind": "intLiteral",
+                        "value": 1
+                      },
+                      "arguments": [
+                        {
+                          "kind": "intLiteral",
+                          "line": 27,
+                          "value": 5
+                        }
+                      ],
+                      "kind": "send",
+                      "line": 27,
+                      "messageServer": "step",
+                      "target": {
+                        "kind": "self"
+                      },
+                      "targetClassName": "Selector"
+                    }
+                  ]
+                },
+                {
+                  "kind": "assign",
+                  "line": 32,
+                  "target": "total",
+                  "value": {
+                    "kind": "variable",
+                    "line": 32,
+                    "name": "t"
+                  }
+                }
+              ]
+            }
+          ],
+          "line": 22,
+          "name": "step",
+          "parameters": [
+            {
+              "line": 22,
+              "name": "v",
+              "type": "int"
+            }
+          ],
+          "priority": null
+        }
+      ],
+      "name": "Selector",
+      "queueBound": 5,
+      "stateVariables": [
+        {
+          "line": 16,
+          "name": "total",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "family": "general",
+  "instances": [
+    {
+      "arguments": [],
+      "bindings": [],
+      "className": "Selector",
+      "line": 42,
+      "name": "selector",
+      "priority": null
+    }
+  ],
+  "schemaVersion": 1
+}

@@ -8,20 +8,22 @@ import json
 import re
 import sys
 
+from relico_bench_properties import validate_properties
+
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_ROOT = REPOSITORY_ROOT / "evaluation" / "registry"
 TRANSLATOR_TEST_ROOT = REPOSITORY_ROOT / "tests" / "translator"
 APPLICATION_BENCHMARK_ROOT = REPOSITORY_ROOT / "benchmarks"
 
-EXPECTED_BENCHMARKS = 102
-EXPECTED_POSITIVE = 101
+EXPECTED_BENCHMARKS = 106
+EXPECTED_POSITIVE = 105
 # One genuine negative remains: core--well-formedness--negative, whose source is
 # refused by upstream Timed Rebeca itself (an undefined message server). Every
 # other former negative encoded a family bridge limit that the verified general
 # fragment has since lifted, and was re-polarized or removed in stage K.
 EXPECTED_NEGATIVE = 1
-EXPECTED_OBLIGATIONS = 2468
+EXPECTED_OBLIGATIONS = 2579
 EXPECTED_SHARED_FORMAL = 2
 EXPECTED_LEGACY = 6
 EXPECTED_CORPUS_CANDIDATES = 81
@@ -120,6 +122,106 @@ def validate_implementation_status(
         )
 
 
+def validate_manifest_contract(row: dict[str, str]) -> None:
+    benchmark_id = row["benchmark_id"]
+    manifest_path = benchmark_directory(row) / "manifest.json"
+
+    if row["implementation_status"] != "implemented":
+        return
+
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise RegistryError(
+            f"{benchmark_id}: cannot read manifest: {error}"
+        ) from error
+
+    if not isinstance(manifest, dict):
+        raise RegistryError(f"{benchmark_id}: manifest root is not an object")
+
+    stages = manifest.get("stages")
+    if not isinstance(stages, list):
+        raise RegistryError(f"{benchmark_id}: manifest stages are invalid")
+
+    manifest_stages = [
+        stage.get("name")
+        for stage in stages
+        if isinstance(stage, dict)
+    ]
+    registry_stages = [
+        value.strip()
+        for value in row["required_stages"].split(",")
+        if value.strip()
+    ]
+
+    if manifest_stages != registry_stages:
+        raise RegistryError(
+            f"{benchmark_id}: registry stages differ from manifest stages"
+        )
+
+    artifacts = manifest.get("expected_artifacts", [])
+    if not isinstance(artifacts, list):
+        raise RegistryError(
+            f"{benchmark_id}: expected_artifacts is not a list"
+        )
+
+    expected_root = benchmark_directory(row) / "expected"
+    declared: set[str] = set()
+
+    for artifact in artifacts:
+        if not isinstance(artifact, dict):
+            raise RegistryError(f"{benchmark_id}: invalid artifact entry")
+        relative = artifact.get("path")
+        expected_hash = artifact.get("sha256")
+        if not isinstance(relative, str) or not relative:
+            raise RegistryError(f"{benchmark_id}: invalid artifact path")
+        if relative in declared:
+            raise RegistryError(
+                f"{benchmark_id}: duplicate expected artifact {relative}"
+            )
+        declared.add(relative)
+        path = expected_root / relative
+        required = bool(artifact.get("required", True))
+        if required and not path.is_file():
+            raise RegistryError(
+                f"{benchmark_id}: committed expected artifact is absent: {relative}"
+            )
+        if expected_hash is not None:
+            if not isinstance(expected_hash, str) or not re.fullmatch(
+                r"[0-9a-f]{64}", expected_hash
+            ):
+                raise RegistryError(
+                    f"{benchmark_id}: invalid artifact SHA-256: {relative}"
+                )
+            if path.is_file():
+                import hashlib
+
+                observed = hashlib.sha256(path.read_bytes()).hexdigest()
+                if observed != expected_hash:
+                    raise RegistryError(
+                        f"{benchmark_id}: committed expected artifact SHA-256 differs: {relative}"
+                    )
+
+    committed = {
+        path.relative_to(expected_root).as_posix()
+        for path in expected_root.rglob("*")
+        if path.is_file() and path.name != ".DS_Store"
+    }
+    undeclared = committed - declared
+    if undeclared:
+        raise RegistryError(
+            f"{benchmark_id}: undeclared committed expected artifacts: "
+            + ", ".join(sorted(undeclared))
+        )
+
+    validate_properties(
+        benchmark_id=benchmark_id,
+        benchmark_directory=benchmark_directory(row),
+        properties=manifest.get("properties"),
+        error_type=RegistryError,
+    )
+
+
 # Every human-readable restatement of a registry counter, and which computed
 # value it must equal. The triple-lock below (EXPECTED_* constants, the
 # obligation_count column sum, the per-benchmark tallies) guards three integers;
@@ -135,7 +237,10 @@ NARRATIVE_COUNTER_CHECKS = (
     ("evaluation/registry/PROVENANCE.md",
      r"^- (\S+) mapped test obligations$", "obligations"),
     ("evaluation/registry/PROVENANCE.md",
-     r"^- (\S+) planned source benchmarks$", "benchmarks"),
+     # Renamed from the historical "planned source benchmarks" bullet when the
+     # suite vocabulary moved to registered source cases; the captured counter
+     # still covers ALL rows, per the NOTE above.
+     r"^- (\S+) registered source cases", "benchmarks"),
     ("evaluation/registry/PROVENANCE.md",
      r"^- (\S+) positive benchmarks$", "positive"),
     ("evaluation/registry/PROVENANCE.md",
@@ -143,7 +248,7 @@ NARRATIVE_COUNTER_CHECKS = (
      # re-polarization, and the sentence should not claim a plural.
      r"^- (\S+) negative benchmarks?$", "negative"),
     ("evaluation/README.md",
-     r"records the (\S+) planned source benchmarks", "benchmarks"),
+     r"implementation status for (\S+) rows", "benchmarks"),
     ("evaluation/README.md",
      r"maps all (\S+) Lean test obligations", "obligations"),
     ("evaluation/registry/coverage-audit.txt",
@@ -491,6 +596,8 @@ def validate(registry: dict[str, list[dict[str, str]]]) -> list[str]:
             row["implementation_status"],
         )
 
+        validate_manifest_contract(row)
+
         expected_source = str(
             benchmark_directory(row).relative_to(REPOSITORY_ROOT)
             / "source"
@@ -614,9 +721,9 @@ def validate(registry: dict[str, list[dict[str, str]]]) -> list[str]:
         row["suite"] == "benchmark" for row in benchmarks
     )
 
-    if test_count != 61 or application_count != 41:
+    if test_count != 65 or application_count != 41:
         raise RegistryError(
-            "suite classification differs from the reviewed 61/41 split"
+            "suite classification differs from the reviewed 65/41 split"
         )
 
     if any(

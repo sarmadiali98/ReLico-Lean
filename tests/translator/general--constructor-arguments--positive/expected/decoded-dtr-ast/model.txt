@@ -1,0 +1,36 @@
+{ classes := [{ name := { value := "Configured" },
+                knownRebecs := [],
+                stateVariables := [{ name := { value := "limit" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "enabled" }, declaredType := Relico.DTR.GeneralType.boolean }],
+                constructor := { parameters := [{ name := { value := "bound" },
+                                                  declaredType := Relico.DTR.GeneralType.int },
+                                                { name := { value := "active" },
+                                                  declaredType := Relico.DTR.GeneralType.boolean }],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "limit" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "bound" }),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "enabled" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "active" })] },
+                messageServers := [{ name := { value := "reconfigure" },
+                                     parameters := [{ name := { value := "bound" },
+                                                      declaredType := Relico.DTR.GeneralType.int },
+                                                    { name := { value := "active" },
+                                                      declaredType := Relico.DTR.GeneralType.boolean }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "limit" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "bound" }),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "enabled" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "active" })],
+                                     priority := none }] }],
+  instances := [{ name := { value := "configuredOn" },
+                  className := { value := "Configured" },
+                  bindings := [],
+                  arguments := [Relico.DTR.GeneralValue.int 7, Relico.DTR.GeneralValue.bool true],
+                  priority := none },
+                { name := { value := "configuredOff" },
+                  className := { value := "Configured" },
+                  bindings := [],
+                  arguments := [Relico.DTR.GeneralValue.int 0, Relico.DTR.GeneralValue.bool false],
+                  priority := none }] }

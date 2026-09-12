@@ -1,0 +1,28 @@
+{ classes := [{ name := { value := "Pulse" },
+                knownRebecs := [],
+                stateVariables := [{ name := { value := "fired" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "fired" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "ping" }
+                                            []
+                                            { value := 0 }] },
+                messageServers := [{ name := { value := "ping" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "fired" }
+                                                (Relico.DTR.GeneralExpr.intLiteral 1),
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                { value := "ping" }
+                                                []
+                                                { value := 1 }],
+                                     priority := none }] }],
+  instances := [{ name := { value := "pulse" },
+                  className := { value := "Pulse" },
+                  bindings := [],
+                  arguments := [],
+                  priority := none }] }

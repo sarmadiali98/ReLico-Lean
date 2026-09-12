@@ -1,0 +1,113 @@
+target Cpp
+
+reactor Sensor(seed: int = 0) {
+  input requestToSensorFirstFromGateway0: int
+  input requestToSensorSecondFromGateway0: int
+  input requestToSensorThirdFromGateway0: int
+  output collectToGateway: int
+  state reading: int = 0
+  logical action request_action: int
+
+  reaction(startup) {=
+    reading = seed;
+  =}
+
+  reaction(request_action) -> collectToGateway {=
+    auto round = *request_action.get();
+    collectToGateway.set(reading);
+  =}
+
+  reaction(requestToSensorFirstFromGateway0) -> collectToGateway {=
+    auto round = *requestToSensorFirstFromGateway0.get();
+    collectToGateway.set(reading);
+  =}
+
+  reaction(requestToSensorSecondFromGateway0) -> collectToGateway {=
+    auto round = *requestToSensorSecondFromGateway0.get();
+    collectToGateway.set(reading);
+  =}
+
+  reaction(requestToSensorThirdFromGateway0) -> collectToGateway {=
+    auto round = *requestToSensorThirdFromGateway0.get();
+    collectToGateway.set(reading);
+  =}
+}
+
+reactor Gateway {
+  input collectToGatewayFromSensorFirst: int
+  input collectToGatewayFromSensorSecond: int
+  input collectToGatewayFromSensorThird: int
+  output requestToSensorFirst: int
+  output requestToSensorSecond: int
+  output requestToSensorThird: int
+  state latest: int = 0
+  state resolved: int = 0
+  state round: int = 0
+  logical action poll_action1: void
+  logical action poll_action2: void
+  logical action collect_action: int
+
+  reaction(startup) -> poll_action1 {=
+    latest = 0;
+    resolved = 0;
+    round = 0;
+    poll_action1.schedule(1ms);
+  =}
+
+  reaction(poll_action1) -> requestToSensorFirst, requestToSensorSecond, requestToSensorThird {=
+    resolved = 0;
+    if ((round == 0)) { round = 1; } else { round = 0; }
+    requestToSensorFirst.set(round);
+    requestToSensorSecond.set(round);
+    requestToSensorThird.set(round);
+  =}
+
+  reaction(poll_action2) -> requestToSensorFirst, requestToSensorSecond, requestToSensorThird {=
+    resolved = 0;
+    if ((round == 0)) { round = 1; } else { round = 0; }
+    requestToSensorFirst.set(round);
+    requestToSensorSecond.set(round);
+    requestToSensorThird.set(round);
+  =}
+
+  reaction(collect_action) -> poll_action2 {=
+    auto value = *collect_action.get();
+    latest = value;
+    resolved = (resolved + 1);
+    if ((resolved == 3)) { poll_action2.schedule(1ms); } else {}
+  =}
+
+  reaction(collectToGatewayFromSensorFirst) -> poll_action2 {=
+    auto value = *collectToGatewayFromSensorFirst.get();
+    latest = value;
+    resolved = (resolved + 1);
+    if ((resolved == 3)) { poll_action2.schedule(1ms); } else {}
+  =}
+
+  reaction(collectToGatewayFromSensorSecond) -> poll_action2 {=
+    auto value = *collectToGatewayFromSensorSecond.get();
+    latest = value;
+    resolved = (resolved + 1);
+    if ((resolved == 3)) { poll_action2.schedule(1ms); } else {}
+  =}
+
+  reaction(collectToGatewayFromSensorThird) -> poll_action2 {=
+    auto value = *collectToGatewayFromSensorThird.get();
+    latest = value;
+    resolved = (resolved + 1);
+    if ((resolved == 3)) { poll_action2.schedule(1ms); } else {}
+  =}
+}
+
+main reactor {
+  sensorFirst = new Sensor(seed=10)
+  sensorSecond = new Sensor(seed=20)
+  sensorThird = new Sensor(seed=30)
+  gateway0 = new Gateway()
+  sensorFirst.collectToGateway -> gateway0.collectToGatewayFromSensorFirst after 0 msec
+  sensorSecond.collectToGateway -> gateway0.collectToGatewayFromSensorSecond after 0 msec
+  sensorThird.collectToGateway -> gateway0.collectToGatewayFromSensorThird after 0 msec
+  gateway0.requestToSensorFirst -> sensorFirst.requestToSensorFirstFromGateway0 after 0 msec
+  gateway0.requestToSensorSecond -> sensorSecond.requestToSensorSecondFromGateway0 after 0 msec
+  gateway0.requestToSensorThird -> sensorThird.requestToSensorThirdFromGateway0 after 0 msec
+}

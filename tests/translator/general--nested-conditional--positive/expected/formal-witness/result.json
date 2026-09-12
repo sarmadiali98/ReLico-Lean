@@ -1,0 +1,34 @@
+{
+  "benchmark_id": "general--nested-conditional--positive",
+  "elaborated_modules": [
+    "Relico/Tests/GeneralNestedConditional.lean"
+  ],
+  "obligation_count": 23,
+  "obligation_ids": [
+    "GeneralNestedConditional:0001",
+    "GeneralNestedConditional:0002",
+    "GeneralNestedConditional:0003",
+    "GeneralNestedConditional:0004",
+    "GeneralNestedConditional:0005",
+    "GeneralNestedConditional:0006",
+    "GeneralNestedConditional:0007",
+    "GeneralNestedConditional:0008",
+    "GeneralNestedConditional:0009",
+    "GeneralNestedConditional:0010",
+    "GeneralNestedConditional:0011",
+    "GeneralNestedConditional:0012",
+    "GeneralNestedConditional:0013",
+    "GeneralNestedConditional:0014",
+    "GeneralNestedConditional:0015",
+    "GeneralNestedConditional:0016",
+    "GeneralNestedConditional:0017",
+    "GeneralNestedConditional:0018",
+    "GeneralNestedConditional:0019",
+    "GeneralNestedConditional:0020",
+    "GeneralNestedConditional:0021",
+    "GeneralNestedConditional:0022",
+    "GeneralNestedConditional:0023"
+  ],
+  "schema_version": 1,
+  "status": "pass"
+}

@@ -27,8 +27,11 @@ class CatalogTests(unittest.TestCase):
         cls.counts = cls.validator.validate_catalog()
 
     def test_preserves_distinct_fixture_and_application_populations(self) -> None:
-        self.assertEqual(self.counts["translator_fixtures"], 61)
+        self.assertEqual(self.counts["translator_fixtures"], 65)
         self.assertEqual(self.counts["application_benchmarks"], 41)
+        self.assertEqual(self.counts["promoted_negative_fixtures"], 2)
+        self.assertEqual(self.counts["lean_logical_cases"], 59)
+        self.assertEqual(self.counts["conditional_external_cases"], 1)
 
     def test_multiple_evidence_records_do_not_inflate_logical_cases(self) -> None:
         self.assertNotEqual(
@@ -53,21 +56,28 @@ class CatalogTests(unittest.TestCase):
         self.assertIn("translator.target.acceptance", identifiers)
         self.assertIn("source.independent.model-check", identifiers)
 
-    def test_general_matrix_is_present_and_names_uncovered_decisions(self) -> None:
+    def test_general_matrix_is_present_and_closes_bounded_gaps(self) -> None:
         rows = self.validator.read_tsv(
             self.validator.CATALOG_ROOT / "general-accepted-fragment.tsv"
         )
         self.assertEqual(self.counts["general_matrix_features"], len(rows))
-        self.assertTrue(
-            any("uncovered" in row["evidence_classes"].split(";") for row in rows)
-        )
+        closed = {
+            "general.decoder.constructor-argument-arity",
+            "general.elaborator.unsupported-statement-kind",
+            "general.routing.generated-port-collision",
+        }
+        evidence = {
+            row["feature_id"]: row["evidence_classes"].split(";")
+            for row in rows
+        }
+        self.assertTrue(all("uncovered" not in evidence[feature] for feature in closed))
 
     def test_general_focused_cases_do_not_change_formal_module_population(self) -> None:
         rows = self.validator.read_tsv(
             self.validator.REPOSITORY_ROOT
             / "tests/translator/general--focused--software/cases.tsv"
         )
-        self.assertEqual(len(rows), 13)
+        self.assertEqual(len(rows), 17)
         self.assertTrue(
             all(not row["lean_module"].startswith("Relico/Tests/") for row in rows)
         )

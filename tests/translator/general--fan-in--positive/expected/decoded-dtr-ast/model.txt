@@ -1,0 +1,117 @@
+{ classes := [{ name := { value := "Sensor" },
+                knownRebecs := [{ name := { value := "gateway" }, className := { value := "Gateway" } }],
+                stateVariables := [{ name := { value := "reading" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [{ name := { value := "seed" },
+                                                  declaredType := Relico.DTR.GeneralType.int }],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "reading" }
+                                            (Relico.DTR.GeneralExpr.parameterVar { value := "seed" })] },
+                messageServers := [{ name := { value := "request" },
+                                     parameters := [{ name := { value := "round" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "gateway" })
+                                                { value := "collect" }
+                                                [Relico.DTR.GeneralExpr.stateVar { value := "reading" }]
+                                                { value := 0 }],
+                                     priority := none }] },
+              { name := { value := "Gateway" },
+                knownRebecs := [{ name := { value := "sensorFirst" }, className := { value := "Sensor" } },
+                                { name := { value := "sensorSecond" }, className := { value := "Sensor" } },
+                                { name := { value := "sensorThird" }, className := { value := "Sensor" } }],
+                stateVariables := [{ name := { value := "latest" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "resolved" }, declaredType := Relico.DTR.GeneralType.int },
+                                   { name := { value := "round" }, declaredType := Relico.DTR.GeneralType.int }],
+                constructor := { parameters := [],
+                                 body := [Relico.DTR.GeneralStmt.assign
+                                            { value := "latest" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "resolved" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.assign
+                                            { value := "round" }
+                                            (Relico.DTR.GeneralExpr.intLiteral 0),
+                                          Relico.DTR.GeneralStmt.send
+                                            (Relico.DTR.GeneralSendTarget.selfTarget)
+                                            { value := "poll" }
+                                            []
+                                            { value := 1 }] },
+                messageServers := [{ name := { value := "poll" },
+                                     parameters := [],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "resolved" }
+                                                (Relico.DTR.GeneralExpr.intLiteral 0),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "round" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 0))
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "round" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 1)]
+                                                [Relico.DTR.GeneralStmt.assign
+                                                   { value := "round" }
+                                                   (Relico.DTR.GeneralExpr.intLiteral 0)],
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "sensorFirst" })
+                                                { value := "request" }
+                                                [Relico.DTR.GeneralExpr.stateVar { value := "round" }]
+                                                { value := 0 },
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "sensorSecond" })
+                                                { value := "request" }
+                                                [Relico.DTR.GeneralExpr.stateVar { value := "round" }]
+                                                { value := 0 },
+                                              Relico.DTR.GeneralStmt.send
+                                                (Relico.DTR.GeneralSendTarget.knownRebec { value := "sensorThird" })
+                                                { value := "request" }
+                                                [Relico.DTR.GeneralExpr.stateVar { value := "round" }]
+                                                { value := 0 }],
+                                     priority := none },
+                                   { name := { value := "collect" },
+                                     parameters := [{ name := { value := "value" },
+                                                      declaredType := Relico.DTR.GeneralType.int }],
+                                     body := [Relico.DTR.GeneralStmt.assign
+                                                { value := "latest" }
+                                                (Relico.DTR.GeneralExpr.parameterVar { value := "value" }),
+                                              Relico.DTR.GeneralStmt.assign
+                                                { value := "resolved" }
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.add)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "resolved" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 1)),
+                                              Relico.DTR.GeneralStmt.ifThenElse
+                                                (Relico.DTR.GeneralExpr.binary
+                                                  (Relico.DTR.GeneralBinaryOp.eq)
+                                                  (Relico.DTR.GeneralExpr.stateVar { value := "resolved" })
+                                                  (Relico.DTR.GeneralExpr.intLiteral 3))
+                                                [Relico.DTR.GeneralStmt.send
+                                                   (Relico.DTR.GeneralSendTarget.selfTarget)
+                                                   { value := "poll" }
+                                                   []
+                                                   { value := 1 }]
+                                                []],
+                                     priority := none }] }],
+  instances := [{ name := { value := "sensorFirst" },
+                  className := { value := "Sensor" },
+                  bindings := [({ value := "gateway" }, { value := "gateway0" })],
+                  arguments := [Relico.DTR.GeneralValue.int 10],
+                  priority := some 1 },
+                { name := { value := "sensorSecond" },
+                  className := { value := "Sensor" },
+                  bindings := [({ value := "gateway" }, { value := "gateway0" })],
+                  arguments := [Relico.DTR.GeneralValue.int 20],
+                  priority := some 2 },
+                { name := { value := "sensorThird" },
+                  className := { value := "Sensor" },
+                  bindings := [({ value := "gateway" }, { value := "gateway0" })],
+                  arguments := [Relico.DTR.GeneralValue.int 30],
+                  priority := some 3 },
+                { name := { value := "gateway0" },
+                  className := { value := "Gateway" },
+                  bindings := [({ value := "sensorFirst" }, { value := "sensorFirst" }),
+                               ({ value := "sensorSecond" }, { value := "sensorSecond" }),
+                               ({ value := "sensorThird" }, { value := "sensorThird" })],
+                  arguments := [],
+                  priority := none }] }
